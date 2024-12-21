@@ -1,13 +1,12 @@
 import { TFunction } from "i18next";
 import { navigate } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Avatar } from "@/components/Common/Avatar";
-import Tabs from "@/components/Common/Tabs";
-import SearchInput from "@/components/Form/SearchInput";
 import { UserAssignedModel, UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -344,61 +343,16 @@ export const UserList = ({
 };
 interface UserListViewProps {
   users: UserModel[] | UserAssignedModel[];
-  onSearch: (username: string) => void;
-  searchValue: string;
   activeTab: number;
-  onTabChange: (tab: number) => void;
 }
 
-export default function UserListView({
-  users,
-  onSearch,
-  searchValue,
-  activeTab,
-  onTabChange,
-}: UserListViewProps) {
+export default function UserListView({ users, activeTab }: UserListViewProps) {
   const { t } = useTranslation();
-
+  useEffect(() => {
+    console.log("re-rednerd");
+  }, []);
   return (
     <>
-      <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <div className="sm:w-1/2">
-          <SearchInput
-            id="search-by-username"
-            name="username"
-            onChange={(e) => onSearch(e.value)}
-            value={searchValue}
-            placeholder={t("search_by_username")}
-          />
-        </div>
-        <Tabs
-          tabs={[
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-credit-card" className="text-lg" />
-                  <span>Card</span>
-                </div>
-              ),
-              value: 0,
-              id: "user-card-view",
-            },
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>List</span>
-                </div>
-              ),
-              value: 1,
-              id: "user-list-view",
-            },
-          ]}
-          currentTab={activeTab}
-          onTabChange={(tab) => onTabChange(tab as number)}
-          className="float-right"
-        />
-      </div>
       {users.length > 0 ? (
         <>
           {activeTab === 0 ? (

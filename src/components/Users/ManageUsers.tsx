@@ -28,6 +28,9 @@ import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
+import Tabs from "../Common/Tabs";
+import SearchInput from "../Form/SearchInput";
+
 export default function ManageUsers() {
   const { t } = useTranslation();
   const {
@@ -102,22 +105,19 @@ export default function ManageUsers() {
     </ButtonV2>
   );
 
-  if (userListLoading || districtDataLoading || !userListData?.results) {
+  if (userListLoading || districtDataLoading || !userListData) {
     manageUsers = <Loading />;
+  } else {
+    manageUsers = (
+      <div>
+        <UserListView
+          users={userListData?.results ?? []}
+          activeTab={activeTab}
+        />
+        <Pagination totalCount={userListData.count} />
+      </div>
+    );
   }
-
-  manageUsers = (
-    <div>
-      <UserListView
-        users={userListData?.results ?? []}
-        onSearch={(username) => updateQuery({ username })}
-        searchValue={qParams.username}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-      <Pagination totalCount={userListData?.count ?? 0} />
-    </div>
-  );
 
   return (
     <Page title={t("user_management")} hideBack={true} breadcrumbs={false}>
@@ -178,6 +178,44 @@ export default function ManageUsers() {
       </div>
 
       <div className="pt-4">
+        <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="sm:w-1/2">
+            <SearchInput
+              id="search-by-username"
+              name="username"
+              onChange={(e) => updateQuery({ username: e.value })}
+              value={qParams.username}
+              placeholder={t("search_by_username")}
+            />
+          </div>
+          <Tabs
+            tabs={[
+              {
+                text: (
+                  <div className="flex items-center gap-2">
+                    <CareIcon icon="l-credit-card" className="text-lg" />
+                    <span>Card</span>
+                  </div>
+                ),
+                value: 0,
+                id: "user-card-view",
+              },
+              {
+                text: (
+                  <div className="flex items-center gap-2">
+                    <CareIcon icon="l-list-ul" className="text-lg" />
+                    <span>List</span>
+                  </div>
+                ),
+                value: 1,
+                id: "user-list-view",
+              },
+            ]}
+            currentTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab as number)}
+            className="float-right"
+          />
+        </div>
         <div>{manageUsers}</div>
       </div>
     </Page>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Page from "@/components/Common/Page";
 import UserListView from "@/components/Users/UserListAndCard";
@@ -11,8 +12,15 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
+import Loading from "../Common/Loading";
+import Tabs from "../Common/Tabs";
+import SearchInput from "../Form/SearchInput";
+
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
+
+  let manageUsers: JSX.Element = <></>;
+
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 18,
     cacheBlacklist: ["username"],
@@ -43,6 +51,20 @@ export default function FacilityUsers(props: { facilityId: number }) {
       prefetch: facilityId !== undefined,
     });
 
+  if (userListLoading || !userListData) {
+    manageUsers = <Loading />;
+  } else {
+    manageUsers = (
+      <div>
+        <UserListView
+          users={userListData?.results ?? []}
+          activeTab={activeTab}
+        />
+        <Pagination totalCount={userListData.count} />
+      </div>
+    );
+  }
+
   return (
     <Page
       title={`${t("users")} - ${facilityData?.name}`}
@@ -56,16 +78,45 @@ export default function FacilityUsers(props: { facilityId: number }) {
         icon="d-people"
         className="my-3 flex flex-col items-center sm:items-start"
       />
-
-      <UserListView
-        users={userListData?.results ?? []}
-        onSearch={(username) => updateQuery({ username })}
-        searchValue={qParams.username}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-
-      <Pagination totalCount={userListData?.count ?? 0} />
+      <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+        <div className="sm:w-1/2">
+          <SearchInput
+            id="search-by-username"
+            name="username"
+            onChange={(e) => updateQuery({ username: e.value })}
+            value={qParams.username}
+            placeholder={t("search_by_username")}
+          />
+        </div>
+        <Tabs
+          tabs={[
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-credit-card" className="text-lg" />
+                  <span>Card</span>
+                </div>
+              ),
+              value: 0,
+              id: "user-card-view",
+            },
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-list-ul" className="text-lg" />
+                  <span>List</span>
+                </div>
+              ),
+              value: 1,
+              id: "user-list-view",
+            },
+          ]}
+          currentTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as number)}
+          className="float-right"
+        />
+      </div>
+      <div>{manageUsers}</div>
     </Page>
   );
 }
