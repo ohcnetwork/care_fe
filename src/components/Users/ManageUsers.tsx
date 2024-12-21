@@ -43,7 +43,7 @@ export default function ManageUsers() {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  let manageUsers: JSX.Element = <></>;
+  let usersList: JSX.Element = <></>;
   const authUser = useAuthUser();
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const userTypes = authUser.is_superuser
@@ -105,9 +105,9 @@ export default function ManageUsers() {
   );
 
   if (userListLoading || districtDataLoading || !userListData) {
-    manageUsers = <Loading />;
+    usersList = <Loading />;
   } else {
-    manageUsers = (
+    usersList = (
       <div>
         <UserListView
           users={userListData?.results ?? []}
@@ -215,7 +215,7 @@ export default function ManageUsers() {
             className="float-right"
           />
         </div>
-        <div>{manageUsers}</div>
+        <div>{usersList}</div>
       </div>
     </Page>
   );

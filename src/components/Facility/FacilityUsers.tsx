@@ -18,7 +18,7 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
 
-  let manageUsers: JSX.Element = <></>;
+  let usersList: JSX.Element = <></>;
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 18,
@@ -51,9 +51,9 @@ export default function FacilityUsers(props: { facilityId: number }) {
     });
 
   if (userListLoading || !userListData) {
-    manageUsers = <Loading />;
+    usersList = <Loading />;
   } else {
-    manageUsers = (
+    usersList = (
       <div>
         <UserListView
           users={userListData?.results ?? []}
@@ -115,7 +115,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
           className="float-right"
         />
       </div>
-      <div>{manageUsers}</div>
+      <div>{usersList}</div>
     </Page>
   );
 }
