@@ -12,7 +12,9 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
+import Tabs from "@/components/Common/Tabs";
 import { FacilityModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
 import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
 import UserFilter from "@/components/Users/UserFilter";
 import UserListView from "@/components/Users/UserListAndCard";
@@ -27,9 +29,6 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
-
-import Tabs from "../Common/Tabs";
-import SearchInput from "../Form/SearchInput";
 
 export default function ManageUsers() {
   const { t } = useTranslation();

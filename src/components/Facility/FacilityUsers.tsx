@@ -4,17 +4,16 @@ import { useTranslation } from "react-i18next";
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import Tabs from "@/components/Common/Tabs";
+import SearchInput from "@/components/Form/SearchInput";
 import UserListView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import Loading from "../Common/Loading";
-import Tabs from "../Common/Tabs";
-import SearchInput from "../Form/SearchInput";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();

@@ -1,6 +1,5 @@
 import { TFunction } from "i18next";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
@@ -347,10 +346,6 @@ interface UserListViewProps {
 }
 
 export default function UserListView({ users, activeTab }: UserListViewProps) {
-  const { t } = useTranslation();
-  useEffect(() => {
-    console.log("re-rednerd");
-  }, []);
   return (
     <>
       {users.length > 0 ? (
