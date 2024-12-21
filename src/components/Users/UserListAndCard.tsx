@@ -1,6 +1,5 @@
 import { TFunction } from "i18next";
 import { navigate } from "raviger";
-import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
@@ -359,13 +358,6 @@ export default function UserListView({
   onTabChange,
 }: UserListViewProps) {
   const { t } = useTranslation();
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (searchValue) {
-      searchInputRef.current?.focus();
-    }
-  }, [searchValue]);
 
   return (
     <>
@@ -374,7 +366,6 @@ export default function UserListView({
           <SearchInput
             id="search-by-username"
             name="username"
-            ref={searchInputRef}
             onChange={(e) => onSearch(e.value)}
             value={searchValue}
             placeholder={t("search_by_username")}

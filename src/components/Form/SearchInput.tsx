@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -23,94 +23,94 @@ type SearchInputProps = TextFormFieldProps & {
       }
   );
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  (
-    {
-      debouncePeriod = 500,
-      className = "w-full md:max-w-sm",
-      onChange,
-      name = "search",
-      ...props
-    }: SearchInputProps,
-    ref,
-  ) => {
-    // Debounce related
-    const [value, setValue] = useState(() => props.value);
-    const internalRef = useRef<HTMLInputElement>(null);
-    const inputRef = (ref || internalRef) as React.RefObject<HTMLInputElement>;
-    useEffect(() => setValue(props.value), [props.value]);
+const SearchInput = ({
+  debouncePeriod = 500,
+  className = "w-full md:max-w-sm",
+  onChange,
+  name = "search",
+  ...props
+}: SearchInputProps) => {
+  // Debounce related
+  const [value, setValue] = useState(() => props.value);
+  useEffect(() => setValue(props.value), [props.value]);
+  useEffect(() => {
+    if (value !== props.value) {
+      const timeoutId = setTimeout(
+        () => onChange && onChange({ name, value: value || "" }),
+        debouncePeriod,
+      );
+      return () => clearTimeout(timeoutId);
+    }
+  }, [value, debouncePeriod, name, onChange, props.value]);
 
-    useEffect(() => {
-      if (value !== props.value) {
-        const timeoutId = setTimeout(() => {
-          onChange && onChange({ name, value: value || "" });
-        }, debouncePeriod);
+  // Focus hotkey related
+  const ref = createRef<HTMLInputElement>();
+  useKeyboardShortcut(
+    props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
+    () => !props.secondary && ref.current?.focus(),
+    { overrideSystem: !props.secondary },
+  );
 
-        return () => clearTimeout(timeoutId);
+  const shortcutKeyIcon =
+    props.hotkeyIcon ||
+    (isAppleDevice ? (
+      "⌘K"
+    ) : (
+      <div className="flex gap-1 font-medium">
+        <span className="text-secondary-400">Ctrl</span>
+        <span className="text-secondary-500">K</span>
+      </div>
+    ));
+
+  // Escape hotkey to clear related
+  useKeyboardShortcut(
+    ["Escape"],
+    () => {
+      if (value) {
+        setValue("");
       }
-    }, [value, debouncePeriod, name, onChange, props.value]);
+      ref.current?.blur();
+    },
+    {
+      ignoreInputFields: false,
+    },
+  );
 
-    // Focus shortcut logic
-    useKeyboardShortcut(
-      props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
-      () => {
-        if (!props.secondary) {
-          inputRef.current?.focus();
-        }
-      },
-      { overrideSystem: !props.secondary },
-    );
-
-    // Clear input and blur on `Escape` key
-    useKeyboardShortcut(
-      ["Escape"],
-      () => {
-        if (value) {
-          setValue("");
-        }
-        inputRef.current?.blur();
-      },
-      {
-        ignoreInputFields: false,
-      },
-    );
-
-    return (
-      <TextFormField
-        labelClassName="font-medium"
-        {...props}
-        name={name}
-        errorClassName="hidden"
-        type="search"
-        ref={inputRef}
-        className={className}
-        leading={
-          props.leading || (
-            <CareIcon icon="l-search-alt" className="text-secondary-600 z-10" />
-          )
-        }
-        trailing={
-          props.trailing ||
-          (!props.secondary && (
-            <div className="absolute inset-y-0 right-0 hidden py-1.5 pr-1.5 md:flex">
-              <kbd className="inline-flex items-center rounded border border-secondary-200 bg-white px-2 font-sans text-sm font-medium text-secondary-500 focus:opacity-0">
-                {props.hotkeyIcon || (isAppleDevice ? "⌘K" : "Ctrl+K")}
-              </kbd>
-            </div>
-          ))
-        }
-        trailingFocused={
-          <div className="absolute inset-y-0 right-0 hidden gap-1 py-1.5 pr-1.5 md:flex">
-            <kbd className="inline-flex items-center rounded border border-secondary-200 bg-white px-2 font-sans text-sm font-medium text-secondary-500">
-              Esc
+  return (
+    <TextFormField
+      labelClassName="font-medium"
+      {...props}
+      name={name}
+      errorClassName="hidden"
+      type="search"
+      ref={ref}
+      className={className}
+      leading={
+        props.leading || (
+          <CareIcon icon="l-search-alt" className="text-secondary-600 z-10" />
+        )
+      }
+      trailing={
+        props.trailing ||
+        (!props.secondary && (
+          <div className="absolute inset-y-0 right-0 hidden py-1.5 pr-1.5 md:flex">
+            <kbd className="inline-flex items-center rounded border border-secondary-200 bg-white px-2 font-sans text-sm font-medium text-secondary-500 focus:opacity-0">
+              {shortcutKeyIcon}
             </kbd>
           </div>
-        }
-        value={value || ""}
-        onChange={({ value }) => setValue(value)}
-      />
-    );
-  },
-);
+        ))
+      }
+      trailingFocused={
+        <div className="absolute inset-y-0 right-0 hidden gap-1 py-1.5 pr-1.5 md:flex">
+          <kbd className="inline-flex items-center rounded border border-secondary-200 bg-white px-2 font-sans text-sm font-medium text-secondary-500">
+            Esc
+          </kbd>
+        </div>
+      }
+      value={value || ""}
+      onChange={({ value }) => setValue(value)}
+    />
+  );
+};
 
 export default SearchInput;
