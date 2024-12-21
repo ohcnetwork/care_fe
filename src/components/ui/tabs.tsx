@@ -72,28 +72,4 @@ const SectionTabs = (props: SectionTabsProps) => (
   </Tabs>
 );
 
-const TabbedSections = (props: {
-  tabs: { label: string; value: string; section: React.ReactNode }[];
-}) => {
-  const [activeTab, setActiveTab] = React.useState(props.tabs[0].value);
-
-  return (
-    <>
-      <SectionTabs
-        tabs={props.tabs}
-        activeTab={activeTab}
-        onChange={(t) => setActiveTab(t)}
-      />
-      <div>{props.tabs.find(({ value }) => activeTab === value)?.section}</div>
-    </>
-  );
-};
-
-export {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-  SectionTabs,
-  TabbedSections,
-};
+export { Tabs, TabsList, TabsTrigger, TabsContent, SectionTabs };

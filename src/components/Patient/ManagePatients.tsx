@@ -4,12 +4,10 @@ import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Common/Avatar";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import SortDropdownMenu from "@/components/Common/SortDropdown";
-import Tabs from "@/components/Common/Tabs";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -49,6 +47,7 @@ import { getDiagnosesByIds } from "../Diagnosis/utils";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { FacilityModel, PatientCategory } from "../Facility/models";
+import { Button } from "../ui/button";
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
@@ -339,13 +338,6 @@ export const PatientManager = () => {
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    },
-  );
-
-  const { data: permittedFacilities } = useTanStackQueryInstead(
-    routes.getPermittedFacilities,
-    {
-      query: { limit: 1 },
     },
   );
 
@@ -740,9 +732,6 @@ export const PatientManager = () => {
     );
   }
 
-  const onlyAccessibleFacility =
-    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
-
   const searchOptions = [
     {
       key: "name",
@@ -804,43 +793,12 @@ export const PatientManager = () => {
 
   return (
     <>
-      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-        <div></div>
-        <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-          <Tabs
-            tabs={[
-              { text: t("live"), value: 0 },
-              { text: t("discharged"), value: 1 },
-            ]}
-            onTabChange={(tab) => {
-              if (tab === 0) {
-                updateQuery({ is_active: "True" });
-              } else {
-                const id = qParams.facility || onlyAccessibleFacility?.id;
-                if (id) {
-                  navigate(`facility/${id}/discharged-patients`);
-                  return;
-                }
-
-                if (
-                  authUser.user_type === "StateAdmin" ||
-                  authUser.user_type === "StateReadOnlyAdmin"
-                ) {
-                  updateQuery({ is_active: "False" });
-                  return;
-                }
-
-                Notification.Warn({
-                  msg: t("select_facility_for_discharged_patients_warning"),
-                });
-                setShowDialog("list-discharged");
-              }
-            }}
-            currentTab={tabValue}
-          />
+      <div className="flex w-full flex-col items-center justify-end lg:flex-row">
+        <div className="flex w-full items-center justify-center lg:justify-end gap-2 flex-wrap">
           {!!params.facility && (
-            <ButtonV2
-              className="w-full lg:w-fit"
+            <Button
+              className=""
+              variant={"primary"}
               id="doctor-connect-patient-button"
               onClick={() => {
                 triggerGoal("Doctor Connect Clicked", {
@@ -851,9 +809,9 @@ export const PatientManager = () => {
                 setShowDoctors(true);
               }}
             >
-              <CareIcon icon="l-phone" className="text-lg" />
+              <CareIcon icon="l-phone" className="text-lg mr-2" />
               <p className="lg:my-[2px]">Doctor Connect</p>
-            </ButtonV2>
+            </Button>
           )}
 
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
@@ -862,9 +820,10 @@ export const PatientManager = () => {
             selected={qParams.ordering}
             onSelect={updateQuery}
           />
-          <div className="tooltip w-full md:w-auto" id="patient-export">
+          <div className="tooltip" id="patient-export">
             {!isExportAllowed ? (
-              <ButtonV2
+              <Button
+                variant={"primary_gradient"}
                 onClick={() => {
                   advancedFilter.setShow(true);
                   setTimeout(() => {
@@ -875,11 +834,11 @@ export const PatientManager = () => {
                     });
                   }, 500);
                 }}
-                className="mr-5 w-full lg:w-fit"
+                className="gap-2"
               >
                 <CareIcon icon="l-export" />
                 <span className="lg:my-[3px]">Export</span>
-              </ButtonV2>
+              </Button>
             ) : (
               <ExportMenu
                 disabled={!isExportAllowed}

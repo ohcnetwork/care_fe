@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TabbedSections } from "@/components/ui/tabs";
+import { SectionTabs } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -40,8 +40,11 @@ import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatPatientAge, parsePhoneNumber } from "@/Utils/utils";
 
-export default function PatientIndex() {
+export default function PatientIndex(props: {
+  tab?: "live" | "discharged" | "search";
+}) {
   const { t } = useTranslation();
+  const { tab = "search" } = props;
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -208,7 +211,7 @@ export default function PatientIndex() {
     useKeyboardShortcut(["Shift", "P"], handleAddPatient);
     return (
       <Button
-        variant={props.outline ? "outline_primary" : "primary"}
+        variant={props.outline ? "outline_primary" : "primary_gradient"}
         className="gap-3 group"
         onClick={handleAddPatient}
       >
@@ -233,112 +236,126 @@ export default function PatientIndex() {
       breadcrumbs={false}
       options={<AddPatientButton />}
     >
-      <TabbedSections
+      <SectionTabs
+        activeTab={tab}
+        onChange={(value) => {
+          if (value === "discharged") {
+            const id = qParams.facility || onlyAccessibleFacility?.id;
+            if (id) {
+              navigate(`facility/${id}/discharged-patients`);
+              return;
+            }
+
+            if (
+              authUser.user_type === "StateAdmin" ||
+              authUser.user_type === "StateReadOnlyAdmin"
+            ) {
+              navigate("/patients/discharged?is_active=false");
+              return;
+            }
+            setShowDialog("list-discharged");
+          } else if (value === "search") {
+            navigate("/patients");
+          } else if (value === "live") {
+            navigate("/patients/live");
+          }
+        }}
         tabs={[
           {
             label: t("search_patients"),
             value: "search",
-            section: (
-              <div className="flex items-center flex-col w-full lg:w-[800px] mx-auto">
-                <div className="w-full mt-4">
-                  <div className="flex flex-col md:flex-row justify-between mb-2 md:items-center gap-2">
-                    <div>
-                      <PatientFilterBadges />
-                    </div>
-                    <Button
-                      variant={"secondary"}
-                      className="gap-1 text-gray-700"
-                      onClick={() => advancedFilter.setShow(true)}
-                    >
-                      <CareIcon icon="l-filter" />
-                      {t("filters")}
-                    </Button>
-                  </div>
-                  <SearchByMultipleFields
-                    id="patient-search"
-                    options={searchOptions}
-                    onSearch={handleSearch}
-                    clearSearch={clearSearch}
-                    className="w-full"
-                  />
-                </div>
-                {isValidSearch &&
-                  !listingQuery.loading &&
-                  !listingQuery.data?.results.length && (
-                    <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
-                      {t("no_records_found")}
-                      <br />
-                      {t("to_proceed_with_registration")}
-                      <AddPatientButton outline />
-                    </div>
-                  )}
-                {isValidSearch && listingQuery.loading && <Loading />}
-                {isValidSearch && !!listingQuery.data?.results.length && (
-                  <Table className="mt-4">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="">{t("name")}/IP/OP</TableHead>
-                        <TableHead className="">
-                          {t("primary_phone_no")}
-                        </TableHead>
-                        <TableHead className="">
-                          {t("dob")}/{t("age")}
-                        </TableHead>
-                        <TableHead className="">{t("sex")}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {listingQuery.data?.results.map((patient) => (
-                        <TableRow
-                          className="bg-white cursor-pointer"
-                          key={patient.id}
-                          onClick={() => navigate(getPatientUrl(patient))}
-                        >
-                          <TableCell className="min-w-[200px]">
-                            {patient.name}
-
-                            <br />
-                            <span>{patient.last_consultation?.patient_no}</span>
-                          </TableCell>
-                          <TableCell className="">
-                            {patient.phone_number}
-                          </TableCell>
-                          <TableCell className="">
-                            {!!patient.date_of_birth &&
-                              dayjs(patient.date_of_birth).format(
-                                "DD-MM-YYYY",
-                              )}{" "}
-                            ({formatPatientAge(patient)})
-                          </TableCell>
-                          <TableCell className="">
-                            {
-                              GENDER_TYPES.find((g) => g.id === patient.gender)
-                                ?.text
-                            }
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-                {listingQuery.data && (
-                  <Pagination totalCount={listingQuery?.data?.count} />
-                )}
-              </div>
-            ),
           },
           {
             label: t("all_patients"),
-            value: "all",
-            section: <PatientManager />,
+            value: "live",
           },
           {
             label: t("discharged_patients"),
             value: "discharged",
-            section: <></>,
           },
         ]}
       />
+      {tab === "search" ? (
+        <div className="flex items-center flex-col w-full lg:w-[800px] mx-auto">
+          <div className="w-full mt-4">
+            <div className="flex flex-col md:flex-row justify-between mb-2 md:items-center gap-2">
+              <div>
+                <PatientFilterBadges />
+              </div>
+              <Button
+                variant={"secondary"}
+                className="gap-1 text-gray-700"
+                onClick={() => advancedFilter.setShow(true)}
+              >
+                <CareIcon icon="l-filter" />
+                {t("filters")}
+              </Button>
+            </div>
+            <SearchByMultipleFields
+              id="patient-search"
+              options={searchOptions}
+              onSearch={handleSearch}
+              clearSearch={clearSearch}
+              className="w-full"
+            />
+          </div>
+          {isValidSearch &&
+            !listingQuery.loading &&
+            !listingQuery.data?.results.length && (
+              <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
+                {t("no_records_found")}
+                <br />
+                {t("to_proceed_with_registration")}
+                <AddPatientButton outline />
+              </div>
+            )}
+          {isValidSearch && listingQuery.loading && <Loading />}
+          {isValidSearch && !!listingQuery.data?.results.length && (
+            <Table className="mt-4">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="">{t("name")}/IP/OP</TableHead>
+                  <TableHead className="">{t("primary_phone_no")}</TableHead>
+                  <TableHead className="">
+                    {t("dob")}/{t("age")}
+                  </TableHead>
+                  <TableHead className="">{t("sex")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {listingQuery.data?.results.map((patient) => (
+                  <TableRow
+                    className="bg-white cursor-pointer"
+                    key={patient.id}
+                    onClick={() => navigate(getPatientUrl(patient))}
+                  >
+                    <TableCell className="min-w-[200px]">
+                      {patient.name}
+
+                      <br />
+                      <span>{patient.last_consultation?.patient_no}</span>
+                    </TableCell>
+                    <TableCell className="">{patient.phone_number}</TableCell>
+                    <TableCell className="">
+                      {!!patient.date_of_birth &&
+                        dayjs(patient.date_of_birth).format("DD-MM-YYYY")}{" "}
+                      ({formatPatientAge(patient)})
+                    </TableCell>
+                    <TableCell className="">
+                      {GENDER_TYPES.find((g) => g.id === patient.gender)?.text}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          {listingQuery.data && (
+            <Pagination totalCount={listingQuery?.data?.count} />
+          )}
+        </div>
+      ) : (
+        <PatientManager />
+      )}
       <PatientFilter
         {...advancedFilter}
         key={JSON.stringify(advancedFilter.filter)}
@@ -350,10 +367,10 @@ export default function PatientIndex() {
         handleOk={() => {
           switch (showDialog) {
             case "create":
-              navigate(`facility/${selectedFacility.id}/register-patient`);
+              navigate(`/facility/${selectedFacility.id}/register-patient`);
               break;
             case "list-discharged":
-              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              navigate(`/facility/${selectedFacility.id}/discharged-patients`);
               break;
           }
         }}

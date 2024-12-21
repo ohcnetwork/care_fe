@@ -2,7 +2,13 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface SortOption {
   isAscending: boolean;
@@ -22,31 +28,31 @@ interface Props {
 export default function SortDropdownMenu(props: Props) {
   const { t } = useTranslation();
   return (
-    <DropdownMenu
-      title={props.label ?? t("sort_by")}
-      variant="secondary"
-      className="w-full border border-primary-500 bg-white md:w-auto"
-      icon={<CareIcon icon="l-sort" />}
-      containerClassName="w-full md:w-auto z-20"
+    <Select
+      value={props.selected}
+      onValueChange={(v) => props.onSelect({ ordering: v })}
     >
-      {props.options.map(({ isAscending, value }, i) => (
-        <DropdownItem
-          key={i}
-          className={
-            props.selected === value
-              ? "bg-primary-100 !font-medium text-primary-500"
-              : ""
-          }
-          onClick={() => props.onSelect({ ordering: value })}
-          icon={
+      <SelectTrigger className="w-auto">
+        {props.selected ? (
+          <SelectValue />
+        ) : (
+          <div>
+            <CareIcon icon="l-sort" className="mr-2" />
+            {t("sort_by")}
+          </div>
+        )}
+      </SelectTrigger>
+      <SelectContent>
+        {props.options.map(({ isAscending, value }, i) => (
+          <SelectItem key={i} value={value}>
             <CareIcon
               icon={isAscending ? "l-sort-amount-up" : "l-sort-amount-down"}
+              className="mr-2"
             />
-          }
-        >
-          <span>{t("SORT_OPTIONS__" + value)}</span>
-        </DropdownItem>
-      ))}
-    </DropdownMenu>
+            {t("SORT_OPTIONS__" + value)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

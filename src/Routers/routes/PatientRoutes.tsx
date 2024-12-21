@@ -12,6 +12,8 @@ import { AppRoutes } from "@/Routers/AppRouter";
 
 const PatientRoutes: AppRoutes = {
   "/patients": () => <PatientIndex />,
+  "/patients/live": () => <PatientIndex tab={"live"} />,
+  "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/investigation_reports": ({ id }) => (
     <InvestigationReports id={id} />
