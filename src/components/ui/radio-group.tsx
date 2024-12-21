@@ -3,32 +3,16 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Label } from "@/components/ui/label";
-
-import { InputErrors } from "./errors";
-
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> & {
-    label?: string;
-    errors?: string[];
-  }
->(({ className, label, errors, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
+>(({ className, ...props }, ref) => {
   return (
-    <div>
-      {label && (
-        <Label className="mb-4">
-          {label}
-          {props.required && <span className="text-red-500">*</span>}
-        </Label>
-      )}
-      <RadioGroupPrimitive.Root
-        className={cn("grid gap-2", className)}
-        {...props}
-        ref={ref}
-      />
-      <InputErrors errors={errors} />
-    </div>
+    <RadioGroupPrimitive.Root
+      className={cn("grid gap-2", className)}
+      {...props}
+      ref={ref}
+    />
   );
 });
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;

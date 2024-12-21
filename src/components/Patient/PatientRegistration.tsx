@@ -54,6 +54,9 @@ import {
   parsePhoneNumber,
 } from "@/Utils/utils";
 
+import Autocomplete from "../ui/autocomplete";
+import FormField from "../ui/form-field";
+
 interface PatientRegistrationPageProps {
   facilityId: string;
   patientId?: string;
@@ -332,7 +335,6 @@ export default function PatientRegistration(
         ...f,
         [field]: e.target.value === "" ? undefined : e.target.value,
       })),
-    errors: errors[field],
   });
 
   const selectProps = (field: keyof typeof form) => ({
@@ -457,59 +459,74 @@ export default function PatientRegistration(
             </h2>
             <div className="text-sm">{t("general_info_detail")}</div>
             <br />
-            <Input
-              {...fieldProps("name")}
-              required
-              label={t("name")}
-              placeholder={t("type_patient_name")}
-            />
-            <br />
-            <Input
-              {...fieldProps("phone_number")}
-              onChange={(e) => {
-                if (e.target.value.length > 13) return;
-                setForm((f) => ({
-                  ...f,
-                  phone_number: e.target.value,
-                  emergency_phone_number: samePhoneNumber
-                    ? e.target.value
-                    : f.emergency_phone_number,
-                }));
-              }}
-              required
-              label={t("phone_number")}
-            />
-            <div className="mt-1">
-              <Checkbox
-                checked={samePhoneNumber}
-                onCheckedChange={() => {
-                  const newValue = !samePhoneNumber;
-                  setSamePhoneNumber(newValue);
-                  if (newValue) {
-                    setForm((f) => ({
-                      ...f,
-                      emergency_phone_number: f.phone_number,
-                    }));
-                  }
-                }}
-                id="same-phone-number"
-                label={t("use_phone_number_for_emergency")}
+            <FormField label={t("name")} required errors={errors["name"]}>
+              <Input
+                {...fieldProps("name")}
+                required
+                placeholder={t("type_patient_name")}
               />
+            </FormField>
+            <br />
+            <FormField
+              label={t("phone_number")}
+              required
+              errors={errors["phone_number"]}
+            >
+              <Input
+                {...fieldProps("phone_number")}
+                onChange={(e) => {
+                  if (e.target.value.length > 13) return;
+                  setForm((f) => ({
+                    ...f,
+                    phone_number: e.target.value,
+                    emergency_phone_number: samePhoneNumber
+                      ? e.target.value
+                      : f.emergency_phone_number,
+                  }));
+                }}
+                required
+              />
+            </FormField>
+            <div className="mt-1 flex gap-1 items-center">
+              <FormField>
+                <Checkbox
+                  checked={samePhoneNumber}
+                  onCheckedChange={() => {
+                    const newValue = !samePhoneNumber;
+                    setSamePhoneNumber(newValue);
+                    if (newValue) {
+                      setForm((f) => ({
+                        ...f,
+                        emergency_phone_number: f.phone_number,
+                      }));
+                    }
+                  }}
+                  id="same-phone-number"
+                />
+                <Label htmlFor="same-phone-number">
+                  {t("use_phone_number_for_emergency")}
+                </Label>
+              </FormField>
             </div>
             <br />
-            <Input
-              {...fieldProps("emergency_phone_number")}
-              onChange={(e) => {
-                if (e.target.value.length > 13) return;
-                setForm((f) => ({
-                  ...f,
-                  emergency_phone_number: e.target.value,
-                }));
-              }}
-              required
-              disabled={samePhoneNumber}
+            <FormField
               label={t("emergency_phone_number")}
-            />
+              required
+              errors={errors["emergency_phone_number"]}
+            >
+              <Input
+                {...fieldProps("emergency_phone_number")}
+                onChange={(e) => {
+                  if (e.target.value.length > 13) return;
+                  setForm((f) => ({
+                    ...f,
+                    emergency_phone_number: e.target.value,
+                  }));
+                }}
+                required
+                disabled={samePhoneNumber}
+              />
+            </FormField>
             {/* <br />
             <Input
               // This field does not exist in the backend, but is present in the design
@@ -518,44 +535,46 @@ export default function PatientRegistration(
               placeholder={t("emergency_contact_person_name")}
             /> */}
             <br />
-            <RadioGroup
-              label={t("sex")}
-              required
-              value={form.gender?.toString()}
-              onValueChange={(value) =>
-                setForm((f) => ({ ...f, gender: Number(value) }))
-              }
-              errors={errors["gender"]}
-              className="flex items-center gap-4"
-            >
-              {GENDER_TYPES.map((g) => (
-                <Fragment key={g.id}>
-                  <RadioGroupItem
-                    value={g.id.toString()}
-                    id={"gender_" + g.id}
-                  />
-                  <Label htmlFor={"gender_" + g.id}>
-                    {t(`GENDER__${g.id}`)}
-                  </Label>
-                </Fragment>
-              ))}
-            </RadioGroup>
-            <br />
-            <Select {...selectProps("blood_group")}>
-              <SelectTrigger
-                label={t("blood_group")}
-                required
-                errors={errors["blood_group"]}
-                className="w-full"
+            <FormField label={t("sex")} required errors={errors["gender"]}>
+              <RadioGroup
+                value={form.gender?.toString()}
+                onValueChange={(value) =>
+                  setForm((f) => ({ ...f, gender: Number(value) }))
+                }
+                className="flex items-center gap-4"
               >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BLOOD_GROUPS.map((bg) => (
-                  <SelectItem value={bg}>{bg}</SelectItem>
+                {GENDER_TYPES.map((g) => (
+                  <Fragment key={g.id}>
+                    <RadioGroupItem
+                      value={g.id.toString()}
+                      id={"gender_" + g.id}
+                    />
+                    <Label htmlFor={"gender_" + g.id}>
+                      {t(`GENDER__${g.id}`)}
+                    </Label>
+                  </Fragment>
                 ))}
-              </SelectContent>
-            </Select>
+              </RadioGroup>
+            </FormField>
+            <br />
+            <FormField
+              label={t("blood_group")}
+              required
+              errors={errors["blood_group"]}
+            >
+              <Select {...selectProps("blood_group")}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BLOOD_GROUPS.map((bg) => (
+                    <SelectItem key={bg} value={bg}>
+                      {bg}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
             <br />
             <Tabs
               value={ageDob}
@@ -573,48 +592,63 @@ export default function PatientRegistration(
               </TabsList>
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
-                  <Input
-                    required
-                    placeholder="DD"
-                    type="number"
-                    label={t("day")}
-                    value={form.date_of_birth?.split("-")[2] || ""}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
-                      }))
-                    }
-                    errors={errors["date_of_birth"] ? [""] : undefined}
-                  />
-                  <Input
-                    required
-                    placeholder="MM"
-                    type="number"
-                    label={t("month")}
-                    value={form.date_of_birth?.split("-")[1] || ""}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
-                      }))
-                    }
-                    errors={errors["date_of_birth"] ? [""] : undefined}
-                  />
-                  <Input
-                    required
-                    type="number"
-                    placeholder="YYYY"
-                    label={t("year")}
-                    value={form.date_of_birth?.split("-")[0] || ""}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                      }))
-                    }
-                    errors={errors["date_of_birth"] ? [""] : undefined}
-                  />
+                  <div>
+                    <FormField
+                      label={t("day")}
+                      required
+                      errors={errors["date_of_birth"]}
+                    >
+                      <Input
+                        placeholder="DD"
+                        type="number"
+                        value={form.date_of_birth?.split("-")[2] || ""}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
+                          }))
+                        }
+                      />
+                    </FormField>
+                  </div>
+                  <div>
+                    <FormField
+                      label={t("month")}
+                      required
+                      errors={errors["date_of_birth"]}
+                    >
+                      <Input
+                        placeholder="MM"
+                        type="number"
+                        value={form.date_of_birth?.split("-")[1] || ""}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
+                          }))
+                        }
+                      />
+                    </FormField>
+                  </div>
+                  <div>
+                    <FormField
+                      label={t("year")}
+                      required
+                      errors={errors["date_of_birth"]}
+                    >
+                      <Input
+                        type="number"
+                        placeholder="YYYY"
+                        value={form.date_of_birth?.split("-")[0] || ""}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
+                          }))
+                        }
+                      />
+                    </FormField>
+                  </div>
                 </div>
                 {errors["date_of_birth"] && (
                   <InputErrors errors={errors["date_of_birth"]} />
@@ -627,25 +661,29 @@ export default function PatientRegistration(
                   <b>{t("age_input_warning_bold")}</b>
                 </div>
                 <div className="relative">
-                  <Input
-                    value={
-                      form.year_of_birth
-                        ? new Date().getFullYear() - (form.year_of_birth || 0)
-                        : undefined
-                    }
-                    errors={errors["year_of_birth"]}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        year_of_birth: e.target.value
-                          ? new Date().getFullYear() - Number(e.target.value)
-                          : undefined,
-                      }))
-                    }
-                    required
-                    type="number"
+                  <FormField
                     label={t("age")}
-                  />
+                    required
+                    errors={errors["year_of_birth"]}
+                  >
+                    <Input
+                      value={
+                        form.year_of_birth
+                          ? new Date().getFullYear() - (form.year_of_birth || 0)
+                          : undefined
+                      }
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          year_of_birth: e.target.value
+                            ? new Date().getFullYear() - Number(e.target.value)
+                            : undefined,
+                        }))
+                      }
+                      required
+                      type="number"
+                    />
+                  </FormField>
                   {form.year_of_birth && (
                     <div className="text-xs absolute right-6 top-[22px] bottom-0 flex items-center justify-center p-2 pointer-events-none">
                       {t("year_of_birth")} : {form.year_of_birth}
@@ -655,59 +693,64 @@ export default function PatientRegistration(
               </TabsContent>
             </Tabs>
             <br />
-            <Textarea
-              {...fieldProps("address")}
+            <FormField
               label={t("current_address")}
               required
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  address: e.target.value,
-                  permanent_address: sameAddress
-                    ? e.target.value
-                    : f.permanent_address,
-                }))
-              }
-            />
-            <div className="mt-1">
-              <Checkbox
-                checked={sameAddress}
-                onCheckedChange={() => {
-                  setSameAddress(!sameAddress);
+              errors={errors["address"]}
+            >
+              <Textarea
+                {...fieldProps("address")}
+                onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    permanent_address: !sameAddress
-                      ? f.address
+                    address: e.target.value,
+                    permanent_address: sameAddress
+                      ? e.target.value
                       : f.permanent_address,
-                  }));
-                }}
-                id="same-address"
-                label={t("use_address_as_permanent")}
+                  }))
+                }
               />
+            </FormField>
+            <div className="mt-1 flex gap-1 items-center">
+              <FormField>
+                <Checkbox
+                  checked={sameAddress}
+                  onCheckedChange={() => {
+                    setSameAddress(!sameAddress);
+                    setForm((f) => ({
+                      ...f,
+                      permanent_address: !sameAddress
+                        ? f.address
+                        : f.permanent_address,
+                    }));
+                  }}
+                  id="same-address"
+                />
+                <Label htmlFor="same-address">
+                  {t("use_address_as_permanent")}
+                </Label>
+              </FormField>
             </div>
             <br />
-            <Textarea
-              {...fieldProps("permanent_address")}
-              label={t("permanent_address")}
-              required
-              value={form.permanent_address}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, permanent_address: e.target.value }))
-              }
-              disabled={sameAddress}
-            />
+            <FormField label={t("permanent_address")} required>
+              <Textarea
+                {...fieldProps("permanent_address")}
+                value={form.permanent_address}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, permanent_address: e.target.value }))
+                }
+                disabled={sameAddress}
+              />
+            </FormField>
             {/* <br />
             <Input
               // This field does not exist in the backend, but is present in the design
               label={t("landmark")}
             /> */}
             <br />
-            <Input
-              {...fieldProps("pincode")}
-              type="number"
-              required
-              label={t("pincode")}
-            />
+            <FormField label={t("pincode")} required errors={errors["pincode"]}>
+              <Input {...fieldProps("pincode")} type="number" required />
+            </FormField>
             {showAutoFilledPincode && (
               <div>
                 <CareIcon
@@ -722,170 +765,160 @@ export default function PatientRegistration(
             <br />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Select
-                  {...selectProps("nationality")}
-                  onValueChange={(value) => {
-                    setForm((f) => ({
-                      ...f,
-                      nationality: value,
-                      state: undefined,
-                      district: undefined,
-                      local_body: undefined,
-                      ward: undefined,
-                      village: undefined,
-                      passport_no: undefined,
-                    }));
-                  }}
+                <FormField
+                  label={t("nationality")}
+                  errors={errors["nationality"]}
+                  required
                 >
-                  <SelectTrigger
-                    label={t("nationality")}
-                    required
-                    className="w-full"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countryList.map((country) => (
-                      <SelectItem value={country} key={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Autocomplete
+                    options={countryList.map((c) => ({ label: c, value: c }))}
+                    value={form.nationality || ""}
+                    onChange={(value) => {
+                      setForm((f) => ({
+                        ...f,
+                        nationality: value,
+                        state: undefined,
+                        district: undefined,
+                        local_body: undefined,
+                        ward: undefined,
+                        village: undefined,
+                        passport_no: undefined,
+                      }));
+                    }}
+                  />
+                </FormField>
               </div>
               {form.nationality === "India" ? (
                 <>
                   <div>
-                    <Select
-                      {...selectProps("state")}
-                      disabled={statesQuery.isLoading}
-                      onValueChange={(value) =>
-                        setForm((f) => ({
-                          ...f,
-                          state: Number(value),
-                          district: undefined,
-                          local_body: undefined,
-                          ward: undefined,
-                        }))
-                      }
+                    <FormField
+                      label={t("state")}
+                      errors={errors["state"]}
+                      required
                     >
-                      <SelectTrigger
-                        label={t("state")}
-                        required
-                        errors={errors["state"]}
-                        className="w-full"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statesQuery.data?.results.map((state) => (
-                          <SelectItem value={state.id.toString()}>
-                            {state.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Autocomplete
+                        options={
+                          statesQuery.data?.results.map((state) => ({
+                            label: state.name,
+                            value: state.id.toString(),
+                          })) || []
+                        }
+                        value={form.state?.toString() || ""}
+                        onChange={(value) =>
+                          setForm((f) => ({
+                            ...f,
+                            state: Number(value),
+                            district: undefined,
+                            local_body: undefined,
+                            ward: undefined,
+                          }))
+                        }
+                        disabled={statesQuery.isLoading}
+                      />
+                    </FormField>
                   </div>
                   <div>
-                    <Select
-                      {...selectProps("district")}
-                      value={form.district?.toString()}
-                      onValueChange={(value) =>
-                        setForm((f) => ({
-                          ...f,
-                          district: Number(value),
-                          local_body: undefined,
-                          ward: undefined,
-                        }))
-                      }
-                      disabled={
-                        !form.state ||
-                        districtsQuery.isLoading ||
-                        !districtsQuery.data?.length
-                      }
+                    <FormField
+                      label={t("district")}
+                      errors={errors["district"]}
+                      required
                     >
-                      <SelectTrigger
-                        label={t("district")}
-                        required
-                        errors={errors["district"]}
-                        className="w-full"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {districtsQuery.data?.map((district) => (
-                          <SelectItem value={district.id.toString()}>
-                            {district.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Autocomplete
+                        options={
+                          districtsQuery.data?.map((district) => ({
+                            label: district.name,
+                            value: district.id.toString(),
+                          })) || []
+                        }
+                        value={form.district?.toString() || ""}
+                        onChange={(value) =>
+                          setForm((f) => ({
+                            ...f,
+                            district: Number(value),
+                            local_body: undefined,
+                            ward: undefined,
+                          }))
+                        }
+                        disabled={
+                          !form.state ||
+                          districtsQuery.isLoading ||
+                          !districtsQuery.data?.length
+                        }
+                      />
+                    </FormField>
                   </div>
                   <div>
-                    <Select
-                      {...selectProps("local_body")}
-                      onValueChange={(value) =>
-                        setForm((f) => ({
-                          ...f,
-                          local_body: Number(value),
-                          ward: undefined,
-                        }))
-                      }
-                      disabled={
-                        !form.district ||
-                        localBodyQuery.isLoading ||
-                        !localBodyQuery.data?.length
-                      }
+                    <FormField
+                      label={t("local_body")}
+                      errors={errors["local_body"]}
+                      required
                     >
-                      <SelectTrigger
-                        label={t("local_body")}
-                        required
-                        errors={errors["local_body"]}
-                        className="w-full"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {localBodyQuery.data?.map((localbody) => (
-                          <SelectItem value={localbody.id.toString()}>
-                            {localbody.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Autocomplete
+                        options={
+                          localBodyQuery.data?.map((localbody) => ({
+                            label: localbody.name,
+                            value: localbody.id.toString(),
+                          })) || []
+                        }
+                        value={form.local_body?.toString() || ""}
+                        onChange={(value) =>
+                          setForm((f) => ({
+                            ...f,
+                            local_body: Number(value),
+                            ward: undefined,
+                          }))
+                        }
+                        disabled={
+                          !form.district ||
+                          localBodyQuery.isLoading ||
+                          !localBodyQuery.data?.length
+                        }
+                      />
+                    </FormField>
                   </div>
                   <div>
-                    <Select
-                      {...selectProps("ward")}
-                      disabled={
-                        !form.local_body ||
-                        wardsQuery.isLoading ||
-                        !wardsQuery.data?.results.length
-                      }
+                    <FormField
+                      label={t("ward")}
+                      errors={errors["ward"]}
+                      required
                     >
-                      <SelectTrigger
-                        label={t("ward")}
-                        errors={errors["ward"]}
-                        className="w-full"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {wardsQuery.data?.results.map((ward) => (
-                          <SelectItem value={ward.id.toString()}>
-                            {ward.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Autocomplete
+                        options={
+                          wardsQuery.data?.results.map((ward) => ({
+                            label: ward.name,
+                            value: ward.id.toString(),
+                          })) || []
+                        }
+                        value={form.ward?.toString() || ""}
+                        onChange={(value) =>
+                          setForm((f) => ({
+                            ...f,
+                            ward: value,
+                          }))
+                        }
+                        disabled={
+                          !form.local_body ||
+                          wardsQuery.isLoading ||
+                          !wardsQuery.data?.results.length
+                        }
+                      />
+                    </FormField>
                   </div>
-                  <Input {...fieldProps("village")} label={t("village")} />
+                  <div>
+                    <FormField label={t("village")} errors={errors["village"]}>
+                      <Input {...fieldProps("village")} />
+                    </FormField>
+                  </div>
                 </>
               ) : (
-                <Input
-                  {...fieldProps("passport_no")}
-                  label={t("passport_number")}
-                />
+                <div>
+                  <FormField
+                    label={t("passport_number")}
+                    errors={errors["passport_no"]}
+                  >
+                    <Input {...fieldProps("passport_no")} />
+                  </FormField>
+                </div>
               )}
             </div>
           </div>
@@ -896,93 +929,92 @@ export default function PatientRegistration(
             <div className="text-sm">{t("social_profile_detail")}</div>
             <br />
             <div>
-              <Select
-                value={form.meta_info?.occupation}
-                onValueChange={(value) =>
-                  setForm((f) => ({
-                    ...f,
-                    meta_info: { ...(f.meta_info as any), occupation: value },
-                  }))
-                }
-              >
-                <SelectTrigger label={t("occupation")} className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {OCCUPATION_TYPES.map((occupation) => (
-                    <SelectItem value={occupation.value}>
-                      {occupation.text}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormField label={t("occupation")}>
+                <Autocomplete
+                  options={OCCUPATION_TYPES.map((occupation) => ({
+                    label: occupation.text,
+                    value: occupation.value,
+                  }))}
+                  value={form.meta_info?.occupation || ""}
+                  onChange={(value) =>
+                    setForm((f) => ({
+                      ...f,
+                      meta_info: { ...(f.meta_info as any), occupation: value },
+                    }))
+                  }
+                />
+              </FormField>
             </div>
             <br />
             <div>
-              <Select {...selectProps("ration_card_category")}>
-                <SelectTrigger
-                  label={t("ration_card_category")}
-                  className="w-full"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {RATION_CARD_CATEGORY.map((rcg) => (
-                    <SelectItem value={rcg}>
-                      {t(`ration_card__${rcg}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormField
+                label={t("ration_card_category")}
+                errors={errors["ration_card_category"]}
+              >
+                <Select {...selectProps("ration_card_category")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RATION_CARD_CATEGORY.map((rcg) => (
+                      <SelectItem key={rcg} value={rcg}>
+                        {t(`ration_card__${rcg}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormField>
             </div>
             <br />
-            <RadioGroup
-              label={t("socioeconomic_status")}
-              value={form.meta_info?.socioeconomic_status}
-              onValueChange={(value) =>
-                setForm((f) => ({
-                  ...f,
-                  meta_info: {
-                    ...(f.meta_info as any),
-                    socioeconomic_status: value,
-                  },
-                }))
-              }
-              className="flex items-center gap-4"
-            >
-              {SOCIOECONOMIC_STATUS_CHOICES.map((sec) => (
-                <>
-                  <RadioGroupItem value={sec} id={"sec_" + sec} />
-                  <Label htmlFor={"sec_" + sec}>
-                    {t(`SOCIOECONOMIC_STATUS__${sec}`)}
-                  </Label>
-                </>
-              ))}
-            </RadioGroup>
+            <FormField label={t("socioeconomic_status")}>
+              <RadioGroup
+                value={form.meta_info?.socioeconomic_status}
+                onValueChange={(value) =>
+                  setForm((f) => ({
+                    ...f,
+                    meta_info: {
+                      ...(f.meta_info as any),
+                      socioeconomic_status: value,
+                    },
+                  }))
+                }
+                className="flex items-center gap-4"
+              >
+                {SOCIOECONOMIC_STATUS_CHOICES.map((sec) => (
+                  <Fragment key={sec}>
+                    <RadioGroupItem value={sec} id={"sec_" + sec} />
+                    <Label htmlFor={"sec_" + sec}>
+                      {t(`SOCIOECONOMIC_STATUS__${sec}`)}
+                    </Label>
+                  </Fragment>
+                ))}
+              </RadioGroup>
+            </FormField>
             <br />
-            <RadioGroup
-              label={t("has_domestic_healthcare_support")}
-              value={form.meta_info?.domestic_healthcare_support}
-              onValueChange={(value) =>
-                setForm((f) => ({
-                  ...f,
-                  meta_info: {
-                    ...(f.meta_info as any),
-                    domestic_healthcare_support: value,
-                  },
-                }))
-              }
-              className="flex items-center gap-4"
-            >
-              {DOMESTIC_HEALTHCARE_SUPPORT_CHOICES.map((dhs) => (
-                <>
-                  <RadioGroupItem value={dhs} id={"dhs_" + dhs} />
-                  <Label htmlFor={"dhs_" + dhs}>
-                    {t(`DOMESTIC_HEALTHCARE_SUPPORT__${dhs}`)}
-                  </Label>
-                </>
-              ))}
-            </RadioGroup>
+            <FormField label={t("has_domestic_healthcare_support")}>
+              <RadioGroup
+                value={form.meta_info?.domestic_healthcare_support}
+                onValueChange={(value) =>
+                  setForm((f) => ({
+                    ...f,
+                    meta_info: {
+                      ...(f.meta_info as any),
+                      domestic_healthcare_support: value,
+                    },
+                  }))
+                }
+                className="flex items-center gap-4"
+              >
+                {DOMESTIC_HEALTHCARE_SUPPORT_CHOICES.map((dhs) => (
+                  <Fragment key={dhs}>
+                    <RadioGroupItem value={dhs} id={"dhs_" + dhs} />
+                    <Label htmlFor={"dhs_" + dhs}>
+                      {t(`DOMESTIC_HEALTHCARE_SUPPORT__${dhs}`)}
+                    </Label>
+                  </Fragment>
+                ))}
+              </RadioGroup>
+            </FormField>
           </div>
           {/* <div id="volunteer-contact" className="mt-10">
             <h2 className="text-lg font-semibold">

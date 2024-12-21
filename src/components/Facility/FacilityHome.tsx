@@ -41,7 +41,36 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-import { patientRegisterAuth } from "../Patient/PatientRegister";
+import { UserModel } from "../Users/models";
+import { FacilityModel } from "./models";
+
+export function patientRegisterAuth(
+  authUser: UserModel,
+  facilityObject: FacilityModel | undefined,
+  facilityId: string,
+) {
+  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+  if (
+    !showAllFacilityUsers.includes(authUser.user_type) &&
+    authUser.home_facility_object?.id === facilityId
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    authUser.district === facilityObject?.district
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "StateAdmin" &&
+    authUser.state === facilityObject?.state
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 type Props = {
   facilityId: string;

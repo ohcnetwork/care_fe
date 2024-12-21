@@ -332,6 +332,11 @@ export default function PatientIndex() {
             value: "all",
             section: <PatientManager />,
           },
+          {
+            label: t("discharged_patients"),
+            value: "discharged",
+            section: <></>,
+          },
         ]}
       />
       <PatientFilter
