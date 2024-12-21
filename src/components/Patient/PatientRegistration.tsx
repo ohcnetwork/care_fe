@@ -398,6 +398,9 @@ export default function PatientRegistration(
 
     if (Object.keys(errors).length > 0) {
       setFeErrors(errors);
+      Notification.Error({
+        msg: t("please_fix_errors"),
+      });
     } else {
       patientId
         ? updatePatientMutation.mutate()
@@ -462,7 +465,6 @@ export default function PatientRegistration(
             <FormField label={t("name")} required errors={errors["name"]}>
               <Input
                 {...fieldProps("name")}
-                required
                 placeholder={t("type_patient_name")}
               />
             </FormField>
@@ -484,7 +486,6 @@ export default function PatientRegistration(
                       : f.emergency_phone_number,
                   }));
                 }}
-                required
               />
             </FormField>
             <div className="mt-1 flex gap-1 items-center">
@@ -523,7 +524,6 @@ export default function PatientRegistration(
                     emergency_phone_number: e.target.value,
                   }));
                 }}
-                required
                 disabled={samePhoneNumber}
               />
             </FormField>
@@ -593,11 +593,7 @@ export default function PatientRegistration(
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
                   <div>
-                    <FormField
-                      label={t("day")}
-                      required
-                      errors={errors["date_of_birth"]}
-                    >
+                    <FormField label={t("day")} required>
                       <Input
                         placeholder="DD"
                         type="number"
@@ -612,11 +608,7 @@ export default function PatientRegistration(
                     </FormField>
                   </div>
                   <div>
-                    <FormField
-                      label={t("month")}
-                      required
-                      errors={errors["date_of_birth"]}
-                    >
+                    <FormField label={t("month")} required>
                       <Input
                         placeholder="MM"
                         type="number"
@@ -631,11 +623,7 @@ export default function PatientRegistration(
                     </FormField>
                   </div>
                   <div>
-                    <FormField
-                      label={t("year")}
-                      required
-                      errors={errors["date_of_birth"]}
-                    >
+                    <FormField label={t("year")} required>
                       <Input
                         type="number"
                         placeholder="YYYY"
@@ -680,7 +668,6 @@ export default function PatientRegistration(
                             : undefined,
                         }))
                       }
-                      required
                       type="number"
                     />
                   </FormField>
@@ -749,7 +736,7 @@ export default function PatientRegistration(
             /> */}
             <br />
             <FormField label={t("pincode")} required errors={errors["pincode"]}>
-              <Input {...fieldProps("pincode")} type="number" required />
+              <Input {...fieldProps("pincode")} type="number" />
             </FormField>
             {showAutoFilledPincode && (
               <div>
