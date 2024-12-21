@@ -1,3 +1,5 @@
+import { DOSAGE_UNITS } from "@/components/Medicine/models";
+
 import { Code } from "@/types/questionnaire/code";
 
 export const MEDICATION_REQUEST_STATUS = [
@@ -47,33 +49,10 @@ export const MEDICATION_REQUEST_INTENT = [
 export type MedicationRequestIntent =
   (typeof MEDICATION_REQUEST_INTENT)[number];
 
-export const MEDICATION_REQUEST_PRIORITY = [
-  "routine",
-  "urgent",
-  "asap",
-  "stat",
-] as const;
-
-export type MedicationRequestPriority =
-  (typeof MEDICATION_REQUEST_PRIORITY)[number];
-
-export const MEDICATION_REQUEST_CATEGORY = [
-  "inpatient",
-  "outpatient",
-  "community",
-  "discharge",
-] as const;
-
-export type MedicationRequestCategory =
-  (typeof MEDICATION_REQUEST_CATEGORY)[number];
-
-export type TimingUnit = "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
-
-export type DoseType = "ordered" | "calculated";
-
 export interface DosageQuantity {
-  value: number;
-  unit: string;
+  value?: number;
+  // TODO: confirm if we should be using these units itself.
+  unit?: (typeof DOSAGE_UNITS)[number];
 }
 
 export interface DoseRange {
@@ -81,52 +60,66 @@ export interface DoseRange {
   high: DosageQuantity;
 }
 
-export interface DoseAndRate {
-  type?: DoseType | null;
-  dose_range?: DoseRange | null;
-  dose_quantity?: DosageQuantity | null;
-}
-
-export interface TimingRepeat {
-  frequency?: number | null;
-  period: number;
-  period_unit: TimingUnit;
-  bounds_duration?: DosageQuantity | null;
-}
-
-export interface Timing {
-  repeat?: TimingRepeat | null;
-  code?: Code | null;
-}
-
-export interface DosageInstruction {
-  sequence?: number | null;
-  text?: string | null;
-  additional_instruction?: Code[] | null;
-  patient_instruction?: string | null;
-  timing?: Timing | null;
-  as_needed_boolean?: boolean | null;
-  as_needed_for?: Code | null;
-  site?: Code | null;
-  route?: Code | null;
-  method?: Code | null;
-  dose_and_rate?: DoseAndRate[] | null;
-  max_dose_per_period?: DoseRange | null;
-}
-
 export interface MedicationRequest {
-  readonly id?: string; // TODO: make this non nullable and use Writable once type issue with StructuredRequestMap for allergy intolerance is solved.
+  readonly id?: string;
   status?: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
-  status_changed?: string | null; // DateTime
+  status_changed?: string; // DateTime
   intent?: MedicationRequestIntent;
-  category?: MedicationRequestCategory;
-  priority?: MedicationRequestPriority;
+  category?: "inpatient" | "outpatient" | "community" | "discharge";
+  priority?: "stat" | "urgent" | "asap" | "routine";
   do_not_perform: boolean;
   medication?: Code;
-  patient?: string | null; // UUID
-  encounter?: string | null; // UUID
+  patient?: string; // UUID
+  encounter?: string; // UUID
   authored_on: string;
-  dosage_instruction: DosageInstruction[];
-  note?: string | null;
+  dosage_instruction: {
+    sequence?: number;
+    text?: string;
+    additional_instruction?: Code[];
+    patient_instruction?: string;
+    // TODO: query: how to map for "Immediate" frequency
+    // TODO: query how to map Days
+    timing?: {
+      repeat?: {
+        frequency?: number;
+        period: number;
+        period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
+        bounds_duration?: DosageQuantity;
+      };
+      code?: Code;
+    };
+    /**
+     * True if it is a PRN medication
+     */
+    as_needed_boolean?: boolean;
+    /**
+     * If it is a PRN medication (as_needed_boolean is true), the indicator.
+     */
+    as_needed_for?: Code;
+    site?: Code;
+    route?: Code;
+    method?: Code;
+    /**
+     * One of `dose_quantity` or `dose_range` must be present.
+     * `type` is optional and defaults to `ordered`.
+     *
+     * - If `type` is `ordered`, `dose_quantity` must be present.
+     * - If `type` is `calculated`, `dose_range` must be present. This is used for titrated medications.
+     */
+    dose_and_rate?: (
+      | {
+          type?: "ordered";
+          dose_quantity?: DosageQuantity;
+          dose_range?: undefined;
+        }
+      | {
+          type: "calculated";
+          dose_range?: DoseRange;
+          dose_quantity?: undefined;
+        }
+    )[];
+    max_dose_per_period?: DoseRange;
+  }[];
+  note?: string;
 }

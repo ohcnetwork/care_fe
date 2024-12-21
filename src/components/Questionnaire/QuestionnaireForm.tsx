@@ -24,6 +24,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
+import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
 interface QuestionnaireFormState {
@@ -74,7 +75,7 @@ export function QuestionnaireForm({
     error: questionnaireError,
   } = useQuery(routes.questionnaire.detail, {
     pathParams: { id: questionnaireSlug ?? "" },
-    prefetch: !!questionnaireSlug,
+    prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
   const { mutate: submitBatch, isProcessing } = useMutation(
@@ -83,17 +84,22 @@ export function QuestionnaireForm({
   );
 
   useEffect(() => {
-    if (questionnaireData && !isInitialized) {
-      setQuestionnaireForms([
-        {
-          questionnaire: questionnaireData,
-          responses: initializeResponses(questionnaireData.questions),
-          errors: [],
-        },
-      ]);
-      setIsInitialized(true);
+    if (!isInitialized && questionnaireSlug) {
+      const questionnaire =
+        FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
+
+      if (questionnaire) {
+        setQuestionnaireForms([
+          {
+            questionnaire,
+            responses: initializeResponses(questionnaire.questions),
+            errors: [],
+          },
+        ]);
+        setIsInitialized(true);
+      }
     }
-  }, [questionnaireData, isInitialized]);
+  }, [questionnaireData, isInitialized, questionnaireSlug]);
 
   if (isQuestionnaireLoading) {
     return <Loading />;
@@ -314,7 +320,7 @@ export function QuestionnaireForm({
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen">
+      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -356,33 +362,6 @@ export function QuestionnaireForm({
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto max-w-3xl pb-8">
         <div className="p-4 space-y-6">
-          {/* Search and Add Questionnaire */}
-
-          <div className="flex gap-4 items-center">
-            <QuestionnaireSearch
-              subjectType={subjectType}
-              onSelect={(selected) => {
-                if (
-                  questionnaireForms.some(
-                    (form) => form.questionnaire.id === selected.id,
-                  )
-                ) {
-                  return;
-                }
-
-                setQuestionnaireForms((prev) => [
-                  ...prev,
-                  {
-                    questionnaire: selected,
-                    responses: initializeResponses(selected.questions),
-                    errors: [],
-                  },
-                ]);
-              }}
-              disabled={isProcessing}
-            />
-          </div>
-
           {/* Questionnaire Forms */}
           {questionnaireForms.map((form, index) => (
             <div
@@ -452,6 +431,33 @@ export function QuestionnaireForm({
               />
             </div>
           ))}
+
+          {/* Search and Add Questionnaire */}
+
+          <div className="flex gap-4 items-center">
+            <QuestionnaireSearch
+              subjectType={subjectType}
+              onSelect={(selected) => {
+                if (
+                  questionnaireForms.some(
+                    (form) => form.questionnaire.id === selected.id,
+                  )
+                ) {
+                  return;
+                }
+
+                setQuestionnaireForms((prev) => [
+                  ...prev,
+                  {
+                    questionnaire: selected,
+                    responses: initializeResponses(selected.questions),
+                    errors: [],
+                  },
+                ]);
+              }}
+              disabled={isProcessing}
+            />
+          </div>
 
           {/* Submit and Cancel Buttons */}
           {questionnaireForms.length > 0 && (

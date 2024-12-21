@@ -86,7 +86,6 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         date_to: monthRange.end.toISOString().split("T")[0],
       },
     }),
-    enabled: false, // TODO: enable this once we have exceptions
   });
 
   if (!templatesQuery.data) {
@@ -112,10 +111,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           );
 
           const unavailableExceptions =
-            exceptionsQuery.data?.results.filter(
-              (exception) =>
-                !exception.is_available &&
-                isDateInRange(date, exception.valid_from, exception.valid_to),
+            exceptionsQuery.data?.results.filter((exception) =>
+              isDateInRange(date, exception.valid_from, exception.valid_to),
             ) ?? [];
 
           const isFullDayUnavailable = unavailableExceptions.some(

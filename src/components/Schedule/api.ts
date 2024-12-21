@@ -2,14 +2,13 @@ import {
   Appointment,
   AppointmentCreate,
   ScheduleException,
-  ScheduleExceptionCreate,
   ScheduleTemplate,
   SlotAvailability,
 } from "@/components/Schedule/types";
 
 import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { WritableOnly } from "@/Utils/types";
+import { Writable, WritableOnly } from "@/Utils/types";
 import { UserBase } from "@/types/user/base";
 
 export const ScheduleAPIs = {
@@ -37,7 +36,7 @@ export const ScheduleAPIs = {
       path: "/api/v1/facility/{facility_id}/schedule_exceptions/",
       method: "POST",
       TRes: Type<ScheduleException>(),
-      TBody: Type<ScheduleExceptionCreate>(),
+      TBody: Type<Writable<ScheduleException>>(),
     },
     list: {
       path: "/api/v1/facility/{facility_id}/schedule_exceptions/",
@@ -67,6 +66,7 @@ export const ScheduleAPIs = {
   },
 
   appointments: {
+    // TODO: rename this to available_resources (or something more accurate)
     availableDoctors: {
       path: "/api/v1/facility/{facility_id}/appointments/available_doctors/",
       method: "GET",

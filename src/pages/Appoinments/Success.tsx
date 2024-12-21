@@ -24,12 +24,10 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(CarePatientTokenKey) || "{}",
   );
-  const doctorData: UserModel = JSON.parse(
-    localStorage.getItem("doctor") ?? "{}",
-  );
+  const userData: UserModel = JSON.parse(localStorage.getItem("user") ?? "{}");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["appointment"],
+    queryKey: ["appointment", tokenData.phoneNumber],
     queryFn: query(routes.otp.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
@@ -51,7 +49,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8 mt-4">
+    <div className="mx-auto p-2">
       <div className="flex flex-row justify-start mb-4">
         <Button
           variant="outline"
@@ -79,7 +77,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("doctor_nurse")}:
           </h2>
-          <p className="text-lg font-medium">{formatName(doctorData)}</p>
+          <p className="text-lg font-medium">{formatName(userData)}</p>
         </div>
 
         <div>
@@ -116,7 +114,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
       <div className="mt-12 text-left space-y-2">
         <p className="text-gray-900">
-          {formatName(doctorData)} {t("doc_will_visit_patient")}
+          {formatName(userData)} {t("doc_will_visit_patient")}
         </p>
         <p className="text-gray-600">{t("thank_you_for_choosing")}</p>
       </div>

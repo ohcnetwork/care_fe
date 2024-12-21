@@ -1,8 +1,8 @@
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, useQueryParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -19,13 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
   filterAvailabilitiesByDayOfWeek,
   getFakeTokenNumber,
 } from "@/components/Schedule/helpers";
-import { Appointment, ScheduleAvailability } from "@/components/Schedule/types";
+import { Appointment } from "@/components/Schedule/types";
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -34,62 +35,79 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
+interface QueryParams {
+  resource?: string;
+  slot?: string;
+}
+
 export default function AppointmentsPage() {
+  const [qParams, setQParams] = useQueryParams<QueryParams>();
+
   const authUser = useAuthUser();
+
+  // TODO: remove this
   const facilityId = authUser.home_facility!;
 
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
-  const [selectedResource, setSelectedResource] = useState<string>();
-  const [selectedSlot, setSelectedSlot] = useState<ScheduleAvailability>();
-
-  const availableResourcesQuery = useQuery({
-    queryKey: ["availableResources", facilityId],
+  const resourcesQuery = useQuery({
+    queryKey: ["appointments-resources", facilityId],
     queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
       pathParams: { facility_id: facilityId },
     }),
   });
 
-  useEffect(() => {
-    if (availableResourcesQuery.data?.users.length && !selectedResource) {
-      setSelectedResource(availableResourcesQuery.data?.users[0].id);
-    }
-  }, [availableResourcesQuery.data, selectedResource]);
+  const resources = resourcesQuery.data?.users;
+  const resource = resources?.find((r) => r.id === qParams.resource);
 
-  const selectedResourceObj = availableResourcesQuery.data?.users.find(
-    (r) => r.id === selectedResource,
-  );
-
-  const slots = useSlots(facilityId, selectedResourceObj?.id);
+  const slots = useSlots(facilityId, qParams.resource);
+  const slot = slots?.find((s) => s.id === qParams.slot);
 
   return (
     <Page title="Out Patient (OP) Appointments" collapseSidebar>
       <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           <div>
-            <Label className="mb-2 text-black">Select Doctor</Label>
+            <Label className="mb-2 text-black">Select Practitioner</Label>
             <Select
-              value={selectedResourceObj?.id}
+              disabled={resourcesQuery.isLoading}
+              value={qParams.resource}
               onValueChange={(value) => {
-                const resource = availableResourcesQuery.data?.users.find(
+                const resource = resourcesQuery.data?.users.find(
                   (r) => r.id === value,
                 );
-                setSelectedResource(resource?.id);
+                setQParams({ resource: resource?.id });
               }}
             >
-              <SelectTrigger className="w-[240px]">
-                <SelectValue placeholder="Show all" />
+              <SelectTrigger className="min-w-60">
+                <SelectValue placeholder="Show all">
+                  {resource && (
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        imageUrl={resource.read_profile_picture_url}
+                        name={formatName(resource)}
+                        className="size-6 rounded-full"
+                      />
+                      <span>{formatName(resource)}</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {availableResourcesQuery.data?.users.map((doctor) => (
-                  <SelectItem key={doctor.id} value={doctor.id}>
+                {resourcesQuery.data?.users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">
-                      {/* <Avatar
-                        imageUrl={doctor.read_profile_picture_url}
-                        name={formatName(doctor)}
+                      <Avatar
+                        imageUrl={user.read_profile_picture_url}
+                        name={formatName(user)}
                         className="size-6 rounded-full"
-                      /> */}
-                      <span>{formatName(doctor)}</span>
+                      />
+                      <div className="space-x-2">
+                        <span>{formatName(user)}</span>
+                        <span className="text-xs text-gray-500 font-medium">
+                          {user.user_type}
+                        </span>
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
@@ -106,19 +124,21 @@ export default function AppointmentsPage() {
             </Label>
             <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
               <Button
-                variant={selectedSlot ? "ghost" : "outline"}
-                onClick={() => setSelectedSlot(undefined)}
-                className={cn(!selectedSlot && "shadow", "hover:bg-white")}
+                variant={slot ? "ghost" : "outline"}
+                onClick={() => setQParams({ resource: qParams.resource })}
+                className={cn(!slot && "shadow", "hover:bg-white")}
               >
                 ALL
               </Button>
               {slots?.map((slot) => (
                 <Button
                   key={slot.id}
-                  variant={selectedSlot?.id === slot.id ? "outline" : "ghost"}
-                  onClick={() => setSelectedSlot(slot)}
+                  variant={slot?.id === qParams.slot ? "outline" : "ghost"}
+                  onClick={() =>
+                    setQParams({ resource: qParams.resource, slot: slot.id })
+                  }
                   className={cn(
-                    selectedSlot?.id === slot.id && "shadow",
+                    slot?.id === qParams.slot && "shadow",
                     "hover:bg-white",
                   )}
                 >
@@ -131,7 +151,7 @@ export default function AppointmentsPage() {
 
         <div className="flex gap-4 items-center">
           <Input className="w-[300px]" placeholder="Search" />
-          {/* <Button variant="outline">Filter</Button> */}
+          <Button variant="outline">Filter</Button>
           <div className="flex border rounded-lg">
             <Button
               variant="ghost"
@@ -188,11 +208,11 @@ function AppointmentColumn(props: {
   return (
     <div
       className={cn(
-        "bg-gray-100 py-4 px-3 rounded-lg w-[20rem] overflow-y-hidden",
+        "bg-gray-100 py-4 rounded-lg w-[20rem] overflow-y-hidden",
         !data && "animate-pulse",
       )}
     >
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex px-3 items-center gap-3 mb-4">
         <h2 className="font-semibold capitalize text-base px-1">
           {props.status.replace("_", " ")}
         </h2>
@@ -206,7 +226,7 @@ function AppointmentColumn(props: {
         </div>
       ) : (
         <ScrollArea>
-          <ul className="space-y-3 px-0.5 pb-4 pt-1 h-[calc(100vh-22rem)]">
+          <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-22rem)]">
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link

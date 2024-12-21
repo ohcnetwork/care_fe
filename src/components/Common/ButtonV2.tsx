@@ -1,11 +1,8 @@
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
-
-import Spinner from "@/components/Common/Spinner";
 
 import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
 import { classNames } from "@/Utils/utils";
@@ -110,6 +107,9 @@ export const buttonStyles = ({
   );
 };
 
+/**
+ * @deprecated Use `Button` instead.
+ */
 const ButtonV2 = ({
   authorizeFor,
   size,
@@ -187,6 +187,9 @@ export default ButtonV2;
 
 export type CommonButtonProps = ButtonProps & { label?: string };
 
+/**
+ * @deprecated Use `Button` with the `type="submit"` prop instead.
+ */
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
   const { t } = useTranslation();
   return (
@@ -205,6 +208,9 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
   );
 };
 
+/**
+ * @deprecated Use `Button` instead.
+ */
 export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
   const { t } = useTranslation();
   return (
@@ -228,49 +234,4 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
 export type ButtonWithTimerProps = CommonButtonProps & {
   initialInverval?: number;
   interval?: number;
-};
-
-export const ButtonWithTimer = ({
-  initialInverval,
-  interval = 60,
-  ...buttonProps
-}: ButtonWithTimerProps) => {
-  const [seconds, setSeconds] = useState(initialInverval ?? interval);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
-  useEffect(() => {
-    let interval = undefined;
-    if (seconds > 0) {
-      interval = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      }, 1000);
-    } else {
-      setIsButtonDisabled(false);
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [seconds]);
-
-  return (
-    <div>
-      <ButtonV2
-        {...buttonProps}
-        disabled={isButtonDisabled}
-        onClick={async (e) => {
-          await buttonProps.onClick?.(e);
-          setSeconds(interval);
-          setIsButtonDisabled(true);
-        }}
-      >
-        {!!(seconds && isButtonDisabled) && (
-          <div className="mr-2 flex items-center">
-            <Spinner className="h-4 w-4" />
-            {seconds}
-          </div>
-        )}
-
-        {buttonProps.children ?? buttonProps.label}
-      </ButtonV2>
-    </div>
-  );
 };

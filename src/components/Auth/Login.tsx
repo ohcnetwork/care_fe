@@ -28,10 +28,13 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
 import FiltersCache from "@/Utils/FiltersCache";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
   username: string;
@@ -115,13 +118,14 @@ const Login = (props: { forgot?: boolean }) => {
     mutationFn: async (phone: string) => {
       const response = await request(routes.otp.sendOtp, {
         body: { phone_number: `+91${phone}` },
+        silent: true,
       });
       return response;
     },
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
-      Notification.Success({ msg: t("otp_sent_successfully") });
+      Notification.Success({ msg: t("send_otp_success") });
     },
     onError: (error: any) => {
       const errors = error?.data || [];
@@ -129,7 +133,7 @@ const Login = (props: { forgot?: boolean }) => {
         const firstError = errors[0] as OtpError;
         setOtpError(firstError.msg);
       } else {
-        setOtpError(t("failed_to_send_otp"));
+        setOtpError(t("send_otp_error"));
       }
     },
   });
@@ -145,9 +149,14 @@ const Login = (props: { forgot?: boolean }) => {
     onSuccess: async (response) => {
       const { data } = response;
       if (data?.access) {
-        localStorage.setItem("care_patient_token", data.access);
+        const tokenData: TokenData = {
+          token: data.access,
+          phoneNumber: `+91${phone}`,
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
         navigate("/patient/home");
-        Notification.Success({ msg: t("login_successful") });
+        Notification.Success({ msg: t("verify_otp_success_login") });
       }
     },
     onError: (error: any) => {

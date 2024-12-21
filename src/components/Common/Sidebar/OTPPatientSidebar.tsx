@@ -1,27 +1,23 @@
 import careConfig from "@careConfig";
 import { Link } from "raviger";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useContext } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
+  INavItem,
+  SidebarShrinkContext,
+  ToggleShrink,
+} from "@/components/Common/Sidebar/Sidebar";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "@/components/Common/Sidebar/SidebarItem";
-import SidebarUserCard from "@/components/Common/Sidebar/SidebarUserCard";
-import NotificationItem from "@/components/Notifications/NotificationsList";
 
 import useActiveLink from "@/hooks/useActiveLink";
-import { useCareAppNavItems } from "@/hooks/useCareApps";
 
 import { classNames } from "@/Utils/utils";
 
@@ -29,11 +25,46 @@ export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/care_logo_mark.svg";
 
-export interface INavItem {
-  text: string;
-  to?: string;
-  icon: IconName;
+const GetNavItems = () => {
+  const { t } = useTranslation();
+  const BaseNavItems: INavItem[] = [
+    { text: t("appointments"), to: "/patient/home", icon: "d-patient" },
+    { text: t("lab_tests"), to: "/patient/lab_tests", icon: "d-patient" },
+    { text: t("abha"), to: "/patient/abha", icon: "d-folder" },
+    {
+      text: t("medical_records"),
+      to: "/patient/medical_records",
+      icon: "d-book-open",
+    },
+    { text: t("my_doctors"), to: "/patient/doctors", icon: "d-book-open" },
+    { text: t("my_profile"), to: "/patient/profile", icon: "d-people" },
+  ];
+  return BaseNavItems;
+};
+
+export const OTPPatientDesktopSidebar = () => {
+  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
+  return (
+    <OTPPatientStatelessSidebar
+      shrinked={shrinked}
+      setShrinked={setShrinked}
+      shrinkable
+    />
+  );
+};
+
+interface MobileSidebarProps {
+  open: boolean;
+  setOpen: (state: boolean) => void;
 }
+
+export const OTPPatientMobileSidebar = (props: MobileSidebarProps) => {
+  return (
+    <SlideOver {...props} slideFrom="left" onlyChild>
+      <OTPPatientStatelessSidebar onItemClick={props.setOpen} />
+    </SlideOver>
+  );
+};
 
 type StatelessSidebarProps =
   | {
@@ -49,29 +80,15 @@ type StatelessSidebarProps =
       onItemClick: (open: boolean) => void;
     };
 
-const StatelessSidebar = ({
+export const OTPPatientStatelessSidebar = ({
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const { t } = useTranslation();
-  const BaseNavItems: INavItem[] = [
-    { text: t("facilities"), to: "/facility", icon: "d-hospital" },
-    { text: t("appointments"), to: "/appointments", icon: "d-calendar" },
-    { text: t("patients"), to: "/patients", icon: "d-patient" },
-    { text: t("assets"), to: "/assets", icon: "d-folder" },
-    { text: t("shifting"), to: "/shifting", icon: "d-ambulance" },
-    { text: t("resource"), to: "/resource", icon: "d-book-open" },
-    { text: t("users"), to: "/users", icon: "d-people" },
-    { text: t("notice_board"), to: "/notice_board", icon: "d-notice-board" },
-  ];
-
-  const PluginNavItems = useCareAppNavItems();
-
-  const NavItems = [...BaseNavItems, ...PluginNavItems];
-
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
+  const NavItems = GetNavItems();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
@@ -178,90 +195,9 @@ const StatelessSidebar = ({
               />
             );
           })}
-
-          <NotificationItem
-            shrinked={shrinked}
-            handleOverflow={handleOverflow}
-            onClickCB={() => onItemClick && onItemClick(false)}
-          />
-          {careConfig.urls.dashboard && (
-            <Item
-              text="Dashboard"
-              to={careConfig.urls.dashboard}
-              icon={<CareIcon icon="l-dashboard" className="text-lg" />}
-              external
-              handleOverflow={handleOverflow}
-            />
-          )}
         </div>
         <div className="hidden md:block md:flex-1" />
-
-        <SidebarUserCard shrinked={shrinked} />
       </div>
     </nav>
-  );
-};
-
-export const SidebarShrinkContext = createContext<{
-  shrinked: boolean;
-  setShrinked: (state: boolean) => void;
-}>({
-  shrinked: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setShrinked: () => {},
-});
-
-export const DesktopSidebar = () => {
-  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
-  return (
-    <StatelessSidebar
-      shrinked={shrinked}
-      setShrinked={setShrinked}
-      shrinkable
-    />
-  );
-};
-
-interface MobileSidebarProps {
-  open: boolean;
-  setOpen: (state: boolean) => void;
-}
-
-export const MobileSidebar = (props: MobileSidebarProps) => {
-  return (
-    <SlideOver {...props} slideFrom="left" onlyChild>
-      <StatelessSidebar onItemClick={props.setOpen} />
-    </SlideOver>
-  );
-};
-
-interface ToggleShrinkProps {
-  shrinked: boolean;
-  toggle: () => void;
-}
-
-export const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => {
-  const { t } = useTranslation();
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
-              shrinked ? "mx-auto" : "mr-4"
-            } transition-all ease-in-out`}
-            onClick={toggle}
-          >
-            <CareIcon
-              icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
-              className="text-lg transition"
-            />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{shrinked ? t("expand_sidebar") : t("collapse_sidebar")}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 };

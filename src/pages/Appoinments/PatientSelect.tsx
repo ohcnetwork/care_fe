@@ -21,9 +21,8 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
-
-import { AppointmentPatient } from "./Utils";
 
 export default function PatientSelect({
   facilityId,

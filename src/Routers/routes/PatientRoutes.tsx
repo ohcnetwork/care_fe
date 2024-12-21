@@ -11,7 +11,6 @@ import PatientRegistration from "@/components/Patient/PatientRegistration";
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const PatientRoutes: AppRoutes = {
-  //"/patients": () => <PatientManager />,
   "/patients": () => <PatientIndex />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/investigation_reports": ({ id }) => (
@@ -20,9 +19,6 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/register-patient": ({ facilityId }) => (
     <PatientRegistration facilityId={facilityId} />
   ),
-  // "/facility/:facilityId/patient": ({ facilityId }) => (
-  //   <PatientRegister facilityId={facilityId} />
-  // ),
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientHome facilityId={facilityId} id={id} page="demography" />
   ),

@@ -1,14 +1,30 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -20,6 +36,12 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { parsePhoneNumber } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
+
+const FormSchema = z.object({
+  pin: z.string().min(5, {
+    message: "Your one-time password must be 5 characters.",
+  }),
+});
 
 export default function OTP({
   facilityId,
@@ -33,8 +55,13 @@ export default function OTP({
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("+91");
-  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const OTPForm = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      pin: "",
+    },
+  });
   const validate = (phoneNumber: string) => {
     let errors = "";
 
@@ -58,9 +85,23 @@ export default function OTP({
       }),
     onSuccess: () => {
       if (page === "send") {
-        navigate(
-          `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
+        const tokenData: TokenData = JSON.parse(
+          localStorage.getItem(CarePatientTokenKey) || "{}",
         );
+        if (
+          Object.keys(tokenData).length > 0 &&
+          tokenData.phoneNumber === phoneNumber &&
+          dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+        ) {
+          Notification.Success({ msg: t("valid_otp_found") });
+          navigate(
+            `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+          );
+        } else {
+          navigate(
+            `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
+          );
+        }
       }
     },
     onError: () => {
@@ -109,9 +150,8 @@ export default function OTP({
     },
   });
 
-  const handleVerifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    verifyOTP(otp);
+  const handleVerifySubmit = async (data: z.infer<typeof FormSchema>) => {
+    verifyOTP(data.pin);
   };
 
   const renderPhoneNumberForm = () => {
@@ -158,37 +198,58 @@ export default function OTP({
           {t("we_ve_sent_you_a_code_to")}{" "}
           <span className="font-bold">{phoneNumber}</span>
         </span>
-        <form
-          onSubmit={handleVerifySubmit}
-          className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
-        >
-          <div className="flex flex-col space-y-4">
-            <span className="text-xl self-center">
-              {t("enter_the_verification_code")}
-            </span>
-            <OtpFormField
-              name="otp"
-              required
-              onChange={(e) => setOtp(e.toString())}
-              value={otp}
-              error={error}
-              length={5}
+        <Form {...OTPForm}>
+          <form
+            onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
+            className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
+          >
+            <FormField
+              control={OTPForm.control}
+              name="pin"
+              render={({ field }) => (
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-base flex-wrap">
+                    {t("enter_the_verification_code")}
+                  </FormLabel>
+                  <FormControl>
+                    <InputOTP maxLength={5} {...field} className="focus:ring-0">
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                      </InputOTPGroup>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={1} />
+                      </InputOTPGroup>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={2} />
+                      </InputOTPGroup>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={3} />
+                      </InputOTPGroup>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={4} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button
-            variant="primary_gradient"
-            type="submit"
-            className="w-full h-12 text-lg"
-          >
-            {t("verify_otp")}
-          </Button>
-          <a
-            className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-            onClick={() => sendOTP(phoneNumber)}
-          >
-            {t("didnt_receive_a_message")} {t("resend_otp")}
-          </a>
-        </form>
+
+            <Button
+              variant="primary_gradient"
+              type="submit"
+              className="w-full h-12 text-lg"
+            >
+              {t("verify_otp")}
+            </Button>
+            <a
+              className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
+              onClick={() => sendOTP(phoneNumber)}
+            >
+              {t("didnt_receive_a_message")} {t("resend_otp")}
+            </a>
+          </form>
+        </Form>
       </div>
     );
   };

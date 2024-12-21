@@ -1,11 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
-
-import Callout from "@/CAREUI/display/Callout";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,13 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -36,30 +27,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
 
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import { ScheduleSlotTypes } from "@/components/Schedule/types";
 import { UserModel } from "@/components/Users/models";
 
-import useMutation from "@/Utils/request/useMutation";
+import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  is_available: z.boolean(),
-  slot_type: z.enum(ScheduleSlotTypes).optional(),
-  from_date: z.date({ required_error: "From date is required" }),
-  to_date: z.date({ required_error: "To date is required" }),
-  unavailable_all_day: z.boolean(),
+  reason: z.string().min(1, "Reason is required"),
+  valid_from: z.date({ required_error: "From date is required" }),
+  valid_to: z.date({ required_error: "To date is required" }),
   start_time: z
     .string()
     .min(1, "Start time is required") as unknown as z.ZodType<Time>,
   end_time: z
     .string()
     .min(1, "End time is required") as unknown as z.ZodType<Time>,
-  reason: z.string().optional(),
-  tokens_allowed: z.number().optional(),
+  unavailable_all_day: z.boolean(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,90 +55,66 @@ interface Props {
 }
 
 export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      is_available: false,
-      from_date: undefined,
-      to_date: undefined,
-      unavailable_all_day: false,
+      valid_from: undefined,
+      valid_to: undefined,
       start_time: undefined,
       end_time: undefined,
       reason: "",
-      tokens_allowed: undefined,
+      unavailable_all_day: false,
     },
   });
 
-  const { mutate, isProcessing } = useMutation(ScheduleAPIs.exceptions.create, {
-    pathParams: {
-      facility_id: user.home_facility_object!.id!,
-    },
+  const {
+    mutate: createException,
+    isPending,
+    isSuccess,
+  } = useMutation({
+    mutationFn: mutate(ScheduleAPIs.exceptions.create, {
+      pathParams: { facility_id: user.home_facility_object!.id! },
+    }),
   });
 
-  const isAvailable = form.watch("is_available");
-  const isAllDay = form.watch("unavailable_all_day");
+  const unavailableAllDay = form.watch("unavailable_all_day");
 
   useEffect(() => {
-    if (isAllDay) {
+    if (unavailableAllDay) {
       form.setValue("start_time", "00:00");
       form.setValue("end_time", "23:59");
     } else {
       form.resetField("start_time");
       form.resetField("end_time");
     }
-  }, [isAllDay, form]);
+  }, [unavailableAllDay]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Exception created successfully");
+      setOpen(false);
+      form.reset();
+      onRefresh?.();
+    }
+  }, [isSuccess]);
 
   async function onSubmit(data: FormValues) {
-    toast.promise(
-      mutate({
-        body: {
-          doctor_username: user.username,
-          name: data.name,
-          is_available: data.is_available,
-          valid_from: data.from_date.toISOString().split("T")[0],
-          valid_to: data.to_date.toISOString().split("T")[0],
-          start_time: data.unavailable_all_day ? "00:00" : data.start_time,
-          end_time: data.unavailable_all_day ? "23:59" : data.end_time,
-          reason: data.reason ?? "",
-          slot_type: data.slot_type,
-          tokens_per_slot: data.tokens_allowed,
-        },
-      }),
-      {
-        loading: "Creating...",
-        success: ({ res }) => {
-          if (res?.ok) {
-            setOpen(false);
-            form.reset();
-            onRefresh?.();
-            return `Exception '${data.name}' created successfully`;
-          }
-        },
-        error: "Error",
-      },
-    );
+    createException({
+      reason: data.reason,
+      valid_from: data.valid_from.toISOString().split("T")[0],
+      valid_to: data.valid_to.toISOString().split("T")[0],
+      start_time: data.start_time,
+      end_time: data.end_time,
+      resource: user.external_id,
+    });
   }
-
-  const renderTimeAllocationCallout = () => {
-    const tokensAllowed = form.watch("tokens_allowed");
-    if (!tokensAllowed) return null;
-
-    return (
-      <Callout variant="alert" badge="Info">
-        Allocating {tokensAllowed} tokens in this schedule provides
-        approximately 6 minutes for each patient
-      </Callout>
-    );
-  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="primary" disabled={isProcessing}>
+        <Button variant="primary" disabled={isPending}>
           Add Exception
         </Button>
       </SheetTrigger>
@@ -174,13 +135,13 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
               >
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>Exception Name</FormLabel>
+                      <FormLabel required>Reason</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g. Holiday Leave, Conference"
+                          placeholder="e.g. Holiday Leave, Conference, etc."
                           {...field}
                         />
                       </FormControl>
@@ -189,84 +150,13 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                   )}
                 />
 
-                {/* <FormField
-                  control={form.control}
-                  name="is_available"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel required>Exception Type</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={(value) =>
-                            field.onChange(value === "true")
-                          }
-                          defaultValue={field.value ? "true" : "false"}
-                          className="flex space-x-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="false" id="unavailable" />
-                            <label
-                              htmlFor="unavailable"
-                              className="text-sm font-medium leading-none"
-                            >
-                              Unavailable
-                            </label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="true" id="modify" />
-                            <label
-                              htmlFor="modify"
-                              className="text-sm font-medium leading-none"
-                            >
-                              Modify Schedule
-                            </label>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
-
-                {isAvailable && (
-                  <FormField
-                    control={form.control}
-                    name="slot_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel required>Appointment Type</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select appointment type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ScheduleSlotTypes.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {t(`SCHEDULE_SLOT_TYPE__${type}`)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="from_date"
+                    name="valid_from"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {isAvailable ? "Valid From" : "Unavailable From"}
-                        </FormLabel>
+                        <FormLabel required>Valid From</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -278,12 +168,10 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
 
                   <FormField
                     control={form.control}
-                    name="to_date"
+                    name="valid_to"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {isAvailable ? "Valid Till" : "Unavailable Until"}
-                        </FormLabel>
+                        <FormLabel required>Valid Till</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -294,25 +182,23 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                   />
                 </div>
 
-                {!isAvailable && (
-                  <FormField
-                    control={form.control}
-                    name="unavailable_all_day"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Full Day Unavailable</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                )}
+                <FormField
+                  control={form.control}
+                  name="unavailable_all_day"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Full Day Unavailable</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -320,16 +206,12 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                     name="start_time"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {isAvailable
-                            ? "Start Time"
-                            : "From (Unavailable Time)"}
-                        </FormLabel>
+                        <FormLabel required>From</FormLabel>
                         <FormControl>
                           <Input
                             type="time"
                             {...field}
-                            disabled={!isAvailable && isAllDay}
+                            disabled={unavailableAllDay}
                           />
                         </FormControl>
                         <FormMessage />
@@ -342,14 +224,12 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                     name="end_time"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {isAvailable ? "End Time" : "To (Unavailable Time)"}
-                        </FormLabel>
+                        <FormLabel required>To</FormLabel>
                         <FormControl>
                           <Input
                             type="time"
                             {...field}
-                            disabled={!isAvailable && isAllDay}
+                            disabled={unavailableAllDay}
                           />
                         </FormControl>
                         <FormMessage />
@@ -358,77 +238,18 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                   />
                 </div>
 
-                {!isAvailable && (
-                  <FormField
-                    control={form.control}
-                    name="reason"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Reason (Optional)</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Type your reason here"
-                            className="resize-none"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {isAvailable && (
-                  <>
-                    <div className="flex gap-4">
-                      <FormField
-                        control={form.control}
-                        name="tokens_allowed"
-                        render={({ field }) => (
-                          <FormItem className="w-[180px]">
-                            <FormLabel required>Tokens Allowed</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                placeholder="10"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(parseInt(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      {renderTimeAllocationCallout()}
-                    </div>
-
-                    <Callout variant="warning" badge="Warning">
-                      You have 7 unbooked and 3 booked OP appointments for this
-                      day. Saving this configuration will overwrite all existing
-                      appointments.
-                    </Callout>
-                  </>
-                )}
-
                 <SheetFooter>
                   <SheetClose asChild>
                     <Button
                       variant="outline"
                       type="button"
-                      disabled={isProcessing}
+                      disabled={isPending}
                     >
                       Cancel
                     </Button>
                   </SheetClose>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    disabled={isProcessing}
-                  >
-                    {isAvailable ? "Modify Schedule" : "Confirm Unavailability"}
+                  <Button variant="primary" type="submit" disabled={isPending}>
+                    Confirm Unavailability
                   </Button>
                 </SheetFooter>
               </form>

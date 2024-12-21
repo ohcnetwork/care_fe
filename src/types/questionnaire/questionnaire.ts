@@ -1,17 +1,9 @@
 import { Code } from "./code";
 import { Question } from "./question";
 
-export type SubjectType = "patient";
+export type SubjectType = "patient" | "encounter";
 
 export type QuestionStatus = "active" | "retired" | "draft";
-
-export type QuestionnaireType =
-  | "custom"
-  | "allergy_intolerance"
-  | "medication_request"
-  | "medication_statement"
-  | "immunization"
-  | "encounter";
 
 export interface QuestionnaireDetail {
   id: string;
@@ -19,7 +11,6 @@ export interface QuestionnaireDetail {
   version?: string;
   code?: Code;
   questions: Question[];
-  type: QuestionnaireType;
   title: string;
   description?: string;
   status: QuestionStatus;

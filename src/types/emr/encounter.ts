@@ -9,7 +9,7 @@ export const ENCOUNTER_SUGGESTIONS = [
   "A", // Admit
   "R", // Refer
   "OP", // Outpatient
-  "DC", // Discharge
+  "DC", // Domiciliary Care
   "DD", // Death
 ] as const;
 

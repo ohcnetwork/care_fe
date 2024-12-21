@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -14,26 +15,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { ScheduleAPIs } from "@/components/Schedule/api";
 
-import { PatientProps } from ".";
+import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
   const { t } = useTranslation();
 
-  const { data: appointments, loading } = useTanStackQueryInstead(
-    routes.getFacilityAppointments,
-    {
+  const { data } = useQuery({
+    queryKey: ["patient-appointments", id],
+    queryFn: query(ScheduleAPIs.appointments.list, {
       pathParams: { facility_id: facilityId },
-      query: {
+      queryParams: {
         patient: id,
       },
-      prefetch: !!id && !!facilityId,
-    },
-  );
+    }),
+  });
+
+  const appointments = data?.results;
 
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {
@@ -87,14 +90,14 @@ export const Appointments = (props: PatientProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {!appointments ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
                   {t("loading")}
                 </TableCell>
               </TableRow>
-            ) : appointments?.results?.length ? (
-              appointments.results.map((appointment) => (
+            ) : appointments.length ? (
+              appointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell className="font-medium">
                     {appointment.token_slot.availability.name}
@@ -103,9 +106,20 @@ export const Appointments = (props: PatientProps) => {
                     {formatDateTime(appointment.token_slot.start_datetime)}
                   </TableCell>
                   <TableCell>
-                    {appointment.booked_by
-                      ? formatName(appointment.booked_by)
-                      : "-"}
+                    {appointment.booked_by ? (
+                      <>
+                        <Avatar
+                          imageUrl={
+                            appointment.booked_by?.read_profile_picture_url
+                          }
+                          name={formatName(appointment.booked_by)}
+                          className="mr-2 size-4"
+                        />
+                        <span>{formatName(appointment.booked_by)}</span>
+                      </>
+                    ) : (
+                      <span className="text-gray-500">{t("self_booked")}</span>
+                    )}
                   </TableCell>
                   <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                   <TableCell className="text-right">

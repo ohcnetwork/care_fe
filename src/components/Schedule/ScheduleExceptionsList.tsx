@@ -3,7 +3,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import Callout from "@/CAREUI/display/Callout";
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -16,6 +15,7 @@ import { ScheduleException } from "@/components/Schedule/types";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import useMutation from "@/Utils/request/useMutation";
+import { formatTimeShort } from "@/Utils/utils";
 
 interface Props {
   items?: ScheduleException[];
@@ -72,18 +72,23 @@ const ScheduleExceptionItem = (
         <div className="flex">
           <ColoredIndicator className="my-1 mr-2.5 h-5 w-1.5 rounded-r" />
           <div className="flex flex-col">
-            <span className="space-x-1 text-lg font-semibold">
-              <span className="text-gray-700">{props.name}</span>
-              <span className="text-gray-500">from</span>
-              <span className="text-gray-700">
+            <span className="space-x-1 text-lg font-semibold text-gray-700">
+              {props.reason}
+            </span>
+            <span className="text-sm text-gray-500">
+              <span className="font-medium">
+                {formatTimeShort(props.start_time)} -{" "}
+                {formatTimeShort(props.end_time)}
+              </span>
+              <span> from </span>
+              <span className="font-medium">
                 {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
               </span>
-              <span className="text-gray-500">to</span>
-              <span className="text-gray-700">
+              <span> to </span>
+              <span className="font-medium">
                 {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
               </span>
             </span>
-            <span className="text-sm text-gray-500">{props.name}</span>
           </div>
         </div>
         <Button
@@ -105,12 +110,13 @@ const ScheduleExceptionItem = (
           <span className="ml-2">Remove</span>
         </Button>
       </div>
-      <div className="px-4 py-2">
+      {/* TODO: Add this information */}
+      {/* <div className="px-4 py-2">
         <Callout className="mt-2" variant="warning" badge="Warning">
           (TODO: Placeholder; replace this) 3 booked appointments were cancelled
           when you marked this leave. These may need to be rescheduled.
         </Callout>
-      </div>
+      </div> */}
     </div>
   );
 };

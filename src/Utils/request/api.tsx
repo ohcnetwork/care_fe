@@ -149,42 +149,6 @@ export const ModelCrudApis = <
   };
 };
 
-interface FacilityAppointment {
-  id: string;
-  token_slot: {
-    id: string;
-    availability: {
-      name: string;
-      tokens_per_slot: number;
-    };
-    start_datetime: string;
-    end_datetime: string;
-    allocated: number;
-  };
-  patient: {
-    id: string;
-    name: string;
-    gender: number;
-    date_of_birth: string | null;
-    age: number | null;
-    address: string;
-    pincode: number;
-    ward: string | null;
-  };
-  booked_on: string;
-  booked_by?: {
-    id: number;
-    last_login: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    user_type: number;
-  };
-  status: "booked" | "checked_in" | "cancelled";
-  reason_for_visit: string;
-}
-
 const routes = {
   // Auth Endpoints
   login: {
@@ -1562,12 +1526,6 @@ const routes = {
       TRes: Type<Appointment>(),
       TBody: Type<AppointmentCreate>(),
     },
-  },
-
-  getFacilityAppointments: {
-    path: "/api/v1/facility/{facility_id}/appointments/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilityAppointment>>(),
   },
 } as const;
 

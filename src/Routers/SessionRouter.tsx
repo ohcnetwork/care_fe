@@ -6,18 +6,19 @@ import ResetPassword from "@/components/Auth/ResetPassword";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
-import { AppointmentSuccess } from "@/pages/Appoinments/AppointmentSuccess";
-import OTP from "@/pages/Appoinments/OTP";
-import { AppointmentsPage } from "@/pages/Facility/AppointmentsPage";
+import { PatientRegistration } from "@/pages/Appoinments/PatientRegistration";
+import PatientSelect from "@/pages/Appoinments/PatientSelect";
+import { ScheduleAppointment } from "@/pages/Appoinments/Schedule";
+import OTP from "@/pages/Appoinments/auth/OTP";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
-import { PatientRegistration } from "@/pages/Patient/PatientRegistration";
-import PatientSelect from "@/pages/Patient/PatientSelect";
+
+import OTPPatientRouter from "./OTPPatientRouter";
 
 const LicensesPage = lazy(() => import("@/components/Licenses/LicensesPage"));
 
-const routes = {
+export const routes = {
   "/": () => <LandingPage />,
   "/facilities": () => <FacilitiesPage />,
   "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
@@ -39,7 +40,7 @@ const routes = {
     facilityId: string;
     staffExternalId: string;
   }) => (
-    <AppointmentsPage
+    <ScheduleAppointment
       facilityId={facilityId}
       staffExternalId={staffExternalId}
     />
@@ -63,11 +64,6 @@ const routes = {
       staffUsername={staffUsername}
     />
   ),
-  "/facility/:facilityId/appointments/:appointmentId/success": ({
-    appointmentId,
-  }: {
-    appointmentId: string;
-  }) => <AppointmentSuccess appointmentId={appointmentId} />,
   "/login": () => <Login />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (
@@ -79,5 +75,5 @@ const routes = {
 };
 
 export default function SessionRouter() {
-  return useRoutes(routes) || <Login />;
+  return useRoutes(routes) || <OTPPatientRouter />;
 }

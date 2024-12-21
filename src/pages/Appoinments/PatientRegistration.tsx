@@ -76,7 +76,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { t } = useTranslation();
   const [ageInputType, setAgeInputType] = useState<"age" | "date_of_birth">(
-    "age",
+    "date_of_birth",
   );
 
   const { publish } = usePubSub();

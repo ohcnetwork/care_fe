@@ -1,6 +1,6 @@
 import { DayOfWeekValue } from "@/CAREUI/interactive/WeekdayCheckbox";
 
-import { Time, WritableOnly } from "@/Utils/types";
+import { Time } from "@/Utils/types";
 import { UserBase } from "@/types/user/base";
 
 export interface ScheduleTemplate {
@@ -34,21 +34,12 @@ export type ScheduleAvailability = ScheduleTemplate["availabilities"][number];
 
 export interface ScheduleException {
   readonly id: string;
-  name: string;
-  is_available: boolean;
+  resource: string; // UUID of the resource
   reason: string;
-  valid_from: string;
-  valid_to: string;
-  start_time: Time;
-  end_time: Time;
-  slot_type?: (typeof ScheduleSlotTypes)[number];
-  slot_size_in_minutes?: number;
-  tokens_per_slot?: number;
-}
-
-export interface ScheduleExceptionCreate
-  extends WritableOnly<ScheduleException> {
-  doctor_username: string;
+  valid_from: string; // date in YYYY-MM-DD format
+  valid_to: string; // date in YYYY-MM-DD format
+  start_time: Time; // time in HH:MM format
+  end_time: Time; // time in HH:MM format
 }
 
 export interface SlotAvailability {
@@ -82,7 +73,10 @@ export interface Appointment {
   readonly token_slot: SlotAvailability;
   readonly patient: AppointmentPatient;
   readonly booked_on: string;
-  readonly booked_by: UserBase;
+  /**
+   * This is null if the appointment was booked by the patient itself.
+   */
+  readonly booked_by: UserBase | null;
   status:
     | "proposed"
     | "pending"

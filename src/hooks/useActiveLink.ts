@@ -10,6 +10,7 @@ import { keysOf } from "@/Utils/utils";
  * by `useActiveLink` hook.
  */
 const activeLinkPriority = {
+  "/patient/home": "/patient/home",
   "/patients": "/patients",
   "/patient/": "/patients",
   "/death_report": "/patients",
