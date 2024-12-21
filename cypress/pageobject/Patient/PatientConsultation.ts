@@ -65,7 +65,7 @@ export class PatientConsultationPage {
   }
 
   clickPatientDetails() {
-    cy.verifyAndClickElement("#consultationpage-header", "Patient Details");
+    cy.verifyAndClickElement("#patient-details", "Patient Details");
   }
 
   typePatientIllnessHistory(history: string) {
@@ -103,12 +103,7 @@ export class PatientConsultationPage {
   }
 
   clickEditConsultationButton() {
-    cy.get("#consultation-buttons").scrollIntoView();
-    cy.get("button").contains("Manage Patient").click();
-    cy.verifyAndClickElement(
-      "#consultation-buttons",
-      "Edit Consultation Details",
-    );
+    cy.clickAndSelectOption("#show-more", "Edit Consultation Details", true);
   }
 
   interceptConsultation() {

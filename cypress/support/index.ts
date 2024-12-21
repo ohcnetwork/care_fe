@@ -34,6 +34,7 @@ declare global {
       clickAndSelectOption(
         element: string,
         reference: string,
+        skipVerification?: boolean,
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,
@@ -49,7 +50,7 @@ declare global {
       typeIntoField(
         selector: string,
         value: string,
-        options?: { clearBeforeTyping?: boolean },
+        options?: { clearBeforeTyping?: boolean; skipVerification?: boolean },
       ): Chainable<Element>;
     }
   }
