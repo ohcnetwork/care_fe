@@ -103,7 +103,7 @@ export default function ManageUsers() {
   );
 
   if (userListLoading || districtDataLoading || !userListData?.results) {
-    return <Loading />;
+    manageUsers = <Loading />;
   }
 
   manageUsers = (
@@ -115,7 +115,7 @@ export default function ManageUsers() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-      <Pagination totalCount={userListData.count} />
+      <Pagination totalCount={userListData?.count ?? 0} />
     </div>
   );
 
