@@ -6,6 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import Tabs from "@/components/Common/Tabs";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -13,8 +14,6 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
