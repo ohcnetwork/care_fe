@@ -55,7 +55,7 @@ import {
 } from "@/Utils/utils";
 
 import Autocomplete from "../ui/autocomplete";
-import InputWithError from "../ui/form-field";
+import InputWithError from "../ui/input-with-error";
 
 interface PatientRegistrationPageProps {
   facilityId: string;
