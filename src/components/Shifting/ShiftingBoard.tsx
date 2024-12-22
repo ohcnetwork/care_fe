@@ -30,13 +30,12 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
 ) as KanbanBoardType;
 
-export default function BoardView() {
+export default function ({ setView }: { setView: (view: string) => void }) {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
     cacheBlacklist: ["patient_name"],
@@ -77,10 +76,6 @@ export default function BoardView() {
 
   const [boardFilter, setBoardFilter] = useState(activeBoards);
   const { t } = useTranslation();
-  const onListViewBtnClick = () => {
-    navigate("/shifting/list", { query: qParams });
-    setDefaultView("defaultShiftView", "list");
-  };
 
   return (
     <div className="flex-col px-2 pb-2">
@@ -127,7 +122,7 @@ export default function BoardView() {
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <Button
               variant={"primary"}
-              onClick={onListViewBtnClick}
+              onClick={() => setView("list")}
               className="h-10.8 px-4 py-2"
             >
               <CareIcon icon="l-list-ul" className="mr-2" />

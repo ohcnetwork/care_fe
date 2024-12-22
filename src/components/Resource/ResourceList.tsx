@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Chip from "@/CAREUI/display/Chip";
@@ -22,9 +22,12 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
-import { setDefaultView } from "@/Utils/viewStorageUtils";
 
-export default function ListView() {
+export default function ListView({
+  setView,
+}: {
+  setView: (view: string) => void;
+}) {
   const {
     qParams,
     Pagination,
@@ -36,10 +39,6 @@ export default function ListView() {
 
   const { t } = useTranslation();
 
-  const onBoardViewBtnClick = () => {
-    navigate("/resource/board", { query: qParams });
-    setDefaultView("defaultResourceView", "board");
-  };
   const appliedFilters = formatFilter(qParams);
 
   const { loading, data, refetch } = useTanStackQueryInstead(
@@ -232,7 +231,7 @@ export default function ListView() {
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <Button
               variant={"primary"}
-              onClick={onBoardViewBtnClick}
+              onClick={() => setView("board")}
               className="h-10.8 px-4 py-2"
             >
               <CareIcon icon="l-list-ul" className="mr-2" />

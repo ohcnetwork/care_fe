@@ -26,8 +26,8 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { useView } from "@/Utils/useView";
 import { classNames } from "@/Utils/utils";
-import { getDefaultView, setDefaultView } from "@/Utils/viewStorageUtils";
 
 export default function ManageUsers() {
   const { t } = useTranslation();
@@ -48,9 +48,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState(
-    getDefaultView("usersDefaultView", "card") === "list" ? 1 : 0,
-  );
+  const [activeTab, setActiveTab] = useView("usersDefaultView");
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,
@@ -109,9 +107,7 @@ export default function ManageUsers() {
     return <Loading />;
   }
   const handleTabChange = (tab: number) => {
-    setActiveTab(tab);
-    const newView = tab === 1 ? "list" : "card";
-    setDefaultView("usersDefaultView", newView);
+    setActiveTab(tab === 1 ? "list" : "card");
   };
 
   manageUsers = (
@@ -120,7 +116,7 @@ export default function ManageUsers() {
         users={userListData?.results ?? []}
         onSearch={(username) => updateQuery({ username })}
         searchValue={qParams.username}
-        activeTab={activeTab}
+        activeTab={activeTab === "list" ? 1 : 0}
         onTabChange={handleTabChange}
       />
       <Pagination totalCount={userListData.count} />

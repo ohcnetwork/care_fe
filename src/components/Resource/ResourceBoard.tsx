@@ -25,7 +25,6 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
@@ -36,7 +35,11 @@ const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 const COMPLETED = ["COMPLETED", "REJECTED"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
-export default function BoardView() {
+export default function BoardView({
+  setView,
+}: {
+  setView: (view: string) => void;
+}) {
   const { qParams, FilterBadges, advancedFilter, updateQuery } = useFilters({
     limit: -1,
     cacheBlacklist: ["title"],
@@ -45,11 +48,6 @@ export default function BoardView() {
   // eslint-disable-next-line
   const appliedFilters = formatFilter(qParams);
   const { t } = useTranslation();
-
-  const onListViewBtnClick = () => {
-    navigate("/resource/list", { query: qParams });
-    setDefaultView("defaultResourceView", "list");
-  };
 
   return (
     <div className="flex-col px-2 pb-2">
@@ -96,7 +94,7 @@ export default function BoardView() {
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <Button
               variant={"primary"}
-              onClick={onListViewBtnClick}
+              onClick={() => setView("list")}
               className="h-10.8 px-4 py-2"
             >
               <CareIcon icon="l-list-ul" className="mr-2" />

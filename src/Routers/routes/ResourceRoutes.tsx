@@ -1,21 +1,13 @@
-import { Redirect } from "raviger";
-
+import View from "@/components/Common/View";
 import BoardView from "@/components/Resource/ResourceBoard";
 import ResourceDetails from "@/components/Resource/ResourceDetails";
 import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpdate";
 import ListView from "@/components/Resource/ResourceList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { getDefaultView } from "@/Utils/viewStorageUtils";
 
 const ResourceRoutes: AppRoutes = {
-  "/resource": () => (
-    <Redirect
-      to={`/resource/${getDefaultView("defaultResourceView", "board")}`}
-    />
-  ),
-  "/resource/board": () => <BoardView />,
-  "/resource/list": () => <ListView />,
+  "/resource": () => <View name="resource" board={BoardView} list={ListView} />,
   "/resource/:id": ({ id }) => <ResourceDetails id={id} />,
   "/resource/:id/update": ({ id }) => <ResourceDetailsUpdate id={id} />,
 };

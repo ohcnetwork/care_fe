@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,11 +18,14 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 import ShiftingTable from "./ShiftingTable";
 
-export default function ListView() {
+export default function ListView({
+  setView,
+}: {
+  setView: (view: string) => void;
+}) {
   const {
     qParams,
     updateQuery,
@@ -34,10 +36,7 @@ export default function ListView() {
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
   const { t } = useTranslation();
-  const onBoardViewBtnClick = () => {
-    navigate("/shifting/board", { query: qParams });
-    setDefaultView("defaultShiftView", "board");
-  };
+
   const {
     data: shiftData,
     loading,
@@ -83,7 +82,7 @@ export default function ListView() {
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <Button
               variant={"primary"}
-              onClick={onBoardViewBtnClick}
+              onClick={() => setView("board")}
               className="h-10.8 px-4 py-2"
             >
               <CareIcon icon="l-list-ul" className="mr-2" />
