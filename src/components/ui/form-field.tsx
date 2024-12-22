@@ -1,7 +1,7 @@
 import { InputErrors } from "./errors";
 import { Label } from "./label";
 
-export default function FormField(props: {
+export default function InputWithError(props: {
   label?: string;
   required?: boolean;
   errors?: string[];

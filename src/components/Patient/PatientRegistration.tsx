@@ -55,7 +55,7 @@ import {
 } from "@/Utils/utils";
 
 import Autocomplete from "../ui/autocomplete";
-import FormField from "../ui/form-field";
+import InputWithError from "../ui/form-field";
 
 interface PatientRegistrationPageProps {
   facilityId: string;
@@ -462,14 +462,14 @@ export default function PatientRegistration(
             </h2>
             <div className="text-sm">{t("general_info_detail")}</div>
             <br />
-            <FormField label={t("name")} required errors={errors["name"]}>
+            <InputWithError label={t("name")} required errors={errors["name"]}>
               <Input
                 {...fieldProps("name")}
                 placeholder={t("type_patient_name")}
               />
-            </FormField>
+            </InputWithError>
             <br />
-            <FormField
+            <InputWithError
               label={t("phone_number")}
               required
               errors={errors["phone_number"]}
@@ -487,9 +487,9 @@ export default function PatientRegistration(
                   }));
                 }}
               />
-            </FormField>
+            </InputWithError>
             <div className="mt-1 flex gap-1 items-center">
-              <FormField>
+              <InputWithError>
                 <Checkbox
                   checked={samePhoneNumber}
                   onCheckedChange={() => {
@@ -507,10 +507,10 @@ export default function PatientRegistration(
                 <Label htmlFor="same-phone-number">
                   {t("use_phone_number_for_emergency")}
                 </Label>
-              </FormField>
+              </InputWithError>
             </div>
             <br />
-            <FormField
+            <InputWithError
               label={t("emergency_phone_number")}
               required
               errors={errors["emergency_phone_number"]}
@@ -526,7 +526,7 @@ export default function PatientRegistration(
                 }}
                 disabled={samePhoneNumber}
               />
-            </FormField>
+            </InputWithError>
             {/* <br />
             <Input
               // This field does not exist in the backend, but is present in the design
@@ -535,7 +535,7 @@ export default function PatientRegistration(
               placeholder={t("emergency_contact_person_name")}
             /> */}
             <br />
-            <FormField label={t("sex")} required errors={errors["gender"]}>
+            <InputWithError label={t("sex")} required errors={errors["gender"]}>
               <RadioGroup
                 value={form.gender?.toString()}
                 onValueChange={(value) =>
@@ -555,9 +555,9 @@ export default function PatientRegistration(
                   </Fragment>
                 ))}
               </RadioGroup>
-            </FormField>
+            </InputWithError>
             <br />
-            <FormField
+            <InputWithError
               label={t("blood_group")}
               required
               errors={errors["blood_group"]}
@@ -574,7 +574,7 @@ export default function PatientRegistration(
                   ))}
                 </SelectContent>
               </Select>
-            </FormField>
+            </InputWithError>
             <br />
             <Tabs
               value={ageDob}
@@ -593,7 +593,7 @@ export default function PatientRegistration(
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
                   <div>
-                    <FormField label={t("day")} required>
+                    <InputWithError label={t("day")} required>
                       <Input
                         placeholder="DD"
                         type="number"
@@ -605,10 +605,10 @@ export default function PatientRegistration(
                           }))
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField label={t("month")} required>
+                    <InputWithError label={t("month")} required>
                       <Input
                         placeholder="MM"
                         type="number"
@@ -620,10 +620,10 @@ export default function PatientRegistration(
                           }))
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField label={t("year")} required>
+                    <InputWithError label={t("year")} required>
                       <Input
                         type="number"
                         placeholder="YYYY"
@@ -635,7 +635,7 @@ export default function PatientRegistration(
                           }))
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                 </div>
                 {errors["date_of_birth"] && (
@@ -649,7 +649,7 @@ export default function PatientRegistration(
                   <b>{t("age_input_warning_bold")}</b>
                 </div>
                 <div className="relative">
-                  <FormField
+                  <InputWithError
                     label={t("age")}
                     required
                     errors={errors["year_of_birth"]}
@@ -670,7 +670,7 @@ export default function PatientRegistration(
                       }
                       type="number"
                     />
-                  </FormField>
+                  </InputWithError>
                   {form.year_of_birth && (
                     <div className="text-xs absolute right-6 top-[22px] bottom-0 flex items-center justify-center p-2 pointer-events-none">
                       {t("year_of_birth")} : {form.year_of_birth}
@@ -680,7 +680,7 @@ export default function PatientRegistration(
               </TabsContent>
             </Tabs>
             <br />
-            <FormField
+            <InputWithError
               label={t("current_address")}
               required
               errors={errors["address"]}
@@ -697,9 +697,9 @@ export default function PatientRegistration(
                   }))
                 }
               />
-            </FormField>
+            </InputWithError>
             <div className="mt-1 flex gap-1 items-center">
-              <FormField>
+              <InputWithError>
                 <Checkbox
                   checked={sameAddress}
                   onCheckedChange={() => {
@@ -716,10 +716,10 @@ export default function PatientRegistration(
                 <Label htmlFor="same-address">
                   {t("use_address_as_permanent")}
                 </Label>
-              </FormField>
+              </InputWithError>
             </div>
             <br />
-            <FormField label={t("permanent_address")} required>
+            <InputWithError label={t("permanent_address")} required>
               <Textarea
                 {...fieldProps("permanent_address")}
                 value={form.permanent_address}
@@ -728,16 +728,20 @@ export default function PatientRegistration(
                 }
                 disabled={sameAddress}
               />
-            </FormField>
+            </InputWithError>
             {/* <br />
             <Input
               // This field does not exist in the backend, but is present in the design
               label={t("landmark")}
             /> */}
             <br />
-            <FormField label={t("pincode")} required errors={errors["pincode"]}>
+            <InputWithError
+              label={t("pincode")}
+              required
+              errors={errors["pincode"]}
+            >
               <Input {...fieldProps("pincode")} type="number" />
-            </FormField>
+            </InputWithError>
             {showAutoFilledPincode && (
               <div>
                 <CareIcon
@@ -752,7 +756,7 @@ export default function PatientRegistration(
             <br />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <FormField
+                <InputWithError
                   label={t("nationality")}
                   errors={errors["nationality"]}
                   required
@@ -773,12 +777,12 @@ export default function PatientRegistration(
                       }));
                     }}
                   />
-                </FormField>
+                </InputWithError>
               </div>
               {form.nationality === "India" ? (
                 <>
                   <div>
-                    <FormField
+                    <InputWithError
                       label={t("state")}
                       errors={errors["state"]}
                       required
@@ -802,10 +806,10 @@ export default function PatientRegistration(
                         }
                         disabled={statesQuery.isLoading}
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField
+                    <InputWithError
                       label={t("district")}
                       errors={errors["district"]}
                       required
@@ -832,10 +836,10 @@ export default function PatientRegistration(
                           !districtsQuery.data?.length
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField
+                    <InputWithError
                       label={t("local_body")}
                       errors={errors["local_body"]}
                       required
@@ -861,10 +865,10 @@ export default function PatientRegistration(
                           !localBodyQuery.data?.length
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField
+                    <InputWithError
                       label={t("ward")}
                       errors={errors["ward"]}
                       required
@@ -889,22 +893,25 @@ export default function PatientRegistration(
                           !wardsQuery.data?.results.length
                         }
                       />
-                    </FormField>
+                    </InputWithError>
                   </div>
                   <div>
-                    <FormField label={t("village")} errors={errors["village"]}>
+                    <InputWithError
+                      label={t("village")}
+                      errors={errors["village"]}
+                    >
                       <Input {...fieldProps("village")} />
-                    </FormField>
+                    </InputWithError>
                   </div>
                 </>
               ) : (
                 <div>
-                  <FormField
+                  <InputWithError
                     label={t("passport_number")}
                     errors={errors["passport_no"]}
                   >
                     <Input {...fieldProps("passport_no")} />
-                  </FormField>
+                  </InputWithError>
                 </div>
               )}
             </div>
@@ -916,7 +923,7 @@ export default function PatientRegistration(
             <div className="text-sm">{t("social_profile_detail")}</div>
             <br />
             <div>
-              <FormField label={t("occupation")}>
+              <InputWithError label={t("occupation")}>
                 <Autocomplete
                   options={OCCUPATION_TYPES.map((occupation) => ({
                     label: occupation.text,
@@ -930,11 +937,11 @@ export default function PatientRegistration(
                     }))
                   }
                 />
-              </FormField>
+              </InputWithError>
             </div>
             <br />
             <div>
-              <FormField
+              <InputWithError
                 label={t("ration_card_category")}
                 errors={errors["ration_card_category"]}
               >
@@ -950,10 +957,10 @@ export default function PatientRegistration(
                     ))}
                   </SelectContent>
                 </Select>
-              </FormField>
+              </InputWithError>
             </div>
             <br />
-            <FormField label={t("socioeconomic_status")}>
+            <InputWithError label={t("socioeconomic_status")}>
               <RadioGroup
                 value={form.meta_info?.socioeconomic_status}
                 onValueChange={(value) =>
@@ -976,9 +983,9 @@ export default function PatientRegistration(
                   </Fragment>
                 ))}
               </RadioGroup>
-            </FormField>
+            </InputWithError>
             <br />
-            <FormField label={t("has_domestic_healthcare_support")}>
+            <InputWithError label={t("has_domestic_healthcare_support")}>
               <RadioGroup
                 value={form.meta_info?.domestic_healthcare_support}
                 onValueChange={(value) =>
@@ -1001,7 +1008,7 @@ export default function PatientRegistration(
                   </Fragment>
                 ))}
               </RadioGroup>
-            </FormField>
+            </InputWithError>
           </div>
           {/* <div id="volunteer-contact" className="mt-10">
             <h2 className="text-lg font-semibold">
