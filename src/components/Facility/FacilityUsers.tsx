@@ -14,7 +14,7 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
-import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
