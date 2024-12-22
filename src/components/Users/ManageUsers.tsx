@@ -12,9 +12,9 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import Tabs from "@/components/Common/Tabs";
 import { FacilityModel } from "@/components/Facility/models";
-import SearchInput from "@/components/Form/SearchInput";
 import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
 import UserFilter from "@/components/Users/UserFilter";
 import UserListView from "@/components/Users/UserListAndCard";
@@ -39,6 +39,7 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 18,
     cacheBlacklist: ["username"],
@@ -179,12 +180,21 @@ export default function ManageUsers() {
       <div className="pt-4">
         <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="sm:w-1/2">
-            <SearchInput
+            <SearchByMultipleFields
               id="search-by-username"
-              name="username"
-              onChange={(e) => updateQuery({ username: e.value })}
-              value={qParams.username}
-              placeholder={t("search_by_username")}
+              className="w-full"
+              onSearch={(key, value) => updateQuery({ username: value })}
+              options={[
+                {
+                  key: "username",
+                  label: "username",
+                  type: "text" as const,
+                  placeholder: t("search_by_username"),
+                  value: qParams.username || "",
+                  shortcutKey: "u",
+                },
+              ]}
+              clearSearch={clearSearch}
             />
           </div>
           <Tabs

@@ -7,13 +7,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Tabs from "@/components/Common/Tabs";
-import SearchInput from "@/components/Form/SearchInput";
 import UserListView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+
+import SearchByMultipleFields from "../Common/SearchByMultipleFields";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
@@ -79,12 +80,20 @@ export default function FacilityUsers(props: { facilityId: number }) {
       />
       <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="sm:w-1/2">
-          <SearchInput
+          <SearchByMultipleFields
             id="search-by-username"
-            name="username"
-            onChange={(e) => updateQuery({ username: e.value })}
-            value={qParams.username}
-            placeholder={t("search_by_username")}
+            className="w-full"
+            onSearch={(key, value) => updateQuery({ username: value })}
+            options={[
+              {
+                key: "username",
+                label: "username",
+                type: "text" as const,
+                placeholder: t("search_by_username"),
+                value: qParams.username || "",
+                shortcutKey: "u",
+              },
+            ]}
           />
         </div>
         <Tabs
