@@ -1,8 +1,10 @@
+import { UserBareMinimum } from "../Users/models";
+
 export interface NotificationData {
   id: string;
   title: string;
   caused_objects: cause_object;
-  caused_by: any;
+  caused_by: UserBareMinimum;
   content: string;
   offset: number;
   event: string;
