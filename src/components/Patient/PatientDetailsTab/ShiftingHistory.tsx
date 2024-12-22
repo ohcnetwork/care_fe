@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { AuthorizedButton } from "@/components/ui/button";
-
+import AuthorizedButton from "@/components/Common/AuthorizedButton";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import { PatientModel } from "@/components/Patient/models";
@@ -67,11 +66,11 @@ const ShiftingHistory = (props: PatientProps) => {
   return (
     <section className="mt-4">
       <div className="flex justify-between items-center">
-        <div className="flex mb-4 bg-gray-100 w-fit rounded-lg px-2 py-1">
+        <div className="flex mb-4 bg-gray-100 text-sm w-fit rounded-lg px-2 py-1">
           <button
             className={`px-3 py-2 ${
               activeTab === "current"
-                ? "bg-white rounded-lg font-bold shadow"
+                ? "bg-white rounded-lg font-semibold shadow"
                 : ""
             }`}
             onClick={() => setActiveTab("current")}
@@ -81,7 +80,7 @@ const ShiftingHistory = (props: PatientProps) => {
           <button
             className={`px-3 py-2 ${
               activeTab === "previous"
-                ? "bg-white rounded-lg font-bold shadow"
+                ? "bg-white rounded-lg font-semibold shadow"
                 : ""
             }`}
             onClick={() => setActiveTab("previous")}
@@ -91,7 +90,7 @@ const ShiftingHistory = (props: PatientProps) => {
         </div>
         <AuthorizedButton
           id="shift_create_button"
-          variant="outline"
+          variant="outline_primary"
           disabled={isPatientInactive(patientData, facilityId)}
           size="default"
           onClick={() => setIsSlideOverOpen(true)}

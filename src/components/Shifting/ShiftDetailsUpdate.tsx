@@ -3,7 +3,6 @@ import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
@@ -337,7 +336,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           handleSubmit(true);
         }}
       />
-      <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
+
+      <div className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-2 grid grid-cols-1 gap-4 md:grid-cols-2">
             <SelectFormField
@@ -572,7 +572,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             <Submit onClick={() => handleSubmit()} />
           </div>
         </div>
-      </Card>
+      </div>
     </SlideOver>
   );
 };

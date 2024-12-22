@@ -79,21 +79,21 @@ export default function ShiftingTable(props: {
         )}
       >
         {!hidePatient && (
-          <div className="col-span-1 px-2 uppercase sm:text-center md:text-center lg:block lg:text-left">
+          <div className="col-span-1 px-2  sm:text-center md:text-center lg:block lg:text-left">
             {t("patients")}
           </div>
         )}
 
-        <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
+        <div className="col-span-1 hidden text-left  sm:hidden md:hidden lg:block">
           {t("consent__status")}
         </div>
-        <div className="col-span-1 px-2 hidden text-left uppercase sm:hidden md:hidden lg:block">
+        <div className="col-span-1 px-2 hidden text-left  sm:hidden md:hidden lg:block">
           {t("from")}
         </div>
-        <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
+        <div className="col-span-1 hidden text-left  sm:hidden md:hidden lg:block">
           {t("to")}
         </div>
-        <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
+        <div className="col-span-1 hidden text-left  sm:hidden md:hidden lg:block">
           {t("date_and_time")}
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function ShiftingTable(props: {
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <h1
-                          className="w-7 hover:cursor-pointer font-bold text-lg text-green-700"
+                          className="w-7 hover:cursor-pointer font-bold text-lg text-primary-700"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -221,7 +221,7 @@ export default function ShiftingTable(props: {
                         }}
                       >
                         <DropdownMenuItem
-                          className="cursor-pointer"
+                          className="cursor-pointer text-primary-700 focus:text-primary-800"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -231,7 +231,7 @@ export default function ShiftingTable(props: {
                           {t("view_details")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer"
+                          className="cursor-pointer text-primary-700 focus:text-primary-800"
                           disabled={
                             shift?.status === "COMPLETED" ||
                             shift?.status === "CANCELLED"
@@ -245,7 +245,7 @@ export default function ShiftingTable(props: {
                           {t("update_status_details")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="cursor-pointer"
+                          className="cursor-pointer text-primary-700 focus:text-primary-800"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -259,7 +259,7 @@ export default function ShiftingTable(props: {
                         {shift.status === "COMPLETED" &&
                           shift.assigned_facility && (
                             <DropdownMenuItem
-                              className="cursor-pointer"
+                              className="cursor-pointer text-primary-700 focus:text-primary-800"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();

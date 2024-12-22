@@ -144,8 +144,8 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 mt-4 lg:mt-0 w-full lg:flex-row lg:w-auto">
-              <div className="relative group w-full sm:w-auto">
+            <div className="flex flex-col lg:flex-row gap-4 mt-4 lg:mt-0 w-full lg:w-auto text-sm items-stretch lg:items-center">
+              <div className="relative group w-full sm:w-auto flex">
                 <button
                   className={`w-full px-4 py-2 rounded-lg sm:w-auto underline ${
                     ["COMPLETED", "CANCELLED"].includes(data?.status || "")
@@ -167,16 +167,17 @@ export default function ShiftDetails(props: { id: string }) {
                 )}
               </div>
 
-              {/* Referral Letter Button */}
-              <button
-                className="w-full sm:w-auto underline hover:text-primary-700 text-primary-600 flex items-center justify-center lg:justify-start"
-                onClick={() =>
-                  navigate(`/shifting/${props.id}/referral-letter`)
-                }
-              >
-                <CareIcon icon="l-file-alt" className="mr-2 text-base" />
-                {t("referral_letter")}
-              </button>
+              <div className="w-full sm:w-auto flex lg:justify-start">
+                <button
+                  className="w-full sm:w-auto underline hover:text-primary-700 text-primary-600 flex items-center justify-center lg:justify-start px-4 py-2"
+                  onClick={() =>
+                    navigate(`/shifting/${props.id}/referral-letter`)
+                  }
+                >
+                  <CareIcon icon="l-file-alt" className="mr-2 text-base" />
+                  {t("referral_letter")}
+                </button>
+              </div>
             </div>
           </div>
 

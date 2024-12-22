@@ -3,7 +3,6 @@ import { navigate } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
@@ -270,8 +269,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
       slideFrom="right"
       dialogClass="md:w-[780px]"
     >
-      <Card className="mx-auto mt-4 flex flex-col ">
-        <div className="lg:grid gap-4 lg:grid-cols-2 ">
+      <div className="flex flex-col">
+        <div className="lg:grid gap-4 lg:grid-cols-2 m-3">
           <TextFormField
             {...field("refering_facility_contact_name")}
             label="Name of Contact person at the current facility"
@@ -394,7 +393,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>
-      </Card>
+      </div>
     </SlideOver>
   );
 };

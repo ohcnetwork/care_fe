@@ -119,7 +119,7 @@ export const Comment = ({
         </div>
       </div>
 
-      <div className="w-5/6 rounded-md border-secondary-300 bg-gray-300 p-3 text-white">
+      <div className="w-5/6 rounded-md border-secondary-300 bg-gray-400 p-3 text-white">
         {comment}
       </div>
     </div>
