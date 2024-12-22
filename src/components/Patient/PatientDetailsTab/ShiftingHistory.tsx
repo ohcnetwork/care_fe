@@ -66,7 +66,7 @@ const ShiftingHistory = (props: PatientProps) => {
   return (
     <section className="mt-4">
       <div className="flex justify-between items-center">
-        <div className="flex mb-4 bg-gray-100 text-sm w-fit rounded-lg px-2 py-1">
+        <div className="flex mb-4 bg-gray-100 text-sm w-fit rounded-lg px-1 py-1">
           <button
             className={`px-3 py-2 ${
               activeTab === "current"
