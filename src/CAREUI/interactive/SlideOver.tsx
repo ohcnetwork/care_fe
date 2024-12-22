@@ -98,7 +98,7 @@ export default function SlideOver({
             className={classNames(
               "pointer-events-auto fixed",
               directionClasses[slideFrom].stick,
-              !onlyChild && "md:p-2",
+              !onlyChild && "md:p-2 ",
             )}
           >
             {onlyChild ? (
@@ -106,7 +106,7 @@ export default function SlideOver({
             ) : (
               <div
                 className={classNames(
-                  "flex flex-col bg-white md:rounded-xl",
+                  "flex flex-col bg-secondary-100 md:rounded-xl",
                   directionClasses[slideFrom].proportions,
                   dialogClass,
                 )}
@@ -127,7 +127,7 @@ export default function SlideOver({
                   </div>
                 </div>
                 <div
-                  className="flex-1 overflow-auto p-4"
+                  className="flex-1 overflow-auto p-4 bg-secondary-100"
                   data-test-id="slide-over-container"
                 >
                   {children}

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
@@ -33,6 +32,8 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
+
+import { Button } from "../ui/button";
 
 interface patientShiftProps {
   facilityId: string;
@@ -267,7 +268,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
       setOpen={props.setOpen}
       title="Create Shift Request"
       slideFrom="right"
-      dialogClass="md:w-[780px]"
+      dialogClass="md:w-[780px] rounded-none bg-secondary-100"
     >
       <div className="flex flex-col">
         <div className="lg:grid gap-4 lg:grid-cols-2 m-3">
@@ -390,8 +391,12 @@ export const ShiftCreate = (props: patientShiftProps) => {
           </div>
         </div>
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-          <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} />
+          <Button variant="outline" onClick={() => goBack()}>
+            {t("cancel")}
+          </Button>
+          <Button variant="primary" onClick={() => handleSubmit()}>
+            {t("submit")}
+          </Button>
         </div>
       </div>
     </SlideOver>

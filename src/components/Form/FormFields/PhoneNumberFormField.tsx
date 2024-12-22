@@ -126,7 +126,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
               return (
                 <>
                   <PopoverButton className="absolute h-full">
-                    <div className="hover:border-1 absolute inset-y-0 left-0 flex cursor-pointer items-center justify-around border-gray-200 hover:border hover:bg-gray-50">
+                    <div className="hover:border-1 absolute border-l rounded bg-secondary-200 border-y inset-y-0 left-0 flex cursor-pointer items-center justify-around border-gray-200 hover:border hover:bg-secondary-300">
                       <span className="rounded-md pl-2">{country?.flag}</span>
                       <CareIcon
                         icon="l-angle-down"

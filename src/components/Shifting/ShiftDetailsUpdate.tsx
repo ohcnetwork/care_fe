@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
@@ -41,6 +40,8 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
+
+import { Button } from "../ui/button";
 
 interface patientShiftProps {
   id: string;
@@ -337,7 +338,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         }}
       />
 
-      <div className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
+      <div className="mx-auto  w-full max-w-4xl md:px-4 lg:px-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-2 grid grid-cols-1 gap-4 md:grid-cols-2">
             <SelectFormField
@@ -567,9 +568,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             error={state.errors.comments}
           />
 
-          <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
-            <Cancel onClick={() => goBack()} />
-            <Submit onClick={() => handleSubmit()} />
+          <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
+            <Button variant="outline" onClick={() => goBack()}>
+              {t("cancel")}
+            </Button>
+            <Button variant="primary" onClick={() => handleSubmit()}>
+              {t("submit")}
+            </Button>
           </div>
         </div>
       </div>
