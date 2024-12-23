@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import AuthorizedButton from "@/components/Common/AuthorizedButton";
+import { AuthorizedButton } from "@/components/Common/AuthorizedButton";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import { PatientModel } from "@/components/Patient/models";
