@@ -6,12 +6,11 @@ import { Button, ButtonProps } from "@/components/ui/button";
 
 import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
 
-const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
-  authorizeFor = () => true,
-  ...props
-}) => {
+const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = (
+  props,
+) => {
   return (
-    <AuthorizedChild authorizeFor={authorizeFor}>
+    <AuthorizedChild authorizeFor={() => true}>
       {({ isAuthorized }) => (
         <Button {...props} disabled={props.disabled || !isAuthorized}>
           {props.children}
