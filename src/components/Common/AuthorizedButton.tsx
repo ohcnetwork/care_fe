@@ -2,9 +2,9 @@ import * as React from "react";
 
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
-import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+import { Button, ButtonProps } from "@/components/ui/button";
 
-import { Button, ButtonProps } from "../ui/button";
+import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
 
 const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
   authorizeFor = () => true,
