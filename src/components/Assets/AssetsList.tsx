@@ -438,7 +438,7 @@ const AssetsList = () => {
               type: "text" as const,
               placeholder: "Search by Name / Serial no. / QR code ID",
               value: qParams.search || "",
-              shortcutKey: "f",
+              shortcutKey: "n",
             },
           ]}
           className="w-full"
