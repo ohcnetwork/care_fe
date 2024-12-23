@@ -20,7 +20,7 @@ export const groupAndMergeByColumn = (
   }
   const lines = data.split("\n"); // Split the data into individual lines
   if (!lines.length || lines.length === 2) {
-    throw new Error("No discharged patients found for export");
+    throw new Error("No  patients found for export");
   }
 
   // Remove the last line only if it's empty
