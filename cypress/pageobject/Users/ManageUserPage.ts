@@ -54,18 +54,6 @@ export class ManageUserPage {
     cy.get("#link-facility").click();
   }
 
-  verifyErrorText(expectedError: string) {
-    cy.get(".error-text").first().scrollIntoView();
-    cy.get(".error-text")
-      .should("be.visible")
-      .then(($elements) => {
-        const errorTextArray = Array.from($elements).map(
-          (el) => el.textContent,
-        );
-        expect(errorTextArray).to.include(expectedError);
-      });
-  }
-
   clearUserBasicInfo() {
     cy.get("input[name='first_name']").click().clear();
     cy.get("input[name='last_name']").click().clear();
@@ -81,6 +69,15 @@ export class ManageUserPage {
     this.editLastName(lName);
     this.editDateOfBirth(dateOfBirth);
     this.editGender(gender);
+  }
+
+  clickUserInfoSubmitButton() {
+    cy.clickSubmitButton("Submit");
+  }
+
+  userInfoUpdateSuccessNotification() {
+    cy.verifyNotification("User details updated successfully");
+    cy.closeNotification();
   }
 
   editFirstName(fName: string, clearBeforeTyping = true) {
@@ -298,6 +295,30 @@ export class ManageUserPage {
     cy.intercept("GET", "**/api/v1/users/**").as("getUserDetails");
     cy.get(`#more-details-${username}`).click();
     cy.wait("@getUserDetails");
+  }
+
+  clickBasicInfoEditButton() {
+    cy.verifyAndClickElement("#basic-info-edit-button", "Edit");
+  }
+
+  clickBaicInfoViewButton() {
+    cy.verifyAndClickElement("#basic-info-view-button", "View");
+  }
+
+  clickContactInfoEditButton() {
+    cy.verifyAndClickElement("#contact-info-edit-button", "Edit");
+  }
+
+  clickContactInfoViewButton() {
+    cy.verifyAndClickElement("#contact-info-view-button", "View");
+  }
+
+  clickProfessionalInfoViewButton() {
+    cy.verifyAndClickElement("#professional-info-view-button", "View");
+  }
+
+  clickProfessionalInfoEditButton() {
+    cy.verifyAndClickElement("#professional-info-edit-button", "Edit");
   }
 
   verifyMoreDetailsPage(hasPermissions = true) {

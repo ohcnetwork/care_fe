@@ -270,3 +270,8 @@ Cypress.Commands.add(
     }
   },
 );
+
+Cypress.Commands.add("formatDate", (rawDate) => {
+  const formattedDate = `${rawDate.slice(0, 2)}/${rawDate.slice(2, 4)}/${rawDate.slice(4)}`;
+  return formattedDate;
+});

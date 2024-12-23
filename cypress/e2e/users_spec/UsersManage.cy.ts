@@ -1,6 +1,7 @@
 import * as dayjs from "dayjs";
 import FacilityHome from "pageobject/Facility/FacilityHome";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { generatePhoneNumber } from "pageobject/utils/constants";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
@@ -50,102 +51,131 @@ describe("Manage User", () => {
   }); */
 
   it("edit a nurse user's basic information and verify its reflection", () => {
+    const basicInfoErrorMessages = [
+      "First Name is required",
+      "Last Name is required",
+    ];
+    const modifiedFirstName = "Devo";
+    const modifiedLastName = "Districto";
+    const modifiedRawDOB = "11081999";
+    const modifiedGender = "Female";
+    const modifiedFormattedDOB = cy.formatDate(modifiedRawDOB);
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    cy.verifyAndClickElement("#basic-info-view-button", "View");
-    cy.verifyAndClickElement("#basic-info-edit-button", "Edit");
+    manageUserPage.clickBaicInfoViewButton();
+    manageUserPage.clickBasicInfoEditButton();
     manageUserPage.clearUserBasicInfo();
-    cy.clickSubmitButton();
-    manageUserPage.verifyErrorText("First Name is required");
-    manageUserPage.verifyErrorText("Last Name is required");
-    manageUserPage.editUserBasicInfo("Devo", "Districto", "11081999", "Female");
-    cy.clickSubmitButton();
-    cy.verifyNotification("User details updated successfully");
-    cy.closeNotification();
-    cy.verifyAndClickElement("#basic-info-view-button", "View");
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(basicInfoErrorMessages);
+    manageUserPage.editUserBasicInfo(
+      modifiedFirstName,
+      modifiedLastName,
+      modifiedRawDOB,
+      modifiedGender,
+    );
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
+    manageUserPage.clickBaicInfoViewButton();
     manageUserPage.verifyEditUserDetails(
-      "Devo",
-      "Districto",
-      "11/08/1999",
-      "Female",
+      modifiedFirstName,
+      modifiedLastName,
+      modifiedFormattedDOB,
+      modifiedGender,
     );
   });
 
   it("edit a nurse user's contact information and verify its reflection", () => {
+    const contactInfoErrorMessages = [
+      "Please enter a valid email address",
+      "Please enter valid phone number",
+    ];
+    const modifiedEmail = "dev@gmail.com";
+    const modifiedPhone = generatePhoneNumber();
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    cy.verifyAndClickElement("#contact-info-view-button", "View");
-    cy.verifyAndClickElement("#contact-info-edit-button", "Edit");
+    manageUserPage.clickContactInfoViewButton();
+    manageUserPage.clickContactInfoEditButton();
     manageUserPage.clearUserContactInfo();
-    cy.clickSubmitButton();
-    manageUserPage.verifyErrorText("Please enter a valid email address");
-    manageUserPage.verifyErrorText("Please enter valid phone number");
-    manageUserPage.editUserContactInfo("dev@gmail.com", "6234343435");
-    cy.clickSubmitButton();
-    cy.verifyNotification("User details updated successfully");
-    cy.closeNotification();
-    cy.verifyAndClickElement("#contact-info-view-button", "View");
-    manageUserPage.verifyEditUserContactInfo("dev@gmail.com", "6234343435");
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(contactInfoErrorMessages);
+    manageUserPage.editUserContactInfo(modifiedEmail, modifiedPhone);
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
+    manageUserPage.clickContactInfoViewButton();
+    manageUserPage.verifyEditUserContactInfo(modifiedEmail, modifiedPhone);
   });
 
   it("edit a nurse user's professional information and verify its reflection", () => {
+    const qualificationErrorMessages = ["Qualification is required"];
+    const qualification = "Msc";
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    cy.verifyAndClickElement("#professional-info-view-button", "View");
+    manageUserPage.clickProfessionalInfoViewButton();
     // Should have qualification field
     // Should not have years of experience and medical council registration fields
     manageUserPage.verifyQualificationExist();
     manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
-    cy.verifyAndClickElement("#professional-info-edit-button", "Edit");
+    manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearDoctorOrNurseProfessionalInfo(false);
-    cy.clickSubmitButton();
-    manageUserPage.verifyErrorText("Qualification is required");
-    manageUserPage.editUserProfessionalInfo("Msc");
-    cy.clickSubmitButton();
-    cy.verifyNotification("User details updated successfully");
-    cy.closeNotification();
-    cy.verifyAndClickElement("#professional-info-view-button", "View");
-    manageUserPage.verifyEditUserProfessionalInfo("Msc");
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(qualificationErrorMessages);
+    manageUserPage.editUserProfessionalInfo(qualification);
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
+    manageUserPage.clickProfessionalInfoViewButton();
+    manageUserPage.verifyEditUserProfessionalInfo(qualification);
   });
 
   it("edit a doctor user's professional information and verify its reflection", () => {
     // Should have qualification, years of experience and medical council registration
+    const qualificationErrorMessages = [
+      "Qualification is required",
+      "Years of experience is required",
+      "Medical Council Registration is required",
+    ];
+    const qualification = "Msc";
+    const yoe = "120";
+    const modifiedYoe = "10";
+    const medicalRegistrationNumber = "1234567890";
+    const experienceCommencedOn = dayjs().subtract(10, "year");
+    const formattedDate = dayjs(experienceCommencedOn).format("YYYY-MM-DD");
     userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
     userPage.checkUsernameText(usernameToLinkFacilitydoc1);
     manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc1);
     manageUserPage.verifyMoreDetailsPage();
-    cy.verifyAndClickElement("#professional-info-view-button", "View");
+    manageUserPage.clickProfessionalInfoViewButton();
     manageUserPage.verifyQualificationExist();
     manageUserPage.verifyYoeAndCouncilRegistrationExist();
-    cy.verifyAndClickElement("#professional-info-edit-button", "Edit");
+    manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
-    cy.clickSubmitButton();
-    manageUserPage.verifyErrorText("Qualification is required");
-    manageUserPage.verifyErrorText("Years of experience is required");
-    manageUserPage.verifyErrorText("Medical Council Registration is required");
-    manageUserPage.editUserProfessionalInfo("Msc", "120", "1234567890");
-    cy.clickSubmitButton();
-    manageUserPage.verifyErrorText(
-      "Please enter a valid number between 0 and 100.",
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(qualificationErrorMessages);
+    manageUserPage.editUserProfessionalInfo(
+      qualification,
+      yoe,
+      medicalRegistrationNumber,
     );
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(["Please enter a valid number between 0 and 100."]);
     manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
-    manageUserPage.editUserProfessionalInfo("Msc", "10", "1234567890");
-    cy.clickSubmitButton();
-    cy.verifyNotification("User details updated successfully");
-    cy.closeNotification();
-    cy.verifyAndClickElement("#professional-info-view-button", "View");
-    const experienceCommencedOn = dayjs().subtract(10, "year");
-    const formattedDate = dayjs(experienceCommencedOn).format("YYYY-MM-DD");
+    manageUserPage.editUserProfessionalInfo(
+      qualification,
+      modifiedYoe,
+      medicalRegistrationNumber,
+    );
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
+    manageUserPage.clickProfessionalInfoViewButton();
     manageUserPage.verifyEditUserProfessionalInfo(
-      "Msc",
+      qualification,
       formattedDate,
-      "1234567890",
+      medicalRegistrationNumber,
     );
   });
 
@@ -297,9 +327,9 @@ describe("Manage User", () => {
     manageUserPage.clearProfessionalInfo();
     manageUserPage.editWeeklyWorkingHours("200");
     cy.clickSubmitButton();
-    manageUserPage.verifyErrorText(
+    cy.verifyErrorMessages([
       "Average weekly working hours must be a number between 0 and 168",
-    );
+    ]);
     manageUserPage.clearProfessionalInfo();
     manageUserPage.editHoursAndVideoConnectLink(
       workinghour,

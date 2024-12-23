@@ -52,6 +52,7 @@ declare global {
         value: string,
         options?: { clearBeforeTyping?: boolean; skipVerification?: boolean },
       ): Chainable<Element>;
+      formatDate(rawDate: string): string;
     }
   }
 }
