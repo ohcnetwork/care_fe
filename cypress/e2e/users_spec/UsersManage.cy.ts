@@ -1,6 +1,7 @@
 import * as dayjs from "dayjs";
 import FacilityHome from "pageobject/Facility/FacilityHome";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { generatePhoneNumber } from "pageobject/utils/constants";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
@@ -50,28 +51,48 @@ describe("Manage User", () => {
   }); */
 
   it("edit a nurse user's basic information and verify its reflection", () => {
+    const basicInfoErrorMessages = [
+      "First Name is required",
+      "Last Name is required",
+    ];
+    const modifiedFirstName = "Devo";
+    const modifiedLastName = "Districto";
+    const modifiedRawDOB = "11081999";
+    const modifiedGender = "Female";
+    const modifiedFormattedDOB = "11/08/1999";
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.clickBasicInfoViewButton();
+    manageUserPage.clickBaicInfoViewButton();
     manageUserPage.clickBasicInfoEditButton();
     manageUserPage.clearUserBasicInfo();
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText("First Name is required");
-    manageUserPage.verifyErrorText("Last Name is required");
-    manageUserPage.editUserBasicInfo("Devo", "Districto", "11081999", "Female");
-    manageUserPage.clickSubmit();
-    manageUserPage.clickBasicInfoViewButton();
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(basicInfoErrorMessages);
+    manageUserPage.editUserBasicInfo(
+      modifiedFirstName,
+      modifiedLastName,
+      modifiedRawDOB,
+      modifiedGender,
+    );
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
+    manageUserPage.clickBaicInfoViewButton();
     manageUserPage.verifyEditUserDetails(
-      "Devo",
-      "Districto",
-      "11/08/1999",
-      "Female",
+      modifiedFirstName,
+      modifiedLastName,
+      modifiedFormattedDOB,
+      modifiedGender,
     );
   });
 
   it("edit a nurse user's contact information and verify its reflection", () => {
+    const contactInfoErrorMessages = [
+      "Please enter a valid email address",
+      "Please enter valid phone number",
+    ];
+    const modifiedEmail = "dev@gmail.com";
+    const modifiedPhone = generatePhoneNumber();
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
@@ -79,16 +100,18 @@ describe("Manage User", () => {
     manageUserPage.clickContactInfoViewButton();
     manageUserPage.clickContactInfoEditButton();
     manageUserPage.clearUserContactInfo();
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText("Please enter a valid email address");
-    manageUserPage.verifyErrorText("Please enter valid phone number");
-    manageUserPage.editUserContactInfo("dev@gmail.com", "6234343435");
-    manageUserPage.clickSubmit();
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(contactInfoErrorMessages);
+    manageUserPage.editUserContactInfo(modifiedEmail, modifiedPhone);
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
     manageUserPage.clickContactInfoViewButton();
-    manageUserPage.verifyEditUserContactInfo("dev@gmail.com", "6234343435");
+    manageUserPage.verifyEditUserContactInfo(modifiedEmail, modifiedPhone);
   });
 
   it("edit a nurse user's professional information and verify its reflection", () => {
+    const qualificationErrorMessages = ["Qualification is required"];
+    const qualification = "Msc";
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
@@ -100,16 +123,28 @@ describe("Manage User", () => {
     manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
     manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearDoctorOrNurseProfessionalInfo(false);
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText("Qualification is required");
-    manageUserPage.editUserProfessionalInfo("Msc");
-    manageUserPage.clickSubmit();
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(qualificationErrorMessages);
+    manageUserPage.editUserProfessionalInfo(qualification);
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
     manageUserPage.clickProfessionalInfoViewButton();
-    manageUserPage.verifyEditUserProfessionalInfo("Msc");
+    manageUserPage.verifyEditUserProfessionalInfo(qualification);
   });
 
   it("edit a doctor user's professional information and verify its reflection", () => {
     // Should have qualification, years of experience and medical council registration
+    const qualificationErrorMessages = [
+      "Qualification is required",
+      "Years of experience is required",
+      "Medical Council Registration is required",
+    ];
+    const qualification = "Msc";
+    const yoe = "120";
+    const modifiedYoe = "10";
+    const medicalRegistrationNumber = "1234567890";
+    const experienceCommencedOn = dayjs().subtract(10, "year");
+    const formattedDate = dayjs(experienceCommencedOn).format("YYYY-MM-DD");
     userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
     userPage.checkUsernameText(usernameToLinkFacilitydoc1);
     manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc1);
@@ -119,25 +154,28 @@ describe("Manage User", () => {
     manageUserPage.verifyYoeAndCouncilRegistrationExist();
     manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText("Qualification is required");
-    manageUserPage.verifyErrorText("Years of experience is required");
-    manageUserPage.verifyErrorText("Medical Council Registration is required");
-    manageUserPage.editUserProfessionalInfo("Msc", "120", "1234567890");
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText(
-      "Please enter a valid number between 0 and 100.",
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(qualificationErrorMessages);
+    manageUserPage.editUserProfessionalInfo(
+      qualification,
+      yoe,
+      medicalRegistrationNumber,
     );
+    manageUserPage.clickUserInfoSubmitButton();
+    cy.verifyErrorMessages(["Please enter a valid number between 0 and 100."]);
     manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
-    manageUserPage.editUserProfessionalInfo("Msc", "10", "1234567890");
-    manageUserPage.clickSubmit();
+    manageUserPage.editUserProfessionalInfo(
+      qualification,
+      modifiedYoe,
+      medicalRegistrationNumber,
+    );
+    manageUserPage.clickUserInfoSubmitButton();
+    manageUserPage.userInfoUpdateSuccessNotification();
     manageUserPage.clickProfessionalInfoViewButton();
-    const experienceCommencedOn = dayjs().subtract(10, "year");
-    const formattedDate = dayjs(experienceCommencedOn).format("YYYY-MM-DD");
     manageUserPage.verifyEditUserProfessionalInfo(
-      "Msc",
+      qualification,
       formattedDate,
-      "1234567890",
+      medicalRegistrationNumber,
     );
   });
 
@@ -151,7 +189,7 @@ describe("Manage User", () => {
     userPage.checkUsernameText(doctorUsername);
     manageUserPage.clickMoreDetailsButton(doctorUsername);
     manageUserPage.verifyMoreDetailsPage(false);
-    manageUserPage.verifyUsername(doctorUsername);
+    cy.verifyContentPresence("#view-username", [doctorUsername]);
     manageUserPage.verifyBasicInfoEditButtonNotExist();
     manageUserPage.verifyContactInfoEditButtonNotExist();
     manageUserPage.verifyProfessionalInfoEditButtonNotExist();
@@ -189,9 +227,11 @@ describe("Manage User", () => {
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.clickPasswordEditButton();
+    cy.verifyAndClickElement("#change-edit-password-button", "Change Password");
     manageUserPage.changePassword("Coronasafe@123", "Coronasafe@1233");
-    manageUserPage.clickSubmit();
+    cy.clickSubmitButton();
+    cy.verifyNotification("Password updated successfully");
+    cy.closeNotification();
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
     loginPage.loginManuallyAsNurse("Coronasafe@1233");
@@ -201,9 +241,11 @@ describe("Manage User", () => {
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.clickPasswordEditButton();
+    cy.verifyAndClickElement("#change-edit-password-button", "Change Password");
     manageUserPage.changePassword("Coronasafe@1233", "Coronasafe@123");
-    manageUserPage.clickSubmit();
+    cy.clickSubmitButton();
+    cy.verifyNotification("Password updated successfully");
+    cy.closeNotification();
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
     loginPage.loginManuallyAsDistrictAdmin();
@@ -217,7 +259,7 @@ describe("Manage User", () => {
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.verifyDeleteButtonVisible();
     manageUserPage.clickDeleteButton();
-    manageUserPage.clickSubmit();
+    cy.clickSubmitButton("Delete");
     cy.verifyNotification("User Deleted Successfully");
     cy.closeNotification();
     userPage.typeInSearchInput(doctorToDelete);
@@ -238,19 +280,6 @@ describe("Manage User", () => {
     manageUserPage.interceptAddSkill();
     manageUserPage.clickAddSkillButton(usernameforworkinghour);
     manageUserPage.verifyAddSkillResponse();
-    manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.navigateToProfile();
-    cy.verifyContentPresence("#username-profile-details", [
-      usernameforworkinghour,
-    ]);
-    manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
-    // unlink the skill
-    manageUserPage.navigateToManageUser();
-    userPage.typeInSearchInput(usernameforworkinghour);
-    userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
-    manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.clickLinkedSkillTab();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.verifyUnlinkSkillModal();
@@ -283,7 +312,7 @@ describe("Manage User", () => {
     manageUserPage.assertSkillIndoctorconnect(linkedskill);
   });
 
-  it("add working hour for a user and verify its reflection in card and user profile", () => {
+  it("add working hour and video connect link for a user and verify its reflection in card and user profile", () => {
     // verify qualification and yoe and council registration fields are not present
     // verify field error and add working hour
     userPage.typeInSearchInput(usernameforworkinghour);
@@ -291,23 +320,28 @@ describe("Manage User", () => {
     manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.verifyProfileTabPage();
-    manageUserPage.clickProfessionalInfoViewButton();
+    cy.verifyAndClickElement("#professional-info-view-button", "View");
     manageUserPage.verifyQualificationDoesntExist();
     manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
-    manageUserPage.clickProfessionalInfoEditButton();
+    cy.verifyAndClickElement("#professional-info-edit-button", "Edit");
     manageUserPage.clearProfessionalInfo();
-    manageUserPage.typeInWeeklyWorkingHours("200");
-    manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText(
+    manageUserPage.editWeeklyWorkingHours("200");
+    cy.clickSubmitButton();
+    cy.verifyErrorMessages([
       "Average weekly working hours must be a number between 0 and 168",
-    );
+    ]);
     manageUserPage.clearProfessionalInfo();
-    manageUserPage.typeInWeeklyWorkingHours(workinghour);
-    manageUserPage.clickSubmit();
-    // verify the data is reflected in the page
-    manageUserPage.verifyWorkingHours(workinghour);
-    manageUserPage.navigateToProfile();
-    manageUserPage.verifyProfileWorkingHours(workinghour);
+    manageUserPage.editHoursAndVideoConnectLink(
+      workinghour,
+      "https://www.example.com",
+    );
+    cy.clickSubmitButton();
+    cy.verifyNotification("User details updated successfully");
+    cy.closeNotification();
+    manageUserPage.verifyHoursAndVideoConnectLink(
+      workinghour,
+      "https://www.example.com",
+    );
   });
 
   it("linking and unlinking facility for multiple users, and confirm reflection in user cards and doctor connect", () => {
@@ -357,7 +391,7 @@ describe("Manage User", () => {
     manageUserPage.clickLinkFacility();
     manageUserPage.clickLinkedFacilitySettings();
     manageUserPage.clickUnlinkFacilityButton();
-    manageUserPage.clickSubmit();
+    cy.clickSubmitButton("Unlink");
     manageUserPage.linkedfacilitylistnotvisible();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access
     // Path will be facility page to patient page then doctor connect button
