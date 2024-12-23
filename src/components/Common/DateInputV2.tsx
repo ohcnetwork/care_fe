@@ -348,7 +348,7 @@ const DateInputV2: React.FC<Props> = ({
     const right = popOverX > viewportWidth - (allowTime ? 420 : 300);
     const top = popOverY > viewportHeight - 400;
 
-    return `${right ? "md:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)]" : ""}`;
+    return `${right ? "sm:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)]" : ""} ${right ? "max-sm:-translate-x-1/2" : ""} ${top ? "max-sm:-translate-y-[calc(100%+50px)]" : ""}`.trim();
   };
 
   const domValue = useValueInjectionObserver<string>({
