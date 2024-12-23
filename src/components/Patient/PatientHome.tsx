@@ -4,20 +4,11 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
-import { AuthorizedButton, Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import { Avatar } from "@/components/Common/Avatar";
+import AuthorizedButton from "@/components/Common/AuthorizedButton";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import {
-  AssignedToObjectModel,
-  PatientModel,
-} from "@/components/Patient/models";
-import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -34,6 +25,7 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+
 import {
   formatDateTime,
   formatName,
@@ -42,7 +34,14 @@ import {
   isAntenatal,
   isPostPartum,
   relativeDate,
-} from "@/Utils/utils";
+} from "../../Utils/utils";
+import { Avatar } from "../Common/Avatar";
+import Loading from "../Common/Loading";
+import Page from "../Common/Page";
+import { SkillModel, UserBareMinimum } from "../Users/models";
+import { Badge } from "../ui/badge";
+import { patientTabs } from "./PatientDetailsTab";
+import { AssignedToObjectModel, PatientModel } from "./models";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -218,30 +217,55 @@ export const PatientHome = (props: {
                 <div className="h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      {patientData?.is_active &&
-                        (!patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date) && (
-                          <div>
-                            <Button
-                              id="create-consultation"
-                              className="w-full"
-                              size="default"
-                              variant={"primary"}
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("add_consultation")}
-                              </span>
-                            </Button>
-                          </div>
+                      {facilityId ===
+                        patientData.facility_object?.id.toString() &&
+                        patientData?.is_active && (
+                          <>
+                            {patientData?.last_consultation &&
+                            !patientData?.last_consultation.discharge_date ? (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("view_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            ) : (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData?.facility}/patient/${id}/consultation`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("add_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            )}
+                          </>
                         )}
                     </div>
                   </div>
@@ -438,7 +462,7 @@ export const PatientHome = (props: {
           </div>
           <div className="sticky top-20 mt-8 h-full lg:basis-1/6">
             <section className="mb-4 space-y-2 md:flex">
-              <div className="mx-3 w-full lg:mx-0">
+              <div className="mx-auto w-full lg:mx-0">
                 <div className="font-semibold text-secondary-900">
                   {t("actions")}
                 </div>
@@ -481,7 +505,7 @@ export const PatientHome = (props: {
                       </Button>
                     </div>
 
-                    {NonReadOnlyUsers && (
+                    {NonReadOnlyUsers(authUser.user_type) && (
                       <div>
                         <AuthorizedButton
                           id="assign-volunteer"
@@ -506,7 +530,6 @@ export const PatientHome = (props: {
                       <AuthorizedButton
                         id="patient-allow-transfer"
                         className="w-full"
-                        size="lg"
                         variant="outline_primary"
                         disabled={
                           !patientData.last_consultation?.id ||
