@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -18,44 +19,44 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import { formatName, relativeTime } from "@/Utils/utils";
 
-import { UserBareMinimum } from "../Users/models";
-import { useGetNotifications } from "./GetNotifications";
-import { NotificationData } from "./models";
+import { NoticeData } from "./models";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
-  const { data, loading } = useGetNotifications(routes.getNotifications, {
-    query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      routes.getNotifications.path,
+      { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+    ],
+    queryFn: query(routes.getNotifications, {
+      queryParams: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+    }),
+    enabled: true,
+    refetchOnWindowFocus: false,
   });
-
-  const [selectedNotice, setSelectedNotice] = useState<NotificationData | null>(
-    null,
-  );
-
-  interface UserInfoProps {
-    user: UserBareMinimum;
-    createdDate: string;
-  }
   console.log(data?.results);
-  const UserInfo: React.FC<UserInfoProps> = ({ user, createdDate }) => (
-    <div className=" py-2 flex items-center bg-gray-200 rounded-lg">
+  const [selectedNotice, setSelectedNotice] = useState<NoticeData | null>(null);
+
+  const UserInfo: React.FC<NoticeData> = (notice) => (
+    <div className="flex items-center bg-gray-200 rounded-lg">
       <Avatar
-        name={user.username}
-        imageUrl={user.read_profile_picture_url}
-        aria-label={`${formatName(user)}'s avatar`}
+        name={notice.caused_by.username}
+        imageUrl={notice.caused_by.read_profile_picture_url}
+        aria-label={`${formatName(notice.caused_by)}'s avatar`}
         className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
       />
       <div className="text-md my-1 text-secondary-700  px-3">
         <div className="flex font-bold items-center text-black">
-          {formatName(user)}
+          {formatName(notice.caused_by)}
           <span className="font-oblique text-gray-500 font-medium ml-2">
-            {user.username}
+            {notice.caused_by.username}
           </span>
         </div>
         <div className="text-xs text-secondary-900 font-medium ">
-          {relativeTime(createdDate)}
+          {relativeTime(notice.created_date)}
         </div>
       </div>
     </div>
@@ -86,7 +87,7 @@ export const NoticeBoard = () => {
     );
   };
 
-  const NoticeDialog: React.FC<{ notice: NotificationData }> = ({ notice }) => {
+  const NoticeDialog: React.FC<{ notice: NoticeData }> = ({ notice }) => {
     return (
       <>
         {" "}
@@ -100,7 +101,7 @@ export const NoticeBoard = () => {
         </DialogHeader>
         <Message classes="" message={notice.message} />
         <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-200 rounded-lg mt-4">
-          <UserInfo user={notice.caused_by} createdDate={notice.created_date} />
+          <UserInfo {...notice} />
         </DialogFooter>
       </>
     );
@@ -116,20 +117,20 @@ export const NoticeBoard = () => {
             className="flex-col flex  justify-between overflow-hidden rounded shadow-md my-1 h-[33vh]"
           >
             <div
-              className="flex-1 text-justify mx-2 py-3 px-5"
+              className="flex-1 text-justify mx-2 py-3 px-5 overflow-hidden  mb-3"
               id="notification-message"
             >
               <Message classes="truncate" message={item.message} />
             </div>
-            <div className="h-1/4 flex justify-between items-center bg-gray-200 ">
-              <UserInfo user={item.caused_by} createdDate={item.created_date} />
-              <div className="col-span-1 mt-2 flex flex-col text-left border-2 border-gray-400 rounded-md mr-10">
+            <div className="h-1/4 flex justify-between items-center bg-gray-200 py-1">
+              <UserInfo {...item} />
+              <div className="flex flex-col text-left border-2 border-gray-400 rounded-md mr-10">
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button
                       variant={"ghost"}
                       onClick={() => setSelectedNotice(item)}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg  p-2 text-sm font-semibold text-inherit "
+                      className="py-2 flex w-full items-center justify-center gap-2 rounded-lg  p-2 text-sm font-semibold text-inherit "
                     >
                       <CareIcon icon="l-eye" className="text-lg" />
                       {t("view_notice")}
@@ -158,7 +159,7 @@ export const NoticeBoard = () => {
     );
   }
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
   return (
     <Page title={t("notice_board")} hideBack={true} breadcrumbs={false}>
       <div>{notices}</div>
