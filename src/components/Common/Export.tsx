@@ -1,5 +1,7 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DropdownMenu, {
   DropdownItem,
@@ -49,8 +51,9 @@ export const ExportMenu = ({
     const item = exportItems[0];
 
     return (
-      <ButtonV2
+      <Button
         disabled={isExporting || disabled}
+        size="default"
         onClick={() => {
           let action = item.action;
           if (item.route) {
@@ -63,13 +66,12 @@ export const ExportMenu = ({
             exportFile(action, item.filePrefix, item.type, item.parse);
           }
         }}
-        border
-        ghost
+        variant="outline_primary"
         className="py-2.5"
       >
         <CareIcon icon="l-export" />
         {isExporting ? "Exporting..." : label}
-      </ButtonV2>
+      </Button>
     );
   }
 
@@ -79,7 +81,7 @@ export const ExportMenu = ({
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
         icon={<CareIcon icon="l-export" />}
-        className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
+        className="border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white h-9 px-4 py-2dark:border-primary-700 dark:bg-primary-700 dark:text-white"
       >
         {exportItems.map((item) => (
           <DropdownItem
@@ -130,7 +132,7 @@ export const ExportButton = ({
             exportFile(action, props.filenamePrefix, type, parse);
           }
         }}
-        className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
+        className="tooltip mx-2 p-4 text-lg text-secondary-800  bg-red disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
         ghost
         circle
