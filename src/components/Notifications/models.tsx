@@ -4,7 +4,7 @@ export interface NotificationData {
   id: string;
   title: string;
   caused_objects: cause_object;
-  caused_by: any;
+  caused_by: UserBareMinimum;
   content: string;
   offset: number;
   event: string;
@@ -28,15 +28,4 @@ export interface PNconfigData {
   pf_auth: string;
   pf_endpoint: string;
   pf_p256dh: string;
-}
-
-export interface NoticeData {
-  id: string;
-  caused_objects: cause_object;
-  caused_by: UserBareMinimum;
-  event: string;
-  event_type: string;
-  created_date: string;
-  read_at: string;
-  message: string;
 }

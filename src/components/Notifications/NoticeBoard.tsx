@@ -22,28 +22,25 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, relativeTime } from "@/Utils/utils";
 
-import { NoticeData } from "./models";
+import { NotificationData } from "./models";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({
-    queryKey: [
-      routes.getNotifications.path,
-      { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
-    ],
+    queryKey: ["notices"],
     queryFn: query(routes.getNotifications, {
       queryParams: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
     }),
-    enabled: true,
-    refetchOnWindowFocus: false,
   });
-  console.log(data?.results);
-  const [selectedNotice, setSelectedNotice] = useState<NoticeData | null>(null);
 
-  const UserInfo: React.FC<NoticeData> = (notice) => (
+  const [selectedNotice, setSelectedNotice] = useState<NotificationData | null>(
+    null,
+  );
+
+  const UserInfo: React.FC<NotificationData> = (notice) => (
     <div className="flex items-center bg-gray-200 rounded-lg">
       <Avatar
-        name={notice.caused_by.username}
+        name={formatName(notice.caused_by)}
         imageUrl={notice.caused_by.read_profile_picture_url}
         aria-label={`${formatName(notice.caused_by)}'s avatar`}
         className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
@@ -76,18 +73,10 @@ export const NoticeBoard = () => {
     classes,
   }) => {
     const formattedMessage = formatMessage(message);
-    return (
-      <>
-        <h1 className="font-semibold text-lg text-black mb-1 truncate hover:text-clip">
-          {" "}
-          {message?.split("\n")[0]}
-        </h1>
-        <p className={classes}>{formattedMessage}</p>
-      </>
-    );
+    return <p className={classes}>{formattedMessage}</p>;
   };
 
-  const NoticeDialog: React.FC<{ notice: NoticeData }> = ({ notice }) => {
+  const NoticeDialog: React.FC<{ notice: NotificationData }> = ({ notice }) => {
     return (
       <>
         {" "}
@@ -99,7 +88,16 @@ export const NoticeBoard = () => {
             />
           </div>
         </DialogHeader>
-        <Message classes="" message={notice.message} />
+        <div
+          className="flex-1 text-justify mx-2 mb-2"
+          id="notification-message"
+        >
+          <h1 className="font-semibold text-lg text-black mb-1">
+            {" "}
+            {notice.title ? notice.title : notice.message?.split("\n")[0]}
+          </h1>
+          <Message classes="" message={notice.message} />
+        </div>
         <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-200 rounded-lg mt-4">
           <UserInfo {...notice} />
         </DialogFooter>
@@ -110,19 +108,23 @@ export const NoticeBoard = () => {
   let notices;
   if (data?.results.length) {
     notices = (
-      <section className="grid grid-cols-1 gap-6 sm:grid-cols-1 xl:grid-cols-2 mt-4">
+      <section className="grid grid-cols-1 gap-6  xl:grid-cols-2 mt-4">
         {data.results.map((item) => (
           <div
             key={`usr_${item.id}`}
-            className="flex-col flex  justify-between overflow-hidden rounded shadow-md my-1 h-[33vh]"
+            className="my-2 flex-col flex justify-between rounded shadow-md min-h-[33vh]"
           >
             <div
-              className="flex-1 text-justify mx-2 py-3 px-5 overflow-hidden  mb-3"
+              className="h-auto md:h-3/4 flex-1 text-justify mx-2 py-3 px-5  mb-3"
               id="notification-message"
             >
-              <Message classes="truncate" message={item.message} />
+              <h1 className="font-semibold text-lg text-black mb-1 truncate hover:text-clip">
+                {" "}
+                {item.title ? item.title : item.message?.split("\n")[0]}
+              </h1>
+              <Message classes="line-clamp-5" message={item.message} />
             </div>
-            <div className="h-1/4 flex justify-between items-center bg-gray-200 py-1">
+            <div className="h-auto md:h-1/4 flex flex-col md:flex-row justify-between items-center bg-gray-200 p-3 md:py-1 space-y-3 md:space-y-0">
               <UserInfo {...item} />
               <div className="flex flex-col text-left border-2 border-gray-400 rounded-md mr-10">
                 <Dialog>
