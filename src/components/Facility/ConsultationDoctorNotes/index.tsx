@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -23,7 +24,7 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { callApi } from "@/Utils/request/query";
 import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
 interface ConsultationDoctorNotesProps {
@@ -61,6 +62,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const { mutate: addNote } = useAddPatientNote({
     patientId,
+    thread,
+    consultationId,
   });
 
   const onAddNote = () => {
@@ -70,26 +73,33 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       });
       return;
     }
+    setReplyTo(undefined);
+    setNoteField("");
     addNote({
       note: noteField,
       reply_to: reply_to?.id,
       thread,
       consultation: consultationId,
     });
-    setReplyTo(undefined);
-    setNoteField("");
   };
 
-  useTanStackQueryInstead(routes.getPatient, {
-    pathParams: { id: patientId },
-    onResponse: ({ data }) => {
-      if (data) {
-        setPatientActive(data.is_active ?? true);
-        setPatientName(data.name ?? "");
-        setFacilityName(data.facility_object?.name ?? "");
-      }
+  const { data } = useQuery({
+    queryKey: [patientId],
+    queryFn: async ({ signal }) => {
+      const response = await callApi(routes.getPatient, {
+        pathParams: { patientId },
+        queryParams: { thread, offset: thread },
+        signal,
+      });
+      return response;
     },
   });
+
+  useEffect(() => {
+    setPatientActive(data?.is_active ?? true);
+    setPatientName(data?.name ?? "");
+    setFacilityName(data?.facility_object?.name ?? "");
+  }, [data]);
 
   useMessageListener((data) => {
     const message = data?.message;
@@ -141,6 +151,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                 if (thread !== PATIENT_NOTES_THREADS[current]) {
                   setThread(PATIENT_NOTES_THREADS[current]);
                   setState(initialData);
+                  setReplyTo(undefined);
+                  setNoteField("");
                 }
               }}
             >

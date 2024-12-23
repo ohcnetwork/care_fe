@@ -40,6 +40,7 @@ const PatientNotes = (props: PatientProps) => {
   );
   const { mutate: addNote } = useAddPatientNote({
     patientId,
+    thread,
   });
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -92,6 +93,8 @@ const PatientNotes = (props: PatientProps) => {
                 if (thread !== PATIENT_NOTES_THREADS[current]) {
                   setThread(PATIENT_NOTES_THREADS[current]);
                   setState(initialData);
+                  setReplyTo(undefined);
+                  setNoteField("");
                 }
               }}
             >

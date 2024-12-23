@@ -2,9 +2,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PatientModel } from "@/components/Patient/models";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+
+import { PatientNotesModel } from "../Facility/models";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (
@@ -24,21 +25,22 @@ export function isPatientMandatoryDataFilled(patient: PatientModel) {
   );
 }
 
-export const useAddPatientNote = (options: { patientId: string }) => {
+export const useAddPatientNote = (options: {
+  patientId: string;
+  thread: PatientNotesModel["thread"];
+  consultationId?: string;
+}) => {
   const queryClient = useQueryClient();
-  const { patientId } = options;
+  const { patientId, thread, consultationId } = options;
 
   return useMutation({
     mutationFn: mutate(routes.addPatientNote, {
       pathParams: { patientId },
     }),
     onSuccess: (data) => {
-      console.log("here");
       queryClient.invalidateQueries({
-        queryKey: ["notes", patientId],
-        exact: false,
+        queryKey: ["notes", patientId, thread, consultationId],
       });
-      Notification.Success({ msg: "Note added successfully" });
       return data;
     },
   });

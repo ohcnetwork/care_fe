@@ -1,7 +1,7 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -20,6 +20,7 @@ import { USER_TYPES_MAP } from "@/common/constants";
 
 import { Error, Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import { callApi } from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import {
   classNames,
@@ -46,14 +47,15 @@ const PatientNoteCard = ({
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
 
-  const fetchEditHistory = async () => {
-    const { res, data } = await request(routes.getPatientNoteEditHistory, {
-      pathParams: { patientId, noteId: note.id },
-    });
-    if (res?.status === 200) {
-      setEditHistory(data?.results ?? []);
-    }
-  };
+  const { data, refetch } = useQuery({
+    queryKey: [patientId, note.id],
+    queryFn: async () => {
+      const response = await callApi(routes.getPatientNoteEditHistory, {
+        pathParams: { patientId, noteId: note.id },
+      });
+      return response;
+    },
+  });
 
   const onUpdateNote = async () => {
     if (noteField === note.note) {
@@ -76,13 +78,14 @@ const PatientNoteCard = ({
     });
     if (res?.status === 200) {
       Success({ msg: "Note updated successfully" });
-      queryClient.invalidateQueries({
-        queryKey: ["notes", patientId],
-        exact: false,
-      });
+      queryClient.invalidateQueries({ queryKey: ["notes", patientId] });
       setIsEditing(false);
     }
   };
+
+  useEffect(() => {
+    setEditHistory(data?.results ?? []);
+  }, [data]);
 
   return (
     <>
@@ -122,7 +125,7 @@ const PatientNoteCard = ({
                   <div
                     className="cursor-pointer text-xs text-secondary-600"
                     onClick={() => {
-                      fetchEditHistory();
+                      refetch();
                       setShowEditHistory(true);
                     }}
                   >

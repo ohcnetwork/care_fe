@@ -78,6 +78,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   );
   const { mutate: addNote } = useAddPatientNote({
     patientId,
+    thread,
+    consultationId,
   });
 
   const onAddNote = () => {
@@ -87,15 +89,14 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
+    setReplyTo(undefined);
+    setNoteField("");
     addNote({
       note: noteField,
       reply_to: reply_to?.id,
       thread,
       consultation: consultationId,
     });
-
-    setReplyTo(undefined);
-    setNoteField("");
   };
 
   useMessageListener((data) => {
@@ -234,6 +235,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                   if (thread !== PATIENT_NOTES_THREADS[current]) {
                     setThread(PATIENT_NOTES_THREADS[current]);
                     setState(initialData);
+                    setReplyTo(undefined);
+                    setNoteField("");
                   }
                 }}
               >
