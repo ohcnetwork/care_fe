@@ -9,11 +9,8 @@ import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import Pagination from "@/components/Common/Pagination";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import Tabs from "@/components/Common/Tabs";
-import { FacilityModel } from "@/components/Facility/models";
-import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
 import UserFilter from "@/components/Users/UserFilter";
 import UserListView from "@/components/Users/UserListAndCard";
 
