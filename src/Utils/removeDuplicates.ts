@@ -28,22 +28,11 @@ export const groupAndMergeByColumn = (
     lines.pop();
   }
 
-  const firstLineColumns = lines[0].split(",").length;
-
-  lines.forEach((line, index) => {
-    const columnCount = line.split(",").length;
-    if (columnCount !== firstLineColumns) {
-      throw new Error(`Inconsistent columns in Patient Data at ${index + 1}`);
-    }
-  });
-
   const groupedData = lines.reduce(
     (groupMap, line) => {
       const columns = line.split(",");
       const groupByKey = columns[groupByColumnIndex]?.trim();
-      if (!groupByKey) {
-        throw new Error(`Invalid Column in Patient Data`);
-      }
+
       if (!groupMap[groupByKey]) {
         groupMap[groupByKey] = [];
       }
