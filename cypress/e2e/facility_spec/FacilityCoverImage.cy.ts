@@ -26,6 +26,8 @@ describe("Facility Cover Image Upload Functionality", () => {
   const facilityHome = new FacilityHome();
   const facilityManage = new FacilityManage();
   const successUploadNotificationText = "Cover image updated.";
+  const errorMessage =
+    "Image width is greater than the maximum allowed width of 1024 pixels.";
 
   rolesAndFacility.forEach(({ role, facilityName }) => {
     before(() => {
@@ -47,16 +49,15 @@ describe("Facility Cover Image Upload Functionality", () => {
       facilityManage.clickCoverImage();
       facilityManage.verifyUploadButtonVisible();
       facilityManage.clickCancelCoverImage();
-      // Test Functionality of Upload Cover Image
+      //Test Error Message on Uploading Invalid Image
       facilityManage.interceptImageUploadRequest();
       facilityManage.clickCoverImage();
       facilityManage.uploadCoverImage("facility-cover-image.jpg");
       facilityManage.clickSaveCoverImage();
-      facilityManage.verifyImageUploadRequest();
-      facilityManage.verifySuccessMessageVisibilityAndContent(
-        successUploadNotificationText,
-      );
-      // Test Edit Cover Image Functionality
+      facilityManage.verifyImageUploadRequest(400);
+      facilityManage.verifySuccessMessageVisibilityAndContent(errorMessage);
+      facilityManage.clickCancelCoverImage();
+      // Test Functionality of Upload Cover Image
       facilityManage.interceptImageUploadRequest();
       facilityManage.clickCoverImage();
       facilityManage.uploadCoverImage("facility-cover-image-1.jpg");

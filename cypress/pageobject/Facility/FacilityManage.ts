@@ -114,8 +114,10 @@ class FacilityManage {
     );
   }
 
-  verifyImageUploadRequest() {
-    cy.wait("@imageUploadReq").its("response.statusCode").should("eq", 200);
+  verifyImageUploadRequest(expectedCode: number = 200) {
+    cy.wait("@imageUploadReq")
+      .its("response.statusCode")
+      .should("eq", expectedCode);
   }
 
   interceptImageDeleteRequest() {
