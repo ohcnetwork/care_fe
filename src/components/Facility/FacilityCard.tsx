@@ -6,10 +6,11 @@ import { useTranslation } from "react-i18next";
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import { TooltipComponent, TooltipProvider } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
-import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import { FacilityModel } from "@/components/Facility/models";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
@@ -103,6 +104,7 @@ export const FacilityCard = (props: {
                         <TooltipProvider>
                           <TooltipComponent
                             content={t("live_patients_total_beds")}
+                            className="text-sm px-3 py-3 max-w-[300px]"
                           >
                             <div
                               data-test-id="occupancy-badge"
@@ -123,19 +125,20 @@ export const FacilityCard = (props: {
                           </TooltipComponent>
                         </TooltipProvider>
                       </div>
-                      <ButtonV2
+                      <Button
                         id="view-cns-button"
-                        href={`/facility/${facility.id}/cns`}
-                        border
-                        ghost
+                        asChild
                         className="mt-2 sm:mt-0"
+                        variant={"outline_primary"}
                       >
-                        <CareIcon
-                          icon="l-monitor-heart-rate"
-                          className="text-lg"
-                        />
-                        <span>{t("view_cns")}</span>
-                      </ButtonV2>
+                        <Link href={`/facility/${facility.id}/cns`}>
+                          <CareIcon
+                            icon="l-monitor-heart-rate"
+                            className="text-lg mr-1"
+                          />
+                          <span>{t("view_cns")}</span>
+                        </Link>
+                      </Button>
                     </div>
 
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -233,38 +236,81 @@ export const FacilityCard = (props: {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {["DistrictAdmin", "StateAdmin"].includes(userType) && (
-                      <ButtonV2
-                        id="facility-notify"
-                        ghost
-                        border
-                        className="h-[38px]"
-                        onClick={(_) => setNotifyModalFor(facility.id)}
-                      >
-                        <CareIcon icon="l-megaphone" className="text-lg" />
-                        <span className="hidden md:block">Notify</span>
-                      </ButtonV2>
+                      <TooltipProvider>
+                        <TooltipComponent
+                          content={t("notify")}
+                          side="top"
+                          className="sm:hidden text-sm px-3 py-3 max-w-[300px]"
+                        >
+                          <Button
+                            id="facility-notify"
+                            variant={"outline_primary"}
+                            className="h-[38px]"
+                            onClick={(_) => setNotifyModalFor(facility.id)}
+                            aria-label={t("notify")}
+                            role="button"
+                          >
+                            <CareIcon
+                              icon="l-megaphone"
+                              className="text-lg mr-1"
+                            />
+                            <span className="hidden sm:inline">
+                              {t("notify")}
+                            </span>
+                          </Button>
+                        </TooltipComponent>
+                      </TooltipProvider>
                     )}
-                    <ButtonV2
-                      href={`/facility/${facility.id}`}
-                      id="facility-details"
-                      border
-                      ghost
-                      className="h-[38px]"
-                    >
-                      <CareIcon icon="l-hospital" className="text-lg" />
-                      <span className="hidden md:inline">
-                        {t("view_faciliy")}
-                      </span>
-                    </ButtonV2>
-                    <ButtonV2
-                      href={`/patients?facility=${facility.id}`}
-                      id="facility-patients"
-                      border
-                      ghost
-                    >
-                      <CareIcon icon="l-user-injured" className="text-lg" />
-                      {t("view_patients")}
-                    </ButtonV2>
+                    <TooltipProvider>
+                      <TooltipComponent
+                        content={t("view_facility")}
+                        side="top"
+                        className="sm:hidden text-sm px-3 py-3 max-w-[300px]"
+                      >
+                        <Button
+                          id="facility-details"
+                          variant={"outline_primary"}
+                          className="tooltip h-[38px]"
+                          aria-label={t("view_facility")}
+                          asChild
+                        >
+                          <Link href={`/facility/${facility.id}`}>
+                            <CareIcon
+                              icon="l-hospital"
+                              className="text-lg mr-1"
+                            />
+                            <span className="hidden sm:inline">
+                              {t("view_facility")}
+                            </span>
+                          </Link>
+                        </Button>
+                      </TooltipComponent>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                      <TooltipComponent
+                        content={t("view_patients")}
+                        side="top"
+                        className="sm:hidden text-sm px-3 py-3 max-w-[300px]"
+                      >
+                        <Button
+                          id="facility-patients"
+                          variant={"outline_primary"}
+                          aria-label={t("view_patients")}
+                          asChild
+                          className="tooltip h-[38px]"
+                        >
+                          <Link href={`/patients?facility=${facility.id}`}>
+                            <CareIcon
+                              icon="l-user-injured"
+                              className="text-lg mr-1"
+                            />
+                            <span className="hidden sm:inline">
+                              {t("view_patients")}
+                            </span>
+                          </Link>
+                        </Button>
+                      </TooltipComponent>
+                    </TooltipProvider>
                     {/* </div> */}
                   </div>
                 </div>
