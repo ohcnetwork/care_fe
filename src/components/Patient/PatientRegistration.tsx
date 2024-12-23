@@ -84,6 +84,7 @@ export default function PatientRegistration(
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [debouncedNumber, setDebouncedNumber] = useState<string>();
 
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
@@ -407,8 +408,6 @@ export default function PatientRegistration(
         : createPatientMutation.mutate();
     }
   };
-
-  const [debouncedNumber, setDebouncedNumber] = useState<string>();
 
   useEffect(() => {
     const handler = setTimeout(() => {

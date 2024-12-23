@@ -185,7 +185,7 @@ export const FacilityList = () => {
             {
               key: "facility_district_name",
               type: "text" as const,
-              placeholder: "facility_search_placeholder",
+              placeholder: t("facility_search_placeholder"),
               value: qParams.search || "",
               shortcutKey: "f",
             },

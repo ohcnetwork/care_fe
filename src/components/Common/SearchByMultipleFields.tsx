@@ -181,7 +181,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <PhoneNumberFormField
             id={id}
             name={selectedOption.key}
-            placeholder={t(selectedOption.placeholder)}
+            placeholder={selectedOption.placeholder}
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
@@ -194,7 +194,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <Input
             id={id}
             type="text"
-            placeholder={t(selectedOption.placeholder)}
+            placeholder={selectedOption.placeholder}
             {...commonProps}
           />
         );

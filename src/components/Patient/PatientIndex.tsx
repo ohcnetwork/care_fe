@@ -70,21 +70,21 @@ export default function PatientIndex(props: {
     {
       key: "name",
       type: "text" as const,
-      placeholder: "search_by_patient_name",
+      placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
       shortcutKey: "n",
     },
     {
       key: "patient_no",
       type: "text" as const,
-      placeholder: "search_by_patient_no",
+      placeholder: t("search_by_patient_no"),
       value: qParams.patient_no || "",
       shortcutKey: "u",
     },
     {
       key: "phone_number",
       type: "phone" as const,
-      placeholder: "Search_by_phone_number",
+      placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
       shortcutKey: "p",
     },
@@ -92,7 +92,7 @@ export default function PatientIndex(props: {
     {
       key: "emergency_contact_number",
       type: "phone" as const,
-      placeholder: "search_by_emergency_phone_number",
+      placeholder: t("search_by_emergency_phone_number"),
       value: qParams.emergency_phone_number || "",
       shortcutKey: "e",
     },
@@ -102,22 +102,22 @@ export default function PatientIndex(props: {
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
-      const updatedQuery = {
-        phone_number:
-          key === "phone_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
-            : undefined,
-        name: key === "name" ? value : undefined,
-        patient_no: key === "patient_no" ? value : undefined,
-        emergency_phone_number:
-          key === "emergency_contact_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
-            : undefined,
-      };
+      const updatedQuery: Record<string, string | undefined> = {};
+
+      switch (key) {
+        case "phone_number":
+        case "emergency_contact_number":
+          if (value.length >= 13 || value === "") {
+            updatedQuery[key] = value;
+          }
+          break;
+        case "name":
+        case "patient_no":
+          updatedQuery[key] = value;
+          break;
+        default:
+          break;
+      }
 
       updateQuery(updatedQuery);
     },
@@ -240,12 +240,14 @@ export default function PatientIndex(props: {
         activeTab={tab}
         onChange={(value) => {
           if (value === "discharged") {
+            // for a user that has access to just one facility, or if the user is filtering by one facility, take them to the dedicated facility discharge page
             const id = qParams.facility || onlyAccessibleFacility?.id;
             if (id) {
               navigate(`facility/${id}/discharged-patients`);
               return;
             }
 
+            // only state admins can view all discharged patients
             if (
               authUser.user_type === "StateAdmin" ||
               authUser.user_type === "StateReadOnlyAdmin"
@@ -253,6 +255,8 @@ export default function PatientIndex(props: {
               navigate("/patients/discharged?is_active=false");
               return;
             }
+
+            // for other users, ask what facility they would like to view discharged patients of
             setShowDialog("list-discharged");
           } else if (value === "search") {
             navigate("/patients");
@@ -300,55 +304,65 @@ export default function PatientIndex(props: {
             />
           </div>
           {isValidSearch &&
-            !listingQuery.loading &&
-            !listingQuery.data?.results.length && (
+            (!listingQuery.loading && !listingQuery.data?.results.length ? (
               <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
                 {t("no_records_found")}
                 <br />
                 {t("to_proceed_with_registration")}
                 <AddPatientButton outline />
               </div>
-            )}
-          {isValidSearch && listingQuery.loading && <Loading />}
-          {isValidSearch && !!listingQuery.data?.results.length && (
-            <Table className="mt-4">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="">{t("name")}/IP/OP</TableHead>
-                  <TableHead className="">{t("primary_phone_no")}</TableHead>
-                  <TableHead className="">
-                    {t("dob")}/{t("age")}
-                  </TableHead>
-                  <TableHead className="">{t("sex")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {listingQuery.data?.results.map((patient) => (
-                  <TableRow
-                    className="bg-white cursor-pointer"
-                    key={patient.id}
-                    onClick={() => navigate(getPatientUrl(patient))}
-                  >
-                    <TableCell className="min-w-[200px]">
-                      {patient.name}
+            ) : listingQuery.loading ? (
+              <Loading />
+            ) : (
+              !!listingQuery.data?.results.length && (
+                <Table className="mt-4">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="">{t("name")}/IP/OP</TableHead>
+                      <TableHead className="">
+                        {t("primary_phone_no")}
+                      </TableHead>
+                      <TableHead className="">
+                        {t("dob")}/{t("age")}
+                      </TableHead>
+                      <TableHead className="">{t("sex")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {listingQuery.data?.results.map((patient) => (
+                      <TableRow
+                        className="bg-white cursor-pointer"
+                        key={patient.id}
+                        onClick={() => navigate(getPatientUrl(patient))}
+                      >
+                        <TableCell className="min-w-[200px]">
+                          {patient.name}
 
-                      <br />
-                      <span>{patient.last_consultation?.patient_no}</span>
-                    </TableCell>
-                    <TableCell className="">{patient.phone_number}</TableCell>
-                    <TableCell className="">
-                      {!!patient.date_of_birth &&
-                        dayjs(patient.date_of_birth).format("DD-MM-YYYY")}{" "}
-                      ({formatPatientAge(patient)})
-                    </TableCell>
-                    <TableCell className="">
-                      {GENDER_TYPES.find((g) => g.id === patient.gender)?.text}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+                          <br />
+                          <span>{patient.last_consultation?.patient_no}</span>
+                        </TableCell>
+                        <TableCell className="">
+                          {patient.phone_number}
+                        </TableCell>
+                        <TableCell className="">
+                          {!!patient.date_of_birth &&
+                            dayjs(patient.date_of_birth).format(
+                              "DD-MM-YYYY",
+                            )}{" "}
+                          ({formatPatientAge(patient)})
+                        </TableCell>
+                        <TableCell className="">
+                          {
+                            GENDER_TYPES.find((g) => g.id === patient.gender)
+                              ?.text
+                          }
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )
+            ))}
           {listingQuery.data && (
             <Pagination totalCount={listingQuery?.data?.count} />
           )}

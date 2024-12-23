@@ -737,7 +737,7 @@ export const PatientManager = () => {
       key: "name",
       label: "Name",
       type: "text" as const,
-      placeholder: "search_by_patient_name",
+      placeholder: t("search_by_patient_name"),
       value: qParams.name || "",
       shortcutKey: "n",
     },
@@ -745,7 +745,7 @@ export const PatientManager = () => {
       key: "patient_no",
       label: "IP/OP No",
       type: "text" as const,
-      placeholder: "search_by_patient_no",
+      placeholder: t("search_by_patient_no"),
       value: qParams.patient_no || "",
       shortcutKey: "u",
     },
@@ -753,7 +753,7 @@ export const PatientManager = () => {
       key: "phone_number",
       label: "Phone Number",
       type: "phone" as const,
-      placeholder: "Search_by_phone_number",
+      placeholder: t("search_by_phone_number"),
       value: qParams.phone_number || "",
       shortcutKey: "p",
     },
@@ -761,7 +761,7 @@ export const PatientManager = () => {
       key: "emergency_contact_number",
       label: "Emergency Contact Phone Number",
       type: "phone" as const,
-      placeholder: "search_by_emergency_phone_number",
+      placeholder: t("search_by_emergency_phone_number"),
       value: qParams.emergency_phone_number || "",
       shortcutKey: "e",
     },
@@ -769,22 +769,22 @@ export const PatientManager = () => {
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
-      const updatedQuery = {
-        phone_number:
-          key === "phone_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
-            : undefined,
-        name: key === "name" ? value : undefined,
-        patient_no: key === "patient_no" ? value : undefined,
-        emergency_phone_number:
-          key === "emergency_contact_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
-            : undefined,
-      };
+      const updatedQuery: Record<string, string | undefined> = {};
+
+      switch (key) {
+        case "phone_number":
+        case "emergency_contact_number":
+          if (value.length >= 13 || value === "") {
+            updatedQuery[key] = value;
+          }
+          break;
+        case "name":
+        case "patient_no":
+          updatedQuery[key] = value;
+          break;
+        default:
+          break;
+      }
 
       updateQuery(updatedQuery);
     },
@@ -837,21 +837,21 @@ export const PatientManager = () => {
                 className="gap-2"
               >
                 <CareIcon icon="l-export" />
-                <span className="lg:my-[3px]">Export</span>
+                {t("export")}
               </Button>
             ) : (
               <ExportMenu
                 disabled={!isExportAllowed}
                 exportItems={[
                   {
-                    label: "Export Live patients",
+                    label: t("export_live_patients"),
                     action: async () => {
                       const query = {
                         ...params,
                         csv: true,
                         facility: qParams.facility,
+                        is_active: "True",
                       };
-                      delete qParams.is_active;
                       const { data } = await request(routes.patientList, {
                         query,
                       });
@@ -865,7 +865,7 @@ export const PatientManager = () => {
 
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-                Select a seven day period
+                {t("select_seven_day_period")}
               </span>
             )}
           </div>

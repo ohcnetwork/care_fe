@@ -44,32 +44,25 @@ import { sleep } from "@/Utils/utils";
 import { UserModel } from "../Users/models";
 import { FacilityModel } from "./models";
 
-export function patientRegisterAuth(
+export function canUserRegisterPatient(
   authUser: UserModel,
   facilityObject: FacilityModel | undefined,
   facilityId: string,
 ) {
-  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-  if (
-    !showAllFacilityUsers.includes(authUser.user_type) &&
-    authUser.home_facility_object?.id === facilityId
-  ) {
-    return true;
-  }
-  if (
-    authUser.user_type === "DistrictAdmin" &&
-    authUser.district === facilityObject?.district
-  ) {
-    return true;
-  }
-  if (
-    authUser.user_type === "StateAdmin" &&
-    authUser.state === facilityObject?.state
-  ) {
-    return true;
-  }
+  // User types that can register a new patient
+  const privilegedUserTypes = ["DistrictAdmin", "StateAdmin"];
 
-  return false;
+  return (
+    // Allow non privileged users of the same facility
+    (!privilegedUserTypes.includes(authUser.user_type) &&
+      authUser.home_facility_object?.id === facilityId) ||
+    // allow district admins
+    (authUser.user_type === "DistrictAdmin" &&
+      authUser.district === facilityObject?.district) ||
+    // allow state admins
+    (authUser.user_type === "StateAdmin" &&
+      authUser.state === facilityObject?.state)
+  );
 }
 
 type Props = {
@@ -482,7 +475,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              {patientRegisterAuth(authUser, facilityData, facilityId) && (
+              {canUserRegisterPatient(authUser, facilityData, facilityId) && (
                 <ButtonV2
                   variant="primary"
                   ghost

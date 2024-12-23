@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
@@ -39,6 +40,8 @@ export function FacilitiesPage() {
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(CarePatientTokenKey) || "{}",
   );
+
+  const { t } = useTranslation();
 
   const { data: districtResponse } = useQuery<RequestResult<DistrictModel>>({
     queryKey: ["district", qParams.district],
@@ -115,7 +118,7 @@ export function FacilitiesPage() {
             {
               key: "facility_district_pincode",
               type: "text" as const,
-              placeholder: "facility_search_placeholder_pincode",
+              placeholder: t("facility_search_placeholder_pincode"),
               value: qParams.search || "",
               shortcutKey: "f",
             },
