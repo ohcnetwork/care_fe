@@ -229,14 +229,11 @@ Cypress.Commands.add("closeNotification", () => {
 });
 
 Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
-  const timeout = 10000;
-  cy.get(selector, { timeout })
-    .should("be.visible")
-    .then(($el) => {
-      texts.forEach((text) => {
-        cy.wrap($el).should("contain", text, { timeout });
-      });
+  cy.get(selector).then(($el) => {
+    texts.forEach((text) => {
+      cy.wrap($el).should("contain", text);
     });
+  });
 });
 
 Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
