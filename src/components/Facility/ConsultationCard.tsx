@@ -30,6 +30,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
     : !itemData.current_bed
       ? t("assign_bed")
       : t("switch_bed");
+
   return (
     <>
       <DialogModal
@@ -53,16 +54,39 @@ export const ConsultationCard = (props: ConsultationProps) => {
         )}
       </DialogModal>
       <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
-        <Chip
-          size="small"
-          variant={itemData.suggestion === "A" ? "alert" : "primary"}
-          text={
-            itemData.suggestion === "A" ? t("ip_encounter") : t("op_encounter")
-          }
-          className="-translate-y-2"
-        />
-        <div className="text-sm">
-          {dayjs(itemData.created_date).format("DD/MM/YYYY")}
+        <div className="flex flex-wrap items-center gap-4 mt-4">
+          <div className="flex flex-col gap-1">
+            <Chip
+              size="small"
+              variant={itemData.suggestion === "A" ? "alert" : "primary"}
+              text={
+                itemData.suggestion === "A"
+                  ? t("ip_encounter")
+                  : t("op_encounter")
+              }
+              className="-translate-y-2"
+            />
+            <div className="text-sm">
+              {dayjs(itemData.created_date).format("DD/MM/YYYY")}
+            </div>
+          </div>
+
+          {/* Patient Status Section */}
+          <div className="flex items-center gap-2 -translate-y-5 ">
+            <div className="text-sm font-normal leading-5">
+              {t("patient_status")}
+            </div>
+            <Chip
+              size="small"
+              variant="custom"
+              className={
+                !itemData.discharge_date
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-red-100 text-red-800"
+              }
+              text={!itemData.discharge_date ? "LIVE" : "DISCHARGED"}
+            />
+          </div>
         </div>
 
         {itemData.is_kasp && (
