@@ -1,5 +1,4 @@
-import { ArrowRightIcon } from "@radix-ui/react-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
@@ -32,7 +31,6 @@ import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
 interface QueryParams {
@@ -40,13 +38,13 @@ interface QueryParams {
   slot?: string;
 }
 
-export default function AppointmentsPage() {
+export default function AppointmentsPage(props: { facilityId?: string }) {
+  const { t } = useTranslation();
+
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
   const authUser = useAuthUser();
-
-  // TODO: remove this
-  const facilityId = authUser.home_facility!;
+  const facilityId = props.facilityId ?? authUser.home_facility!;
 
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
@@ -68,7 +66,9 @@ export default function AppointmentsPage() {
       <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           <div>
-            <Label className="mb-2 text-black">Select Practitioner</Label>
+            <Label className="mb-2 text-black">
+              {t("select_practitioner")}
+            </Label>
             <Select
               disabled={resourcesQuery.isLoading}
               value={qParams.resource}
@@ -80,11 +80,11 @@ export default function AppointmentsPage() {
               }}
             >
               <SelectTrigger className="min-w-60">
-                <SelectValue placeholder="Show all">
+                <SelectValue placeholder={t("show_all")}>
                   {resource && (
                     <div className="flex items-center gap-2">
                       <Avatar
-                        imageUrl={resource.read_profile_picture_url}
+                        imageUrl={resource.profile_picture_url}
                         name={formatName(resource)}
                         className="size-6 rounded-full"
                       />
@@ -98,7 +98,7 @@ export default function AppointmentsPage() {
                   <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">
                       <Avatar
-                        imageUrl={user.read_profile_picture_url}
+                        imageUrl={user.profile_picture_url}
                         name={formatName(user)}
                         className="size-6 rounded-full"
                       />
@@ -117,7 +117,7 @@ export default function AppointmentsPage() {
 
           <div>
             <Label className="mb-2">
-              <span className="text-black">Today</span>
+              <span className="text-black">{t("today")}</span>
               <span className="pl-1 text-gray-500">
                 ({formatDate(new Date(), "dd MMM yyyy")})
               </span>
@@ -128,7 +128,7 @@ export default function AppointmentsPage() {
                 onClick={() => setQParams({ resource: qParams.resource })}
                 className={cn(!slot && "shadow", "hover:bg-white")}
               >
-                ALL
+                {t("all")}
               </Button>
               {slots?.map((slot) => (
                 <Button
@@ -150,8 +150,8 @@ export default function AppointmentsPage() {
         </div>
 
         <div className="flex gap-4 items-center">
-          <Input className="w-[300px]" placeholder="Search" />
-          <Button variant="outline">Filter</Button>
+          <Input className="w-[300px]" placeholder={t("search")} />
+          <Button variant="outline">{t("filter")}</Button>
           <div className="flex border rounded-lg">
             <Button
               variant="ghost"
@@ -161,7 +161,7 @@ export default function AppointmentsPage() {
               )}
               onClick={() => setViewMode("board")}
             >
-              Board
+              {t("board")}
             </Button>
             <Button
               variant="ghost"
@@ -171,7 +171,7 @@ export default function AppointmentsPage() {
               )}
               onClick={() => setViewMode("list")}
             >
-              List
+              {t("list")}
             </Button>
           </div>
         </div>
@@ -195,6 +195,8 @@ function AppointmentColumn(props: {
   status: Appointment["status"];
   facilityId: string;
 }) {
+  const { t } = useTranslation();
+
   const { data } = useQuery({
     queryKey: ["appointments", props.facilityId, props.status],
     queryFn: query(ScheduleAPIs.appointments.list, {
@@ -221,8 +223,8 @@ function AppointmentColumn(props: {
         </span>
       </div>
       {appointments.length === 0 ? (
-        <div className="flex justify-center items-center h-full">
-          <p className="text-gray-500">No appointments</p>
+        <div className="flex justify-center items-center h-[calc(100vh-22rem)]">
+          <p className="text-gray-500">{t("no_appointments")}</p>
         </div>
       ) : (
         <ScrollArea>
@@ -230,13 +232,10 @@ function AppointmentColumn(props: {
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link
-                  href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/encounters`}
+                  href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
                   className="text-inherit"
                 >
-                  <AppointmentCard
-                    appointment={appointment}
-                    facilityId={props.facilityId}
-                  />
+                  <AppointmentCard appointment={appointment} />
                 </Link>
               </li>
             ))}
@@ -247,35 +246,9 @@ function AppointmentColumn(props: {
   );
 }
 
-function AppointmentCard({
-  appointment,
-  facilityId,
-}: {
-  appointment: Appointment;
-  facilityId: string;
-}) {
+function AppointmentCard({ appointment }: { appointment: Appointment }) {
   const { patient } = appointment;
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  const { mutate: updateStatus } = useMutation({
-    mutationFn: (status: Appointment["status"]) =>
-      request(ScheduleAPIs.appointments.update, {
-        pathParams: {
-          facility_id: facilityId,
-          id: appointment.id,
-        },
-        body: { status },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", facilityId, appointment.status],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", facilityId, "checked_in"],
-      });
-    },
-  });
 
   return (
     <div className="bg-white p-3 rounded shadow group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
@@ -289,39 +262,13 @@ function AppointmentCard({
             {t(`GENDER__${patient.gender}`)}
           </p>
         </div>
-        <div className="flex gap-0 group-hover:gap-3 items-end transition-all duration-200 ease-in-out">
-          {appointment.status === "booked" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                updateStatus("checked_in");
-              }}
-            >
-              <span>Check In</span>
-              <ArrowRightIcon className="size-3 ml-1" />
-            </Button>
-          )}
-          {appointment.status === "checked_in" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out"
-            >
-              <span>Consult</span>
-              <ArrowRightIcon className="size-3 ml-1" />
-            </Button>
-          )}
-          <div className="bg-gray-100 px-2 py-1 rounded text-center">
-            <p className="text-[10px]">TOKEN</p>
-            {/* TODO: replace this with token number once that's ready... */}
-            <p className="font-bold text-2xl uppercase">
-              {getFakeTokenNumber(appointment)}
-            </p>
-          </div>
+
+        <div className="bg-gray-100 px-2 py-1 rounded text-center">
+          <p className="text-[10px] uppercase">{t("token")}</p>
+          {/* TODO: replace this with token number once that's ready... */}
+          <p className="font-bold text-2xl uppercase">
+            {getFakeTokenNumber(appointment)}
+          </p>
         </div>
       </div>
     </div>

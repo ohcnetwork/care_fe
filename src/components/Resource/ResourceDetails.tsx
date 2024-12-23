@@ -131,7 +131,7 @@ const RequestLetter = (data: any) => {
       <div className="mx-4 p-4 lg:mx-20">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold">Resource Request Letter</div>
+          <div className="text-2xl font-bold">Request Letter</div>
           <div className="mt-2 text-sm text-gray-600">
             Reference No: {data.id}
           </div>
@@ -175,8 +175,7 @@ const RequestLetter = (data: any) => {
 
           <div className="mb-4 ml-4">
             <div>
-              <span className="font-semibold">Resource Title:</span>{" "}
-              {data.title}
+              <span className="font-semibold">Request Title:</span> {data.title}
             </div>
             <div>
               <span className="font-semibold">Category:</span>{" "}
@@ -253,7 +252,7 @@ export default function ResourceDetails(props: { id: string }) {
 
   return (
     <Page
-      title="Resource Details"
+      title="Request Details"
       crumbsReplacements={{ [props.id]: { name: data.title } }}
       backUrl="/resource/board"
     >

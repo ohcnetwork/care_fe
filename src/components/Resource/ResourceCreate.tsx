@@ -206,7 +206,7 @@ export default function ResourceCreate(props: resourceProps) {
       if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
-          msg: "Resource request created successfully",
+          msg: "Request created successfully",
         });
 
         navigate(`/resource/${data.id}`);

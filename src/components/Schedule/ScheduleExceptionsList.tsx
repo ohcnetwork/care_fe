@@ -1,4 +1,6 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -11,39 +13,37 @@ import { Button } from "@/components/ui/button";
 import Loading from "@/components/Common/Loading";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { ScheduleException } from "@/components/Schedule/types";
+import { UserModel } from "@/components/Users/models";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
-import useMutation from "@/Utils/request/useMutation";
+import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
 
 interface Props {
+  user: UserModel;
   items?: ScheduleException[];
-  onRefresh?: () => void;
 }
 
-export default function ScheduleExceptionsList(props: Props) {
-  if (props.items == null) {
+export default function ScheduleExceptionsList({ user, items }: Props) {
+  const { t } = useTranslation();
+
+  if (items == null) {
     return <Loading />;
   }
 
-  if (props.items.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="flex flex-col items-center text-center text-gray-500 py-64">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>No schedule exceptions found for this month.</p>
+        <p>{t("no_scheduled_exceptions_found")}</p>
       </div>
     );
   }
 
   return (
     <ul className="flex flex-col gap-4">
-      {props.items.map((exception) => (
+      {items.map((exception) => (
         <li key={exception.id}>
-          <ScheduleExceptionItem
-            {...exception}
-            onDelete={() => props.onRefresh?.()}
-          />
+          <ScheduleExceptionItem {...exception} user={user} />
         </li>
       ))}
     </ul>
@@ -51,13 +51,23 @@ export default function ScheduleExceptionsList(props: Props) {
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { onDelete: () => void },
+  props: ScheduleException & { user: UserModel },
 ) => {
-  const authUser = useAuthUser();
-  const { mutate, isProcessing } = useMutation(ScheduleAPIs.exceptions.delete, {
-    pathParams: {
-      id: props.id,
-      facility_id: authUser.home_facility_object!.id!,
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteException, isPending } = useMutation({
+    mutationFn: mutate(ScheduleAPIs.exceptions.delete, {
+      pathParams: {
+        id: props.id,
+        facility_id: props.user.home_facility_object!.id!,
+      },
+    }),
+    onSuccess: () => {
+      toast.success(t("exception_deleted"));
+      queryClient.invalidateQueries({
+        queryKey: ["user-availability-exceptions", props.user.username],
+      });
     },
   });
 
@@ -65,7 +75,7 @@ const ScheduleExceptionItem = (
     <div
       className={cn(
         "rounded-lg bg-white py-2 shadow",
-        isProcessing && "opacity-50",
+        isPending && "opacity-50",
       )}
     >
       <div className="flex items-center justify-between py-2 pr-4">
@@ -80,11 +90,11 @@ const ScheduleExceptionItem = (
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
               </span>
-              <span> from </span>
+              <span> {t("from")} </span>
               <span className="font-medium">
                 {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
               </span>
-              <span> to </span>
+              <span> {t("to")} </span>
               <span className="font-medium">
                 {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
               </span>
@@ -94,20 +104,11 @@ const ScheduleExceptionItem = (
         <Button
           variant="secondary"
           size="sm"
-          disabled={isProcessing}
-          onClick={() => {
-            toast.promise(mutate(), {
-              loading: "Deleting...",
-              success: () => {
-                props.onDelete();
-                return "Exception removed successfully";
-              },
-              error: "Error",
-            });
-          }}
+          disabled={isPending}
+          onClick={() => deleteException(undefined)}
         >
           <CareIcon icon="l-minus-circle" className="text-base" />
-          <span className="ml-2">Remove</span>
+          <span className="ml-2">{t("remove")}</span>
         </Button>
       </div>
       {/* TODO: Add this information */}

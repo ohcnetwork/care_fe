@@ -47,6 +47,7 @@ import { UserModel } from "@/components/Users/models";
 
 import request from "@/Utils/request/request";
 import { Time, WritableOnly } from "@/Utils/types";
+import { dateQueryString } from "@/Utils/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -122,8 +123,8 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     mutate({
-      valid_from: values.valid_from.toISOString().split("T")[0],
-      valid_to: values.valid_to.toISOString().split("T")[0],
+      valid_from: dateQueryString(values.valid_from),
+      valid_to: dateQueryString(values.valid_to),
       name: values.name,
       resource_type: "user",
       resource: user.external_id,

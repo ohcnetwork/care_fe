@@ -1095,7 +1095,7 @@ const routes = {
     TRes: Type<MedibaseMedicine[]>(),
   },
 
-  // Resource
+  // Request
   createResource: {
     path: "/api/v1/resource/",
     method: "POST",

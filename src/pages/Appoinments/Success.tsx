@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 import { UserModel } from "@/components/Users/models";
@@ -49,19 +46,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   }
 
   return (
-    <div className="mx-auto p-2">
-      <div className="flex flex-row justify-start mb-4">
-        <Button
-          variant="outline"
-          className="border border-secondary-400"
-          onClick={() => {
-            navigate("/facilities");
-          }}
-        >
-          <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-          <span className="text-sm underline">{t("back_to_home")}</span>
-        </Button>
-      </div>
+    <div className="mx-auto p-2 max-w-3xl">
       <div className="bg-secondary-100/50 rounded-lg shadow-sm p-12 border border-secondary-400 text-center mb-12">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
           <CareIcon icon="l-check" className="w-8 h-8 text-green-600" />

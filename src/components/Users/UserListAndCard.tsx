@@ -186,7 +186,7 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
             <div className="flex flex-col items-center gap-4 min-[400px]:flex-row sm:items-start">
               <Avatar
                 imageUrl={user.read_profile_picture_url}
-                name={user.username ?? ""}
+                name={formatName(user)}
                 className="h-16 w-16 self-center text-2xl sm:self-auto"
               />
               {isMediumScreen && getNameAndStatusCard(user, userOnline)}

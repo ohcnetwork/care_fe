@@ -51,6 +51,14 @@ export const ScheduleAPIs = {
   },
 
   slots: {
+    availabilityHeatmap: {
+      path: "/api/v1/facility/{facility_id}/slots/availability_stats/",
+      method: "POST",
+      TRes: Type<{
+        [date: string]: { total_slots: number; booked_slots: number };
+      }>(),
+      TBody: Type<{ from_date: string; to_date: string; resource: string }>(),
+    },
     getAvailableSlotsForADay: {
       path: "/api/v1/facility/{facility_id}/slots/get_slots_for_day/",
       method: "POST",

@@ -184,7 +184,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     onSuccess: (data: AppointmentPatient) => {
       Notification.Success({ msg: "Patient created successfully" });
       publish("patient:upsert", data);
-      console.log("data", data);
       createAppointment({
         patient: data.id,
         reason_for_visit: reason ?? "",

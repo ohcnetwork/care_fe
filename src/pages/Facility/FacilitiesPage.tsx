@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,9 +20,12 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otpToken";
 
 import { FacilityCard } from "./components/FacilityCard";
 
@@ -31,6 +35,10 @@ export function FacilitiesPage() {
     useFilters({
       limit: 14,
     });
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
 
   const { data: districtResponse } = useQuery<RequestResult<DistrictModel>>({
     queryKey: ["district", qParams.district],
@@ -56,13 +64,50 @@ export function FacilitiesPage() {
     }
   }, [advancedFilter, qParams]);
 
+  const GetLoginHeader = () => {
+    if (
+      tokenData &&
+      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+    ) {
+      return (
+        <header className="w-full p-4">
+          <div className="flex justify-end items-center">
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+              onClick={() => navigate("/patient/home")}
+            >
+              Patient Dashboard
+            </Button>
+          </div>
+        </header>
+      );
+    }
+    return (
+      <header className="w-full p-4">
+        <div className="flex justify-end items-center">
+          <Button
+            variant="ghost"
+            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+            onClick={() => navigate("/login")}
+          >
+            Sign in
+          </Button>
+        </div>
+      </header>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/" className="flex items-center gap-4 mb-6">
-        <div className="mb-8">
-          <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
-        </div>
-      </Link>
+      <div className="flex justify-between w-full">
+        <Link href="/" className="mb-6">
+          <div className="mb-8">
+            <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
+          </div>
+        </Link>
+        <GetLoginHeader />
+      </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
         <SearchByMultipleFields
           id="facility-search"

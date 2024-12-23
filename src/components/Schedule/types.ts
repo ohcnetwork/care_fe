@@ -63,7 +63,7 @@ interface AppointmentPatient {
   readonly name: string;
   readonly gender: number;
   readonly date_of_birth: string | null;
-  readonly age: number | null;
+  readonly year_of_birth: string | null;
   readonly address: string;
   readonly pincode: string;
 }

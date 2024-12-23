@@ -8,6 +8,9 @@ type Options<TData, TBody> = RequestOptions<TData, TBody> & {
   signal?: AbortSignal;
 };
 
+/**
+ * @deprecated use useQuery/useMutation/callApi instead
+ */
 export default async function request<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
   {

@@ -102,9 +102,7 @@ export default function Calendar(props: Props) {
                 isToday && highlightToday && "ring-2 ring-primary-400",
               )}
             >
-              {props.renderDay ? (
-                props.renderDay(date)
-              ) : (
+              {props.renderDay?.(date) ?? (
                 <span className="block text-right p-2 transition-all rounded-lg bg-white text-gray-900">
                   {date.getDate()}
                 </span>

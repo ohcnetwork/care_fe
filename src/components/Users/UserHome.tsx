@@ -6,7 +6,6 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { userChildProps } from "@/components/Common/UserColumns";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { HomeFacilityWrapper } from "@/components/Schedule/routes";
 import LinkedFacilitiesTab from "@/components/Users/LinkedFacilitiesTab";
 import LinkedSkillsTab from "@/components/Users/LinkedSkillsTab";
 import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
@@ -81,12 +80,8 @@ export default function UserHome(props: UserHomeProps) {
       hidden: !editPermissions,
     },
     AVAILABILITY: {
-      body: (props: userChildProps) => (
-        <HomeFacilityWrapper user={props.userData}>
-          <UserAvailabilityTab {...props} />
-        </HomeFacilityWrapper>
-      ),
-      hidden: !editPermissions,
+      body: UserAvailabilityTab,
+      hidden: !editPermissions || !userData.home_facility_object,
     },
   } satisfies Record<string, tabChildProp>;
 

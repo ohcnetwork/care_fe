@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -7,15 +8,20 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import { Avatar } from "@/components/Common/Avatar";
+import { useSignOut } from "@/components/Common/Sidebar/Utils";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import useFilters from "@/hooks/useFilters";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otpToken";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -60,6 +66,8 @@ export function FacilityDetailsPage({ id }: Props) {
 
   const facility = facilityResponse?.data;
 
+  const signOut = useSignOut();
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -69,6 +77,10 @@ export function FacilityDetailsPage({ id }: Props) {
       </div>
     );
   }
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
 
   if (!facility) {
     return (
@@ -89,6 +101,44 @@ export function FacilityDetailsPage({ id }: Props) {
     );
   }
 
+  const GetLoginHeader = () => {
+    if (
+      tokenData &&
+      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+    ) {
+      return (
+        <header className="w-full">
+          <div className="flex justify-end items-center">
+            <div className="text-sm text-primary-500">
+              Logged in as{"  "}
+              <span className="font-bold">{tokenData.phoneNumber}</span>
+            </div>
+            <Button
+              variant="ghost"
+              className="text-sm font-medium hover:bg-transparent hover:text-red-800 underline px-2 self-center text-red-500"
+              onClick={signOut}
+            >
+              Sign out
+            </Button>
+          </div>
+        </header>
+      );
+    }
+    return (
+      <header className="w-full">
+        <div className="flex justify-end items-center">
+          <Button
+            variant="ghost"
+            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+            onClick={() => navigate("/login")}
+          >
+            Sign in
+          </Button>
+        </div>
+      </header>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex px-2 pb-4 justify-start">
@@ -102,16 +152,14 @@ export function FacilityDetailsPage({ id }: Props) {
             <span className="text-sm underline">{t("back")}</span>
           </Link>
         </Button>
+        <GetLoginHeader />
       </div>
       <Card className="overflow-hidden bg-white">
         <div className="flex flex-col sm:flex-row  m-6">
           <div className="h-64 w-64 shrink-0 overflow-hidden rounded-lg">
-            <img
-              src={
-                facility.read_cover_image_url || "/images/default-facility.png"
-              }
-              alt={facility.name}
-              className="h-full w-full object-cover"
+            <Avatar
+              imageUrl={facility.read_cover_image_url}
+              name={facility.name || ""}
             />
           </div>
 

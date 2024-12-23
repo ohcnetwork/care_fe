@@ -173,7 +173,7 @@ export default function ListFilter(props: any) {
       </div>
 
       <div>
-        <FieldLabel>Resource approving facility</FieldLabel>
+        <FieldLabel>Request approving facility</FieldLabel>
         {filter.approving_facility && resourceFacilityLoading ? (
           <CircularProgress />
         ) : (

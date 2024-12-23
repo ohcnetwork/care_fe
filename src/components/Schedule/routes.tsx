@@ -1,66 +1,49 @@
-import { ReactNode } from "react";
+import { Redirect } from "raviger";
 
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { FacilityModel } from "@/components/Facility/models";
-import AppointmentCreatePage from "@/components/Schedule/AppointmentCreatePage";
-import AppointmentTokenPage from "@/components/Schedule/AppointmentTokenPage";
-import AppointmentsPage from "@/components/Schedule/AppointmentsPage";
+import AppointmentCreatePage from "@/components/Schedule/Appointments/AppointmentCreatePage";
+import AppointmentDetailsPage from "@/components/Schedule/Appointments/AppointmentDetailsPage";
+import AppointmentTokenPage from "@/components/Schedule/Appointments/AppointmentTokenPage";
+import AppointmentsPage from "@/components/Schedule/Appointments/AppointmentsPage";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
-/**
- * TODO: temp. hack to ensure that the user has a home facility until facility switcher is merged.
- */
-export const HomeFacilityWrapper = ({
-  children,
-  user,
-}: {
-  children: ReactNode;
-  user?: { home_facility_object?: FacilityModel };
-}) => {
+const HomeFacilityRedirect = ({ suffix }: { suffix: string }) => {
   const authUser = useAuthUser();
-  const resolvedUser = user ?? authUser;
+  const facilityId = authUser.home_facility!;
 
-  if (!resolvedUser.home_facility_object) {
-    return (
-      <ErrorPage
-        forError="CUSTOM_ERROR"
-        title="No Home Facility"
-        message="You need to be linked to a home facility to use this feature"
-      />
-    );
-  }
-
-  return children;
+  return <Redirect to={`/facility/${facilityId}${suffix}`} />;
 };
 
 const ScheduleRoutes: AppRoutes = {
   // Appointments
-  "/appointments": () => (
-    <HomeFacilityWrapper>
-      <AppointmentsPage />
-    </HomeFacilityWrapper>
+  "/appointments": () => <HomeFacilityRedirect suffix="/appointments" />,
+  "/facility/:facilityId/appointments": ({ facilityId }) => (
+    <AppointmentsPage facilityId={facilityId} />
   ),
 
-  "/facility/:facilityId/patient/:id/appointments/create": ({
+  "/facility/:facilityId/patient/:patientId/book-appointment": ({
     facilityId,
-    id,
+    patientId,
+  }) => <AppointmentCreatePage facilityId={facilityId} patientId={patientId} />,
+
+  "/facility/:facilityId/patient/:patientId/appointments/:appointmentId": ({
+    facilityId,
+    appointmentId,
   }) => (
-    <HomeFacilityWrapper>
-      <AppointmentCreatePage facilityId={facilityId} patientId={id} />
-    </HomeFacilityWrapper>
+    <AppointmentDetailsPage
+      facilityId={facilityId}
+      appointmentId={appointmentId}
+    />
   ),
 
-  "/facility/:facilityId/patient/:patientId/appointment/:appointmentId/token":
+  "/facility/:facilityId/patient/:patientId/appointments/:appointmentId/token":
     ({ facilityId, appointmentId }) => (
-      <HomeFacilityWrapper>
-        <AppointmentTokenPage
-          facilityId={facilityId}
-          appointmentId={appointmentId}
-        />
-      </HomeFacilityWrapper>
+      <AppointmentTokenPage
+        facilityId={facilityId}
+        appointmentId={appointmentId}
+      />
     ),
 };
 

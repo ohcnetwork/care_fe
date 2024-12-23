@@ -14,8 +14,6 @@ import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
 
-import OTPPatientRouter from "./OTPPatientRouter";
-
 const LicensesPage = lazy(() => import("@/components/Licenses/LicensesPage"));
 
 export const routes = {
@@ -75,5 +73,5 @@ export const routes = {
 };
 
 export default function SessionRouter() {
-  return useRoutes(routes) || <OTPPatientRouter />;
+  return useRoutes(routes) || <Login />;
 }

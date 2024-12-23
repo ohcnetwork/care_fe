@@ -8,6 +8,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
   INavItem,
   SidebarShrinkContext,
   ToggleShrink,
@@ -19,25 +27,25 @@ import {
 
 import useActiveLink from "@/hooks/useActiveLink";
 
+import { OTPPatientUserContext } from "@/Routers/OTPPatientRouter";
 import { classNames } from "@/Utils/utils";
+import { AppointmentPatient } from "@/pages/Patient/Utils";
+
+import OTPPatientSidebarUserCard from "./OTPPatientSidebarUserCard";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/care_logo_mark.svg";
 
-const GetNavItems = () => {
+const GetNavItems = (externalId: string | undefined) => {
   const { t } = useTranslation();
   const BaseNavItems: INavItem[] = [
     { text: t("appointments"), to: "/patient/home", icon: "d-patient" },
-    { text: t("lab_tests"), to: "/patient/lab_tests", icon: "d-patient" },
-    { text: t("abha"), to: "/patient/abha", icon: "d-folder" },
     {
       text: t("medical_records"),
-      to: "/patient/medical_records",
+      to: `/patient/${externalId}`,
       icon: "d-book-open",
     },
-    { text: t("my_doctors"), to: "/patient/doctors", icon: "d-book-open" },
-    { text: t("my_profile"), to: "/patient/profile", icon: "d-people" },
   ];
   return BaseNavItems;
 };
@@ -88,12 +96,23 @@ export const OTPPatientStatelessSidebar = ({
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
 
-  const NavItems = GetNavItems();
+  const { t } = useTranslation();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
+  const {
+    users,
+    selectedUser,
+    setSelectedUser,
+  }: {
+    users?: AppointmentPatient[] | undefined;
+    selectedUser: AppointmentPatient | null;
+    setSelectedUser: (user: AppointmentPatient) => void;
+  } = useContext(OTPPatientUserContext);
+
+  const NavItems = GetNavItems(selectedUser?.id);
 
   const updateIndicator = () => {
     if (!indicatorRef.current) return;
@@ -174,6 +193,56 @@ export const OTPPatientStatelessSidebar = ({
         )}
       </div>
       <div className="relative mt-4 flex h-full flex-col justify-between">
+        <div
+          className={classNames(
+            "mx-2 mb-2 flex flex-wrap",
+            shrinked ? "flex-row" : "flex-col",
+          )}
+        >
+          <Select
+            disabled={users?.length === 0}
+            value={users ? selectedUser?.id : "Book "}
+            onValueChange={(value) => {
+              const user = users?.find((user) => user.id === value);
+              if (user) {
+                setSelectedUser(user);
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue
+                asChild
+                placeholder={
+                  !shrinked &&
+                  (users?.length === 0 ? t("no_patients") : t("select_patient"))
+                }
+              >
+                <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
+                  {!shrinked && (
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="font-semibold">
+                        {selectedUser?.name && selectedUser?.name.length > 8
+                          ? selectedUser?.name.slice(0, 8) + "..."
+                          : selectedUser?.name}
+                      </span>
+                      <span className="text-xs text-secondary-600">
+                        {t("switch_patient")}
+                      </span>
+                    </div>
+                  )}
+                  <CareIcon icon="l-users-alt" className="h-4 self-center" />
+                </div>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {users?.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
@@ -197,6 +266,7 @@ export const OTPPatientStatelessSidebar = ({
           })}
         </div>
         <div className="hidden md:block md:flex-1" />
+        <OTPPatientSidebarUserCard shrinked={shrinked} />
       </div>
     </nav>
   );

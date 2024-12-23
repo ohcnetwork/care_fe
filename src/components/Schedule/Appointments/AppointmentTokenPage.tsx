@@ -60,6 +60,7 @@ export default function AppointmentTokenPage(props: Props) {
             />
           </div>
           <div className="flex justify-end">
+            {/* TODO: add download as image/pdf/etc */}
             <Button variant="outline" onClick={print}>
               <CareIcon icon="l-print" className="text-lg mr-2" />
               <span>Print Token</span>

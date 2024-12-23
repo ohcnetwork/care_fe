@@ -30,7 +30,7 @@ import { ScheduleAvailability } from "@/components/Schedule/types";
 import { UserModel } from "@/components/Users/models";
 
 import query from "@/Utils/request/query";
-import { formatTimeShort, getMonthStartAndEnd } from "@/Utils/utils";
+import { formatTimeShort } from "@/Utils/utils";
 
 type Props = {
   userData: UserModel;
@@ -48,48 +48,34 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }
   }, [facilityId]);
 
-  const monthRange = getMonthStartAndEnd(month);
-
   const templatesQuery = useQuery({
-    queryKey: [
-      "user-availability-templates",
-      user.username,
-      monthRange.start,
-      monthRange.end,
-    ],
+    queryKey: ["user-availability-templates", user.username],
     queryFn: query(ScheduleAPIs.templates.list, {
       pathParams: {
         facility_id: facilityId!,
       },
       queryParams: {
-        resource: user.external_id,
         resource_type: "user",
+        resource: user.external_id,
       },
     }),
     enabled: !!facilityId,
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: [
-      "user-availability-exceptions",
-      user.username,
-      monthRange.start,
-      monthRange.end,
-    ],
+    queryKey: ["user-availability-exceptions", user.username],
     queryFn: query(ScheduleAPIs.exceptions.list, {
       pathParams: {
         facility_id: facilityId!,
       },
       queryParams: {
-        doctor_username: user.username,
-        date_from: monthRange.start.toISOString().split("T")[0],
-        date_to: monthRange.end.toISOString().split("T")[0],
+        resource_type: "user",
+        resource: user.external_id,
       },
     }),
   });
 
-  if (!templatesQuery.data) {
-    // TODO: also check exceptionsQuery.data
+  if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
 
@@ -188,7 +174,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
 
                 <ScrollArea className="h-[22rem]">
                   {templates.map((template) => (
-                    <div className="border-t pt-3 mt-3">
+                    <div key={template.id} className="border-t pt-3 mt-3">
                       <div className="flex items-center">
                         <ColoredIndicator
                           className="mr-2 size-3 rounded"
@@ -202,12 +188,13 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                       <div className="pl-5 py-2 space-y-4">
                         {template.availabilities.map(
                           ({
+                            id,
                             name,
                             slot_type,
                             availability,
                             slot_size_in_minutes,
                           }) => (
-                            <div>
+                            <div key={id}>
                               <h4 className="font-medium text-base">{name}</h4>
                               <p className="text-sm text-gray-600">
                                 <span>{slot_type}</span>
@@ -294,7 +281,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     ? undefined
                     : exceptionsQuery.data?.results
                 }
-                onRefresh={exceptionsQuery.refetch}
+                user={user}
               />
             )}
 

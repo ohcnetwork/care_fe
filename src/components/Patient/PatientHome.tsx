@@ -193,7 +193,7 @@ export const PatientHome = (props: {
         <>
           <Button asChild variant="primary">
             <Link
-              href={`/facility/${facilityId}/patient/${id}/appointments/create`}
+              href={`/facility/${facilityId}/patient/${id}/book-appointment`}
             >
               Doctor Consultation
             </Link>

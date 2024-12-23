@@ -62,6 +62,19 @@ export default function OTP({
       pin: "",
     },
   });
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
+
+  if (
+    Object.keys(tokenData).length > 0 &&
+    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+  ) {
+    navigate(
+      `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+    );
+  }
   const validate = (phoneNumber: string) => {
     let errors = "";
 

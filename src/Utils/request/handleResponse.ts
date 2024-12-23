@@ -15,8 +15,7 @@ export default function handleResponse(
 
   // 404 Not Found
   if (res.status === 404) {
-    // TODO: Remove this after testing
-    // notify?.Error({ msg: "Not Found" });
+    notify?.Error({ msg: "Not Found" });
     return;
   }
 
