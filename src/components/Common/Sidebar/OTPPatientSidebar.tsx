@@ -37,13 +37,24 @@ export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/care_logo_mark.svg";
 
-const GetNavItems = (externalId: string | undefined) => {
+const GetNavItems = (selectedUser: AppointmentPatient | null) => {
   const { t } = useTranslation();
+  const { state, district, ward, local_body } = selectedUser || {};
+  const paramString =
+    (!state ? `state=${state}&` : "") +
+    (!district ? `district=${district}&` : "") +
+    (ward ? `ward=${ward}&` : "") +
+    (local_body ? `local_body=${local_body}` : "");
   const BaseNavItems: INavItem[] = [
     { text: t("appointments"), to: "/patient/home", icon: "d-patient" },
     {
+      text: t("nearby_facilities"),
+      to: `/facilities/?${paramString}`,
+      icon: "d-patient",
+    },
+    {
       text: t("medical_records"),
-      to: `/patient/${externalId}`,
+      to: `/patient/${selectedUser?.id}`,
       icon: "d-book-open",
     },
   ];
@@ -112,7 +123,7 @@ export const OTPPatientStatelessSidebar = ({
     setSelectedUser: (user: AppointmentPatient) => void;
   } = useContext(OTPPatientUserContext);
 
-  const NavItems = GetNavItems(selectedUser?.id);
+  const NavItems = GetNavItems(selectedUser);
 
   const updateIndicator = () => {
     if (!indicatorRef.current) return;

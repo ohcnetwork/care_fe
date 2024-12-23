@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
@@ -155,8 +154,10 @@ const Login = (props: { forgot?: boolean }) => {
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        navigate("/patient/home");
         Notification.Success({ msg: t("verify_otp_success_login") });
+        setTimeout(() => {
+          window.location.href = "/patient/home";
+        }, 200);
       }
     },
     onError: (error: any) => {

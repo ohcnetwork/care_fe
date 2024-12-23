@@ -386,7 +386,7 @@ export default function AppointmentCreatePage(props: Props) {
   );
 }
 
-const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
+export const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
   const result: {
     availability: SlotAvailability["availability"];
     slots: Omit<SlotAvailability, "availability">[];

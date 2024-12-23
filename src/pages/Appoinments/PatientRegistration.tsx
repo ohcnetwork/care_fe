@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -78,6 +78,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const [ageInputType, setAgeInputType] = useState<"age" | "date_of_birth">(
     "date_of_birth",
   );
+
+  const queryClient = useQueryClient();
 
   const { publish } = usePubSub();
 
@@ -164,7 +166,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       })(body),
     onSuccess: (data: Appointment) => {
       Notification.Success({ msg: t("appointment_created_success") });
-      navigate(`/facility/${props.facilityId}/appointments/${data.id}/success`);
+      queryClient.invalidateQueries({
+        queryKey: ["patients", tokenData.phoneNumber],
+      });
+      setTimeout(() => {
+        navigate(
+          `/facility/${props.facilityId}/appointments/${data.id}/success`,
+          { replace: true },
+        );
+      }, 100);
     },
     onError: (error) => {
       Notification.Error({

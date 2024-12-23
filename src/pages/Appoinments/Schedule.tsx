@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
+import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/AppointmentCreatePage";
 import { SlotAvailability } from "@/components/Schedule/types";
 
 import { CarePatientTokenKey } from "@/common/constants";
@@ -140,37 +141,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const user = userData.data;
 
-  const slotsData = slotsQuery.data?.results;
-  const morningSlots = slotsData?.filter((slot) => {
-    const slotTime = parseISO(slot.start_datetime);
-    return slotTime.getHours() < 12;
-  });
-
-  const eveningSlots = slotsData?.filter((slot) => {
-    const slotTime = parseISO(slot.start_datetime);
-    return slotTime.getHours() >= 12;
-  });
-
-  const getSlotButtons = (slots: SlotAvailability[] | undefined) => {
-    if (!slots) return [];
-    return slots.map((slot) => (
-      <Button
-        key={slot.id}
-        variant={selectedSlot?.id === slot.id ? "primary" : "outline"}
-        onClick={() => {
-          if (selectedSlot?.id === slot.id) {
-            setSelectedSlot(undefined);
-          } else {
-            setSelectedSlot(slot);
-          }
-        }}
-        disabled={!slot.availability.tokens_per_slot}
-      >
-        {format(slot.start_datetime, "HH:mm a")}
-      </Button>
-    ));
-  };
-
   return (
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-8">
@@ -182,7 +152,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           >
             <Link href={`/facility/${facilityId}`}>
               <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-              <span className="text-sm underline">Back</span>
+              <span className="text-sm underline">{t("back")}</span>
             </Link>
           </Button>
         </div>
@@ -227,15 +197,15 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <div className="flex-1 mx-2">
             <div className="flex flex-col gap-6">
               <span className="text-base font-semibold">
-                Book an Appointment with{" "}
+                {t("book_an_appointment_with")}{" "}
                 {user.user_type === "Doctor"
                   ? `Dr. ${user.first_name} ${user.last_name}`
                   : `${user.first_name} ${user.last_name}`}
               </span>
               <div>
-                <Label className="mb-2">Reason for visit</Label>
+                <Label className="mb-2">{t("reason_for_visit")}</Label>
                 <Textarea
-                  placeholder="Type the reason for visit"
+                  placeholder={t("reason_for_visit_placeholder")}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                 />
@@ -247,38 +217,68 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 highlightToday={false}
               />
               <div className="space-y-6">
-                {slotsData &&
-                ((morningSlots && morningSlots.length > 0) ||
-                  (eveningSlots && eveningSlots.length > 0)) ? (
-                  <div>
-                    <span className="mb-6 text-xs">
-                      {t("available_time_slots")}
-                    </span>
-                    <div className="flex flex-col gap-4">
-                      {morningSlots && morningSlots.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {t("morning_slots")}: {morningSlots?.length}{" "}
-                            {morningSlots.length > 1 ? "Slots" : "Slot"}
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {getSlotButtons(morningSlots)}
-                          </div>
+                {slotsQuery.data?.results &&
+                slotsQuery.data.results.length > 0 ? (
+                  groupSlotsByAvailability(slotsQuery.data.results).map(
+                    ({ availability, slots }) => (
+                      <div key={availability.name}>
+                        <h4 className="mb-3">{availability.name}</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {slots.map((slot) => {
+                            const percentage =
+                              slot.allocated / availability.tokens_per_slot;
+
+                            return (
+                              <Button
+                                key={slot.id}
+                                size="default"
+                                variant={
+                                  selectedSlot?.id === slot.id
+                                    ? "outline_primary"
+                                    : "outline"
+                                }
+                                onClick={() => {
+                                  if (selectedSlot?.id === slot.id) {
+                                    setSelectedSlot(undefined);
+                                  } else {
+                                    setSelectedSlot({
+                                      ...slot,
+                                      availability: availability,
+                                    });
+                                  }
+                                }}
+                                disabled={
+                                  slot.allocated ===
+                                  availability.tokens_per_slot
+                                }
+                                className="flex flex-col items-center group"
+                              >
+                                <span className="font-semibold">
+                                  {format(slot.start_datetime, "HH:mm")}
+                                </span>
+                                <span
+                                  className={cn(
+                                    "text-xs group-hover:text-inherit",
+                                    percentage >= 1
+                                      ? "text-gray-400"
+                                      : percentage >= 0.8
+                                        ? "text-red-600"
+                                        : percentage >= 0.6
+                                          ? "text-yellow-600"
+                                          : "text-green-600",
+                                  )}
+                                >
+                                  {availability.tokens_per_slot -
+                                    slot.allocated}{" "}
+                                  left
+                                </span>
+                              </Button>
+                            );
+                          })}
                         </div>
-                      )}
-                      {eveningSlots && eveningSlots.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {t("evening_slots")}: {eveningSlots.length}{" "}
-                            {eveningSlots.length > 1 ? "Slots" : "Slot"}
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {getSlotButtons(eveningSlots)}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    ),
+                  )
                 ) : (
                   <div>{t("no_slots_available")}</div>
                 )}
@@ -304,7 +304,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               }}
             >
               <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-              Continue
+              {t("continue")}
               <CareIcon icon="l-arrow-right" className="h-4 w-4" />
             </Button>
           </div>
