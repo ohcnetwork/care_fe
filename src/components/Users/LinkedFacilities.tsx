@@ -213,7 +213,10 @@ export default function LinkedFacilities({
                 </div>
               )}
             </div>
-            <DropdownMenuTrigger id="linked-facility-settings">
+            <DropdownMenuTrigger
+              disabled={authUser.user_type == "Volunteer"}
+              id="linked-facility-settings"
+            >
               <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 min-h-16">
                 <CareIcon icon="l-setting" className="text-xl" />
               </div>
@@ -274,6 +277,7 @@ export default function LinkedFacilities({
                 onClick={() =>
                   handleOnClick("clear_home_facility", homeFacility)
                 }
+                disabled={authUser.user_type == "Volunteer"}
                 title={t("clear_home_facility")}
                 aria-label={t("clear_home_facility")}
               >
