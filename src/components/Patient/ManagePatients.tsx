@@ -894,9 +894,9 @@ export const PatientManager = () => {
                       parse: (data) => {
                         try {
                           return preventDuplicatePatientsDuetoPolicyId(data);
-                        } catch (error) {
+                        } catch (e) {
                           Notification.Warn({
-                            msg: error,
+                            msg: e,
                           });
                           return "";
                         }

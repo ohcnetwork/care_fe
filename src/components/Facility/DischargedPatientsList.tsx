@@ -437,10 +437,12 @@ const DischargedPatientsList = ({
                       parse: (data) => {
                         try {
                           return preventDuplicatePatientsDuetoPolicyId(data);
-                        } catch (error) {
-                          Notification.Warn({
-                            msg: error,
-                          });
+                        } catch (e) {
+                          if (e instanceof Error) {
+                            Notification.Warn({
+                              msg: e.message,
+                            });
+                          }
                           return "";
                         }
                       },
