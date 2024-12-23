@@ -127,7 +127,7 @@ export default function ShiftingTable(props: {
                 )}
 
                 <div className="col-span-1 flex mt-1 flex-col text-left">
-                  <div className="3xl:flex-row  flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
+                  <div className="3xl:flex-row flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
                     <dt title={t("shifting_status")}>
                       {shift.status === "COMPLETED" ? (
                         <Badge
@@ -138,7 +138,7 @@ export default function ShiftingTable(props: {
                           <dd>{shift.status}</dd>
                         </Badge>
                       ) : (
-                        <Badge variant="warning">
+                        <Badge variant="warning_outline">
                           <CareIcon icon="l-truck" className="mr-2" />
                           <dd>{shift.status}</dd>
                         </Badge>

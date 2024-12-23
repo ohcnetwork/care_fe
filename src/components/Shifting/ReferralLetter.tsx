@@ -37,7 +37,7 @@ export const ReferralLetter = ({ id }: ReferralLetterProps) => {
 
   return (
     <PrintPreview title={t("Patient Referral Letter")}>
-      <Card className="shadow-none border-none h-full ">
+      <Card className="shadow-none border-none">
         <CardHeader className="flex flex-col items-center space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
           <CardTitle className="mx-auto my-auto text-lg font-bold sm:text-2xl">
             {t("referral_letter")}
