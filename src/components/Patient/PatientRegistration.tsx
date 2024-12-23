@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,8 +45,8 @@ import { validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import useMutation from "@/Utils/request/useMutation";
 import {
   dateQueryString,
   getPincodeDetails,
@@ -135,38 +135,35 @@ export default function PatientRegistration(
     },
   };
 
-  const createPatientMutation = useMutation(routes.addPatient, {
-    body: { ...mutationData, facility: facilityId, ward_old: undefined },
-    onResponse: (resp) => {
-      if (resp.error) {
-        Notification.Error({
-          msg: t("patient_registration_error"),
-        });
-      } else {
-        Notification.Success({
-          msg: t("patient_registration_success"),
-        });
-        navigate(
-          `/facility/${facilityId}/patient/${resp.data?.id}/consultation`,
-        );
-      }
+  const createPatientMutation = useMutation({
+    mutationFn: mutate(routes.addPatient),
+    onSuccess: (resp: PatientModel) => {
+      Notification.Success({
+        msg: t("patient_registration_success"),
+      });
+      navigate(`/facility/${facilityId}/patient/${resp.id}/consultation`);
+    },
+    onError: () => {
+      Notification.Error({
+        msg: t("patient_registration_error"),
+      });
     },
   });
 
-  const updatePatientMutation = useMutation(routes.updatePatient, {
-    pathParams: { id: patientId || "" },
-    body: { ...mutationData, ward_old: undefined },
-    onResponse: (data) => {
-      if (data.error) {
-        Notification.Error({
-          msg: t("patient_update_error"),
-        });
-      } else {
-        Notification.Success({
-          msg: t("patient_update_success"),
-        });
-        goBack();
-      }
+  const updatePatientMutation = useMutation({
+    mutationFn: mutate(routes.updatePatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    onSuccess: () => {
+      Notification.Success({
+        msg: t("patient_update_success"),
+      });
+      goBack();
+    },
+    onError: () => {
+      Notification.Error({
+        msg: t("patient_update_error"),
+      });
     },
   });
 
@@ -327,7 +324,10 @@ export default function PatientRegistration(
     ? t("add_details_of_patient")
     : t("update_patient_details");
 
-  const errors = { ...feErrors, ...createPatientMutation.error };
+  const errors = {
+    ...feErrors,
+    ...(createPatientMutation.error as unknown as string[]),
+  };
 
   const fieldProps = (field: keyof typeof form) => ({
     value: form[field] as string,
@@ -404,8 +404,12 @@ export default function PatientRegistration(
       });
     } else {
       patientId
-        ? updatePatientMutation.mutate()
-        : createPatientMutation.mutate();
+        ? updatePatientMutation.mutate({ ...mutationData, ward_old: undefined })
+        : createPatientMutation.mutate({
+            ...mutationData,
+            facility: facilityId,
+            ward_old: undefined,
+          });
     }
   };
 
@@ -867,11 +871,7 @@ export default function PatientRegistration(
                     </InputWithError>
                   </div>
                   <div>
-                    <InputWithError
-                      label={t("ward")}
-                      errors={errors["ward"]}
-                      required
-                    >
+                    <InputWithError label={t("ward")} errors={errors["ward"]}>
                       <Autocomplete
                         options={
                           wardsQuery.data?.results.map((ward) => ({
@@ -1030,8 +1030,8 @@ export default function PatientRegistration(
               variant={"primary"}
               disabled={
                 patientId
-                  ? updatePatientMutation.isProcessing
-                  : createPatientMutation.isProcessing
+                  ? updatePatientMutation.isPending
+                  : createPatientMutation.isPending
               }
             >
               {patientId ? t("save") : t("save_and_continue")}
