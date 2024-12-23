@@ -4,6 +4,7 @@ import { Link } from "raviger";
 import { useState } from "react";
 
 import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,7 +191,8 @@ export const Authenticate = () => {
                       className="w-full mt-4"
                       variant="primary"
                     >
-                      Verify
+                      Verify{" "}
+                      <CareIcon icon="l-angle-right" className="ml-2 text-sm" />
                     </Button>
                     <p className="text-sm text-red-500 font-base mt-3">
                       Dont share this verification code with anyone!
@@ -200,10 +202,10 @@ export const Authenticate = () => {
                       <p className="text-sm text-gray-500 font-base">
                         Can't you access your code?
                       </p>
-                      <ul className="mt-1 w-full inline-flex flex-wrap justify-center items-center gap-1">
+                      <ul className="list-disc mt-2 w-full inline-flex flex-wrap justify-center items-center gap-1">
                         {accesWays.map((way: string) => (
                           <li
-                            className="text-sm font-medium text-primary-500"
+                            className="text-sm font-medium text-primary-500 hover:underline cursor-pointer mx-2"
                             value={way}
                             onClick={() => handleRedirect(way)}
                           >
@@ -233,7 +235,8 @@ export const Authenticate = () => {
                       className="w-full mt-4"
                       variant="primary"
                     >
-                      Verify
+                      Verify{" "}
+                      <CareIcon icon="l-angle-right" className="ml-2 text-sm" />
                     </Button>
                     <p className="text-sm text-rose-500 font-base mt-3">
                       Dont share this verification code with anyone!

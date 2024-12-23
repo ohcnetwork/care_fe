@@ -1,6 +1,7 @@
 import { useRoutes } from "raviger";
 import { lazy } from "react";
 
+import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
@@ -63,6 +64,7 @@ export const routes = {
     />
   ),
   "/login": () => <Login />,
+  "/authenticate": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (
     <ResetPassword token={token} />
