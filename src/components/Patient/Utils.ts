@@ -1,11 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { PatientNotesModel } from "@/components/Facility/models";
 import { PatientModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-
-import { PatientNotesModel } from "../Facility/models";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (

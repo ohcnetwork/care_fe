@@ -24,7 +24,7 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import { callApi } from "@/Utils/request/query";
+import query from "@/Utils/request/query";
 import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
 interface ConsultationDoctorNotesProps {
@@ -85,14 +85,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const { data } = useQuery({
     queryKey: [patientId],
-    queryFn: async ({ signal }) => {
-      const response = await callApi(routes.getPatient, {
-        pathParams: { patientId },
-        queryParams: { thread, offset: thread },
-        signal,
-      });
-      return response;
-    },
+    queryFn: query(routes.getPatient, {
+      pathParams: { patientId },
+      queryParams: { thread, offset: thread },
+    }),
   });
 
   useEffect(() => {

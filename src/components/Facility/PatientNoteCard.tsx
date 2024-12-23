@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -20,8 +20,8 @@ import { USER_TYPES_MAP } from "@/common/constants";
 
 import { Error, Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import { callApi } from "@/Utils/request/query";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import {
   classNames,
   formatDateTime,
@@ -49,11 +49,19 @@ const PatientNoteCard = ({
 
   const { data, refetch } = useQuery({
     queryKey: [patientId, note.id],
-    queryFn: async () => {
-      const response = await callApi(routes.getPatientNoteEditHistory, {
-        pathParams: { patientId, noteId: note.id },
-      });
-      return response;
+    queryFn: query(routes.getPatientNoteEditHistory, {
+      pathParams: { patientId, noteId: note.id },
+    }),
+  });
+
+  const { mutate: updateNote } = useMutation({
+    mutationFn: mutate(routes.updatePatientNote, {
+      pathParams: { patientId, noteId: note.id },
+    }),
+    onSuccess: () => {
+      Success({ msg: "Note updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["notes", patientId] });
+      setIsEditing(false);
     },
   });
 
@@ -72,15 +80,7 @@ const PatientNoteCard = ({
       return;
     }
 
-    const { res } = await request(routes.updatePatientNote, {
-      pathParams: { patientId, noteId: note.id },
-      body: payload,
-    });
-    if (res?.status === 200) {
-      Success({ msg: "Note updated successfully" });
-      queryClient.invalidateQueries({ queryKey: ["notes", patientId] });
-      setIsEditing(false);
-    }
+    updateNote(payload);
   };
 
   useEffect(() => {
