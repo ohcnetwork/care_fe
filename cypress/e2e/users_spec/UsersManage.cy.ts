@@ -59,7 +59,7 @@ describe("Manage User", () => {
     const modifiedLastName = "Districto";
     const modifiedRawDOB = "11081999";
     const modifiedGender = "Female";
-    const modifiedFormattedDOB = cy.formatDate(modifiedRawDOB);
+    const modifiedFormattedDOB = "11/08/1999";
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
