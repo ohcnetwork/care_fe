@@ -38,6 +38,8 @@ export default function UserHome(props: UserHomeProps) {
   if (!username) {
     username = authUser.username;
   }
+  const loggedInUser = username === authUser.username;
+  const urlPrefix = loggedInUser ? "/user" : `/users/${username}`;
 
   const { loading, refetch: refetchUserDetails } = useTanStackQueryInstead(
     routes.getUserDetails,
@@ -96,7 +98,11 @@ export default function UserHome(props: UserHomeProps) {
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={{ [username]: { name: username } }}
+        crumbsReplacements={
+          loggedInUser
+            ? { [username]: { name: "Profile" } }
+            : { [username]: { name: username } }
+        }
         focusOnLoad={true}
         backUrl="/users"
         hideTitleOnPage
@@ -123,7 +129,7 @@ export default function UserHome(props: UserHomeProps) {
                                 ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
                                 : "text-secondary-700 hover:text-secondary-700",
                             )}
-                            href={`/users/${username}/${p.toLocaleLowerCase()}`}
+                            href={`${urlPrefix}/${p.toLocaleLowerCase()}`}
                           >
                             <div className="px-3 py-1.5" id={p.toLowerCase()}>
                               {t(`USERMANAGEMENT_TAB__${p}`)}
