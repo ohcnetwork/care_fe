@@ -68,18 +68,17 @@ export const NoticeBoard = () => {
     ));
   };
 
-  const Message: React.FC<{ message: string; classes: string }> = ({
+  const Message: React.FC<{ message: string; className: string }> = ({
     message,
-    classes,
+    className,
   }) => {
     const formattedMessage = formatMessage(message);
-    return <p className={classes}>{formattedMessage}</p>;
+    return <p className={className}>{formattedMessage}</p>;
   };
 
   const NoticeDialog: React.FC<{ notice: NotificationData }> = ({ notice }) => {
     return (
       <>
-        {" "}
         <DialogHeader>
           <div className="flex justify-between w-full  items-center mb-4">
             <CareIcon
@@ -93,10 +92,9 @@ export const NoticeBoard = () => {
           id="notification-message"
         >
           <h1 className="font-semibold text-lg text-black mb-1">
-            {" "}
             {notice.title ? notice.title : notice.message?.split("\n")[0]}
           </h1>
-          <Message classes="" message={notice.message} />
+          <Message className="" message={notice.message} />
         </div>
         <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-200 rounded-lg mt-4">
           <UserInfo {...notice} />
@@ -119,10 +117,9 @@ export const NoticeBoard = () => {
               id="notification-message"
             >
               <h1 className="font-semibold text-lg text-black mb-1 truncate hover:text-clip">
-                {" "}
                 {item.title ? item.title : item.message?.split("\n")[0]}
               </h1>
-              <Message classes="line-clamp-5" message={item.message} />
+              <Message className="line-clamp-5" message={item.message} />
             </div>
             <div className="h-auto md:h-1/4 flex flex-col md:flex-row justify-between items-center bg-gray-200 p-3 md:py-1 space-y-3 md:space-y-0">
               <UserInfo {...item} />
