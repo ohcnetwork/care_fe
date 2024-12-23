@@ -6,10 +6,9 @@ import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
 
 import { Button, ButtonProps } from "../ui/button";
 
-const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
-  authorizeFor = () => true,
-  ...props
-}) => {
+export const AuthorizedButton: React.FC<
+  AuthorizedElementProps & ButtonProps
+> = ({ authorizeFor = () => true, ...props }) => {
   return (
     <AuthorizedChild authorizeFor={authorizeFor}>
       {({ isAuthorized }) => (
@@ -20,5 +19,3 @@ const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
     </AuthorizedChild>
   );
 };
-
-export default AuthorizedButton;
