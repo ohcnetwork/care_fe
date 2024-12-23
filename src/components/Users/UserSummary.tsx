@@ -15,6 +15,7 @@ import {
   UserProfessionalInfoView,
 } from "@/components/Users/UserEditDetails";
 import UserResetPassword from "@/components/Users/UserResetPassword";
+import UserSoftwareUpdate from "@/components/Users/UserSoftwareUpdate";
 import {
   BasicInfoDetails,
   ContactInfoDetails,
@@ -200,12 +201,20 @@ export default function UserSummaryTab({
           />
         )}
         {authUser.username === userData.username && (
-          <UserColumns
-            heading={t("language_selection")}
-            note={t("set_your_local_language")}
-            Child={LanguageSelector}
-            childProps={userColumnsData}
-          />
+          <>
+            <UserColumns
+              heading={t("language_selection")}
+              note={t("set_your_local_language")}
+              Child={LanguageSelector}
+              childProps={userColumnsData}
+            />
+            <UserColumns
+              heading={t("software_update")}
+              note={t("check_for_available_update")}
+              Child={UserSoftwareUpdate}
+              childProps={userColumnsData}
+            />
+          </>
         )}
         {deletePermitted && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
