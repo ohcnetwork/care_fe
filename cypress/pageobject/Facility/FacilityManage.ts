@@ -10,7 +10,7 @@ class FacilityManage {
   uploadCoverImage(fileName: string) {
     cy.get("#upload-cover-image")
       .selectFile(`cypress/fixtures/${fileName}`, { force: true })
-      .wait(100); // Adjust the wait time as needed
+      .wait(100);
   }
 
   clickSaveCoverImage() {

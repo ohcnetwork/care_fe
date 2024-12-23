@@ -6,12 +6,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent, TooltipProvider } from "@/components/ui/tooltip";
 
 import {
   ShrinkedSidebarItem,
@@ -59,7 +54,6 @@ const StatelessSidebar = ({
     { text: t("facilities"), to: "/facility", icon: "d-hospital" },
     { text: t("patients"), to: "/patients", icon: "d-patient" },
     { text: t("assets"), to: "/assets", icon: "d-folder" },
-    { text: t("sample_test"), to: "/sample", icon: "d-microscope" },
     { text: t("shifting"), to: "/shifting", icon: "d-ambulance" },
     { text: t("resource"), to: "/resource", icon: "d-book-open" },
     { text: t("users"), to: "/users", icon: "d-people" },
@@ -244,24 +238,19 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => {
   const { t } = useTranslation();
   return (
     <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
-              shrinked ? "mx-auto" : "mr-4"
-            } transition-all ease-in-out`}
-            onClick={toggle}
-          >
-            <CareIcon
-              icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
-              className="text-lg transition"
-            />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{shrinked ? t("expand_sidebar") : t("collapse_sidebar")}</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipComponent
+        content={shrinked ? t("expand_sidebar") : t("collapse_sidebar")}
+      >
+        <button
+          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${shrinked ? "mx-auto" : "mr-4"} transition-all ease-in-out`}
+          onClick={toggle}
+        >
+          <CareIcon
+            icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
+            className="text-lg transition"
+          />
+        </button>
+      </TooltipComponent>
     </TooltipProvider>
   );
 };

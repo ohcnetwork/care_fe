@@ -114,20 +114,25 @@ const AvatarEditModal = ({
   };
 
   const uploadAvatar = async () => {
-    if (!selectedFile) {
-      closeModal();
-      return;
-    }
+    try {
+      if (!selectedFile) {
+        closeModal();
+        return;
+      }
 
-    setIsProcessing(true);
-    setIsCaptureImgBeingUploaded(true);
-    await handleUpload(selectedFile, () => {
-      setSelectedFile(undefined);
-      setPreview(undefined);
-      setPreviewImage(null);
+      setIsProcessing(true);
+      setIsCaptureImgBeingUploaded(true);
+      await handleUpload(selectedFile, () => {
+        setSelectedFile(undefined);
+        setPreview(undefined);
+        setPreviewImage(null);
+        setIsCaptureImgBeingUploaded(false);
+        setIsProcessing(false);
+      });
+    } finally {
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
-    });
+    }
   };
 
   const deleteAvatar = async () => {

@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { formatDate } from "@/Utils/utils";
+
 import { UserModel } from "./models";
 
 interface UserViewDetailsProps {
@@ -77,11 +79,7 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
         <LabelValue
           id="date_of_birth"
           label={t("date_of_birth")}
-          value={
-            user.date_of_birth
-              ? new Date(user.date_of_birth).toLocaleDateString()
-              : null
-          }
+          value={user.date_of_birth ? formatDate(user.date_of_birth) : null}
         />
       </div>
     </div>

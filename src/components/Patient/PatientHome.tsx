@@ -2,8 +2,22 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
+import {
+  AssignedToObjectModel,
+  PatientModel,
+} from "@/components/Patient/models";
+import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -11,19 +25,15 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   OCCUPATION_TYPES,
-  SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useTanStackQueryInstead from "../../Utils/request/useQuery";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -32,15 +42,7 @@ import {
   isAntenatal,
   isPostPartum,
   relativeDate,
-} from "../../Utils/utils";
-import { Avatar } from "../Common/Avatar";
-import ButtonV2 from "../Common/ButtonV2";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import { SkillModel, UserBareMinimum } from "../Users/models";
-import { patientTabs } from "./PatientDetailsTab";
-import { isPatientMandatoryDataFilled } from "./Utils";
-import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -56,10 +58,6 @@ export const PatientHome = (props: {
 
   const authUser = useAuthUser();
   const { t } = useTranslation();
-  const [selectedStatus, _setSelectedStatus] = useState<{
-    status: number;
-    sample: SampleTestModel | null;
-  }>({ status: 0, sample: null });
 
   const [assignedVolunteer, setAssignedVolunteer] = useState<
     AssignedToObjectModel | undefined
@@ -69,7 +67,6 @@ export const PatientHome = (props: {
     setAssignedVolunteer(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     useState(false);
 
@@ -152,31 +149,6 @@ export const PatientHome = (props: {
     return `${first}, ${second} and ${rest.length} other skills...`;
   };
 
-  const handleApproval = async () => {
-    const { status, sample } = selectedStatus;
-    const sampleData = {
-      id: sample?.id,
-      status: status.toString(),
-      consultation: sample?.consultation,
-    };
-    const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-
-    await request(routes.patchSample, {
-      body: sampleData,
-      pathParams: {
-        id: sample?.id || "",
-      },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          Notification.Success({
-            msg: `Request ${statusName}`,
-          });
-        }
-        setShowAlertMessage(false);
-      },
-    });
-  };
-
   if (isLoading) {
     return <Loading />;
   }
@@ -216,15 +188,6 @@ export const PatientHome = (props: {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      <ConfirmDialog
-        title={t("send_sample_to_collection_centre_title")}
-        description={t("send_sample_to_collection_centre_description")}
-        show={showAlertMessage}
-        action={t("approve")}
-        onConfirm={() => handleApproval()}
-        onClose={() => setShowAlertMessage(false)}
-      />
-
       <div className="mt-3" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
@@ -487,6 +450,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                refetch={refetch}
               />
             )}
           </div>
