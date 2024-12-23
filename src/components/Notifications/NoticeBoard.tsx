@@ -18,16 +18,15 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName, relativeTime } from "@/Utils/utils";
 
 import { UserBareMinimum } from "../Users/models";
+import { useGetNotifications } from "./GetNotifications";
 import { NotificationData } from "./models";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
-
-  const { data, loading } = useTanStackQueryInstead(routes.getNotifications, {
+  const { data, loading } = useGetNotifications(routes.getNotifications, {
     query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
   });
 
