@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -35,13 +35,12 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     setReplyTo,
     reload,
   } = props;
-  const queryClient = useQueryClient();
 
   const consultationId = useSlug("consultation") ?? "";
 
   const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["notes"],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryKey: ["notes", state.patientId, thread, consultationId],
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await callApi(routes.getPatientNotes, {
         pathParams: { patientId: state.patientId! },
         queryParams: {
@@ -49,8 +48,8 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
           offset: pageParam,
           consultation: consultationId,
         },
+        signal,
       });
-      setReload?.(false);
       return {
         results: response?.results ?? [],
         nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
@@ -81,13 +80,6 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       }));
     }
   }, [data]);
-
-  useEffect(() => {
-    setReload?.(true);
-    queryClient.invalidateQueries({
-      queryKey: ["notes"],
-    });
-  }, [thread]);
 
   if (isLoading || reload) {
     return (

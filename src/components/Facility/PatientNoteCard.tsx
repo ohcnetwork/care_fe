@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { useState } from "react";
@@ -43,6 +44,7 @@ const PatientNoteCard = ({
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
   const authUser = useAuthUser();
+  const queryClient = useQueryClient();
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
@@ -74,6 +76,10 @@ const PatientNoteCard = ({
     });
     if (res?.status === 200) {
       Success({ msg: "Note updated successfully" });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", patientId],
+        exact: false,
+      });
       setIsEditing(false);
     }
   };

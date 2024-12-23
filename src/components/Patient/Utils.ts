@@ -26,13 +26,18 @@ export function isPatientMandatoryDataFilled(patient: PatientModel) {
 
 export const useAddPatientNote = (options: { patientId: string }) => {
   const queryClient = useQueryClient();
+  const { patientId } = options;
 
   return useMutation({
     mutationFn: mutate(routes.addPatientNote, {
-      pathParams: { patientId: options.patientId },
+      pathParams: { patientId },
     }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      console.log("here");
+      queryClient.invalidateQueries({
+        queryKey: ["notes", patientId],
+        exact: false,
+      });
       Notification.Success({ msg: "Note added successfully" });
       return data;
     },

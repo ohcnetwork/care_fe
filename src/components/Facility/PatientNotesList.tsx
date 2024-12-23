@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -27,16 +27,15 @@ interface PatientNotesProps {
 const PatientNotesList = (props: PatientNotesProps) => {
   const { state, setState, thread, setReplyTo, setReload, patientId, reload } =
     props;
-  const queryClient = useQueryClient();
 
   const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["notes"],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryKey: ["notes", patientId, thread],
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await callApi(routes.getPatientNotes, {
         pathParams: { patientId },
         queryParams: { thread, offset: pageParam },
+        signal,
       });
-      setReload(false);
 
       return {
         results: response?.results ?? [],
@@ -68,13 +67,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
       }));
     }
   }, [data]);
-
-  useEffect(() => {
-    setReload?.(true);
-    queryClient.invalidateQueries({
-      queryKey: ["notes"],
-    });
-  }, [thread]);
 
   if (isLoading || reload) {
     return (
