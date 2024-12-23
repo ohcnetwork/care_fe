@@ -15,10 +15,7 @@ import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
-import {
-  AssignedToObjectModel,
-  PatientModel,
-} from "@/components/Patient/models";
+import { AssignedToObjectModel } from "@/components/Patient/models";
 import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -45,6 +42,7 @@ import {
   isPostPartum,
   relativeDate,
 } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;

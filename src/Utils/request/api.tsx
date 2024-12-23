@@ -62,7 +62,7 @@ import {
   NotificationData,
   PNconfigData,
 } from "@/components/Notifications/models";
-import { DailyRoundsModel, PatientModel } from "@/components/Patient/models";
+import { DailyRoundsModel } from "@/components/Patient/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -89,6 +89,7 @@ import {
 } from "@/pages/Patient/Utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { Observation } from "@/types/emr/observation";
+import { PatientModel } from "@/types/emr/patient";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,

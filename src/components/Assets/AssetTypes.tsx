@@ -1,8 +1,9 @@
 import { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { BedModel } from "@/components/Facility/models";
-import { PatientModel } from "@/components/Patient/models";
 import { UserBareMinimum } from "@/components/Users/models";
+
+import { PatientModel } from "@/types/emr/patient";
 
 export enum AssetLocationType {
   OTHER = "OTHER",

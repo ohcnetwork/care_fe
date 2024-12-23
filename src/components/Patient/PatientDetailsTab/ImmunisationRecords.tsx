@@ -6,7 +6,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { PatientModel } from "@/components/Patient/models";
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -15,6 +14,7 @@ import { ADMIN_USER_TYPES } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import { formatDateTime } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 export const ImmunisationRecords = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;

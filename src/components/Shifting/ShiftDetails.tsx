@@ -15,7 +15,6 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { ConsultationModel } from "@/components/Facility/models";
-import { PatientModel } from "@/components/Patient/models";
 import CommentSection from "@/components/Shifting/ShiftingCommentsSection";
 
 import {
@@ -27,6 +26,7 @@ import {
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);

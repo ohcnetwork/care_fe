@@ -1,12 +1,11 @@
 import { format } from "date-fns";
 
-import { PatientModel } from "@/components/Patient/models";
-
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { PatientModel } from "@/types/emr/patient";
 
 interface ApacheParams {
   age: number;

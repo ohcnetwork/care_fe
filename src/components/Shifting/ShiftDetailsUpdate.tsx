@@ -21,7 +21,6 @@ import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
-import { PatientModel } from "@/components/Patient/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -43,6 +42,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 interface patientShiftProps {
   id: string;

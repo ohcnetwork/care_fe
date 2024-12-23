@@ -24,7 +24,6 @@ import {
   FILTER_BY_DIAGNOSES_KEYS,
 } from "@/components/Patient/DiagnosesFilter";
 import PatientFilter from "@/components/Patient/PatientFilter";
-import { PatientModel } from "@/components/Patient/models";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -41,6 +40,7 @@ import { parseOptionId } from "@/common/utils";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 const DischargedPatientsList = ({
   facility_external_id,

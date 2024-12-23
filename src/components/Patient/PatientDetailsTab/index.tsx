@@ -5,7 +5,8 @@ import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
 import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
-import { PatientModel } from "@/components/Patient/models";
+
+import { PatientModel } from "@/types/emr/patient";
 
 import { Appointments } from "./Appointments";
 import { ResourceRequests } from "./ResourceRequests";

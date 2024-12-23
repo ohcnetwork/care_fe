@@ -28,7 +28,6 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
-import { PatientModel } from "@/components/Patient/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -53,6 +52,7 @@ import {
   includesIgnoreCase,
   parsePhoneNumber,
 } from "@/Utils/utils";
+import { PatientModel, validatePatient } from "@/types/emr/patient";
 
 import Autocomplete from "../ui/autocomplete";
 import InputWithError from "../ui/input-with-error";
@@ -357,52 +357,8 @@ export default function PatientRegistration(
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors: Record<string, string[]> = {};
-    const requiredFields: Array<keyof typeof form> = [
-      "name",
-      "phone_number",
-      "emergency_phone_number",
-      "gender",
-      "blood_group",
-      ageDob === "dob" ? "date_of_birth" : "year_of_birth",
-      "pincode",
-      "nationality",
-      "address",
-      "permanent_address",
-    ];
-
-    if (form.nationality === "India") {
-      requiredFields.push("state", "district", "local_body");
-    }
-
-    requiredFields.forEach((field) => {
-      if (!form[field]) {
-        errors[field] = errors[field] || [];
-        errors[field].push(`This field is required`);
-      } else if (
-        ageDob === "dob" &&
-        field === "date_of_birth" &&
-        !/^(19[0-9]{2}|20[0-9]{2}|2100)-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/.test(
-          form[field],
-        )
-      ) {
-        errors[field] = errors[field] || [];
-        errors[field].push(t("invalid_date_format", { format: "DD-MM-YYYY" }));
-      } else if (
-        (field === "phone_number" || field === "emergency_phone_number") &&
-        form[field]?.length < 13
-      ) {
-        errors[field] = errors[field] || [];
-        errors[field].push(t("phone_number_min_error"));
-      }
-    });
-
-    if (Object.keys(errors).length > 0) {
-      setFeErrors(errors);
-      Notification.Error({
-        msg: t("please_fix_errors"),
-      });
-    } else {
+    const validate = validatePatient(form, ageDob === "dob");
+    if (typeof validate !== "object") {
       patientId
         ? updatePatientMutation.mutate({ ...mutationData, ward_old: undefined })
         : createPatientMutation.mutate({
@@ -410,6 +366,11 @@ export default function PatientRegistration(
             facility: facilityId,
             ward_old: undefined,
           });
+    } else {
+      Notification.Error({
+        msg: t("please_fix_errors"),
+      });
+      setFeErrors(validate);
     }
   };
 

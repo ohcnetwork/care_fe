@@ -23,7 +23,6 @@ import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
 import PatientNotesSlideover from "@/components/Facility/PatientNotesSlideover";
 import { ConsultationModel } from "@/components/Facility/models";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
-import { PatientModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
@@ -41,6 +40,7 @@ import {
   keysOf,
   relativeTime,
 } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 import { ConsultationProvider } from "./ConsultationContext";
 
