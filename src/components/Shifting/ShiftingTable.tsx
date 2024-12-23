@@ -134,7 +134,7 @@ export default function ShiftingTable(props: {
                 </div>
               </div>
 
-              <div className="col-span-1  flex flex-col text-left">
+              <div className="col-span-1 flex flex-col text-left">
                 <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row flex-wrap">
                   <dt
                     title={t("shifting_status")}
