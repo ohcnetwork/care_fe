@@ -1,34 +1,14 @@
-export const groupAndMergeByColumn = (
+export const csvGroupByColumn = (
   data: string,
-  groupByColumnIndex: number,
-  mergeColumnIndices: number[],
+  groupByColumn: string,
+  mergeColumns: string[],
   delimiter = ";",
 ): string => {
-  if (!data || typeof data !== "string") {
-    throw new Error("Data is in Invalid Format");
-  }
-  const msg = "An error occurred while processing the export";
+  const [header, ...datalines] = data.trim().split("\n"); // Split the data into individual lines
+  const headerColumns = header.split(","); // Extract the header columns
+  const groupByColumnIndex = headerColumns.indexOf(groupByColumn);
 
-  if (groupByColumnIndex < 0) {
-    throw new Error(msg);
-  }
-  if (!mergeColumnIndices.length) {
-    throw new Error(msg);
-  }
-  if (mergeColumnIndices.some((index) => index < 0)) {
-    throw new Error(msg);
-  }
-  const lines = data.split("\n"); // Split the data into individual lines
-  if (!lines.length || lines.length === 2) {
-    throw new Error("No  patients found for export");
-  }
-
-  // Remove the last line only if it's empty
-  if (lines[lines.length - 1].trim() === "") {
-    lines.pop();
-  }
-
-  const groupedData = lines.reduce(
+  const groupedData = datalines.reduce(
     (groupMap, line) => {
       const columns = line.split(",");
       const groupByKey = columns[groupByColumnIndex]?.trim();
@@ -44,16 +24,9 @@ export const groupAndMergeByColumn = (
 
   const mergedLines = Object.values(groupedData).map((group) => {
     if (!group.length) return "";
-    // Validate column indices are within bounds
-    const columnCount = group[0].length;
-    if (groupByColumnIndex >= columnCount) {
-      throw new Error(msg);
-    }
-    mergeColumnIndices.forEach((index) => {
-      if (index >= columnCount) {
-        throw new Error(msg);
-      }
-    });
+    const mergeColumnIndices: number[] = mergeColumns.map((column) =>
+      headerColumns.indexOf(column),
+    );
     const mergedRow = [...group[0]];
     mergeColumnIndices.forEach((mergeIndex) => {
       const mergedValue = group
@@ -66,15 +39,14 @@ export const groupAndMergeByColumn = (
     return mergedRow.join(",");
   });
 
-  // Return the final cleaned data as a string
-  return mergedLines.join("\n");
+  return header.concat(mergedLines.join("\n"));
 };
 
 export const preventDuplicatePatientsDuetoPolicyId = (data: string): string => {
-  const result = groupAndMergeByColumn(
+  const result = csvGroupByColumn(
     data,
-    0, // Group by Patient ID
-    [5], // Merge policy IDs
+    "Patient ID", // Group by Patient ID
+    ["policy ID"], // Merge policy IDs
     ";", // Use ";" as the delimiter
   );
   return result;
