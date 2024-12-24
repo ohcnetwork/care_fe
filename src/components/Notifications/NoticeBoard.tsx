@@ -88,7 +88,7 @@ export const NoticeBoard = () => {
           </div>
         </DialogHeader>
         <div
-          className="flex-1 text-justify mx-5 mb-4"
+          className="flex-1 text-justify mx-6 mb-4"
           id="notification-message"
         >
           <h1 className="font-semibold text-lg text-black mb-1">
@@ -96,7 +96,7 @@ export const NoticeBoard = () => {
           </h1>
           <Message className="" message={notice.message} />
         </div>
-        <DialogFooter className="sm:justify-start w-full border-2 py-2 flex items-center bg-gray-100  mt-4">
+        <DialogFooter className="sm:justify-start w-full  py-2 flex items-center bg-gray-100  mt-4">
           <UserInfo {...notice} />
         </DialogFooter>
       </div>
