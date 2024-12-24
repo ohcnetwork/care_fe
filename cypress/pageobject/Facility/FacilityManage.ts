@@ -18,30 +18,6 @@ class FacilityManage {
     cy.get("#save-cover-image").click();
   }
 
-  verifyTotalDoctorCapacity(expectedCapacity: string) {
-    cy.get("#facility-doctor-totalcapacity").contains(expectedCapacity);
-  }
-
-  verifyFacilityBedCapacity(expectedCapacity: string) {
-    cy.get("#facility-bed-capacity-details").contains(expectedCapacity);
-  }
-
-  clickEditFacilityDoctorCapacity() {
-    cy.get("#edit-facility-doctorcapacity").click();
-  }
-
-  clickEditFacilityBedCapacity() {
-    cy.get("#edit-facility-bedcapacity").click();
-  }
-
-  clickDeleteFacilityDoctorCapacity() {
-    cy.get("#delete-facility-doctorcapacity").click();
-  }
-
-  clickDeleteFacilityBedCapacity() {
-    cy.get("#delete-facility-bedcapacity").click();
-  }
-
   clickFacilityConfigureButton() {
     cy.get("#configure-facility").should("be.visible");
     cy.get("#configure-facility").click();
@@ -90,14 +66,12 @@ class FacilityManage {
     cy.get("#hf_id").should("have.value", expectedValue);
   }
 
-  clickFacilityAddDoctorTypeButton() {
-    cy.get("#facility-add-doctortype").scrollIntoView();
-    cy.get("#facility-add-doctortype").click();
-  }
-
-  clickFacilityAddBedTypeButton() {
-    cy.get("#facility-add-bedtype").scrollIntoView();
-    cy.get("#facility-add-bedtype").click();
+  visitViewPatients() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilityPatients");
+    cy.get("#view-patient-facility-list").scrollIntoView().click();
+    cy.wait("@getFacilityPatients")
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 }
 export default FacilityManage;

@@ -19,9 +19,11 @@ class LoginPage {
     cy.clickSubmitButton("Login");
   }
 
-  loginManuallyAsNurse(): void {
+  loginManuallyAsNurse(password?: string): void {
     cy.get("input[id='username']").click().type("dummynurse1");
-    cy.get("input[id='password']").click().type("Coronasafe@123");
+    cy.get("input[id='password']")
+      .click()
+      .type(password || "Coronasafe@123");
     cy.clickSubmitButton("Login");
   }
 

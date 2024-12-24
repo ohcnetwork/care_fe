@@ -19,7 +19,7 @@ import useFilters from "@/hooks/useFilters";
 import { FACILITY_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import SearchByMultipleFields from "../Common/SearchByMultipleFields";
 
@@ -50,7 +50,7 @@ export const FacilityList = () => {
   const { user_type } = useAuthUser();
   const { t } = useTranslation();
 
-  const { data: permittedData, loading: isLoading } = useQuery(
+  const { data: permittedData, loading: isLoading } = useTanStackQueryInstead(
     routes.getPermittedFacilities,
     {
       query: {
@@ -67,21 +67,21 @@ export const FacilityList = () => {
     },
   );
 
-  const { data: stateData } = useQuery(routes.getState, {
+  const { data: stateData } = useTanStackQueryInstead(routes.getState, {
     pathParams: {
       id: qParams.state,
     },
     prefetch: qParams.state !== undefined,
   });
 
-  const { data: districtData } = useQuery(routes.getDistrict, {
+  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
     },
     prefetch: qParams.district !== undefined,
   });
 
-  const { data: localBodyData } = useQuery(routes.getLocalBody, {
+  const { data: localBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
     pathParams: {
       id: qParams.local_body,
     },
@@ -157,30 +157,17 @@ export const FacilityList = () => {
       options={
         <div className="flex items-center gap-2 ">
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <ExportMenu
-            exportItems={[
-              {
-                label: "Facilities",
-                route: routes.downloadFacility,
-                filePrefix: "facilities",
-              },
-              {
-                label: "Capacities",
-                route: routes.downloadFacilityCapacity,
-                filePrefix: "capacities",
-              },
-              {
-                label: "Doctors",
-                route: routes.downloadFacilityDoctors,
-                filePrefix: "doctors",
-              },
-              {
-                label: "Triages",
-                route: routes.downloadFacilityTriage,
-                filePrefix: "triages",
-              },
-            ]}
-          />
+          <div id="export-button">
+            <ExportMenu
+              exportItems={[
+                {
+                  label: "Facilities",
+                  route: routes.downloadFacility,
+                  filePrefix: "facilities",
+                },
+              ]}
+            />
+          </div>
         </div>
       }
     >

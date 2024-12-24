@@ -1,6 +1,5 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.wait(5000);
     cy.get("#route_to_facility").scrollIntoView();
     cy.get("#route_to_facility").should("be.visible");
     cy.clickAndSelectOption("#route_to_facility", status);
@@ -66,7 +65,7 @@ export class PatientConsultationPage {
   }
 
   clickPatientDetails() {
-    cy.verifyAndClickElement("#consultationpage-header", "Patient Details");
+    cy.verifyAndClickElement("#patient-details", "Patient Details");
   }
 
   typePatientIllnessHistory(history: string) {
@@ -104,13 +103,15 @@ export class PatientConsultationPage {
   }
 
   clickEditConsultationButton() {
-    cy.get("#consultation-buttons").scrollIntoView();
-    cy.get("button").contains("Manage Patient").click();
-    cy.verifyAndClickElement(
-      "#consultation-buttons",
-      "Edit Consultation Details",
-    );
-    cy.wait(3000);
+    cy.clickAndSelectOption("#show-more", "Edit Consultation Details", true);
+  }
+
+  interceptConsultation() {
+    cy.intercept("GET", "**/api/v1/consultation/*").as("getConsultation");
+  }
+
+  verifyConsultation() {
+    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
   }
 
   interceptPatientDetailsAPI(): void {

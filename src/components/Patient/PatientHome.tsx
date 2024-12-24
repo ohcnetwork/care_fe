@@ -2,6 +2,12 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+
+import { AuthorizedButton } from "@/components/Common/AuthorizedButton";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
@@ -11,19 +17,16 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   OCCUPATION_TYPES,
-  SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -34,13 +37,12 @@ import {
   relativeDate,
 } from "../../Utils/utils";
 import { Avatar } from "../Common/Avatar";
-import ButtonV2 from "../Common/ButtonV2";
 import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import { SkillModel, UserBareMinimum } from "../Users/models";
 import { patientTabs } from "./PatientDetailsTab";
 import { isPatientMandatoryDataFilled } from "./Utils";
-import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
+import { AssignedToObjectModel, PatientModel } from "./models";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -56,10 +58,6 @@ export const PatientHome = (props: {
 
   const authUser = useAuthUser();
   const { t } = useTranslation();
-  const [selectedStatus, _setSelectedStatus] = useState<{
-    status: number;
-    sample: SampleTestModel | null;
-  }>({ status: 0, sample: null });
 
   const [assignedVolunteer, setAssignedVolunteer] = useState<
     AssignedToObjectModel | undefined
@@ -69,28 +67,32 @@ export const PatientHome = (props: {
     setAssignedVolunteer(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     useState(false);
 
   const initErr: any = {};
   const errors = initErr;
-  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
-    pathParams: {
-      id,
+  const { loading: isLoading, refetch } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setPatientData(data);
+        }
+        triggerGoal("Patient Profile Viewed", {
+          facilityId: facilityId,
+          userId: authUser.id,
+        });
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setPatientData(data);
-      }
-      triggerGoal("Patient Profile Viewed", {
-        facilityId: facilityId,
-        userId: authUser.id,
-      });
-    },
-  });
+  );
 
   const handleAssignedVolunteer = async () => {
+    const previousVolunteerId = patientData?.assigned_to;
+
     const { res, data } = await request(routes.patchPatient, {
       pathParams: {
         id: patientData.id as string,
@@ -99,25 +101,34 @@ export const PatientHome = (props: {
         assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
       },
     });
+
     if (res?.ok && data) {
       setPatientData(data);
-      if (!assignedVolunteer) {
+
+      if (!previousVolunteerId && assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_assigned"),
         });
-      } else {
+      } else if (previousVolunteerId && assignedVolunteer) {
+        Notification.Success({
+          msg: t("volunteer_update"),
+        });
+      } else if (!assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_unassigned"),
         });
       }
+
       refetch();
     }
+
     setOpenAssignVolunteerDialog(false);
+
     if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
   const consultation = patientData?.last_consultation;
-  const skillsQuery = useQuery(routes.userListSkill, {
+  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
@@ -136,31 +147,6 @@ export const PatientHome = (props: {
 
     const [first, second, ...rest] = skills;
     return `${first}, ${second} and ${rest.length} other skills...`;
-  };
-
-  const handleApproval = async () => {
-    const { status, sample } = selectedStatus;
-    const sampleData = {
-      id: sample?.id,
-      status: status.toString(),
-      consultation: sample?.consultation,
-    };
-    const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-
-    await request(routes.patchSample, {
-      body: sampleData,
-      pathParams: {
-        id: sample?.id || "",
-      },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          Notification.Success({
-            msg: `Request ${statusName}`,
-          });
-        }
-        setShowAlertMessage(false);
-      },
-    });
   };
 
   if (isLoading) {
@@ -202,15 +188,6 @@ export const PatientHome = (props: {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      <ConfirmDialog
-        title={t("send_sample_to_collection_centre_title")}
-        description={t("send_sample_to_collection_centre_description")}
-        show={showAlertMessage}
-        action={t("approve")}
-        onConfirm={() => handleApproval()}
-        onClose={() => setShowAlertMessage(false)}
-      />
-
       <div className="mt-3" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
@@ -225,7 +202,10 @@ export const PatientHome = (props: {
                       />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold capitalize text-gray-950">
+                      <h1
+                        id="patient-name"
+                        className="text-xl font-bold capitalize text-gray-950"
+                      >
                         {patientData.name}
                       </h1>
                       <h3 className="text-sm font-medium text-gray-600">
@@ -238,28 +218,55 @@ export const PatientHome = (props: {
                 <div className="h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      {patientData?.is_active &&
-                        (!patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date) && (
-                          <div>
-                            <ButtonV2
-                              className="w-full"
-                              size="default"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("add_consultation")}
-                              </span>
-                            </ButtonV2>
-                          </div>
+                      {facilityId ===
+                        patientData.facility_object?.id.toString() &&
+                        patientData?.is_active && (
+                          <>
+                            {patientData?.last_consultation &&
+                            !patientData?.last_consultation.discharge_date ? (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("view_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            ) : (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData?.facility}/patient/${id}/consultation`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("add_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            )}
+                          </>
                         )}
                     </div>
                   </div>
@@ -344,13 +351,14 @@ export const PatientHome = (props: {
                       text={t("TELEMEDICINE")}
                     />
                   )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  {patientData.allergies &&
+                    patientData.allergies.trim().length > 0 && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={t("has_allergies")}
+                      />
+                    )}
                 </div>
               </div>
 
@@ -384,7 +392,7 @@ export const PatientHome = (props: {
                             className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
                             role="tooltip"
                           >
-                            {skillsQuery.data?.results.map((skill) => (
+                            {skillsQuery.data?.results.map((skill: any) => (
                               <li key={skill.skill_object.id}>
                                 {skill.skill_object.name}
                               </li>
@@ -468,21 +476,21 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                refetch={refetch}
               />
             )}
           </div>
           <div className="sticky top-20 mt-8 h-full lg:basis-1/6">
             <section className="mb-4 space-y-2 md:flex">
-              <div className="mx-3 w-full lg:mx-0">
+              <div className="mx-auto w-full lg:mx-0">
                 <div className="font-semibold text-secondary-900">
                   {t("actions")}
                 </div>
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      <ButtonV2
+                      <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
                         onClick={() =>
                           navigate(`/patient/${id}/investigation_reports`)
                         }
@@ -494,13 +502,12 @@ export const PatientHome = (props: {
                           />
                           {t("investigations_summary")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
                     <div>
-                      <ButtonV2
+                      <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
-                        size="large"
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -511,32 +518,32 @@ export const PatientHome = (props: {
                           <CareIcon icon="l-file-upload" className="text-xl" />
                           {t("view_update_patient_files")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
 
-                    {NonReadOnlyUsers && (
+                    {NonReadOnlyUsers(authUser.user_type) && (
                       <div>
-                        <ButtonV2
+                        <AuthorizedButton
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
                           authorizeFor={NonReadOnlyUsers}
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                          size="large"
                         >
                           <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon icon="l-users-alt" className="text-lg" />{" "}
-                            {t("assign_to_volunteer")}
+                            {patientData.assigned_to
+                              ? t("update_volunteer")
+                              : t("assign_to_volunteer")}
                           </span>
-                        </ButtonV2>
+                        </AuthorizedButton>
                       </div>
                     )}
 
                     <div>
-                      <ButtonV2
+                      <AuthorizedButton
                         id="patient-allow-transfer"
                         className="flex w-full flex-row bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
                         disabled={
                           !patientData.last_consultation?.id ||
                           !patientData.is_active
@@ -557,7 +564,7 @@ export const PatientHome = (props: {
                             ? t("disable_transfer")
                             : t("allow_transfer")}
                         </span>
-                      </ButtonV2>
+                      </AuthorizedButton>
                     </div>
                   </div>
                 </div>
@@ -676,7 +683,7 @@ export const PatientHome = (props: {
                 {patientData.last_consultation?.new_discharge_reason ===
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
-                    <ButtonV2
+                    <Button
                       id="death-report"
                       className="my-2 w-full"
                       name="death_report"
@@ -684,7 +691,7 @@ export const PatientHome = (props: {
                     >
                       <CareIcon icon="l-file-download" className="text-lg" />
                       {t("death_report")}
-                    </ButtonV2>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -709,7 +716,11 @@ export const PatientHome = (props: {
             />
           </div>
         }
-        action={t("assign")}
+        action={
+          assignedVolunteer || !patientData.assigned_to
+            ? t("assign")
+            : t("unassign")
+        }
         onConfirm={handleAssignedVolunteer}
       />
     </Page>

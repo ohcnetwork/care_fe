@@ -3,26 +3,25 @@ import { navigate } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
+
+import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { parseOccupation } from "@/components/Patient/PatientHome";
+import { AssignedToObjectModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { GENDER_TYPES } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-
-import { PatientProps } from ".";
-import * as Notification from "../../../Utils/Notifications";
-import { InsuranceDetailsCard } from "../InsuranceDetailsCard";
-import { parseOccupation } from "../PatientHome";
-import { AssignedToObjectModel } from "../models";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -55,11 +54,12 @@ export const Demography = (props: PatientProps) => {
     };
   }, [clickedSection]);
 
-  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
-    query: {
-      patient: id,
+  const { data: insuranceDetials } = useTanStackQueryInstead(
+    routes.hcx.policies.list,
+    {
+      query: { patient: id },
     },
-  });
+  );
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
@@ -351,23 +351,6 @@ export const Demography = (props: PatientProps) => {
 
         <div className="lg:basis-4/5">
           <div className="mb-2 flex flex-row justify-between">
-            <div className="w-1/2">
-              <div className="text-sm font-normal leading-5 text-secondary-700">
-                {t("patient_status")}
-              </div>
-              <div className="mt-1 text-xl font-semibold leading-5 text-secondary-900">
-                <Chip
-                  size="medium"
-                  variant="custom"
-                  className={
-                    patientData.is_active
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-red-100 text-red-800"
-                  }
-                  text={patientData.is_active ? "LIVE" : "DISCHARGED"}
-                />
-              </div>
-            </div>
             <div>
               <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                 {({ isAuthorized }) => (

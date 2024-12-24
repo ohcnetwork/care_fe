@@ -90,7 +90,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typeTreatmentPlan(patientTreatment);
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
-    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientTreatmentPlan.fillTreatingPhysician(doctorName);
     cy.clickSubmitButton("Create Consultation");
     // the above submit should fail as IP number is missing
     patientConsultationPage.typePatientNumber(patientIpNumber);
@@ -104,8 +104,9 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
+    patientPrescription.interceptPrescriptions();
     cy.clickSubmitButton("Submit");
-    cy.wait(2000);
+    patientPrescription.verifyPrescription();
     cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
@@ -254,7 +255,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientInvestigation.selectInvestigationFrequency("6");
     // Add advice and treating physican
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
-    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientTreatmentPlan.fillTreatingPhysician(doctorName);
     // add review after and add action
     patientTreatmentPlan.selectReviewAfter("15 mins");
     patientTreatmentPlan.selectAction("Specialist Required");
@@ -311,7 +312,7 @@ describe("Patient Consultation in multiple combination", () => {
     // no investigation
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     // no review after and no action
-    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientTreatmentPlan.fillTreatingPhysician(doctorName);
     cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Patient discharged successfully");
     // verify the Discharge Reason, Diagnosis, treatment physican
@@ -362,7 +363,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     // no investigation for the patient
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
-    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientTreatmentPlan.fillTreatingPhysician(doctorName);
     // no review after and no action
     cy.clickSubmitButton("Create Consultation");
     // Create a shifting request
@@ -376,7 +377,9 @@ describe("Patient Consultation in multiple combination", () => {
 
   it("Edit created consultation to existing patient", () => {
     patientPage.visitPatient("Dummy Patient Thirteen");
+    patientConsultationPage.interceptConsultation();
     patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.verifyConsultation();
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,
