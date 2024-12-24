@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,8 +29,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -96,30 +95,20 @@ const DischargeModal = ({
 
   const { goBack } = useAppHistory();
 
-  const {
-    isLoading: consultationDataLoading,
-    data: consultationDataFetched,
-    error: errorOnConsultationData,
-    failureReason: failureReasonOnConsultationData,
-  } = useQuery({
-    queryKey: [routes.getConsultation.path, consultationData.id],
-    queryFn: query(routes.getConsultation, {
-      pathParams: { id: consultationData.id },
-    }),
-    enabled: consultationData.id !== undefined,
+  const { data } = useTanStackQueryInstead(routes.getConsultation, {
+    pathParams: { id: consultationData.id ?? "" },
+    prefetch: !!consultationData.id,
+    silent: true,
+    onResponse: ({ error }) => {
+      if (error) {
+        goBack();
+        Notification.Error({ msg: "Error in fetching consultation data" });
+        return;
+      }
+    },
   });
 
-  if (errorOnConsultationData || failureReasonOnConsultationData) {
-    Notification.Error({ msg: "Error on fetching consultation data" });
-    goBack();
-  }
-
-  if (consultationDataLoading) {
-    return <Loading />;
-  }
-  if (consultationDataFetched == undefined) {
-    return;
-  }
+  const initialDiagnoses = data?.diagnoses ?? [];
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
@@ -201,9 +190,8 @@ const DischargeModal = ({
         ? "death_datetime"
         : "discharge_date"
     ];
-
-  if (consultationDataFetched.diagnoses === undefined) {
-    return;
+  if (initialDiagnoses == null) {
+    return <Loading />;
   }
 
   return (
@@ -334,7 +322,7 @@ const DischargeModal = ({
               <FieldLabel>{t("diagnosis_at_discharge")}</FieldLabel>
               <EditDiagnosesBuilder
                 consultationId={consultationData.id}
-                value={consultationDataFetched.diagnoses}
+                value={initialDiagnoses}
               />
             </div>
           )}
