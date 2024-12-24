@@ -835,10 +835,12 @@ export default function PatientRegistration(
                     <InputWithError label={t("ward")} errors={errors["ward"]}>
                       <Autocomplete
                         options={
-                          wardsQuery.data?.results.map((ward) => ({
-                            label: ward.name,
-                            value: ward.id.toString(),
-                          })) || []
+                          wardsQuery.data?.results
+                            .sort((a, b) => a.number - b.number)
+                            .map((ward) => ({
+                              label: ward.number + ": " + ward.name,
+                              value: ward.id.toString(),
+                            })) || []
                         }
                         value={form.ward?.toString() || ""}
                         onChange={(value) =>
