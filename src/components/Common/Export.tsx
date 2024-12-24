@@ -44,19 +44,53 @@ interface ExportButtonProps {
   parse?: (data: string) => string;
   filenamePrefix: string;
 }
+function ExportMenuItem({
+  item,
+  exportFile,
+}: {
+  item: ExportItem;
+  exportFile: (
+    action: Parameters<ReturnType<typeof useExport>["exportFile"]>[0],
+    filePrefix?: string,
+    type?: "csv" | "json",
+    parse?: (data: string) => string,
+  ) => void;
+}) {
+  const isAuthorized = item.options?.authorizeFor
+    ? useIsAuthorized(item.options.authorizeFor)
+    : true;
 
+  return (
+    <DropdownMenuItem
+      onClick={() => {
+        let action = item.action;
+        if (item.route) {
+          action = async () => {
+            const { data } = await request(item.route!);
+            return data ?? null;
+          };
+        }
+        if (action) {
+          exportFile(action, item.filePrefix, item.type, item.parse);
+        }
+      }}
+      disabled={item.options?.disabled || !isAuthorized}
+      id={item.options?.id}
+      className={item.options?.className}
+    >
+      <div>
+        {item.options?.icon}
+        <span className="ml-1">{item.label}</span>
+      </div>
+    </DropdownMenuItem>
+  );
+}
 export const ExportMenu = ({
   label = "Export",
   disabled,
   exportItems,
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
-
-  const authorizationResults = exportItems.map((item) =>
-    item.options?.authorizeFor
-      ? useIsAuthorized(item.options.authorizeFor)
-      : true,
-  );
 
   if (exportItems.length === 1) {
     const item = exportItems[0];
@@ -101,30 +135,12 @@ export const ExportMenu = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
-          {exportItems.map((item, index) => (
-            <DropdownMenuItem
+          {exportItems.map((item) => (
+            <ExportMenuItem
               key={item.label}
-              onClick={() => {
-                let action = item.action;
-                if (item.route) {
-                  action = async () => {
-                    const { data } = await request(item.route!);
-                    return data ?? null;
-                  };
-                }
-                if (action) {
-                  exportFile(action, item.filePrefix, item.type, item.parse);
-                }
-              }}
-              disabled={item.options?.disabled || !authorizationResults[index]}
-              id={item.options?.id}
-              className={item.options?.className}
-            >
-              <div>
-                {item.options?.icon}
-                <span className="ml-1">{item.label}</span>
-              </div>
-            </DropdownMenuItem>
+              item={item}
+              exportFile={exportFile}
+            />
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
