@@ -97,25 +97,28 @@ const DischargeModal = ({
   const { goBack } = useAppHistory();
 
   const {
-    isLoading: consultationLoading,
+    isLoading: consultationDataLoading,
     data: consultationDataFetched,
-    isError: errorOnConsultationData,
+    error: errorOnConsultationData,
+    failureReason: failureReasonOnConsultationData,
   } = useQuery({
     queryKey: [routes.getConsultation.path, consultationData.id],
-    queryFn: () =>
-      query(routes.getConsultation, {
-        pathParams: { id: consultationData.id },
-      }),
+    queryFn: query(routes.getConsultation, {
+      pathParams: { id: consultationData.id },
+    }),
     enabled: consultationData.id !== undefined,
   });
 
-  if (!errorOnConsultationData) {
-    console.log(consultationDataFetched);
+  if (errorOnConsultationData || failureReasonOnConsultationData) {
+    Notification.Error({ msg: "Error on fetching consultation data" });
+    goBack();
   }
 
-  if (errorOnConsultationData) {
-    Notification.Error({ msg: "Error loading consultation data" });
-    goBack();
+  if (consultationDataLoading) {
+    return <Loading />;
+  }
+  if (consultationDataFetched == undefined) {
+    return;
   }
 
   const discharge_reason =
@@ -198,8 +201,9 @@ const DischargeModal = ({
         ? "death_datetime"
         : "discharge_date"
     ];
-  if (consultationLoading) {
-    return <Loading />;
+
+  if (consultationDataFetched.diagnoses === undefined) {
+    return;
   }
 
   return (
@@ -330,7 +334,7 @@ const DischargeModal = ({
               <FieldLabel>{t("diagnosis_at_discharge")}</FieldLabel>
               <EditDiagnosesBuilder
                 consultationId={consultationData.id}
-                value={[]}
+                value={consultationDataFetched.diagnoses}
               />
             </div>
           )}
