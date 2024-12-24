@@ -13,6 +13,7 @@ import { ShadcnMenuDropdownItemProps } from "@/components/Common/Menu";
 import useExport from "@/hooks/useExport";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
+import { Anyone } from "@/Utils/AuthorizeFor";
 import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
 
@@ -56,9 +57,7 @@ function ExportMenuItem({
     parse?: (data: string) => string,
   ) => void;
 }) {
-  const isAuthorized = item.options?.authorizeFor
-    ? useIsAuthorized(item.options.authorizeFor)
-    : true;
+  const isAuthorized = useIsAuthorized(item.options?.authorizeFor || Anyone);
 
   return (
     <DropdownMenuItem
