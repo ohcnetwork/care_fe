@@ -38,7 +38,7 @@ export const NoticeBoard = () => {
   );
 
   const UserInfo: React.FC<NotificationData> = (notice) => (
-    <div className="flex items-center bg-gray-100 rounded-lg">
+    <div className="flex items-center bg-gray-100">
       <Avatar
         name={formatName(notice.caused_by)}
         imageUrl={notice.caused_by.read_profile_picture_url}
@@ -78,17 +78,17 @@ export const NoticeBoard = () => {
 
   const NoticeDialog: React.FC<{ notice: NotificationData }> = ({ notice }) => {
     return (
-      <>
+      <div className="m-0 w-full h-full rounded-md w-full">
         <DialogHeader>
-          <div className="flex justify-between w-full  items-center mb-4">
+          <div className="flex justify-between  items-center mb-4">
             <CareIcon
-              className="bg-primary-200 font-light text-lg p-2  text-primary-600 rounded-lg w-12 h-10 "
+              className="h-10 w-12 text-primary-500 bg-primary-200 rounded-md p-2 m-5"
               icon="l-envelope-open"
             />
           </div>
         </DialogHeader>
         <div
-          className="flex-1 text-justify mx-2 mb-2"
+          className="flex-1 text-justify mx-5 mb-4"
           id="notification-message"
         >
           <h1 className="font-semibold text-lg text-black mb-1">
@@ -96,10 +96,10 @@ export const NoticeBoard = () => {
           </h1>
           <Message className="" message={notice.message} />
         </div>
-        <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-100 rounded-lg mt-4">
+        <DialogFooter className="sm:justify-start w-full border-2 py-2 flex items-center bg-gray-100  mt-4">
           <UserInfo {...notice} />
         </DialogFooter>
-      </>
+      </div>
     );
   };
 
@@ -135,7 +135,7 @@ export const NoticeBoard = () => {
                       {t("view_notice")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto p-0">
                     {selectedNotice && <NoticeDialog notice={selectedNotice} />}
                   </DialogContent>
                 </Dialog>
