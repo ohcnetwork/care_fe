@@ -42,15 +42,12 @@ const AssetsList = () => {
     limit: 18,
     cacheBlacklist: ["search"],
   });
-  const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
-  const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const params = {
@@ -68,18 +65,13 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { refetch: assetsFetch, loading } = useTanStackQueryInstead(
-    routes.listAssets,
-    {
-      query: params,
-      onResponse: ({ res, data }) => {
-        if (res?.status === 200 && data) {
-          setAssets(data.results);
-          setTotalCount(data.count);
-        }
-      },
-    },
-  );
+  const {
+    refetch: assetsFetch,
+    loading,
+    data: assetList,
+  } = useTanStackQueryInstead(routes.listAssets, {
+    query: params,
+  });
 
   const { data: facilityObject } = useTanStackQueryInstead(
     routes.getAnyFacility,
@@ -217,16 +209,16 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (loading) {
+  if (loading || !assetList) {
     manageAssets = (
       <div className="col-span-3 w-full py-8 text-center">
         <Loading />
       </div>
     );
-  } else if (assetsExist) {
+  } else if (assetList?.count) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
-        {assets.map((asset: AssetData) => (
+        {assetList?.results.map((asset: AssetData) => (
           <Link
             key={asset.id}
             href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
@@ -303,7 +295,7 @@ const AssetsList = () => {
         ))}
       </div>
     );
-  } else {
+  } else if (assetList && assetList?.count == 0) {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
@@ -339,7 +331,11 @@ const AssetsList = () => {
                     label: "Export Assets (JSON)",
                     action: async () => {
                       const { data } = await request(routes.listAssets, {
-                        query: { ...qParams, json: true, limit: totalCount },
+                        query: {
+                          ...qParams,
+                          json: true,
+                          limit: assetList?.count,
+                        },
                       });
                       return data ?? null;
                     },
@@ -347,7 +343,8 @@ const AssetsList = () => {
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon icon="l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
+                      disabled:
+                        assetList?.count === 0 || !authorizedForImportExport,
                       id: "export-json-option",
                     },
                   },
@@ -355,7 +352,11 @@ const AssetsList = () => {
                     label: "Export Assets (CSV)",
                     action: async () => {
                       const { data } = await request(routes.listAssets, {
-                        query: { ...qParams, csv: true, limit: totalCount },
+                        query: {
+                          ...qParams,
+                          csv: true,
+                          limit: assetList?.count,
+                        },
                       });
                       return data ?? null;
                     },
@@ -363,7 +364,8 @@ const AssetsList = () => {
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon icon="l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
+                      disabled:
+                        assetList?.count === 0 || !authorizedForImportExport,
                       id: "export-csv-option",
                     },
                   },
@@ -377,7 +379,7 @@ const AssetsList = () => {
       <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
-          count={totalCount}
+          count={assetList?.count || 0}
           loading={loading}
           icon="d-folder"
           className="flex-1"
@@ -462,7 +464,7 @@ const AssetsList = () => {
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              <Pagination totalCount={totalCount} />
+              <Pagination totalCount={assetList?.count || 0} />
             </div>
           </div>
         </>
