@@ -10,8 +10,9 @@ import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
+import { Button } from "@/components/ui/button";
+
 import { Avatar } from "@/components/Common/Avatar";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -209,7 +210,7 @@ export const PatientManager = () => {
     qParams.diagnoses_differential,
   ]);
 
-  const date_range_fields = [
+  const dateRangeFields = [
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
     [params.date_declared_positive_before, params.date_declared_positive_after],
@@ -224,13 +225,10 @@ export const PatientManager = () => {
     ],
   ];
 
-  const durations = date_range_fields.map(([startDate, endDate]) =>
-    calculateDaysBetween(startDate, endDate),
-  );
-
-  const isExportAllowed =
-    durations.every((x) => x >= 0 && x <= 7) &&
-    !durations.every((x) => x === 0);
+  const isExportAllowed = dateRangeFields.some(([startDate, endDate]) => {
+    const days = calculateDaysBetween(startDate, endDate);
+    return days >= 0 && days <= 7 && days !== 0;
+  });
 
   let managePatients: any = null;
   const { loading: isLoading, data } = useTanStackQueryInstead(
@@ -753,7 +751,8 @@ export const PatientManager = () => {
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <ButtonV2
+            <Button
+              variant="primary"
               id="add-patient-details"
               onClick={() => {
                 const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
@@ -790,11 +789,11 @@ export const PatientManager = () => {
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon icon="l-plus" className="text-lg" />
+              <CareIcon icon="l-plus" className="mr-1 text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient
               </p>
-            </ButtonV2>
+            </Button>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <Tabs
@@ -829,7 +828,8 @@ export const PatientManager = () => {
               currentTab={tabValue}
             />
             {!!params.facility && (
-              <ButtonV2
+              <Button
+                variant="primary"
                 className="w-full lg:w-fit"
                 id="doctor-connect-patient-button"
                 onClick={() => {
@@ -843,7 +843,7 @@ export const PatientManager = () => {
               >
                 <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
-              </ButtonV2>
+              </Button>
             )}
 
             <AdvancedFilterButton
@@ -856,7 +856,9 @@ export const PatientManager = () => {
             />
             <div className="tooltip w-full md:w-auto" id="patient-export">
               {!isExportAllowed ? (
-                <ButtonV2
+                <Button
+                  variant="primary"
+                  size="lg"
                   onClick={() => {
                     advancedFilter.setShow(true);
                     setTimeout(() => {
@@ -871,9 +873,9 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon icon="l-export" />
+                  <CareIcon icon="l-export" className="mr-2" />
                   <span className="lg:my-[3px]">Export</span>
-                </ButtonV2>
+                </Button>
               ) : (
                 <ExportMenu
                   disabled={!isExportAllowed}

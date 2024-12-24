@@ -9,7 +9,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -212,7 +213,7 @@ const DischargedPatientsList = ({
     }
   }, [qParams]);
 
-  const date_range_fields = [
+  const dateRangeFields = [
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
     [params.date_declared_positive_before, params.date_declared_positive_after],
@@ -227,13 +228,10 @@ const DischargedPatientsList = ({
     ],
   ];
 
-  const durations = date_range_fields.map(([startDate, endDate]) =>
-    calculateDaysBetween(startDate, endDate),
-  );
-
-  const isExportAllowed =
-    durations.every((x) => x >= 0 && x <= 7) &&
-    !durations.every((x) => x === 0);
+  const isExportAllowed = dateRangeFields.some(([startDate, endDate]) => {
+    const days = calculateDaysBetween(startDate, endDate);
+    return days >= 0 && days <= 7 && days !== 0;
+  });
 
   const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
@@ -394,7 +392,9 @@ const DischargedPatientsList = ({
             />
             <div className="tooltip w-full md:w-auto" id="patient-export">
               {!isExportAllowed ? (
-                <ButtonV2
+                <Button
+                  variant="primary"
+                  size="lg"
                   onClick={() => {
                     advancedFilter.setShow(true);
                     setTimeout(() => {
@@ -409,9 +409,9 @@ const DischargedPatientsList = ({
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon icon="l-export" />
+                  <CareIcon icon="l-export" className="mr-2" />
                   <span className="lg:my-[3px]">Export</span>
-                </ButtonV2>
+                </Button>
               ) : (
                 <ExportMenu
                   disabled={!isExportAllowed}
