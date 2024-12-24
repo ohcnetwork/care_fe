@@ -27,7 +27,7 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
-import { preventDuplicatePatients } from "@/Utils/removeDuplicates";
+import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
 
 import Chip from "../../CAREUI/display/Chip";
@@ -893,11 +893,13 @@ export const PatientManager = () => {
                       },
                       parse: (data) => {
                         try {
-                          return preventDuplicatePatients(data);
+                          return csvGroupByColumn(data);
                         } catch (e) {
-                          Notification.Warn({
-                            msg: "An unexpected error occurred while processing the export",
-                          });
+                          if (e instanceof Error) {
+                            Notification.Error({
+                              msg: e.message,
+                            });
+                          }
                           return "";
                         }
                       },

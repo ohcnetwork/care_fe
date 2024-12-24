@@ -37,7 +37,7 @@ import {
 import { parseOptionId } from "@/common/utils";
 
 import * as Notification from "@/Utils/Notifications";
-import { preventDuplicatePatients } from "@/Utils/removeDuplicates";
+import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -436,11 +436,11 @@ const DischargedPatientsList = ({
                       },
                       parse: (data) => {
                         try {
-                          return preventDuplicatePatients(data);
+                          return csvGroupByColumn(data);
                         } catch (e) {
                           if (e instanceof Error) {
                             Notification.Error({
-                              msg: "An unexpected error occurred while processing the export",
+                              msg: e.message,
                             });
                           }
                           return "";

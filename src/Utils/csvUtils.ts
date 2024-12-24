@@ -1,10 +1,10 @@
 export const csvGroupByColumn = (
   data: string,
-  groupByColumn: string,
+  groupByColumn: string = "Patient ID",
   delimiter = ";",
 ): string => {
-  const [header, ...datalines] = data.trim().split("\n"); // Split the data into individual lines
-  const headerColumns = header.split(","); // Extract the header columns
+  const [header, ...datalines] = data.trim().split("\n");
+  const headerColumns = header.split(",");
   const groupByColumnIndex = headerColumns.indexOf(groupByColumn);
 
   const groupedData = datalines.reduce(
@@ -26,25 +26,16 @@ export const csvGroupByColumn = (
 
     const mergedRow = [...group[0]];
     headerColumns.forEach((column) => {
-      const Index = headerColumns.indexOf(column);
+      const index = headerColumns.indexOf(column);
       const mergedValue = group
-        .map((columns) => columns[Index]?.trim() || "")
-        .filter(Boolean) // Remove empty values
+        .map((columns) => columns[index]?.trim() || "")
+        .filter(Boolean)
         .join(delimiter);
 
-      mergedRow[Index] = mergedValue;
+      mergedRow[index] = mergedValue;
     });
     return mergedRow.join(",");
   });
 
   return header.concat(mergedLines.join("\n"));
-};
-
-export const preventDuplicatePatients = (data: string): string => {
-  const result = csvGroupByColumn(
-    data,
-    "Patient ID", // Group by Patient ID
-    ";", // Use ";" as the delimiter
-  );
-  return result;
 };
