@@ -78,6 +78,12 @@ export const ExportMenu = ({
     );
   }
 
+  const authorizationResults = exportItems.map((item) =>
+    item.options?.authorizeFor
+      ? useIsAuthorized(item.options.authorizeFor)
+      : true,
+  );
+
   return (
     <div key="export-menu" id="export-button">
       <DropdownMenu modal={false}>
@@ -93,7 +99,7 @@ export const ExportMenu = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
-          {exportItems.map((item) => (
+          {exportItems.map((item, index) => (
             <DropdownMenuItem
               key={item.label}
               onClick={() => {
@@ -108,11 +114,7 @@ export const ExportMenu = ({
                   exportFile(action, item.filePrefix, item.type, item.parse);
                 }
               }}
-              disabled={
-                item.options?.disabled ||
-                (item.options?.authorizeFor &&
-                  !useIsAuthorized(item.options.authorizeFor))
-              }
+              disabled={item.options?.disabled || !authorizationResults[index]}
               id={item.options?.id}
               className={item.options?.className}
             >
