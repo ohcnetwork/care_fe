@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -26,8 +27,8 @@ import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import { parseQueryParams } from "@/Utils/primitives";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -67,22 +68,29 @@ const AssetsList = () => {
 
   const {
     refetch: assetsFetch,
-    loading,
+    isLoading: loading,
     data: assetList,
-  } = useQuery(routes.listAssets, {
-    query: params,
+  } = useQuery({
+    queryKey: [routes.listAssets.path, params],
+    queryFn: query(routes.listAssets, {
+      queryParams: params,
+    }),
   });
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: qParams.facility },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setFacility(data);
-        setSelectedFacility(data);
-      }
-    },
-    prefetch: !!qParams.facility,
+  const { data: facilityObject } = useQuery({
+    queryKey: [routes.getAnyFacility.path, qParams.facility],
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: qParams.facility },
+    }),
+    enabled: !!qParams.facility,
   });
+
+  useEffect(() => {
+    if (facilityObject) {
+      setFacility(facilityObject);
+      setSelectedFacility(facilityObject);
+    }
+  }, [facilityObject]);
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -92,12 +100,19 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: String(qParams.facility),
-      external_id: String(qParams.location),
-    },
-    prefetch: !!(qParams.facility && qParams.location),
+  const { data: locationObject } = useQuery({
+    queryKey: [
+      routes.getFacilityAssetLocation.path,
+      qParams.facility,
+      qParams.location,
+    ],
+    queryFn: query(routes.getFacilityAssetLocation, {
+      pathParams: {
+        facility_external_id: String(qParams.facility),
+        external_id: String(qParams.location),
+      },
+    }),
+    enabled: !!(qParams.facility && qParams.location),
   });
 
   function isValidURL(url: string) {
