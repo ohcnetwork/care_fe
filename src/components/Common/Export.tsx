@@ -16,6 +16,8 @@ import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
 
+import ButtonV2 from "./ButtonV2";
+
 interface ExportItem {
   options?: ShadcnMenuDropdownItemProps;
   type?: "csv" | "json";
@@ -140,7 +142,7 @@ export const ExportButton = ({
 
   return (
     <>
-      <Button
+      <ButtonV2
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -154,8 +156,10 @@ export const ExportButton = ({
             exportFile(action, props.filenamePrefix, type, parse);
           }
         }}
-        variant="outline_primary"
-        size="default"
+        className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
+        variant="secondary"
+        ghost
+        circle
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
@@ -165,7 +169,7 @@ export const ExportButton = ({
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}
         </span>
-      </Button>
+      </ButtonV2>
     </>
   );
 };
