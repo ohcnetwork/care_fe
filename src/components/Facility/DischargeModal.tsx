@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +21,7 @@ import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import PrescriptionBuilder from "@/components/Medicine/PrescriptionBuilder";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useConfirmedAction from "@/hooks/useConfirmedAction";
 
 import { DISCHARGE_REASONS } from "@/common/constants";
@@ -28,8 +30,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -92,10 +94,29 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
-  const initialDiagnoses = useTanStackQueryInstead(routes.getConsultation, {
-    pathParams: { id: consultationData.id ?? "" },
-    prefetch: !!consultationData.id,
-  }).data?.diagnoses;
+  const { goBack } = useAppHistory();
+
+  const {
+    isLoading: consultationLoading,
+    data: consultationDataFetched,
+    isError: errorOnConsultationData,
+  } = useQuery({
+    queryKey: [routes.getConsultation.path, consultationData.id],
+    queryFn: () =>
+      query(routes.getConsultation, {
+        pathParams: { id: consultationData.id },
+      }),
+    enabled: consultationData.id !== undefined,
+  });
+
+  if (!errorOnConsultationData) {
+    console.log(consultationDataFetched);
+  }
+
+  if (errorOnConsultationData) {
+    Notification.Error({ msg: "Error loading consultation data" });
+    goBack();
+  }
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
@@ -177,7 +198,7 @@ const DischargeModal = ({
         ? "death_datetime"
         : "discharge_date"
     ];
-  if (initialDiagnoses == null) {
+  if (consultationLoading) {
     return <Loading />;
   }
 
@@ -309,7 +330,7 @@ const DischargeModal = ({
               <FieldLabel>{t("diagnosis_at_discharge")}</FieldLabel>
               <EditDiagnosesBuilder
                 consultationId={consultationData.id}
-                value={initialDiagnoses}
+                value={[]}
               />
             </div>
           )}
