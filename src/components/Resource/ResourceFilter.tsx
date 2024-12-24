@@ -16,7 +16,7 @@ import { RESOURCE_FILTER_ORDER } from "@/common/constants";
 import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import useQuery from "@/Utils/request/useQuery";
 import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
@@ -31,7 +31,7 @@ export default function ListFilter(props: any) {
     approving_facility_ref: null,
     assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
+    emergency: filter.emergency || "",
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -40,51 +40,41 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
   });
 
-  const { loading: orginFacilityLoading } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      prefetch: filter.origin_facility !== undefined,
-      pathParams: { id: filter.origin_facility },
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          setFilterState({
-            origin_facility_ref: filter.origin_facility === "" ? "" : data,
-          });
-        }
-      },
+  const { loading: orginFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.origin_facility !== undefined,
+    pathParams: { id: filter.origin_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          origin_facility_ref: filter.origin_facility === "" ? "" : data,
+        });
+      }
     },
-  );
+  });
 
-  const { loading: resourceFacilityLoading } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      prefetch: filter.approving_facility !== undefined,
-      pathParams: { id: filter.approving_facility },
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          setFilterState({
-            approving_facility_ref:
-              filter.approving_facility === "" ? "" : data,
-          });
-        }
-      },
+  const { loading: resourceFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.approving_facility !== undefined,
+    pathParams: { id: filter.approving_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          approving_facility_ref: filter.approving_facility === "" ? "" : data,
+        });
+      }
     },
-  );
+  });
 
-  const { loading: assignedFacilityLoading } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      pathParams: { id: filter.assigned_facility },
-      prefetch: filter.assigned_facility !== undefined,
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          setFilterState({
-            assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
-          });
-        }
-      },
+  const { loading: assignedFacilityLoading } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.assigned_facility },
+    prefetch: filter.assigned_facility !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
+        });
+      }
     },
-  );
+  });
 
   const setFacility = (selected: any, name: string) => {
     setFilterState({
