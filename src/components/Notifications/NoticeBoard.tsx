@@ -38,7 +38,7 @@ export const NoticeBoard = () => {
   );
 
   const UserInfo: React.FC<NotificationData> = (notice) => (
-    <div className="flex items-center bg-gray-200 rounded-lg">
+    <div className="flex items-center bg-gray-100 rounded-lg">
       <Avatar
         name={formatName(notice.caused_by)}
         imageUrl={notice.caused_by.read_profile_picture_url}
@@ -96,7 +96,7 @@ export const NoticeBoard = () => {
           </h1>
           <Message className="" message={notice.message} />
         </div>
-        <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-200 rounded-lg mt-4">
+        <DialogFooter className="sm:justify-start w-full py-2 flex items-center bg-gray-100 rounded-lg mt-4">
           <UserInfo {...notice} />
         </DialogFooter>
       </>
@@ -121,7 +121,7 @@ export const NoticeBoard = () => {
               </h1>
               <Message className="line-clamp-5" message={item.message} />
             </div>
-            <div className="h-auto md:h-1/4 flex flex-col md:flex-row justify-between items-center bg-gray-200 p-3 md:py-1 space-y-3 md:space-y-0">
+            <div className="h-auto md:h-1/4 flex flex-col md:flex-row justify-between items-center bg-gray-100 p-3 md:py-1 space-y-3 md:space-y-0">
               <UserInfo {...item} />
               <div className="flex flex-col text-left border-2 border-gray-400 rounded-md mr-10">
                 <Dialog>
