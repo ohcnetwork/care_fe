@@ -3,6 +3,13 @@ import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CountBlock from "@/CAREUI/display/Count";
+import FilterBadge from "@/CAREUI/display/FilterBadge";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
@@ -11,6 +18,11 @@ import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
+import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
+import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
+import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
+import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
+import { FacilityModel, PatientCategory } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -27,31 +39,20 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-
-import Chip from "../../CAREUI/display/Chip";
-import CountBlock from "../../CAREUI/display/Count";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import { triggerGoal } from "../../Integrations/Plausible";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useTanStackQueryInstead from "../../Utils/request/useQuery";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
-  calculateDateRangeDuration,
+  calculateDaysBetween,
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
-} from "../../Utils/utils";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
-import { getDiagnosesByIds } from "../Diagnosis/utils";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import { FacilityModel, PatientCategory } from "../Facility/models";
+} from "@/Utils/utils";
+
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
@@ -224,7 +225,7 @@ export const PatientManager = () => {
   ];
 
   const durations = date_range_fields.map(([startDate, endDate]) =>
-    calculateDateRangeDuration(startDate, endDate),
+    calculateDaysBetween(startDate, endDate),
   );
 
   const isExportAllowed =

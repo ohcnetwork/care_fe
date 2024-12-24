@@ -572,7 +572,7 @@ export const copyToClipboard = async (content: string) => {
   }
 };
 
-export const calculateDateRangeDuration = (
+export const calculateDaysBetween = (
   startDate: string,
   endDate: string,
 ): number => {

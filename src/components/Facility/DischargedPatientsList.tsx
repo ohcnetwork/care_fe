@@ -9,6 +9,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
@@ -42,14 +44,11 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
-  calculateDateRangeDuration,
+  calculateDaysBetween,
   formatPatientAge,
   humanizeStrings,
   parsePhoneNumber,
 } from "@/Utils/utils";
-
-import ButtonV2 from "../Common/ButtonV2";
-import ExportMenu from "../Common/Export";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -229,7 +228,7 @@ const DischargedPatientsList = ({
   ];
 
   const durations = date_range_fields.map(([startDate, endDate]) =>
-    calculateDateRangeDuration(startDate, endDate),
+    calculateDaysBetween(startDate, endDate),
   );
 
   const isExportAllowed =
