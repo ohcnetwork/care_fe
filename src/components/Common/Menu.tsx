@@ -76,6 +76,15 @@ export type DropdownItemProps = RawDivProps &
     disabled?: boolean | undefined;
   };
 
+export type ShadcnMenuDropdownItemProps = RawDivProps &
+  AuthorizedElementProps & {
+    onClick?: () => void;
+    disabled?: boolean;
+    icon?: ReactNode | undefined;
+    className?: string;
+    children?: ReactNode;
+  };
+
 export function DropdownItem({
   authorizeFor = Anyone,
   variant = "primary",

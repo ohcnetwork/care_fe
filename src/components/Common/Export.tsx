@@ -1,20 +1,23 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
-import DropdownMenu, {
-  DropdownItem,
-  DropdownItemProps,
-} from "@/components/Common/Menu";
+import { ShadcnMenuDropdownItemProps } from "@/components/Common/Menu";
 
 import useExport from "@/hooks/useExport";
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
 import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
 
 interface ExportItem {
-  options?: DropdownItemProps;
+  options?: ShadcnMenuDropdownItemProps;
   type?: "csv" | "json";
   filePrefix?: string;
   label: string;
@@ -69,7 +72,7 @@ export const ExportMenu = ({
         variant="outline_primary"
         className="py-2.5"
       >
-        <CareIcon icon="l-export" />
+        <CareIcon icon="l-export" className="mr-1" />
         {isExporting ? "Exporting..." : label}
       </Button>
     );
@@ -77,32 +80,49 @@ export const ExportMenu = ({
 
   return (
     <div key="export-menu" id="export-button">
-      <DropdownMenu
-        disabled={isExporting || disabled}
-        title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon icon="l-export" />}
-        className="border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white h-9 px-4 py-2dark:border-primary-700 dark:bg-primary-700 dark:text-white"
-      >
-        {exportItems.map((item) => (
-          <DropdownItem
-            key={item.label}
-            onClick={() => {
-              let action = item.action;
-              if (item.route) {
-                action = async () => {
-                  const { data } = await request(item.route!);
-                  return data ?? null;
-                };
-              }
-              if (action) {
-                exportFile(action, item.filePrefix, item.type, item.parse);
-              }
-            }}
-            {...item.options}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            disabled={isExporting || disabled}
+            size="default"
+            variant="outline_primary"
+            className="py-2.5 w-full"
           >
-            {item.label}
-          </DropdownItem>
-        ))}
+            <CareIcon icon="l-export" className="mr-1" />
+            {isExporting ? "Exporting..." : label}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-full">
+          {exportItems.map((item) => (
+            <DropdownMenuItem
+              key={item.label}
+              onClick={() => {
+                let action = item.action;
+                if (item.route) {
+                  action = async () => {
+                    const { data } = await request(item.route!);
+                    return data ?? null;
+                  };
+                }
+                if (action) {
+                  exportFile(action, item.filePrefix, item.type, item.parse);
+                }
+              }}
+              disabled={
+                item.options?.disabled ||
+                (item.options?.authorizeFor &&
+                  !useIsAuthorized(item.options.authorizeFor))
+              }
+              id={item.options?.id}
+              className={item.options?.className}
+            >
+              <div>
+                {item.options?.icon}
+                <span className="ml-1">{item.label}</span>
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
@@ -118,7 +138,7 @@ export const ExportButton = ({
 
   return (
     <>
-      <ButtonV2
+      <Button
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -132,10 +152,8 @@ export const ExportButton = ({
             exportFile(action, props.filenamePrefix, type, parse);
           }
         }}
-        className="tooltip mx-2 p-4 text-lg text-secondary-800  bg-red disabled:bg-transparent disabled:text-secondary-500"
-        variant="secondary"
-        ghost
-        circle
+        variant="outline_primary"
+        size="default"
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
@@ -145,7 +163,7 @@ export const ExportButton = ({
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}
         </span>
-      </ButtonV2>
+      </Button>
     </>
   );
 };
