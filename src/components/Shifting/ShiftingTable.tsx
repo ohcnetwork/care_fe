@@ -134,8 +134,8 @@ export default function ShiftingTable(props: {
                 </div>
               </div>
 
-              <div className="col-span-1 flex flex-col px-3 text-left">
-                <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
+              <div className="col-span-1 flex flex-col text-left">
+                <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row flex-wrap">
                   <dt
                     title={t("shifting_status")}
                     className={`mt-1 flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
@@ -172,13 +172,13 @@ export default function ShiftingTable(props: {
                 </div>
               </div>
 
-              <div className="col-span-1 text-left">
+              <div className="col-span-1 flex flex-col flex-wrap text-left">
                 <dt
                   title={t("origin_facility")}
                   className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-departure" className="mr-2" />
-                  <dd className="text-sm font-bold leading-5 text-secondary-900">
+                  <dd className="text-sm flex flex-wrap font-bold leading-5 text-secondary-900">
                     {shift.origin_facility_object?.name}
                   </dd>
                 </dt>
@@ -197,17 +197,17 @@ export default function ShiftingTable(props: {
 
                 <dt
                   title={t("assigned_facility")}
-                  className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+                  className="flex flex-wrap items-center text-left text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-arrival" className="mr-2" />
-                  <dd className="text-sm font-bold leading-5 text-secondary-900">
+                  <dd className="text-sm flex flex-wrap font-bold leading-5 text-secondary-900">
                     {shift.assigned_facility_external ||
                       shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
                   </dd>
                 </dt>
               </div>
-              <div className="col-span-1 mt-2 flex flex-col text-left">
+              <div className="ml-3 col-span-1 mt-2 flex flex-col text-left">
                 <ButtonV2
                   onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
                   variant="secondary"
@@ -219,7 +219,7 @@ export default function ShiftingTable(props: {
                 {shift.status === "COMPLETED" && shift.assigned_facility && (
                   <div className="mt-2">
                     <ButtonV2
-                      className="w-full"
+                      className="w-full text-wrap"
                       disabled={
                         !shift.patient_object.allow_transfer ||
                         !(
