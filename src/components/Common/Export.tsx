@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import { ShadcnMenuDropdownItemProps } from "@/components/Common/Menu";
 
 import useExport from "@/hooks/useExport";
@@ -158,7 +157,7 @@ export const ExportButton = ({
 
   return (
     <>
-      <ButtonV2
+      <Button
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -173,9 +172,7 @@ export const ExportButton = ({
           }
         }}
         className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
-        variant="secondary"
-        ghost
-        circle
+        variant="link"
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
@@ -184,8 +181,8 @@ export const ExportButton = ({
         )}
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}
-        </span>
-      </ButtonV2>
+        </span>{" "}
+      </Button>
     </>
   );
 };
