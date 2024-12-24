@@ -27,7 +27,7 @@ import * as Notification from "@/Utils/Notifications";
 import { parseQueryParams } from "@/Utils/primitives";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import useQuery from "@/Utils/request/useQuery";
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -69,23 +69,20 @@ const AssetsList = () => {
     refetch: assetsFetch,
     loading,
     data: assetList,
-  } = useTanStackQueryInstead(routes.listAssets, {
+  } = useQuery(routes.listAssets, {
     query: params,
   });
 
-  const { data: facilityObject } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      pathParams: { id: qParams.facility },
-      onResponse: ({ res, data }) => {
-        if (res?.status === 200 && data) {
-          setFacility(data);
-          setSelectedFacility(data);
-        }
-      },
-      prefetch: !!qParams.facility,
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.facility },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setFacility(data);
+        setSelectedFacility(data);
+      }
     },
-  );
+    prefetch: !!qParams.facility,
+  });
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -95,16 +92,13 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: locationObject } = useTanStackQueryInstead(
-    routes.getFacilityAssetLocation,
-    {
-      pathParams: {
-        facility_external_id: String(qParams.facility),
-        external_id: String(qParams.location),
-      },
-      prefetch: !!(qParams.facility && qParams.location),
+  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: String(qParams.facility),
+      external_id: String(qParams.location),
     },
-  );
+    prefetch: !!(qParams.facility && qParams.location),
+  });
 
   function isValidURL(url: string) {
     try {
