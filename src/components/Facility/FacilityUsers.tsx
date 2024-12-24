@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import Tabs from "@/components/Common/Tabs";
+// import Tabs from "@/components/Common/Tabs";
 import UserListView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -24,7 +26,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("cardView");
   const { facilityId } = props;
 
   const { data: facilityData } = useTanStackQueryInstead(
@@ -78,7 +80,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
         className="my-3 flex flex-col items-center sm:items-start"
       />
       <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <div className="sm:w-1/2">
+        <div className="flex-grow w-full">
           <SearchByMultipleFields
             id="search-by-username"
             className="w-full"
@@ -95,33 +97,22 @@ export default function FacilityUsers(props: { facilityId: number }) {
             ]}
           />
         </div>
-        <Tabs
-          tabs={[
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-credit-card" className="text-lg" />
-                  <span>Card</span>
-                </div>
-              ),
-              value: 0,
-              id: "user-card-view",
-            },
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>List</span>
-                </div>
-              ),
-              value: 1,
-              id: "user-list-view",
-            },
-          ]}
-          currentTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as number)}
-          className="float-right"
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="cardView">
+              <div className="flex items-center gap-2" id="user-card-view">
+                <CareIcon icon="l-credit-card" className="text-lg" />
+                <span>Card</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="listView">
+              <div className="flex items-center gap-2" id="user-list-view">
+                <CareIcon icon="l-list-ul" className="text-lg" />
+                <span>List</span>
+              </div>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       <div>{usersList}</div>
     </Page>

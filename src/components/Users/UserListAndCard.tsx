@@ -342,7 +342,7 @@ export const UserList = ({
 };
 interface UserListViewProps {
   users: UserModel[] | UserAssignedModel[];
-  activeTab: number;
+  activeTab: string;
 }
 
 export default function UserListView({ users, activeTab }: UserListViewProps) {
@@ -350,7 +350,7 @@ export default function UserListView({ users, activeTab }: UserListViewProps) {
     <>
       {users.length > 0 ? (
         <>
-          {activeTab === 0 ? (
+          {activeTab === "cardView" ? (
             <UserGrid users={users} />
           ) : (
             <UserList users={users} />

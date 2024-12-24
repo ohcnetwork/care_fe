@@ -6,11 +6,13 @@ import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import Tabs from "@/components/Common/Tabs";
+// import Tabs from "@/components/Common/Tabs";
 import UserFilter from "@/components/Users/UserFilter";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -42,7 +44,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("cardView");
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,
@@ -171,7 +173,7 @@ export default function ManageUsers() {
 
       <div className="pt-4">
         <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="sm:w-1/2">
+          <div className="flex-grow w-full">
             <SearchByMultipleFields
               id="search-by-username"
               className="w-full"
@@ -189,33 +191,22 @@ export default function ManageUsers() {
               clearSearch={clearSearch}
             />
           </div>
-          <Tabs
-            tabs={[
-              {
-                text: (
-                  <div className="flex items-center gap-2">
-                    <CareIcon icon="l-credit-card" className="text-lg" />
-                    <span>Card</span>
-                  </div>
-                ),
-                value: 0,
-                id: "user-card-view",
-              },
-              {
-                text: (
-                  <div className="flex items-center gap-2">
-                    <CareIcon icon="l-list-ul" className="text-lg" />
-                    <span>List</span>
-                  </div>
-                ),
-                value: 1,
-                id: "user-list-view",
-              },
-            ]}
-            currentTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab as number)}
-            className="float-right"
-          />
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="cardView">
+                <div className="flex items-center gap-2" id="user-card-view">
+                  <CareIcon icon="l-credit-card" className="text-lg" />
+                  <span>Card</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="listView">
+                <div className="flex items-center gap-2" id="user-list-view">
+                  <CareIcon icon="l-list-ul" className="text-lg" />
+                  <span>List</span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
         <div>{usersList}</div>
       </div>
