@@ -62,19 +62,19 @@ function ExportMenuItem({
   return (
     <DropdownMenuItem
       onClick={() => {
-        let action = item.action;
-        if (item.route) {
-          action = async () => {
-            const { data } = await request(item.route!);
-            return data ?? null;
-          };
-        }
-        if (action) {
+        if (item.action) {
+          let action = item.action;
+          if (item.route) {
+            action = async () => {
+              const { data } = await request(item.route!);
+              return data ?? null;
+            };
+          }
           exportFile(action, item.filePrefix, item.type, item.parse);
+        } else if (item.options?.onClick) {
+          item.options.onClick();
         }
       }}
-      disabled={item.options?.disabled || !isAuthorized}
-      id={item.options?.id}
       className={item.options?.className}
     >
       <div>
