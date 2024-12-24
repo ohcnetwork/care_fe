@@ -439,8 +439,8 @@ const DischargedPatientsList = ({
                           return preventDuplicatePatientsDuetoPolicyId(data);
                         } catch (e) {
                           if (e instanceof Error) {
-                            Notification.Warn({
-                              msg: e.message,
+                            Notification.Error({
+                              msg: "An unexpected error occurred while processing the export",
                             });
                           }
                           return "";

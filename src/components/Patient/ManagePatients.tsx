@@ -896,7 +896,7 @@ export const PatientManager = () => {
                           return preventDuplicatePatientsDuetoPolicyId(data);
                         } catch (e) {
                           Notification.Warn({
-                            msg: e,
+                            msg: "An unexpected error occurred while processing the export",
                           });
                           return "";
                         }
