@@ -1,84 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import { FacilityModel } from "@/components/Facility/models";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 import { Appointment } from "@/components/Schedule/types";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 
 interface Props {
-  facilityId: string;
-  appointmentId: string;
-}
-
-export default function AppointmentTokenPage(props: Props) {
-  const facilityQuery = useQuery({
-    queryKey: ["facility", props.facilityId],
-    queryFn: query(routes.getPermittedFacility, {
-      pathParams: {
-        id: props.facilityId,
-      },
-    }),
-  });
-
-  const appointmentQuery = useQuery({
-    queryKey: ["appointment", props.appointmentId],
-    queryFn: query(ScheduleAPIs.appointments.retrieve, {
-      pathParams: {
-        facility_id: props.facilityId,
-        id: props.appointmentId,
-      },
-    }),
-  });
-
-  if (!facilityQuery.data || !appointmentQuery.data) {
-    return <Loading />;
-  }
-
-  return (
-    <Page title="Token">
-      <div className="mt-4 py-4 flex justify-center border-t border-gray-200">
-        <div className="flex flex-col gap-4 mt-4">
-          <div id="section-to-print">
-            <TokenCard
-              appointment={appointmentQuery.data}
-              facility={facilityQuery.data}
-            />
-          </div>
-          <div className="flex justify-end">
-            {/* TODO: add download as image/pdf/etc */}
-            <Button variant="outline" onClick={print}>
-              <CareIcon icon="l-print" className="text-lg mr-2" />
-              <span>Print Token</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </Page>
-  );
-}
-
-export function TokenCard({
-  appointment,
-  facility,
-}: {
   appointment: Appointment;
   facility: FacilityModel;
-}) {
+}
+
+const AppointmentTokenCard = ({ appointment, facility }: Props) => {
   const { patient } = appointment;
   const { t } = useTranslation();
   return (
@@ -154,4 +92,6 @@ export function TokenCard({
       </div>
     </Card>
   );
-}
+};
+
+export { AppointmentTokenCard };

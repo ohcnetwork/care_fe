@@ -28,8 +28,10 @@ export default function CareIcon({
   // TODO: fill & strokeWidth are defined for only one icon
   // Rethink Implementation
 
+  const isDuoTone = icon.startsWith("d-");
+
   const [viewBox, path, fill, strokeWidth, secondaryPath] = (
-    (icon.startsWith("d-") ? duoToneIconData : iconData) as typeof iconData &
+    (isDuoTone ? duoToneIconData : iconData) as typeof iconData &
       typeof duoToneIconData
   )[icon] as [
     number,
@@ -62,7 +64,8 @@ export default function CareIcon({
           fill={fill === false ? "none" : "currentColor"}
           stroke={fill === false ? "currentColor" : undefined}
           strokeWidth={fill === false ? strokeWidth : undefined}
-          opacity={0.32}
+          // TODO: Temp. hack until we properly abstract things
+          opacity={isDuoTone ? 0.32 : 1}
         />
       )}
     </svg>

@@ -92,3 +92,7 @@ export interface Appointment {
   readonly reason_for_visit: string;
   readonly resource: UserBase;
 }
+
+export interface AvailabilityHeatmap {
+  [date: string]: { total_slots: number; booked_slots: number };
+}

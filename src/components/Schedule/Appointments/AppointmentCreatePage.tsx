@@ -1,12 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  compareAsc,
-  format,
-  isBefore,
-  isSameDay,
-  max,
-  startOfToday,
-} from "date-fns";
+import { format, isBefore, isSameDay, startOfToday } from "date-fns";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,17 +22,15 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import { SlotAvailability } from "@/components/Schedule/types";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  dateQueryString,
-  formatDisplayName,
-  formatName,
-  getMonthStartAndEnd,
-} from "@/Utils/utils";
+import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -66,27 +57,20 @@ export default function AppointmentCreatePage(props: Props) {
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
 
-  const month = getMonthStartAndEnd(selectedMonth);
-
-  const fromDate = dateQueryString(max([month.start, startOfToday()]));
-  const toDate = dateQueryString(month.end);
-
-  const heatmapQuery = useQuery({
-    queryKey: ["availabilityHeatmap", resourceId, fromDate, toDate],
-    queryFn: query(ScheduleAPIs.slots.availabilityHeatmap, {
-      pathParams: { facility_id: props.facilityId },
-      body: {
-        resource: resourceId,
-        from_date: fromDate,
-        to_date: toDate,
-      },
-    }),
-    enabled: !!resourceId,
+  const heatmapQuery = useAvailabilityHeatmap({
+    facilityId: props.facilityId,
+    userId: resourceId,
+    month: selectedMonth,
   });
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", resourceId, dateQueryString(selectedDate)],
-    queryFn: query(ScheduleAPIs.slots.getAvailableSlotsForADay, {
+    queryKey: [
+      "slots",
+      props.facilityId,
+      resourceId,
+      dateQueryString(selectedDate),
+    ],
+    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: props.facilityId },
       body: {
         resource: resourceId,
@@ -138,7 +122,8 @@ export default function AppointmentCreatePage(props: Props) {
 
     const { booked_slots, total_slots } = availability;
     const bookedPercentage = booked_slots / total_slots;
-    const isFullyBooked = booked_slots >= total_slots;
+    const tokensLeft = total_slots - booked_slots;
+    const isFullyBooked = tokensLeft <= 0;
 
     return (
       <button
@@ -155,18 +140,20 @@ export default function AppointmentCreatePage(props: Props) {
       >
         <div className="relative z-10">
           <span>{date.getDate()}</span>
-          <span
-            className={cn(
-              "text-xs text-gray-500 block font-semibold",
-              bookedPercentage >= 0.8
-                ? "text-red-500"
-                : bookedPercentage >= 0.5
-                  ? "text-yellow-500"
-                  : "text-primary-500",
-            )}
-          >
-            {total_slots - booked_slots} / {total_slots}
-          </span>
+          {Number.isFinite(tokensLeft) && (
+            <span
+              className={cn(
+                "text-xs text-gray-500 block font-semibold",
+                bookedPercentage >= 0.8
+                  ? "text-red-500"
+                  : bookedPercentage >= 0.5
+                    ? "text-yellow-500"
+                    : "text-primary-500",
+              )}
+            >
+              {tokensLeft} left
+            </span>
+          )}
         </div>
         {!isFullyBooked && (
           <div
@@ -202,7 +189,7 @@ export default function AppointmentCreatePage(props: Props) {
       });
       toast.success("Appointment created successfully");
       navigate(
-        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}/token`,
+        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}`,
       );
     } catch (error) {
       toast.error("Failed to create appointment");
@@ -385,34 +372,3 @@ export default function AppointmentCreatePage(props: Props) {
     </Page>
   );
 }
-
-const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
-  const result: {
-    availability: SlotAvailability["availability"];
-    slots: Omit<SlotAvailability, "availability">[];
-  }[] = [];
-
-  for (const slot of slots) {
-    const availability = slot.availability;
-    const existing = result.find(
-      (r) => r.availability.name === availability.name,
-    );
-    if (existing) {
-      existing.slots.push(slot);
-    } else {
-      result.push({ availability, slots: [slot] });
-    }
-  }
-
-  // sort slots by start time
-  result.forEach(({ slots }) =>
-    slots.sort((a, b) => compareAsc(a.start_datetime, b.start_datetime)),
-  );
-
-  // sort availability by first slot start time
-  result.sort((a, b) =>
-    compareAsc(a.slots[0].start_datetime, b.slots[0].start_datetime),
-  );
-
-  return result;
-};

@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { useSignOut } from "@/components/Common/Sidebar/Utils";
@@ -163,7 +164,7 @@ export function FacilityDetailsPage({ id }: Props) {
             />
           </div>
 
-          <div className="px-4 space-y-6">
+          <div className="px-4 space-y-2">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">{facility.name}</h1>
               <p className="text-lg text-muted-foreground">
@@ -182,6 +183,12 @@ export function FacilityDetailsPage({ id }: Props) {
                 <FeatureBadge key={featureId} featureId={featureId as number} />
               ))}
             </div>
+
+            {facility.description && (
+              <div className="mt-4">
+                <Markdown content={facility.description} />
+              </div>
+            )}
           </div>
         </div>
       </Card>

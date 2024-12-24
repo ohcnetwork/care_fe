@@ -72,6 +72,7 @@ type FacilityForm = {
   latitude: string;
   longitude: string;
   pincode: string;
+  description: string;
 };
 
 const initForm: FacilityForm = {
@@ -88,6 +89,7 @@ const initForm: FacilityForm = {
   latitude: "",
   longitude: "",
   pincode: "",
+  description: "",
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
@@ -195,6 +197,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             kasp_empanelled: "",
             address: data.address ? data.address : "",
             pincode: data.pincode ? data.pincode : "",
+            description: data.description ? data.description : "",
             phone_number: data.phone_number
               ? data.phone_number.length == 10
                 ? "+91" + data.phone_number
@@ -389,6 +392,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         latitude: state.form.latitude,
         longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
+        description: state.form.description,
       };
 
       const { res, data: requestData } = facilityId
@@ -466,6 +470,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {...field("name")}
                 required
                 label={t("facility_name")}
+              />
+              <TextAreaFormField
+                {...field("description")}
+                label={t("description")}
+                placeholder={t("markdown_supported")}
               />
               <MultiSelectFormField
                 {...field("features")}

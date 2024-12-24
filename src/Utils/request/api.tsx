@@ -1487,7 +1487,9 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<Record<string, never>>(),
+      TRes: Type<
+        { access: string } | { errors: Array<Record<string, string>> }
+      >(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
@@ -1510,7 +1512,7 @@ const routes = {
         type: "header",
       },
     },
-    getAvailableSlotsForADay: {
+    getSlotsForDay: {
       path: "/api/v1/otp/slots/get_slots_for_day/",
       method: "POST",
       TRes: Type<{ results: SlotAvailability[] }>(),

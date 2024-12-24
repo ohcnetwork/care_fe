@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,21 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import {
-  filterAvailabilitiesByDayOfWeek,
-  getFakeTokenNumber,
-} from "@/components/Schedule/helpers";
-import { Appointment } from "@/components/Schedule/types";
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
+import { getFakeTokenNumber } from "@/components/Schedule/helpers";
+import { Appointment, SlotAvailability } from "@/components/Schedule/types";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
 
 interface QueryParams {
   resource?: string;
@@ -42,6 +41,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
 
   const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const date = dateQueryString(new Date());
 
   const authUser = useAuthUser();
   const facilityId = props.facilityId ?? authUser.home_facility!;
@@ -58,11 +58,42 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const resources = resourcesQuery.data?.users;
   const resource = resources?.find((r) => r.id === qParams.resource);
 
-  const slots = useSlots(facilityId, qParams.resource);
+  const slotsQuery = useQuery({
+    queryKey: ["slots", facilityId, qParams.resource, date],
+    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
+      pathParams: { facility_id: facilityId },
+      body: {
+        resource: qParams.resource ?? "",
+        day: date,
+      },
+    }),
+    enabled: !!qParams.resource,
+  });
+  const slots = slotsQuery.data?.results;
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   return (
-    <Page title="Out Patient (OP) Appointments" collapseSidebar>
+    <Page
+      title="Out Patient (OP) Appointments"
+      collapseSidebar
+      options={
+        <Tabs
+          value={viewMode}
+          onValueChange={(value) => setViewMode(value as "board" | "list")}
+        >
+          <TabsList>
+            <TabsTrigger value="board">
+              <CareIcon icon="l-kanban" className="mr-2" />
+              <span>{t("board")}</span>
+            </TabsTrigger>
+            <TabsTrigger value="list">
+              <CareIcon icon="l-list-ul" className="mr-2" />
+              <span>{t("list")}</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      }
+    >
       <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           <div>
@@ -122,37 +153,30 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 ({formatDate(new Date(), "dd MMM yyyy")})
               </span>
             </Label>
-            <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
-              <Button
-                variant={slot ? "ghost" : "outline"}
-                onClick={() => setQParams({ resource: qParams.resource })}
-                className={cn(!slot && "shadow", "hover:bg-white")}
-              >
-                {t("all")}
-              </Button>
-              {slots?.map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant={slot?.id === qParams.slot ? "outline" : "ghost"}
-                  onClick={() =>
-                    setQParams({ resource: qParams.resource, slot: slot.id })
-                  }
-                  className={cn(
-                    slot?.id === qParams.slot && "shadow",
-                    "hover:bg-white",
-                  )}
-                >
-                  {formatAvailabilityTime(slot.availability)}
-                </Button>
-              ))}
-            </div>
+
+            <SlotFilter
+              slots={slots ?? []}
+              selectedSlot={qParams.slot}
+              onSelect={(slot) => {
+                const updated = { ...qParams };
+                if (slot === "all") {
+                  delete updated.slot;
+                } else {
+                  updated.slot = slot;
+                }
+                setQParams(updated);
+              }}
+            />
           </div>
         </div>
 
         <div className="flex gap-4 items-center">
           <Input className="w-[300px]" placeholder={t("search")} />
-          <Button variant="outline">{t("filter")}</Button>
-          <div className="flex border rounded-lg">
+          <Button variant="secondary">
+            <CareIcon icon="l-filter" className="mr-2" />
+            <span>{t("filter")}</span>
+          </Button>
+          {/* <div className="flex border rounded-lg">
             <Button
               variant="ghost"
               className={cn(
@@ -173,17 +197,28 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             >
               {t("list")}
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
 
       <ScrollArea>
         <div className="flex w-max space-x-4">
-          <AppointmentColumn status="booked" facilityId={facilityId} />
-          <AppointmentColumn status="checked_in" facilityId={facilityId} />
-          <AppointmentColumn status="in_consultation" facilityId={facilityId} />
-          <AppointmentColumn status="fulfilled" facilityId={facilityId} />
-          <AppointmentColumn status="noshow" facilityId={facilityId} />
+          {(
+            [
+              "booked",
+              "checked_in",
+              "in_consultation",
+              "fulfilled",
+              "noshow",
+            ] as const
+          ).map((status) => (
+            <AppointmentColumn
+              key={status}
+              status={status}
+              facilityId={facilityId}
+              slot={slot?.id}
+            />
+          ))}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
@@ -192,16 +227,29 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 }
 
 function AppointmentColumn(props: {
-  status: Appointment["status"];
   facilityId: string;
+  status: Appointment["status"];
+  resource?: string;
+  slot?: string;
 }) {
   const { t } = useTranslation();
 
   const { data } = useQuery({
-    queryKey: ["appointments", props.facilityId, props.status],
+    queryKey: [
+      "appointments",
+      props.facilityId,
+      props.status,
+      props.resource,
+      props.slot,
+    ],
     queryFn: query(ScheduleAPIs.appointments.list, {
       pathParams: { facility_id: props.facilityId },
-      queryParams: { status: props.status },
+      queryParams: {
+        status: props.status,
+        limit: 100,
+        slot: props.slot,
+        resource: props.resource,
+      },
     }),
   });
 
@@ -274,28 +322,50 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
-const useSlots = (facilityId: string, resource_id?: string) => {
-  const templatesQuery = useQuery({
-    queryKey: ["slots", facilityId, resource_id],
-    queryFn: query(ScheduleAPIs.templates.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        resource: resource_id ?? "",
-        resource_type: "user",
-      },
-    }),
-    enabled: !!resource_id,
-  });
 
-  if (!templatesQuery.data) {
-    return null;
+interface SlotFilterProps {
+  slots: SlotAvailability[];
+  selectedSlot: string | undefined;
+  onSelect: (slot: string) => void;
+}
+
+function SlotFilter({ slots, selectedSlot, onSelect }: SlotFilterProps) {
+  const { t } = useTranslation();
+
+  if (slots.length <= 3) {
+    return (
+      <Tabs value={selectedSlot ?? "all"} onValueChange={onSelect}>
+        <TabsList>
+          <TabsTrigger value="all" className="uppercase">
+            {t("all")}
+          </TabsTrigger>
+          {slots.map((slot) => (
+            <TabsTrigger key={slot.id} value={slot.id}>
+              {format(slot.start_datetime, "h:mm a").replace(":00", "")}
+              {" - "}
+              {format(slot.end_datetime, "h:mm a").replace(":00", "")}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    );
   }
 
-  const today = new Date();
-
   return (
-    templatesQuery.data.results
-      // .filter((t) => isDateInRange(today, t.valid_from, t.valid_to)) // TODO: uncomment this, temp hack.
-      .flatMap((t) => filterAvailabilitiesByDayOfWeek(t.availabilities, today))
+    <Select value={selectedSlot ?? "all"} onValueChange={onSelect}>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">{t("show_all_slots")}</SelectItem>
+        {slots.map((slot) => (
+          <SelectItem key={slot.id} value={slot.id}>
+            {format(slot.start_datetime, "h:mm a")}
+            {" - "}
+            {format(slot.end_datetime, "h:mm a")}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
-};
+}

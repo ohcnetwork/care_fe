@@ -60,7 +60,7 @@ export default function OTPPatientRouter() {
   );
 
   const { data: userData } = useQuery({
-    queryKey: ["user", tokenData.phoneNumber],
+    queryKey: ["patients", tokenData.phoneNumber],
     queryFn: query(routes.otp.getPatient, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,

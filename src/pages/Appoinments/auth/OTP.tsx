@@ -33,7 +33,9 @@ import { CarePatientTokenKey } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
+import { HTTPError } from "@/Utils/request/types";
 import { parsePhoneNumber } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
 
@@ -135,36 +137,47 @@ export default function OTP({
   };
 
   const { mutate: verifyOTP } = useMutation({
-    mutationFn: (otp: string) =>
-      request(routes.otp.loginByOtp, {
-        body: {
-          phone_number: phoneNumber,
-          otp: otp,
-        },
-      }),
-    onSuccess: (response: any) => {
-      const CarePatientToken = response.data?.access;
-      if (CarePatientToken) {
+    mutationFn: async ({
+      phone_number,
+      otp,
+    }: {
+      phone_number: string;
+      otp: string;
+    }) => {
+      const response = await mutate(routes.otp.loginByOtp, { silent: true })({
+        phone_number,
+        otp,
+      });
+      if ("errors" in response) {
+        throw response;
+      }
+      return response;
+    },
+    onSuccess: (response: { access: string }) => {
+      if (response.access) {
         const tokenData: TokenData = {
-          token: CarePatientToken,
+          token: response.access,
           phoneNumber: phoneNumber,
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
+        navigate(
+          `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+        );
       }
-      navigate(
-        `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
-      );
     },
-    onError: () => {
+    onError: (error: HTTPError) => {
+      const errorData = error.cause as { errors: Array<{ otp: string }> };
+      const errorMessage =
+        errorData?.errors?.[0]?.otp || t("error_verifying_otp");
       Notification.Error({
-        msg: t("error_verifying_otp"),
+        msg: errorMessage,
       });
     },
   });
 
   const handleVerifySubmit = async (data: z.infer<typeof FormSchema>) => {
-    verifyOTP(data.pin);
+    verifyOTP({ phone_number: phoneNumber, otp: data.pin });
   };
 
   const renderPhoneNumberForm = () => {

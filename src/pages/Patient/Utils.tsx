@@ -23,6 +23,7 @@ export type AppointmentPatient = {
   state: number;
   district: number;
   local_body: number;
+  ward: number;
   pincode: number;
   gender: string;
 };
