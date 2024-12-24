@@ -1,6 +1,6 @@
 export const csvGroupByColumn = (
   data: string,
-  groupByColumn: string = "Patient ID",
+  groupByColumn: string,
   delimiter = ";",
 ): string => {
   const [header, ...datalines] = data.trim().split("\n");

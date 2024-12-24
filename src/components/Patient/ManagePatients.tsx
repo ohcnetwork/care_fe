@@ -893,7 +893,7 @@ export const PatientManager = () => {
                       },
                       parse: (data) => {
                         try {
-                          return csvGroupByColumn(data);
+                          return csvGroupByColumn(data, "Patient ID");
                         } catch (e) {
                           if (e instanceof Error) {
                             Notification.Error({
