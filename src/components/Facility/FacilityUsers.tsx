@@ -99,14 +99,14 @@ export default function FacilityUsers(props: { facilityId: number }) {
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="cardView">
-              <div className="flex items-center gap-2" id="user-card-view">
+            <TabsTrigger value="cardView" id="user-card-view">
+              <div className="flex items-center gap-2">
                 <CareIcon icon="l-credit-card" className="text-lg" />
                 <span>Card</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="listView">
-              <div className="flex items-center gap-2" id="user-list-view">
+            <TabsTrigger value="listView" id="user-list-view">
+              <div className="flex items-center gap-2">
                 <CareIcon icon="l-list-ul" className="text-lg" />
                 <span>List</span>
               </div>

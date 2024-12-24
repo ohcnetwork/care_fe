@@ -83,6 +83,6 @@ export class UserPage {
   }
 
   verifyListView() {
-    cy.get("#user-list-view").should("have.class", "text-white");
+    cy.get("#user-list-view").should("have.attr", "data-state", "active");
   }
 }
