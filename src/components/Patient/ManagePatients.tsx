@@ -27,7 +27,7 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
-import { preventDuplicatePatientsDuetoPolicyId } from "@/Utils/removeDuplicates";
+import { preventDuplicatePatients } from "@/Utils/removeDuplicates";
 import routes from "@/Utils/request/api";
 
 import Chip from "../../CAREUI/display/Chip";
@@ -893,7 +893,7 @@ export const PatientManager = () => {
                       },
                       parse: (data) => {
                         try {
-                          return preventDuplicatePatientsDuetoPolicyId(data);
+                          return preventDuplicatePatients(data);
                         } catch (e) {
                           Notification.Warn({
                             msg: "An unexpected error occurred while processing the export",

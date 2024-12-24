@@ -1,7 +1,6 @@
 export const csvGroupByColumn = (
   data: string,
   groupByColumn: string,
-  mergeColumns: string[],
   delimiter = ";",
 ): string => {
   const [header, ...datalines] = data.trim().split("\n"); // Split the data into individual lines
@@ -24,17 +23,16 @@ export const csvGroupByColumn = (
 
   const mergedLines = Object.values(groupedData).map((group) => {
     if (!group.length) return "";
-    const mergeColumnIndices: number[] = mergeColumns.map((column) =>
-      headerColumns.indexOf(column),
-    );
+
     const mergedRow = [...group[0]];
-    mergeColumnIndices.forEach((mergeIndex) => {
+    headerColumns.forEach((column) => {
+      const Index = headerColumns.indexOf(column);
       const mergedValue = group
-        .map((columns) => columns[mergeIndex]?.trim() || "")
+        .map((columns) => columns[Index]?.trim() || "")
         .filter(Boolean) // Remove empty values
         .join(delimiter);
 
-      mergedRow[mergeIndex] = mergedValue;
+      mergedRow[Index] = mergedValue;
     });
     return mergedRow.join(",");
   });
@@ -42,11 +40,10 @@ export const csvGroupByColumn = (
   return header.concat(mergedLines.join("\n"));
 };
 
-export const preventDuplicatePatientsDuetoPolicyId = (data: string): string => {
+export const preventDuplicatePatients = (data: string): string => {
   const result = csvGroupByColumn(
     data,
     "Patient ID", // Group by Patient ID
-    ["policy ID"], // Merge policy IDs
     ";", // Use ";" as the delimiter
   );
   return result;

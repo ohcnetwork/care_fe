@@ -37,7 +37,7 @@ import {
 import { parseOptionId } from "@/common/utils";
 
 import * as Notification from "@/Utils/Notifications";
-import { preventDuplicatePatientsDuetoPolicyId } from "@/Utils/removeDuplicates";
+import { preventDuplicatePatients } from "@/Utils/removeDuplicates";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -436,7 +436,7 @@ const DischargedPatientsList = ({
                       },
                       parse: (data) => {
                         try {
-                          return preventDuplicatePatientsDuetoPolicyId(data);
+                          return preventDuplicatePatients(data);
                         } catch (e) {
                           if (e instanceof Error) {
                             Notification.Error({
