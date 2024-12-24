@@ -75,6 +75,8 @@ function ExportMenuItem({
           item.options.onClick();
         }
       }}
+      disabled={item.options?.disabled || !isAuthorized}
+      id={item.options?.id}
       className={item.options?.className}
     >
       <div>
