@@ -52,6 +52,12 @@ export const ExportMenu = ({
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
 
+  const authorizationResults = exportItems.map((item) =>
+    item.options?.authorizeFor
+      ? useIsAuthorized(item.options.authorizeFor)
+      : true,
+  );
+
   if (exportItems.length === 1) {
     const item = exportItems[0];
 
@@ -79,12 +85,6 @@ export const ExportMenu = ({
       </Button>
     );
   }
-
-  const authorizationResults = exportItems.map((item) =>
-    item.options?.authorizeFor
-      ? useIsAuthorized(item.options.authorizeFor)
-      : true,
-  );
 
   return (
     <div key="export-menu" id="export-button">
