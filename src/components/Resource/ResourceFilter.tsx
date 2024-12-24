@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useEffect } from "react";
 
 import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 
@@ -16,7 +18,7 @@ import { RESOURCE_FILTER_ORDER } from "@/common/constants";
 import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
@@ -40,41 +42,62 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
   });
 
-  const { loading: orginFacilityLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.origin_facility !== undefined,
-    pathParams: { id: filter.origin_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          origin_facility_ref: filter.origin_facility === "" ? "" : data,
-        });
-      }
-    },
-  });
+  const { isLoading: orginFacilityLoading, data: originFacilityData } =
+    useQuery({
+      queryKey: [routes.getAnyFacility.path, filter.origin_facility],
+      queryFn: () =>
+        query(routes.getAnyFacility, {
+          pathParams: { id: filter.origin_facility },
+        }),
+      enabled: filter.origin_facility !== undefined,
+    });
 
-  const { loading: resourceFacilityLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.approving_facility !== undefined,
-    pathParams: { id: filter.approving_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          approving_facility_ref: filter.approving_facility === "" ? "" : data,
-        });
-      }
-    },
-  });
+  useEffect(() => {
+    if (originFacilityData) {
+      setFilterState({
+        origin_facility_ref:
+          filter.origin_facility === "" ? "" : originFacilityData,
+      });
+    }
+  }, [originFacilityData]);
 
-  const { loading: assignedFacilityLoading } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: filter.assigned_facility },
-    prefetch: filter.assigned_facility !== undefined,
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
-        });
-      }
-    },
-  });
+  const { isLoading: resourceFacilityLoading, data: resourceFacilityData } =
+    useQuery({
+      queryKey: [routes.getAnyFacility.path, filter.approving_facility],
+      queryFn: () =>
+        query(routes.getAnyFacility, {
+          pathParams: { id: filter.approving_facility },
+        }),
+      enabled: filter.approving_facility !== undefined,
+    });
+
+  useEffect(() => {
+    if (resourceFacilityData) {
+      setFilterState({
+        approving_facility_ref:
+          filter.approving_facility === "" ? "" : resourceFacilityData,
+      });
+    }
+  }, [resourceFacilityData]);
+
+  const { isLoading: assignedFacilityLoading, data: assignedFacilityData } =
+    useQuery({
+      queryKey: [routes.getAnyFacility.path, filter.assigned_facility],
+      queryFn: () =>
+        query(routes.getAnyFacility, {
+          pathParams: { id: filter.assigned_facility },
+        }),
+      enabled: filter.assigned_facility !== undefined,
+    });
+
+  useEffect(() => {
+    if (assignedFacilityData) {
+      setFilterState({
+        assigned_facility_ref:
+          filter.assigned_facility === "" ? "" : assignedFacilityData,
+      });
+    }
+  }, [assignedFacilityData]);
 
   const setFacility = (selected: any, name: string) => {
     setFilterState({
