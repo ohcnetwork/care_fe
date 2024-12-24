@@ -387,7 +387,7 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
                                 <Input
                                   type="number"
                                   min={0}
-                                  placeholder="10"
+                                  placeholder="e.g. 10"
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(e.target.valueAsNumber)
@@ -409,7 +409,7 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
                                 <Input
                                   type="number"
                                   min={0}
-                                  placeholder="10"
+                                  placeholder="e.g. 1"
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(e.target.valueAsNumber)

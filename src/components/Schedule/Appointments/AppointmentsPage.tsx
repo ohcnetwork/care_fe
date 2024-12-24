@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,17 +21,13 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import {
-  filterAvailabilitiesByDayOfWeek,
-  getFakeTokenNumber,
-} from "@/components/Schedule/helpers";
+import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 import { Appointment } from "@/components/Schedule/types";
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
 
 interface QueryParams {
   resource?: string;
@@ -42,6 +38,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
 
   const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const date = dateQueryString(new Date());
 
   const authUser = useAuthUser();
   const facilityId = props.facilityId ?? authUser.home_facility!;
@@ -58,7 +55,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const resources = resourcesQuery.data?.users;
   const resource = resources?.find((r) => r.id === qParams.resource);
 
-  const slots = useSlots(facilityId, qParams.resource);
+  const slotsQuery = useQuery({
+    queryKey: ["slots", facilityId, qParams.resource, date],
+    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
+      pathParams: { facility_id: facilityId },
+      body: {
+        resource: qParams.resource ?? "",
+        day: date,
+      },
+    }),
+  });
+  const slots = slotsQuery.data?.results;
   const slot = slots?.find((s) => s.id === qParams.slot);
 
   return (
@@ -122,8 +129,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 ({formatDate(new Date(), "dd MMM yyyy")})
               </span>
             </Label>
-            <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
+            <div className="flex bg-gray-100 rounded-lg p-1 max-w-min">
+              {/* TODO: switch to select if we have more than 3 slots or in mobile view */}
               <Button
+                size="sm"
                 variant={slot ? "ghost" : "outline"}
                 onClick={() => setQParams({ resource: qParams.resource })}
                 className={cn(!slot && "shadow", "hover:bg-white")}
@@ -132,6 +141,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
               </Button>
               {slots?.map((slot) => (
                 <Button
+                  size="sm"
                   key={slot.id}
                   variant={slot?.id === qParams.slot ? "outline" : "ghost"}
                   onClick={() =>
@@ -142,7 +152,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                     "hover:bg-white",
                   )}
                 >
-                  {formatAvailabilityTime(slot.availability)}
+                  {format(slot.start_datetime, "h:mm a").replace(":00", "")}
+                  {" - "}
+                  {format(slot.end_datetime, "h:mm a").replace(":00", "")}
                 </Button>
               ))}
             </div>
@@ -179,11 +191,22 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
       <ScrollArea>
         <div className="flex w-max space-x-4">
-          <AppointmentColumn status="booked" facilityId={facilityId} />
-          <AppointmentColumn status="checked_in" facilityId={facilityId} />
-          <AppointmentColumn status="in_consultation" facilityId={facilityId} />
-          <AppointmentColumn status="fulfilled" facilityId={facilityId} />
-          <AppointmentColumn status="noshow" facilityId={facilityId} />
+          {(
+            [
+              "booked",
+              "checked_in",
+              "in_consultation",
+              "fulfilled",
+              "noshow",
+            ] as const
+          ).map((status) => (
+            <AppointmentColumn
+              key={status}
+              status={status}
+              facilityId={facilityId}
+              slot={slot?.id}
+            />
+          ))}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
@@ -192,16 +215,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 }
 
 function AppointmentColumn(props: {
-  status: Appointment["status"];
   facilityId: string;
+  status: Appointment["status"];
+  slot?: string;
 }) {
   const { t } = useTranslation();
 
   const { data } = useQuery({
-    queryKey: ["appointments", props.facilityId, props.status],
+    queryKey: ["appointments", props.facilityId, props.status, props.slot],
     queryFn: query(ScheduleAPIs.appointments.list, {
       pathParams: { facility_id: props.facilityId },
-      queryParams: { status: props.status },
+      queryParams: { status: props.status, limit: 100, slot: props.slot },
     }),
   });
 
@@ -274,28 +298,3 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
-const useSlots = (facilityId: string, resource_id?: string) => {
-  const templatesQuery = useQuery({
-    queryKey: ["slots", facilityId, resource_id],
-    queryFn: query(ScheduleAPIs.templates.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        resource: resource_id ?? "",
-        resource_type: "user",
-      },
-    }),
-    enabled: !!resource_id,
-  });
-
-  if (!templatesQuery.data) {
-    return null;
-  }
-
-  const today = new Date();
-
-  return (
-    templatesQuery.data.results
-      // .filter((t) => isDateInRange(today, t.valid_from, t.valid_to)) // TODO: uncomment this, temp hack.
-      .flatMap((t) => filterAvailabilitiesByDayOfWeek(t.availabilities, today))
-  );
-};

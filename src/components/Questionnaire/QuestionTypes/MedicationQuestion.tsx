@@ -232,6 +232,19 @@ const MedicationRequestItem: React.FC<{
           </div>
         </div>
 
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Label className="mb-1 block text-sm font-medium pr-4">Site</Label>
+            <ValueSetSelect
+              system="system-body-site"
+              value={medication.dosage_instruction[0]?.site}
+              onSelect={(site) => handleUpdateDosageInstruction({ site })}
+              placeholder="Select site"
+              disabled={disabled}
+            />
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 mt-2">
           <Checkbox
             id={`prn-checkbox-${medication.medication?.code}`}

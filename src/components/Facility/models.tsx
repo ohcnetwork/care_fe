@@ -63,6 +63,7 @@ export interface FacilityModel {
   facility_type?: string;
   address?: string;
   features?: number[];
+  description?: string;
   location?: {
     latitude: number;
     longitude: number;

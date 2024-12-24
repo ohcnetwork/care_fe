@@ -1021,6 +1021,7 @@
   "mark_as_unread": "Mark as Unread",
   "mark_this_transfer_as_complete_question": "Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient",
   "mark_transfer_complete_confirmation": "Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient",
+  "markdown_supported": "You can use markdown to format your facility description",
   "max_dosage_24_hrs": "Max. dosage in 24 hrs.",
   "max_dosage_in_24hrs_gte_base_dosage_error": "Max. dosage in 24 hours must be greater than or equal to base dosage",
   "max_size_for_image_uploaded_should_be": "Max size for image uploaded should be",

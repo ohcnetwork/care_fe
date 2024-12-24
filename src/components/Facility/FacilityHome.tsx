@@ -13,6 +13,8 @@ import Chip from "@/CAREUI/display/Chip";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Markdown } from "@/components/ui/markdown";
+
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import AvatarEditable from "@/components/Common/AvatarEditable";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -46,6 +48,7 @@ import { patientRegisterAuth } from "../Patient/PatientRegister";
 type Props = {
   facilityId: string;
 };
+
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
@@ -344,6 +347,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       ),
                   )}
                 </div>
+                {facilityData?.description && (
+                  <div className="mt-8">
+                    <Markdown
+                      content={facilityData.description}
+                      className="mt-4"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

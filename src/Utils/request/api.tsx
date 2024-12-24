@@ -1509,7 +1509,7 @@ const routes = {
         type: "header",
       },
     },
-    getAvailableSlotsForADay: {
+    getSlotsForDay: {
       path: "/api/v1/otp/slots/get_slots_for_day/",
       method: "POST",
       TRes: Type<{ results: SlotAvailability[] }>(),

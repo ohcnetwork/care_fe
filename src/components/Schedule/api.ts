@@ -59,7 +59,7 @@ export const ScheduleAPIs = {
       }>(),
       TBody: Type<{ from_date: string; to_date: string; resource: string }>(),
     },
-    getAvailableSlotsForADay: {
+    getSlotsForDay: {
       path: "/api/v1/facility/{facility_id}/slots/get_slots_for_day/",
       method: "POST",
       TRes: Type<{ results: SlotAvailability[] }>(),

@@ -1,12 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  compareAsc,
-  format,
-  isBefore,
-  isSameDay,
-  max,
-  startOfToday,
-} from "date-fns";
+import { format, isBefore, isSameDay, max, startOfToday } from "date-fns";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,8 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
+import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import { SlotAvailability } from "@/components/Schedule/types";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -85,8 +78,13 @@ export default function AppointmentCreatePage(props: Props) {
   });
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", resourceId, dateQueryString(selectedDate)],
-    queryFn: query(ScheduleAPIs.slots.getAvailableSlotsForADay, {
+    queryKey: [
+      "slots",
+      props.facilityId,
+      resourceId,
+      dateQueryString(selectedDate),
+    ],
+    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: props.facilityId },
       body: {
         resource: resourceId,
@@ -165,7 +163,7 @@ export default function AppointmentCreatePage(props: Props) {
                   : "text-primary-500",
             )}
           >
-            {total_slots - booked_slots} / {total_slots}
+            {total_slots - booked_slots} left
           </span>
         </div>
         {!isFullyBooked && (
@@ -202,7 +200,7 @@ export default function AppointmentCreatePage(props: Props) {
       });
       toast.success("Appointment created successfully");
       navigate(
-        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}/token`,
+        `/facility/${props.facilityId}/patient/${props.patientId}/appointments/${data.id}`,
       );
     } catch (error) {
       toast.error("Failed to create appointment");
@@ -385,34 +383,3 @@ export default function AppointmentCreatePage(props: Props) {
     </Page>
   );
 }
-
-export const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
-  const result: {
-    availability: SlotAvailability["availability"];
-    slots: Omit<SlotAvailability, "availability">[];
-  }[] = [];
-
-  for (const slot of slots) {
-    const availability = slot.availability;
-    const existing = result.find(
-      (r) => r.availability.name === availability.name,
-    );
-    if (existing) {
-      existing.slots.push(slot);
-    } else {
-      result.push({ availability, slots: [slot] });
-    }
-  }
-
-  // sort slots by start time
-  result.forEach(({ slots }) =>
-    slots.sort((a, b) => compareAsc(a.start_datetime, b.start_datetime)),
-  );
-
-  // sort availability by first slot start time
-  result.sort((a, b) =>
-    compareAsc(a.slots[0].start_datetime, b.slots[0].start_datetime),
-  );
-
-  return result;
-};

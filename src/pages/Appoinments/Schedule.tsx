@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/AppointmentCreatePage";
+import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 import { SlotAvailability } from "@/components/Schedule/types";
 
 import { CarePatientTokenKey } from "@/common/constants";
@@ -87,7 +87,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
     queryKey: ["slots", facilityId, staffExternalId, selectedDate],
-    queryFn: query(routes.otp.getAvailableSlotsForADay, {
+    queryFn: query(routes.otp.getSlotsForDay, {
       body: {
         facility: facilityId,
         resource: staffExternalId,

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { TokenCard } from "@/components/Schedule/Appointments/AppointmentTokenPage";
+import { AppointmentTokenCard } from "@/components/Schedule/Appointments/AppointmentTokenCard";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 
 import routes from "@/Utils/request/api";
@@ -46,7 +46,7 @@ export default function AppointmentDetailsPage(props: Props) {
       <div className="mt-4 py-4 flex justify-center border-t border-gray-200">
         <div className="flex flex-col gap-4 mt-4">
           <div id="section-to-print">
-            <TokenCard
+            <AppointmentTokenCard
               appointment={appointmentQuery.data}
               facility={facilityQuery.data}
             />
