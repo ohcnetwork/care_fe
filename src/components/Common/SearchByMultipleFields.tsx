@@ -47,6 +47,7 @@ interface SearchByMultipleFieldsProps {
   buttonClassName?: string;
   clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
+  onFieldChange?: (options: SearchOption) => void;
 }
 
 type EventType = React.ChangeEvent<HTMLInputElement> | { value: string };
@@ -60,6 +61,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   inputClassName,
   buttonClassName,
   clearSearch,
+  onFieldChange,
   enableOptionButtons = true,
 }) => {
   const { t } = useTranslation();
@@ -67,13 +69,17 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     initialOptionIndex || 0,
   );
   const selectedOption = options[selectedOptionIndex];
-  const [searchValue, setSearchValue] = useState(
-    options[selectedOptionIndex].value || "",
-  );
+  const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
+
+  useEffect(() => {
+    if (!(selectedOption.type === "phone" && searchValue.length < 13)) {
+      setSearchValue(options[selectedOptionIndex].value);
+    }
+  }, [options]);
 
   useEffect(() => {
     if (clearSearch?.value) {
@@ -95,6 +101,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       inputRef.current?.focus();
       setError(false);
       onSearch(option.key, option.value);
+      onFieldChange?.(options[index]);
     },
     [onSearch],
   );

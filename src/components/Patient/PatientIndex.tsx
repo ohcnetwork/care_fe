@@ -90,7 +90,7 @@ export default function PatientIndex(props: {
     },
 
     {
-      key: "emergency_contact_number",
+      key: "emergency_phone_number",
       type: "phone" as const,
       placeholder: t("search_by_emergency_phone_number"),
       value: qParams.emergency_phone_number || "",
@@ -106,9 +106,11 @@ export default function PatientIndex(props: {
 
       switch (key) {
         case "phone_number":
-        case "emergency_contact_number":
+        case "emergency_phone_number":
           if (value.length >= 13 || value === "") {
             updatedQuery[key] = value;
+          } else {
+            updatedQuery[key] = "";
           }
           break;
         case "name":
@@ -204,7 +206,7 @@ export default function PatientIndex(props: {
       setShowDialog("create");
       return;
     }
-    navigate(`/facility/${facilityId}/register-patient`);
+    navigate(`/facility/${facilityId}/patient/create`);
   };
 
   function AddPatientButton(props: { outline?: boolean }) {
@@ -298,6 +300,14 @@ export default function PatientIndex(props: {
             <SearchByMultipleFields
               id="patient-search"
               options={searchOptions}
+              onFieldChange={() => {
+                updateQuery({
+                  name: "",
+                  patient_no: "",
+                  phone_number: "",
+                  emergency_phone_number: "",
+                });
+              }}
               onSearch={handleSearch}
               clearSearch={clearSearch}
               className="w-full"
@@ -381,7 +391,7 @@ export default function PatientIndex(props: {
         handleOk={() => {
           switch (showDialog) {
             case "create":
-              navigate(`/facility/${selectedFacility.id}/register-patient`);
+              navigate(`/facility/${selectedFacility.id}/patient/create`);
               break;
             case "list-discharged":
               navigate(`/facility/${selectedFacility.id}/discharged-patients`);

@@ -758,7 +758,7 @@ export const PatientManager = () => {
       shortcutKey: "p",
     },
     {
-      key: "emergency_contact_number",
+      key: "emergency_phone_number",
       label: "Emergency Contact Phone Number",
       type: "phone" as const,
       placeholder: t("search_by_emergency_phone_number"),
@@ -776,6 +776,8 @@ export const PatientManager = () => {
         case "emergency_contact_number":
           if (value.length >= 13 || value === "") {
             updatedQuery[key] = value;
+          } else {
+            updatedQuery[key] = "";
           }
           break;
         case "name":

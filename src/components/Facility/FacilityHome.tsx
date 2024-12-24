@@ -482,7 +482,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   border
                   className="mt-2 flex w-full flex-row justify-center md:w-auto"
                   onClick={() =>
-                    navigate(`/facility/${facilityId}/register-patient`)
+                    navigate(`/facility/${facilityId}/patient/create`)
                   }
                   authorizeFor={NonReadOnlyUsers}
                 >

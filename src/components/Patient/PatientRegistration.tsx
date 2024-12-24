@@ -367,6 +367,10 @@ export default function PatientRegistration(
             ward_old: undefined,
           });
     } else {
+      const firstErrorField = document.querySelector("[data-input-error]");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       Notification.Error({
         msg: t("please_fix_errors"),
       });
@@ -987,7 +991,10 @@ export default function PatientRegistration(
             <div className="text-sm">{t("insurance_details_detail")}</div>
             <br />
           </div> */}
-          <div className="flex justify-end mt-20">
+          <div className="flex justify-end mt-20 gap-4">
+            <Button variant={"secondary"} onClick={() => goBack()}>
+              {t("cancel")}
+            </Button>
             <Button
               type="submit"
               variant={"primary"}
