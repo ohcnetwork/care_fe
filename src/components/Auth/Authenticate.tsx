@@ -19,11 +19,7 @@ export const Authenticate = () => {
   );
   const [recoveryModal, setRecoveryModal] = useState(false);
 
-  const accesWays: string[] = [
-    "OTP via SMS",
-    "OTP via Email",
-    "Use a recovery code",
-  ];
+  const accesWays: string[] = ["Use a recovery code"];
   function handleRedirect(way: string): void {
     if (way === "Use a recovery code") {
       setRecoveryModal(true);
@@ -202,11 +198,11 @@ export const Authenticate = () => {
                       <p className="text-sm text-gray-500 font-base">
                         Can't you access your code?
                       </p>
-                      <ul className="list-disc mt-2 w-full inline-flex flex-wrap justify-center items-center gap-1">
+                      <ul className="list-disc w-full inline-flex flex-wrap  items-center gap-1">
                         {accesWays.map((way: string, idx: number) => (
                           <li
                             key={idx}
-                            className="text-sm font-medium text-primary-500 hover:underline cursor-pointer mx-2"
+                            className="text-sm font-medium text-primary-500 hover:underline cursor-pointer mx-4"
                             value={way}
                             onClick={() => handleRedirect(way)}
                           >
