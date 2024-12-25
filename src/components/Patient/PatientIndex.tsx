@@ -396,6 +396,7 @@ export default function PatientIndex(props: {
               navigate(`/patients/discharged?facility=${selectedFacility.id}`);
               break;
           }
+          setShowDialog(undefined);
         }}
         handleCancel={() => {
           setShowDialog(undefined);
