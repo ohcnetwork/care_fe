@@ -91,6 +91,8 @@ export default function BoardView() {
             hideBack
             componentRight={
               <ExportButton
+                variant="secondary"
+                className=" bg-transparent shadow-none text-black rounded-full"
                 action={async () => {
                   const { data } = await request(routes.downloadShiftRequests, {
                     query: { ...formatFilter(qParams), csv: true },
@@ -143,8 +145,8 @@ export default function BoardView() {
               <h3 className="flex h-8 items-center text-xs w-full gap-2">
                 {board.label || board.text}{" "}
                 <ExportButton
-                  variant={"secondary"}
-                  className="bg-secondary-200 text-black"
+                  variant="secondary"
+                  className="bg-transparent shadow-none text-black rounded-full"
                   action={async () => {
                     const { data } = await request(
                       routes.downloadShiftRequests,
