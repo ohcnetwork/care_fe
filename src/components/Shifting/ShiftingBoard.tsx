@@ -140,9 +140,11 @@ export default function BoardView() {
           sections={boardFilter.map((board) => ({
             id: board.text,
             title: (
-              <h3 className="flex h-8 items-center text-xs">
+              <h3 className="flex h-8 items-center text-xs w-full gap-2">
                 {board.label || board.text}{" "}
                 <ExportButton
+                  variant={"secondary"}
+                  className="bg-secondary-200 text-black"
                   action={async () => {
                     const { data } = await request(
                       routes.downloadShiftRequests,

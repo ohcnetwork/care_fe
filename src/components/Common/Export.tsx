@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,8 @@ interface ExportButtonProps {
   route?: Route<string | { results: object[] }, unknown>;
   parse?: (data: string) => string;
   filenamePrefix: string;
+  className?: string;
+  variant?: "primary_gradient" | "secondary";
 }
 
 export const ExportMenu = ({
@@ -111,7 +115,9 @@ export const ExportMenu = ({
 
 export const ExportButton = ({
   tooltipClassName = "tooltip-bottom -translate-x-7",
+  variant,
   type = "csv",
+  className,
   parse,
   ...props
 }: ExportButtonProps) => {
@@ -121,7 +127,7 @@ export const ExportButton = ({
   return (
     <>
       <Button
-        variant={"primary_gradient"}
+        variant={variant || "primary_gradient"}
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -135,7 +141,10 @@ export const ExportButton = ({
             exportFile(action, props.filenamePrefix, type, parse);
           }
         }}
-        className="tooltip gap-2 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
+        className={cn(
+          "tooltip gap-2 text-lg text-white disabled:bg-transparent disabled:text-secondary-500",
+          className,
+        )}
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
