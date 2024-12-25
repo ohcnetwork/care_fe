@@ -1,3 +1,4 @@
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 
@@ -100,13 +101,10 @@ export default function OrganisationIndex() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          {/* <CareIcon
-                            icon="l-ellipsis-vertical"
-                            className="h-4 w-4"
-                          /> */}
+                          <DotsVerticalIcon className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
