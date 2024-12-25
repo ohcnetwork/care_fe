@@ -110,7 +110,7 @@ export const NoticeBoard = () => {
         {data.results.map((item) => (
           <div
             key={`usr_${item.id}`}
-            className="my-2 flex-col flex justify-between rounded shadow-md min-h-[33vh]"
+            className="my-2 flex-col flex justify-between rounded-lg shadow-md min-h-[30vh]"
           >
             <div
               className="h-auto md:h-3/4 flex-1 text-justify mx-2 py-3 px-5  mb-3"
@@ -119,7 +119,7 @@ export const NoticeBoard = () => {
               <h1 className="font-semibold text-lg text-black mb-1 truncate hover:text-clip">
                 {item.title ? item.title : item.message?.split("\n")[0]}
               </h1>
-              <Message className="line-clamp-5" message={item.message} />
+              <Message className="line-clamp-4" message={item.message} />
             </div>
             <div className="h-auto md:h-1/4 flex flex-col md:flex-row justify-between items-center bg-gray-100 p-3 md:py-1 space-y-3 md:space-y-0">
               <UserInfo {...item} />
