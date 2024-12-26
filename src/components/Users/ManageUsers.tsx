@@ -40,7 +40,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useView("usersDefaultView");
+  const [activeTab, setActiveTab] = useView("users");
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,

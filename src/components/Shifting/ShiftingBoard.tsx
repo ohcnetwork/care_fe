@@ -30,12 +30,14 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { useView } from "@/Utils/useView";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
 ) as KanbanBoardType;
 
-export default function ({ setView }: { setView: (view: string) => void }) {
+export default function () {
+  const [, setView] = useView("shifting");
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
     cacheBlacklist: ["patient_name"],

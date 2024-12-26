@@ -21,13 +21,11 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { useView } from "@/Utils/useView";
 import { formatDateTime } from "@/Utils/utils";
 
-export default function ListView({
-  setView,
-}: {
-  setView: (view: string) => void;
-}) {
+export default function ListView() {
+  const [, setView] = useView("resource");
   const {
     qParams,
     Pagination,

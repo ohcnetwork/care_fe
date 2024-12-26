@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 
 export function useView(name: string): [string, (view: string) => void] {
-  const [view, setView] = useState(() => localStorage.getItem(name) || "board");
-
-  const updateView = (view: string) => {
-    setView(view);
-    localStorage.setItem(name, view);
+  const [view, setView] = useState(() => {
+    return localStorage.getItem(name) || "board";
+  });
+  const updateView = (newView: string) => {
+    localStorage.setItem(name, newView);
+    setView(newView);
   };
-
   useEffect(() => {
-    const handleStorageChange = () => {
-      setView(localStorage.getItem(name) || "board");
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
+    const interval = setInterval(() => {
+      const storedView = localStorage.getItem(name);
+      if (storedView !== view) {
+        setView(storedView || "board");
+      }
+    }, 100);
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
     };
-  }, [name]);
-
+  }, [name, view]);
   return [view, updateView];
 }

@@ -25,6 +25,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { useView } from "@/Utils/useView";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
@@ -35,11 +36,8 @@ const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 const COMPLETED = ["COMPLETED", "REJECTED"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
-export default function BoardView({
-  setView,
-}: {
-  setView: (view: string) => void;
-}) {
+export default function BoardView() {
+  const [, setView] = useView("resource");
   const { qParams, FilterBadges, advancedFilter, updateQuery } = useFilters({
     limit: -1,
     cacheBlacklist: ["title"],

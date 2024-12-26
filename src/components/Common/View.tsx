@@ -7,21 +7,18 @@ export default function View({
   board,
   list,
 }: {
-  name: string;
-  board: ComponentType<{ setView: (view: string) => void }>;
-  list: ComponentType<{ setView: (view: string) => void }>;
+  name: "shifting" | "resource";
+  board: ComponentType;
+  list: ComponentType;
 }) {
-  const [view, setView] = useView(`${name}DefaultView`);
+  const [view] = useView(name);
 
-  const views: Record<
-    "board" | "list",
-    ComponentType<{ setView: (view: string) => void }>
-  > = {
+  const views: Record<"board" | "list", ComponentType> = {
     board,
     list,
   };
 
   const SelectedView = views[view as keyof typeof views] || board;
 
-  return <SelectedView setView={setView} />;
+  return <SelectedView />;
 }

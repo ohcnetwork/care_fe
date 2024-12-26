@@ -15,6 +15,7 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import * as Notification from "@/Utils/Notifications";
+import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
@@ -99,6 +100,7 @@ const Login = (props: { forgot?: boolean }) => {
     e.preventDefault();
 
     setLoading(true);
+    ViewCache.invalidateAll();
     FiltersCache.invaldiateAll();
     const validated = validateData();
     if (!validated) {
