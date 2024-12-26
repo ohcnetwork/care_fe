@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,7 +21,6 @@ import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import PrescriptionBuilder from "@/components/Medicine/PrescriptionBuilder";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useConfirmedAction from "@/hooks/useConfirmedAction";
 
 import { DISCHARGE_REASONS } from "@/common/constants";
@@ -29,8 +29,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -93,20 +93,21 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
-  const { goBack } = useAppHistory();
-
-  const { data } = useTanStackQueryInstead(routes.getConsultation, {
-    pathParams: { id: consultationData.id ?? "" },
-    prefetch: !!consultationData.id,
-    silent: true,
-    onResponse: ({ error }) => {
-      if (error) {
-        goBack();
-        Notification.Error({ msg: "Error in fetching consultation data" });
-        return;
-      }
-    },
+  const { data, isLoading, error } = useQuery({
+    queryKey: [routes.getConsultation.path, consultationData.id],
+    queryFn: query(routes.getConsultation, {
+      pathParams: { id: consultationData.id },
+      silent: true,
+    }),
+    enabled: consultationData.id !== undefined,
   });
+
+  if (isLoading) return <Loading />;
+
+  if (error) {
+    Notification.Error({ msg: t("ERROR_FETCHING_CONSULTATION") });
+    return;
+  }
 
   const initialDiagnoses = data?.diagnoses ?? [];
 
@@ -190,9 +191,6 @@ const DischargeModal = ({
         ? "death_datetime"
         : "discharge_date"
     ];
-  if (initialDiagnoses == null) {
-    return <Loading />;
-  }
 
   return (
     <>
