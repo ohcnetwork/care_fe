@@ -161,7 +161,6 @@ export const FacilityCard = (props: {
                           ),
                       )}
                     </div>
-                    <div className="bg-red-500 w-12">here</div>
 
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
