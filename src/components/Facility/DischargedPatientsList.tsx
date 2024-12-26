@@ -445,8 +445,6 @@ const DischargedPatientsList = ({
                         const data = await result.data({
                           signal: new AbortController().signal,
                         });
-                        console.log(data);
-
                         return data || null;
                       },
 
