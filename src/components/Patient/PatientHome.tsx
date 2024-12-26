@@ -4,11 +4,21 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import AuthorizedButton from "@/components/Common/AuthorizedButton";
+import { Avatar } from "@/components/Common/Avatar";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import {
+  AssignedToObjectModel,
+  PatientModel,
+} from "@/components/Patient/models";
+import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -25,7 +35,6 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
 import {
   formatDateTime,
   formatName,
@@ -34,14 +43,7 @@ import {
   isAntenatal,
   isPostPartum,
   relativeDate,
-} from "../../Utils/utils";
-import { Avatar } from "../Common/Avatar";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import { SkillModel, UserBareMinimum } from "../Users/models";
-import { Badge } from "../ui/badge";
-import { patientTabs } from "./PatientDetailsTab";
-import { AssignedToObjectModel, PatientModel } from "./models";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
