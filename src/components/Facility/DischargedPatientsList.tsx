@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +43,7 @@ import { parseOptionId } from "@/common/utils";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   calculateDaysBetween,
@@ -233,6 +234,24 @@ const DischargedPatientsList = ({
     return days > 0 && days <= 7 && days !== 0;
   });
 
+  const queryParams = {
+    ...params,
+    csv: true,
+  };
+  const pathParams = { facility_external_id };
+
+  const { refetch: exportAsCSV } = useQuery({
+    queryKey: ["Discharged Patients", queryParams],
+    queryFn: async () => {
+      const data = await query(routes.listFacilityDischargedPatients, {
+        queryParams,
+        pathParams,
+      });
+      return data;
+    },
+    enabled: false,
+  });
+
   const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
@@ -419,20 +438,18 @@ const DischargedPatientsList = ({
                     {
                       label: "Export Discharged patients",
                       action: async () => {
-                        const query = {
-                          ...params,
-                          csv: true,
-                        };
-                        const pathParams = { facility_external_id };
-                        const { data } = await request(
-                          routes.listFacilityDischargedPatients,
-                          {
-                            query,
-                            pathParams,
-                          },
-                        );
-                        return data ?? null;
+                        const result = await exportAsCSV();
+                        if (result.isError || !result.data) {
+                          return null;
+                        }
+                        const data = await result.data({
+                          signal: new AbortController().signal,
+                        });
+                        console.log(data);
+
+                        return data || null;
                       },
+
                       parse: (data) => {
                         try {
                           return csvGroupByColumn(data, "Patient ID");

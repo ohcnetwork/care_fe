@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
@@ -44,7 +45,7 @@ import { triggerGoal } from "@/Integrations/Plausible";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   calculateDaysBetween,
@@ -228,6 +229,23 @@ export const PatientManager = () => {
   const isExportAllowed = dateRangeFields.some(([startDate, endDate]) => {
     const days = calculateDaysBetween(startDate, endDate);
     return days > 0 && days <= 7 && days !== 0;
+  });
+
+  const queryParams = {
+    ...params,
+    csv: true,
+    facility: qParams.facility,
+  };
+
+  const { refetch: exportAsCSV } = useQuery({
+    queryKey: ["Live Patients", queryParams],
+    queryFn: async () => {
+      const data = await query(routes.patientList, {
+        queryParams,
+      });
+      return data;
+    },
+    enabled: false,
   });
 
   let managePatients: any = null;
@@ -883,16 +901,15 @@ export const PatientManager = () => {
                     {
                       label: "Export Live patients",
                       action: async () => {
-                        const query = {
-                          ...params,
-                          csv: true,
-                          facility: qParams.facility,
-                        };
-                        delete qParams.is_active;
-                        const { data } = await request(routes.patientList, {
-                          query,
+                        const result = await exportAsCSV();
+                        console.log(result);
+                        if (result.isError || !result.data) {
+                          return null;
+                        }
+                        const data = await result.data({
+                          signal: new AbortController().signal,
                         });
-                        return data ?? null;
+                        return data || null;
                       },
                       parse: (data) => {
                         try {
