@@ -102,8 +102,6 @@ const DischargeModal = ({
     enabled: consultationData.id !== undefined,
   });
 
-  if (isLoading) return <Loading />;
-
   if (error) {
     Notification.Error({ msg: t("ERROR_FETCHING_CONSULTATION") });
   }
@@ -190,6 +188,8 @@ const DischargeModal = ({
         ? "death_datetime"
         : "discharge_date"
     ];
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
