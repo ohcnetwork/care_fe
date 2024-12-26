@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { CommentModel } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
@@ -14,6 +13,8 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
+
+import { Button } from "../ui/button";
 
 interface CommentSectionProps {
   id: string;
@@ -83,18 +84,16 @@ const CommentSection = (props: CommentSectionProps) => {
               errorClassName="hidden"
               innerClassName="pr-10"
             />
-            <ButtonV2
-              border={false}
+            <Button
               className="absolute right-2"
-              ghost
-              size="small"
+              variant="primary"
               onClick={async () => {
                 await onSubmitComment();
                 query.refetch();
               }}
             >
               <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
+            </Button>
           </div>
         </div>
       )}
