@@ -61,12 +61,23 @@ export const FacilityCard = (props: {
       <div className="block h-full overflow-hidden rounded-lg border border-secondary-300 bg-white transition-all hover:border-secondary-400">
         <div className="flex h-full">
           <div className="h-full w-full grow">
+            <Link
+              href={`/facility/${facility.id}`}
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch facility-view:hidden"
+            >
+              <Avatar
+                name={facility.name || ""}
+                imageUrl={facility.read_cover_image_url}
+                className="m-4 mb-0 md:m-0"
+              />
+            </Link>
+
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
               <div className="w-full p-4">
                 <div className="flex flex-col gap-5 sm:flex-row">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="h-[10rem] min-h-[10rem] w-[10rem] min-w-[10rem]"
+                    className="hidden h-[10rem] min-h-[10rem] w-[10rem] min-w-[10rem] facility-view:block"
                   >
                     <Avatar
                       name={facility.name || ""}

@@ -23,6 +23,9 @@ module.exports = {
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
       },
+      screens: {
+        "facility-view": "37rem",
+      },
       colors: {
         green: colors.emerald,
         yellow: colors.amber,
