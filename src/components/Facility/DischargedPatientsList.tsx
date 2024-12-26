@@ -230,7 +230,7 @@ const DischargedPatientsList = ({
 
   const isExportAllowed = dateRangeFields.some(([startDate, endDate]) => {
     const days = calculateDaysBetween(startDate, endDate);
-    return days > 0 && days <= 7 && days !== 0;
+    return days > 0 && days <= 7;
   });
 
   const { refetch: exportDischargedAsCSV } = usePatientExport(
