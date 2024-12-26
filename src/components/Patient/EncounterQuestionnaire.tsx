@@ -5,6 +5,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { conditionalObject } from "@/Utils/utils";
@@ -53,37 +54,40 @@ export default function EncounterQuestionnaire({
   }
 
   return (
-    <Page
-      title="Questionnaire"
-      crumbsReplacements={{
-        [facilityId]: { name: patient?.facility_object?.name },
-        [patientId]: { name: patient?.name },
-        ...conditionalObject(consultationId, {
-          consultation: {
-            name: "Consultation",
-            uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
-          },
-          [consultationId as string]: {
-            name: consultation?.encounter_date
-              ? `Admitted on ${consultation.encounter_date}`
-              : consultation?.suggestion_text,
-          },
-        }),
-      }}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
-    >
-      <div className="container mx-auto p-4">
-        <Card>
-          <CardContent className="pt-6">
-            <QuestionnaireForm
-              patientId={patientId}
-              subjectType={subjectType}
-              encounterId={consultationId}
-              questionnaireSlug={questionnaireSlug}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </Page>
+    <>
+      <PLUGIN_Component __name="Scribe" />
+      <Page
+        title="Questionnaire"
+        crumbsReplacements={{
+          [facilityId]: { name: patient?.facility_object?.name },
+          [patientId]: { name: patient?.name },
+          ...conditionalObject(consultationId, {
+            consultation: {
+              name: "Consultation",
+              uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
+            },
+            [consultationId as string]: {
+              name: consultation?.encounter_date
+                ? `Admitted on ${consultation.encounter_date}`
+                : consultation?.suggestion_text,
+            },
+          }),
+        }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+      >
+        <div className="container mx-auto p-4">
+          <Card>
+            <CardContent className="pt-6">
+              <QuestionnaireForm
+                patientId={patientId}
+                subjectType={subjectType}
+                encounterId={consultationId}
+                questionnaireSlug={questionnaireSlug}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </Page>
+    </>
   );
 }
