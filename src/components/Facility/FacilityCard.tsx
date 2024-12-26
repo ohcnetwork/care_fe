@@ -61,23 +61,12 @@ export const FacilityCard = (props: {
       <div className="block h-full overflow-hidden rounded-lg border border-secondary-300 bg-white transition-all hover:border-secondary-400">
         <div className="flex h-full">
           <div className="h-full w-full grow">
-            <Link
-              href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[450px]:hidden"
-            >
-              <Avatar
-                name={facility.name || ""}
-                imageUrl={facility.read_cover_image_url}
-                className="m-4 mb-0 md:m-0"
-              />
-            </Link>
-
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
               <div className="w-full p-4">
                 <div className="flex flex-col gap-5 sm:flex-row">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="hidden min-[450px]:block h-[150px] min-h-[150px] w-[150px] min-w-[150px]"
+                    className="h-[10rem] min-h-[10rem] w-[10rem] min-w-[10rem]"
                   >
                     <Avatar
                       name={facility.name || ""}
@@ -172,6 +161,7 @@ export const FacilityCard = (props: {
                           ),
                       )}
                     </div>
+                    <div className="bg-red-500 w-12">here</div>
 
                     <div className="mt-2 flex justify-between">
                       <div className="flex flex-col">
@@ -193,7 +183,6 @@ export const FacilityCard = (props: {
                 </div>
               </div>
               <div className="flex flex-wrap border-t border-t-secondary-300 bg-secondary-50 px-2 py-1 md:px-3">
-                {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
                     <DialogModal
