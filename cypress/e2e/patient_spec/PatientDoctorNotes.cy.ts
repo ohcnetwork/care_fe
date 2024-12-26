@@ -35,7 +35,6 @@ describe("Patient Discussion notes in the consultation page", () => {
     patientDoctorNotes.addDiscussionNotes(patientNurseNote);
     patientDoctorNotes.postDiscussionNotes();
     cy.verifyNotification(discussionNotesSuccessMessage);
-    cy.closeNotification();
     // verify the auto-switching of tab to nurse notes if the user is a nurse
     patientDoctorNotes.signout();
     loginPage.loginManuallyAsNurse();
@@ -51,7 +50,6 @@ describe("Patient Discussion notes in the consultation page", () => {
     patientDoctorNotes.addDiscussionNotes(patientNurseReplyNote);
     patientDoctorNotes.postDiscussionNotes();
     cy.verifyNotification(discussionNotesSuccessMessage);
-    cy.closeNotification();
     patientDoctorNotes.verifyDiscussionMessage(patientNurseReplyNote);
   });
 
