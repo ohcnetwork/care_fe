@@ -134,30 +134,33 @@ export const UserStatusIndicator = ({
   className?: string;
   addPadding?: boolean;
 }) => {
-  const cur_online = isUserOnline(user);
+  const authUser = useAuthUser();
+  const isAuthUser = user.id === authUser.id;
+  const isOnline = isUserOnline(user) || isAuthUser;
   const { t } = useTranslation();
+
   return (
     <div
       className={classNames(
         "inline-flex items-center gap-2 rounded-full",
         addPadding ? "px-3 py-1" : "py-px",
-        cur_online ? "bg-green-100" : "bg-gray-100",
+        isOnline ? "bg-green-100" : "bg-gray-100",
         className,
       )}
     >
       <span
         className={classNames(
           "inline-block h-2 w-2 shrink-0 rounded-full",
-          cur_online ? "bg-green-500" : "bg-gray-400",
+          isOnline ? "bg-green-500" : "bg-gray-400",
         )}
       ></span>
       <span
         className={classNames(
           "whitespace-nowrap text-xs",
-          cur_online ? "text-green-700" : "text-gray-500",
+          isOnline ? "text-green-700" : "text-gray-500",
         )}
       >
-        {cur_online
+        {isOnline
           ? t("online")
           : user.last_login
             ? relativeTime(user.last_login)
