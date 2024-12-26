@@ -1,4 +1,5 @@
 import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -7,20 +8,21 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
-import { ConsultationModel } from "@/components/Facility/models";
+import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
 
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 interface ReferralLetterProps {
   id: string;
 }
 export const ReferralLetter = ({ id }: ReferralLetterProps) => {
-  const { data, loading } = useTanStackQueryInstead(routes.getShiftDetails, {
-    pathParams: { id },
+  const { data, isLoading } = useQuery<ShiftingModel>({
+    queryKey: [routes.getShiftDetails.path, id],
+    queryFn: query(routes.getShiftDetails, { pathParams: { id } }),
   });
 
   const patientData = data?.patient_object;
@@ -31,7 +33,7 @@ export const ReferralLetter = ({ id }: ReferralLetterProps) => {
     (i) => i.id === patientData?.gender,
   )?.text;
 
-  if (loading || !patientData) {
+  if (isLoading || !patientData) {
     return <Loading />;
   }
 

@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import SlideOver from "@/CAREUI/interactive/SlideOver";
@@ -19,7 +20,7 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
 import { PatientModel } from "@/components/Patient/models";
-import { UserBareMinimum } from "@/components/Users/models";
+import { UserBareMinimum, UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -37,8 +38,9 @@ import {
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 import { Button } from "../ui/button";
@@ -153,16 +155,21 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     };
   }
 
-  const { loading: assignedUserLoading } = useTanStackQueryInstead(
-    routes.userList,
-    {
-      query: { id: state.form.assigned_to },
-      prefetch: state.form.assigned_to && props.open ? true : false,
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
-      },
-    },
-  );
+  const { data, isLoading: assignedUserLoading } = useQuery<
+    PaginatedResponse<UserModel>
+  >({
+    queryKey: [routes.userList.path, state.form.assigned_to],
+    queryFn: query(routes.userList, {
+      queryParams: { id: state.form.assigned_to },
+    }),
+    enabled: !!state.form.assigned_to && props.open,
+  });
+
+  useEffect(() => {
+    if (data?.count) {
+      SetAssignedUser(data.results[0]);
+    }
+  }, [data]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -285,33 +292,36 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  useTanStackQueryInstead(routes.getShiftDetails, {
-    pathParams: { id: props.id },
-    prefetch: props.open,
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        const d = data;
-        setConsultationData(
-          (d.patient as PatientModel).last_consultation as ConsultationModel,
-        );
-        if (d.assigned_facility_external)
-          d["assigned_facility_object"] = {
-            name: String(data.assigned_facility_external),
-          };
-        d["initial_status"] = data.status;
-        d["status"] = qParams.status || data.status;
-        const patient_category =
-          (d.patient as PatientModel).last_consultation?.last_daily_round
-            ?.patient_category ??
-          (d.patient as PatientModel).last_consultation?.category;
-        d["patient_category"] =
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
-        dispatch({ type: "set_form", form: d });
-        setIsLoading(false);
-      }
-    },
+  const { data: shiftDetailsData } = useQuery<ShiftingModel>({
+    queryKey: [routes.getShiftDetails.path, props.id],
+    queryFn: query(routes.getShiftDetails, {
+      pathParams: { id: props.id },
+    }),
+    enabled: props.open,
   });
 
+  useEffect(() => {
+    if (shiftDetailsData) {
+      const d = shiftDetailsData;
+      setConsultationData(
+        (d.patient as PatientModel).last_consultation as ConsultationModel,
+      );
+      if (d.assigned_facility_external)
+        d["assigned_facility_object"] = {
+          name: String(d.assigned_facility_external),
+        };
+      d["initial_status"] = d.status;
+      d["status"] = qParams.status || d.status;
+      const patient_category =
+        (d.patient as PatientModel).last_consultation?.last_daily_round
+          ?.patient_category ??
+        (d.patient as PatientModel).last_consultation?.category;
+      d["patient_category"] =
+        PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
+      dispatch({ type: "set_form", form: d });
+      setIsLoading(false);
+    }
+  }, [shiftDetailsData]);
   const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 

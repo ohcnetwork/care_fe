@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,7 +12,7 @@ import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoEx
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface CommentSectionProps {
@@ -22,20 +23,27 @@ const CommentSection = (props: CommentSectionProps) => {
   const [commentBox, setCommentBox] = useState("");
   const { t } = useTranslation();
 
+  const { mutate: addComment } = useMutation({
+    mutationFn: mutate(routes.addShiftComments, {
+      pathParams: { id: props.id },
+      body: { comment: commentBox },
+    }),
+    onSuccess: () => {
+      Notification.Success({ msg: t("comment_added_successfully") });
+      setCommentBox("");
+    },
+    onError: () => {
+      Notification.Error({ msg: t("comment_add_error") });
+    },
+  });
+
   const onSubmitComment = async () => {
     const payload = { comment: commentBox };
     if (!/\S+/.test(commentBox)) {
       Notification.Error({ msg: t("comment_min_length") });
       return;
     }
-    const { res } = await request(routes.addShiftComments, {
-      pathParams: { id: props.id },
-      body: payload,
-    });
-    if (res?.ok) {
-      Notification.Success({ msg: t("comment_added_successfully") });
-      setCommentBox("");
-    }
+    addComment(payload);
   };
 
   return (

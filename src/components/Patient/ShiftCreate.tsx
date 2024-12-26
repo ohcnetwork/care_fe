@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import SlideOver from "@/CAREUI/interactive/SlideOver";
@@ -29,11 +30,12 @@ import { phonePreg } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 import { Button } from "../ui/button";
+import { PatientModel } from "./models";
 
 interface patientShiftProps {
   facilityId: string;
@@ -110,22 +112,27 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const { data: _patientData } = useTanStackQueryInstead(routes.getPatient, {
-    pathParams: {
-      id: patientId,
-    },
-    prefetch: !!patientId,
-    onResponse: ({ data }) => {
-      if (data) {
-        const patient_category =
-          data.last_consultation?.last_daily_round?.patient_category ??
-          data.last_consultation?.category;
-        setPatientCategory(
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id,
-        );
-      }
-    },
+  const { data: patientData } = useQuery<PatientModel>({
+    queryKey: [routes.getPatient.path, patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId },
+    }),
+    enabled: !!patientId,
   });
+
+  useEffect(() => {
+    if (patientData) {
+      const patient_category =
+        patientData.last_consultation?.last_daily_round?.patient_category ??
+        patientData.last_consultation?.category;
+
+      const matchedCategory = PATIENT_CATEGORIES.find(
+        (c) => c.text === patient_category,
+      )?.id;
+
+      setPatientCategory(matchedCategory);
+    }
+  }, [patientData]);
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
