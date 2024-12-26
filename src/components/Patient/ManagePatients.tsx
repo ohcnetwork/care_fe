@@ -227,7 +227,7 @@ export const PatientManager = () => {
 
   const isExportAllowed = dateRangeFields.some(([startDate, endDate]) => {
     const days = calculateDaysBetween(startDate, endDate);
-    return days >= 0 && days <= 7 && days !== 0;
+    return days > 0 && days <= 7 && days !== 0;
   });
 
   let managePatients: any = null;
@@ -867,14 +867,14 @@ export const PatientManager = () => {
                       if (element)
                         element.scrollIntoView({ behavior: "smooth" });
                       Notification.Warn({
-                        msg: "Please select a seven day period.",
+                        msg: t("select_seven_day_period"),
                       });
                     }, 500);
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
                   <CareIcon icon="l-export" className="mr-2" />
-                  <span className="lg:my-[3px]">Export</span>
+                  <span className="lg:my-[3px]">{t("export")}</span>
                 </Button>
               ) : (
                 <ExportMenu
@@ -913,7 +913,7 @@ export const PatientManager = () => {
 
               {!isExportAllowed && (
                 <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-                  Select a seven day period
+                  {t("select_seven_day_period")}
                 </span>
               )}
             </div>
