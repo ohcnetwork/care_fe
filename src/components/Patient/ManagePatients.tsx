@@ -231,20 +231,11 @@ export const PatientManager = () => {
     return days > 0 && days <= 7 && days !== 0;
   });
 
-  const queryParams = {
-    ...params,
-    csv: true,
-    facility: qParams.facility,
-  };
-
   const { refetch: exportAsCSV } = useQuery({
-    queryKey: ["Live Patients", queryParams],
-    queryFn: async () => {
-      const data = await query(routes.patientList, {
-        queryParams,
-      });
-      return data;
-    },
+    queryKey: ["Live-Patients-csv"],
+    queryFn: query(routes.patientList, {
+      queryParams: { ...params, csv: true, facility: qParams.facility },
+    }),
     enabled: false,
   });
 
@@ -902,14 +893,7 @@ export const PatientManager = () => {
                       label: "Export Live patients",
                       action: async () => {
                         const result = await exportAsCSV();
-                        console.log(result);
-                        if (result.isError || !result.data) {
-                          return null;
-                        }
-                        const data = await result.data({
-                          signal: new AbortController().signal,
-                        });
-                        return data || null;
+                        return result.data || null;
                       },
                       parse: (data) => {
                         try {

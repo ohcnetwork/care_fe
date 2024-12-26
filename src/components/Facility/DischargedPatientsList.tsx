@@ -234,21 +234,12 @@ const DischargedPatientsList = ({
     return days > 0 && days <= 7 && days !== 0;
   });
 
-  const queryParams = {
-    ...params,
-    csv: true,
-  };
-  const pathParams = { facility_external_id };
-
   const { refetch: exportAsCSV } = useQuery({
-    queryKey: ["Discharged Patients", queryParams],
-    queryFn: async () => {
-      const data = await query(routes.listFacilityDischargedPatients, {
-        queryParams,
-        pathParams,
-      });
-      return data;
-    },
+    queryKey: ["discharged-patients-csv"],
+    queryFn: query(routes.listFacilityDischargedPatients, {
+      queryParams: { ...params, csv: true },
+      pathParams: { facility_external_id },
+    }),
     enabled: false,
   });
 
@@ -439,15 +430,8 @@ const DischargedPatientsList = ({
                       label: "Export Discharged patients",
                       action: async () => {
                         const result = await exportAsCSV();
-                        if (result.isError || !result.data) {
-                          return null;
-                        }
-                        const data = await result.data({
-                          signal: new AbortController().signal,
-                        });
-                        return data || null;
+                        return result.data || null;
                       },
-
                       parse: (data) => {
                         try {
                           return csvGroupByColumn(data, "Patient ID");
