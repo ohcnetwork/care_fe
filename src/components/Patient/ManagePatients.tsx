@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
@@ -28,6 +27,7 @@ import { FacilityModel, PatientCategory } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
+import { usePatientExport } from "@/hooks/usePatientExport";
 
 import {
   ADMITTED_TO,
@@ -45,7 +45,6 @@ import { triggerGoal } from "@/Integrations/Plausible";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   calculateDaysBetween,
@@ -231,13 +230,11 @@ export const PatientManager = () => {
     return days > 0 && days <= 7 && days !== 0;
   });
 
-  const { refetch: exportAsCSV } = useQuery({
-    queryKey: ["Live-Patients-csv"],
-    queryFn: query(routes.patientList, {
-      queryParams: { ...params, csv: true, facility: qParams.facility },
-    }),
-    enabled: false,
-  });
+  const { refetch: exportAsCSV } = usePatientExport(
+    routes.patientList,
+    { ...params, facility: qParams.facility },
+    {},
+  );
 
   let managePatients: any = null;
   const { loading: isLoading, data } = useTanStackQueryInstead(
@@ -893,7 +890,7 @@ export const PatientManager = () => {
                       label: "Export Live patients",
                       action: async () => {
                         const result = await exportAsCSV();
-                        return result.data || null;
+                        return result.data as string | null;
                       },
                       parse: (data) => {
                         try {

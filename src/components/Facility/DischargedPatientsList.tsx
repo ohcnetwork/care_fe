@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ import PatientFilter from "@/components/Patient/PatientFilter";
 import { PatientModel } from "@/components/Patient/models";
 
 import useFilters from "@/hooks/useFilters";
+import { usePatientExport } from "@/hooks/usePatientExport";
 
 import {
   ADMITTED_TO,
@@ -43,7 +43,6 @@ import { parseOptionId } from "@/common/utils";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   calculateDaysBetween,
@@ -234,14 +233,11 @@ const DischargedPatientsList = ({
     return days > 0 && days <= 7 && days !== 0;
   });
 
-  const { refetch: exportAsCSV } = useQuery({
-    queryKey: ["discharged-patients-csv"],
-    queryFn: query(routes.listFacilityDischargedPatients, {
-      queryParams: { ...params, csv: true },
-      pathParams: { facility_external_id },
-    }),
-    enabled: false,
-  });
+  const { refetch: exportDischargedAsCSV } = usePatientExport(
+    routes.listFacilityDischargedPatients,
+    { ...params },
+    { facility_external_id },
+  );
 
   const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
@@ -429,8 +425,8 @@ const DischargedPatientsList = ({
                     {
                       label: "Export Discharged patients",
                       action: async () => {
-                        const result = await exportAsCSV();
-                        return result.data || null;
+                        const result = await exportDischargedAsCSV();
+                        return (result.data as string) || null;
                       },
                       parse: (data) => {
                         try {
