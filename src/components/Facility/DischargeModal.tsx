@@ -106,7 +106,6 @@ const DischargeModal = ({
 
   if (error) {
     Notification.Error({ msg: t("ERROR_FETCHING_CONSULTATION") });
-    return;
   }
 
   const initialDiagnoses = data?.diagnoses ?? [];
