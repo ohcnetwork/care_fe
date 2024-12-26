@@ -63,7 +63,7 @@ export const FacilityCard = (props: {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[425px]:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[450px]:hidden"
             >
               <Avatar
                 name={facility.name || ""}
@@ -77,7 +77,7 @@ export const FacilityCard = (props: {
                 <div className="flex flex-col gap-5 sm:flex-row">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] sm:block"
+                    className="hidden min-[450px]:block h-[150px] min-h-[150px] w-[150px] min-w-[150px]"
                   >
                     <Avatar
                       name={facility.name || ""}
