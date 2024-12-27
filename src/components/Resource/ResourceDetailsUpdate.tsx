@@ -168,7 +168,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       if (res && res.status == 200 && data) {
         dispatch({ type: "set_form", form: data });
         Notification.Success({
-          msg: "Resource request updated successfully",
+          msg: "Request updated successfully",
         });
 
         navigate(`/resource/${props.id}`);
@@ -184,7 +184,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   return (
     <Page
-      title="Update Resource Request"
+      title="Update Request"
       backUrl={`/resource/${props.id}`}
       crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >

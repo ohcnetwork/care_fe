@@ -17,7 +17,6 @@ import {
   ConsultationModel,
   PatientCategory,
 } from "@/components/Facility/models";
-import { PatientModel } from "@/components/Patient/models";
 import { SkillModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -45,6 +44,7 @@ import {
   formatPatientAge,
   humanizeStrings,
 } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -30,9 +30,7 @@ export const Appointments = (props: PatientProps) => {
     queryKey: ["patient-appointments", id],
     queryFn: query(ScheduleAPIs.appointments.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: {
-        patient: id,
-      },
+      queryParams: { patient: id, limit: 100 },
     }),
   });
 
@@ -66,15 +64,14 @@ export const Appointments = (props: PatientProps) => {
           {t("appointments")}
         </h2>
         <Button
+          variant="outline_primary"
+          asChild
           disabled={isPatientInactive(facilityId)}
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/new?patient_id=${patientData.id}`,
-            )
-          }
         >
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("create_appointment")}
+          <Link href={`/facility/${facilityId}/patient/${id}/book-appointment`}>
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("schedule_appointment")}
+          </Link>
         </Button>
       </div>
 
@@ -97,9 +94,10 @@ export const Appointments = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : appointments.length ? (
-              appointments.map((appointment) => (
+              appointments.map((appointment, i) => (
                 <TableRow key={appointment.id}>
                   <TableCell className="font-medium">
+                    {i + 1}
                     {appointment.token_slot.availability.name}
                   </TableCell>
                   <TableCell>
@@ -107,29 +105,27 @@ export const Appointments = (props: PatientProps) => {
                   </TableCell>
                   <TableCell>
                     {appointment.booked_by ? (
-                      <>
+                      <div className="flex items-center gap-2">
                         <Avatar
-                          imageUrl={
-                            appointment.booked_by?.read_profile_picture_url
-                          }
+                          imageUrl={appointment.booked_by?.profile_picture_url}
                           name={formatName(appointment.booked_by)}
-                          className="mr-2 size-4"
+                          className="size-6 rounded-full"
                         />
                         <span>{formatName(appointment.booked_by)}</span>
-                      </>
+                      </div>
                     ) : (
                       <span className="text-gray-500">{t("self_booked")}</span>
                     )}
                   </TableCell>
                   <TableCell>{getStatusBadge(appointment.status)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/appointment/${appointment.id}`)}
-                    >
-                      <CareIcon icon="l-eye" className="mr-2" />
-                      {t("view")}
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                      >
+                        <CareIcon icon="l-eye" className="mr-1" />
+                        {t("view")}
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -137,7 +133,7 @@ export const Appointments = (props: PatientProps) => {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  {t("no_appointments_found")}
+                  {t("no_appointments")}
                 </TableCell>
               </TableRow>
             )}

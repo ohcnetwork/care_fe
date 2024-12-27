@@ -1,9 +1,9 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
 import { ConsultationModel } from "@/components/Facility/models";
-import { PatientModel } from "@/components/Patient/models";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { PatientModel } from "@/types/emr/patient";
 
 interface ConsultationContextBase {
   consultation?: ConsultationModel;

@@ -47,6 +47,7 @@ import { UserModel } from "@/components/Users/models";
 
 import request from "@/Utils/request/request";
 import { Time, WritableOnly } from "@/Utils/types";
+import { dateQueryString } from "@/Utils/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -56,22 +57,26 @@ const formSchema = z.object({
   valid_to: z.date({
     required_error: "Valid to date is required",
   }),
-  weekdays: z.array(z.number() as unknown as z.ZodType<DayOfWeekValue>),
-  availabilities: z.array(
-    z.object({
-      name: z.string().min(1, "Session name is required"),
-      slot_type: z.enum(ScheduleSlotTypes),
-      reason: z.string(),
-      start_time: z
-        .string()
-        .min(1, "Start time is required") as unknown as z.ZodType<Time>,
-      end_time: z
-        .string()
-        .min(1, "End time is required") as unknown as z.ZodType<Time>,
-      slot_size_in_minutes: z.number().min(1, "Must be greater than 0"),
-      tokens_per_slot: z.number().min(1, "Must be greater than 0"),
-    }),
-  ),
+  weekdays: z
+    .array(z.number() as unknown as z.ZodType<DayOfWeekValue>)
+    .min(1, "At least one weekday is required"),
+  availabilities: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Session name is required"),
+        slot_type: z.enum(ScheduleSlotTypes),
+        reason: z.string(),
+        start_time: z
+          .string()
+          .min(1, "Start time is required") as unknown as z.ZodType<Time>,
+        end_time: z
+          .string()
+          .min(1, "End time is required") as unknown as z.ZodType<Time>,
+        slot_size_in_minutes: z.number().min(1, "Must be greater than 0"),
+        tokens_per_slot: z.number().min(1, "Must be greater than 0"),
+      }),
+    )
+    .min(1, "At least one session is required"),
 });
 
 interface Props {
@@ -122,10 +127,9 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     mutate({
-      valid_from: values.valid_from.toISOString().split("T")[0],
-      valid_to: values.valid_to.toISOString().split("T")[0],
+      valid_from: dateQueryString(values.valid_from),
+      valid_to: dateQueryString(values.valid_to),
       name: values.name,
-      resource_type: "user",
       resource: user.external_id,
       availabilities: values.availabilities.map((availability) => ({
         name: availability.name,
@@ -172,6 +176,9 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
       </Callout>
     );
   };
+
+  console.log(form.formState.errors);
+  console.log(form.formState);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -386,7 +393,7 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
                                 <Input
                                   type="number"
                                   min={0}
-                                  placeholder="10"
+                                  placeholder="e.g. 10"
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(e.target.valueAsNumber)
@@ -408,7 +415,7 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
                                 <Input
                                   type="number"
                                   min={0}
-                                  placeholder="10"
+                                  placeholder="e.g. 1"
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(e.target.valueAsNumber)
@@ -444,6 +451,11 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
                     </div>
                   </div>
                 ))}
+                {form.formState.errors.availabilities && (
+                  <FormMessage>
+                    {form.formState.errors.availabilities.root?.message}
+                  </FormMessage>
+                )}
               </div>
 
               <Button

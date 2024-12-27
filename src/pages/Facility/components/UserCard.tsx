@@ -1,4 +1,6 @@
+import dayjs from "dayjs";
 import { navigate } from "raviger";
+import { useMemo } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -8,7 +10,10 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/Common/Avatar";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
 import { formatName } from "@/Utils/utils";
+import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
   user: UserAssignedModel;
@@ -21,6 +26,20 @@ export function UserCard({ user, className, facilityId }: Props) {
     first_name: user.first_name || "",
     last_name: user.last_name || "",
   });
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
+
+  const returnLink = useMemo(() => {
+    if (
+      Object.keys(tokenData).length > 0 &&
+      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+    ) {
+      return `/facility/${facilityId}/appointments/${user.external_id}/book-appointment`;
+    }
+    return `/facility/${facilityId}/appointments/${user.external_id}/otp/send`;
+  }, [tokenData, facilityId, user.external_id]);
 
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
@@ -55,9 +74,7 @@ export function UserCard({ user, className, facilityId }: Props) {
               variant="outline"
               onClick={() => {
                 localStorage.setItem("user", JSON.stringify(user));
-                navigate(
-                  `/facility/${facilityId}/appointments/${user.external_id}/otp/send`,
-                );
+                navigate(returnLink);
               }}
             >
               Book Appointment

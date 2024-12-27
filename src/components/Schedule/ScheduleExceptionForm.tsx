@@ -33,6 +33,7 @@ import { UserModel } from "@/components/Users/models";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
+import { dateQueryString } from "@/Utils/utils";
 
 const formSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
@@ -103,8 +104,8 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
   async function onSubmit(data: FormValues) {
     createException({
       reason: data.reason,
-      valid_from: data.valid_from.toISOString().split("T")[0],
-      valid_to: data.valid_to.toISOString().split("T")[0],
+      valid_from: dateQueryString(data.valid_from),
+      valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
       resource: user.external_id,

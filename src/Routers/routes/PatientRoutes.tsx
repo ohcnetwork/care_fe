@@ -2,22 +2,24 @@ import DeathReport from "@/components/DeathReport/DeathReport";
 import InvestigationReports from "@/components/Facility/Investigations/Reports";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
 import { InsuranceDetails } from "@/components/Patient/InsuranceDetails";
-import { PatientManager } from "@/components/Patient/ManagePatients";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
+import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientNotes from "@/components/Patient/PatientNotes";
-import { PatientRegister } from "@/components/Patient/PatientRegister";
+import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const PatientRoutes: AppRoutes = {
-  "/patients": () => <PatientManager />,
+  "/patients": () => <PatientIndex />,
+  "/patients/live": () => <PatientIndex tab={"live"} />,
+  "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/investigation_reports": ({ id }) => (
     <InvestigationReports id={id} />
   ),
-  "/facility/:facilityId/patient": ({ facilityId }) => (
-    <PatientRegister facilityId={facilityId} />
+  "/facility/:facilityId/patient/create": ({ facilityId }) => (
+    <PatientRegistration facilityId={facilityId} />
   ),
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientHome facilityId={facilityId} id={id} page="demography" />
@@ -33,7 +35,7 @@ const PatientRoutes: AppRoutes = {
     <InsuranceDetails facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
-    <PatientRegister facilityId={facilityId} id={id} />
+    <PatientRegistration facilityId={facilityId} patientId={id} />
   ),
   "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,

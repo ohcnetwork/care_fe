@@ -1,19 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
@@ -68,82 +61,6 @@ function OTPPatientHome() {
     );
   };
 
-  const getTableRow = (appointment: Appointment) => {
-    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
-    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
-    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
-    return (
-      <TableRow key={appointment.id}>
-        <td colSpan={7}>
-          <div className="flex bg-white rounded-md shadow items-center p-3">
-            <TableCell className="ml-2 border-0 first:rounded-l-md w-[14.28%]">
-              {appointment?.resource
-                ? formatName(appointment.resource)
-                : "Resource from BE"}
-            </TableCell>
-            <TableCell className="border-0 w-[14.28%]">
-              {"Currently doesn't exist"}
-            </TableCell>
-            <TableCell className="border-0 w-[14.28%]">
-              {appointmentDate}
-            </TableCell>
-            <TableCell className="border-0 w-[14.28%]">
-              {appointmentTimeSlot}
-            </TableCell>
-            <TableCell className="border-0 w-[14.28%]">
-              {"Facility Location"}
-            </TableCell>
-            <TableCell className="border-0 w-[14.28%]">
-              {getStatusChip(appointment.status)}
-            </TableCell>
-            <TableCell className="border-0 last:rounded-r-md w-[14.28%]">
-              <Button
-                variant="secondary"
-                className="border border-secondary-600 shadow"
-              >
-                {t("view_details")}
-              </Button>
-            </TableCell>
-          </div>
-        </td>
-      </TableRow>
-    );
-  };
-
-  const getTableHeader = () => {
-    return (
-      <TableHeader>
-        <TableRow>
-          <th colSpan={7}>
-            <div className="flex rounded-md shadow">
-              <TableHead className="ml-2 bg-secondary-200 border-0 first:rounded-l-md w-[14.28%] content-center">
-                {t("practitioner")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 w-[14.28%] content-center">
-                {t("appointment_type")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 w-[14.28%] content-center">
-                {t("date")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 w-[14.28%] content-center">
-                {t("time_slot")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 w-[14.28%] content-center">
-                {t("location")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 w-[14.28%] content-center">
-                {t("status")}
-              </TableHead>
-              <TableHead className="bg-secondary-200 border-0 last:rounded-r-md w-[14.28%] content-center">
-                {t("action")}
-              </TableHead>
-            </div>
-          </th>
-        </TableRow>
-      </TableHeader>
-    );
-  };
-
   if (isLoading) {
     return <Loading />;
   }
@@ -164,35 +81,85 @@ function OTPPatientHome() {
     dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
   );
 
-  const getAppointmentsTable = (appointments: Appointment[] | undefined) => {
+  const getAppointmentCard = (appointment: Appointment) => {
+    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
+    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
+    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
     return (
-      <Table className="[border-spacing:0_0.5rem] border-separate">
-        {getTableHeader()}
-        <TableBody>
-          {appointments && appointments.length > 0 ? (
-            appointments.map((appointment) => getTableRow(appointment))
-          ) : (
-            <TableRow className="h-32">
-              <TableCell
-                colSpan={7}
-                className="text-center bg-white shadow rounded"
-              >
-                {t("no_appointments")}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <Card className="shadow overflow-hidden">
+        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
+          <CardTitle>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">{t("practitioner")}: </span>
+              <span className="text-sm">
+                {appointment?.resource
+                  ? formatName(appointment.resource)
+                  : "Resource from BE"}
+              </span>
+            </div>
+          </CardTitle>
+          <Button variant="secondary" className="border border-secondary-400">
+            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span>{t("view_details")}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="mt-2 pt-2 px-6 pb-3">
+          <div className="flex flex-col md:flex-row gap-2 justify-between">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+              <span className="text-xs font-medium">
+                {t("appointment_type")}:{" "}
+              </span>
+              <span className="text-sm">{"Currently doesn't exist"}</span>
+            </div>
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+              <span className="text-xs font-medium">{t("location")}: </span>
+              <span className="text-sm">{"Facility Location"}</span>
+            </div>
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
+              <span className="text-xs font-medium">{t("status")}: </span>
+              <span>{getStatusChip(appointment.status)}</span>
+            </div>
+            <div className="flex flex-row gap-3 justify-between">
+              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+                <span className="text-xs font-medium">{t("date")}: </span>
+                <span className="text-sm">{appointmentDate}</span>
+              </div>
+              <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+                <span className="text-xs font-medium">{t("time_slot")}: </span>
+                <span className="text-sm">{appointmentTimeSlot}</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const getAppointmentCardContent = (
+    appointments: Appointment[] | undefined,
+  ) => {
+    return (
+      <div className="grid gap-4 mb-2">
+        {appointments && appointments.length > 0 ? (
+          appointments.map((appointment) => getAppointmentCard(appointment))
+        ) : (
+          <div className="col-span-full text-center bg-white shadow rounded p-4 font-medium">
+            {t("no_appointments")}
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
     <div className="container mx-auto mt-2">
-      <div className="flex justify-between">
+      <div className="flex justify-between w-full">
         <span className="text-xl font-bold">{t("appointments")}</span>
-        <Button variant="primary_gradient">
-          <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-          <span>{t("book_appointment")}</span>
+        <Button variant="primary_gradient" className="sticky right-0" asChild>
+          <Link href="/facilities">
+            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span>{t("book_appointment")}</span>
+          </Link>
         </Button>
       </div>
       <Tabs defaultValue="scheduled" className="mt-4">
@@ -201,10 +168,10 @@ function OTPPatientHome() {
           <TabsTrigger value="history">{t("history")}</TabsTrigger>
         </TabsList>
         <TabsContent value="scheduled">
-          {getAppointmentsTable(scheduledAppointments)}
+          {getAppointmentCardContent(scheduledAppointments)}
         </TabsContent>
         <TabsContent value="history">
-          {getAppointmentsTable(pastAppointments)}
+          {getAppointmentCardContent(pastAppointments)}
         </TabsContent>
       </Tabs>
     </div>

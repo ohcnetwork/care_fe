@@ -44,7 +44,10 @@ const App = () => {
         <PubSubProvider>
           <PluginEngine>
             <HistoryAPIProvider>
-              <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+              <AuthUserProvider
+                unauthorized={<Routers.SessionRouter />}
+                otpAuthorized={<Routers.OTPPatientRouter />}
+              >
                 <FeatureFlagsProvider>
                   <Routers.AppRouter />
                 </FeatureFlagsProvider>

@@ -199,6 +199,8 @@ export default function ListView() {
       hideBack
       componentRight={
         <ExportButton
+          variant="secondary"
+          className="ml-4 bg-transparent shadow-none text-black rounded-full"
           action={async () => {
             const { data } = await request(routes.downloadResourceRequests, {
               query: { ...appliedFilters, csv: true },

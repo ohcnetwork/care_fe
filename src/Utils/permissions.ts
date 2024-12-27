@@ -46,6 +46,7 @@ export const showUserPasswordReset = (
 export const showAvatarEdit = (authUser: UserModel, targetUser: UserModel) => {
   return authUser.username === targetUser.username || authUser.is_superuser;
 };
+
 export const editUserPermissions = (
   authUser: UserModel,
   targetUser: UserModel,
@@ -54,6 +55,7 @@ export const editUserPermissions = (
     return true;
   return checkIfStateOrDistrictAdminInSameLocation(authUser, targetUser);
 };
+
 export const CameraFeedPermittedUserTypes: UserRole[] = [
   "DistrictAdmin",
   "StateAdmin",

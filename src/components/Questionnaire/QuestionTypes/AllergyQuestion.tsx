@@ -95,8 +95,6 @@ export function AllergyQuestion({
     });
   };
 
-  console.log(allergies);
-
   return (
     <div className="space-y-4">
       <Label className="text-base font-medium">

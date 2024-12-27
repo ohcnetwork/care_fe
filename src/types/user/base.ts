@@ -6,5 +6,5 @@ export type UserBase = {
   last_name: string;
   user_type: number;
   last_login: string;
-  read_profile_picture_url: string;
+  profile_picture_url: string;
 };

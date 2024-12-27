@@ -13,6 +13,8 @@ import Chip from "@/CAREUI/display/Chip";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Markdown } from "@/components/ui/markdown";
+
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import AvatarEditable from "@/components/Common/AvatarEditable";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -41,11 +43,34 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-import { patientRegisterAuth } from "../Patient/PatientRegister";
+import { UserModel } from "../Users/models";
+import { FacilityModel } from "./models";
+
+export function canUserRegisterPatient(
+  authUser: UserModel,
+  facilityObject: FacilityModel | undefined,
+  facilityId: string,
+) {
+  // User types that can register a new patient
+  const privilegedUserTypes = ["DistrictAdmin", "StateAdmin"];
+
+  return (
+    // Allow non privileged users of the same facility
+    (!privilegedUserTypes.includes(authUser.user_type) &&
+      authUser.home_facility_object?.id === facilityId) ||
+    // allow district admins
+    (authUser.user_type === "DistrictAdmin" &&
+      authUser.district === facilityObject?.district) ||
+    // allow state admins
+    (authUser.user_type === "StateAdmin" &&
+      authUser.state === facilityObject?.state)
+  );
+}
 
 type Props = {
   facilityId: string;
 };
+
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
@@ -344,6 +369,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       ),
                   )}
                 </div>
+                {facilityData?.description && (
+                  <div className="mt-8">
+                    <Markdown
+                      content={facilityData.description}
+                      className="mt-4"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -453,13 +486,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              {patientRegisterAuth(authUser, facilityData, facilityId) && (
+              {canUserRegisterPatient(authUser, facilityData, facilityId) && (
                 <ButtonV2
                   variant="primary"
                   ghost
                   border
                   className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                  onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/patient/create`)
+                  }
                   authorizeFor={NonReadOnlyUsers}
                 >
                   <CareIcon icon="l-plus" className="text-lg" />

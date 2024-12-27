@@ -1,29 +1,51 @@
 import careConfig from "@careConfig";
+import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
-import { LocalStorageKeys } from "@/common/constants";
+import { CarePatientTokenKey, LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
   children: React.ReactNode;
   unauthorized: React.ReactNode;
+  otpAuthorized: React.ReactNode;
 }
 
-export default function AuthUserProvider({ children, unauthorized }: Props) {
+export default function AuthUserProvider({
+  children,
+  unauthorized,
+  otpAuthorized,
+}: Props) {
   const {
     res,
     data: user,
     loading,
     refetch,
   } = useTanStackQueryInstead(routes.currentUser, { silent: true });
+  const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
+
+  useEffect(() => {
+    if (
+      tokenData.token &&
+      Object.keys(tokenData).length > 0 &&
+      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+    ) {
+      setIsOTPAuthorized(true);
+    }
+  }, [tokenData]);
 
   useEffect(() => {
     if (!user) {
@@ -99,7 +121,11 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         refetchUser: refetch,
       }}
     >
-      {!res.ok || !user ? unauthorized : children}
+      {!res.ok || !user
+        ? isOTPAuthorized
+          ? otpAuthorized
+          : unauthorized
+        : children}
     </AuthUserContext.Provider>
   );
 }

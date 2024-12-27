@@ -18,13 +18,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+interface AutoCompleteOption {
+  label: string;
+  value: string;
+}
+
 interface AutocompleteProps {
-  options: string[];
+  options: AutoCompleteOption[];
   value: string;
   onChange: (value: string) => void;
-  onSearch: (value: string) => void;
   placeholder?: string;
   noOptionsMessage?: string;
+  disabled?: boolean;
 }
 
 export default function Autocomplete({
@@ -33,6 +38,7 @@ export default function Autocomplete({
   onChange,
   placeholder = "Select...",
   noOptionsMessage = "No options found",
+  disabled,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -40,26 +46,41 @@ export default function Autocomplete({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          title={
+            value
+              ? options.find((option) => option.value === value)?.label
+              : undefined
+          }
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={disabled}
         >
-          {value ? options.find((option) => option === value) : placeholder}
+          <span className="overflow-hidden">
+            {value
+              ? options.find((option) => option.value === value)?.label
+              : placeholder}
+          </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="Search option..." />
+          <CommandInput placeholder="Search option..." disabled={disabled} />
           <CommandList>
             <CommandEmpty>{noOptionsMessage}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
-                  key={option}
-                  value={option}
-                  onSelect={(currentValue) => {
+                  key={option.value}
+                  value={option.label}
+                  onSelect={(v) => {
+                    const currentValue =
+                      options.find(
+                        (option) =>
+                          option.label.toLowerCase() === v.toLowerCase(),
+                      )?.value || "";
                     onChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
@@ -67,10 +88,10 @@ export default function Autocomplete({
                   <CheckIcon
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === option ? "opacity-100" : "opacity-0",
+                      value === option.value ? "opacity-100" : "opacity-0",
                     )}
                   />
-                  {option}
+                  {option.label}
                 </CommandItem>
               ))}
             </CommandGroup>
