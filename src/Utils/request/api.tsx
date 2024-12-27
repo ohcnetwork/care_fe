@@ -65,7 +65,6 @@ import {
   CreateFileResponse,
   DailyRoundsModel,
   FileUploadModel,
-  PatientModel,
 } from "@/components/Patient/models";
 import {
   Appointment,
