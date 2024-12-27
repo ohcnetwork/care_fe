@@ -58,13 +58,13 @@ describe("Facility Homepage Function", () => {
   it("Verify Sidebar functionality", () => {
     // Verify Icon and Corresponding Text Should be Visible
     NavItems.forEach((item) => {
-      facilityHome.verifyIconVisiblity(item.icon);
-      facilityHome.verifyTextVisibility(item.text);
+      facilityHome.verifyIconVisibility(item.icon);
+      facilityHome.verifyTextVisibility(item.text.replace(" ", "-"));
     });
     facilityHome.toggleSideBar();
     // Toggle Sidebar and Just Icon Should be visible
     NavItems.forEach((item) => {
-      facilityHome.verifyIconVisiblity(item.icon);
+      facilityHome.verifyIconVisibility(item.icon);
       facilityHome.verifyTextVisibility(item.text, false);
     });
     facilityHome.toggleSideBar();

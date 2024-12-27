@@ -67,7 +67,7 @@ const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
             className={`${
               shrinked ? "hidden" : "grow"
             } flex w-full items-center text-nowrap pl-4 text-sm tracking-wide`}
-            data-testid={`sidebar-text-${props.text}`}
+            data-testid={`sidebar-text-${props.text.replace(" ", "-")}`}
           >
             {t(props.text)}
           </span>

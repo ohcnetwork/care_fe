@@ -4,7 +4,7 @@ class FacilityHome {
   sidebar_toggle = "sidebar-toggle";
 
   // Operations
-  verifyIconVisiblity(iconClassName: string) {
+  verifyIconVisibility(iconClassName: string) {
     cy.get(`.${iconClassName}`).should("be.visible").should("exist");
   }
 
