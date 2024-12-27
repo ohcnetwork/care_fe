@@ -19,6 +19,7 @@ export type QuestionType =
 export type StructuredQuestionType =
   | "allergy_intolerance"
   | "medication_request"
+  | "medication_statement"
   | "symptom"
   | "diagnosis"
   | "encounter";

@@ -26,7 +26,7 @@ import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
-interface MedicationQuestionProps {
+interface MedicationRequestQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
@@ -44,12 +44,12 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   dosage_instruction: [{}],
 };
 
-export function MedicationQuestion({
+export function MedicationRequestQuestion({
   question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
-}: MedicationQuestionProps) {
+}: MedicationRequestQuestionProps) {
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
