@@ -91,9 +91,8 @@ export function KanbanSection<T extends { id: string }>(
   const sectionRef = useRef<HTMLDivElement>(null);
   const defaultLimit = 14;
   const { t } = useTranslation();
-
+  const options = section.fetchOptions(section.id);
   const fetchPage = async ({ pageParam = 0 }) => {
-    const options = section.fetchOptions(section.id);
     try {
       const data = await callApi(options.route, {
         ...options.options,
@@ -118,7 +117,7 @@ export function KanbanSection<T extends { id: string }>(
     isLoading,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [section.id],
+    queryKey: ["board", section.id, options.options?.query],
     queryFn: fetchPage,
     getNextPageParam: (lastPage, pages) => {
       if (!lastPage.next) return undefined;
