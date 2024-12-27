@@ -285,9 +285,7 @@ const DischargedPatientsList = ({
               onTabChange={() => navigate("/patients")}
               currentTab={1}
             />
-            <FilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <FilterButton onClick={() => advancedFilter.setShow(true)} />
             <SortDropdownMenu
               options={DISCHARGED_PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}

@@ -123,9 +123,7 @@ export default function ManageUsers() {
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="flex flex-col gap-2">
-            <FilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <FilterButton onClick={() => advancedFilter.setShow(true)} />
             {userTypes.length && addUser}
           </div>
 

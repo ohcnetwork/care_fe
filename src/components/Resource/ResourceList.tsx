@@ -237,9 +237,7 @@ export default function ListView() {
               <CareIcon icon="l-list-ul" className="mr-2" />
               {t("board_view")}
             </Button>
-            <FilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <FilterButton onClick={() => advancedFilter.setShow(true)} />
           </div>
         </div>
       </div>

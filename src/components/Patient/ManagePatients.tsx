@@ -902,9 +902,7 @@ export const PatientManager = () => {
               </ButtonV2>
             )}
 
-            <FilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <FilterButton onClick={() => advancedFilter.setShow(true)} />
             <SortDropdownMenu
               options={PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}
