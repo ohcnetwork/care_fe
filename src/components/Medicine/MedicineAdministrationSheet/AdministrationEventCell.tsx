@@ -32,7 +32,7 @@ export default function AdministrationEventCell({
   // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.occurrence_period?.end).isBetween(
+      dayjs(administration.occurrence_period_end).isBetween(
         start,
         end,
         null,
@@ -41,8 +41,8 @@ export default function AdministrationEventCell({
     )
     .sort(
       (a, b) =>
-        new Date(a.occurrence_period!.end!).getTime() -
-        new Date(b.occurrence_period!.end!).getTime(),
+        new Date(a.occurrence_period_end!).getTime() -
+        new Date(b.occurrence_period_end!).getTime(),
     );
 
   const hasComment = administered.some((obj) => !!obj.note);

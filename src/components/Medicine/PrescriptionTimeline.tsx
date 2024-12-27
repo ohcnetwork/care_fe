@@ -144,7 +144,7 @@ const MedicineAdministeredNode = ({
             ? event.administration.dosage + " dose of "
             : ""
         }the medicine at ${formatTime(
-          event.administration.occurrence_period?.end,
+          event.administration.occurrence_period_end,
         )}.`}
         actions={
           !event.cancelled &&
@@ -223,14 +223,14 @@ const compileEvents = (
   administrations
     .sort(
       (a, b) =>
-        new Date(a.occurrence_period!.end!).getTime() -
-        new Date(b.occurrence_period!.end!).getTime(),
+        new Date(a.occurrence_period_end!).getTime() -
+        new Date(b.occurrence_period_end!).getTime(),
     )
     .forEach((administration) => {
       events.push({
         type: "administered",
         icon: "l-syringe",
-        timestamp: administration.occurrence_period!.end!,
+        timestamp: administration.occurrence_period_end!,
         by: administration.created_by,
         cancelled: administration.status === "entered_in_error",
         administration,

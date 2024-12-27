@@ -141,10 +141,8 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
             function: "performer",
           },
         ],
-        occurrence_period: {
-          start: time.toISOString(),
-          end: time.toISOString(),
-        },
+        occurrence_period_start: time.toISOString(),
+        occurrence_period_end: time.toISOString(),
         note: values.note,
         dosage: {
           text: prescription.dosage_instruction[0].text,

@@ -46,10 +46,8 @@ export interface MedicationAdministration {
   medication: Code;
 
   authored_on?: string; // datetime
-  occurrence_period?: {
-    start: string; // datetime
-    end?: string; // datetime
-  };
+  occurrence_period_start: string; // datetime
+  occurrence_period_end?: string; // datetime
   recorded?: string; // datetime
 
   encounter: string; // uuid
