@@ -1,8 +1,33 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
+  sidebar_toggle = "sidebar-toggle";
 
   // Operations
+  verifyIconVisiblity(iconClassName: string) {
+    cy.get(`.${iconClassName}`).should("be.visible").should("exist");
+  }
+
+  verifyTextVisibility(expectedText: string, isVisible: boolean = true) {
+    if (isVisible) {
+      cy.get(`[data-testid="sidebar-text-${expectedText}"]`)
+        .then(($elem) => {
+          expect($elem.text().trim()).to.equal(expectedText);
+        })
+        .should("be.visible");
+    } else {
+      cy.get(`[data-testid="sidebar-text-${expectedText}"]`).should(
+        "not.be.visible",
+      );
+    }
+  }
+
+  toggleSideBar() {
+    cy.get(`[data-testid="${this.sidebar_toggle}"]`)
+      .should("be.visible")
+      .click();
+  }
+
   clickExportButton() {
     cy.get(this.exportButton).scrollIntoView();
     cy.get(this.exportButton).click();

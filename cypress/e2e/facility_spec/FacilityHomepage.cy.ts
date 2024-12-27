@@ -32,6 +32,16 @@ describe("Facility Homepage Function", () => {
   const facilityWithNoAvailableBeds = "Dummy Facility 12";
   const locationName = "Test-location";
   const locationType = "WARD";
+  const NavItems = [
+    { text: "Facilities", icon: "care-d-hospital" },
+    { text: "Patients", icon: "care-d-patient" },
+    { text: "Assets", icon: "care-d-folder" },
+    { text: "Shifting", icon: "care-d-ambulance" },
+    { text: "Resource", icon: "care-d-book-open" },
+    { text: "Users", icon: "care-d-people" },
+    { text: "Notice Board", icon: "care-d-notice-board" },
+    { text: "Notifications", icon: "care-d-bell" },
+  ];
 
   before(() => {
     loginPage.loginByRole("districtAdmin");
@@ -43,6 +53,26 @@ describe("Facility Homepage Function", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/facility");
+  });
+
+  it("Verify Sidebar functionality", () => {
+    // Verify Icon and Corresponding Text Should be Visible
+    NavItems.forEach((item) => {
+      facilityHome.verifyIconVisiblity(item.icon);
+      facilityHome.verifyTextVisibility(item.text);
+    });
+    facilityHome.toggleSideBar();
+    // Toggle Sidebar and Just Icon Should be visible
+    NavItems.forEach((item) => {
+      facilityHome.verifyIconVisiblity(item.icon);
+      facilityHome.verifyTextVisibility(item.text, false);
+    });
+    facilityHome.toggleSideBar();
+    // Toggle Sidebar again and Verify Icon and Corresponding Text Should be Visible
+    NavItems.forEach((item) => {
+      facilityHome.verifyIconVisiblity(item.icon);
+      facilityHome.verifyTextVisibility(item.text);
+    });
   });
 
   it("Verify the Facility card button redirection", () => {
