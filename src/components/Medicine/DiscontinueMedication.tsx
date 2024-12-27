@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -19,7 +20,7 @@ import {
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import {
   MEDICATION_REQUEST_STATUS_REASON,
   MedicationRequest,
@@ -66,18 +67,19 @@ export default function DiscontinueMedication({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { res } = await request(routes.medicationRequest.discontinue, {
-      pathParams: { patientId, id: prescription.id! },
-      body: {
-        status_reason: values.reason,
-      },
-    });
+  const { mutate: discontinueMedication } = useMutation({
+    mutationFn: async (body: {
+      status_reason: z.infer<typeof formSchema>["reason"];
+    }) =>
+      mutate(routes.medicationRequest.discontinue, {
+        pathParams: { patientId, id: prescription.id! },
+        body,
+      }),
+    onSuccess: () => onClose(true),
+  });
 
-    if (res?.ok) {
-      onClose(true);
-      return;
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    discontinueMedication({ status_reason: values.reason });
   }
 
   return (

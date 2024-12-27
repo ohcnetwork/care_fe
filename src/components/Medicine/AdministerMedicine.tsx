@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -24,8 +25,9 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import { displayDoseRange } from "@/Utils/utils";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
@@ -118,48 +120,49 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
     },
   });
 
+  const { mutate: administerMedication } = useMutation({
+    mutationFn: async (body: MedicationAdministration) =>
+      mutate(routes.medicationAdministration.create, {
+        pathParams: { patientId },
+        body,
+      }),
+    onSuccess: () => onClose(true),
+  });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const time = values.time ?? new Date();
     const doseValue = values.dosageValue ?? doseAndRate.dose_quantity?.value;
     const doseUnit =
       doseAndRate.dose_quantity?.unit ?? doseAndRate.dose_range?.low.unit;
 
-    const { res } = await request(routes.medicationAdministration.create, {
-      pathParams: { patientId },
-      body: {
-        encounter: consultationId,
-        request: prescription.id!,
-        status: "completed",
-        category: "inpatient",
-        medication: prescription.medication!,
-        authored_on: prescription.authored_on!,
-        recorded: new Date().toISOString(),
-        performer: [
-          {
-            actor: authUser.external_id,
-            function: "performer",
-          },
-        ],
-        occurrence_period_start: time.toISOString(),
-        occurrence_period_end: time.toISOString(),
-        note: values.note,
-        dosage: {
-          text: prescription.dosage_instruction[0].text,
-          site: prescription.dosage_instruction[0].site,
-          route: prescription.dosage_instruction[0].route,
-          method: prescription.dosage_instruction[0].method,
-          dose: {
-            value: doseValue!,
-            unit: doseUnit!,
-          },
+    administerMedication({
+      encounter: consultationId,
+      request: prescription.id!,
+      status: "completed",
+      category: "inpatient",
+      medication: prescription.medication!,
+      authored_on: prescription.authored_on!,
+      recorded: new Date().toISOString(),
+      performer: [
+        {
+          actor: authUser.external_id,
+          function: "performer",
+        },
+      ],
+      occurrence_period_start: time.toISOString(),
+      occurrence_period_end: time.toISOString(),
+      note: values.note,
+      dosage: {
+        text: prescription.dosage_instruction[0].text,
+        site: prescription.dosage_instruction[0].site,
+        route: prescription.dosage_instruction[0].route,
+        method: prescription.dosage_instruction[0].method,
+        dose: {
+          value: doseValue!,
+          unit: doseUnit!,
         },
       },
     });
-
-    if (res?.ok) {
-      onClose(true);
-      return;
-    }
   }
 
   return (
