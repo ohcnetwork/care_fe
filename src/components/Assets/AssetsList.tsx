@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import Chip from "@/CAREUI/display/Chip";
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import { Button } from "@/components/ui/button";
 
@@ -356,9 +356,7 @@ const AssetsList = () => {
 
           {/* Advanced Filter Button */}
           <div className="w-full md:w-auto">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <FilterButton onClick={() => advancedFilter.setShow(true)} />
           </div>
 
           {/* Import/Export Menu */}

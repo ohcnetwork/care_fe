@@ -57,7 +57,7 @@ export default function FiltersSlideover({
   );
 }
 
-export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
+export const FilterButton = ({ onClick }: { onClick: () => void }) => {
   const { t } = useTranslation();
   return (
     <Button

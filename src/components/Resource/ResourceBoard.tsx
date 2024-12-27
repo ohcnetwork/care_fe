@@ -3,7 +3,7 @@ import { Suspense, lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import { Button } from "@/components/ui/button";
 
@@ -101,7 +101,7 @@ export default function BoardView() {
               <CareIcon icon="l-list-ul" className="mr-2" />
               {t("list_view")}
             </Button>
-            <AdvancedFilterButton
+            <FilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
           </div>

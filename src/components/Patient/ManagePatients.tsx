@@ -34,7 +34,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { triggerGoal } from "../../Integrations/Plausible";
 import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
@@ -902,7 +902,7 @@ export const PatientManager = () => {
               </ButtonV2>
             )}
 
-            <AdvancedFilterButton
+            <FilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu

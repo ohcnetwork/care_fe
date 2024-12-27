@@ -6,7 +6,7 @@ import CountBlock from "@/CAREUI/display/Count";
 import FilterBadge from "@/CAREUI/display/FilterBadge";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import Loading from "@/components/Common/Loading";
@@ -285,7 +285,7 @@ const DischargedPatientsList = ({
               onTabChange={() => navigate("/patients")}
               currentTab={1}
             />
-            <AdvancedFilterButton
+            <FilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu

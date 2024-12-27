@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
@@ -123,7 +123,7 @@ export default function ManageUsers() {
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="flex flex-col gap-2">
-            <AdvancedFilterButton
+            <FilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
             {userTypes.length && addUser}

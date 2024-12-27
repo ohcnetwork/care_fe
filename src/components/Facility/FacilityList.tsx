@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
@@ -156,7 +156,7 @@ export const FacilityList = () => {
       hideBack
       options={
         <div className="flex items-center gap-2 ">
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <FilterButton onClick={() => advancedFilter.setShow(true)} />
           <div id="export-button">
             <ExportMenu
               exportItems={[
