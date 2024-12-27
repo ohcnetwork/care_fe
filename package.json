@@ -89,7 +89,7 @@
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^3.0.1",
     "postcss-loader": "^8.1.1",
-    "qrcode.react": "^4.1.0",
+    "qrcode.react": "^4.2.0",
     "raviger": "^4.1.2",
     "react": "18.3.1",
     "react-copy-to-clipboard": "^5.1.0",
