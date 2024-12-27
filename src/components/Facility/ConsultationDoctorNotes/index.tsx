@@ -87,7 +87,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     queryKey: ["/patient", patientId, thread],
     queryFn: query(routes.getPatient, {
       pathParams: { patientId },
-      queryParams: { thread, offset: thread },
     }),
   });
 
