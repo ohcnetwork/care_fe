@@ -44,7 +44,7 @@ export default function ListFilter(props: any) {
 
   const { isLoading: orginFacilityLoading, data: originFacilityData } =
     useQuery({
-      queryKey: [routes.getAnyFacility.path, filter.origin_facility],
+      queryKey: ["getAnyFacility", filter.origin_facility],
       queryFn: query(routes.getAnyFacility, {
         pathParams: { id: filter.origin_facility },
       }),
@@ -62,7 +62,7 @@ export default function ListFilter(props: any) {
 
   const { isLoading: resourceFacilityLoading, data: resourceFacilityData } =
     useQuery({
-      queryKey: [routes.getAnyFacility.path, filter.approving_facility],
+      queryKey: ["getAnyFacility", filter.approving_facility],
       queryFn: query(routes.getAnyFacility, {
         pathParams: { id: filter.approving_facility },
       }),
@@ -80,7 +80,7 @@ export default function ListFilter(props: any) {
 
   const { isLoading: assignedFacilityLoading, data: assignedFacilityData } =
     useQuery({
-      queryKey: [routes.getAnyFacility.path, filter.assigned_facility],
+      queryKey: ["getAnyFacility", filter.assigned_facility],
       queryFn: query(routes.getAnyFacility, {
         pathParams: { id: filter.assigned_facility },
       }),
