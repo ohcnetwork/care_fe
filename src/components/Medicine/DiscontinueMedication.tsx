@@ -16,8 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationQuestion";
-
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
@@ -27,6 +25,7 @@ import {
   MedicationRequest,
 } from "@/types/emr/medicationRequest";
 
+import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
   DialogContent,

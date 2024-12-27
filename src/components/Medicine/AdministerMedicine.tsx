@@ -20,8 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationQuestion";
-
 import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 
@@ -30,6 +28,7 @@ import request from "@/Utils/request/request";
 import { displayDoseRange } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
+import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
   DialogContent,

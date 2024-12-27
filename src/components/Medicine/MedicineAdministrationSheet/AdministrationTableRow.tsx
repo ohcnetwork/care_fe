@@ -10,7 +10,7 @@ import DialogModal from "@/components/Common/Dialog";
 import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
 import AdministrationEventCell from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
 import AdministrationEventSeperator from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
-import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationQuestion";
+import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
 import useSlug from "@/hooks/useSlug";
 
