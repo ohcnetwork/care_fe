@@ -70,7 +70,7 @@ describe("Facility Homepage Function", () => {
     facilityHome.toggleSideBar();
     // Toggle Sidebar again and Verify Icon and Corresponding Text Should be Visible
     NavItems.forEach((item) => {
-      facilityHome.verifyIconVisiblity(item.icon);
+      facilityHome.verifyIconVisibility(item.icon);
       facilityHome.verifyTextVisibility(item.text);
     });
   });
