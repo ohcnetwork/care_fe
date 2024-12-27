@@ -29,6 +29,7 @@ import {
   DailyRoundsBody,
   DailyRoundsRes,
   DistrictModel,
+  DupPatientModel,
   FacilityModel,
   FacilityRequest,
   FacilitySpokeModel,
@@ -42,18 +43,15 @@ import {
   LocalBodyModel,
   LocationModel,
   MinimumQuantityItemResponse,
+  PatientConsentModel,
   PatientNotesEditModel,
   PatientNotesModel,
+  PatientTransferRequest,
   PatientTransferResponse,
   ResourceModel,
   ShiftingModel,
   StateModel,
   WardModel,
-} from "@/components/Facility/models";
-import {
-  DupPatientModel,
-  PatientConsentModel,
-  PatientTransferRequest,
 } from "@/components/Facility/models";
 import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
 import { HCXPolicyModel } from "@/components/HCX/models";
@@ -62,11 +60,12 @@ import {
   NotificationData,
   PNconfigData,
 } from "@/components/Notifications/models";
-import { DailyRoundsModel, PatientModel } from "@/components/Patient/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
+  DailyRoundsModel,
   FileUploadModel,
+  PatientModel,
 } from "@/components/Patient/models";
 import {
   Appointment,
@@ -88,6 +87,8 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { Observation } from "@/types/emr/observation";
 import { PlugConfig } from "@/types/plugConfig";
 import {
@@ -1525,6 +1526,35 @@ const routes = {
       method: "POST",
       TRes: Type<Appointment>(),
       TBody: Type<AppointmentCreate>(),
+    },
+  },
+
+  // Medication
+  medicationRequest: {
+    list: {
+      path: "/api/v1/patient/{patientId}/medication/request/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<MedicationRequest>>(),
+    },
+    discontinue: {
+      path: "/api/v1/patient/{patientId}/medication/request/{id}/discontinue/",
+      method: "POST",
+      TBody: Type<{ status_reason: MedicationRequest["status_reason"] }>(),
+      TRes: Type<MedicationRequest>(),
+    },
+  },
+
+  medicationAdministration: {
+    list: {
+      path: "/api/v1/patient/{patientId}/medication/administration/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<MedicationAdministration>>(),
+    },
+    create: {
+      path: "/api/v1/patient/{patientId}/medication/administration/",
+      method: "POST",
+      TBody: Type<MedicationAdministration>(),
+      TRes: Type<MedicationAdministration>(),
     },
   },
 } as const;

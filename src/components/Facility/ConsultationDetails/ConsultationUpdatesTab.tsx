@@ -263,15 +263,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn={false}
-                            prescription_type="DISCHARGE"
+                            category="discharge"
                           />
                         </div>
                         <hr className="my-2 border border-secondary-300"></hr>
                         <div className="overflow-x-auto overflow-y-hidden">
-                          <PrescriptionsTable
-                            is_prn
-                            prescription_type="DISCHARGE"
-                          />
+                          <PrescriptionsTable is_prn category="discharge" />
                         </div>
                       </div>
                     )}

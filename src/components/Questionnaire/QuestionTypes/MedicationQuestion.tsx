@@ -41,7 +41,7 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   do_not_perform: false,
   medication: undefined,
   authored_on: new Date().toISOString(),
-  dosage_instruction: [],
+  dosage_instruction: [{}],
 };
 
 export function MedicationQuestion({
@@ -131,18 +131,18 @@ export function MedicationQuestion({
   );
 }
 
-const MedicationRequestItem: React.FC<{
+export const MedicationRequestItem: React.FC<{
   medication: MedicationRequest;
   disabled?: boolean;
-  onUpdate: (medication: Partial<MedicationRequest>) => void;
-  onRemove: () => void;
-  index: number;
-}> = ({ medication, disabled, onUpdate, onRemove, index }) => {
+  onUpdate?: (medication: Partial<MedicationRequest>) => void;
+  onRemove?: () => void;
+  index?: number;
+}> = ({ medication, disabled, onUpdate, onRemove, index = 0 }) => {
   const dosageInstruction = medication.dosage_instruction[0];
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequest["dosage_instruction"][number]>,
   ) => {
-    onUpdate({
+    onUpdate?.({
       dosage_instruction: [{ ...dosageInstruction, ...updates }],
     });
   };
@@ -159,7 +159,7 @@ const MedicationRequestItem: React.FC<{
             <Select
               value={medication.intent}
               onValueChange={(value: MedicationRequestIntent) =>
-                onUpdate({ intent: value })
+                onUpdate?.({ intent: value })
               }
               disabled={disabled}
             >
@@ -179,14 +179,16 @@ const MedicationRequestItem: React.FC<{
               </SelectContent>
             </Select>
           </div>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={onRemove}
-            disabled={disabled}
-          >
-            <MinusCircledIcon className="size-4" />
-          </Button>
+          {onRemove && (
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={onRemove}
+              disabled={disabled}
+            >
+              <MinusCircledIcon className="size-4" />
+            </Button>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-4">
@@ -325,7 +327,7 @@ const MedicationRequestItem: React.FC<{
                 medication.dosage_instruction[0]?.additional_instruction?.[0]
               }
               onSelect={(additionalInstruction) =>
-                onUpdate({
+                onUpdate?.({
                   dosage_instruction: [
                     {
                       ...medication.dosage_instruction[0],

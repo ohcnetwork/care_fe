@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck - File not in use
+// TODO: Replace this with Question Form
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +11,7 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
 import CreatePrescriptionForm from "@/components/Medicine/CreatePrescriptionForm";
-import DiscontinuePrescription from "@/components/Medicine/DiscontinuePrescription";
+import DiscontinuePrescription from "@/components/Medicine/DiscontinueMedication";
 import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
 import {
   NormalPrescription,

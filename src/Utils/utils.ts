@@ -7,6 +7,9 @@ import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
+import { DoseRange, Timing } from "@/types/emr/medicationRequest";
+import { Code } from "@/types/questionnaire/code";
+import { Quantity } from "@/types/questionnaire/quantity";
 
 interface ApacheParams {
   age: number;
@@ -586,4 +589,31 @@ export const getMonthStartAndEnd = (date: Date) => {
 export const conditionalObject = (condition: unknown, object?: object) => {
   if (condition) return object;
   else return {};
+};
+
+export const displayCode = (code?: Code) => {
+  if (!code) return "N/A";
+
+  return code.display ?? code.code;
+};
+
+export const displayQuantity = (quantity?: Quantity) => {
+  if (!quantity) return "N/A";
+
+  return [quantity.value ?? "N/A", quantity.unit].join(" ");
+};
+
+// TODO: make it generic
+export const displayDoseRange = (range?: DoseRange) => {
+  if (!range) return "N/A";
+
+  return ([range.low, range.high] as Quantity[])
+    .map(displayQuantity)
+    .join(" - ");
+};
+
+export const displayTiming = (timing?: Timing) => {
+  if (!timing || !timing.repeat) return "N/A";
+
+  return `${timing.repeat.frequency} every ${timing.repeat.period} ${timing.repeat.period_unit}`;
 };

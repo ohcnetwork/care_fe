@@ -11,21 +11,22 @@ import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/Authorize
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import {
-  MedicineAdministrationRecord,
-  Prescription,
-} from "@/components/Medicine/models";
 import MedicineRoutes from "@/components/Medicine/routes";
 
 import useSlug from "@/hooks/useSlug";
 
 import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatDateTime, formatTime } from "@/Utils/utils";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+
+import { isMedicationDiscontinued } from "./MedicineAdministrationSheet/utils";
 
 interface MedicineAdministeredEvent extends TimelineEvent<"administered"> {
-  administration: MedicineAdministrationRecord;
+  administration: MedicationAdministration;
 }
 
 type PrescriptionTimelineEvents =
@@ -34,27 +35,36 @@ type PrescriptionTimelineEvents =
 
 interface Props {
   interval: { start: Date; end: Date };
-  prescription: Prescription;
+  prescription: MedicationRequest;
   showPrescriptionDetails?: boolean;
   onRefetch?: () => void;
   readonly?: boolean;
 }
 
-export default function PrescrpitionTimeline({
+export default function PrescriptionTimeline({
   prescription,
   interval,
   onRefetch,
   readonly,
 }: Props) {
-  const consultation = useSlug("consultation");
+  const consultationId = useSlug("consultation");
+  const patientId = useSlug("patient");
+
   const { data, refetch, loading } = useTanStackQueryInstead(
-    MedicineRoutes.listAdministrations,
+    routes.medicationAdministration.list,
     {
-      pathParams: { consultation },
+      pathParams: { patientId },
       query: {
-        prescription: prescription.id,
-        administered_date_after: formatDateTime(interval.start, "YYYY-MM-DD"),
-        administered_date_before: formatDateTime(interval.end, "YYYY-MM-DD"),
+        encounter: consultationId,
+        request: prescription.id,
+        occurrence_period_end_after: formatDateTime(
+          interval.start,
+          "YYYY-MM-DD",
+        ),
+        occurrence_period_end_before: formatDateTime(
+          interval.end,
+          "YYYY-MM-DD",
+        ),
       },
     },
   );
@@ -99,7 +109,7 @@ export default function PrescrpitionTimeline({
                   refetch();
                 }}
                 isLastNode={index === events.length - 1}
-                hideArchive={prescription.discontinued || readonly}
+                hideArchive={isMedicationDiscontinued(prescription) || readonly}
               />
             );
         }
@@ -134,7 +144,7 @@ const MedicineAdministeredNode = ({
             ? event.administration.dosage + " dose of "
             : ""
         }the medicine at ${formatTime(
-          event.administration.administered_date,
+          event.administration.occurrence_period?.end,
         )}.`}
         actions={
           !event.cancelled &&
@@ -159,8 +169,8 @@ const MedicineAdministeredNode = ({
             <span className="md:flex md:gap-1">
               Prescription was archived{" "}
               <RecordMeta
-                time={event.administration.archived_on}
-                user={event.administration.administered_by}
+                // time={event.administration.archived_on}
+                user={event.administration.updated_by}
                 inlineUser
               />
             </span>
@@ -178,8 +188,8 @@ const MedicineAdministeredNode = ({
           setIsArchiving(true);
 
           const { res } = await request(MedicineRoutes.archiveAdministration, {
-            pathParams: { consultation, external_id: event.administration.id },
-          });
+            pathParams: { consultation, external_id: event.administration.id! },
+          }); // FIXME: remove archiving or wire up the correct API
 
           if (res?.status === 200) {
             setIsArchiving(false);
@@ -194,55 +204,50 @@ const MedicineAdministeredNode = ({
 };
 
 const compileEvents = (
-  prescription: Prescription,
-  administrations: MedicineAdministrationRecord[],
+  prescription: MedicationRequest,
+  administrations: MedicationAdministration[],
   interval: { start: Date; end: Date },
 ): PrescriptionTimelineEvents[] => {
   const events: PrescriptionTimelineEvents[] = [];
 
-  if (
-    dayjs(prescription.created_date).isBetween(interval.start, interval.end)
-  ) {
+  if (dayjs(prescription.authored_on).isBetween(interval.start, interval.end)) {
     events.push({
       type: "created",
       icon: "l-plus-circle",
-      timestamp: prescription.created_date,
-      by: prescription.prescribed_by,
-      notes: prescription.notes,
+      timestamp: prescription.authored_on,
+      by: prescription.created_by,
+      notes: prescription.note,
     });
   }
 
   administrations
     .sort(
       (a, b) =>
-        new Date(a.administered_date!).getTime() -
-        new Date(b.administered_date!).getTime(),
+        new Date(a.occurrence_period!.end!).getTime() -
+        new Date(b.occurrence_period!.end!).getTime(),
     )
     .forEach((administration) => {
       events.push({
         type: "administered",
         icon: "l-syringe",
-        timestamp: administration.administered_date!,
-        by: administration.administered_by,
-        cancelled: !!administration.archived_on,
+        timestamp: administration.occurrence_period!.end!,
+        by: administration.created_by,
+        cancelled: administration.status === "entered_in_error",
         administration,
-        notes: administration.notes,
+        notes: administration.note,
       });
     });
 
   if (
-    prescription?.discontinued &&
-    dayjs(prescription.discontinued_date).isBetween(
-      interval.start,
-      interval.end,
-    )
+    isMedicationDiscontinued(prescription) &&
+    dayjs(prescription.status_changed).isBetween(interval.start, interval.end)
   ) {
     events.push({
       type: "discontinued",
       icon: "l-times-circle",
-      timestamp: prescription.discontinued_date,
+      timestamp: prescription.status_changed!,
       by: undefined,
-      notes: prescription.discontinued_reason,
+      notes: prescription.status_reason,
     });
   }
 

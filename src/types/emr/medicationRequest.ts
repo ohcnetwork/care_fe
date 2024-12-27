@@ -1,4 +1,5 @@
 import { DOSAGE_UNITS } from "@/components/Medicine/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
 import { Code } from "@/types/questionnaire/code";
 
@@ -60,6 +61,57 @@ export interface DoseRange {
   high: DosageQuantity;
 }
 
+export interface Timing {
+  repeat?: {
+    frequency?: number;
+    period: number;
+    period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
+    bounds_duration?: DosageQuantity;
+  };
+  code?: Code;
+}
+
+export interface MedicationRequestDosageInstruction {
+  sequence?: number;
+  text?: string;
+  additional_instruction?: Code[];
+  patient_instruction?: string;
+  // TODO: query: how to map for "Immediate" frequency
+  // TODO: query how to map Days
+  timing?: Timing;
+  /**
+   * True if it is a PRN medication
+   */
+  as_needed_boolean?: boolean;
+  /**
+   * If it is a PRN medication (as_needed_boolean is true), the indicator.
+   */
+  as_needed_for?: Code;
+  site?: Code;
+  route?: Code;
+  method?: Code;
+  /**
+   * One of `dose_quantity` or `dose_range` must be present.
+   * `type` is optional and defaults to `ordered`.
+   *
+   * - If `type` is `ordered`, `dose_quantity` must be present.
+   * - If `type` is `calculated`, `dose_range` must be present. This is used for titrated medications.
+   */
+  dose_and_rate?: (
+    | {
+        type?: "ordered";
+        dose_quantity?: DosageQuantity;
+        dose_range?: undefined;
+      }
+    | {
+        type: "calculated";
+        dose_range?: DoseRange;
+        dose_quantity?: undefined;
+      }
+  )[];
+  max_dose_per_period?: DoseRange;
+}
+
 export interface MedicationRequest {
   readonly id?: string;
   status?: MedicationRequestStatus;
@@ -73,53 +125,9 @@ export interface MedicationRequest {
   patient?: string; // UUID
   encounter?: string; // UUID
   authored_on: string;
-  dosage_instruction: {
-    sequence?: number;
-    text?: string;
-    additional_instruction?: Code[];
-    patient_instruction?: string;
-    // TODO: query: how to map for "Immediate" frequency
-    // TODO: query how to map Days
-    timing?: {
-      repeat?: {
-        frequency?: number;
-        period: number;
-        period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
-        bounds_duration?: DosageQuantity;
-      };
-      code?: Code;
-    };
-    /**
-     * True if it is a PRN medication
-     */
-    as_needed_boolean?: boolean;
-    /**
-     * If it is a PRN medication (as_needed_boolean is true), the indicator.
-     */
-    as_needed_for?: Code;
-    site?: Code;
-    route?: Code;
-    method?: Code;
-    /**
-     * One of `dose_quantity` or `dose_range` must be present.
-     * `type` is optional and defaults to `ordered`.
-     *
-     * - If `type` is `ordered`, `dose_quantity` must be present.
-     * - If `type` is `calculated`, `dose_range` must be present. This is used for titrated medications.
-     */
-    dose_and_rate?: (
-      | {
-          type?: "ordered";
-          dose_quantity?: DosageQuantity;
-          dose_range?: undefined;
-        }
-      | {
-          type: "calculated";
-          dose_range?: DoseRange;
-          dose_quantity?: undefined;
-        }
-    )[];
-    max_dose_per_period?: DoseRange;
-  }[];
+  dosage_instruction: [MedicationRequestDosageInstruction];
   note?: string;
+
+  created_by?: UserBareMinimum;
+  updated_by?: UserBareMinimum;
 }
