@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -43,7 +44,7 @@ import { parseOptionId } from "@/common/utils";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   calculateDaysBetween,
   formatPatientAge,
@@ -57,8 +58,12 @@ const DischargedPatientsList = ({
   facility_external_id: string;
 }) => {
   const { t } = useTranslation();
-  const facilityQuery = useTanStackQueryInstead(routes.getAnyFacility, {
-    pathParams: { id: facility_external_id },
+
+  const facilityQuery = useQuery({
+    queryKey: ["facilties-query"],
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: facility_external_id },
+    }),
   });
 
   const {
@@ -239,30 +244,36 @@ const DischargedPatientsList = ({
     { facility_external_id },
   );
 
-  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
-    pathParams: {
-      id: qParams.district,
-    },
-    prefetch: !!Number(qParams.district),
+  const { data: districtData } = useQuery({
+    queryKey: ["district-data"],
+    queryFn: query(routes.getDistrict, {
+      pathParams: {
+        id: qParams.district,
+      },
+    }),
+    enabled: Boolean(Number(qParams.district)),
   });
 
-  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
-    pathParams: {
-      id: qParams.lsgBody,
-    },
-    prefetch: !!Number(qParams.lsgBody),
+  const { data: LocalBodyData } = useQuery({
+    queryKey: ["localbody-data"],
+    queryFn: query(routes.getLocalBody, {
+      pathParams: {
+        id: qParams.lsgBody,
+      },
+    }),
+    enabled: Boolean(Number(qParams.lsgBody)),
   });
 
-  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
-    routes.getFacilityAssetLocation,
-    {
+  const { data: facilityAssetLocationData } = useQuery({
+    queryKey: ["facility-asset-location"],
+    queryFn: query(routes.getFacilityAssetLocation, {
       pathParams: {
         facility_external_id: qParams.facility,
         external_id: qParams.last_consultation_current_bed__location,
       },
-      prefetch: !!qParams.last_consultation_current_bed__location,
-    },
-  );
+    }),
+    enabled: Boolean(qParams.last_consultation_current_bed__location),
+  });
 
   const getTheCategoryFromId = () => {
     let category_name;

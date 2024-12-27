@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
@@ -45,7 +46,7 @@ import { triggerGoal } from "@/Integrations/Plausible";
 import * as Notification from "@/Utils/Notifications";
 import { csvGroupByColumn } from "@/Utils/csvUtils";
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   calculateDaysBetween,
   formatPatientAge,
@@ -237,12 +238,12 @@ export const PatientManager = () => {
   );
 
   let managePatients: any = null;
-  const { loading: isLoading, data } = useTanStackQueryInstead(
-    routes.patientList,
-    {
-      query: params,
-    },
-  );
+  const { isLoading, data } = useQuery({
+    queryKey: ["patients-list", params],
+    queryFn: query(routes.patientList, {
+      queryParams: params,
+    }),
+  });
 
   const getTheCategoryFromId = () => {
     let category_name;
@@ -257,46 +258,53 @@ export const PatientManager = () => {
     }
   };
 
-  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
-    pathParams: {
-      id: qParams.district,
-    },
-    prefetch: !!Number(qParams.district),
+  const { data: districtData } = useQuery({
+    queryKey: ["district-data"],
+    queryFn: query(routes.getDistrict, {
+      pathParams: {
+        id: qParams.district,
+      },
+    }),
+    enabled: Boolean(Number(qParams.district)),
   });
 
-  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
-    pathParams: {
-      id: qParams.lsgBody,
-    },
-    prefetch: !!Number(qParams.lsgBody),
+  const { data: LocalBodyData } = useQuery({
+    queryKey: ["localbody-data"],
+    queryFn: query(routes.getLocalBody, {
+      pathParams: {
+        id: qParams.lsgBody,
+      },
+    }),
+    enabled: Boolean(Number(qParams.lsgBody)),
   });
 
-  const { data: facilityData } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility-data"],
+    queryFn: query(routes.getAnyFacility, {
       pathParams: {
         id: qParams.facility,
       },
-      prefetch: !!qParams.facility,
-    },
-  );
-  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
-    routes.getFacilityAssetLocation,
-    {
+    }),
+    enabled: Boolean(qParams.facility),
+  });
+
+  const { data: facilityAssetLocationData } = useQuery({
+    queryKey: ["facility-asset-location"],
+    queryFn: query(routes.getFacilityAssetLocation, {
       pathParams: {
         facility_external_id: qParams.facility,
         external_id: qParams.last_consultation_current_bed__location,
       },
-      prefetch: !!qParams.last_consultation_current_bed__location,
-    },
-  );
+    }),
+    enabled: Boolean(qParams.last_consultation_current_bed__location),
+  });
 
-  const { data: permittedFacilities } = useTanStackQueryInstead(
-    routes.getPermittedFacilities,
-    {
-      query: { limit: 1 },
-    },
-  );
+  const { data: permittedFacilities } = useQuery({
+    queryKey: ["permitted-facilities"],
+    queryFn: query(routes.getPermittedFacilities, {
+      queryParams: { limit: 1 },
+    }),
+  });
 
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: string | undefined, id: string) => {
