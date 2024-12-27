@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,8 +26,8 @@ import { phonePreg } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
@@ -110,17 +111,22 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { data: facilityData } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      prefetch: facilityId !== undefined,
-      pathParams: { id: String(facilityId) },
-    },
-  );
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: () =>
+      query(routes.getAnyFacility, {
+        pathParams: { id: String(facilityId) },
+      }),
+    enabled: !!facilityId,
+  });
 
-  const { data: patientData } = useTanStackQueryInstead(routes.getPatient, {
-    pathParams: { id: related_patient || "" },
-    prefetch: !!related_patient,
+  const { data: patientData } = useQuery({
+    queryKey: ["patient", related_patient],
+    queryFn: () =>
+      query(routes.getPatient, {
+        pathParams: { id: related_patient || "" },
+      }),
+    enabled: !!related_patient,
   });
 
   const validateForm = () => {
@@ -240,26 +246,8 @@ export default function ResourceCreate(props: resourceProps) {
           </div>
         )}
 
-        <TextFormField
-          required
-          label={t("contact_person")}
-          name="refering_facility_contact_name"
-          value={state.form.refering_facility_contact_name}
-          onChange={handleChange}
-          error={state.errors.refering_facility_contact_name}
-        />
-        <PhoneNumberFormField
-          label={t("contact_phone")}
-          name="refering_facility_contact_number"
-          required
-          value={state.form.refering_facility_contact_number}
-          onChange={handleFormFieldChange}
-          error={state.errors.refering_facility_contact_number}
-          types={["mobile", "landline"]}
-        />
-
         <div>
-          <FieldLabel required>{t("assigned_facility")}</FieldLabel>
+          <FieldLabel required>{t("organization_for_care_support")}</FieldLabel>
           <FacilitySelect
             multiple={false}
             name="assigned_facility"
@@ -270,16 +258,17 @@ export default function ResourceCreate(props: resourceProps) {
             errors={state.errors.assigned_facility}
           />
         </div>
-
-        <RadioFormField
-          label={t("is_this_an_emergency")}
-          name="emergency"
-          options={[true, false]}
-          optionLabel={(o) => (o ? t("yes") : t("no"))}
-          optionValue={(o) => String(o)}
-          value={state.form.emergency}
-          onChange={handleChange}
-        />
+        <span className="pt-4 px-4 bg-red-200/50 rounded-lg">
+          <RadioFormField
+            label={t("is_this_an_emergency")}
+            name="emergency"
+            options={[true, false]}
+            optionLabel={(o) => (o ? t("yes") : t("no"))}
+            optionValue={(o) => String(o)}
+            value={state.form.emergency}
+            onChange={handleChange}
+          />
+        </span>
 
         <SelectFormField
           label={t("category")}
@@ -287,8 +276,8 @@ export default function ResourceCreate(props: resourceProps) {
           required
           value={state.form.category}
           options={RESOURCE_CATEGORY_CHOICES}
-          optionLabel={(option: string) => option}
-          optionValue={(option: string) => option}
+          optionLabel={(option: { text: string; id: string }) => option.text}
+          optionValue={(option: { text: string; id: string }) => option.id}
           onChange={({ value }) => handleValueChange(value, "category")}
         />
         <div className="md:col-span-2">
@@ -315,6 +304,24 @@ export default function ResourceCreate(props: resourceProps) {
             error={state.errors.reason}
           />
         </div>
+
+        <TextFormField
+          required
+          label={t("contact_person")}
+          name="refering_facility_contact_name"
+          value={state.form.refering_facility_contact_name}
+          onChange={handleChange}
+          error={state.errors.refering_facility_contact_name}
+        />
+        <PhoneNumberFormField
+          label={t("contact_phone")}
+          name="refering_facility_contact_number"
+          required
+          value={state.form.refering_facility_contact_number}
+          onChange={handleFormFieldChange}
+          error={state.errors.refering_facility_contact_number}
+          types={["mobile", "landline"]}
+        />
 
         <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
           <Cancel onClick={() => goBack()} />

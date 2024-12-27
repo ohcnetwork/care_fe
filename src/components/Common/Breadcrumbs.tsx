@@ -109,7 +109,7 @@ export default function Breadcrumbs({
           <Button
             asChild
             variant="link"
-            className="p-1 font-normal text-gray-800 underline underline-offset-2 hover:text-gray-700"
+            className="p-0 font-normal text-gray-800 underline underline-offset-2 hover:text-gray-700"
           >
             <Link href="/">Home</Link>
           </Button>

@@ -1,7 +1,9 @@
 import careConfig from "@careConfig";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import FilterBadge from "@/CAREUI/display/FilterBadge";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 
@@ -22,10 +24,13 @@ import {
 import MultiSelectMenuV2 from "@/components/Form/MultiSelectMenuV2";
 import SelectMenuV2 from "@/components/Form/SelectMenuV2";
 import DiagnosesFilter, {
+  DIAGNOSES_FILTER_LABELS,
+  DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
 } from "@/components/Patient/DiagnosesFilter";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
 import useMergeState from "@/hooks/useMergeState";
 
 import {
@@ -34,14 +39,19 @@ import {
   DISCHARGE_REASONS,
   FACILITY_TYPES,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
 } from "@/common/constants";
+import { parseOptionId } from "@/common/utils";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, humanizeStrings } from "@/Utils/utils";
+
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -780,5 +790,268 @@ export default function PatientFilter(props: any) {
         </div>
       </AccordionV2>
     </FiltersSlideover>
+  );
+}
+
+export function PatientFilterBadges() {
+  const { t } = useTranslation();
+
+  const { qParams, FilterBadges, updateQuery } = useFilters({
+    limit: 12,
+    cacheBlacklist: [
+      "name",
+      "patient_no",
+      "phone_number",
+      "emergency_phone_number",
+    ],
+  });
+
+  const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
+
+  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
+    pathParams: {
+      id: qParams.district,
+    },
+    prefetch: !!Number(qParams.district),
+  });
+
+  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.lsgBody,
+    },
+    prefetch: !!Number(qParams.lsgBody),
+  });
+
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: qParams.facility,
+      },
+      prefetch: !!qParams.facility,
+    },
+  );
+  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: qParams.facility,
+        external_id: qParams.last_consultation_current_bed__location,
+      },
+      prefetch: !!qParams.last_consultation_current_bed__location,
+    },
+  );
+
+  const LastAdmittedToTypeBadges = () => {
+    const badge = (key: string, value: string | undefined, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_bed_type_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_bed_type_list: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+    return qParams.last_consultation_admitted_bed_type_list
+      .split(",")
+      .map((id: string) => {
+        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
+        return badge("Bed Type", text, id);
+      });
+  };
+
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: string | undefined, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
+      });
+  };
+
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id,
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
+
+  const getDiagnosisFilterValue = (key: DiagnosesFilterKey) => {
+    const ids: string[] = (qParams[key] ?? "").split(",");
+    return ids.map((id) => diagnoses.find((obj) => obj.id == id)?.label ?? id);
+  };
+
+  useEffect(() => {
+    const ids: string[] = [];
+    FILTER_BY_DIAGNOSES_KEYS.forEach((key) => {
+      ids.push(...(qParams[key] ?? "").split(",").filter(Boolean));
+    });
+    const existing = diagnoses.filter(({ id }) => ids.includes(id));
+    const objIds = existing.map((o) => o.id);
+    const diagnosesToBeFetched = ids.filter((id) => !objIds.includes(id));
+    getDiagnosesByIds(diagnosesToBeFetched).then((data) => {
+      const retrieved = data.filter(Boolean) as ICD11DiagnosisModel[];
+      setDiagnoses([...existing, ...retrieved]);
+    });
+  }, [
+    qParams.diagnoses,
+    qParams.diagnoses_confirmed,
+    qParams.diagnoses_provisional,
+    qParams.diagnoses_unconfirmed,
+    qParams.diagnoses_differential,
+  ]);
+
+  return (
+    <FilterBadges
+      badges={({
+        badge,
+        value,
+        kasp,
+        phoneNumber,
+        dateRange,
+        range,
+        ordering,
+      }) => [
+        phoneNumber("Primary number", "phone_number"),
+        phoneNumber("Emergency number", "emergency_phone_number"),
+        badge("Patient name", "name"),
+        badge("IP/OP number", "patient_no"),
+        ...dateRange("Modified", "modified_date"),
+        ...dateRange("Created", "created_date"),
+        ...dateRange("Admitted", "last_consultation_encounter_date"),
+        ...dateRange("Discharged", "last_consultation_discharge_date"),
+        // Admitted to type badges
+        badge("No. of vaccination doses", "number_of_doses"),
+        kasp(),
+        badge("COWIN ID", "covin_id"),
+        badge("Is Antenatal", "is_antenatal"),
+        badge("Review Missed", "review_missed"),
+        badge("Is Medico-Legal Case", "last_consultation_medico_legal_case"),
+        value(
+          "Ration Card Category",
+          "ration_card_category",
+          qParams.ration_card_category
+            ? t(`ration_card__${qParams.ration_card_category}`)
+            : "",
+        ),
+        value(
+          "Facility",
+          "facility",
+          qParams.facility ? facilityData?.name || "" : "",
+        ),
+        value(
+          "Location",
+          "last_consultation_current_bed__location",
+          qParams.last_consultation_current_bed__location
+            ? facilityAssetLocationData?.name ||
+                qParams.last_consultation_current_bed__locations
+            : "",
+        ),
+        badge("Facility Type", "facility_type"),
+        value(
+          "District",
+          "district",
+          qParams.district ? districtData?.name || "" : "",
+        ),
+        ordering(),
+        value("Category", "category", getTheCategoryFromId()),
+        value(
+          "Respiratory Support",
+          "ventilator_interface",
+          qParams.ventilator_interface &&
+            t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
+        ),
+        value(
+          "Gender",
+          "gender",
+          parseOptionId(GENDER_TYPES, qParams.gender) || "",
+        ),
+        {
+          name: "Admitted to",
+          value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+          paramKey: "last_consultation_admitted_to",
+        },
+        ...range("Age", "age"),
+        {
+          name: "LSG Body",
+          value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
+          paramKey: "lsgBody",
+        },
+        ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
+          value(
+            DIAGNOSES_FILTER_LABELS[key],
+            key,
+            humanizeStrings(getDiagnosisFilterValue(key)),
+          ),
+        ),
+        badge("Declared Status", "is_declared_positive"),
+        ...dateRange("Declared positive", "date_declared_positive"),
+        ...dateRange("Last vaccinated", "last_vaccinated_date"),
+        {
+          name: "Telemedicine",
+          paramKey: "last_consultation_is_telemedicine",
+        },
+        value(
+          "Discharge Reason",
+          "last_consultation__new_discharge_reason",
+          parseOptionId(
+            DISCHARGE_REASONS,
+            qParams.last_consultation__new_discharge_reason,
+          ) || "",
+        ),
+      ]}
+      children={
+        (qParams.last_consultation_admitted_bed_type_list ||
+          qParams.last_consultation__consent_types) && (
+          <>
+            {qParams.last_consultation_admitted_bed_type_list &&
+              LastAdmittedToTypeBadges()}
+            {qParams.last_consultation__consent_types &&
+              HasConsentTypesBadges()}
+          </>
+        )
+      }
+    />
   );
 }

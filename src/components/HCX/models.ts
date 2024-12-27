@@ -1,4 +1,4 @@
-import { PatientModel } from "@/components/Patient/models";
+import { PatientModel } from "@/types/emr/patient";
 
 export type HCXPolicyPriority = "Immediate" | "Normal" | "Deferred";
 export type HCXPolicyStatus =

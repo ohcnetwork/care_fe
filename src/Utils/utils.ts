@@ -1,6 +1,5 @@
-import { format } from "date-fns";
-
-import { PatientModel } from "@/components/Patient/models";
+import { differenceInMinutes, format } from "date-fns";
+import html2canvas from "html2canvas";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
@@ -10,6 +9,7 @@ import { Time } from "@/Utils/types";
 import { DoseRange, Timing } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
+import { PatientModel } from "@/types/emr/patient";
 
 interface ApacheParams {
   age: number;
@@ -243,6 +243,7 @@ export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   if (phoneNumber === "+91") return "";
   const phoneCodes: Record<string, CountryData> = phoneCodesJson;
   let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
+  if (parsedNumber.length < 12) return "";
   if (countryCode && phoneCodes[countryCode]) {
     parsedNumber = phoneCodes[countryCode].code + parsedNumber;
   } else if (!phoneNumber.startsWith("+")) {
@@ -616,4 +617,39 @@ export const displayTiming = (timing?: Timing) => {
   if (!timing || !timing.repeat) return "N/A";
 
   return `${timing.repeat.frequency} every ${timing.repeat.period} ${timing.repeat.period_unit}`;
+};
+
+/**
+ * Returns hours and minutes between two dates.
+ *
+ * Eg.
+ * 1 hour and 30 minutes
+ * 2 hours
+ * 30 minutes
+ */
+export const getReadableDuration = (
+  start: string | Date,
+  end: string | Date,
+) => {
+  const duration = differenceInMinutes(end, start);
+  const hours = Math.floor(duration / 60);
+  const minutes = duration % 60;
+  if (hours === 0 && minutes === 0) return "0 minutes";
+  if (hours === 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+  if (minutes === 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+  return `${hours} hour${hours > 1 ? "s" : ""} and ${minutes} minute${
+    minutes > 1 ? "s" : ""
+  }`;
+};
+
+export const saveElementAsImage = async (id: string, filename: string) => {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  const canvas = await html2canvas(element);
+
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = canvas.toDataURL("image/png", 1);
+  link.click();
 };

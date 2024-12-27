@@ -26,7 +26,7 @@ const OTPPatientSidebarUserCard: React.FC<SidebarUserCardProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { selectedUser, phoneNumber } = useContext(OTPPatientUserContext);
+  const { selectedUser, tokenData } = useContext(OTPPatientUserContext);
 
   const signOut = useSignOut();
 
@@ -50,14 +50,13 @@ const OTPPatientSidebarUserCard: React.FC<SidebarUserCardProps> = ({
               <div className="flex-none text-lg">
                 <Avatar
                   {...(selectedUser != null && { name: selectedUser.name })}
-                  icon={<CareIcon icon="l-phone-alt" className="h-4 w-4" />}
-                  className="h-8 rounded-full text-black/50"
+                  className="h-6 w-6"
                 />
               </div>
               <div className="max-w-32">
                 {!shrinked && (
                   <p className="truncate pl-1 text-xs font-medium tracking-wide">
-                    {selectedUser ? selectedUser.name : phoneNumber}
+                    {selectedUser ? selectedUser.name : tokenData.phoneNumber}
                   </p>
                 )}
               </div>

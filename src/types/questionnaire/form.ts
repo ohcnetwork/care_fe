@@ -13,6 +13,7 @@ export type ResponseValue = {
     | "string"
     | "number"
     | "boolean"
+    | "dateTime"
     | "allergy_intolerance"
     | "medication_request"
     | "symptom"
@@ -23,6 +24,7 @@ export type ResponseValue = {
     | string
     | number
     | boolean
+    | Date
     | AllergyIntolerance[]
     | MedicationRequest[]
     | Symptom[]

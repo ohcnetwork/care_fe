@@ -32,16 +32,20 @@ const OTPPatientRoutes = {
   "/patient/home": () => <OTPPatientHome />,
 };
 
+const tokenData: TokenData = JSON.parse(
+  localStorage.getItem(CarePatientTokenKey) || "{}",
+);
+
 export const OTPPatientUserContext = createContext<{
   users?: AppointmentPatient[];
   selectedUser: AppointmentPatient | null;
   setSelectedUser: (user: AppointmentPatient) => void;
-  phoneNumber: string;
+  tokenData: TokenData;
 }>({
   users: undefined,
   selectedUser: null,
   setSelectedUser: () => {},
-  phoneNumber: "",
+  tokenData: tokenData,
 });
 
 export default function OTPPatientRouter() {
@@ -52,11 +56,6 @@ export default function OTPPatientRouter() {
   const [users, setUsers] = useState<AppointmentPatient[]>([]);
   const [selectedUser, setSelectedUser] = useState<AppointmentPatient | null>(
     null,
-  );
-  const [phoneNumber, setPhoneNumber] = useState("");
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
   );
 
   const { data: userData } = useQuery({
@@ -75,12 +74,6 @@ export default function OTPPatientRouter() {
       setSelectedUser(userData.results[0]);
     }
   }, [userData]);
-
-  useEffect(() => {
-    if (tokenData.phoneNumber) {
-      setPhoneNumber(tokenData.phoneNumber);
-    }
-  }, [tokenData]);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -105,7 +98,7 @@ export default function OTPPatientRouter() {
 
   return (
     <OTPPatientUserContext.Provider
-      value={{ users, selectedUser, setSelectedUser, phoneNumber }}
+      value={{ users, selectedUser, setSelectedUser, tokenData }}
     >
       <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
         <div className="flex h-screen overflow-hidden bg-secondary-100 print:overflow-visible">

@@ -12,7 +12,6 @@ import {
   DailyRoundsModel,
   FacilityNameModel,
   FileUploadModel,
-  PatientModel,
 } from "@/components/Patient/models";
 import { EncounterSymptom } from "@/components/Symptoms/types";
 import { UserBareMinimum } from "@/components/Users/models";
@@ -28,6 +27,7 @@ import {
 } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
+import { PatientModel } from "@/types/emr/patient";
 
 export interface LocalBodyModel {
   id: number;

@@ -90,6 +90,14 @@ import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { Observation } from "@/types/emr/observation";
+import { PatientModel } from "@/types/emr/patient";
+import {
+  Organization,
+  OrganizationResponse,
+  OrganizationUserRole,
+  OrganizationUserRoleResponse,
+  RoleResponse,
+} from "@/types/organisation/organisation";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -1470,6 +1478,56 @@ const routes = {
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
 
+  // Organisation Routes
+  organisation: {
+    listMine: {
+      path: "/api/v1/organization/mine/",
+      method: "GET",
+      TRes: {} as OrganizationResponse,
+    },
+    list: {
+      path: "/api/v1/organization/",
+      method: "GET",
+      TRes: {} as OrganizationResponse,
+    },
+    get: {
+      path: "/api/v1/organization/{id}/",
+      method: "GET",
+      TRes: {} as Organization,
+    },
+    listUsers: {
+      path: "/api/v1/organization/{id}/users/",
+      method: "GET",
+      TRes: {} as OrganizationUserRoleResponse,
+    },
+    assignUser: {
+      path: "/api/v1/organization/{id}/users/",
+      method: "POST",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    updateUserRole: {
+      path: "/api/v1/organization/{id}/users/{userRoleId}/",
+      method: "PUT",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    removeUserRole: {
+      path: "/api/v1/organization/{id}/users/{userRoleId}/",
+      method: "DELETE",
+      TRes: {} as Record<string, never>,
+    },
+  },
+
+  // Role Routes
+  role: {
+    list: {
+      path: "/api/v1/role/",
+      method: "GET",
+      TRes: {} as RoleResponse,
+    },
+  },
+
   // OTP Routes
   otp: {
     sendOtp: {
@@ -1487,7 +1545,9 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<{ access: string }>(),
+      TRes: Type<
+        { access: string } | { errors: Array<Record<string, string>> }
+      >(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
@@ -1502,7 +1562,7 @@ const routes = {
     createPatient: {
       path: "/api/v1/otp/patient/",
       method: "POST",
-      TBody: Type<AppointmentPatientRegister>(),
+      TBody: Type<Partial<AppointmentPatientRegister>>(),
       TRes: Type<AppointmentPatient>(),
       auth: {
         key: "Authorization",

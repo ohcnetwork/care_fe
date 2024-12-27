@@ -1,9 +1,9 @@
 import ViewInvestigationSuggestions from "@/components/Facility/Investigations/InvestigationSuggestions";
 import ViewInvestigations from "@/components/Facility/Investigations/ViewInvestigations";
-import { PatientModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { PatientModel } from "@/types/emr/patient";
 
 export interface InvestigationSessionType {
   session_external_id: string;

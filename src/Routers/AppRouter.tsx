@@ -33,6 +33,7 @@ import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 
 import { QuestionnaireList } from "../components/Questionnaire";
 import { QuestionnaireShow } from "../components/Questionnaire/show";
+import OrganisationRoutes from "./routes/OrganisationRouter";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -60,7 +61,7 @@ const Routes: AppRoutes = {
   ...ShiftingRoutes,
   ...ScheduleRoutes,
   ...UserRoutes,
-
+  ...OrganisationRoutes,
   "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 

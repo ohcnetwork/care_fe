@@ -1,4 +1,4 @@
-import { PatientModel } from "@/components/Patient/models";
+import { PatientModel } from "@/types/emr/patient";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (
@@ -17,3 +17,21 @@ export function isPatientMandatoryDataFilled(patient: PatientModel) {
     patient.blood_group
   );
 }
+
+export const getPatientUrl = (patient: PatientModel) => {
+  let patientUrl = "";
+  if (!isPatientMandatoryDataFilled(patient)) {
+    patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+  } else if (
+    patient.last_consultation &&
+    patient.last_consultation?.facility === patient.facility &&
+    !(patient.last_consultation?.discharge_date && patient.is_active)
+  ) {
+    patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
+  } else if (patient.facility) {
+    patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+  } else {
+    patientUrl = `/patient/${patient.id}`;
+  }
+  return patientUrl;
+};

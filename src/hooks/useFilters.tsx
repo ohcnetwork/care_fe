@@ -209,7 +209,7 @@ export default function useFilters({
 
     return (
       <div
-        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 mt-6  ${show ? "" : "hidden"}`}
+        className={`col-span-3 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
       >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />

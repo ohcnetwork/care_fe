@@ -5,6 +5,12 @@ interface ILogo {
   dark: string;
 }
 
+const boolean = (key: string, fallback = false) => {
+  if (env[key] === "true") return true;
+  if (env[key] === "false") return false;
+  return fallback;
+};
+
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
     return fallback;
@@ -16,6 +22,7 @@ const logo = (value?: string, fallback?: ILogo) => {
     return fallback;
   }
 };
+
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
 
@@ -51,7 +58,7 @@ const careConfig = {
     env.REACT_RECAPTCHA_SITE_KEY || "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
 
   kasp: {
-    enabled: env.REACT_KASP_ENABLED === "true",
+    enabled: boolean("REACT_KASP_ENABLED"),
     string: env.REACT_KASP_STRING || "KASP",
     fullString:
       env.REACT_KASP_FULL_STRING || "Karunya Arogya Suraksha Padhathi",
@@ -62,7 +69,7 @@ const careConfig = {
       env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
   },
 
-  wartimeShifting: env.REACT_WARTIME_SHIFTING === "true",
+  wartimeShifting: boolean("REACT_WARTIME_SHIFTING"),
 
   stillWatching: {
     idleTimeout: env.REACT_STILL_WATCHING_IDLE_TIMEOUT
@@ -96,11 +103,19 @@ const careConfig = {
   },
 
   hcx: {
-    enabled: env.REACT_ENABLE_HCX === "true",
+    enabled: boolean("REACT_ENABLE_HCX"),
   },
 
   abdm: {
-    enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
+    enabled: boolean("REACT_ENABLE_ABDM", true),
+  },
+
+  appointments: {
+    // Kill switch in-case the heatmap API doesn't scale as expected
+    useAvailabilityStatsAPI: boolean(
+      "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
+      true,
+    ),
   },
 
   careApps: env.REACT_ENABLED_APPS

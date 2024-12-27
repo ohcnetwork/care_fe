@@ -31,6 +31,7 @@ import { OTPPatientUserContext } from "@/Routers/OTPPatientRouter";
 import { classNames } from "@/Utils/utils";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 
+import { Avatar } from "../Avatar";
 import OTPPatientSidebarUserCard from "./OTPPatientSidebarUserCard";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
@@ -41,8 +42,8 @@ const GetNavItems = (selectedUser: AppointmentPatient | null) => {
   const { t } = useTranslation();
   const { state, district, ward, local_body } = selectedUser || {};
   const paramString =
-    (!state ? `state=${state}&` : "") +
-    (!district ? `district=${district}&` : "") +
+    (state ? `state=${state}&` : "") +
+    (district ? `district=${district}&` : "") +
     (ward ? `ward=${ward}&` : "") +
     (local_body ? `local_body=${local_body}` : "");
   const BaseNavItems: INavItem[] = [
@@ -229,26 +230,27 @@ export const OTPPatientStatelessSidebar = ({
                 }
               >
                 <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
+                  <Avatar name={selectedUser?.name} className="h-4 w-4" />
                   {!shrinked && (
-                    <div className="flex flex-row items-center gap-2">
-                      <span className="font-semibold">
-                        {selectedUser?.name && selectedUser?.name.length > 8
-                          ? selectedUser?.name.slice(0, 8) + "..."
-                          : selectedUser?.name}
+                    <div className="flex flex-row items-center justify-between w-full gap-2">
+                      <span className="font-semibold truncate max-w-32">
+                        {selectedUser?.name}
                       </span>
                       <span className="text-xs text-secondary-600">
-                        {t("switch_patient")}
+                        {t("switch")}
                       </span>
                     </div>
                   )}
-                  <CareIcon icon="l-users-alt" className="h-4 self-center" />
                 </div>
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {users?.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
-                  {user.name}
+                  <div className="flex flex-row items-center gap-2">
+                    <Avatar name={user.name} className="h-4 w-4" />
+                    {user.name}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

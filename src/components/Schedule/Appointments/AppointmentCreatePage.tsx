@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isSameDay, max, startOfToday } from "date-fns";
+import { format, isBefore, isSameDay, startOfToday } from "date-fns";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import Calendar from "@/CAREUI/interactive/Calendar";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -18,21 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  dateQueryString,
-  formatDisplayName,
-  formatName,
-  getMonthStartAndEnd,
-} from "@/Utils/utils";
+import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -59,22 +59,10 @@ export default function AppointmentCreatePage(props: Props) {
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
 
-  const month = getMonthStartAndEnd(selectedMonth);
-
-  const fromDate = dateQueryString(max([month.start, startOfToday()]));
-  const toDate = dateQueryString(month.end);
-
-  const heatmapQuery = useQuery({
-    queryKey: ["availabilityHeatmap", resourceId, fromDate, toDate],
-    queryFn: query(ScheduleAPIs.slots.availabilityHeatmap, {
-      pathParams: { facility_id: props.facilityId },
-      body: {
-        resource: resourceId,
-        from_date: fromDate,
-        to_date: toDate,
-      },
-    }),
-    enabled: !!resourceId,
+  const heatmapQuery = useAvailabilityHeatmap({
+    facilityId: props.facilityId,
+    userId: resourceId,
+    month: selectedMonth,
   });
 
   const slotsQuery = useQuery({
@@ -136,7 +124,8 @@ export default function AppointmentCreatePage(props: Props) {
 
     const { booked_slots, total_slots } = availability;
     const bookedPercentage = booked_slots / total_slots;
-    const isFullyBooked = booked_slots >= total_slots;
+    const tokensLeft = total_slots - booked_slots;
+    const isFullyBooked = tokensLeft <= 0;
 
     return (
       <button
@@ -153,18 +142,20 @@ export default function AppointmentCreatePage(props: Props) {
       >
         <div className="relative z-10">
           <span>{date.getDate()}</span>
-          <span
-            className={cn(
-              "text-xs text-gray-500 block font-semibold",
-              bookedPercentage >= 0.8
-                ? "text-red-500"
-                : bookedPercentage >= 0.5
-                  ? "text-yellow-500"
-                  : "text-primary-500",
-            )}
-          >
-            {total_slots - booked_slots} left
-          </span>
+          {Number.isFinite(tokensLeft) && (
+            <span
+              className={cn(
+                "text-xs text-gray-500 block font-semibold",
+                bookedPercentage >= 0.8
+                  ? "text-red-500"
+                  : bookedPercentage >= 0.5
+                    ? "text-yellow-500"
+                    : "text-primary-500",
+              )}
+            >
+              {tokensLeft} left
+            </span>
+          )}
         </div>
         {!isFullyBooked && (
           <div
@@ -208,12 +199,12 @@ export default function AppointmentCreatePage(props: Props) {
   };
 
   return (
-    <Page title="Doctor Consultation">
+    <Page title={t("book_appointment")}>
       <hr className="mt-6 mb-8" />
       <div className="container mx-auto p-4 max-w-5xl">
         <div className="mb-8">
           {/* TODO: confirm how to rename this since we are keeping it abstract / not specific to doctor */}
-          <h1 className="text-lg font-bold mb-2">Doctor Consultation</h1>
+          <h1 className="text-lg font-bold mb-2">{t("book_appointment")}</h1>
         </div>
 
         <div className="space-y-8">
@@ -289,81 +280,85 @@ export default function AppointmentCreatePage(props: Props) {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-medium">{t("available_time_slots")}</h3>
               </div>
-
-              <div className="space-y-6">
-                {slotsQuery.data == null && (
-                  <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                    <p className="text-gray-400">
-                      {t("to_view_available_slots_select_resource_and_date")}
-                    </p>
-                  </div>
-                )}
-                {slotsQuery.data?.results.length === 0 && (
-                  <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                    <p className="text-gray-400">
-                      {t("no_slots_available_for_this_date")}
-                    </p>
-                  </div>
-                )}
-                {!!slotsQuery.data?.results.length &&
-                  groupSlotsByAvailability(slotsQuery.data.results).map(
-                    ({ availability, slots }) => (
-                      <div key={availability.name}>
-                        <h4 className="mb-3">{availability.name}</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {slots.map((slot) => {
-                            const percentage =
-                              slot.allocated / availability.tokens_per_slot;
-
-                            return (
-                              <Button
-                                key={slot.id}
-                                size="lg"
-                                variant={
-                                  selectedSlotId === slot.id
-                                    ? "outline_primary"
-                                    : "outline"
-                                }
-                                onClick={() => {
-                                  if (selectedSlotId === slot.id) {
-                                    setSelectedSlotId(undefined);
-                                  } else {
-                                    setSelectedSlotId(slot.id);
-                                  }
-                                }}
-                                disabled={
-                                  slot.allocated ===
-                                  availability.tokens_per_slot
-                                }
-                                className="flex flex-col items-center group"
-                              >
-                                <span className="font-semibold">
-                                  {format(slot.start_datetime, "HH:mm")}
-                                </span>
-                                <span
-                                  className={cn(
-                                    "text-xs group-hover:text-inherit",
-                                    percentage >= 1
-                                      ? "text-gray-400"
-                                      : percentage >= 0.8
-                                        ? "text-red-600"
-                                        : percentage >= 0.6
-                                          ? "text-yellow-600"
-                                          : "text-green-600",
-                                  )}
-                                >
-                                  {availability.tokens_per_slot -
-                                    slot.allocated}{" "}
-                                  left
-                                </span>
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ),
+              <ScrollArea>
+                <div className="max-h-96">
+                  {slotsQuery.data == null && (
+                    <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                      <p className="text-gray-400">
+                        {t("to_view_available_slots_select_resource_and_date")}
+                      </p>
+                    </div>
                   )}
-              </div>
+                  {slotsQuery.data?.results.length === 0 && (
+                    <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+                      <p className="text-gray-400">
+                        {t("no_slots_available_for_this_date")}
+                      </p>
+                    </div>
+                  )}
+                  {!!slotsQuery.data?.results.length &&
+                    groupSlotsByAvailability(slotsQuery.data.results).map(
+                      ({ availability, slots }) => (
+                        <div key={availability.name}>
+                          <h4 className="text-lg font-semibold mb-3">
+                            {availability.name}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {slots.map((slot) => {
+                              const percentage =
+                                slot.allocated / availability.tokens_per_slot;
+
+                              return (
+                                <Button
+                                  key={slot.id}
+                                  size="lg"
+                                  variant={
+                                    selectedSlotId === slot.id
+                                      ? "outline_primary"
+                                      : "outline"
+                                  }
+                                  onClick={() => {
+                                    if (selectedSlotId === slot.id) {
+                                      setSelectedSlotId(undefined);
+                                    } else {
+                                      setSelectedSlotId(slot.id);
+                                    }
+                                  }}
+                                  disabled={
+                                    slot.allocated ===
+                                    availability.tokens_per_slot
+                                  }
+                                  className="flex flex-col items-center group"
+                                >
+                                  <span className="font-semibold">
+                                    {format(slot.start_datetime, "HH:mm")}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      "text-xs group-hover:text-inherit",
+                                      percentage >= 1
+                                        ? "text-gray-400"
+                                        : percentage >= 0.8
+                                          ? "text-red-600"
+                                          : percentage >= 0.6
+                                            ? "text-yellow-600"
+                                            : "text-green-600",
+                                    )}
+                                  >
+                                    {availability.tokens_per_slot -
+                                      slot.allocated}{" "}
+                                    left
+                                  </span>
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          <Separator className="my-6" />
+                        </div>
+                      ),
+                    )}
+                </div>
+              </ScrollArea>
             </div>
           </div>
 

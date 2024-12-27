@@ -8,9 +8,12 @@ import { AppRoutes } from "./Routers/AppRouter";
 import { ConsultationTabProps } from "./components/Facility/ConsultationDetails";
 import { FormContextValue } from "./components/Form/FormContext";
 import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
-import { PatientForm } from "./components/Patient/PatientRegister";
-import { PatientModel } from "./components/Patient/models";
+import { PatientMeta } from "./components/Patient/models";
 import { pluginMap } from "./pluginMap";
+import { PatientModel } from "./types/emr/patient";
+
+export type PatientForm = PatientModel &
+  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
