@@ -350,7 +350,7 @@ export default function UserListView({ users, activeTab }: UserListViewProps) {
     <>
       {users.length > 0 ? (
         <>
-          {activeTab === "cardView" ? (
+          {activeTab === "card" ? (
             <UserGrid users={users} />
           ) : (
             <UserList users={users} />

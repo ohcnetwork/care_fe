@@ -9,7 +9,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-// import Tabs from "@/components/Common/Tabs";
 import UserListView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -26,7 +25,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  const [activeTab, setActiveTab] = useState("cardView");
+  const [activeTab, setActiveTab] = useState<"card" | "list">("card");
   const { facilityId } = props;
 
   const { data: facilityData } = useTanStackQueryInstead(
@@ -97,15 +96,18 @@ export default function FacilityUsers(props: { facilityId: number }) {
             ]}
           />
         </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "card" | "list")}
+        >
           <TabsList>
-            <TabsTrigger value="cardView" id="user-card-view">
+            <TabsTrigger value="card" id="user-card-view">
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-credit-card" className="text-lg" />
                 <span>Card</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="listView" id="user-list-view">
+            <TabsTrigger value="list" id="user-list-view">
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-list-ul" className="text-lg" />
                 <span>List</span>

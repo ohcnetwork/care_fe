@@ -12,7 +12,6 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-// import Tabs from "@/components/Common/Tabs";
 import UserFilter from "@/components/Users/UserFilter";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -44,7 +43,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState("cardView");
+  const [activeTab, setActiveTab] = useState<"card" | "list">("card");
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,
@@ -191,15 +190,18 @@ export default function ManageUsers() {
               clearSearch={clearSearch}
             />
           </div>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "card" | "list")}
+          >
             <TabsList>
-              <TabsTrigger value="cardView" id="user-card-view">
+              <TabsTrigger value="card" id="user-card-view">
                 <div className="flex items-center gap-2">
                   <CareIcon icon="l-credit-card" className="text-lg" />
                   <span>Card</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="listView" id="user-list-view">
+              <TabsTrigger value="list" id="user-list-view">
                 <div className="flex items-center gap-2" id="user-list-view">
                   <CareIcon icon="l-list-ul" className="text-lg" />
                   <span>List</span>
