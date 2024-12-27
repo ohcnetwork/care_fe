@@ -84,7 +84,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   };
 
   const { data } = useQuery({
-    queryKey: [patientId],
+    queryKey: ["/patient", patientId, thread],
     queryFn: query(routes.getPatient, {
       pathParams: { patientId },
       queryParams: { thread, offset: thread },

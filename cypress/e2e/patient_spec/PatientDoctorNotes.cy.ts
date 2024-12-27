@@ -47,7 +47,6 @@ describe("Patient Discussion notes in the consultation page", () => {
     // Post a reply comment to the message
     patientDoctorNotes.addDiscussionNotes(patientNurseReplyNote);
     patientDoctorNotes.postDiscussionNotes();
-
     patientDoctorNotes.verifyDiscussionMessage(patientNurseReplyNote);
   });
 
