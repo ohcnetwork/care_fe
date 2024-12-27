@@ -16,9 +16,9 @@ class FacilityHome {
         })
         .should("be.visible");
     } else {
-      cy.get(`[data-testid="sidebar-text-${expectedText}"]`).should(
-        "not.be.visible",
-      );
+      cy.get(
+        `[data-testid="sidebar-text-${expectedText.replace(" ", "-")}"]`,
+      ).should("not.be.visible");
     }
   }
 
