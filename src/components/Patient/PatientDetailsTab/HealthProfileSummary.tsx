@@ -4,6 +4,7 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
 import { PatientProps } from ".";
+import { MedicationStatementList } from "../MedicationStatementList";
 import { AllergyList } from "../allergy/list";
 
 export const HealthProfileSummary = (props: PatientProps) => {
@@ -52,17 +53,10 @@ export const HealthProfileSummary = (props: PatientProps) => {
               </div>
             </div>
 
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("ongoing_medications")}
-              </div>
-              <div
-                data-testid="patient-ongoing-medication"
-                className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
-              >
-                {patientData.ongoing_medication || "-"}
-              </div>
+            <div className="md:col-span-2">
+              <MedicationStatementList patientId={id} />
             </div>
+
             <div className="md:col-span-2">
               <AllergyList patientId={id} />
             </div>

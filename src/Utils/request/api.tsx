@@ -88,6 +88,7 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { Observation } from "@/types/emr/observation";
 import { PatientModel } from "@/types/emr/patient";
 import {
@@ -1585,6 +1586,13 @@ const routes = {
       method: "POST",
       TRes: Type<Appointment>(),
       TBody: Type<AppointmentCreate>(),
+    },
+  },
+  medicationStatement: {
+    list: {
+      path: "/api/v1/patient/{patientId}/medication/statement/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<MedicationStatement>>(),
     },
   },
 } as const;
