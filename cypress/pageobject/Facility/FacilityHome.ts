@@ -10,7 +10,7 @@ class FacilityHome {
 
   verifyTextVisibility(expectedText: string, isVisible: boolean = true) {
     if (isVisible) {
-      cy.get(`[data-testid="sidebar-text-${expectedText}"]`)
+      cy.get(`[data-testid="sidebar-text-${expectedText.replace(" ", "-")}"]`)
         .then(($elem) => {
           expect($elem.text().trim()).to.equal(expectedText);
         })

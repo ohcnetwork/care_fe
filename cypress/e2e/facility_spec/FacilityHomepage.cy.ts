@@ -59,7 +59,7 @@ describe("Facility Homepage Function", () => {
     // Verify Icon and Corresponding Text Should be Visible
     NavItems.forEach((item) => {
       facilityHome.verifyIconVisibility(item.icon);
-      facilityHome.verifyTextVisibility(item.text.replace(" ", "-"));
+      facilityHome.verifyTextVisibility(item.text);
     });
     facilityHome.toggleSideBar();
     // Toggle Sidebar and Just Icon Should be visible
