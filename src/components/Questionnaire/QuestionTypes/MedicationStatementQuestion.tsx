@@ -1,5 +1,4 @@
 import {
-  InfoCircledIcon,
   MinusCircledIcon,
   QuestionMarkCircledIcon,
   TextAlignLeftIcon,
@@ -7,11 +6,12 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -21,14 +21,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { QuantityInput } from "@/components/Common/QuantityInput";
-import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import {
-  MEDICATION_STATEMENT_INFORMATION_SOURCE_TYPE,
   MEDICATION_STATEMENT_STATUS,
   MedicationStatement,
+  MedicationStatementInformationSourceType,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
 import { Code } from "@/types/questionnaire/code";
@@ -48,9 +46,9 @@ const MEDICATION_STATEMENT_INITIAL_VALUE: Omit<
 > = {
   status: "active",
   reason: undefined,
-  dosage: "",
+  dosage_text: "",
   effective_period: undefined,
-  information_source: undefined,
+  information_source: MedicationStatementInformationSourceType.PATIENT,
   note: undefined,
 };
 
@@ -77,7 +75,7 @@ export function MedicationStatementQuestion({
       ...questionnaireResponse,
       values: [
         {
-          type: "medication_request",
+          type: "medication_statement",
           value: newMedications as MedicationStatement[], // FIXME: Remove this cast
         },
       ],
@@ -88,7 +86,7 @@ export function MedicationStatementQuestion({
     const newMedications = medications.filter((_, i) => i !== index);
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
-      values: [{ type: "medication_request", value: newMedications }],
+      values: [{ type: "medication_statement", value: newMedications }],
     });
   };
 
@@ -104,7 +102,7 @@ export function MedicationStatementQuestion({
       ...questionnaireResponse,
       values: [
         {
-          type: "medication_request",
+          type: "medication_statement",
           value: newMedications,
         },
       ],
@@ -198,28 +196,67 @@ const MedicationStatementItem: React.FC<{
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <div className="flex-1">
+            <Label className="mb-1 block text-sm font-medium">
+              {t("source")}
+            </Label>
+            <Select
+              value={medication.information_source}
+              onValueChange={(
+                value: MedicationStatementInformationSourceType,
+              ) => onUpdate({ information_source: value })}
+              disabled={disabled}
+            >
+              <SelectTrigger className="capitalize">
+                <SelectValue placeholder={t("select_source")} />
+              </SelectTrigger>
+              <SelectContent>
+                {(
+                  [
+                    {
+                      value: MedicationStatementInformationSourceType.PATIENT,
+                      icon: "l-user",
+                    },
+                    {
+                      value: MedicationStatementInformationSourceType.USER,
+                      icon: "l-user-nurse",
+                    },
+                    {
+                      value:
+                        MedicationStatementInformationSourceType.RELATED_PERSON,
+                      icon: "l-users-alt",
+                    },
+                  ] as {
+                    value: MedicationStatementInformationSourceType;
+                    icon: IconName;
+                  }[]
+                ).map((source) => (
+                  <SelectItem value={source.value} className="capitalize">
+                    <CareIcon icon={source.icon} className="mr-2" />
+                    {source.value.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-[2]">
             <Label className="mb-1 block text-sm font-medium">
               {t("dosage")}
             </Label>
-            <QuantityInput
-              units={DOSAGE_UNITS}
-              quantity={{
-                value: Number(medication.dosage?.split(" ").shift()),
-                unit: medication.dosage?.split(" ").pop(),
-              }}
-              onChange={(value) =>
+            <Input
+              value={medication.dosage_text}
+              onChange={(event) =>
                 onUpdate({
-                  dosage: `${value.value} ${value.unit}`,
+                  dosage_text: event.target.value,
                 })
               }
               disabled={disabled}
             />
           </div>
           <div className="flex-[2]">
-            <Label className="mb-1 block text-sm font-medium">
-              {t("effective_period")}
+            <Label className="mb-1 block text-sm font-medium truncate">
+              {t("medication_taken_between")}
             </Label>
             <DateRangePicker
               date={{
@@ -269,27 +306,6 @@ const MedicationStatementItem: React.FC<{
           </div>
         )}
 
-        {medication.information_source !== undefined && (
-          <div>
-            <Label className="mb-1 block text-sm font-medium">
-              {t("information_source")}
-            </Label>
-            <RadioGroup
-              defaultValue={medication.information_source}
-              className="flex items-center gap-2 flex-wrap"
-            >
-              {MEDICATION_STATEMENT_INFORMATION_SOURCE_TYPE.map((type) => (
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={type} id={type} />
-                  <Label htmlFor={type}>
-                    {t(`information_source_${type}`)}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-        )}
-
         <div className="flex gap-3 flex-wrap mt-2">
           {medication.reason === undefined && (
             <Button
@@ -317,20 +333,6 @@ const MedicationStatementItem: React.FC<{
             >
               <TextAlignLeftIcon className="size-4" />
               {t("additional_information")}
-            </Button>
-          )}
-          {medication.information_source === undefined && (
-            <Button
-              onClick={() =>
-                onUpdate({
-                  information_source: "patient",
-                })
-              }
-              variant="secondary"
-              className="flex gap-1.5 items-center"
-            >
-              <InfoCircledIcon className="size-4" />
-              {t("information_source")}
             </Button>
           )}
         </div>

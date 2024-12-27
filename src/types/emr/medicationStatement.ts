@@ -1,21 +1,11 @@
 import { Period } from "@/types/questionnaire/base";
 import { Code } from "@/types/questionnaire/code";
 
-export const MEDICATION_STATEMENT_INFORMATION_SOURCE_TYPE = [
-  "patient",
-  "user",
-  "related_person",
-] as const;
-
-export type MedicationStatementInformationSourceType =
-  (typeof MEDICATION_STATEMENT_INFORMATION_SOURCE_TYPE)[number];
-
-export type MedicationStatementInformationSource = {
-  type: MedicationStatementInformationSourceType;
-  id?: string; // UUID
-  display?: string;
-  relationship?: string;
-};
+export enum MedicationStatementInformationSourceType {
+  PATIENT = "patient",
+  USER = "user",
+  RELATED_PERSON = "related_person",
+}
 
 export const MEDICATION_STATEMENT_STATUS = [
   "active",
@@ -37,7 +27,7 @@ export type MedicationStatement = {
   reason?: string;
 
   medication: Code;
-  dosage?: string;
+  dosage_text?: string;
   effective_period?: Period;
 
   patient: string; // UUID
