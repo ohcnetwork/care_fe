@@ -17,12 +17,11 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { NotificationData } from "@/components/Notifications/models";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, relativeTime } from "@/Utils/utils";
-
-import { NotificationData } from "./models";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
