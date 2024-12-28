@@ -50,7 +50,6 @@ export interface AssignedToObjectModel {
   last_name: string;
   last_login?: string;
   alt_phone_number?: string;
-  phone_number?: string;
   user_type: string;
 }
 
