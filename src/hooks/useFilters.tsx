@@ -143,11 +143,12 @@ export default function useFilters({
       const paramKeys = [paramKey + "_" + minKey, paramKey + "_" + maxKey];
       const values = [qParams[paramKeys[0]], qParams[paramKeys[1]]];
       if (values[0] === values[1])
-        return [{ name, value: values[0], paramKey: paramKeys }];
+        return [{ name, value: values[0], paramKey: paramKeys[0] }];
       return [name + " " + minKey, name + " " + maxKey].map((name, i) => {
         return { name, value: values[i], paramKey: paramKeys[i] };
       });
     },
+
     dateRange(name = "Date", paramKey = "date") {
       return badgeUtils.range(name, paramKey, "after", "before");
     },
