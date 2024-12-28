@@ -6,8 +6,8 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
   return (
     <FileUpload
       patientId={props.patient.id}
-      consultationId={props.encounter.id}
-      type="CONSULTATION"
+      encounterId={props.encounter.id}
+      type="encounter"
       allowAudio
     />
   );

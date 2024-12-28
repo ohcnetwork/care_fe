@@ -18,7 +18,7 @@ import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
 import { AssignedToObjectModel } from "@/components/Patient/models";
 import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
-import useAuthUser from "@/hooks/useAuthUser";
+import useAuthOrPatientUser from "@/hooks/useAuthOrPatientUser";
 
 import {
   DISCHARGE_REASONS,
@@ -54,7 +54,7 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
   const [patientData, setPatientData] = useState<PatientModel>({});
 
-  const authUser = useAuthUser();
+  const { user, patient } = useAuthOrPatientUser();
   const { t } = useTranslation();
 
   const [assignedVolunteer, setAssignedVolunteer] = useState<
@@ -82,7 +82,7 @@ export const PatientHome = (props: {
         }
         triggerGoal("Patient Profile Viewed", {
           facilityId: facilityId,
-          userId: authUser.id,
+          userId: user?.id || patient?.id,
         });
       },
     },

@@ -1,3 +1,5 @@
+import { navigate } from "raviger";
+
 import { Card, CardContent } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
@@ -8,7 +10,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 interface Props {
   facilityId: string;
   patientId: string;
-  consultationId?: string;
+  encounterId?: string;
   questionnaireSlug?: string;
   subjectType?: string;
 }
@@ -16,7 +18,7 @@ interface Props {
 export default function EncounterQuestionnaire({
   facilityId,
   patientId,
-  consultationId,
+  encounterId,
   questionnaireSlug,
   subjectType,
 }: Props) {
@@ -25,7 +27,7 @@ export default function EncounterQuestionnaire({
       <PLUGIN_Component __name="Scribe" />
       <Page
         title="Questionnaire"
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+        backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
       >
         <div className="container mx-auto p-4">
           <Card>
@@ -33,8 +35,17 @@ export default function EncounterQuestionnaire({
               <QuestionnaireForm
                 patientId={patientId}
                 subjectType={subjectType}
-                encounterId={consultationId}
+                encounterId={encounterId}
                 questionnaireSlug={questionnaireSlug}
+                onSubmit={() => {
+                  if (encounterId) {
+                    navigate(
+                      `/facility/${facilityId}/encounter/${encounterId}/updates`,
+                    );
+                  } else {
+                    navigate(`/patient/${patientId}/updates`);
+                  }
+                }}
               />
             </CardContent>
           </Card>

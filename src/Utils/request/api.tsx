@@ -86,7 +86,7 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
-import { Encounter, EncounterRequest } from "@/types/emr/encounter";
+import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import { Observation } from "@/types/emr/observation";
@@ -94,6 +94,7 @@ import { ObservationAnalyzeResponse } from "@/types/emr/observation";
 import { PatientModel } from "@/types/emr/patient";
 import {
   FacilityOrganization,
+  FacilityOrganizationCreate,
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
 import {
@@ -1037,7 +1038,7 @@ const routes = {
   },
   editUpload: {
     path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
-    method: "PATCH",
+    method: "PUT",
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
   },
@@ -1324,6 +1325,14 @@ const routes = {
     },
   },
 
+  facility: {
+    getUsers: {
+      path: "/api/v1/facility/{facility_id}/users/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<UserModel>>(),
+    },
+  },
+
   valueset: {
     // list: {
     //   path: "/api/v1/valueset/",
@@ -1532,7 +1541,7 @@ const routes = {
       path: "/api/v1/facility/{facilityId}/organizations/",
       method: "POST",
       TRes: {} as FacilityOrganization,
-      TBody: {} as { name: string; description?: string },
+      TBody: {} as FacilityOrganizationCreate,
     },
     listUsers: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
@@ -1578,12 +1587,18 @@ const routes = {
       path: "/api/v1/encounter/",
       method: "POST",
       TRes: Type<Encounter>(),
-      TBody: Type<EncounterRequest>(),
+      TBody: Type<EncounterEditRequest>(),
     },
     get: {
       path: "/api/v1/encounter/{id}/",
       method: "GET",
       TRes: Type<Encounter>(),
+    },
+    update: {
+      path: "/api/v1/encounter/{id}/",
+      method: "PUT",
+      TRes: Type<Encounter>(),
+      TBody: Type<EncounterEditRequest>(),
     },
   },
 

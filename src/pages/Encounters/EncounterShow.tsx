@@ -179,7 +179,6 @@ export const EncounterShow = (props: Props) => {
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
           title="Encounter"
-          className="sm:m-0 sm:p-0"
           crumbsReplacements={{
             [encounterId]: { name: encounterData.patient.name },
             consultation: {

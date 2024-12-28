@@ -25,6 +25,7 @@ import { TextQuestion } from "./TextQuestion";
 interface QuestionInputProps {
   question: Question;
   questionnaireResponses: QuestionnaireResponse[];
+  encounterId?: string;
   updateQuestionnaireResponseCB: (
     questionnaireResponse: QuestionnaireResponse,
   ) => void;
@@ -36,6 +37,7 @@ interface QuestionInputProps {
 export function QuestionInput({
   question,
   questionnaireResponses,
+  encounterId,
   updateQuestionnaireResponseCB,
   errors,
   clearError,
@@ -157,7 +159,12 @@ export function QuestionInput({
           case "diagnosis":
             return <DiagnosisQuestion {...commonProps} />;
           case "encounter":
-            return <EncounterQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <EncounterQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return null;
         }
         return null;
 

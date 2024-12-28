@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,39 +21,36 @@ import Loading from "@/components/Common/Loading";
 import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
 import { Appointment } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
-import { PatientUserContext } from "@/Routers/PatientRouter";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
 
-function PatientHome() {
+function PatientIndex() {
   const { t } = useTranslation();
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
 
   const [selectedAppointment, setSelectedAppointment] = useState<
     Appointment | undefined
   >();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
 
-  const { selectedPatient } = useContext(PatientUserContext);
+  const patient = usePatientContext();
+  const selectedPatient = patient?.selectedPatient;
+  const tokenData = patient?.tokenData;
 
   if (!tokenData) {
     navigate("/login");
   }
 
   const { data: appointmentsData, isLoading } = useQuery({
-    queryKey: ["appointment", tokenData.phoneNumber],
+    queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(routes.otp.getAppointments, {
       headers: {
-        Authorization: `Bearer ${tokenData.token}`,
+        Authorization: `Bearer ${tokenData?.token}`,
       },
     }),
-    enabled: !!tokenData.token,
+    enabled: !!tokenData?.token,
   });
 
   const getStatusChip = (status: string) => {
@@ -262,4 +259,4 @@ function PatientHome() {
   );
 }
 
-export default PatientHome;
+export default PatientIndex;

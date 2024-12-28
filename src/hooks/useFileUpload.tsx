@@ -81,7 +81,7 @@ export default function useFileUpload(
   const {
     type,
     onUpload,
-    category = "UNSPECIFIED",
+    category = "unspecified",
     multiple,
     allowNameFallback = true,
   } = options;

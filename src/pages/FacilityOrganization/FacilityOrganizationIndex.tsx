@@ -20,6 +20,8 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
+import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
+
 export default function FacilityOrganizationIndex({
   facilityId,
 }: {
@@ -60,6 +62,9 @@ export default function FacilityOrganizationIndex({
   if (!data?.results?.length) {
     return (
       <Page title="Organisations">
+        <div className="flex justify-end mb-4">
+          <CreateFacilityOrganizationSheet facilityId={facilityId} />
+        </div>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -85,7 +90,10 @@ export default function FacilityOrganizationIndex({
 
   return (
     <Page title="Facility Organisations">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 mt-4">
+      <div className="flex justify-end mb-4">
+        <CreateFacilityOrganizationSheet facilityId={facilityId} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
         {data.results.map((org: FacilityOrganization) => (
           <Card key={org.id} className="relative group">
             <CardHeader>

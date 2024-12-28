@@ -1,4 +1,5 @@
-import { navigate } from "raviger";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,16 +9,164 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
+import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 interface Props {
   encounter: Encounter;
 }
 
+function formatValue(value: string, type: string): string {
+  switch (type) {
+    case "dateTime":
+      return formatDateTime(value);
+    case "choice":
+      return properCase(value);
+    default:
+      return value;
+  }
+}
+
+function QuestionResponseValue({
+  question,
+  response,
+}: {
+  question: Question;
+  response: any;
+}) {
+  const value =
+    response.values[0]?.value || response.values[0]?.value_quantity?.value;
+
+  if (!value) return null;
+
+  return (
+    <div className="flex flex-col space-y-0.5">
+      <div className="text-xs text-muted-foreground">
+        {question.text}
+        {question.code && (
+          <span className="ml-1 text-xs text-muted-foreground">
+            ({question.code.display})
+          </span>
+        )}
+      </div>
+      <div className="text-sm">
+        {formatValue(String(value), question.type)}
+        {response.note && (
+          <span className="ml-2 text-xs text-muted-foreground">
+            ({response.note})
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuestionGroup({
+  group,
+  responses,
+}: {
+  group: Question;
+  responses: any[];
+}) {
+  // If this is a nested group (like BP with systolic/diastolic)
+  if (group.questions?.some((q) => q.questions)) {
+    return (
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium text-secondary-700">
+          {group.text}
+          {group.code && (
+            <span className="ml-1 text-xs text-muted-foreground">
+              ({group.code.display})
+            </span>
+          )}
+        </h4>
+        <div className="space-y-2 pl-3">
+          {group.questions?.map((subGroup) => (
+            <QuestionGroup
+              key={subGroup.id}
+              group={subGroup}
+              responses={responses}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Regular group with questions
+  return (
+    <div className="space-y-2">
+      <h4 className="text-sm font-medium text-secondary-700">
+        {group.text}
+        {group.code && (
+          <span className="ml-1 text-xs text-muted-foreground">
+            ({group.code.display})
+          </span>
+        )}
+      </h4>
+      <div
+        className={`space-y-2 pl-3 ${group.styling_metadata?.classes || ""}`}
+      >
+        {group.questions?.map((question) => {
+          const response = responses.find((r) => r.question_id === question.id);
+          if (!response) return null;
+          return (
+            <QuestionResponseValue
+              key={question.id}
+              question={question}
+              response={response}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function QuestionnaireResponsesList({ encounter }: Props) {
   const { t } = useTranslation();
+  const [expandedResponseIds, setExpandedResponseIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Create a query for each expanded response
+  const expandedResponses = useQuery({
+    queryKey: ["questionnaireResponses", Array.from(expandedResponseIds)],
+    queryFn: async () => {
+      const responses = await Promise.all(
+        Array.from(expandedResponseIds).map((id) =>
+          query(routes.getQuestionnaireResponse, {
+            pathParams: {
+              patientId: encounter.patient.id,
+              responseId: id,
+            },
+          })({ signal: new AbortController().signal }),
+        ),
+      );
+      return Object.fromEntries(
+        responses.map((response, index) => [
+          Array.from(expandedResponseIds)[index],
+          response,
+        ]),
+      );
+    },
+    enabled: expandedResponseIds.size > 0,
+  });
+
+  const toggleResponse = (id: string) => {
+    setExpandedResponseIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   return (
     <PaginatedList
@@ -26,7 +175,7 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
     >
       {() => (
         <div className="mt-4 flex w-full flex-col gap-4">
-          <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
+          <div>
             <PaginatedList.WhenEmpty>
               <Card className="p-6">
                 <div className="text-lg font-medium text-muted-foreground">
@@ -59,39 +208,82 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
               {(item) => (
                 <Card
                   key={item.id}
-                  className="flex items-center justify-between p-4 transition-colors hover:bg-muted/50"
+                  className="flex flex-col p-4 transition-colors hover:bg-muted/50"
                 >
-                  <div className="flex items-start gap-4">
-                    <CareIcon
-                      icon="l-file-alt"
-                      className="mt-1 h-5 w-5 text-muted-foreground"
-                    />
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {item.questionnaire?.title ||
-                          structuredResponsesPreview(item.structured_responses)}
-                      </h3>
-                      <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                        <CareIcon icon="l-calender" className="h-4 w-4" />
-                        <span>{formatDateTime(item.created_date)}</span>
-                      </div>
-                      <div className="mt-1 text-sm text-muted-foreground">
-                        by {item.created_by?.first_name || ""}{" "}
-                        {item.created_by?.last_name || ""}
-                        {` (${item.created_by?.user_type})`}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4">
+                      <CareIcon
+                        icon="l-file-alt"
+                        className="mt-1 h-4 w-4 text-muted-foreground"
+                      />
+                      <div>
+                        <h3 className="text-base font-medium">
+                          {item.questionnaire?.title ||
+                            structuredResponsesPreview(
+                              item.structured_responses,
+                            )}
+                        </h3>
+                        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                          <CareIcon icon="l-calender" className="h-3 w-3" />
+                          <span>{formatDateTime(item.created_date)}</span>
+                        </div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          by {item.created_by?.first_name || ""}{" "}
+                          {item.created_by?.last_name || ""}
+                          {` (${item.created_by?.user_type})`}
+                        </div>
                       </div>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleResponse(item.id)}
+                    >
+                      {expandedResponseIds.has(item.id) ? "Hide" : "View"}
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      navigate(
-                        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire_response/${item.id}`,
-                      );
-                    }}
-                  >
-                    View
-                  </Button>
+
+                  {expandedResponseIds.has(item.id) &&
+                    expandedResponses.data?.[item.id] && (
+                      <div className="mt-3 border-t pt-3">
+                        <div className="space-y-4">
+                          {expandedResponses.data[
+                            item.id
+                          ].questionnaire?.questions.map((question) => {
+                            // Skip structured questions for now as they need special handling
+                            if (question.type === "structured") return null;
+
+                            const response = expandedResponses.data[
+                              item.id
+                            ].responses.find(
+                              (r) => r.question_id === question.id,
+                            );
+
+                            if (question.type === "group") {
+                              return (
+                                <QuestionGroup
+                                  key={question.id}
+                                  group={question}
+                                  responses={
+                                    expandedResponses.data[item.id].responses
+                                  }
+                                />
+                              );
+                            }
+
+                            if (!response) return null;
+
+                            return (
+                              <QuestionResponseValue
+                                key={question.id}
+                                question={question}
+                                response={response}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                 </Card>
               )}
             </PaginatedList.Items>

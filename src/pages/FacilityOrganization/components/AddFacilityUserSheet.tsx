@@ -124,7 +124,7 @@ export default function AddFacilityUserSheet({
             Search for a user and assign a role to add them to the organization.
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 min-h-full">
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Search User</h3>
             <Autocomplete
@@ -135,7 +135,6 @@ export default function AddFacilityUserSheet({
               noOptionsMessage="No users found"
             />
           </div>
-
           {selectedUser && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4 space-y-4">

@@ -2,7 +2,7 @@ import {
   AllergyIntolerance,
   AllergyIntoleranceRequest,
 } from "@/types/emr/allergyIntolerance";
-import { Encounter, EncounterRequest } from "@/types/emr/encounter";
+import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { Diagnosis, DiagnosisRequest } from "@/types/questionnaire/diagnosis";
@@ -26,7 +26,7 @@ export interface StructuredRequestMap {
   medication_statement: { datapoints: MedicationStatement[] };
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
-  encounter: EncounterRequest;
+  encounter: EncounterEditRequest;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

@@ -39,16 +39,15 @@ const consultationRoutes: AppRoutes = {
       questionnaireSlug="encounter"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter": ({
-    facilityId,
-    patientId,
-  }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
-      questionnaireSlug="encounter"
-    />
-  ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/edit_encounter":
+    ({ facilityId, encounterId, patientId }) => (
+      <EncounterQuestionnaire
+        facilityId={facilityId}
+        encounterId={encounterId}
+        questionnaireSlug="encounter"
+        patientId={patientId}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
     ({ facilityId, patientId, id }) => (
       <PatientConsentRecords
@@ -57,7 +56,7 @@ const consultationRoutes: AppRoutes = {
         consultationId={id}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
+  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
     facilityId,
     patientId,
     id,
@@ -65,8 +64,8 @@ const consultationRoutes: AppRoutes = {
     <FileUploadPage
       facilityId={facilityId}
       patientId={patientId}
-      consultationId={id}
-      type="CONSULTATION"
+      encounterId={id}
+      type="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
@@ -175,25 +174,25 @@ const consultationRoutes: AppRoutes = {
       subjectType="patient"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/questionnaire":
-    ({ facilityId, patientId, consultationId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
+    ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
         facilityId={facilityId}
+        encounterId={encounterId}
         patientId={patientId}
-        consultationId={consultationId}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/questionnaire/:slug":
-    ({ facilityId, patientId, consultationId, slug }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
+    ({ facilityId, encounterId, slug, patientId }) => (
       <EncounterQuestionnaire
         facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
+        encounterId={encounterId}
         questionnaireSlug={slug}
+        patientId={patientId}
       />
     ),
 };

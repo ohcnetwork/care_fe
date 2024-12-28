@@ -42,7 +42,7 @@ export const LinearProgressWithLabel = (props: { value: number }) => {
 interface FileUploadProps {
   type: string;
   patientId?: string;
-  consultationId?: string;
+  encounterId?: string;
   consentId?: string;
   allowAudio?: boolean;
   sampleId?: string;
@@ -76,7 +76,7 @@ export interface StateInterface {
 export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const {
-    consultationId,
+    encounterId,
     patientId,
     consentId,
     type,
@@ -113,7 +113,7 @@ export const FileUpload = (props: FileUploadProps) => {
     {
       PATIENT: patientId,
       CONSENT_RECORD: consentId,
-      CONSULTATION: consultationId,
+      ENCOUNTER: encounterId,
       SAMPLE_MANAGEMENT: sampleId,
       CLAIM: claimId,
     }[type] || "";
@@ -140,13 +140,13 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
-      file_type: "DISCHARGE_SUMMARY",
+      file_type: "discharge_summary",
       associating_id: associatedId,
       is_archived: false,
       limit: RESULTS_PER_PAGE_LIMIT,
       offset: offset,
     },
-    prefetch: type === "CONSULTATION",
+    prefetch: type === "consultation",
     silent: true,
   });
 

@@ -110,6 +110,18 @@ export interface Encounter {
   status_history: StatusHistory;
 }
 
+export interface EncounterEditRequest {
+  organizations: string[];
+  patient: string;
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization;
+  priority: EncounterPriority;
+  external_identifier?: string;
+  facility: string;
+}
+
 export interface EncounterRequest {
   organizations: string[];
   patient: string;
@@ -121,3 +133,5 @@ export interface EncounterRequest {
   external_identifier?: string;
   facility: string;
 }
+
+export const completedEncounterStatus = ["completed", "discharged"];

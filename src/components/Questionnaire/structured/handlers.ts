@@ -129,10 +129,9 @@ const handlers: {
       }),
   },
   encounter: {
-    getRequests: (encounters, { patientId, facilityId }) => {
+    getRequests: (encounters, { patientId, facilityId, encounterId }) => {
+      if (!encounterId) return [];
       console.log("Encounters", encounters, facilityId);
-      if (!encounters.length || !facilityId) return [];
-
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
           organizations: [],
@@ -143,12 +142,12 @@ const handlers: {
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
-          facility: facilityId,
+          facility: encounter.facility.id,
         };
 
         return {
-          url: `/api/v1/encounter/`,
-          method: "POST",
+          url: `/api/v1/encounter/${encounterId}/`,
+          method: "PUT",
           body,
           reference_id: "encounter",
         };

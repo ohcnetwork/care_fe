@@ -61,7 +61,7 @@ const PatientRoutes: AppRoutes = {
     <FileUploadPage
       facilityId={facilityId}
       patientId={patientId}
-      type="PATIENT"
+      type="patient"
     />
   ),
   "/death_report/:id": ({ id }) => <DeathReport id={id} />,

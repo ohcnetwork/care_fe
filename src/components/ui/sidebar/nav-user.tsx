@@ -31,7 +31,7 @@ import { AppointmentPatient } from "@/pages/Patient/Utils";
 export function FacilityNavUser() {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -43,18 +43,30 @@ export function FacilityNavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar
-                className="h-8 w-8 rounded-lg"
-                name={`${user.first_name} ${user.last_name}`}
-                imageUrl={user.read_profile_picture_url}
-              />
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {user.first_name} {user.last_name}
-                </span>
-                <span className="truncate text-xs">{user.username}</span>
-              </div>
-              <CaretSortIcon className="ml-auto size-4" />
+              {open && (
+                <>
+                  <Avatar
+                    className="h-8 w-8 rounded-lg"
+                    name={`${user.first_name} ${user.last_name}`}
+                    imageUrl={user.read_profile_picture_url}
+                  />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {user.first_name} {user.last_name}
+                    </span>
+                    <span className="truncate text-xs">{user.username}</span>
+                  </div>
+                  <CaretSortIcon className="ml-auto size-4" />
+                </>
+              )}
+              {!open && (
+                <div className="flex flex-row items-center">
+                  <Avatar
+                    name={`${user.first_name} ${user.last_name}`}
+                    className="h-8 w-8 rounded-lg"
+                  />
+                </div>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -107,7 +119,7 @@ export function PatientNavUser({
   phoneNumber: string;
 }) {
   const { t } = useTranslation();
-  const { isMobile } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const signOut = usePatientSignOut();
 
   return (
@@ -119,19 +131,31 @@ export function PatientNavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar
-                className="h-8 w-8 rounded-lg"
-                name={patient?.name || phoneNumber}
-              />
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {patient?.name || phoneNumber}
-                </span>
-                {patient && (
-                  <span className="truncate text-xs">{phoneNumber}</span>
-                )}
-              </div>
-              <CaretSortIcon className="ml-auto size-4" />
+              {open && (
+                <>
+                  <Avatar
+                    className="h-8 w-8 rounded-lg"
+                    name={patient?.name || phoneNumber}
+                  />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {patient?.name || phoneNumber}
+                    </span>
+                    {patient && (
+                      <span className="truncate text-xs">{phoneNumber}</span>
+                    )}
+                  </div>
+                  <CaretSortIcon className="ml-auto size-4" />
+                </>
+              )}
+              {!open && (
+                <div className="flex flex-row items-center">
+                  <Avatar
+                    name={patient?.name || phoneNumber}
+                    className="h-8 w-8 rounded-lg"
+                  />
+                </div>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

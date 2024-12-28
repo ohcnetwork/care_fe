@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import {
+  type EncounterAdmitSources,
   type EncounterClass,
+  type EncounterDietPreference,
+  type EncounterDischargeDisposition,
+  type EncounterEditRequest,
   type EncounterPriority,
-  type EncounterRequest,
   type EncounterStatus,
-  type Hospitalization,
 } from "@/types/emr/encounter";
 import type {
   QuestionnaireResponse,
@@ -23,8 +28,11 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import { Switch } from "../../../components/ui/switch";
+
 interface EncounterQuestionProps {
   question: Question;
+  encounterId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -39,36 +47,79 @@ export function EncounterQuestion({
   disabled,
   clearError,
   organizations = [],
+  encounterId,
   patientId = "",
 }: EncounterQuestionProps) {
-  const [encounter, setEncounter] = useState<
-    Omit<EncounterRequest, "organizations" | "patient">
-  >(() => {
-    const existingValue =
-      (questionnaireResponse.values?.[0]
-        ?.value as unknown as EncounterRequest) || null;
+  // Fetch encounter data
+  const { data: encounterData, isLoading } = useQuery({
+    queryKey: ["encounter", encounterId],
+    queryFn: query(routes.encounter.get, {
+      pathParams: { id: encounterId },
+    }),
+    enabled: !!encounterId,
+  });
+
+  const [encounter, setEncounter] = useState<EncounterEditRequest>(() => {
+    if (!encounterData) {
+      return {
+        status: "unknown" as EncounterStatus,
+        encounter_class: "amb" as EncounterClass,
+        period: {
+          start: new Date().toISOString(),
+          end: undefined,
+        },
+        priority: "routine" as EncounterPriority,
+        external_identifier: "",
+        hospitalization: {
+          re_admission: false,
+          admit_source: "other" as EncounterAdmitSources,
+          discharge_disposition: "home" as EncounterDischargeDisposition,
+          diet_preference: "none" as EncounterDietPreference,
+        },
+        facility: "",
+        patient: "",
+        organizations: [],
+      };
+    }
     return {
-      status: existingValue?.status || "in_progress",
-      encounter_class: existingValue?.encounter_class || "amb",
-      period: existingValue?.period || {
-        start: new Date().toISOString(),
-      },
-      priority: existingValue?.priority || "routine",
-      external_identifier: existingValue?.external_identifier || "",
-      hospitalization: existingValue?.hospitalization,
-      facility: existingValue?.facility,
+      status: encounterData.status,
+      encounter_class: encounterData.encounter_class,
+      period: encounterData.period,
+      priority: encounterData.priority,
+      external_identifier: encounterData.external_identifier || "",
+      hospitalization: encounterData.hospitalization,
+      facility: encounterData.facility.id,
+      patient: encounterData.patient.id,
+      organizations: [],
     };
   });
 
-  const updateEncounter = (
-    updates: Partial<Omit<EncounterRequest, "organizations" | "patient">>,
+  // Update encounter state when data is loaded
+  useEffect(() => {
+    if (encounterData) {
+      setEncounter({
+        status: encounterData.status,
+        encounter_class: encounterData.encounter_class,
+        period: encounterData.period,
+        priority: encounterData.priority,
+        external_identifier: encounterData.external_identifier || "",
+        hospitalization: encounterData.hospitalization,
+        facility: encounterData.facility.id,
+        patient: encounterData.patient.id,
+        organizations: [],
+      });
+    }
+  }, [encounterData]);
+
+  const handleUpdateEncounter = (
+    updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     setEncounter(newEncounter);
 
     // Create the full encounter request object
-    const encounterRequest: EncounterRequest = {
+    const encounterRequest: EncounterEditRequest = {
       ...newEncounter,
       organizations,
       patient: patientId,
@@ -86,6 +137,10 @@ export function EncounterQuestion({
     });
   };
 
+  if (isLoading) {
+    return <div>Loading encounter...</div>;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Basic Details */}
@@ -94,7 +149,7 @@ export function EncounterQuestion({
         <Select
           value={encounter.status}
           onValueChange={(value) =>
-            updateEncounter({
+            handleUpdateEncounter({
               status: value as EncounterStatus,
             })
           }
@@ -116,12 +171,13 @@ export function EncounterQuestion({
           </SelectContent>
         </Select>
       </div>
+
       <div className="space-y-2">
         <Label>Encounter Class</Label>
         <Select
           value={encounter.encounter_class}
           onValueChange={(value) =>
-            updateEncounter({
+            handleUpdateEncounter({
               encounter_class: value as EncounterClass,
             })
           }
@@ -133,19 +189,20 @@ export function EncounterQuestion({
           <SelectContent>
             <SelectItem value="imp">Inpatient (IP)</SelectItem>
             <SelectItem value="amb">Ambulatory (OP)</SelectItem>
-            <SelectItem value="obsenc">Observation Room </SelectItem>
+            <SelectItem value="obsenc">Observation Room</SelectItem>
             <SelectItem value="emer">Emergency</SelectItem>
             <SelectItem value="vr">Virtual</SelectItem>
             <SelectItem value="hh">Home Health</SelectItem>
           </SelectContent>
         </Select>
       </div>
+
       <div className="space-y-2">
         <Label>Priority</Label>
         <Select
           value={encounter.priority}
           onValueChange={(value) =>
-            updateEncounter({
+            handleUpdateEncounter({
               priority: value as EncounterPriority,
             })
           }
@@ -173,53 +230,175 @@ export function EncounterQuestion({
           </SelectContent>
         </Select>
       </div>
-      {encounter.encounter_class === "imp" && (
-        <div className="space-y-2">
-          <Label>Hospitalization Details</Label>
-          <Select
-            value={encounter.hospitalization?.admit_source}
-            onValueChange={(value) =>
-              updateEncounter({
-                hospitalization: {
-                  ...encounter.hospitalization,
-                  admit_source: value as Hospitalization["admit_source"],
-                  re_admission: false,
-                  discharge_disposition: "home",
-                  diet_preference: "none",
-                },
-              })
-            }
-            disabled={disabled}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select admission source" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hosp_trans">Hospital Transfer</SelectItem>
-              <SelectItem value="emd">Emergency Department</SelectItem>
-              <SelectItem value="outp">Outpatient</SelectItem>
-              <SelectItem value="born">Born</SelectItem>
-              <SelectItem value="gp">General Practitioner</SelectItem>
-              <SelectItem value="mp">Medical Practitioner</SelectItem>
-              <SelectItem value="nursing">Nursing</SelectItem>
-              <SelectItem value="psych">Psychiatric Hospital</SelectItem>
-              <SelectItem value="rehab">Rehabilitation Hospital</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+
       <div className="space-y-2">
-        <Label>External Identifier</Label>
+        <Label>Hospital Identifier</Label>
         <Input
           value={encounter.external_identifier || ""}
           onChange={(e) =>
-            updateEncounter({ external_identifier: e.target.value })
+            handleUpdateEncounter({ external_identifier: e.target.value })
           }
           disabled={disabled}
-          placeholder="Enter external identifier"
+          placeholder="Ip/op/obs/emr number"
         />
       </div>
+
+      {/* Hospitalization Details - Only show for relevant encounter classes */}
+      {(encounter.encounter_class === "imp" ||
+        encounter.encounter_class === "obsenc" ||
+        encounter.encounter_class === "emer") && (
+        <div className="col-span-2 border rounded-lg p-4 space-y-4">
+          <h3 className="text-lg font-semibold">Hospitalization Details</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={encounter.hospitalization?.re_admission || false}
+                onCheckedChange={(checked: boolean) =>
+                  handleUpdateEncounter({
+                    hospitalization: {
+                      ...encounter.hospitalization,
+                      re_admission: checked,
+                      admit_source:
+                        encounter.hospitalization?.admit_source || "other",
+                      discharge_disposition:
+                        encounter.hospitalization?.discharge_disposition ||
+                        "home",
+                      diet_preference:
+                        encounter.hospitalization?.diet_preference || "none",
+                    },
+                  })
+                }
+                disabled={disabled}
+              />
+              <Label>Re-admission</Label>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Admit Source</Label>
+              <Select
+                value={encounter.hospitalization?.admit_source}
+                onValueChange={(value) =>
+                  handleUpdateEncounter({
+                    hospitalization: {
+                      ...encounter.hospitalization,
+                      admit_source: value as EncounterAdmitSources,
+                      re_admission:
+                        encounter.hospitalization?.re_admission || false,
+                      discharge_disposition:
+                        encounter.hospitalization?.discharge_disposition ||
+                        "home",
+                      diet_preference:
+                        encounter.hospitalization?.diet_preference || "none",
+                    },
+                  })
+                }
+                disabled={disabled}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select admit source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hosp_trans">Hospital Transfer</SelectItem>
+                  <SelectItem value="emd">Emergency Department</SelectItem>
+                  <SelectItem value="outp">Outpatient Department</SelectItem>
+                  <SelectItem value="born">Born</SelectItem>
+                  <SelectItem value="gp">General Practitioner</SelectItem>
+                  <SelectItem value="mp">Medical Practitioner</SelectItem>
+                  <SelectItem value="nursing">Nursing Home</SelectItem>
+                  <SelectItem value="psych">Psychiatric Hospital</SelectItem>
+                  <SelectItem value="rehab">Rehabilitation Facility</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Show discharge disposition only when status is completed */}
+            {encounter.status === "completed" && (
+              <div className="space-y-2">
+                <Label>Discharge Disposition</Label>
+                <Select
+                  value={encounter.hospitalization?.discharge_disposition}
+                  onValueChange={(value) =>
+                    handleUpdateEncounter({
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        discharge_disposition:
+                          value as EncounterDischargeDisposition,
+                        re_admission:
+                          encounter.hospitalization?.re_admission || false,
+                        admit_source:
+                          encounter.hospitalization?.admit_source || "other",
+                        diet_preference:
+                          encounter.hospitalization?.diet_preference || "none",
+                      },
+                    })
+                  }
+                  disabled={disabled}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select discharge disposition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="home">Home</SelectItem>
+                    <SelectItem value="alt_home">Alternate Home</SelectItem>
+                    <SelectItem value="other_hcf">
+                      Other Healthcare Facility
+                    </SelectItem>
+                    <SelectItem value="hosp">Hospice</SelectItem>
+                    <SelectItem value="long">Long Term Care</SelectItem>
+                    <SelectItem value="aadvice">Left Against Advice</SelectItem>
+                    <SelectItem value="exp">Expired</SelectItem>
+                    <SelectItem value="psy">Psychiatric Hospital</SelectItem>
+                    <SelectItem value="rehab">Rehabilitation</SelectItem>
+                    <SelectItem value="snf">
+                      Skilled Nursing Facility
+                    </SelectItem>
+                    <SelectItem value="oth">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Diet Preference</Label>
+              <Select
+                value={encounter.hospitalization?.diet_preference}
+                onValueChange={(value) =>
+                  handleUpdateEncounter({
+                    hospitalization: {
+                      ...encounter.hospitalization,
+                      diet_preference: value as EncounterDietPreference,
+                      re_admission:
+                        encounter.hospitalization?.re_admission || false,
+                      admit_source:
+                        encounter.hospitalization?.admit_source || "other",
+                      discharge_disposition:
+                        encounter.hospitalization?.discharge_disposition ||
+                        "home",
+                    },
+                  })
+                }
+                disabled={disabled}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select diet preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                  <SelectItem value="diary_free">Dairy Free</SelectItem>
+                  <SelectItem value="nut_free">Nut Free</SelectItem>
+                  <SelectItem value="gluten_free">Gluten Free</SelectItem>
+                  <SelectItem value="vegan">Vegan</SelectItem>
+                  <SelectItem value="halal">Halal</SelectItem>
+                  <SelectItem value="kosher">Kosher</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

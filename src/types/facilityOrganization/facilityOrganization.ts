@@ -24,6 +24,13 @@ export interface FacilityOrganization {
   updated_at: string;
 }
 
+export interface FacilityOrganizationCreate {
+  name: string;
+  description?: string;
+  org_type: org_type;
+  parent?: string;
+}
+
 export interface FacilityOrganizationUserRole {
   id: string;
   user: {
