@@ -53,3 +53,22 @@ export function useValueInjectionObserver<T = unknown>(options: {
 
   return value;
 }
+
+export function useValueInjection<T = unknown>(options: {
+  targetElement: HTMLElement | null;
+  attribute?: string;
+  onChange: (value: T | undefined) => void;
+}) {
+  const { targetElement, attribute = "data-scribe-value", onChange } = options;
+
+  const domValue = useValueInjectionObserver<T>({
+    targetElement,
+    attribute,
+  });
+
+  useEffect(() => {
+    onChange(domValue);
+  }, [domValue, targetElement, attribute]);
+
+  return null;
+}

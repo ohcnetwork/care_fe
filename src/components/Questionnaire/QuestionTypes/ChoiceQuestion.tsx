@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useCallback, useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import {
@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
+import { useValueInjection } from "@/Utils/useValueInjectionObserver";
 import { properCase } from "@/Utils/utils";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { AnswerOption, Question } from "@/types/questionnaire/question";
@@ -33,7 +33,11 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const currentValue = questionnaireResponse.values[0]?.value?.toString();
-  const ref = useRef(null);
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  const callbackRef = useCallback(
+    (node: HTMLElement | null) => setElement(node),
+    [],
+  );
 
   const handleValueChange = (newValue: string) => {
     clearError();
@@ -48,16 +52,11 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     });
   };
 
-  const domValue = useValueInjectionObserver<string>({
-    targetElement: ref.current,
+  useValueInjection<string>({
+    targetElement: element,
     attribute: "data-cui-listbox-value",
+    onChange: (value) => value && handleValueChange(value),
   });
-
-  useEffect(() => {
-    if (currentValue !== domValue && typeof domValue !== "undefined") {
-      handleValueChange(domValue);
-    }
-  }, [domValue]);
 
   return (
     <div className="space-y-2">
@@ -72,7 +71,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       >
         <SelectTrigger
           className="w-full"
-          ref={ref}
+          ref={callbackRef}
           data-cui-listbox
           data-cui-listbox-options={JSON.stringify(
             options.map((option) => [option.value, option.value?.toString()]),

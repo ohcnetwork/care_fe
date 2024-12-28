@@ -23,6 +23,7 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import ScribeStructuredInput from "@/Utils/scribe";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 
@@ -101,7 +102,29 @@ export function AllergyQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div className="rounded-lg border p-4">
+      <ScribeStructuredInput
+        value={allergies}
+        onChange={(value) => value && setAllergies(value)}
+        name="Allergies"
+        prompt={`An array of objects of the following type: {
+          clinical_status?: "active" | "inactive" | "resolved",
+          category?: "food" | "medication" | "environment" | "biologic",
+          criticality?: "low" | "high" | "unable-to-assess",
+          verification?: "unconfirmed" | "presumed" | "confirmed" | "refuted" | "entered-in-error"
+          last_occurrence?: YYYY-MM-DD string,
+          note?: string
+        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
+        example={[
+          {
+            clinical_status: "inactive",
+            category: "environment",
+            criticality: "high",
+            last_occurrence: "2024-12-11",
+            note: "212",
+          },
+        ]}
+        className="rounded-lg border p-4"
+      >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -261,7 +284,7 @@ export function AllergyQuestion({
           <PlusIcon className="mr-2 h-4 w-4" />
           Add Allergy
         </Button>
-      </div>
+      </ScribeStructuredInput>
     </div>
   );
 }
