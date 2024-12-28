@@ -96,7 +96,7 @@ export const Updates = (props: PatientProps) => {
                       variant="outline"
                       onClick={() => {
                         navigate(
-                          `/facility/${facilityId}/patient/${patientId}/consultation/${item.encounter}/questionnaire_response/${item.id}`,
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${item.encounter}/questionnaire_response/${item.id}`,
                         );
                       }}
                     >

@@ -38,8 +38,6 @@ import {
   formatName,
   formatPatientAge,
   humanizeStrings,
-  isAntenatal,
-  isPostPartum,
   relativeDate,
 } from "@/Utils/utils";
 import { PatientModel } from "@/types/emr/patient";
@@ -301,32 +299,6 @@ export const PatientHome = (props: {
                       size="small"
                       text={t("transfer_blocked")}
                     />
-                  )}
-
-                  {patientData.gender === 2 && (
-                    <>
-                      {patientData.is_antenatal &&
-                        isAntenatal(
-                          patientData.last_menstruation_start_date,
-                        ) && (
-                          <Chip
-                            variant="custom"
-                            size="small"
-                            className="border-pink-300 bg-pink-100 text-pink-600"
-                            startIcon="l-baby-carriage"
-                            text={t("antenatal")}
-                          />
-                        )}
-                      {isPostPartum(patientData.date_of_delivery) && (
-                        <Chip
-                          variant="custom"
-                          size="small"
-                          className="border-pink-300 bg-pink-100 text-pink-600"
-                          startIcon="l-baby-carriage"
-                          text={t("post_partum")}
-                        />
-                      )}
-                    </>
                   )}
                   {patientData.last_consultation?.is_telemedicine && (
                     <Chip

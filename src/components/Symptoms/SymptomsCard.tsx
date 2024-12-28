@@ -12,10 +12,10 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 // TODO: switch to list from events as timeline view instead once filter event by event type name is done
 const EncounterSymptomsCard = () => {
-  const consultationId = useSlug("consultation");
+  const encounterId = useSlug("encounter");
 
   const { data } = useTanStackQueryInstead(SymptomsApi.list, {
-    pathParams: { consultationId },
+    pathParams: { consultationId: encounterId },
     query: { limit: 100 },
   });
 

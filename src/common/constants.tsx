@@ -360,9 +360,10 @@ export const OXYGEN_MODALITY_OPTIONS = [
 ] as const;
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: "M" },
-  { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Transgender", icon: "TRANS" },
+  { id: "male", text: "Male", icon: "M" },
+  { id: "female", text: "Female", icon: "F" },
+  { id: "transgender", text: "Transgender", icon: "TRANS" },
+  { id: "non_binary", text: "Non Binary", icon: "TRANS" },
 ] as const;
 
 export const CONSULTATION_SUGGESTION = [
@@ -478,6 +479,18 @@ export const BLOOD_GROUPS = [
   "AB-",
   "O+",
   "O-",
+];
+
+export const BLOOD_GROUP_CHOICES = [
+  { id: "UNK", text: "Unknown" },
+  { id: "A_positive", text: "A+" },
+  { id: "A_negative", text: "A-" },
+  { id: "B_positive", text: "B+" },
+  { id: "B_negative", text: "B-" },
+  { id: "AB_positive", text: "AB+" },
+  { id: "AB_negative", text: "AB-" },
+  { id: "O_positive", text: "O+" },
+  { id: "O_negative", text: "O-" },
 ];
 
 export const SAMPLE_TYPE_CHOICES = [

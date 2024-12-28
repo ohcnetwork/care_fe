@@ -25,12 +25,12 @@ export default function PrescriptionsTable({
   is_prn = false,
   prescription_type = "REGULAR",
 }: Props) {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const { t } = useTranslation();
   const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
 
   const { data } = useTanStackQueryInstead(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation },
+    pathParams: { consultation: encounterId },
     query: {
       dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
       prescription_type,

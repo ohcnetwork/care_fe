@@ -1,21 +1,28 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { Fragment } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-
 import {
-  FieldError,
-  RequiredFieldValidator,
-} from "@/components/Form/FieldValidators";
-import Form from "@/components/Form/Form";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+
 import DateFormField from "@/components/Form/FormFields/DateFormField";
-import RadioFormField from "@/components/Form/FormFields/RadioFormField";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
   Appointment,
   AppointmentCreate,
@@ -29,6 +36,7 @@ import * as Notification from "@/Utils/Notifications";
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import {
   AppointmentPatient,
@@ -38,14 +46,17 @@ import { TokenData } from "@/types/auth/otpToken";
 
 import OrganisationSelector from "../Organisation/components/OrganisationSelector";
 
-const initialForm: AppointmentPatientRegister = {
+const initialForm: AppointmentPatientRegister & {
+  ageInputType: "age" | "date_of_birth";
+} = {
   name: "",
   gender: "1",
+  ageInputType: "date_of_birth",
   year_of_birth: undefined,
-  date_of_birth: "",
+  date_of_birth: undefined,
   phone_number: "",
   address: "",
-  pincode: undefined,
+  pincode: "",
   geo_organization: undefined,
 };
 
@@ -65,85 +76,67 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   );
 
   const { t } = useTranslation();
-  const [ageInputType, setAgeInputType] = useState<"age" | "date_of_birth">(
-    "date_of_birth",
-  );
 
   const queryClient = useQueryClient();
 
   const { publish } = usePubSub();
 
-  const validateForm = (form: any) => {
-    const errors: Partial<Record<keyof any, FieldError>> = {};
-
-    Object.keys(form).forEach((field) => {
-      switch (field) {
-        case "name": {
-          const requiredError = RequiredFieldValidator()(form[field]);
-          if (requiredError) {
-            errors[field] = requiredError;
-          } else if (!validateName(form[field])) {
-            errors[field] = t("min_char_length_error", { min_length: 3 });
-          }
-          return;
-        }
-        case "address":
-        case "gender":
-          errors[field] = RequiredFieldValidator()(form[field]);
-          return;
-        case "year_of_birth":
-        case "date_of_birth": {
-          const field =
-            ageInputType === "age" ? "year_of_birth" : "date_of_birth";
-
-          errors[field] = RequiredFieldValidator()(form[field]);
-          if (errors[field]) {
-            return;
-          }
-
-          if (field === "year_of_birth") {
-            if (form.year_of_birth < 0) {
-              errors.year_of_birth = "Age cannot be less than 0";
-              return;
-            }
-
-            form.date_of_birth = null;
-            form.year_of_birth = new Date().getFullYear() - form.year_of_birth;
-          }
-
-          if (field === "date_of_birth") {
-            form.year_of_birth = null;
-          }
-
-          return;
-        }
-        case "local_body":
-          if (form.nationality === "India" && !Number(form[field])) {
-            errors[field] = "Please select a localbody";
-          }
-          return;
-        case "district":
-          if (form.nationality === "India" && !Number(form[field])) {
-            errors[field] = "Please select district";
-          }
-          return;
-        case "state":
-          if (form.nationality === "India" && !Number(form[field])) {
-            errors[field] = "Please enter the state";
-          }
-          return;
-        case "pincode":
-          if (!validatePincode(form[field])) {
-            errors[field] = "Please enter valid pincode";
-          }
-          return;
-        default:
-          return;
+  const patientSchema = z
+    .object({
+      name: z
+        .string()
+        .min(1, t("field_required"))
+        .refine(validateName, t("min_char_length_error", { min_length: 3 })),
+      gender: z.string().min(1, t("field_required")),
+      address: z.string().min(1, t("field_required")),
+      year_of_birth: z.string().optional(),
+      date_of_birth: z.date().or(z.string()).optional(),
+      pincode: z
+        .string()
+        .min(1, t("field_required"))
+        .refine((pincode) => {
+          if (!pincode) return true;
+          return validatePincode(pincode);
+        }, t("invalid_pincode_msg")),
+      geo_organization: z
+        .string()
+        .min(1, t("organization_required"))
+        .optional(),
+      ageInputType: z.enum(["age", "date_of_birth"]),
+    })
+    .superRefine((data, ctx) => {
+      const field =
+        data.ageInputType === "age" ? "year_of_birth" : "date_of_birth";
+      if (!data[field]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: [field],
+        });
+        return;
+      }
+      // yob corresponds to age till now, only converted to year after validation
+      if (
+        field === "year_of_birth" &&
+        data.year_of_birth &&
+        !isNaN(Number(data.year_of_birth)) &&
+        Number(data.year_of_birth) < 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("age_less_than_0"),
+          path: ["year_of_birth"],
+        });
       }
     });
 
-    return errors;
-  };
+  type PatientFormData = z.infer<typeof patientSchema>;
+  const formResolver = zodResolver(patientSchema);
+
+  const form = useForm<PatientFormData>({
+    resolver: formResolver,
+    defaultValues: initialForm,
+  });
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
@@ -157,14 +150,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     onSuccess: (data: Appointment) => {
       Notification.Success({ msg: t("appointment_created_success") });
       queryClient.invalidateQueries({
-        queryKey: ["patients", tokenData.phoneNumber],
+        queryKey: [
+          ["patients", tokenData.phoneNumber],
+          ["appointment", tokenData.phoneNumber],
+        ],
       });
-      setTimeout(() => {
-        navigate(
-          `/facility/${props.facilityId}/appointments/${data.id}/success`,
-          { replace: true },
-        );
-      }, 100);
+      navigate(
+        `/facility/${props.facilityId}/appointments/${data.id}/success`,
+        {
+          replace: true,
+        },
+      );
     },
     onError: (error) => {
       Notification.Error({
@@ -174,9 +170,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   });
 
   const { mutate: createPatient } = useMutation({
-    mutationFn: (body: AppointmentPatientRegister) =>
+    mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(routes.otp.createPatient, {
-        body,
+        body: { ...body, phone_number: tokenData.phoneNumber },
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },
@@ -189,37 +185,39 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         reason_for_visit: reason ?? "",
       });
     },
-    onError: (error) => {
-      Notification.Error({
-        msg: error.message,
-      });
+    onError: (error: HTTPError) => {
+      const errorData = error.cause;
+      const errors = errorData?.errors;
+      if (Array.isArray(errors) && errors.length > 0) {
+        const firstError = errors[0];
+        Notification.Error({
+          msg: firstError.msg,
+        });
+      } else {
+        Notification.Error({
+          msg: error.message,
+        });
+      }
     },
   });
 
-  const handleSubmit = async (formData: AppointmentPatientRegister) => {
-    const data = {
+  const onSubmit = form.handleSubmit((data) => {
+    const formattedData = {
       phone_number: tokenData.phoneNumber,
+      name: data.name,
+      gender: data.gender,
+      address: data.address || "",
       date_of_birth:
-        ageInputType === "date_of_birth"
-          ? dateQueryString(formData.date_of_birth)
+        data.ageInputType === "date_of_birth"
+          ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: ageInputType === "age" ? formData.year_of_birth : undefined,
-      /* year_of_birth:
-        ageInputType === "age"
-          ? (
-              new Date().getFullYear() - Number(formData.year_of_birth ?? 0)
-            ).toString()
-          : undefined, */
-      name: formData.name,
-      pincode: formData.pincode ? formData.pincode : undefined,
-      gender: formData.gender,
-      geo_organization: formData.geo_organization,
-      address: formData.address ? formData.address : "",
+      age: data.ageInputType === "age" ? data.year_of_birth : undefined,
+      pincode: data.pincode || undefined,
+      geo_organization: data.geo_organization,
       is_active: true,
     };
-    console.log(formData);
-    createPatient(data);
-  };
+    createPatient(formattedData);
+  });
 
   // const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
@@ -237,139 +235,225 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           }
         >
           <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-          <span className="text-sm underline">Back</span>
+          <span className="text-sm underline">{t("back")}</span>
         </Button>
       </div>
-      <Form
-        defaults={initialForm}
-        validate={validateForm}
-        onSubmit={handleSubmit}
-        className="mx-auto space-y-6"
-        submitLabel="Register Patient"
-        hideRestoreDraft
-        noPadding
-        hideSubmitButton
-        hideCancelButton
-        disableMarginOnChildren
-      >
-        {(field) => (
-          <>
-            <div className="container mx-auto p-4 max-w-3xl">
-              <h2 className="text-xl font-semibold">
-                {t("patient_registration")}
-              </h2>
+      <Form {...form}>
+        <form onSubmit={onSubmit} className="mx-auto space-y-6">
+          <div className="container mx-auto p-4 max-w-3xl">
+            <h2 className="text-xl font-semibold">
+              {t("patient_registration")}
+            </h2>
 
-              <div className="mt-4 flex-row bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
-                <span className="inline-block bg-primary-100 p-4 rounded-md w-full mb-4 text-primary-600 text-sm">
-                  Phone Number Verified:{" "}
-                  <span className="font-bold">{tokenData.phoneNumber}</span>
-                </span>
-                <TextFormField
-                  {...field("name")}
-                  label="Patient Name"
-                  required
+            <div className="mt-4 space-y-6 flex flex-col bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
+              <span className="inline-block bg-primary-100 p-4 rounded-md w-full mb-4 text-primary-600 text-sm">
+                {t("phone_number_verified")}:{" "}
+                <span className="font-bold">{tokenData.phoneNumber}</span>
+              </span>
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel required>{t("patient_name")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder={t("type_patient_name")} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel required>{t("sex")}</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="flex items-center gap-4"
+                      >
+                        {GENDER_TYPES.map((g) => (
+                          <Fragment key={g.id}>
+                            <RadioGroupItem value={g.id.toString()} />
+                            <Label>{g.text}</Label>
+                          </Fragment>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="ageInputType"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel required>
+                        {t("date_of_birth_or_age")}
+                      </FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex items-center divide-x divide-secondary-400 bg-white rounded-md w-fit border border-secondary-400"
+                        >
+                          <div className="flex items-center gap-2 px-4 py-2">
+                            <RadioGroupItem value="date_of_birth" />
+                            <Label>{t("date_of_birth")}</Label>
+                          </div>
+                          <div className="flex items-center gap-2 px-4 py-2">
+                            <RadioGroupItem value="age" />
+                            <Label>{t("age")}</Label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
-                <RadioFormField
-                  {...field("gender")}
-                  label="Gender"
-                  options={GENDER_TYPES}
-                  optionLabel={(o: any) => o.text}
-                  optionValue={(o: any) => o.id.toString()}
-                />
-
-                <RadioFormField
-                  name="age_input_type"
-                  label="Date of Birth or Age"
-                  options={[
-                    { id: "date_of_birth", text: "Date of Birth" },
-                    { id: "age", text: "Age" },
-                  ]}
-                  optionLabel={(o: any) => o.text}
-                  optionValue={(o: any) => o.id}
-                  value={ageInputType}
-                  onChange={(e) => {
-                    setAgeInputType(e.value);
-                  }}
-                />
-                {ageInputType === "date_of_birth" && (
-                  <DateFormField
-                    className="w-full"
-                    containerClassName="w-full"
-                    {...field("date_of_birth")}
-                    errorClassName="hidden"
-                    required
-                    disableFuture
+                {form.watch("ageInputType") === "date_of_birth" && (
+                  <FormField
+                    control={form.control}
+                    name="date_of_birth"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel required>{t("date_of_birth")}</FormLabel>
+                        <FormControl>
+                          <DateFormField
+                            name="date_of_birth"
+                            value={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onChange={(dateObj: {
+                              name: string;
+                              value: Date;
+                            }) => {
+                              if (dateObj?.value instanceof Date) {
+                                field.onChange(dateObj.value.toISOString());
+                              } else {
+                                field.onChange(null);
+                              }
+                            }}
+                            disableFuture
+                            min={new Date(1900, 0, 1)}
+                            className="-mb-6"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 )}
-                {ageInputType === "age" && (
-                  <>
-                    <span className="text-xs text-gray-500">
-                      {t("age_notice")}
-                    </span>
-                    <TextFormField
-                      {...field("year_of_birth")}
-                      placeholder="Enter Age"
-                      required
-                      type="number"
-                    />
-                  </>
+
+                {form.watch("ageInputType") === "age" && (
+                  <FormField
+                    control={form.control}
+                    name="year_of_birth"
+                    render={() => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel required>{t("age")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...form.register("year_of_birth")}
+                            required={form.watch("ageInputType") === "age"}
+                            placeholder={t("type_patient_age")}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        <span className="text-xs text-gray-500">
+                          {t("age_notice")}
+                        </span>
+                      </FormItem>
+                    )}
+                  />
                 )}
               </div>
-              <div className="space-y-2 mt-12 flex-row bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
-                <TextAreaFormField
-                  {...field("address")}
-                  label="Current Address"
-                  required
-                />
-
-                <TextFormField
-                  {...field("pincode")}
-                  label="Pin code"
-                  required
-                  onChange={(e) => {
-                    field("pincode").onChange(e);
-                  }}
-                />
-
-                <OrganisationSelector
-                  required={true}
-                  authToken={tokenData.token}
-                  onChange={(value) => {
-                    console.log(value);
-                    field("geo_organization").onChange(value);
-                  }}
-                />
-              </div>
             </div>
 
-            <div className="bg-secondary-200 pt-3 pb-8">
-              <div className="flex flex-row gap-2 justify-center sm:ml-64 mt-4">
-                <Button
-                  variant="white"
-                  className="sm:w-1/5"
-                  type="button"
-                  onClick={() => {
-                    navigate(
-                      `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
-                    );
-                  }}
-                >
-                  <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-                  {t("cancel")}
-                </Button>
-                <Button
-                  variant="primary_gradient"
-                  className="sm:w-1/5"
-                  type="submit"
-                >
-                  <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-                  {t("register_patient")}
-                </Button>
-              </div>
+            <div className="space-y-6 mt-12 flex-row bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel required>{t("current_address")}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pincode"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t("pincode")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="geo_organization"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormControl>
+                      <OrganisationSelector
+                        required
+                        authToken={tokenData.token}
+                        onChange={(value) => {
+                          field.onChange(value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          </>
-        )}
+          </div>
+
+          <div className="bg-secondary-200 pt-3 pb-8">
+            <div className="flex flex-row gap-2 justify-center sm:ml-64 mt-4">
+              <Button
+                variant="white"
+                className="sm:w-1/5"
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
+                  )
+                }
+              >
+                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="primary_gradient"
+                className="sm:w-1/5"
+                type="submit"
+              >
+                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                {t("register_patient")}
+              </Button>
+            </div>
+          </div>
+        </form>
       </Form>
     </>
   );

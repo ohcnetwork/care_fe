@@ -60,7 +60,7 @@ export default function ShiftDetails(props: { id: string }) {
   };
 
   const copyContent = (data: any) => {
-    let formattedText =
+    const formattedText =
       t("name") +
       ":" +
       data?.patient_object?.name +
@@ -86,10 +86,6 @@ export default function ShiftDetails(props: { id: string }) {
       t("reason") +
       ":" +
       data?.reason;
-    if (careConfig.wartimeShifting) {
-      formattedText +=
-        t("facility_preference") + ": " + data?.assigned_facility_type + "\n";
-    }
     return formattedText;
   };
 
@@ -138,14 +134,6 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("age")}:{" "}
               </span>
               {patientData ? formatPatientAge(patientData, true) : ""}
-            </div>
-          )}
-          {patientData?.gender === 2 && patientData?.is_antenatal && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("is_antenatal")}:{" "}
-              </span>
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
             </div>
           )}
           <div>
@@ -286,13 +274,6 @@ export default function ShiftDetails(props: { id: string }) {
 
           <CardContent className="space-y-6">
             <div className="flex flex-col-reverse items-start justify-end sm:flex-row sm:items-center">
-              {data.is_kasp && (
-                <img
-                  alt="logo"
-                  src={careConfig.headerLogo?.dark}
-                  className="max-h-12"
-                />
-              )}
               <QRCodeSVG
                 value={`${window.location.origin}/shifting/${data.id}`}
                 size={120}
@@ -302,9 +283,7 @@ export default function ShiftDetails(props: { id: string }) {
 
             <div className="mt-6 text-lg">
               <span className="font-semibold">{t("name_of_hospital")}: </span>
-              {data.is_kasp
-                ? t("district_program_management_supporting_unit")
-                : data.origin_facility_object?.name || "--"}
+              {data.origin_facility_object?.name || "--"}
             </div>
 
             <div className="my-6 border-b-2"></div>
@@ -582,49 +561,6 @@ export default function ShiftDetails(props: { id: string }) {
                     data?.patient_object.last_consultation?.category}
                 </span>
               </div>
-              {careConfig.kasp.enabled && (
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    {careConfig.kasp.fullString}:{" "}
-                  </span>
-                  <span className="badge badge-pill badge-warning px-2 py-1">
-                    {" "}
-                    {data?.is_kasp ? t("yes") : t("no")}
-                  </span>
-                </div>
-              )}
-              {careConfig.wartimeShifting && (
-                <>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      {careConfig.kasp.fullString}:{" "}
-                    </span>
-                    <span className="badge badge-pill badge-warning px-2 py-1">
-                      {" "}
-                      {data?.is_kasp ? t("yes") : t("no")}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      {t("vehicle_preference")}:{" "}
-                    </span>
-                    {data?.vehicle_preference || data?.preferred_vehicle_choice}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      {t("facility_preference")}:{" "}
-                    </span>
-                    {data?.assigned_facility_type || "--"}
-                  </div>
-                  <div>
-                    <span className="font-semibold leading-relaxed">
-                      {t("severity_of_breathlessness")}:{" "}
-                    </span>
-                    {data?.breathlessness_level || "--"}
-                  </div>{" "}
-                </>
-              )}
-
               <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("reason")}:{" "}

@@ -6,7 +6,7 @@ import AssetCreate from "@/components/Facility/AssetCreate";
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const AssetRoutes: AppRoutes = {
-  "/assets": () => <AssetsList />,
+  "/facility/:facilityId/assets": () => <AssetsList />,
   "/facility/:facilityId/assets/new": ({ facilityId }) => (
     <AssetCreate facilityId={facilityId} />
   ),

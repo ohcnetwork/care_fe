@@ -57,13 +57,6 @@ const careConfig = {
   reCaptchaSiteKey:
     env.REACT_RECAPTCHA_SITE_KEY || "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
 
-  kasp: {
-    enabled: boolean("REACT_KASP_ENABLED"),
-    string: env.REACT_KASP_STRING || "KASP",
-    fullString:
-      env.REACT_KASP_FULL_STRING || "Karunya Arogya Suraksha Padhathi",
-  },
-
   sampleFormats: {
     assetImport:
       env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
@@ -124,6 +117,9 @@ const careConfig = {
         package: app.split("@")[0],
       }))
     : [],
+
+  plotsConfigUrl:
+    env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 } as const;
 
 export default careConfig;

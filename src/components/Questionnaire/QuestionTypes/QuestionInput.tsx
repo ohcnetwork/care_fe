@@ -15,7 +15,8 @@ import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
-import { MedicationQuestion } from "./MedicationQuestion";
+import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
+import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
@@ -146,7 +147,9 @@ export function QuestionInput({
       case "structured":
         switch (question.structured_type) {
           case "medication_request":
-            return <MedicationQuestion {...commonProps} />;
+            return <MedicationRequestQuestion {...commonProps} />;
+          case "medication_statement":
+            return <MedicationStatementQuestion {...commonProps} />;
           case "allergy_intolerance":
             return <AllergyQuestion {...commonProps} />;
           case "symptom":

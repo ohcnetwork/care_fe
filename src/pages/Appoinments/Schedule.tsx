@@ -231,7 +231,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                             return (
                               <Button
                                 key={slot.id}
-                                size="default"
+                                size="lg"
                                 variant={
                                   selectedSlot?.id === slot.id
                                     ? "outline_primary"
@@ -251,7 +251,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                   slot.allocated ===
                                   availability.tokens_per_slot
                                 }
-                                className="flex flex-col items-center group"
+                                className="flex flex-col items-center group py-6 gap-1"
                               >
                                 <span className="font-semibold">
                                   {format(slot.start_datetime, "HH:mm")}

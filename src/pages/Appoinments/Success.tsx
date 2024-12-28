@@ -77,10 +77,12 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
             {t("date")}:
           </h2>
           <p className="text-lg font-medium">
-            {format(
-              new Date(appointmentData?.token_slot.start_datetime ?? ""),
-              "do MMMM",
-            )}
+            {appointmentData?.token_slot.start_datetime
+              ? format(
+                  new Date(appointmentData?.token_slot.start_datetime),
+                  "do MMMM",
+                )
+              : ""}
           </p>
         </div>
 
@@ -89,10 +91,12 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
             {t("time")}:
           </h2>
           <p className="text-lg font-medium">
-            {format(
-              new Date(appointmentData?.token_slot.start_datetime ?? ""),
-              "hh:mm a",
-            )}
+            {appointmentData?.token_slot.start_datetime
+              ? format(
+                  new Date(appointmentData?.token_slot.start_datetime),
+                  "hh:mm a",
+                )
+              : ""}
           </p>
         </div>
       </div>

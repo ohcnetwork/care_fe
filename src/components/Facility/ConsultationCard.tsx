@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { navigate } from "raviger";
@@ -65,11 +64,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
           {dayjs(itemData.created_date).format("DD/MM/YYYY")}
         </div>
 
-        {itemData.is_kasp && (
-          <div className="ml-3 mt-2 inline-flex items-center rounded-md bg-yellow-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-yellow-800">
-            {careConfig.kasp.string}
-          </div>
-        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {[
             {
@@ -87,16 +81,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
               label: t("suggestion"),
               value: itemData.suggestion_text?.toLocaleLowerCase(),
             },
-            {
-              hide: !itemData.kasp_enabled_date,
-              label: t("kasp_enabled_date", {
-                kasp_string: careConfig.kasp.string,
-              }),
-              value: itemData.kasp_enabled_date
-                ? formatDateTime(itemData.kasp_enabled_date)
-                : undefined,
-            },
-
             {
               label: t("admitted_on"),
               hide: !(itemData.admitted && itemData.encounter_date),

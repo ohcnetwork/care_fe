@@ -46,7 +46,7 @@ const App = () => {
             <HistoryAPIProvider>
               <AuthUserProvider
                 unauthorized={<Routers.SessionRouter />}
-                otpAuthorized={<Routers.OTPPatientRouter />}
+                otpAuthorized={<Routers.PatientRouter />}
               >
                 <FeatureFlagsProvider>
                   <Routers.AppRouter />

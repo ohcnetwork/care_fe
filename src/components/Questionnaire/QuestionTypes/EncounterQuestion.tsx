@@ -1,4 +1,3 @@
-import { useQueryParams } from "raviger";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -10,20 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
-import { BedSelect } from "@/components/Common/BedSelect";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { LocationSelect } from "@/components/Common/LocationSelect";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import { FacilityModel } from "@/components/Facility/models";
-import { FieldLabel } from "@/components/Form/FormFields/FormField";
-import { UserBareMinimum } from "@/components/Users/models";
-
-import { CONSULTATION_SUGGESTION } from "@/common/constants";
-
-import { type Encounter, ROUTE_TO_FACILITY } from "@/types/emr/encounter";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  type EncounterClass,
+  type EncounterPriority,
+  type EncounterRequest,
+  type EncounterStatus,
+  type Hospitalization,
+} from "@/types/emr/encounter";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 interface EncounterQuestionProps {
@@ -32,6 +29,8 @@ interface EncounterQuestionProps {
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
   clearError: () => void;
+  organizations?: string[];
+  patientId?: string;
 }
 
 export function EncounterQuestion({
@@ -39,309 +38,188 @@ export function EncounterQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
+  organizations = [],
+  patientId = "",
 }: EncounterQuestionProps) {
-  const [encounter, setEncounter] = useState<Partial<Encounter>>(() => {
-    return (
-      (questionnaireResponse.values?.[0]?.value as Partial<Encounter>) || {
-        admitted: false,
-        transferred_from_location: undefined,
-      }
-    );
+  const [encounter, setEncounter] = useState<
+    Omit<EncounterRequest, "organizations" | "patient">
+  >(() => {
+    const existingValue =
+      (questionnaireResponse.values?.[0]
+        ?.value as unknown as EncounterRequest) || null;
+    return {
+      status: existingValue?.status || "in_progress",
+      encounter_class: existingValue?.encounter_class || "amb",
+      period: existingValue?.period || {
+        start: new Date().toISOString(),
+      },
+      priority: existingValue?.priority || "routine",
+      external_identifier: existingValue?.external_identifier || "",
+      hospitalization: existingValue?.hospitalization,
+      facility: existingValue?.facility,
+    };
   });
 
-  // Get facilityId from queryParams
-  const [qParams] = useQueryParams();
-  const facilityId = qParams.facilityId;
-
-  const [bed, setBed] = useState<any>(null);
-  const [referredToFacility, setReferredToFacility] =
-    useState<FacilityModel | null>(null);
-  const [referredFromFacility, setReferredFromFacility] =
-    useState<FacilityModel | null>(null);
-
-  const updateEncounter = (updates: Partial<Encounter>) => {
+  const updateEncounter = (
+    updates: Partial<Omit<EncounterRequest, "organizations" | "patient">>,
+  ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     setEncounter(newEncounter);
+
+    // Create the full encounter request object
+    const encounterRequest: EncounterRequest = {
+      ...newEncounter,
+      organizations,
+      patient: patientId,
+    };
+
+    // Create the response value with the encounter request
+    const responseValue: ResponseValue = {
+      type: "encounter",
+      value: [encounterRequest] as unknown as typeof responseValue.value,
+    };
+
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
-      values: [
-        {
-          type: "encounter",
-          value: newEncounter as Encounter,
-        },
-      ],
+      values: [responseValue],
     });
-  };
-
-  const handleDoctorSelect = (doctor: UserBareMinimum | null) => {
-    if (doctor?.id) {
-      updateEncounter({
-        treating_physician: doctor.id.toString(),
-        treating_physician_object: doctor,
-      });
-    } else {
-      updateEncounter({
-        treating_physician: "",
-        treating_physician_object: null,
-      });
-    }
-  };
-
-  const handleReferredToFacilityChange = (selected: FacilityModel | null) => {
-    setReferredToFacility(selected);
-    if (selected) {
-      if (!selected.id) {
-        updateEncounter({
-          referred_to_external: selected.name,
-          referred_to: undefined,
-        });
-      } else {
-        updateEncounter({
-          referred_to: selected.id,
-          referred_to_external: undefined,
-        });
-      }
-    }
-  };
-
-  const handleReferredFromFacilityChange = (
-    selected: FacilityModel | FacilityModel[] | null,
-  ) => {
-    setReferredFromFacility(selected as FacilityModel | null);
-    if (selected && !Array.isArray(selected)) {
-      if (!selected.id) {
-        updateEncounter({
-          referred_from_facility_external: selected.name,
-          referred_from_facility: undefined,
-        });
-      } else {
-        updateEncounter({
-          referred_from_facility: selected.id,
-          referred_from_facility_external: undefined,
-        });
-      }
-    }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Basic Details */}
       <div className="space-y-2">
-        <Label>Choose the type of encounter</Label>
+        <Label>Encounter Status</Label>
         <Select
-          value={encounter.suggestion}
+          value={encounter.status}
           onValueChange={(value) =>
             updateEncounter({
-              suggestion: value as Encounter["suggestion"],
-              admitted: value === "A",
+              status: value as EncounterStatus,
             })
           }
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select decision" />
+            <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>
-            {CONSULTATION_SUGGESTION.filter(
-              (option) => !("deprecated" in option),
-            ).map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.text}
-              </SelectItem>
-            ))}
+            <SelectItem value="planned">Planned</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="on_hold">On Hold</SelectItem>
+            <SelectItem value="discharged">Discharged</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="discontinued">Discontinued</SelectItem>
+            <SelectItem value="entered_in_error">Entered in Error</SelectItem>
+            <SelectItem value="unknown">Unknown</SelectItem>
           </SelectContent>
         </Select>
       </div>
-
-      {encounter.suggestion && encounter.suggestion !== "DC" && (
+      <div className="space-y-2">
+        <Label>Encounter Class</Label>
+        <Select
+          value={encounter.encounter_class}
+          onValueChange={(value) =>
+            updateEncounter({
+              encounter_class: value as EncounterClass,
+            })
+          }
+          disabled={disabled}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select class" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="imp">Inpatient (IP)</SelectItem>
+            <SelectItem value="amb">Ambulatory (OP)</SelectItem>
+            <SelectItem value="obsenc">Observation Room </SelectItem>
+            <SelectItem value="emer">Emergency</SelectItem>
+            <SelectItem value="vr">Virtual</SelectItem>
+            <SelectItem value="hh">Home Health</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Priority</Label>
+        <Select
+          value={encounter.priority}
+          onValueChange={(value) =>
+            updateEncounter({
+              priority: value as EncounterPriority,
+            })
+          }
+          disabled={disabled}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ASAP">ASAP</SelectItem>
+            <SelectItem value="callback_results">Callback Results</SelectItem>
+            <SelectItem value="callback_for_scheduling">
+              Callback for Scheduling
+            </SelectItem>
+            <SelectItem value="elective">Elective</SelectItem>
+            <SelectItem value="emergency">Emergency</SelectItem>
+            <SelectItem value="preop">Pre-op</SelectItem>
+            <SelectItem value="as_needed">As Needed</SelectItem>
+            <SelectItem value="routine">Routine</SelectItem>
+            <SelectItem value="rush_reporting">Rush Reporting</SelectItem>
+            <SelectItem value="stat">Stat</SelectItem>
+            <SelectItem value="timing_critical">Timing Critical</SelectItem>
+            <SelectItem value="use_as_directed">Use as Directed</SelectItem>
+            <SelectItem value="urgent">Urgent</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {encounter.encounter_class === "imp" && (
         <div className="space-y-2">
-          <Label>Route to Facility</Label>
+          <Label>Hospitalization Details</Label>
           <Select
-            value={encounter.route_to_facility?.toString()}
+            value={encounter.hospitalization?.admit_source}
             onValueChange={(value) =>
               updateEncounter({
-                route_to_facility: Number(
-                  value,
-                ) as Encounter["route_to_facility"],
+                hospitalization: {
+                  ...encounter.hospitalization,
+                  admit_source: value as Hospitalization["admit_source"],
+                  re_admission: false,
+                  discharge_disposition: "home",
+                  diet_preference: "none",
+                },
               })
             }
             disabled={disabled}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select route" />
+              <SelectValue placeholder="Select admission source" />
             </SelectTrigger>
             <SelectContent>
-              {ROUTE_TO_FACILITY.map((route) => (
-                <SelectItem key={route} value={route.toString()}>
-                  {route === 10
-                    ? "Direct"
-                    : route === 20
-                      ? "Referred"
-                      : "Transfer"}
-                </SelectItem>
-              ))}
+              <SelectItem value="hosp_trans">Hospital Transfer</SelectItem>
+              <SelectItem value="emd">Emergency Department</SelectItem>
+              <SelectItem value="outp">Outpatient</SelectItem>
+              <SelectItem value="born">Born</SelectItem>
+              <SelectItem value="gp">General Practitioner</SelectItem>
+              <SelectItem value="mp">Medical Practitioner</SelectItem>
+              <SelectItem value="nursing">Nursing</SelectItem>
+              <SelectItem value="psych">Psychiatric Hospital</SelectItem>
+              <SelectItem value="rehab">Rehabilitation Hospital</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
       )}
-
-      {encounter.suggestion === "R" && (
-        <div id="referred_to" className="col-span-6 mb-5">
-          <FieldLabel>Referred To Facility</FieldLabel>
-          <FacilitySelect
-            name="referred_to"
-            searchAll={true}
-            selected={referredToFacility}
-            setSelected={handleReferredToFacilityChange}
-            freeText={true}
-            errors={""}
-          />
-        </div>
-      )}
-
-      {encounter.suggestion && encounter.suggestion !== "DC" && (
-        <div className="space-y-2">
-          <Label>
-            {encounter.suggestion === "A" ? "IP Number" : "OP Number"}
-          </Label>
-          <Input
-            value={encounter.patient_no || ""}
-            onChange={(e) => updateEncounter({ patient_no: e.target.value })}
-            disabled={disabled}
-            required={encounter.suggestion === "A"}
-          />
-        </div>
-      )}
-
-      {/* Death Details */}
-      {encounter.suggestion === "DD" && (
-        <>
-          <div className="col-span-full space-y-2">
-            <Label>Cause of Death</Label>
-            <Textarea
-              value={encounter.discharge_notes || ""}
-              onChange={(e) =>
-                updateEncounter({ discharge_notes: e.target.value })
-              }
-              disabled={disabled}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Date & Time of Death</Label>
-            <Input
-              type="datetime-local"
-              value={encounter.death_datetime || ""}
-              onChange={(e) =>
-                updateEncounter({ death_datetime: e.target.value })
-              }
-              disabled={disabled}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Death Confirmed by</Label>
-            <Input
-              value={encounter.death_confirmed_doctor || ""}
-              onChange={(e) =>
-                updateEncounter({
-                  death_confirmed_doctor: e.target.value,
-                })
-              }
-              disabled={disabled}
-              required
-            />
-          </div>
-        </>
-      )}
-
-      {/* Bed Selection */}
-      {encounter.suggestion === "A" && (
-        <div className="col-span-full space-y-2">
-          <Label>Bed</Label>
-          <BedSelect
-            name="bed"
-            setSelected={setBed}
-            selected={bed}
-            error=""
-            multiple={false}
-            unoccupiedOnly={true}
-            facility={encounter.facility}
-          />
-        </div>
-      )}
-
-      {/* Referral Details */}
-      {(encounter.route_to_facility === 20 ||
-        encounter.route_to_facility === 30) && (
-        <div className="col-span-full space-y-4">
-          <div className="space-y-2">
-            <Label>
-              {encounter.route_to_facility === 20
-                ? "Referred From Facility"
-                : "Transferred From Facility"}
-            </Label>
-            <FacilitySelect
-              name="referred_from_facility"
-              searchAll={true}
-              selected={referredFromFacility}
-              setSelected={handleReferredFromFacilityChange}
-              freeText={true}
-              disabled={disabled}
-            />
-          </div>
-
-          {encounter.route_to_facility === 20 && (
-            <div className="space-y-2">
-              <Label>Referring Doctor</Label>
-              <Input
-                value={encounter.referred_by_external || ""}
-                onChange={(e) =>
-                  updateEncounter({ referred_by_external: e.target.value })
-                }
-                disabled={disabled}
-                placeholder="Enter referring doctor's name"
-              />
-            </div>
-          )}
-
-          {encounter.route_to_facility === 30 && (
-            <div className="space-y-2">
-              <Label>Transferred From Location</Label>
-              <LocationSelect
-                name="transferred_from_location"
-                facilityId={facilityId}
-                setSelected={(location) =>
-                  updateEncounter({
-                    transferred_from_location: location ?? undefined,
-                  })
-                }
-                selected={encounter.transferred_from_location ?? null}
-                showAll={false}
-                multiple={false}
-                disabled={disabled}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Doctor Details */}
-      {encounter.suggestion && encounter.suggestion !== "DC" && (
-        <div className="space-y-2">
-          <Label>Treating Doctor</Label>
-          <UserAutocomplete
-            name="treating_physician"
-            value={encounter.treating_physician_object ?? undefined}
-            onChange={(e) => handleDoctorSelect(e.value)}
-            userType="Doctor"
-            disabled={disabled}
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label>External Identifier</Label>
+        <Input
+          value={encounter.external_identifier || ""}
+          onChange={(e) =>
+            updateEncounter({ external_identifier: e.target.value })
+          }
+          disabled={disabled}
+          placeholder="Enter external identifier"
+        />
+      </div>
     </div>
   );
 }

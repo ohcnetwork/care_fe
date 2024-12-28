@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -173,12 +172,6 @@ export default function useFilters({
         (qParams[paramKey] === falseValue && falseLabel) ||
         "";
       return { name, value, paramKey };
-    },
-    kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const { kasp } = careConfig;
-      const name = nameSuffix ? kasp.string + " " + nameSuffix : kasp.string;
-      const [trueLabel, falseLabel] = [kasp.string, "Non " + kasp.string];
-      return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };
 

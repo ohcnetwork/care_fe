@@ -3,10 +3,10 @@ export type AppointmentPatientRegister = {
   gender: string;
   phone_number: string;
   address: string;
-  date_of_birth?: string;
+  date_of_birth?: Date | string;
   year_of_birth?: string;
-  geo_organization?: number;
-  pincode?: number;
+  geo_organization?: string;
+  pincode?: string;
 };
 
 export type AppointmentPatient = {

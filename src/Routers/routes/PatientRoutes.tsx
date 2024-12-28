@@ -9,11 +9,24 @@ import PatientNotes from "@/components/Patient/PatientNotes";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { EncounterList } from "@/pages/Encounters/EncounterList";
+import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const PatientRoutes: AppRoutes = {
-  "/patients": () => <PatientIndex />,
-  "/patients/live": () => <PatientIndex tab={"live"} />,
-  "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
+  "/facility/:facilityId/patients": ({ facilityId }) => (
+    <PatientIndex facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/encounters": ({ facilityId }) => (
+    <EncounterList facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/patients/verify": ({ facilityId }) => (
+    <VerifyPatient facilityId={facilityId} />
+  ),
+  // "/facility/:facilityId/encounters/live": ({ facilityId }) => (
+  //   <EncounterIndex facilityId={facilityId} />
+  // ),
+  // "/patients/live": () => <PatientIndex tab={"live"} />,
+  // "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/investigation_reports": ({ id }) => (
     <InvestigationReports id={id} />

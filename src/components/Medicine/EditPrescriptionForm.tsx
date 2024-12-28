@@ -64,7 +64,7 @@ const handleSubmit = async (
 };
 
 export default function EditPrescriptionForm(props: Props) {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
 
@@ -75,7 +75,7 @@ export default function EditPrescriptionForm(props: Props) {
       onCancel={() => props.onDone(false)}
       onSubmit={async (obj) => {
         setIsLoading(true);
-        const success = await handleSubmit(consultation, props.initial, obj);
+        const success = await handleSubmit(encounterId, props.initial, obj);
         setIsLoading(false);
 
         if (success) {

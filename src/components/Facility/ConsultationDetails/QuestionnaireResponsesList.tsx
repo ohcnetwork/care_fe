@@ -7,24 +7,22 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { useSlugs } from "@/hooks/useSlug";
-
 import routes from "@/Utils/request/api";
 import { formatDateTime, properCase } from "@/Utils/utils";
+import { Encounter } from "@/types/emr/encounter";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
-export default function QuestionnaireResponsesList() {
-  const [facilityId, patientId, consultationId] = useSlugs(
-    "facility",
-    "patient",
-    "consultation",
-  );
+interface Props {
+  encounter: Encounter;
+}
+
+export default function QuestionnaireResponsesList({ encounter }: Props) {
   const { t } = useTranslation();
 
   return (
     <PaginatedList
       route={routes.getQuestionnaireResponses}
-      pathParams={{ patientId }}
+      pathParams={{ patientId: encounter.patient.id }}
     >
       {() => (
         <div className="mt-4 flex w-full flex-col gap-4">
@@ -88,7 +86,7 @@ export default function QuestionnaireResponsesList() {
                     variant="outline"
                     onClick={() => {
                       navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/questionnaire_response/${item.id}`,
+                        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire_response/${item.id}`,
                       );
                     }}
                   >

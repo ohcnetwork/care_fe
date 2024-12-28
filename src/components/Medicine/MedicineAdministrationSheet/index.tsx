@@ -28,7 +28,7 @@ const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 
 const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
@@ -41,7 +41,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { data, loading, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listPrescriptions,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: { ...filters, discontinued: false },
     },
   );
@@ -49,7 +49,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const discontinuedPrescriptions = useTanStackQueryInstead(
     MedicineRoutes.listPrescriptions,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: {
         ...filters,
         limit: 100,

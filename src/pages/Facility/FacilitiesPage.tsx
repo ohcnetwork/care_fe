@@ -11,6 +11,7 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import FacilityFilter from "@/components/Facility/FacilityFilter";
 import {
@@ -139,7 +140,7 @@ export function FacilitiesPage() {
         <FacilityFilter {...advancedFilter} key={window.location.search} />
       </div>
       <FilterBadges
-        badges={({ badge, value, kasp }) => [
+        badges={({ badge, value }) => [
           badge("Facility/District/Pincode", "search"),
           value(
             "District",
@@ -156,7 +157,6 @@ export function FacilitiesPage() {
               : "",
           ),
           value("Pin Code", "pin_code", qParams.pin_code || ""),
-          kasp("Empanelled", "kasp_empanelled"),
         ]}
       />
 
@@ -172,10 +172,13 @@ export function FacilitiesPage() {
         {() => (
           <div className="mt-4 flex w-full flex-col gap-4">
             <div className="flex flex-col gap-4">
+              <PaginatedList.WhenLoading>
+                <Loading />
+              </PaginatedList.WhenLoading>
               <PaginatedList.WhenEmpty>
                 <Card className="p-6">
                   <div className="text-lg font-medium text-muted-foreground">
-                    No facilities found
+                    {t("no_facilities_found")}
                   </div>
                 </Card>
               </PaginatedList.WhenEmpty>

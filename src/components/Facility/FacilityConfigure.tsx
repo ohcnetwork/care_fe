@@ -62,10 +62,6 @@ export const FacilityConfigure = (props: IProps) => {
       if (res.data) {
         const formData = {
           name: res.data.name,
-          state: res.data.state,
-          district: res.data.district,
-          local_body: res.data.local_body,
-          ward: res.data.ward,
           middleware_address: res.data.middleware_address,
         };
         dispatch({ type: "set_form", form: formData });
