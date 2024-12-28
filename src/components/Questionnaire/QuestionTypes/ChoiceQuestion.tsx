@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 
 import { Label } from "@/components/ui/label";
 import {
@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 import { properCase } from "@/Utils/utils";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { AnswerOption, Question } from "@/types/questionnaire/question";
@@ -32,6 +33,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const currentValue = questionnaireResponse.values[0]?.value?.toString();
+  const ref = useRef(null);
 
   const handleValueChange = (newValue: string) => {
     clearError();
@@ -46,6 +48,17 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     });
   };
 
+  const domValue = useValueInjectionObserver<string>({
+    targetElement: ref.current,
+    attribute: "data-cui-listbox-value",
+  });
+
+  useEffect(() => {
+    if (currentValue !== domValue && typeof domValue !== "undefined") {
+      handleValueChange(domValue);
+    }
+  }, [domValue]);
+
   return (
     <div className="space-y-2">
       <Label className="text-base font-medium">
@@ -57,7 +70,15 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         onValueChange={handleValueChange}
         disabled={disabled}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger
+          className="w-full"
+          ref={ref}
+          data-cui-listbox
+          data-cui-listbox-options={JSON.stringify(
+            options.map((option) => [option.value, option.value?.toString()]),
+          )}
+          data-cui-listbox-value={JSON.stringify(currentValue)}
+        >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent>
