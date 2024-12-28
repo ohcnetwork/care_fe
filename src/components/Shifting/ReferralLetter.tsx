@@ -8,7 +8,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
-import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
+import { ConsultationModel } from "@/components/Facility/models";
 
 import { GENDER_TYPES } from "@/common/constants";
 
@@ -20,7 +20,7 @@ interface ReferralLetterProps {
   id: string;
 }
 export const ReferralLetter = ({ id }: ReferralLetterProps) => {
-  const { data, isLoading } = useQuery<ShiftingModel>({
+  const { data, isLoading } = useQuery({
     queryKey: [routes.getShiftDetails.path, id],
     queryFn: query(routes.getShiftDetails, { pathParams: { id } }),
   });

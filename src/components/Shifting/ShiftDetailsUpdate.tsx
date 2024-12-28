@@ -20,7 +20,7 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
 import { PatientModel } from "@/components/Patient/models";
-import { UserBareMinimum, UserModel } from "@/components/Users/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -40,7 +40,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 import { Button } from "../ui/button";
@@ -155,9 +154,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     };
   }
 
-  const { data, isLoading: assignedUserLoading } = useQuery<
-    PaginatedResponse<UserModel>
-  >({
+  const { data, isLoading: assignedUserLoading } = useQuery({
     queryKey: [routes.userList.path, state.form.assigned_to],
     queryFn: query(routes.userList, {
       queryParams: { id: state.form.assigned_to },
@@ -292,7 +289,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  const { data: shiftDetailsData } = useQuery<ShiftingModel>({
+  const { data: shiftDetailsData } = useQuery({
     queryKey: [routes.getShiftDetails.path, props.id],
     queryFn: query(routes.getShiftDetails, {
       pathParams: { id: props.id },

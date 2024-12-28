@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
+import { Button } from "@/components/ui/button";
+
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
@@ -33,9 +35,6 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { parsePhoneNumber } from "@/Utils/utils";
-
-import { Button } from "../ui/button";
-import { PatientModel } from "./models";
 
 interface patientShiftProps {
   facilityId: string;
@@ -112,7 +111,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const { data: patientData } = useQuery<PatientModel>({
+  const { data: patientData } = useQuery({
     queryKey: [routes.getPatient.path, patientId],
     queryFn: query(routes.getPatient, {
       pathParams: { id: patientId },
