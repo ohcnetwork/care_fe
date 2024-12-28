@@ -55,7 +55,7 @@ export default function MedibaseAutocompleteFormField(
         required
         onChange={field.handleChange}
         options={mergeQueryOptions(
-          field.value && !query ? [field.value] : [],
+          field.value ? [field.value] : [],
           data ?? [],
           (obj) => obj.id,
         )}
