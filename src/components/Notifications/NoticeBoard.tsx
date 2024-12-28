@@ -28,7 +28,7 @@ export const NoticeBoard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["notices"],
     queryFn: query(routes.getNotifications, {
-      queryParams: { event: "MESSAGE", medium_sent: "SYSTEM" },
+      queryParams: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
     }),
   });
 
