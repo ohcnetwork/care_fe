@@ -44,11 +44,6 @@ const TextAreaFormField = forwardRef(
           )}
           onFocus={props.onFocus}
           onBlur={props.onBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && !e.metaKey) {
-              e.stopPropagation();
-            }
-          }}
         />
       </FormField>
     );
