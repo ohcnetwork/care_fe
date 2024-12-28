@@ -21,7 +21,7 @@ interface ReferralLetterProps {
 }
 export const ReferralLetter = ({ id }: ReferralLetterProps) => {
   const { data, isLoading } = useQuery({
-    queryKey: [routes.getShiftDetails.path, id],
+    queryKey: ["getShiftDetails", id],
     queryFn: query(routes.getShiftDetails, { pathParams: { id } }),
   });
 

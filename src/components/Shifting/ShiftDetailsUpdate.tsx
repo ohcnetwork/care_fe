@@ -155,7 +155,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }
 
   const { data, isLoading: assignedUserLoading } = useQuery({
-    queryKey: [routes.userList.path, state.form.assigned_to],
+    queryKey: ["userList", state.form.assigned_to],
     queryFn: query(routes.userList, {
       queryParams: { id: state.form.assigned_to },
     }),
@@ -290,7 +290,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   };
 
   const { data: shiftDetailsData } = useQuery({
-    queryKey: [routes.getShiftDetails.path, props.id],
+    queryKey: ["getShiftDetails", props.id],
     queryFn: query(routes.getShiftDetails, {
       pathParams: { id: props.id },
     }),

@@ -112,7 +112,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
   };
 
   const { data: patientData } = useQuery({
-    queryKey: [routes.getPatient.path, patientId],
+    queryKey: ["getPatient", patientId],
     queryFn: query(routes.getPatient, {
       pathParams: { id: patientId },
     }),
