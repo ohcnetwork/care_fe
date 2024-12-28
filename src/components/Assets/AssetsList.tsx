@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -29,6 +29,7 @@ import { parseQueryParams } from "@/Utils/primitives";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ const AssetsList = () => {
     limit: 18,
     cacheBlacklist: ["search"],
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [facility, setFacility] = useState<FacilityModel>();
   const [status, setStatus] = useState<string>();
@@ -66,19 +67,17 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const {
-    refetch: assetsFetch,
-    isLoading: loading,
-    data: assetList,
-  } = useQuery({
-    queryKey: [routes.listAssets.path, params],
+  const queryClient = useQueryClient();
+
+  const { isLoading, data } = useQuery<PaginatedResponse<AssetData>>({
+    queryKey: ["assets", params],
     queryFn: query(routes.listAssets, {
       queryParams: params,
     }),
   });
 
   const { data: facilityObject } = useQuery({
-    queryKey: [routes.getAnyFacility.path, qParams.facility],
+    queryKey: ["facility", qParams.facility],
     queryFn: query(routes.getAnyFacility, {
       pathParams: { id: qParams.facility },
     }),
@@ -218,16 +217,16 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (loading || !assetList) {
+  if (isLoading || !data) {
     manageAssets = (
       <div className="col-span-3 w-full py-8 text-center">
         <Loading />
       </div>
     );
-  } else if (assetList?.count) {
+  } else if (data?.count) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
-        {assetList?.results.map((asset: AssetData) => (
+        {data?.results.map((asset: AssetData) => (
           <Link
             key={asset.id}
             href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
@@ -304,7 +303,7 @@ const AssetsList = () => {
         ))}
       </div>
     );
-  } else if (assetList && assetList?.count == 0) {
+  } else if (data && data?.count == 0) {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
@@ -339,42 +338,46 @@ const AssetsList = () => {
                   {
                     label: "Export Assets (JSON)",
                     action: async () => {
-                      const { data } = await request(routes.listAssets, {
-                        query: {
-                          ...qParams,
-                          json: true,
-                          limit: assetList?.count,
+                      const { data: exportData } = await request(
+                        routes.listAssets,
+                        {
+                          query: {
+                            ...qParams,
+                            json: true,
+                            limit: data?.count,
+                          },
                         },
-                      });
-                      return data ?? null;
+                      );
+                      return exportData ?? null;
                     },
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon icon="l-export" />,
-                      disabled:
-                        assetList?.count === 0 || !authorizedForImportExport,
+                      disabled: data?.count === 0 || !authorizedForImportExport,
                       id: "export-json-option",
                     },
                   },
                   {
                     label: "Export Assets (CSV)",
                     action: async () => {
-                      const { data } = await request(routes.listAssets, {
-                        query: {
-                          ...qParams,
-                          csv: true,
-                          limit: assetList?.count,
+                      const { data: exportData } = await request(
+                        routes.listAssets,
+                        {
+                          query: {
+                            ...qParams,
+                            csv: true,
+                            limit: data?.count,
+                          },
                         },
-                      });
-                      return data ?? null;
+                      );
+                      return exportData ?? null;
                     },
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon icon="l-export" />,
-                      disabled:
-                        assetList?.count === 0 || !authorizedForImportExport,
+                      disabled: data?.count === 0 || !authorizedForImportExport,
                       id: "export-csv-option",
                     },
                   },
@@ -388,8 +391,8 @@ const AssetsList = () => {
       <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
-          count={assetList?.count || 0}
-          loading={loading}
+          count={data?.count || 0}
+          loading={isLoading}
           icon="d-folder"
           className="flex-1"
         />
@@ -439,7 +442,7 @@ const AssetsList = () => {
         </div>
       </div>
       <AssetFilter {...advancedFilter} key={window.location.search} />
-      {isLoading ? (
+      {loading ? (
         <Loading />
       ) : (
         <>
@@ -473,7 +476,7 @@ const AssetsList = () => {
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              <Pagination totalCount={assetList?.count || 0} />
+              <Pagination totalCount={data?.count || 0} />
             </div>
           </div>
         </>
@@ -496,6 +499,9 @@ const AssetsList = () => {
           open={importAssetModalOpen}
           onClose={() => {
             setImportAssetModalOpen(false);
+            if (facility && qParams.facility) {
+              queryClient.invalidateQueries({ queryKey: ["assets", params] });
+            }
             setFacility((f) => {
               if (!qParams.facility) {
                 return undefined;
@@ -503,7 +509,9 @@ const AssetsList = () => {
               return f;
             });
           }}
-          onUpdate={assetsFetch}
+          onUpdate={() =>
+            queryClient.invalidateQueries({ queryKey: ["assets", params] })
+          }
           facility={facility}
         />
       )}
