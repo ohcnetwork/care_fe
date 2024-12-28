@@ -27,7 +27,7 @@ interface Props {
 
 export default function AdministerMedicine({ prescription, ...props }: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<string>("");
   const [dosage, setDosage] = useState<DosageValue>();
@@ -84,7 +84,10 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
 
         setIsLoading(true);
         const { res } = await request(MedicineRoutes.administerPrescription, {
-          pathParams: { consultation, external_id: prescription.id },
+          pathParams: {
+            consultation: encounterId,
+            external_id: prescription.id,
+          },
           body: {
             notes,
             dosage,

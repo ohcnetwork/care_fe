@@ -1,6 +1,7 @@
 import {
   Appointment,
   AppointmentCreate,
+  AvailabilityHeatmap,
   ScheduleException,
   ScheduleTemplate,
   SlotAvailability,
@@ -54,9 +55,7 @@ export const ScheduleAPIs = {
     availabilityHeatmap: {
       path: "/api/v1/facility/{facility_id}/slots/availability_stats/",
       method: "POST",
-      TRes: Type<{
-        [date: string]: { total_slots: number; booked_slots: number };
-      }>(),
+      TRes: Type<AvailabilityHeatmap>(),
       TBody: Type<{ from_date: string; to_date: string; resource: string }>(),
     },
     getSlotsForDay: {

@@ -33,7 +33,7 @@ export default function MedicineAdministrationTableRow({
   ...props
 }: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   // const [showActions, setShowActions] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -43,7 +43,7 @@ export default function MedicineAdministrationTableRow({
   const { data, loading, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listAdministrations,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: {
         prescription: prescription.id,
         administered_date_after: formatDateTime(

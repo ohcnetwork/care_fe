@@ -19,7 +19,6 @@ import {
   InvestigationType,
 } from "@/components/Facility/Investigations";
 import { Investigation } from "@/components/Facility/Investigations/Reports/types";
-import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
 import {
   BedModel,
   CommentModel,
@@ -51,7 +50,6 @@ import {
   WardModel,
 } from "@/components/Facility/models";
 import {
-  DupPatientModel,
   PatientConsentModel,
   PatientTransferRequest,
 } from "@/components/Facility/models";
@@ -62,7 +60,7 @@ import {
   NotificationData,
   PNconfigData,
 } from "@/components/Notifications/models";
-import { DailyRoundsModel, PatientModel } from "@/components/Patient/models";
+import { DailyRoundsModel } from "@/components/Patient/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -88,7 +86,23 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { Encounter, EncounterRequest } from "@/types/emr/encounter";
+import { MedicationStatement } from "@/types/emr/medicationStatement";
+import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import { Observation } from "@/types/emr/observation";
+import { ObservationAnalyzeResponse } from "@/types/emr/observation";
+import { PatientModel } from "@/types/emr/patient";
+import {
+  FacilityOrganization,
+  FacilityOrganizationResponse,
+} from "@/types/facilityOrganization/facilityOrganization";
+import {
+  Organization,
+  OrganizationResponse,
+  OrganizationUserRole,
+  OrganizationUserRoleResponse,
+  RoleResponse,
+} from "@/types/organisation/organisation";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -666,7 +680,8 @@ const routes = {
 
   searchPatient: {
     path: "/api/v1/patient/search/",
-    TRes: Type<PaginatedResponse<DupPatientModel>>(),
+    method: "POST",
+    TRes: Type<PaginatedResponse<PartialPatientModel>>(),
   },
   patientList: {
     path: "/api/v1/patient/",
@@ -1051,11 +1066,6 @@ const routes = {
       }[];
     }>(),
   },
-  getInvestigationSessions: {
-    path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
-    method: "GET",
-    TRes: Type<InvestigationSessionType[]>(),
-  },
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
@@ -1397,14 +1407,6 @@ const routes = {
     TBody: Type<BatchRequestBody>(),
   },
 
-  patient: {
-    allergyIntolerance: {
-      create: {
-        method: "POST",
-        path: "/api/v1/patient/:patientId/allergy_intolerance/",
-      },
-    },
-  },
   plugConfig: {
     listPlugConfigs: {
       path: "/api/v1/plug_config/",
@@ -1449,6 +1451,11 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<Observation>>(),
   },
+  observationsAnalyse: {
+    path: "/api/v1/patient/{patientId}/observation/analyse/",
+    method: "POST",
+    TRes: Type<ObservationAnalyzeResponse>(),
+  },
 
   // Diagnosis Routes
   getDiagnosis: {
@@ -1469,6 +1476,138 @@ const routes = {
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
 
+  // Organisation Routes
+  organisation: {
+    listMine: {
+      path: "/api/v1/organization/mine/",
+      method: "GET",
+      TRes: {} as OrganizationResponse,
+    },
+    list: {
+      path: "/api/v1/organization/",
+      method: "GET",
+      TRes: {} as OrganizationResponse,
+    },
+    get: {
+      path: "/api/v1/organization/{id}/",
+      method: "GET",
+      TRes: {} as Organization,
+    },
+    listUsers: {
+      path: "/api/v1/organization/{id}/users/",
+      method: "GET",
+      TRes: {} as OrganizationUserRoleResponse,
+    },
+    assignUser: {
+      path: "/api/v1/organization/{id}/users/",
+      method: "POST",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    updateUserRole: {
+      path: "/api/v1/organization/{id}/users/{userRoleId}/",
+      method: "PUT",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    removeUserRole: {
+      path: "/api/v1/organization/{id}/users/{userRoleId}/",
+      method: "DELETE",
+      TRes: {} as Record<string, never>,
+    },
+  },
+
+  facilityOrganization: {
+    list: {
+      path: "/api/v1/facility/{facilityId}/organizations/",
+      method: "GET",
+      TRes: {} as FacilityOrganizationResponse,
+    },
+    get: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
+      method: "GET",
+      TRes: {} as FacilityOrganization,
+    },
+    create: {
+      path: "/api/v1/facility/{facilityId}/organizations/",
+      method: "POST",
+      TRes: {} as FacilityOrganization,
+      TBody: {} as { name: string; description?: string },
+    },
+    listUsers: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
+      method: "GET",
+      TRes: {} as OrganizationUserRoleResponse,
+    },
+    assignUser: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
+      method: "POST",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    updateUserRole: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
+      method: "PUT",
+      TRes: {} as OrganizationUserRole,
+      TBody: {} as { user: string; role: string },
+    },
+    removeUserRole: {
+      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
+      method: "DELETE",
+      TRes: {} as Record<string, never>,
+    },
+  },
+
+  // Role Routes
+  role: {
+    list: {
+      path: "/api/v1/role/",
+      method: "GET",
+      TRes: {} as RoleResponse,
+    },
+  },
+
+  // Encounter Routes
+  encounter: {
+    list: {
+      path: "/api/v1/encounter/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<Encounter>>(),
+    },
+    create: {
+      path: "/api/v1/encounter/",
+      method: "POST",
+      TRes: Type<Encounter>(),
+      TBody: Type<EncounterRequest>(),
+    },
+    get: {
+      path: "/api/v1/encounter/{id}/",
+      method: "GET",
+      TRes: Type<Encounter>(),
+    },
+  },
+
+  // New Patient Routes
+
+  patient: {
+    allergyIntolerance: {
+      create: {
+        method: "POST",
+        path: "/api/v1/patient/:patientId/allergy_intolerance/",
+      },
+    },
+    search_retrieve: {
+      path: "/api/v1/patient/search_retrieve/",
+      method: "POST",
+      TRes: Type<Patient>(),
+      TBody: Type<{
+        phone_number: string;
+        year_of_birth: string;
+        partial_id: string;
+      }>(),
+    },
+  },
+
   // OTP Routes
   otp: {
     sendOtp: {
@@ -1486,7 +1625,9 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<{ access: string }>(),
+      TRes: Type<
+        { access: string } | { errors: Array<Record<string, string>> }
+      >(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
@@ -1501,7 +1642,7 @@ const routes = {
     createPatient: {
       path: "/api/v1/otp/patient/",
       method: "POST",
-      TBody: Type<AppointmentPatientRegister>(),
+      TBody: Type<Partial<AppointmentPatientRegister>>(),
       TRes: Type<AppointmentPatient>(),
       auth: {
         key: "Authorization",
@@ -1525,6 +1666,13 @@ const routes = {
       method: "POST",
       TRes: Type<Appointment>(),
       TBody: Type<AppointmentCreate>(),
+    },
+  },
+  medicationStatement: {
+    list: {
+      path: "/api/v1/patient/{patientId}/medication/statement/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<MedicationStatement>>(),
     },
   },
 } as const;

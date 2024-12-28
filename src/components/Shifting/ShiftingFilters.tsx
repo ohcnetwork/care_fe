@@ -58,7 +58,6 @@ export default function ListFilter(props: any) {
     modified_date_after: filter.modified_date_after || null,
     patient_phone_number: filter.patient_phone_number || "",
     ordering: filter.ordering || null,
-    is_kasp: filter.is_kasp || "",
     status: filter.status || null,
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || "",
@@ -162,7 +161,6 @@ export default function ListFilter(props: any) {
       modified_date_before,
       modified_date_after,
       ordering,
-      is_kasp,
       status,
       assigned_to,
       is_antenatal,
@@ -183,7 +181,6 @@ export default function ListFilter(props: any) {
       modified_date_before: dateQueryString(modified_date_before),
       modified_date_after: dateQueryString(modified_date_after),
       ordering: ordering || "",
-      is_kasp: is_kasp || "",
       status: status || "",
       assigned_to: assigned_to || "",
       is_antenatal: is_antenatal || "",
@@ -319,21 +316,6 @@ export default function ListFilter(props: any) {
         onChange={(option) => handleFormFieldChange(option)}
         errorClassName="hidden"
       />
-
-      {careConfig.kasp.enabled && (
-        <SelectFormField
-          name="is_kasp"
-          id="is-kasp"
-          placeholder="Show all"
-          label={`${t("is")} ${careConfig.kasp.string}`}
-          value={filterState.is_kasp}
-          options={["yes", "no"]}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          errorClassName="hidden"
-        />
-      )}
 
       <SelectFormField
         name="is_up_shift"

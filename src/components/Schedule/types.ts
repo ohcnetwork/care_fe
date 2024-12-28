@@ -5,7 +5,6 @@ import { UserBase } from "@/types/user/base";
 
 export interface ScheduleTemplate {
   readonly id: string;
-  resource_type: "user";
   resource: string;
   name: string;
   valid_from: string;
@@ -62,11 +61,31 @@ interface AppointmentPatient {
   readonly id: string;
   readonly name: string;
   readonly gender: number;
-  readonly date_of_birth: string | null;
-  readonly year_of_birth: string | null;
+  readonly phone_number: string;
+  readonly emergency_phone_number: string;
   readonly address: string;
   readonly pincode: string;
+  readonly state: string | null;
+  readonly district: string | null;
+  readonly local_body: string | null;
+  readonly ward: string | null;
+  readonly date_of_birth: string | null;
+  readonly year_of_birth: string | null;
 }
+
+export const AppointmentStatuses = [
+  "proposed",
+  "pending",
+  "booked",
+  "arrived",
+  "fulfilled",
+  "cancelled",
+  "noshow",
+  "entered_in_error",
+  "checked_in",
+  "waitlist",
+  "in_consultation",
+] as const;
 
 export interface Appointment {
   readonly id: string;
@@ -77,18 +96,11 @@ export interface Appointment {
    * This is null if the appointment was booked by the patient itself.
    */
   readonly booked_by: UserBase | null;
-  status:
-    | "proposed"
-    | "pending"
-    | "booked"
-    | "arrived"
-    | "fulfilled"
-    | "cancelled"
-    | "noshow"
-    | "entered_in_error"
-    | "checked_in"
-    | "waitlist"
-    | "in_consultation";
+  status: (typeof AppointmentStatuses)[number];
   readonly reason_for_visit: string;
   readonly resource: UserBase;
+}
+
+export interface AvailabilityHeatmap {
+  [date: string]: { total_slots: number; booked_slots: number };
 }

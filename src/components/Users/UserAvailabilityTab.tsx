@@ -51,13 +51,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const templatesQuery = useQuery({
     queryKey: ["user-availability-templates", user.username],
     queryFn: query(ScheduleAPIs.templates.list, {
-      pathParams: {
-        facility_id: facilityId!,
-      },
-      queryParams: {
-        resource_type: "user",
-        resource: user.external_id,
-      },
+      pathParams: { facility_id: facilityId! },
+      queryParams: { resource: user.external_id },
     }),
     enabled: !!facilityId,
   });
@@ -65,13 +60,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const exceptionsQuery = useQuery({
     queryKey: ["user-availability-exceptions", user.username],
     queryFn: query(ScheduleAPIs.exceptions.list, {
-      pathParams: {
-        facility_id: facilityId!,
-      },
-      queryParams: {
-        resource_type: "user",
-        resource: user.external_id,
-      },
+      pathParams: { facility_id: facilityId! },
+      queryParams: { resource: user.external_id },
     }),
   });
 

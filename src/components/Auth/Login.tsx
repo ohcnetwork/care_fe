@@ -32,7 +32,9 @@ import { CarePatientTokenKey } from "@/common/constants";
 import FiltersCache from "@/Utils/FiltersCache";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
+import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
@@ -82,6 +84,7 @@ const Login = (props: { forgot?: boolean }) => {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
+  const [otpValidationError, setOtpValidationError] = useState<string>("");
 
   // Staff Login Mutation
   const staffLoginMutation = useMutation({
@@ -113,7 +116,7 @@ const Login = (props: { forgot?: boolean }) => {
   });
 
   // Send OTP Mutation
-  const sendOtpMutation = useMutation({
+  const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: async (phone: string) => {
       const response = await request(routes.otp.sendOtp, {
         body: { phone_number: `+91${phone}` },
@@ -138,18 +141,22 @@ const Login = (props: { forgot?: boolean }) => {
   });
 
   // Verify OTP Mutation
-  const verifyOtpMutation = useMutation({
+  const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
     mutationFn: async (data: OtpLoginData) => {
-      const response = await request(routes.otp.loginByOtp, {
-        body: data,
-      });
+      const response = await mutate(routes.otp.loginByOtp, { silent: true })(
+        data,
+      );
+      if ("errors" in response) {
+        throw response;
+      }
       return response;
     },
-    onSuccess: async (response) => {
-      const { data } = response;
-      if (data?.access) {
+    onSuccess: async (response: { access: string }) => {
+      const { access } = response;
+      if (access) {
+        setOtpValidationError("");
         const tokenData: TokenData = {
-          token: data.access,
+          token: access,
           phoneNumber: `+91${phone}`,
           createdAt: new Date().toISOString(),
         };
@@ -160,13 +167,18 @@ const Login = (props: { forgot?: boolean }) => {
         }, 200);
       }
     },
-    onError: (error: any) => {
-      const errors = error?.data || [];
+    onError: (error: HTTPError) => {
+      const errorData = error.cause as { errors: Array<{ otp: string }> };
+      const errors = errorData?.errors;
       if (Array.isArray(errors) && errors.length > 0) {
-        const firstError = errors[0] as OtpError;
-        setOtpError(firstError.msg);
+        // BE returns a different format for invalid OTP
+        // TODO: fix this
+        //const firstError = errors[0] as OtpError;
+        //setOtpError(firstError.msg);
+        const firstError = errors[0];
+        setOtpValidationError(firstError.otp);
       } else {
-        setOtpError(t("invalid_otp"));
+        setOtpValidationError(t("invalid_otp"));
       }
     },
   });
@@ -186,6 +198,7 @@ const Login = (props: { forgot?: boolean }) => {
     const formattedNumber = formatPhoneNumber(e.target.value);
     setPhone(formattedNumber);
     setOtpError(""); // Clear error when input changes
+    setOtpValidationError("");
   };
 
   // Login form validation
@@ -216,12 +229,12 @@ const Login = (props: { forgot?: boolean }) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = "field_required";
+          err[key] = t("field_required");
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = "field_required";
+        err[key] = t("field_required");
       }
     });
     if (hasError) {
@@ -254,12 +267,12 @@ const Login = (props: { forgot?: boolean }) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = "field_required";
+        err.username = t("field_required");
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = "field_required";
+      err.username = t("field_required");
     }
 
     if (hasError) {
@@ -290,9 +303,9 @@ const Login = (props: { forgot?: boolean }) => {
     e.preventDefault();
 
     if (!isOtpSent) {
-      sendOtpMutation.mutate(phone);
+      sendOtp(phone);
     } else {
-      verifyOtpMutation.mutate({ phone_number: `+91${phone}`, otp });
+      verifyOtp({ phone_number: `+91${phone}`, otp });
     }
   };
 
@@ -306,8 +319,8 @@ const Login = (props: { forgot?: boolean }) => {
   const isLoading =
     staffLoginMutation.isPending ||
     forgotPasswordMutation.isPending ||
-    sendOtpMutation.isPending ||
-    verifyOtpMutation.isPending;
+    sendOtpPending ||
+    verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
@@ -650,17 +663,23 @@ const Login = (props: { forgot?: boolean }) => {
                             value={otp}
                             onChange={(e) => {
                               setOtp(e.target.value);
-                              setOtpError(""); // Clear error when OTP changes
+                              setOtpValidationError("");
                             }}
                             maxLength={5}
                             placeholder="Enter 5-digit OTP"
                           />
+                          {otpValidationError && (
+                            <p className="text-sm text-red-500">
+                              {otpValidationError}
+                            </p>
+                          )}
                           <Button
                             variant="link"
                             type="button"
                             onClick={() => {
                               setIsOtpSent(false);
                               setOtpError("");
+                              setOtpValidationError("");
                             }}
                             className="px-0"
                           >

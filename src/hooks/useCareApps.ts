@@ -28,7 +28,7 @@ export const useCareAppConsultationTabs = () => {
   const careApps = useCareApps();
 
   return careApps.reduce((acc, app) => {
-    return { ...acc, ...(app.consultationTabs ?? {}) };
+    return { ...acc, ...(app.encounterTabs ?? {}) };
   }, {});
 };
 

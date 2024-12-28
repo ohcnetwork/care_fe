@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { useSignOut } from "@/components/Common/Sidebar/Utils";
+import { usePatientSignOut } from "@/components/Common/Sidebar/Utils";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
@@ -67,7 +67,7 @@ export function FacilityDetailsPage({ id }: Props) {
 
   const facility = facilityResponse?.data;
 
-  const signOut = useSignOut();
+  const signOut = usePatientSignOut();
 
   if (isLoading) {
     return (

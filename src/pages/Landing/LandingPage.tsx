@@ -133,7 +133,7 @@ export function LandingPage() {
         </div>
 
         {/* Search Section */}
-        <div className="w-full max-w-[584px] mx-auto space-y-6">
+        <div className="w-full max-w-[584px] mx-auto space-y-6 px-6">
           <div className="relative" data-search-container>
             <div className="rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow">
               <div className="flex items-center px-4 h-12">

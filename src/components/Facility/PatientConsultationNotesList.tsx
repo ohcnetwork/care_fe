@@ -36,7 +36,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     thread,
     setReplyTo,
   } = props;
-  const consultationId = useSlug("consultation") ?? "";
+  const encounterId = useSlug("encounter") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,7 +48,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
         patientId: props.state.patientId || "",
       },
       query: {
-        consultation: consultationId,
+        consultation: encounterId,
         thread,
         offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
       },

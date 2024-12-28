@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -65,15 +65,13 @@ export const Appointments = (props: PatientProps) => {
         </h2>
         <Button
           variant="outline_primary"
+          asChild
           disabled={isPatientInactive(facilityId)}
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/new?patient_id=${patientData.id}`,
-            )
-          }
         >
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("schedule_appointment")}
+          <Link href={`/facility/${facilityId}/patient/${id}/book-appointment`}>
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("schedule_appointment")}
+          </Link>
         </Button>
       </div>
 

@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -174,12 +173,6 @@ export default function useFilters({
         "";
       return { name, value, paramKey };
     },
-    kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const { kasp } = careConfig;
-      const name = nameSuffix ? kasp.string + " " + nameSuffix : kasp.string;
-      const [trueLabel, falseLabel] = [kasp.string, "Non " + kasp.string];
-      return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
-    },
   };
 
   const FilterBadges = ({
@@ -209,7 +202,7 @@ export default function useFilters({
 
     return (
       <div
-        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 mt-6  ${show ? "" : "hidden"}`}
+        className={`col-span-3 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
       >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />

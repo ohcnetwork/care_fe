@@ -46,11 +46,11 @@ export default function PrescrpitionTimeline({
   onRefetch,
   readonly,
 }: Props) {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const { data, refetch, loading } = useTanStackQueryInstead(
     MedicineRoutes.listAdministrations,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: {
         prescription: prescription.id,
         administered_date_after: formatDateTime(interval.start, "YYYY-MM-DD"),
@@ -119,7 +119,7 @@ const MedicineAdministeredNode = ({
   isLastNode: boolean;
   hideArchive?: boolean;
 }) => {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
@@ -178,7 +178,10 @@ const MedicineAdministeredNode = ({
           setIsArchiving(true);
 
           const { res } = await request(MedicineRoutes.archiveAdministration, {
-            pathParams: { consultation, external_id: event.administration.id },
+            pathParams: {
+              encounter: encounterId,
+              external_id: event.administration.id,
+            },
           });
 
           if (res?.status === 200) {

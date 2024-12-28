@@ -21,7 +21,6 @@ import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
-import { PatientModel } from "@/components/Patient/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -43,6 +42,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 interface patientShiftProps {
   id: string;
@@ -67,7 +67,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     shifting_approving_facility_object: null,
     assigned_facility_object: null,
     emergency: "false",
-    is_kasp: "false",
     is_up_shift: "true",
     reason: "",
     vehicle_preference: "",
@@ -244,7 +243,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           : null,
         patient: state.form.patient_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
-        is_kasp: [true, "true"].includes(state.form.is_kasp),
         is_up_shift: [true, "true"].includes(state.form.is_up_shift),
         reason: state.form.reason,
         vehicle_preference: state.form.vehicle_preference,
@@ -428,21 +426,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             optionLabel={(option) => option.label}
             optionValue={(option) => option.value}
           />
-
-          {careConfig.kasp.enabled && (
-            <RadioFormField
-              name="is_kasp"
-              value={state.form.is_kasp?.toString()}
-              label={t("is") + " " + careConfig.kasp.fullString + "?"}
-              options={[
-                { label: t("yes"), value: "true" },
-                { label: t("no"), value: "false" },
-              ]}
-              optionValue={(option) => option.value}
-              optionLabel={(option) => option.label}
-              onChange={handleFormFieldChange}
-            />
-          )}
 
           <RadioFormField
             label={t("is_this_an_upshift")}

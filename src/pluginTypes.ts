@@ -4,13 +4,17 @@ import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+
 import { AppRoutes } from "./Routers/AppRouter";
-import { ConsultationTabProps } from "./components/Facility/ConsultationDetails";
 import { FormContextValue } from "./components/Form/FormContext";
 import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
-import { PatientForm } from "./components/Patient/PatientRegister";
-import { PatientModel } from "./components/Patient/models";
+import { PatientMeta } from "./components/Patient/models";
 import { pluginMap } from "./pluginMap";
+import { PatientModel } from "./types/emr/patient";
+
+export type PatientForm = PatientModel &
+  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
@@ -85,10 +89,7 @@ export type PluginManifest = {
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
   navItems: INavItem[];
-  consultationTabs?: Record<
-    string,
-    LazyComponent<React.FC<ConsultationTabProps>>
-  >;
+  encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
 };
 
 export { pluginMap };

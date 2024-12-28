@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -82,11 +81,6 @@ export const FacilityCard = (props: {
                     />
                   </Link>
                   <div className="flow-root grow">
-                    {facility.kasp_empanelled && (
-                      <div className="float-right ml-2 mt-2 inline-flex items-center rounded-md bg-yellow-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-yellow-800">
-                        {careConfig.kasp.string}
-                      </div>
-                    )}
                     <div
                       className="flex flex-wrap items-center justify-between"
                       id="facility-name-card"
@@ -98,19 +92,6 @@ export const FacilityCard = (props: {
                         >
                           {facility.name}
                         </Link>
-                        <div
-                          data-test-id="occupancy-badge"
-                          className={`hidden tooltip items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
-                        >
-                          <span className="tooltip-text tooltip-top">
-                            {t("live_patients_total_beds")}
-                          </span>{" "}
-                          <CareIcon icon="l-bed" />
-                          <dt data-test-id="occupancy-badge-text">
-                            {t("occupancy")}: {facility.patient_count} /{" "}
-                            {facility.bed_count}{" "}
-                          </dt>
-                        </div>
                       </div>
                       <ButtonV2
                         id="view-cns-button"

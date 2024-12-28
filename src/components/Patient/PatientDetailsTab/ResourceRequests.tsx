@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,8 +17,10 @@ import {
 
 import { ResourceModel } from "@/components/Facility/models";
 
+import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
+
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 import { PatientProps } from ".";
@@ -26,13 +29,14 @@ export const ResourceRequests = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
   const { t } = useTranslation();
 
-  const { data: resourceRequests, loading } = useTanStackQueryInstead<{
-    results: ResourceModel[];
-  }>(routes.listResourceRequests, {
-    query: {
-      related_patient: id,
-    },
-    prefetch: !!id,
+  const { data: resourceRequests, isLoading: loading } = useQuery({
+    queryKey: ["resourceRequests", id],
+    queryFn: query(routes.listResourceRequests, {
+      queryParams: {
+        related_patient: id,
+      },
+    }),
+    enabled: !!id,
   });
 
   const isPatientInactive = (facilityId: string) => {
@@ -99,7 +103,9 @@ export const ResourceRequests = (props: PatientProps) => {
               resourceRequests.results.map((request) => (
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">
-                    {request.category}
+                    {RESOURCE_CATEGORY_CHOICES.find(
+                      (item) => item.id === request.category,
+                    )?.text || "--"}
                   </TableCell>
                   <TableCell>{request.title}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>

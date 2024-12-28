@@ -50,4 +50,26 @@ const TabsContent = React.forwardRef<
 ));
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+interface SectionTabsProps {
+  activeTab: string;
+  onChange: (newTab: string) => void;
+  tabs: { label: string; value: string }[];
+}
+
+const SectionTabs = (props: SectionTabsProps) => (
+  <Tabs value={props.activeTab} onValueChange={props.onChange} className="mt-3">
+    <TabsList className="h-auto mb-4 bg-transparent p-0 border-b border-b-gray-200 w-full justify-start gap-4 overflow-auto ">
+      {props.tabs.map(({ label, value }) => (
+        <TabsTrigger
+          key={value}
+          className=" bg-transparent px-1 py-1 data-[state=active]:bg-transparent border-b-2 text-base font-semibold text-gray-500 border-b-transparent transition-all rounded-none data-[state=active]:shadow-none data-[state=active]:border-b-primary-500 data-[state=active]:text-primary-500"
+          value={value}
+        >
+          {label}
+        </TabsTrigger>
+      ))}
+    </TabsList>
+  </Tabs>
+);
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, SectionTabs };

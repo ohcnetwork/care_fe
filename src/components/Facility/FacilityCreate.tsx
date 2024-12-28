@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import {
   Popover,
   PopoverButton,
@@ -17,10 +16,9 @@ import GLocationPicker from "@/components/Common/GLocationPicker";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import SpokeFacilityEditor from "@/components/Facility/SpokeFacilityEditor";
-import { DistrictModel, FacilityRequest } from "@/components/Facility/models";
+import { FacilityRequest } from "@/components/Facility/models";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "@/components/Form/FormFields/RadioFormField";
 import {
   MultiSelectFormField,
   SelectFormField,
@@ -45,14 +43,9 @@ import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import {
-  compareBy,
-  getPincodeDetails,
-  includesIgnoreCase,
-  parsePhoneNumber,
-} from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
+import OrganisationSelector from "@/pages/Organisation/components/OrganisationSelector";
 
 interface FacilityProps {
   facilityId?: string;
@@ -61,12 +54,8 @@ interface FacilityProps {
 type FacilityForm = {
   facility_type?: string;
   name: string;
-  state: number;
-  district: number;
-  local_body: number;
+  geo_organization?: string;
   features: number[];
-  ward: number;
-  kasp_empanelled: string;
   address: string;
   phone_number: string;
   latitude: string;
@@ -78,11 +67,6 @@ type FacilityForm = {
 const initForm: FacilityForm = {
   facility_type: undefined,
   name: "",
-  state: 0,
-  district: 0,
-  local_body: 0,
-  ward: 0,
-  kasp_empanelled: "false",
   features: [],
   address: "",
   phone_number: "",
@@ -90,6 +74,7 @@ const initForm: FacilityForm = {
   longitude: "",
   pincode: "",
   description: "",
+  geo_organization: "",
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
@@ -124,11 +109,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
-
-  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
-  const [stateId, setStateId] = useState<number>();
-  const [districtId, setDistrictId] = useState<number>();
-  const [localBodyId, setLocalBodyId] = useState<number>();
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -148,35 +128,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   }, [authUser]);
 
-  const {
-    data: districtData,
-    refetch: districtFetch,
-    loading: isDistrictLoading,
-  } = useTanStackQueryInstead(routes.getDistrictByState, {
-    pathParams: {
-      id: String(stateId),
-    },
-    prefetch: !!stateId,
-  });
-
-  const { data: localbodyData, loading: isLocalbodyLoading } =
-    useTanStackQueryInstead(routes.getLocalbodyByDistrict, {
-      pathParams: {
-        id: String(districtId),
-      },
-      prefetch: !!districtId,
-    });
-
-  const { data: wardData, loading: isWardLoading } = useTanStackQueryInstead(
-    routes.getWardByLocalBody,
-    {
-      pathParams: {
-        id: String(localBodyId),
-      },
-      prefetch: !!localBodyId,
-    },
-  );
-
   const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
@@ -189,12 +140,8 @@ export const FacilityCreate = (props: FacilityProps) => {
           const formData = {
             facility_type: data.facility_type ? data.facility_type : "",
             name: data.name ? data.name : "",
-            state: data.state ? data.state : 0,
-            district: data.district ? data.district : 0,
-            local_body: data.local_body ? data.local_body : 0,
+            geo_organization: data.geo_organization,
             features: data.features || [],
-            ward: data.ward_object ? data.ward_object.id : 0,
-            kasp_empanelled: "",
             address: data.address ? data.address : "",
             pincode: data.pincode ? data.pincode : "",
             description: data.description ? data.description : "",
@@ -209,9 +156,6 @@ export const FacilityCreate = (props: FacilityProps) => {
               : "",
           };
           dispatch({ type: "set_form", form: formData });
-          setStateId(data.state);
-          setDistrictId(data.district);
-          setLocalBodyId(data.local_body);
         } else {
           navigate(`/facility/${facilityId}`);
         }
@@ -219,10 +163,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     },
   });
-
-  const { data: stateData, loading: isStateLoading } = useTanStackQueryInstead(
-    routes.statesList,
-  );
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
@@ -242,50 +182,6 @@ export const FacilityCreate = (props: FacilityProps) => {
         },
       });
     }
-  };
-
-  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
-    handleChange(e);
-
-    if (!validatePincode(e.value)) return;
-
-    const pincodeDetails = await getPincodeDetails(
-      e.value,
-      careConfig.govDataApiKey,
-    );
-    if (!pincodeDetails) return;
-
-    const matchedState = (stateData ? stateData.results : []).find((state) => {
-      return includesIgnoreCase(state.name, pincodeDetails.statename);
-    });
-    if (!matchedState) return;
-
-    const newDistrictDataResult: RequestResult<DistrictModel[]> =
-      await districtFetch({ pathParams: { id: String(matchedState.id) } });
-    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
-
-    if (!fetchedDistricts) return;
-
-    const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.districtname);
-    });
-    if (!matchedDistrict) return;
-
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        state: matchedState.id,
-        district: matchedDistrict.id,
-        pincode: e.value,
-      },
-    });
-
-    setDistrictId(matchedDistrict.id);
-    setShowAutoFilledPincode(true);
-    setTimeout(() => {
-      setShowAutoFilledPincode(false);
-    }, 2000);
   };
 
   const handleSelectCurrentLocation = (
@@ -321,11 +217,8 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
 
-        case "district":
-        case "state":
-        case "local_body":
-        case "ward":
-          if (!Number(state.form[field])) {
+        case "geo_organization":
+          if (!String(state.form[field])) {
             errors[field] = t("required");
             invalidForm = true;
           }
@@ -382,17 +275,18 @@ export const FacilityCreate = (props: FacilityProps) => {
       const data: FacilityRequest = {
         facility_type: state.form.facility_type,
         name: state.form.name,
-        district: state.form.district,
-        state: state.form.state,
+        geo_organization: state.form.geo_organization,
         address: state.form.address,
-        local_body: state.form.local_body,
         features: state.form.features,
-        ward: state.form.ward,
         pincode: state.form.pincode,
         latitude: state.form.latitude,
         longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
         description: state.form.description,
+        ward: 5896,
+        local_body: 95,
+        district: 5,
+        state: 1,
       };
 
       const { res, data: requestData } = facilityId
@@ -452,9 +346,6 @@ export const FacilityCreate = (props: FacilityProps) => {
             <DraftSection
               handleDraftSelect={(newState: any) => {
                 dispatch({ type: "set_state", state: newState });
-                setStateId(newState.form.state);
-                setDistrictId(newState.form.district);
-                setLocalBodyId(newState.form.local_body);
               }}
               formData={state.form}
             />
@@ -475,6 +366,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 {...field("description")}
                 label={t("description")}
                 placeholder={t("markdown_supported")}
+                className="col-span-2"
               />
               <MultiSelectFormField
                 {...field("features")}
@@ -484,82 +376,23 @@ export const FacilityCreate = (props: FacilityProps) => {
                 optionValue={(o) => o.id}
               />
               <div>
-                <TextFormField
-                  {...field("pincode")}
-                  required
-                  onChange={handlePincodeChange}
-                />
-                {showAutoFilledPincode && (
-                  <div className="flex items-center gap-2 text-primary-500">
-                    <CareIcon icon="l-check-circle" />
-                    <span className="text-sm">
-                      State and district auto-filled from pincode
-                    </span>
-                  </div>
-                )}
+                <TextFormField {...field("pincode")} required />
               </div>
-              <SelectFormField
-                {...field("state")}
-                required
-                placeholder="Choose State"
-                className={isStateLoading ? "animate-pulse" : ""}
-                disabled={isStateLoading}
-                options={stateData ? stateData.results : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setStateId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("district")}
-                placeholder="Choose District"
-                required
-                className={isDistrictLoading ? "animate-pulse" : ""}
-                disabled={isDistrictLoading}
-                options={districtData ? districtData : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setDistrictId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("local_body")}
-                required
-                className={isLocalbodyLoading ? "animate-pulse" : ""}
-                disabled={isLocalbodyLoading}
-                placeholder="Choose Local Body"
-                options={localbodyData ? localbodyData : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setLocalBodyId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("ward")}
-                required
-                className={isWardLoading ? "animate-pulse" : ""}
-                disabled={isWardLoading}
-                placeholder="Choose Ward"
-                options={(wardData ? wardData.results : [])
-                  .sort(compareBy("number"))
-                  .map((e) => {
-                    return {
-                      id: e.id,
-                      name: e.number + ": " + e.name,
-                    };
-                  })}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-              />
+              <div className="col-span-2 grid grid-cols-2 gap-5">
+                <OrganisationSelector
+                  required={true}
+                  onChange={(value) =>
+                    dispatch({
+                      type: "set_form",
+                      form: {
+                        ...state.form,
+                        geo_organization: value,
+                      },
+                    })
+                  }
+                />
+              </div>
+
               <TextAreaFormField {...field("address")} required />
               <PhoneNumberFormField
                 {...field("phone_number")}
@@ -574,15 +407,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                     facility={{ ...facilityQuery.data, id: facilityId }}
                   />
                 </div>
-              )}
-              {careConfig.kasp.enabled && (
-                <RadioFormField
-                  {...field("kasp_empanelled")}
-                  label={`Is this facility ${careConfig.kasp.string} empanelled?`}
-                  options={[true, false]}
-                  optionLabel={(o) => (o ? "Yes" : "No")}
-                  optionValue={(o) => String(o)}
-                />
               )}
             </div>
 

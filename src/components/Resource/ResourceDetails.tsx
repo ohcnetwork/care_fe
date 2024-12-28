@@ -1,5 +1,6 @@
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -12,28 +13,33 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
+import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
+
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 function PatientCard({ patient }: { patient: any }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <CareIcon icon="l-user" className="text-lg text-blue-700" />
-          <CardTitle className="text-lg">Linked Patient Details</CardTitle>
+          <CardTitle className="text-lg">
+            {t("linked_patient_details")}
+          </CardTitle>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Name</p>
+            <p className="text-sm font-medium">{t("name")}</p>
             <p className="text-sm text-muted-foreground">{patient.name}</p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-medium">Phone</p>
+            <p className="text-sm font-medium">{t("phone")}</p>
             {patient.phone_number ? (
               <div className="flex items-center gap-2">
                 <a
@@ -56,7 +62,7 @@ function PatientCard({ patient }: { patient: any }) {
             )}
           </div>
           <div className="space-y-1 md:col-span-2">
-            <p className="text-sm font-medium">Address</p>
+            <p className="text-sm font-medium">{t("address")}</p>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {[
                 patient.address,
@@ -82,6 +88,7 @@ function FacilityCard({
   title: string;
   facilityData: any;
 }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
@@ -90,31 +97,31 @@ function FacilityCard({
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Name</p>
+            <p className="text-sm font-medium">{t("name")}</p>
             <p className="text-sm text-muted-foreground">
               {facilityData?.name || "--"}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium">Facility Type</p>
+            <p className="text-sm font-medium">{t("facility_type")}</p>
             <p className="text-sm text-muted-foreground">
               {facilityData?.facility_type?.name || "--"}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium">District</p>
+            <p className="text-sm font-medium">{t("district")}</p>
             <p className="text-sm text-muted-foreground">
               {facilityData?.district_object?.name || "--"}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium">Local Body</p>
+            <p className="text-sm font-medium">{t("local_body")}</p>
             <p className="text-sm text-muted-foreground">
               {facilityData?.local_body_object?.name || "--"}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium">State</p>
+            <p className="text-sm font-medium">{t("state")}</p>
             <p className="text-sm text-muted-foreground">
               {facilityData?.state_object?.name || "--"}
             </p>
@@ -126,27 +133,28 @@ function FacilityCard({
 }
 
 const RequestLetter = (data: any) => {
+  const { t } = useTranslation();
   return (
     <div id="section-to-print" className="print bg-white">
       <div className="mx-4 p-4 lg:mx-20">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold">Request Letter</div>
+          <div className="text-2xl font-bold">{t("request_letter")}</div>
           <div className="mt-2 text-sm text-gray-600">
-            Reference No: {data.id}
+            {t("reference_no")}: {data.id}
           </div>
         </div>
 
         {/* Date */}
         <div className="mb-6 text-right">
           <div className="font-semibold">
-            Date: {formatDateTime(data.created_date)}
+            {t("date")}: {formatDateTime(data.created_date)}
           </div>
         </div>
 
         {/* From Address */}
         <div className="mb-6">
-          <div className="font-semibold">From:</div>
+          <div className="font-semibold">{t("from")}:</div>
           <div className="mt-1">
             {data.origin_facility_object?.name}
             {data.origin_facility_object?.facility_type?.name && (
@@ -163,43 +171,48 @@ const RequestLetter = (data: any) => {
 
         {/* Subject Line */}
         <div className="mb-6">
-          <div className="font-semibold">Subject: Request for {data.title}</div>
+          <div className="font-semibold">
+            {t("subject")}: {t("request_for")} {data.title}
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="mb-6 leading-relaxed">
           <p className="mb-4">
-            This is to request the following resource
-            {data.emergency ? " on emergency basis" : ""}:
+            {t("request_the_following_resource")}
+            {data.emergency ? t("on_emergency_basis") : ""}:
           </p>
 
           <div className="mb-4 ml-4">
             <div>
-              <span className="font-semibold">Request Title:</span> {data.title}
+              <span className="font-semibold">{t("request_title")}:</span>{" "}
+              {data.title}
             </div>
             <div>
-              <span className="font-semibold">Category:</span>{" "}
-              {data.category || "--"}
+              <span className="font-semibold">{t("category")}:</span>{" "}
+              {RESOURCE_CATEGORY_CHOICES.find(
+                (item) => item.id === data.category,
+              )?.text || "--"}
             </div>
             <div>
-              <span className="font-semibold">Quantity Required:</span>{" "}
+              <span className="font-semibold">{t("quantity_required")}:</span>{" "}
               {data.requested_quantity}
             </div>
             {data.assigned_quantity && (
               <div>
-                <span className="font-semibold">Quantity Approved:</span>{" "}
+                <span className="font-semibold">{t("quantity_approved")}:</span>{" "}
                 {data.assigned_quantity}
               </div>
             )}
             <div className="mt-2">
-              <span className="font-semibold">Reason for Request:</span>
+              <span className="font-semibold">{t("reason_for_request")}:</span>
               <p className="mt-1">{data.reason || "--"}</p>
             </div>
           </div>
 
           {/* Status Section */}
           <div className="mb-4">
-            <span className="font-semibold">Current Status: </span>
+            <span className="font-semibold">{t("current_status")}: </span>
             <span className="rounded bg-gray-100 px-2 py-1">{data.status}</span>
           </div>
         </div>
@@ -208,7 +221,7 @@ const RequestLetter = (data: any) => {
         <div className="mt-12 flex justify-between">
           <div>
             <div className="mb-20">
-              <div className="font-semibold">Requested By:</div>
+              <div className="font-semibold">{t("requested_by")}:</div>
               <div>{formatName(data.created_by_object)}</div>
               <div className="text-sm text-gray-600">
                 {formatDateTime(data.created_date)}
@@ -220,7 +233,8 @@ const RequestLetter = (data: any) => {
             <div>
               <div className="mb-20">
                 <div className="font-semibold">
-                  {data.status === "REJECTED" ? "Rejected" : "Approved"} By:
+                  {data.status === "REJECTED" ? t("rejected") : t("approved")}
+                  {t("by")}:
                 </div>
                 <div>{formatName(data.last_edited_by_object)}</div>
                 <div className="text-sm text-gray-600">
@@ -237,6 +251,7 @@ const RequestLetter = (data: any) => {
 
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
+  const { t } = useTranslation();
   const { data, loading } = useTanStackQueryInstead(routes.getResourceDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
@@ -262,14 +277,14 @@ export default function ResourceDetails(props: { id: string }) {
           <div className="flex gap-2">
             <Button onClick={() => setIsPrintMode(true)}>
               <CareIcon icon="l-file-alt" className="mr-2 h-4 w-4" />
-              Request Letter
+              {t("request_letter")}
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate(`/resource/${data.id}/update`)}
             >
               <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
-              Update Status
+              {t("update_status")}
             </Button>
           </div>
         </div>
@@ -280,30 +295,32 @@ export default function ResourceDetails(props: { id: string }) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl">{data.title}</CardTitle>
               <Badge variant={data.emergency ? "destructive" : "secondary"}>
-                {data.emergency ? "Emergency" : "Regular"}
+                {data.emergency ? t("emergency") : t("REGULAR")}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <p className="text-sm font-medium">Status</p>
+                <p className="text-sm font-medium">{t("status")}</p>
                 <Badge>{data.status}</Badge>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Category</p>
+                <p className="text-sm font-medium">{t("category")}</p>
                 <p className="text-sm text-muted-foreground">
-                  {data.category || "--"}
+                  {RESOURCE_CATEGORY_CHOICES.find(
+                    (item) => item.id === data.category,
+                  )?.text || "--"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Contact Person</p>
+                <p className="text-sm font-medium">{t("contact_person")}</p>
                 <p className="text-sm text-muted-foreground">
                   {data.refering_facility_contact_name || "--"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Contact Number</p>
+                <p className="text-sm font-medium">{t("contact_number")}</p>
                 {data.refering_facility_contact_number ? (
                   <div className="flex items-center gap-2">
                     <a
@@ -330,7 +347,7 @@ export default function ResourceDetails(props: { id: string }) {
             <Separator />
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Reason</p>
+              <p className="text-sm font-medium">{t("reason")}</p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {data.reason || "--"}
               </p>
@@ -346,12 +363,12 @@ export default function ResourceDetails(props: { id: string }) {
         {/* Facilities */}
         <div className="grid gap-6 md:grid-cols-2">
           <FacilityCard
-            title="Origin Facility"
+            title={t("origin_facility")}
             facilityData={data.origin_facility_object}
           />
           {data.assigned_facility_object && (
             <FacilityCard
-              title="Assigned Facility"
+              title={t("assigned_facility")}
               facilityData={data.assigned_facility_object}
             />
           )}
@@ -360,13 +377,13 @@ export default function ResourceDetails(props: { id: string }) {
         {/* Audit Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Audit Information</CardTitle>
+            <CardTitle className="text-lg">{t("audit_information")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               {data.created_by_object && (
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Created By</p>
+                  <p className="text-sm font-medium">{t("created_by")}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatName(data.created_by_object)}
                   </p>
@@ -376,7 +393,7 @@ export default function ResourceDetails(props: { id: string }) {
                 </div>
               )}
               <div className="space-y-1">
-                <p className="text-sm font-medium">Last Modified By</p>
+                <p className="text-sm font-medium">{t("last_modified_by")}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatName(data.last_edited_by_object)}
                 </p>
@@ -391,7 +408,7 @@ export default function ResourceDetails(props: { id: string }) {
         {/* Comments Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Comments</CardTitle>
+            <CardTitle className="text-lg">{t("comments")}</CardTitle>
           </CardHeader>
           <CardContent>
             <CommentSection id={props.id} />
@@ -406,11 +423,11 @@ export default function ResourceDetails(props: { id: string }) {
             <div className="mb-4 flex justify-end gap-2">
               <Button onClick={() => window.print()}>
                 <CareIcon icon="l-print" className="mr-2 h-4 w-4" />
-                Print
+                {t("print")}
               </Button>
               <Button variant="outline" onClick={() => setIsPrintMode(false)}>
                 <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
-                Close
+                {t("close")}
               </Button>
             </div>
             {RequestLetter(data)}

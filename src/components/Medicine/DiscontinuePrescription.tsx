@@ -19,7 +19,7 @@ interface Props {
 
 export default function DiscontinuePrescription(props: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [isDiscontinuing, setIsDiscontinuing] = useState(false);
   const [discontinuedReason, setDiscontinuedReason] = useState<string>("");
 
@@ -33,7 +33,10 @@ export default function DiscontinuePrescription(props: Props) {
       onConfirm={async () => {
         setIsDiscontinuing(true);
         const { res } = await request(MedicineRoutes.discontinuePrescription, {
-          pathParams: { consultation, external_id: props.prescription.id },
+          pathParams: {
+            consultation: encounterId,
+            external_id: props.prescription.id,
+          },
           body: {
             discontinued_reason: discontinuedReason,
           },

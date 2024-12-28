@@ -76,11 +76,11 @@ export const EncounterSymptomsBuilder = (props: {
   showAll?: boolean;
   onChange?: () => void;
 }) => {
-  const consultationId = useSlug("consultation");
+  const encounterId = useSlug("encounter");
 
   const [isProcessing, setIsProcessing] = useState(false);
   const { data, loading, refetch } = useTanStackQueryInstead(SymptomsApi.list, {
-    pathParams: { consultationId },
+    pathParams: { consultationId: encounterId },
     query: { limit: 100 },
   });
 
@@ -115,7 +115,10 @@ export const EncounterSymptomsBuilder = (props: {
           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
             setIsProcessing(true);
             const { res } = await request(SymptomsApi.partialUpdate, {
-              pathParams: { consultationId, external_id: symptom.id },
+              pathParams: {
+                consultationId: encounterId,
+                external_id: symptom.id,
+              },
               body: { [event.name]: event.value },
             });
             if (res?.ok) {
@@ -128,7 +131,10 @@ export const EncounterSymptomsBuilder = (props: {
           const handleMarkAsEnteredInError = async () => {
             setIsProcessing(true);
             const { res } = await request(SymptomsApi.markAsEnteredInError, {
-              pathParams: { consultationId, external_id: symptom.id },
+              pathParams: {
+                consultationId: encounterId,
+                external_id: symptom.id,
+              },
             });
             if (res?.ok) {
               props.onChange?.();
@@ -163,7 +169,7 @@ export const EncounterSymptomsBuilder = (props: {
       <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
         <AddSymptom
           existing={data.results}
-          consultationId={consultationId}
+          encounterId={encounterId}
           onAdd={() => {
             props.onChange?.();
             refetch();
@@ -251,7 +257,7 @@ const AddSymptom = (props: {
   disabled?: boolean;
   existing: (Writable<EncounterSymptom> | EncounterSymptom)[];
   onAdd?: (value: Writable<EncounterSymptom>[]) => void;
-  consultationId?: string;
+  encounterId?: string;
 }) => {
   const [processing, setProcessing] = useState(false);
   const [selected, setSelected] = useState<EncounterSymptom["symptom"][]>([]);
@@ -272,12 +278,12 @@ const AddSymptom = (props: {
       };
     });
 
-    if (props.consultationId) {
+    if (props.encounterId) {
       const responses = await Promise.all(
         objects.map((body) =>
           request(SymptomsApi.add, {
             body,
-            pathParams: { consultationId: props.consultationId! },
+            pathParams: { consultationId: props.encounterId! },
           }),
         ),
       );

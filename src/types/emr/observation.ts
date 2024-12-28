@@ -1,4 +1,5 @@
 import { Code } from "../questionnaire/code";
+import { UserBase } from "../user/base";
 
 export interface ObservationValue {
   value?: string;
@@ -28,4 +29,19 @@ export interface Observation {
   interpretation: string;
   parent: string | null;
   questionnaire_response: string | null;
+}
+
+export interface ObservationWithUser extends Observation {
+  created_by: UserBase;
+  updated_by: UserBase;
+  data_entered_by: UserBase;
+}
+
+export interface ObservationAnalyzeGroup {
+  code: Code;
+  results: ObservationWithUser[];
+}
+
+export interface ObservationAnalyzeResponse {
+  results: ObservationAnalyzeGroup[];
 }

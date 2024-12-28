@@ -10,6 +10,9 @@ import ResourceCreate from "@/components/Resource/ResourceCreate";
 import { AppRoutes } from "@/Routers/AppRouter";
 import FacilityInventoryRoutes from "@/Routers/routes/FacilityInventoryRoutes";
 import FacilityLocationRoutes from "@/Routers/routes/FacilityLocationRoutes";
+import FacilityOrganizationIndex from "@/pages/FacilityOrganization/FacilityOrganizationIndex";
+import FacilityOrganizationUsers from "@/pages/FacilityOrganization/FacilityOrganizationUsers";
+import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrganizationView";
 
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <FacilityList />,
@@ -34,6 +37,15 @@ const FacilityRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/organisation": ({ facilityId }) => (
+    <FacilityOrganizationIndex facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/organisation/:id": ({ facilityId, id }) => (
+    <FacilityOrganizationView facilityId={facilityId} id={id} />
+  ),
+  "/facility/:facilityId/organisation/:id/users": ({ facilityId, id }) => (
+    <FacilityOrganizationUsers facilityId={facilityId} id={id} />
   ),
   ...FacilityLocationRoutes,
   ...FacilityInventoryRoutes,

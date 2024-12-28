@@ -60,6 +60,8 @@ export default function BoardView() {
             className="mx-3 md:mx-5"
             componentRight={
               <ExportButton
+                variant="secondary"
+                className="bg-transparent shadow-none text-black rounded-full"
                 action={async () => {
                   const { data } = await request(
                     routes.downloadResourceRequests,
@@ -109,9 +111,11 @@ export default function BoardView() {
           sections={boardFilter.map((board) => ({
             id: board,
             title: (
-              <h3 className="flex h-8 items-center text-xs">
+              <h3 className="flex h-8 items-center text-xs gap-2">
                 {board}{" "}
                 <ExportButton
+                  variant="secondary"
+                  className=" bg-transparent shadow-none text-black rounded-full"
                   action={async () => {
                     const { data } = await request(
                       routes.downloadResourceRequests,

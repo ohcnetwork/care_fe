@@ -19,8 +19,8 @@ const activeLinkPriority = {
   "/resource": "/resource",
   "/users": "/users",
   "/notice_board": "/notice_board",
-  "/facility": "/facility",
   "/appointments": "/appointments",
+  "/facility": "/facility",
 };
 
 /**

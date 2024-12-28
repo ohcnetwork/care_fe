@@ -37,10 +37,9 @@ export default function BadgesList(props: any) {
 
   return (
     <FilterBadges
-      badges={({ badge, phoneNumber, dateRange, kasp, value }: any) => [
+      badges={({ badge, phoneNumber, dateRange, value }: any) => [
         badge(t("status"), "status"),
         badge(t("emergency"), "emergency", booleanFilterOptions),
-        kasp(),
         badge(t("up_shift"), "is_up_shift", booleanFilterOptions),
         badge(t("antenatal"), "is_antenatal", booleanFilterOptions),
         phoneNumber(t("phone_no"), "patient_phone_number"),

@@ -5,6 +5,8 @@ import PageHeadTitle from "@/components/Common/PageHeadTitle";
 
 import { classNames } from "@/Utils/utils";
 
+import { SidebarTrigger } from "../ui/sidebar";
+
 export interface PageTitleProps {
   title: string;
   className?: string;
@@ -52,6 +54,7 @@ export default function PageTitle({
       className={classNames(!isInsidePage && "mb-2 md:mb-4", className)}
     >
       <div className="flex flex-col items-start md:flex-row md:items-center">
+        <SidebarTrigger className="-ml-6 hidden md:block" />
         {breadcrumbs && (
           <Breadcrumbs
             replacements={crumbsReplacements}

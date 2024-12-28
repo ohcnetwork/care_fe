@@ -153,6 +153,7 @@ export default function LinkedFacilities({
       });
     }
     await refetchUserFacilities();
+    refetchUserData?.();
   };
 
   const unlinkFacility = async () => {
@@ -170,6 +171,7 @@ export default function LinkedFacilities({
       });
     }
     await refetchUserFacilities();
+    refetchUserData?.();
   };
 
   const linkFacility = async (
@@ -192,6 +194,7 @@ export default function LinkedFacilities({
       });
     }
     await refetchUserFacilities();
+    refetchUserData?.();
     setFacility(null);
   };
 

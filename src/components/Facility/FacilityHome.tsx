@@ -43,7 +43,14 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-import { patientRegisterAuth } from "../Patient/PatientRegister";
+import { UserModel } from "../Users/models";
+
+export function canUserRegisterPatient(
+  authUser: UserModel,
+  facilityId: string,
+) {
+  return authUser.home_facility_object?.id === facilityId;
+}
 
 type Props = {
   facilityId: string;
@@ -418,7 +425,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 </DropdownItem>
                 <DropdownItem
                   id="view-assets"
-                  onClick={() => navigate(`/assets?facility=${facilityId}`)}
+                  onClick={() => navigate(`/facility/${facilityId}/assets`)}
                   icon={<CareIcon icon="l-medkit" className="text-lg" />}
                 >
                   {t("view_asset")}
@@ -464,13 +471,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              {patientRegisterAuth(authUser, facilityData, facilityId) && (
+              {canUserRegisterPatient(authUser, facilityId) && (
                 <ButtonV2
                   variant="primary"
                   ghost
                   border
                   className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                  onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                  onClick={() =>
+                    navigate(`/facility/${facilityId}/patient/create`)
+                  }
                   authorizeFor={NonReadOnlyUsers}
                 >
                   <CareIcon icon="l-plus" className="text-lg" />
@@ -483,7 +492,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 ghost
                 border
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/patients?facility=${facilityId}`)}
+                onClick={() => navigate(`/facility/${facilityId}/patients`)}
               >
                 <CareIcon icon="l-user-injured" className="text-lg" />
                 <span>{t("view_patients")}</span>

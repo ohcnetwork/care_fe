@@ -360,9 +360,10 @@ export const OXYGEN_MODALITY_OPTIONS = [
 ] as const;
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: "M" },
-  { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Transgender", icon: "TRANS" },
+  { id: "male", text: "Male", icon: "M" },
+  { id: "female", text: "Female", icon: "F" },
+  { id: "transgender", text: "Transgender", icon: "TRANS" },
+  { id: "non_binary", text: "Non Binary", icon: "TRANS" },
 ] as const;
 
 export const CONSULTATION_SUGGESTION = [
@@ -478,6 +479,18 @@ export const BLOOD_GROUPS = [
   "AB-",
   "O+",
   "O-",
+];
+
+export const BLOOD_GROUP_CHOICES = [
+  { id: "UNK", text: "Unknown" },
+  { id: "A_positive", text: "A+" },
+  { id: "A_negative", text: "A-" },
+  { id: "B_positive", text: "B+" },
+  { id: "B_negative", text: "B-" },
+  { id: "AB_positive", text: "AB+" },
+  { id: "AB_negative", text: "AB-" },
+  { id: "O_positive", text: "O+" },
+  { id: "O_negative", text: "O-" },
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
@@ -634,11 +647,11 @@ export const BREATHLESSNESS_LEVEL = [
 ];
 
 export const RESOURCE_CATEGORY_CHOICES = [
-  "PATIENT_CARE",
-  "COMFORT_DEVICES",
-  "MEDICINES",
-  "FINANCIAL",
-  "OTHER",
+  { id: "PATIENT_CARE", text: "Clinical Care and Social Support" },
+  { id: "COMFORT_DEVICES", text: "Comfort Devices" },
+  { id: "MEDICINES", text: "Medicines" },
+  { id: "FINANCIAL", text: "Financial" },
+  { id: "OTHERS", text: "Other" },
 ];
 
 export const RESOURCE_CHOICES: Array<OptionsType> = [
@@ -1680,3 +1693,12 @@ export const HEADER_CONTENT_TYPES = {
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
 export const CarePatientTokenKey = "care_patient_token";
+
+// organisation_levels map based of type. for govt
+// thought: This might be better placed in the organisation types files
+export const ORGANISATION_LEVELS = {
+  govt: ["State", "District", "LocalBody", "Ward"],
+  team: ["Team"],
+  role: ["Role"],
+  other: ["Other"],
+};
