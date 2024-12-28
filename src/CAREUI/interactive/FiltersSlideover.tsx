@@ -6,8 +6,6 @@ import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Button } from "@/components/ui/button";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
-
 import useFilters from "@/hooks/useFilters";
 
 type AdvancedFilter = ReturnType<typeof useFilters>["advancedFilter"];
@@ -35,18 +33,18 @@ export default function FiltersSlideover({
         <div className="flex items-center justify-between">
           <span className="text-lg font-bold">{t("advanced_filters")}</span>
           <div className="mr-2 flex items-center justify-end gap-1">
-            <ButtonV2
-              variant="danger"
-              ghost
+            <Button
+              variant="none"
+              className="bg-transparent text-red-500 hover:bg-red-100"
               onClick={onClear}
               id="clear-filter"
             >
               <CareIcon icon="l-filter-slash" className="text-lg" />
               <span>{t("clear")}</span>
-            </ButtonV2>
-            <ButtonV2 ghost onClick={onApply} id="apply-filter">
+            </Button>
+            <Button variant="primary" onClick={onApply} id="apply-filter">
               {t("apply")}
-            </ButtonV2>
+            </Button>
           </div>
         </div>
       }
