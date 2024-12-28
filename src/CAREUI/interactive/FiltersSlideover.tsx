@@ -42,7 +42,12 @@ export default function FiltersSlideover({
               <CareIcon icon="l-filter-slash" className="text-lg" />
               <span>{t("clear")}</span>
             </Button>
-            <Button variant="primary" onClick={onApply} id="apply-filter">
+            <Button
+              variant="outline_primary"
+              onClick={onApply}
+              className="border-none"
+              id="apply-filter"
+            >
               {t("apply")}
             </Button>
           </div>
