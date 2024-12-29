@@ -13,6 +13,7 @@ import {
   PatientNoteStateType,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -63,8 +64,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
     patientId: props.patientId,
     facilityId: props.facilityId,
   };
@@ -77,30 +76,27 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState(
     localStorage.getItem(localStorageKey) || "",
   );
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    thread,
+    consultationId,
+  });
 
-  const onAddNote = async () => {
+  const onAddNote = () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
       return;
     }
-    const { res } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
-      body: {
-        note: noteField,
-        consultation: consultationId,
-        thread,
-        reply_to: reply_to?.id,
-      },
+    setReplyTo(undefined);
+    setNoteField("");
+    addNote({
+      note: noteField,
+      reply_to: reply_to?.id,
+      thread,
+      consultation: consultationId,
     });
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setState({ ...state, cPage: 1 });
-      setReload(true);
-      setReplyTo(undefined);
-    }
   };
 
   useMessageListener((data) => {
@@ -235,13 +231,21 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     ? "border-primary-500 font-medium text-white"
                     : "border-primary-800 text-white/70",
                 )}
-                onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+                onClick={() => {
+                  if (thread !== PATIENT_NOTES_THREADS[current]) {
+                    setThread(PATIENT_NOTES_THREADS[current]);
+                    setState(initialData);
+                    setReplyTo(undefined);
+                    setNoteField("");
+                  }
+                }}
               >
                 {t(`patient_notes_thread__${current}`)}
               </button>
             ))}
           </div>
           <PatientConsultationNotesList
+            key={`patient-notes-${patientId}-${thread}`}
             state={state}
             setState={setState}
             reload={reload}
