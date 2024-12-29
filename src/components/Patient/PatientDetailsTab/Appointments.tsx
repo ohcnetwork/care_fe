@@ -50,24 +50,13 @@ export const Appointments = (props: PatientProps) => {
     );
   };
 
-  const isPatientInactive = (facilityId: string) => {
-    return (
-      !patientData.is_active ||
-      !(patientData?.last_consultation?.facility === facilityId)
-    );
-  };
-
   return (
     <div className="mt-4 px-3 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold leading-tight">
           {t("appointments")}
         </h2>
-        <Button
-          variant="outline_primary"
-          asChild
-          disabled={isPatientInactive(facilityId)}
-        >
+        <Button variant="outline_primary" asChild>
           <Link href={`/facility/${facilityId}/patient/${id}/book-appointment`}>
             <CareIcon icon="l-plus" className="mr-2" />
             {t("schedule_appointment")}

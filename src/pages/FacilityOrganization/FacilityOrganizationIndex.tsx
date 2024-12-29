@@ -37,7 +37,7 @@ export default function FacilityOrganizationIndex({
 
   if (isLoading) {
     return (
-      <Page title="Organisations">
+      <Page title="Organizations">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i} className="relative">
@@ -61,17 +61,17 @@ export default function FacilityOrganizationIndex({
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organisations">
+      <Page title="Organizations">
         <div className="flex justify-end mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
-              No Organisations Found
+              No Organizations Found
             </CardTitle>
             <CardDescription className="text-center">
-              You don't have access to any organisations yet.
+              You don't have access to any organizations yet.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -79,7 +79,7 @@ export default function FacilityOrganizationIndex({
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
-              Organisations help you manage facilities, users, and resources
+              Organizations help you manage facilities, users, and resources
               efficiently. Contact your administrator to get access.
             </p>
           </CardContent>
@@ -89,7 +89,7 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title="Facility Organisations">
+    <Page title="Facility Organizations" hideBack={true}>
       <div className="flex justify-end mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
@@ -108,7 +108,7 @@ export default function FacilityOrganizationIndex({
             <CardFooter>
               <Button variant="outline" asChild className="w-full">
                 <Link
-                  href={`/facility/${facilityId}/organisation/${org.id}`}
+                  href={`/facility/${facilityId}/organization/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
                   View Details

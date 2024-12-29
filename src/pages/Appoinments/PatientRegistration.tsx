@@ -44,7 +44,7 @@ import {
 } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
 
-import OrganisationSelector from "../Organisation/components/OrganisationSelector";
+import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
 const initialForm: AppointmentPatientRegister & {
   ageInputType: "age" | "date_of_birth";
@@ -413,7 +413,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormControl>
-                      <OrganisationSelector
+                      <OrganizationSelector
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {

@@ -10,20 +10,21 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { OrganizationUserRole } from "@/types/organisation/organisation";
+import { OrganizationUserRole } from "@/types/organization/organization";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
-import OrganisationLayout from "./components/OrganisationLayout";
+import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;
+  navOrganizationId?: string;
 }
 
-export default function OrganisationUsers({ id }: Props) {
+export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["organizationUsers", id],
-    queryFn: query(routes.organisation.listUsers, {
+    queryFn: query(routes.organization.listUsers, {
       pathParams: { id },
     }),
     enabled: !!id,
@@ -35,7 +36,7 @@ export default function OrganisationUsers({ id }: Props) {
 
   if (isLoadingUsers) {
     return (
-      <OrganisationLayout id={id}>
+      <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
@@ -51,12 +52,12 @@ export default function OrganisationUsers({ id }: Props) {
             </Card>
           ))}
         </div>
-      </OrganisationLayout>
+      </OrganizationLayout>
     );
   }
 
   return (
-    <OrganisationLayout id={id}>
+    <OrganizationLayout id={id}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Users</h2>
@@ -151,6 +152,6 @@ export default function OrganisationUsers({ id }: Props) {
           )}
         </div>
       </div>
-    </OrganisationLayout>
+    </OrganizationLayout>
   );
 }

@@ -103,7 +103,7 @@ import {
   OrganizationUserRole,
   OrganizationUserRoleResponse,
   RoleResponse,
-} from "@/types/organisation/organisation";
+} from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -1037,10 +1037,21 @@ const routes = {
     TRes: Type<FileUploadModel>(),
   },
   editUpload: {
-    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
+    path: "/api/v1/files/{id}/",
     method: "PUT",
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
+  },
+  markUploadCompleted: {
+    path: "/api/v1/files/{id}/mark_upload_completed/",
+    method: "POST",
+    TRes: Type<FileUploadModel>(),
+  },
+  archiveUpload: {
+    path: "/api/v1/files/{id}/archive/",
+    method: "POST",
+    TRes: Type<FileUploadModel>(),
+    TBody: Type<{ archive_reason: string }>(),
   },
 
   // Investigation
@@ -1485,8 +1496,8 @@ const routes = {
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
 
-  // Organisation Routes
-  organisation: {
+  // Organization Routes
+  organization: {
     listMine: {
       path: "/api/v1/organization/mine/",
       method: "GET",
@@ -1605,6 +1616,12 @@ const routes = {
   // New Patient Routes
 
   patient: {
+    getPatient: {
+      path: "/api/v1/patient/{id}/",
+      method: "GET",
+      TBody: Type<Patient>(),
+      TRes: Type<Patient>(),
+    },
     allergyIntolerance: {
       create: {
         method: "POST",

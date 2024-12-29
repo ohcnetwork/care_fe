@@ -7,20 +7,20 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { Button } from "@/components/ui/button";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { ConsultationCard } from "@/components/Facility/ConsultationCard";
-import { ConsultationModel } from "@/components/Facility/models";
+import { EncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import routes from "@/Utils/request/api";
+import { Encounter } from "@/types/emr/encounter";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { patientData, id, refetch, facilityId } = props;
+  const { id, facilityId } = props;
 
   const { t } = useTranslation();
 
   return (
     <PaginatedList
-      route={routes.getConsultationList}
+      route={routes.encounter.list}
       query={{ patient: id }}
       perPage={5}
     >
@@ -48,17 +48,8 @@ const EncounterHistory = (props: PatientProps) => {
               </div>
             </div>
           </PaginatedList.WhenEmpty>
-          <PaginatedList.Items<ConsultationModel>>
-            {(item) => (
-              <ConsultationCard
-                itemData={item}
-                isLastConsultation={
-                  !!patientData.last_consultation &&
-                  item.id === patientData.last_consultation.id
-                }
-                refetch={refetch}
-              />
-            )}
+          <PaginatedList.Items<Encounter>>
+            {(encounter) => <EncounterCard encounter={encounter} />}
           </PaginatedList.Items>
           <div className="flex w-full items-center justify-center">
             <PaginatedList.Paginator hideIfSinglePage />

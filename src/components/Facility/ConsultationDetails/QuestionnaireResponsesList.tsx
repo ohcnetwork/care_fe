@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { Question } from "@/types/questionnaire/question";
@@ -132,30 +130,6 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
     new Set(),
   );
 
-  // Create a query for each expanded response
-  const expandedResponses = useQuery({
-    queryKey: ["questionnaireResponses", Array.from(expandedResponseIds)],
-    queryFn: async () => {
-      const responses = await Promise.all(
-        Array.from(expandedResponseIds).map((id) =>
-          query(routes.getQuestionnaireResponse, {
-            pathParams: {
-              patientId: encounter.patient.id,
-              responseId: id,
-            },
-          })({ signal: new AbortController().signal }),
-        ),
-      );
-      return Object.fromEntries(
-        responses.map((response, index) => [
-          Array.from(expandedResponseIds)[index],
-          response,
-        ]),
-      );
-    },
-    enabled: expandedResponseIds.size > 0,
-  });
-
   const toggleResponse = (id: string) => {
     setExpandedResponseIds((prev) => {
       const next = new Set(prev);
@@ -219,8 +193,8 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                       <div>
                         <h3 className="text-base font-medium">
                           {item.questionnaire?.title ||
-                            structuredResponsesPreview(
-                              item.structured_responses,
+                            Object.keys(item.structured_responses || {}).map(
+                              (key) => properCase(key),
                             )}
                         </h3>
                         <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
@@ -243,19 +217,15 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                     </Button>
                   </div>
 
-                  {expandedResponseIds.has(item.id) &&
-                    expandedResponses.data?.[item.id] && (
-                      <div className="mt-3 border-t pt-3">
-                        <div className="space-y-4">
-                          {expandedResponses.data[
-                            item.id
-                          ].questionnaire?.questions.map((question) => {
+                  {expandedResponseIds.has(item.id) && (
+                    <div className="mt-3 border-t pt-3">
+                      <div className="space-y-4">
+                        {item.questionnaire?.questions.map(
+                          (question: Question) => {
                             // Skip structured questions for now as they need special handling
                             if (question.type === "structured") return null;
 
-                            const response = expandedResponses.data[
-                              item.id
-                            ].responses.find(
+                            const response = item.responses.find(
                               (r) => r.question_id === question.id,
                             );
 
@@ -264,9 +234,7 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                                 <QuestionGroup
                                   key={question.id}
                                   group={question}
-                                  responses={
-                                    expandedResponses.data[item.id].responses
-                                  }
+                                  responses={item.responses}
                                 />
                               );
                             }
@@ -280,10 +248,11 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                                 response={response}
                               />
                             );
-                          })}
-                        </div>
+                          },
+                        )}
                       </div>
-                    )}
+                    </div>
+                  )}
                 </Card>
               )}
             </PaginatedList.Items>
@@ -296,10 +265,4 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
       )}
     </PaginatedList>
   );
-}
-
-export function structuredResponsesPreview(
-  structured_responses?: QuestionnaireResponse["structured_responses"],
-) {
-  return Object.keys(structured_responses || {}).map((key) => properCase(key));
 }

@@ -10,7 +10,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { OrganizationUserRole } from "@/types/organisation/organisation";
+import { OrganizationUserRole } from "@/types/organization/organization";
 
 import AddFacilityUserSheet from "./components/AddFacilityUserSheet";
 import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";

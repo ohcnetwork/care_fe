@@ -1,4 +1,4 @@
-import { ORGANISATION_LEVELS } from "@/common/constants";
+import { ORGANIZATION_LEVELS } from "@/common/constants";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 
@@ -58,8 +58,13 @@ export type RoleResponse = PaginatedResponse<Role>;
 
 export const getOrgLevel = (org_type: org_type, level_cache: number) => {
   if (org_type === "govt") {
-    return ORGANISATION_LEVELS.govt[level_cache];
+    return ORGANIZATION_LEVELS.govt[level_cache];
   } else {
-    return ORGANISATION_LEVELS[org_type];
+    return ORGANIZATION_LEVELS[org_type];
   }
+};
+
+export const getOrgLevelLabel = (org_type: org_type, level_cache: number) => {
+  const orgLevel = getOrgLevel(org_type, level_cache);
+  return typeof orgLevel === "string" ? orgLevel : orgLevel[0];
 };

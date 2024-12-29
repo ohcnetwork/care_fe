@@ -22,9 +22,6 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),
-  // "/facility/:facilityId/encounters/live": ({ facilityId }) => (
-  //   <EncounterIndex facilityId={facilityId} />
-  // ),
   // "/patients/live": () => <PatientIndex tab={"live"} />,
   // "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,

@@ -9,27 +9,33 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { getOrgLevel } from "@/types/organisation/organisation";
+import { Organization, getOrgLevel } from "@/types/organization/organization";
 
-import OrganisationLayout from "./components/OrganisationLayout";
+import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;
+  navOrganizationId?: string;
 }
 
-export default function OrganisationView({ id }: Props) {
+export default function OrganizationView({ id, navOrganizationId }: Props) {
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organisation", id, "children"],
-    queryFn: query(routes.organisation.list, {
+    queryKey: ["organization", id, "children"],
+    queryFn: query(routes.organization.list, {
       queryParams: { parent: id },
     }),
   });
 
+  // Hack for the sidebar to work
+  const baseUrl = navOrganizationId
+    ? `/organization/${navOrganizationId}`
+    : `/organization/${id}`;
+
   return (
-    <OrganisationLayout id={id}>
+    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Organisations</h2>
+          <h2 className="text-lg font-semibold">Organizations</h2>
         </div>
 
         {isLoading ? (
@@ -51,22 +57,27 @@ export default function OrganisationView({ id }: Props) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {children?.results?.length ? (
-              children.results.map((org) => (
-                <Card key={org.id}>
+              children.results.map((orgChild: Organization) => (
+                <Card key={orgChild.id}>
                   <CardContent className="p-6">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <h3 className="text-lg font-semibold">{org.name}</h3>
+                          <h3 className="text-lg font-semibold">
+                            {orgChild.name}
+                          </h3>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline">{org.org_type}</Badge>
+                            <Badge variant="outline">{orgChild.org_type}</Badge>
                             <Badge variant="outline">
-                              {getOrgLevel(org.org_type, org.level_cache)}
+                              {getOrgLevel(
+                                orgChild.org_type,
+                                orgChild.level_cache,
+                              )}
                             </Badge>
                           </div>
                         </div>
                         <Button variant="link" asChild>
-                          <Link href={`/organisation/${org.id}`}>
+                          <Link href={`${baseUrl}/children/${orgChild.id}`}>
                             View Details
                             <CareIcon
                               icon="l-arrow-right"
@@ -75,9 +86,9 @@ export default function OrganisationView({ id }: Props) {
                           </Link>
                         </Button>
                       </div>
-                      {org.description && (
+                      {orgChild.description && (
                         <p className="text-sm text-gray-500 line-clamp-2">
-                          {org.description}
+                          {orgChild.description}
                         </p>
                       )}
                     </div>
@@ -87,13 +98,13 @@ export default function OrganisationView({ id }: Props) {
             ) : (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">
-                  No sub-organisations found.
+                  No sub-organizations found.
                 </CardContent>
               </Card>
             )}
           </div>
         )}
       </div>
-    </OrganisationLayout>
+    </OrganizationLayout>
   );
 }

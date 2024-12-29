@@ -45,7 +45,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganisationSelector from "@/pages/Organisation/components/OrganisationSelector";
+import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 
 interface FacilityProps {
   facilityId?: string;
@@ -379,7 +379,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <TextFormField {...field("pincode")} required />
               </div>
               <div className="col-span-2 grid grid-cols-2 gap-5">
-                <OrganisationSelector
+                <OrganizationSelector
                   required={true}
                   onChange={(value) =>
                     dispatch({

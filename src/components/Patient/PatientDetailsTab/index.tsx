@@ -1,12 +1,11 @@
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
-import { ImmunisationRecords } from "@/components/Patient/PatientDetailsTab//ImmunisationRecords";
 import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
 import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 
-import { PatientModel } from "@/types/emr/patient";
+import { Patient } from "@/types/emr/newPatient";
 
 import { Appointments } from "./Appointments";
 import { ResourceRequests } from "./ResourceRequests";
@@ -14,8 +13,7 @@ import { ResourceRequests } from "./ResourceRequests";
 export interface PatientProps {
   facilityId: string;
   id: string;
-  patientData: PatientModel;
-  refetch: () => void;
+  patientData: Patient;
 }
 
 export const patientTabs = [
@@ -38,10 +36,6 @@ export const patientTabs = [
   {
     route: "updates",
     component: Updates,
-  },
-  {
-    route: "immunisation-records",
-    component: ImmunisationRecords,
   },
   {
     route: "shift",

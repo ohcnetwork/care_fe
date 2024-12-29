@@ -7,6 +7,7 @@ import {
 import { GENDER_TYPES, UserRole } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
+import { Organization } from "@/types/organization/organization";
 
 interface HomeFacilityObjectModel {
   id?: string;
@@ -62,6 +63,7 @@ export type UserModel = UserBareMinimum & {
   weekly_working_hours?: string | null;
   user_flags?: FeatureFlag[];
   facilities?: UserFacilityModel[];
+  organizations?: Organization[];
 };
 
 export type UserBaseModel = {

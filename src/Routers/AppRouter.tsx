@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Redirect, useRedirect, useRoutes } from "raviger";
+import { useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -25,10 +25,14 @@ import ShiftingRoutes from "@/Routers/routes/ShiftingRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
+import UserDashboard from "@/pages/UserDashboard";
 
 import { QuestionnaireList } from "../components/Questionnaire";
 import { QuestionnaireShow } from "../components/Questionnaire/show";
-import OrganisationRoutes from "./routes/OrganisationRouter";
+import OrganizationRoutes from "./routes/OrganizationRoutes";
+
+// List of paths where the sidebar should be hidden
+const PATHS_WITHOUT_SIDEBAR = ["/"];
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -46,8 +50,7 @@ export type AppRoutes = {
 };
 
 const Routes: AppRoutes = {
-  "/": () => <Redirect to="/facility" />,
-
+  "/": () => <UserDashboard />,
   ...AssetRoutes,
   ...ConsultationRoutes,
   ...FacilityRoutes,
@@ -56,7 +59,7 @@ const Routes: AppRoutes = {
   ...ShiftingRoutes,
   ...ScheduleRoutes,
   ...UserRoutes,
-  ...OrganisationRoutes,
+  ...OrganizationRoutes,
   "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 
@@ -88,23 +91,21 @@ export default function AppRouter() {
 
   const pages = useRoutes(routes) || <ErrorPage />;
   const user = useAuthUser();
+  const currentPath = window.location.pathname;
+  const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} />
-
+      {shouldShowSidebar && <AppSidebar user={user} />}
       <main
         id="pages"
         className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
       >
         <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
           <div className="flex items-center">
-            <SidebarTrigger className="px-2" />
+            {shouldShowSidebar && <SidebarTrigger />}
           </div>
-          <a
-            href="/"
-            className="flex h-full w-full items-center px-4 md:hidden"
-          >
+          <a className="flex h-full w-full items-center px-4 md:hidden">
             <img
               className="h-8 w-auto"
               src={careConfig.mainLogo?.dark}

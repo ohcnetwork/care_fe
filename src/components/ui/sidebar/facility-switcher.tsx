@@ -1,4 +1,4 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import * as React from "react";
@@ -37,14 +37,14 @@ export function FacilitySwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Hospital className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {selectedFacility?.name}
+                  {selectedFacility?.name || "Select Facility"}
                 </span>
               </div>
               <CaretSortIcon className="ml-auto" />
@@ -56,9 +56,8 @@ export function FacilitySwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-gray-500 dark:text-gray-400">
-              Facilities
-            </DropdownMenuLabel>
+            <DropdownMenuLabel>Facilities</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
               <DropdownMenuItem
                 key={facility.name}
@@ -73,6 +72,11 @@ export function FacilitySwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
+
+            <DropdownMenuItem onClick={() => navigate("/")}>
+              <DashboardIcon className="size-4" />
+              View Dashboard
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

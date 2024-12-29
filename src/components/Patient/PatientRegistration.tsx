@@ -46,7 +46,7 @@ import {
   getPincodeDetails,
   parsePhoneNumber,
 } from "@/Utils/utils";
-import OrganisationSelector from "@/pages/Organisation/components/OrganisationSelector";
+import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { PatientModel, validatePatient } from "@/types/emr/patient";
 
 import Autocomplete from "../ui/autocomplete";
@@ -113,8 +113,6 @@ export default function PatientRegistration(
     date_of_birth:
       ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
     year_of_birth: ageDob === "age" ? form.year_of_birth : undefined,
-    is_active: true,
-    is_antenatal: false,
     meta_info: {
       ...(form.meta_info as any),
       occupation:
@@ -130,7 +128,17 @@ export default function PatientRegistration(
       Notification.Success({
         msg: t("patient_registration_success"),
       });
-      navigate(`/facility/${facilityId}/patient/${resp.id}/consultation`);
+      // Lets navigate the user to the verify page as the patient is not accessible to the user yet
+      navigate(`/facility/${facilityId}/patients/verify`, {
+        query: {
+          phone_number: resp.phone_number,
+          year_of_birth:
+            ageDob === "dob"
+              ? new Date(resp.date_of_birth!).getFullYear()
+              : resp.year_of_birth,
+          partial_id: resp?.id?.slice(0, 5),
+        },
+      });
     },
     onError: () => {
       Notification.Error({
@@ -621,7 +629,7 @@ export default function PatientRegistration(
               </div>
               {form.nationality === "India" && (
                 <>
-                  <OrganisationSelector
+                  <OrganizationSelector
                     required={true}
                     onChange={(value) =>
                       setForm((f) => ({

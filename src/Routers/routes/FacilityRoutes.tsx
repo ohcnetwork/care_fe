@@ -38,13 +38,13 @@ const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/organisation": ({ facilityId }) => (
+  "/facility/:facilityId/organization": ({ facilityId }) => (
     <FacilityOrganizationIndex facilityId={facilityId} />
   ),
-  "/facility/:facilityId/organisation/:id": ({ facilityId, id }) => (
+  "/facility/:facilityId/organization/:id": ({ facilityId, id }) => (
     <FacilityOrganizationView facilityId={facilityId} id={id} />
   ),
-  "/facility/:facilityId/organisation/:id/users": ({ facilityId, id }) => (
+  "/facility/:facilityId/organization/:id/users": ({ facilityId, id }) => (
     <FacilityOrganizationUsers facilityId={facilityId} id={id} />
   ),
   ...FacilityLocationRoutes,

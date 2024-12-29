@@ -17,7 +17,7 @@ export function NavMain({
   links: {
     name: string;
     url: string;
-    icon: string;
+    icon?: string;
   }[];
 }) {
   return (
@@ -34,9 +34,10 @@ export function NavMain({
             >
               <ActiveLink
                 href={link.url}
+                activeClass="bg-white text-green-700 shadow"
                 exactActiveClass="bg-white text-green-700 shadow"
               >
-                <CareIcon icon={link.icon as IconName} />
+                {link.icon && <CareIcon icon={link.icon as IconName} />}
                 <span className="group-data-[collapsible=icon]:hidden">
                   {link.name}
                 </span>

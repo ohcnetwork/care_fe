@@ -30,7 +30,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Organisations</h2>
+          <h2 className="text-lg font-semibold">Organizations</h2>
         </div>
 
         {isLoading ? (
@@ -65,7 +65,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                           </div>
                         </div>
                         <Button variant="link" asChild>
-                          <Link href={`/organisation/${org.id}`}>
+                          <Link href={`/organization/${org.id}`}>
                             View Details
                             <CareIcon
                               icon="l-arrow-right"
@@ -86,7 +86,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
             ) : (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">
-                  No sub-organisations found.
+                  No sub-organizations found.
                 </CardContent>
               </Card>
             )}

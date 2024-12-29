@@ -116,7 +116,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   return (
     <Page
       title={t("appointments")}
-      collapseSidebar
+      hideBack={true}
+      breadcrumbs={false}
       options={
         <Tabs
           value={viewMode}

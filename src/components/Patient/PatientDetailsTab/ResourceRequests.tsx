@@ -39,13 +39,6 @@ export const ResourceRequests = (props: PatientProps) => {
     enabled: !!id,
   });
 
-  const isPatientInactive = (facilityId: string) => {
-    return (
-      !patientData.is_active ||
-      !(patientData?.last_consultation?.facility === facilityId)
-    );
-  };
-
   const getStatusBadge = (status: ResourceModel["status"]) => {
     const statusColors: Record<ResourceModel["status"], string> = {
       PENDING: "bg-yellow-100 text-yellow-800",
@@ -68,7 +61,6 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         <Button
-          disabled={isPatientInactive(facilityId)}
           onClick={() =>
             navigate(
               `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,

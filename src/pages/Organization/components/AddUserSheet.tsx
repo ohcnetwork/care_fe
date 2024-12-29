@@ -58,7 +58,7 @@ export default function AddUserSheet({ organizationId }: Props) {
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.organisation.assignUser, {
+      mutate(routes.organization.assignUser, {
         pathParams: { id: organizationId },
         body,
       })(body),

@@ -7,7 +7,7 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import InputWithError from "@/components/ui/input-with-error";
 
-import { ORGANISATION_LEVELS } from "@/common/constants";
+import { ORGANIZATION_LEVELS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -15,9 +15,9 @@ import {
   Organization,
   OrganizationResponse,
   getOrgLevel,
-} from "@/types/organisation/organisation";
+} from "@/types/organization/organization";
 
-interface OrganisationSelectorProps {
+interface OrganizationSelectorProps {
   value?: string;
   onChange: (value: string) => void;
   required?: boolean;
@@ -29,7 +29,7 @@ interface AutoCompleteOption {
   value: string;
 }
 
-export default function OrganisationSelector(props: OrganisationSelectorProps) {
+export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
@@ -42,8 +42,8 @@ export default function OrganisationSelector(props: OrganisationSelectorProps) {
     : {};
 
   const { data: getAllOrganizations } = useQuery<OrganizationResponse>({
-    queryKey: ["organisations-root"],
-    queryFn: query(routes.organisation.list, {
+    queryKey: ["organizations-root"],
+    queryFn: query(routes.organization.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
@@ -56,10 +56,10 @@ export default function OrganisationSelector(props: OrganisationSelectorProps) {
     results: Organization[];
   }>({
     queryKey: [
-      "organisations-current",
+      "organizations-current",
       selectedLevels[selectedLevels.length - 1]?.id,
     ],
-    queryFn: query(routes.organisation.list, {
+    queryFn: query(routes.organization.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
@@ -114,7 +114,7 @@ export default function OrganisationSelector(props: OrganisationSelectorProps) {
           <InputWithError
             key={level.id}
             label={
-              index === 0 ? ORGANISATION_LEVELS.govt[0] : getLevelLabel(level)
+              index === 0 ? ORGANIZATION_LEVELS.govt[0] : getLevelLabel(level)
             }
             required={required}
           >
@@ -140,7 +140,7 @@ export default function OrganisationSelector(props: OrganisationSelectorProps) {
         selectedLevels[selectedLevels.length - 1]?.has_children) && (
         <div>
           <InputWithError
-            label={ORGANISATION_LEVELS.govt[selectedLevels.length]}
+            label={ORGANIZATION_LEVELS.govt[selectedLevels.length]}
             required={selectedLevels.length === 0 && required}
           >
             <Autocomplete

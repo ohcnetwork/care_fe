@@ -1,50 +1,20 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
 import { Avatar } from "@/components/Common/Avatar";
-import ButtonV2 from "@/components/Common/ButtonV2";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
-import { AssignedToObjectModel } from "@/components/Patient/models";
-import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
-import useAuthOrPatientUser from "@/hooks/useAuthOrPatientUser";
-
-import {
-  DISCHARGE_REASONS,
-  GENDER_TYPES,
-  OCCUPATION_TYPES,
-} from "@/common/constants";
-
-import { triggerGoal } from "@/Integrations/Plausible";
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
-import * as Notification from "@/Utils/Notifications";
-import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-  humanizeStrings,
-  relativeDate,
-} from "@/Utils/utils";
-import { PatientModel } from "@/types/emr/patient";
-
-export const parseOccupation = (occupation: string | undefined) => {
-  return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
-};
+import query from "@/Utils/request/query";
+import { formatPatientAge } from "@/Utils/utils";
+import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
   facilityId?: string;
@@ -52,139 +22,98 @@ export const PatientHome = (props: {
   page: (typeof patientTabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
-  const [patientData, setPatientData] = useState<PatientModel>({});
+  // const [patientData, setPatientData] = useState<PatientModel>({});
 
-  const { user, patient } = useAuthOrPatientUser();
   const { t } = useTranslation();
 
-  const [assignedVolunteer, setAssignedVolunteer] = useState<
-    AssignedToObjectModel | undefined
-  >(patientData.assigned_to_object);
+  // const [assignedVolunteer, setAssignedVolunteer] = useState<
+  //   AssignedToObjectModel | undefined
+  // >(patientData.assigned_to_object);
 
-  useEffect(() => {
-    setAssignedVolunteer(patientData.assigned_to_object);
-  }, [patientData.assigned_to_object]);
+  // useEffect(() => {
+  //   setAssignedVolunteer(patientData.assigned_to_object);
+  // }, [patientData.assigned_to_object]);
 
-  const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
-    useState(false);
-
-  const initErr: any = {};
-  const errors = initErr;
-  const { loading: isLoading, refetch } = useTanStackQueryInstead(
-    routes.getPatient,
-    {
+  const { data: patientData, isLoading } = useQuery<Patient>({
+    queryKey: ["patient", id],
+    queryFn: query(routes.patient.getPatient, {
       pathParams: {
         id,
       },
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data) {
-          setPatientData(data);
-        }
-        triggerGoal("Patient Profile Viewed", {
-          facilityId: facilityId,
-          userId: user?.id || patient?.id,
-        });
-      },
-    },
-  );
-
-  const handleAssignedVolunteer = async () => {
-    const previousVolunteerId = patientData?.assigned_to;
-
-    const { res, data } = await request(routes.patchPatient, {
-      pathParams: {
-        id: patientData.id as string,
-      },
-      body: {
-        assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
-      },
-    });
-
-    if (res?.ok && data) {
-      setPatientData(data);
-
-      if (!previousVolunteerId && assignedVolunteer) {
-        Notification.Success({
-          msg: t("volunteer_assigned"),
-        });
-      } else if (previousVolunteerId && assignedVolunteer) {
-        Notification.Success({
-          msg: t("volunteer_update"),
-        });
-      } else if (!assignedVolunteer) {
-        Notification.Success({
-          msg: t("volunteer_unassigned"),
-        });
-      }
-
-      refetch();
-    }
-
-    setOpenAssignVolunteerDialog(false);
-
-    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  };
-
-  const consultation = patientData?.last_consultation;
-  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
-    pathParams: {
-      username: consultation?.treating_physician_object?.username ?? "",
-    },
-    prefetch: !!consultation?.treating_physician_object?.username,
+    }),
+    enabled: !!id,
   });
-  const formatSkills = (arr: SkillModel[]) => {
-    const skills = arr.map((skill) => skill.skill_object.name);
 
-    if (skills.length === 0) {
-      return "";
-    }
+  // const handleAssignedVolunteer = async () => {
+  //   const previousVolunteerId = patientData?.assigned_to;
 
-    if (skills.length <= 3) {
-      return humanizeStrings(skills);
-    }
+  //   const { res, data } = await request(routes.patchPatient, {
+  //     pathParams: {
+  //       id: patientData.id as string,
+  //     },
+  //     body: {
+  //       assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
+  //     },
+  //   });
 
-    const [first, second, ...rest] = skills;
-    return `${first}, ${second} and ${rest.length} other skills...`;
-  };
+  //   if (res?.ok && data) {
+  //     setPatientData(data);
+
+  //     if (!previousVolunteerId && assignedVolunteer) {
+  //       Notification.Success({
+  //         msg: t("volunteer_assigned"),
+  //       });
+  //     } else if (previousVolunteerId && assignedVolunteer) {
+  //       Notification.Success({
+  //         msg: t("volunteer_update"),
+  //       });
+  //     } else if (!assignedVolunteer) {
+  //       Notification.Success({
+  //         msg: t("volunteer_unassigned"),
+  //       });
+  //     }
+
+  //     refetch();
+  //   }
+
+  //   setOpenAssignVolunteerDialog(false);
+
+  //   if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
+  // };
 
   if (isLoading) {
     return <Loading />;
   }
 
-  const patientGender = GENDER_TYPES.find(
-    (i) => i.id === patientData.gender,
-  )?.text;
-
-  const handlePatientTransfer = async (value: boolean) => {
-    await request(routes.patchPatient, {
-      pathParams: {
-        id: patientData.id as string,
-      },
-      body: { allow_transfer: value },
-      onResponse: ({ res }) => {
-        if (res?.status === 200) {
-          setPatientData((prev) => ({
-            ...prev,
-            allow_transfer: value,
-          }));
-          Notification.Success({
-            msg: t("transfer_status_updated"),
-          });
-        }
-      },
-    });
-  };
+  // const handlePatientTransfer = async (value: boolean) => {
+  //   await request(routes.patchPatient, {
+  //     pathParams: {
+  //       id: patientData.id as string,
+  //     },
+  //     body: { allow_transfer: value },
+  //     onResponse: ({ res }) => {
+  //       if (res?.status === 200) {
+  //         setPatientData((prev) => ({
+  //           ...prev,
+  //           allow_transfer: value,
+  //         }));
+  //         Notification.Success({
+  //           msg: t("transfer_status_updated"),
+  //         });
+  //       }
+  //     },
+  //   });
+  // };
 
   const Tab = patientTabs.find((t) => t.route === page)?.component;
+
+  if (!patientData) {
+    return <div>Patient not found</div>;
+  }
 
   return (
     <Page
       title={t("patient_details")}
-      crumbsReplacements={{
-        [facilityId || ""]: { name: patientData?.facility_object?.name },
-        [id]: { name: patientData?.name },
-      }}
-      backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
       options={
         <>
           <Button asChild variant="primary">
@@ -207,7 +136,7 @@ export const PatientHome = (props: {
                     <div className="h-10 w-10 flex-shrink-0 md:h-14 md:w-14">
                       <Avatar
                         className="size-10 font-semibold text-secondary-800 md:size-auto"
-                        name={patientData.name || "-"}
+                        name={patientData.name}
                       />
                     </div>
                     <div>
@@ -217,9 +146,10 @@ export const PatientHome = (props: {
                       >
                         {patientData.name}
                       </h1>
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-gray-600 capitalize">
                         {formatPatientAge(patientData, true)},{"  "}
-                        {patientGender},{"  "} {patientData.blood_group || "-"}
+                        {t(`GENDER__${patientData.gender}`)}, {"  "}
+                        {patientData.blood_group?.replace("_", " ")}
                       </h3>
                     </div>
                   </div>
@@ -254,149 +184,6 @@ export const PatientHome = (props: {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <div className="ml-auto mt-4 flex flex-wrap gap-3">
-                  {isPatientMandatoryDataFilled(patientData) &&
-                    (!patientData.last_consultation ||
-                      patientData.last_consultation?.facility !==
-                        patientData.facility ||
-                      (patientData.last_consultation?.discharge_date &&
-                        patientData.is_active)) && (
-                      <span className="relative inline-flex">
-                        <Chip
-                          size="small"
-                          variant="danger"
-                          startIcon="l-notes"
-                          text={t("no_consultation_filed")}
-                        />
-                        <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                          <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                          <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                        </span>
-                      </span>
-                    )}
-                  {patientData.is_vaccinated && (
-                    <Chip
-                      variant="custom"
-                      size="small"
-                      className="bg-blue-100 text-blue-800"
-                      startIcon="l-syringe"
-                      text={t("vaccinated")}
-                    />
-                  )}
-                  {patientData.allow_transfer ? (
-                    <Chip
-                      variant="warning"
-                      size="small"
-                      startIcon="l-unlock"
-                      text={t("transfer_allowed")}
-                    />
-                  ) : (
-                    <Chip
-                      startIcon="l-lock"
-                      size="small"
-                      text={t("transfer_blocked")}
-                    />
-                  )}
-                  {patientData.last_consultation?.is_telemedicine && (
-                    <Chip
-                      variant="alert"
-                      size="small"
-                      startIcon="l-phone"
-                      text={t("TELEMEDICINE")}
-                    />
-                  )}
-                  {patientData.allergies &&
-                    patientData.allergies.trim().length > 0 && (
-                      <Chip
-                        variant="danger"
-                        size="small"
-                        text={t("has_allergies")}
-                      />
-                    )}
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-4">
-                <div>
-                  <p className="text-xs font-normal leading-tight text-gray-600">
-                    {t("facility")}:
-                  </p>
-                  <p className="mt-1 flex text-sm font-semibold leading-tight text-gray-900">
-                    {patientData.facility_object?.name || "-"}
-                  </p>
-                </div>
-
-                {patientData?.last_consultation?.treating_physician_object && (
-                  <div>
-                    <h4 className="text-xs font-normal leading-tight text-gray-600">
-                      {t("treating_doctor")}:
-                    </h4>
-                    <div className="mt-1 flex space-x-2">
-                      <p className="flex text-sm font-semibold leading-tight text-gray-900">
-                        {formatName(
-                          patientData.last_consultation
-                            .treating_physician_object,
-                        )}
-                      </p>
-                      <span className="tooltip text-xs text-secondary-800 flex items-end  font-normal leading-tight">
-                        {!!skillsQuery.data?.results?.length &&
-                          formatSkills(skillsQuery.data?.results)}
-                        {(skillsQuery.data?.results?.length || 0) > 3 && (
-                          <ul
-                            className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
-                            role="tooltip"
-                          >
-                            {skillsQuery.data?.results.map((skill) => (
-                              <li key={skill.skill_object.id}>
-                                {skill.skill_object.name}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {patientData?.last_consultation?.assigned_to_object && (
-                  <div>
-                    <p className="text-xs font-normal leading-tight text-gray-600">
-                      {t("assigned_doctor")}:
-                    </p>
-                    <div className="mt-1 flex space-x-2 text-sm font-semibold leading-tight text-gray-900">
-                      <p>
-                        {formatName(
-                          patientData.last_consultation.assigned_to_object,
-                        )}
-                      </p>
-                      {patientData?.last_consultation?.assigned_to_object
-                        .alt_phone_number && (
-                        <a
-                          href={`https://wa.me/${patientData.last_consultation.assigned_to_object.alt_phone_number.replace(/\D+/g, "")}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center space-x-1 text-xs text-green-500"
-                        >
-                          <CareIcon icon="l-whatsapp" />{" "}
-                          <span>{t("video_call")}</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {patientData.assigned_to_object && (
-                  <div>
-                    <p className="text-xs font-normal leading-tight text-gray-600">
-                      {t("assigned_volunteer")}:
-                    </p>
-                    <p className="mt-1 text-sm font-semibold leading-tight text-gray-900">
-                      {formatName(patientData.assigned_to_object)}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -433,7 +220,6 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
-                refetch={refetch}
               />
             )}
           </div>
@@ -446,30 +232,12 @@ export const PatientHome = (props: {
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      <ButtonV2
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
-                        onClick={() =>
-                          navigate(`/patient/${id}/investigation_reports`)
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon
-                            icon="l-file-search-alt"
-                            className="text-xl"
-                          />
-                          {t("investigations_summary")}
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
+                      <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
-                        size="large"
                         onClick={() =>
                           navigate(
-                            `/facility/${patientData?.facility}/patient/${id}/files`,
+                            `/facility/${facilityId}/patient/${id}/files`,
                           )
                         }
                       >
@@ -477,10 +245,10 @@ export const PatientHome = (props: {
                           <CareIcon icon="l-file-upload" className="text-xl" />
                           {t("view_update_patient_files")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
 
-                    {NonReadOnlyUsers && (
+                    {/* {NonReadOnlyUsers && (
                       <div>
                         <ButtonV2
                           id="assign-volunteer"
@@ -498,35 +266,7 @@ export const PatientHome = (props: {
                           </span>
                         </ButtonV2>
                       </div>
-                    )}
-
-                    <div>
-                      <ButtonV2
-                        id="patient-allow-transfer"
-                        className="flex w-full flex-row bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
-                        disabled={
-                          !patientData.last_consultation?.id ||
-                          !patientData.is_active
-                        }
-                        onClick={() =>
-                          handlePatientTransfer(!patientData.allow_transfer)
-                        }
-                        authorizeFor={NonReadOnlyUsers}
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon
-                            icon={
-                              patientData.allow_transfer ? "l-lock" : "l-unlock"
-                            }
-                            className="text-lg"
-                          />
-                          {patientData.allow_transfer
-                            ? t("disable_transfer")
-                            : t("allow_transfer")}
-                        </span>
-                      </ButtonV2>
-                    </div>
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -537,65 +277,7 @@ export const PatientHome = (props: {
               className="my-2 flex h-full flex-col justify-between space-y-2"
             >
               <div>
-                {patientData.review_time &&
-                  !patientData.last_consultation?.discharge_date &&
-                  Number(patientData.last_consultation?.review_interval) >
-                    0 && (
-                    <div
-                      className={
-                        "my-2 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0" +
-                        (dayjs().isBefore(patientData.review_time)
-                          ? " bg-secondary-100"
-                          : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
-                      }
-                    >
-                      <CareIcon icon="l-clock" className="text-md mr-2" />
-                      <p className="p-1">
-                        {(dayjs().isBefore(patientData.review_time)
-                          ? t("review_before")
-                          : t("review_missed")) +
-                          ": " +
-                          formatDateTime(patientData.review_time)}
-                      </p>
-                    </div>
-                  )}
-
-                <div className="rounded-sm px-2">
-                  <div className="my-1 flex justify-between">
-                    <div>
-                      <div className="text-xs font-normal leading-5 text-gray-600">
-                        {t("last_discharge_reason")}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        {patientData.is_active ? (
-                          "-"
-                        ) : !patientData.last_consultation
-                            ?.new_discharge_reason ? (
-                          <span className="text-secondary-800">
-                            {patientData?.last_consultation?.suggestion === "OP"
-                              ? t("op_file_closed")
-                              : t("unknown")}
-                          </span>
-                        ) : patientData.last_consultation
-                            ?.new_discharge_reason ===
-                          DISCHARGE_REASONS.find((i) => i.text == "Expired")
-                            ?.id ? (
-                          <span className="text-red-600 uppercase">
-                            {t("expired")}
-                          </span>
-                        ) : (
-                          DISCHARGE_REASONS.find(
-                            (reason) =>
-                              reason.id ===
-                              patientData.last_consultation
-                                ?.new_discharge_reason,
-                          )?.text
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="my-1 rounded-sm p-2">
+                {/* <div className="my-1 rounded-sm p-2">
                   <div>
                     <div className="text-xs font-normal text-gray-600">
                       {t("last_updated_by")}{" "}
@@ -616,8 +298,10 @@ export const PatientHome = (props: {
                           : "--:--"}
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-4">
+                  </div> */}
+                {
+                  // TODO: Add this back when backend provides created_date
+                  /* <div className="mt-4">
                     <div className="text-xs font-normal leading-5 text-gray-600">
                       {t("patient_profile_created_by")}{" "}
                       <span className="font-semibold text-gray-900">
@@ -637,30 +321,30 @@ export const PatientHome = (props: {
                           : "--:--"}
                       </div>
                     </div>
-                  </div>
+                  </div> */
+                }
+              </div>
+            </div>
+            <div className="py-2">
+              {patientData.death_datetime && (
+                <div>
+                  <Button
+                    id="death-report"
+                    className="my-2 w-full"
+                    name="death_report"
+                    onClick={() => navigate(`/death_report/${id}`)}
+                  >
+                    <CareIcon icon="l-file-download" className="text-lg" />
+                    {t("death_report")}
+                  </Button>
                 </div>
-              </div>
-              <div className="py-2">
-                {patientData.last_consultation?.new_discharge_reason ===
-                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
-                  <div>
-                    <ButtonV2
-                      id="death-report"
-                      className="my-2 w-full"
-                      name="death_report"
-                      onClick={() => navigate(`/death_report/${id}`)}
-                    >
-                      <CareIcon icon="l-file-download" className="text-lg" />
-                      {t("death_report")}
-                    </ButtonV2>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-      <ConfirmDialog
+
+      {/* <ConfirmDialog
         className="w-full justify-between"
         title={t("assign_a_volunteer_to", { name: patientData.name })}
         show={openAssignVolunteerDialog}
@@ -682,7 +366,7 @@ export const PatientHome = (props: {
             : t("unassign")
         }
         onConfirm={handleAssignedVolunteer}
-      />
+      /> */}
     </Page>
   );
 };

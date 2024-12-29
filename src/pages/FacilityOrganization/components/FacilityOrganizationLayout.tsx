@@ -42,12 +42,12 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/facility/${facilityId}/organisation/${id}`,
-      title: "Organisations",
+      path: `/facility/${facilityId}/organization/${id}`,
+      title: "Organizations",
       icon: "d-hospital",
     },
     {
-      path: `/facility/${facilityId}/organisation/${id}/users`,
+      path: `/facility/${facilityId}/organization/${id}/users`,
       title: "Users",
       icon: "d-people",
     },
@@ -79,7 +79,7 @@ export default function FacilityOrganizationLayout({
 
   return (
     <Page title={`${org.name} `} breadcrumbs={false}>
-      {/* Since we have links to all parent organisations, we can show the breadcrumb here */}
+      {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
       <Breadcrumb className="mt-1">
         <BreadcrumbList>
           {/* Org has parent and each parent may have another parent, so we need to show all the parents */}
@@ -87,7 +87,7 @@ export default function FacilityOrganizationLayout({
           {orgParents.reverse().map((parent) => (
             <>
               <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`/organisation/${parent.id}`}>
+                <BreadcrumbLink href={`/organization/${parent.id}`}>
                   {parent.name}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -98,7 +98,7 @@ export default function FacilityOrganizationLayout({
           ))}
           <BreadcrumbItem key={org.id}>
             <BreadcrumbLink asChild>
-              <Link href={`/organisation/${org.id}`}>{org.name}</Link>
+              <Link href={`/organization/${org.id}`}>{org.name}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>

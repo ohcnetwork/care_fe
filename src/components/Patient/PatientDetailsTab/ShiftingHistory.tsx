@@ -3,31 +3,23 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
 import ShiftingTable from "@/components/Shifting/ShiftingTable";
 
 import useFilters from "@/hooks/useFilters";
 
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { PatientModel } from "@/types/emr/patient";
 
 const ShiftingHistory = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { facilityId, id } = props;
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
     cacheBlacklist: ["patient_name"],
   });
-
-  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
-    return (
-      !patientData.is_active ||
-      !(patientData?.last_consultation?.facility === facilityId)
-    );
-  };
 
   const { data: shiftData, loading } = useTanStackQueryInstead(
     routes.listShiftRequests,
@@ -49,20 +41,18 @@ const ShiftingHistory = (props: PatientProps) => {
         <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
           {t("shifting_history")}
         </h2>
-        <ButtonV2
+        <Button
           className=""
-          disabled={isPatientInactive(patientData, facilityId)}
           size="default"
           onClick={() =>
             navigate(`/facility/${facilityId}/patient/${id}/shift/new`)
           }
-          authorizeFor={NonReadOnlyUsers}
         >
           <span className="flex w-full items-center justify-start gap-2">
             <CareIcon icon="l-ambulance" className="text-xl" />
             {t("shift")}
           </span>
-        </ButtonV2>
+        </Button>
       </div>
       <ShiftingTable hidePatient data={shiftData?.results} loading={loading} />
       <div>

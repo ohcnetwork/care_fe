@@ -178,7 +178,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       title={facilityData?.name || "Facility"}
       crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
-      backUrl="/facility"
+      hideBack={false}
     >
       <ConfirmDialog
         title={t("delete_item", { name: facilityData?.name })}
@@ -202,7 +202,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         onClose={() => setEditCoverImage(false)}
       />
 
-      <div className="rounded bg-white p-3 shadow-sm transition-all duration-200 ease-in-out md:p-6">
+      <div className="p-3 transition-all duration-200 ease-in-out md:p-6">
         <div className="justify-between gap-2 lg:flex">
           <div className="flex-col justify-between md:flex">
             <div className="flex flex-1 flex-col">

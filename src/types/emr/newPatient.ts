@@ -1,3 +1,7 @@
+import { UserBareMinimum } from "@/components/Users/models";
+
+import { Organization } from "../organization/organization";
+
 export type BloodGroupChoices =
   | "A_negative"
   | "A_positive"
@@ -25,6 +29,11 @@ export interface Patient {
   death_datetime?: string;
   blood_group?: BloodGroupChoices;
   year_of_birth: number;
+  created_date: string;
+  modified_date: string;
+  geo_organization: Organization;
+  created_by: UserBareMinimum;
+  modified_by: UserBareMinimum;
 }
 
 export interface PartialPatientModel {

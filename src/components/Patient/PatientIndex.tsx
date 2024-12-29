@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -26,12 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SectionTabs } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import { PatientManager } from "@/components/Patient/ManagePatients";
 
 import { GENDER_TYPES } from "@/common/constants";
 
@@ -40,46 +36,45 @@ import mutate from "@/Utils/request/mutate";
 import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
-type patientListResponse = {
+interface PatientListResponse {
   results: PartialPatientModel[];
   count: number;
-};
+}
 
-export default function PatientIndex(props: {
-  facilityId: string;
-  tab?: "live" | "discharged" | "search";
-}) {
-  const [qParams] = useQueryParams();
-  const { t } = useTranslation();
-  const [phoneNumber, setPhoneNumber] = useState(qParams.phone_number || "");
+export default function PatientIndex({ facilityId }: { facilityId: string }) {
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] =
     useState<PartialPatientModel | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
-
-  const [patientList, setPatientList] = useState<patientListResponse>({
+  const [patientList, setPatientList] = useState<PatientListResponse>({
     results: [],
     count: 0,
   });
-  const { tab = "search" } = props;
 
-  function AddPatientButton(props: { outline?: boolean; facilityId: string }) {
+  const handleCreatePatient = useCallback(() => {
+    navigate(`/facility/${facilityId}/patient/create`);
+  }, [facilityId]);
+
+  function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
       <Button
-        variant={props.outline ? "outline_primary" : "primary_gradient"}
-        className="gap-3 group"
-        onClick={() => navigate(`/facility/${props.facilityId}/patient/create`)}
+        variant={outline ? "outline" : "primary_gradient"}
+        className={cn("gap-3 group")}
+        onClick={handleCreatePatient}
       >
-        <CareIcon icon="l-plus" />
-        {t("add_new_patient")}
-        <div
+        <CareIcon icon="l-plus" className="h-4 w-4" />
+        Add New Patient
+        <kbd
           className={cn(
-            "border border-white/50 rounded-md opacity-50 px-2 py-0.5 text-xs",
-            props.outline && "border-black/50 group-hover:border-white/50",
+            "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
+            outline
+              ? "border-input bg-transparent"
+              : "bg-white/20 border-white/20 text-white",
           )}
         >
-          SHIFT P
-        </div>
+          ⇧P
+        </kbd>
       </Button>
     );
   }
@@ -88,40 +83,25 @@ export default function PatientIndex(props: {
     {
       key: "phone_number",
       type: "phone" as const,
-      placeholder: t("search_by_phone_number"),
+      placeholder: "Search by phone number",
       value: phoneNumber,
       shortcutKey: "p",
     },
   ];
 
-  const handleSearch = useCallback(
-    (key: string, value: string) => {
-      const updatedQuery: Record<string, string | undefined> = {};
-
-      switch (key) {
-        case "phone_number":
-          if (value.length >= 13 || value === "") {
-            updatedQuery[key] = value;
-          } else {
-            updatedQuery[key] = "";
-          }
-          break;
-        default:
-          break;
-      }
-
-      setPhoneNumber(updatedQuery.phone_number || "");
-    },
-    [setPhoneNumber],
-  );
+  const handleSearch = useCallback((key: string, value: string) => {
+    if (key === "phone_number") {
+      setPhoneNumber(value.length >= 13 || value === "" ? value : "");
+    }
+  }, []);
 
   const { mutate: listPatients, isPending } = useMutation({
-    mutationFn: (body: { phone_number: string }) =>
+    mutationFn: () =>
       mutate(routes.searchPatient, {
         body: {
           phone_number: parsePhoneNumber(phoneNumber) || "",
         },
-      })(body),
+      })({ phone_number: parsePhoneNumber(phoneNumber) || "" }),
     onSuccess: (data) => {
       setPatientList({
         results: data.results,
@@ -138,11 +118,11 @@ export default function PatientIndex(props: {
 
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
-      toast.error(t("please_enter_valid_year"));
+      toast.error("Please enter a valid year of birth (YYYY)");
       return;
     }
 
-    navigate(`/facility/${props.facilityId}/patients/verify`, {
+    navigate(`/facility/${facilityId}/patients/verify`, {
       query: {
         phone_number: selectedPatient.phone_number,
         year_of_birth: yearOfBirth,
@@ -153,117 +133,124 @@ export default function PatientIndex(props: {
 
   useEffect(() => {
     if (phoneNumber) {
-      listPatients({
-        phone_number: parsePhoneNumber(phoneNumber) || "",
-      });
+      listPatients();
     }
-  }, [phoneNumber]);
+  }, [phoneNumber, listPatients]);
+
+  useEffect(() => {
+    function handleKeyPress(event: KeyboardEvent) {
+      if (event.shiftKey && (event.key === "p" || event.key === "P")) {
+        event.preventDefault();
+        handleCreatePatient();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [handleCreatePatient]);
 
   return (
-    <Page
-      title="Patients"
-      hideBack
-      breadcrumbs={false}
-      options={<AddPatientButton facilityId={props.facilityId} />}
-    >
-      <SectionTabs
-        activeTab={tab}
-        onChange={(value) => {
-          if (value === "discharged") {
-            navigate(`/facility/${props.facilityId}/encounters/discharged`);
-          } else if (value === "search") {
-            navigate(`/facility/${props.facilityId}/encounters`);
-          } else if (value === "live") {
-            navigate(`/facility/${props.facilityId}/encounters/live`);
-          }
-        }}
-        tabs={[
-          {
-            label: t("search"),
-            value: "search",
-          },
-          {
-            label: t("live"),
-            value: "live",
-          },
-          {
-            label: t("discharged"),
-            value: "discharged",
-          },
-        ]}
-      />
-      {tab === "search" ? (
-        <div className="flex items-center flex-col w-full lg:w-[800px] mx-auto">
-          <div className="w-full mt-4">
-            <SearchByMultipleFields
-              id="patient-search"
-              options={searchOptions}
-              onSearch={handleSearch}
-              className="w-full"
-            />
-          </div>
-          {!!phoneNumber &&
-            (!isPending && !patientList.results.length ? (
-              <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
-                {t("no_records_found")}
-                <br />
-                {t("to_proceed_with_registration")}
-                <AddPatientButton outline facilityId={props.facilityId} />
-              </div>
-            ) : isPending ? (
-              <Loading />
-            ) : (
-              !!patientList.results.length && (
-                <Table className="mt-4">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="">{t("name")}</TableHead>
-                      <TableHead className="">
-                        {t("primary_phone_no")}
-                      </TableHead>
-                      <TableHead className="">{t("sex")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {patientList.results.map((patient) => (
-                      <TableRow
-                        className="bg-white cursor-pointer"
-                        key={patient.id}
-                        onClick={() => handlePatientSelect(patient)}
-                      >
-                        <TableCell className="min-w-[200px]">
-                          {patient.name}
-                        </TableCell>
-                        <TableCell>{patient.phone_number}</TableCell>
-                        <TableCell>
-                          {
-                            GENDER_TYPES.find((g) => g.id === patient.gender)
-                              ?.text
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )
-            ))}
+    <div>
+      <div className="container max-w-5xl mx-auto py-6">
+        <div className="flex justify-end">
+          <AddPatientButton />
         </div>
-      ) : (
-        <PatientManager />
-      )}
+        <div className="space-y-6 mt-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Search Patients
+            </h1>
+            <p className="text-muted-foreground">
+              Search for existing patients using their phone number or create a
+              new patient record
+            </p>
+          </div>
+
+          <div>
+            <div className="space-y-6">
+              <SearchByMultipleFields
+                id="patient-search"
+                options={searchOptions}
+                onSearch={handleSearch}
+                className="w-full"
+              />
+
+              <div className="min-h-[200px]">
+                {!!phoneNumber && (
+                  <>
+                    {isPending ? (
+                      <div className="flex items-center justify-center h-[200px]">
+                        <Loading />
+                      </div>
+                    ) : !patientList.results.length ? (
+                      <div>
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                          <h3 className="text-lg font-semibold">
+                            No Patient Records Found
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-6">
+                            No existing records found with this phone number.
+                            Would you like to register a new patient?
+                          </p>
+                          <AddPatientButton outline />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[300px]">
+                                Patient Name
+                              </TableHead>
+                              <TableHead>Phone Number</TableHead>
+                              <TableHead>Gender</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {patientList.results.map((patient) => (
+                              <TableRow
+                                key={patient.id}
+                                className="cursor-pointer hover:bg-muted/50"
+                                onClick={() => handlePatientSelect(patient)}
+                              >
+                                <TableCell className="font-medium">
+                                  {patient.name}
+                                </TableCell>
+                                <TableCell>{patient.phone_number}</TableCell>
+                                <TableCell>
+                                  {
+                                    GENDER_TYPES.find(
+                                      (g) => g.id === patient.gender,
+                                    )?.text
+                                  }
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("verify_patient")}</DialogTitle>
+            <DialogTitle>Verify Patient Identity</DialogTitle>
             <DialogDescription>
-              {t("enter_year_of_birth_to_verify")}
+              Please enter the patient's year of birth to verify their identity
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Input
               type="text"
-              placeholder={t("year_of_birth")}
+              placeholder="Year of Birth (YYYY)"
               value={yearOfBirth}
               onChange={(e) => {
                 const value = e.target.value;
@@ -278,12 +265,12 @@ export default function PatientIndex(props: {
               variant="outline"
               onClick={() => setVerificationOpen(false)}
             >
-              {t("cancel")}
+              Cancel
             </Button>
-            <Button onClick={handleVerify}>{t("verify")}</Button>
+            <Button onClick={handleVerify}>Verify</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Page>
+    </div>
   );
 }

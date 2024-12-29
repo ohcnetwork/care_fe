@@ -35,7 +35,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { OrganizationUserRole } from "@/types/organisation/organisation";
+import { OrganizationUserRole } from "@/types/organization/organization";
 
 interface Props {
   organizationId: string;
@@ -60,7 +60,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.organisation.updateUserRole, {
+      mutate(routes.organization.updateUserRole, {
         pathParams: { id: organizationId, userRoleId: userRole.id },
         body,
       })(body),
@@ -81,7 +81,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(routes.organisation.removeUserRole, {
+      mutate(routes.organization.removeUserRole, {
         pathParams: { id: organizationId, userRoleId: userRole.id },
       })({}),
     onSuccess: () => {

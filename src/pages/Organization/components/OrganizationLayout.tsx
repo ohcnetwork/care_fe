@@ -20,9 +20,11 @@ import {
   Organization,
   OrganizationParent,
   getOrgLevel,
-} from "@/types/organisation/organisation";
+} from "@/types/organization/organization";
 
 interface Props {
+  // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
+  navOrganizationId?: string;
   id: string;
   children: React.ReactNode;
 }
@@ -33,25 +35,32 @@ interface NavItem {
   icon: IconName;
 }
 
-export default function OrganisationLayout({ id, children }: Props) {
+export default function OrganizationLayout({
+  id,
+  navOrganizationId,
+  children,
+}: Props) {
   const path = usePath() || "";
 
+  const baseUrl = navOrganizationId
+    ? `/organization/${navOrganizationId}/children`
+    : `/organization`;
   const navItems: NavItem[] = [
     {
-      path: `/organisation/${id}`,
-      title: "Organisations",
+      path: `${baseUrl}/${id}`,
+      title: "Organizations",
       icon: "d-hospital",
     },
     {
-      path: `/organisation/${id}/users`,
+      path: `${baseUrl}/${id}/users`,
       title: "Users",
       icon: "d-people",
     },
   ];
 
   const { data: org, isLoading } = useQuery<Organization>({
-    queryKey: ["organisation", id],
-    queryFn: query(routes.organisation.get, {
+    queryKey: ["organization", id],
+    queryFn: query(routes.organization.get, {
       pathParams: { id },
     }),
   });
@@ -78,7 +87,7 @@ export default function OrganisationLayout({ id, children }: Props) {
       title={`${org.name} ${getOrgLevel(org.org_type, org.level_cache)}`}
       breadcrumbs={false}
     >
-      {/* Since we have links to all parent organisations, we can show the breadcrumb here */}
+      {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
       <Breadcrumb className="mt-1">
         <BreadcrumbList>
           {/* Org has parent and each parent may have another parent, so we need to show all the parents */}
@@ -86,7 +95,7 @@ export default function OrganisationLayout({ id, children }: Props) {
           {orgParents.reverse().map((parent) => (
             <>
               <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`/organisation/${parent.id}`}>
+                <BreadcrumbLink href={`${baseUrl}/${parent.id}`}>
                   {parent.name}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -97,7 +106,7 @@ export default function OrganisationLayout({ id, children }: Props) {
           ))}
           <BreadcrumbItem key={org.id}>
             <BreadcrumbLink asChild>
-              <Link href={`/organisation/${org.id}`}>{org.name}</Link>
+              <Link href={`${baseUrl}/${id}`}>{org.name}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>

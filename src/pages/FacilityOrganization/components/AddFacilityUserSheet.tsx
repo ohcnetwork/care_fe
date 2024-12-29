@@ -68,7 +68,7 @@ export default function AddFacilityUserSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["organizationUsers", organizationId],
+        queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
       });
       toast.success("User added to organization successfully");
       setOpen(false);

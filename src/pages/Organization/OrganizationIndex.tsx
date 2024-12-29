@@ -18,18 +18,18 @@ import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import type { Organization } from "@/types/organisation/organisation";
-import { getOrgLevel } from "@/types/organisation/organisation";
+import type { Organization } from "@/types/organization/organization";
+import { getOrgLevel } from "@/types/organization/organization";
 
-export default function OrganisationIndex() {
+export default function OrganizationIndex() {
   const { data, isLoading } = useQuery({
-    queryKey: ["organisation", "mine"],
-    queryFn: query(routes.organisation.listMine),
+    queryKey: ["organization", "mine"],
+    queryFn: query(routes.organization.listMine),
   });
 
   if (isLoading) {
     return (
-      <Page title="Organisations">
+      <Page title="Organizations">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i} className="relative">
@@ -53,14 +53,14 @@ export default function OrganisationIndex() {
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organisations">
+      <Page title="Organizations">
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
-              No Organisations Found
+              No Organizations Found
             </CardTitle>
             <CardDescription className="text-center">
-              You don't have access to any organisations yet.
+              You don't have access to any organizations yet.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -68,7 +68,7 @@ export default function OrganisationIndex() {
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
-              Organisations help you manage facilities, users, and resources
+              Organizations help you manage facilities, users, and resources
               efficiently. Contact your administrator to get access.
             </p>
           </CardContent>
@@ -78,7 +78,7 @@ export default function OrganisationIndex() {
   }
 
   return (
-    <Page title="Organisations">
+    <Page title="Organizations">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 mt-4">
         {data.results.map((org: Organization) => (
           <Card key={org.id} className="relative group">
@@ -96,7 +96,7 @@ export default function OrganisationIndex() {
             <CardFooter>
               <Button variant="outline" asChild className="w-full">
                 <Link
-                  href={`/organisation/${org.id}`}
+                  href={`/organization/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
                   View Details
