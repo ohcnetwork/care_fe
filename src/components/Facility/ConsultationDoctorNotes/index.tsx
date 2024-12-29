@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +14,7 @@ import {
   PatientNoteStateType,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -22,8 +24,7 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
 interface ConsultationDoctorNotesProps {
@@ -54,52 +55,46 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
     facilityId: facilityId,
     patientId: patientId,
   };
   const [state, setState] = useState(initialData);
 
-  const onAddNote = async () => {
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    thread,
+    consultationId,
+  });
+
+  const onAddNote = () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
       return;
     }
-
-    const { res } = await request(routes.addPatientNote, {
-      pathParams: {
-        patientId: patientId,
-      },
-      body: {
-        note: noteField,
-        thread,
-        consultation: consultationId,
-        reply_to: reply_to?.id,
-      },
+    setReplyTo(undefined);
+    setNoteField("");
+    addNote({
+      note: noteField,
+      reply_to: reply_to?.id,
+      thread,
+      consultation: consultationId,
     });
-
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setState({ ...state, cPage: 1 });
-      setNoteField("");
-      setReload(true);
-      setReplyTo(undefined);
-    }
   };
 
-  useTanStackQueryInstead(routes.getPatient, {
-    pathParams: { id: patientId },
-    onResponse: ({ data }) => {
-      if (data) {
-        setPatientActive(data.is_active ?? true);
-        setPatientName(data.name ?? "");
-        setFacilityName(data.facility_object?.name ?? "");
-      }
-    },
+  const { data } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { patientId },
+    }),
   });
+
+  useEffect(() => {
+    setPatientActive(data?.is_active ?? true);
+    setPatientName(data?.name ?? "");
+    setFacilityName(data?.facility_object?.name ?? "");
+  }, [data]);
 
   useMessageListener((data) => {
     const message = data?.message;
@@ -147,13 +142,21 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                if (thread !== PATIENT_NOTES_THREADS[current]) {
+                  setThread(PATIENT_NOTES_THREADS[current]);
+                  setState(initialData);
+                  setReplyTo(undefined);
+                  setNoteField("");
+                }
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
           ))}
         </div>
         <PatientConsultationNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           reload={reload}
