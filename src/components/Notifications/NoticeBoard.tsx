@@ -77,7 +77,7 @@ export const NoticeBoard = () => {
 
   const NoticeDialog: React.FC<{ notice: NotificationData }> = ({ notice }) => {
     return (
-      <div className="m-0 w-full h-full rounded-md w-full">
+      <div className="w-full h-full rounded-md w-full">
         <DialogHeader>
           <div className="flex justify-between  items-center mb-4">
             <CareIcon
@@ -95,7 +95,7 @@ export const NoticeBoard = () => {
           </h1>
           <Message className="" message={notice.message} />
         </div>
-        <DialogFooter className="sm:justify-start w-full  py-2 flex items-center bg-gray-100  mt-4">
+        <DialogFooter className="sm:justify-start w-full  py-2 flex items-center bg-gray-100 mt-4">
           <UserInfo {...notice} />
         </DialogFooter>
       </div>
