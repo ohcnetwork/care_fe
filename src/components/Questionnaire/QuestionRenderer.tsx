@@ -15,6 +15,7 @@ interface QuestionRendererProps {
   disabled?: boolean;
   activeGroupId?: string;
   encounterId?: string;
+  facilityId: string;
 }
 
 export function QuestionRenderer({
@@ -26,6 +27,7 @@ export function QuestionRenderer({
   disabled,
   activeGroupId,
   encounterId,
+  facilityId,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -59,6 +61,7 @@ export function QuestionRenderer({
           ref={(el) => (questionRefs.current[question.id] = el)}
         >
           <QuestionGroup
+            facilityId={facilityId}
             question={question}
             encounterId={encounterId}
             questionnaireResponses={responses}

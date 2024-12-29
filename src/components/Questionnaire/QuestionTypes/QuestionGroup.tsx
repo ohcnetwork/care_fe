@@ -19,6 +19,7 @@ interface QuestionGroupProps {
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
+  facilityId: string;
 }
 
 export const QuestionGroup = memo(function QuestionGroup({
@@ -30,6 +31,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   clearError,
   disabled,
   activeGroupId,
+  facilityId,
 }: QuestionGroupProps) {
   if (question.type !== "group") {
     return (
@@ -41,6 +43,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         errors={errors}
         clearError={() => clearError(question.id)}
         disabled={disabled}
+        facilityId={facilityId}
       />
     );
   }
@@ -76,6 +79,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         >
           {question.questions?.map((subQuestion) => (
             <QuestionGroup
+              facilityId={facilityId}
               key={subQuestion.id}
               question={subQuestion}
               questionnaireResponses={questionnaireResponses}

@@ -45,6 +45,7 @@ export interface QuestionnaireFormProps {
   subjectType?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
+  facilityId: string;
 }
 
 export function QuestionnaireForm({
@@ -54,6 +55,7 @@ export function QuestionnaireForm({
   subjectType,
   onSubmit,
   onCancel,
+  facilityId,
 }: QuestionnaireFormProps) {
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -333,6 +335,7 @@ export function QuestionnaireForm({
               </div>
 
               <QuestionRenderer
+                facilityId={facilityId}
                 encounterId={encounterId}
                 questions={form.questionnaire.questions}
                 responses={form.responses}

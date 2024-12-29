@@ -41,6 +41,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import FacilityOrganizationSelector from "@/pages/FacilityOrganization/components/FacilityOrganizationSelector";
 import {
   Encounter,
   EncounterClass,
@@ -72,6 +73,7 @@ const encounterFormSchema = z.object({
     "use_as_directed",
     "urgent",
   ] as const),
+  organizations: z.array(z.string()),
 });
 
 const encounterClasses = [
@@ -139,6 +141,7 @@ export default function CreateEncounterForm({
       status: "planned",
       encounter_class: encounterClass || "amb",
       priority: "routine",
+      organizations: [],
     },
   });
 
@@ -164,7 +167,6 @@ export default function CreateEncounterForm({
     const encounterRequest: EncounterRequest = {
       ...data,
       patient: patientId,
-      organizations: [], // TODO: Get from context
       facility: facilityId,
       period: {
         start: new Date().toISOString(),
@@ -308,6 +310,13 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
+
+            <FacilityOrganizationSelector
+              facilityId={facilityId}
+              onChange={(value) => {
+                form.setValue("organizations", [value]);
+              }}
+            />
 
             <Button type="submit" className="w-full">
               Create Encounter

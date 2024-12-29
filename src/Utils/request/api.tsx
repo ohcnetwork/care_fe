@@ -1611,6 +1611,18 @@ const routes = {
       TRes: Type<Encounter>(),
       TBody: Type<EncounterEditRequest>(),
     },
+    addOrganization: {
+      path: "/api/v1/encounter/{encounterId}/organizations_add/",
+      method: "POST",
+      TRes: Type<Encounter>(),
+      TBody: Type<{ organization: string }>(),
+    },
+    removeOrganization: {
+      path: "/api/v1/encounter/{encounterId}/organizations_remove/",
+      method: "POST",
+      TRes: Type<Encounter>(),
+      TBody: Type<{ organization: string }>(),
+    },
   },
 
   // New Patient Routes

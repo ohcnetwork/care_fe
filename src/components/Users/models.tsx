@@ -8,6 +8,7 @@ import { GENDER_TYPES, UserRole } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
 import { Organization } from "@/types/organization/organization";
+import { Permission } from "@/types/permission/permission";
 
 interface HomeFacilityObjectModel {
   id?: string;
@@ -64,6 +65,7 @@ export type UserModel = UserBareMinimum & {
   user_flags?: FeatureFlag[];
   facilities?: UserFacilityModel[];
   organizations?: Organization[];
+  permissions: Permission[];
 };
 
 export type UserBaseModel = {

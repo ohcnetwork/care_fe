@@ -15,7 +15,6 @@ import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
 import GLocationPicker from "@/components/Common/GLocationPicker";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import SpokeFacilityEditor from "@/components/Facility/SpokeFacilityEditor";
 import { FacilityRequest } from "@/components/Facility/models";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
@@ -43,7 +42,6 @@ import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 
@@ -115,6 +113,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   const authUser = useAuthUser();
   useEffect(() => {
+    console.log("authUser", authUser.permissions);
     if (
       authUser &&
       authUser.user_type !== "StateAdmin" &&
@@ -127,42 +126,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       });
     }
   }, [authUser]);
-
-  const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
-    pathParams: {
-      id: facilityId!,
-    },
-    prefetch: !!facilityId,
-    onResponse: ({ res, data }) => {
-      if (facilityId) {
-        setIsLoading(true);
-        if (res?.ok && data) {
-          const formData = {
-            facility_type: data.facility_type ? data.facility_type : "",
-            name: data.name ? data.name : "",
-            geo_organization: data.geo_organization,
-            features: data.features || [],
-            address: data.address ? data.address : "",
-            pincode: data.pincode ? data.pincode : "",
-            description: data.description ? data.description : "",
-            phone_number: data.phone_number
-              ? data.phone_number.length == 10
-                ? "+91" + data.phone_number
-                : data.phone_number
-              : "",
-            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : "",
-            longitude: data.longitude
-              ? parseFloat(data.longitude).toFixed(7)
-              : "",
-          };
-          dispatch({ type: "set_form", form: formData });
-        } else {
-          navigate(`/facility/${facilityId}`);
-        }
-        setIsLoading(false);
-      }
-    },
-  });
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
@@ -400,14 +363,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                 required
                 types={["mobile", "landline"]}
               />
-              {facilityId && (
-                <div className="py-4 md:col-span-2">
-                  <h4 className="mb-4">{t("spokes")}</h4>
-                  <SpokeFacilityEditor
-                    facility={{ ...facilityQuery.data, id: facilityId }}
-                  />
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-3">

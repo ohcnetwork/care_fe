@@ -87,6 +87,9 @@ export const EncounterShow = (props: Props) => {
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
+      queryParams: {
+        facility: facilityId,
+      },
     }),
     enabled: !!encounterId,
   });

@@ -195,6 +195,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                 patientId={"some_patient_id"}
                 subjectType={"encounter"}
                 encounterId={"some_encounter_id"}
+                facilityId={"facilityId"}
               />
             </CardContent>
           </Card>

@@ -93,19 +93,6 @@ export const FacilityCard = (props: {
                           {facility.name}
                         </Link>
                       </div>
-                      <ButtonV2
-                        id="view-cns-button"
-                        href={`/facility/${facility.id}/cns`}
-                        border
-                        ghost
-                        className="mt-2 sm:mt-0"
-                      >
-                        <CareIcon
-                          icon="l-monitor-heart-rate"
-                          className="text-lg"
-                        />
-                        <span>{t("view_cns")}</span>
-                      </ButtonV2>
                     </div>
 
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -226,16 +213,6 @@ export const FacilityCard = (props: {
                         {t("view_faciliy")}
                       </span>
                     </ButtonV2>
-                    <ButtonV2
-                      href={`/patients?facility=${facility.id}`}
-                      id="facility-patients"
-                      border
-                      ghost
-                    >
-                      <CareIcon icon="l-user-injured" className="text-lg" />
-                      {t("view_patients")}
-                    </ButtonV2>
-                    {/* </div> */}
                   </div>
                 </div>
               </div>

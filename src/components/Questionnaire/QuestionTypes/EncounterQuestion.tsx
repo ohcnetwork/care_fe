@@ -39,6 +39,7 @@ interface EncounterQuestionProps {
   clearError: () => void;
   organizations?: string[];
   patientId?: string;
+  facilityId: string;
 }
 
 export function EncounterQuestion({
@@ -49,12 +50,14 @@ export function EncounterQuestion({
   organizations = [],
   encounterId,
   patientId = "",
+  facilityId,
 }: EncounterQuestionProps) {
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
+      queryParams: { facility: facilityId },
     }),
     enabled: !!encounterId,
   });

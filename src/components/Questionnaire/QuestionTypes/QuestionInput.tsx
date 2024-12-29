@@ -32,6 +32,7 @@ interface QuestionInputProps {
   errors: QuestionValidationError[];
   clearError: () => void;
   disabled?: boolean;
+  facilityId: string;
 }
 
 export function QuestionInput({
@@ -42,6 +43,7 @@ export function QuestionInput({
   errors,
   clearError,
   disabled,
+  facilityId,
 }: QuestionInputProps) {
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
@@ -161,7 +163,11 @@ export function QuestionInput({
           case "encounter":
             if (encounterId) {
               return (
-                <EncounterQuestion {...commonProps} encounterId={encounterId} />
+                <EncounterQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  facilityId={facilityId}
+                />
               );
             }
             return null;

@@ -1,6 +1,8 @@
 import { Patient } from "@/types/emr/newPatient";
 import { UserBase } from "@/types/user/base";
 
+import { FacilityOrganization } from "../facilityOrganization/facilityOrganization";
+
 export type EncounterStatus =
   | "planned"
   | "in_progress"
@@ -108,6 +110,7 @@ export interface Encounter {
   updated_date: string;
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
+  organizations: FacilityOrganization[];
 }
 
 export interface EncounterEditRequest {

@@ -29,6 +29,7 @@ import { FacilityOrganizationCreate } from "@/types/facilityOrganization/facilit
 
 interface Props {
   facilityId: string;
+  parentId?: string;
 }
 
 const ORG_TYPES = [
@@ -38,7 +39,10 @@ const ORG_TYPES = [
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
 
-export default function CreateFacilityOrganizationSheet({ facilityId }: Props) {
+export default function CreateFacilityOrganizationSheet({
+  facilityId,
+  parentId,
+}: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -53,7 +57,7 @@ export default function CreateFacilityOrganizationSheet({ facilityId }: Props) {
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["facilityOrganization", "list", facilityId],
+        queryKey: ["facilityOrganization", "list", facilityId, parentId],
       });
       toast.success("Organization created successfully");
       setOpen(false);
@@ -79,6 +83,7 @@ export default function CreateFacilityOrganizationSheet({ facilityId }: Props) {
       name: name.trim(),
       description: description.trim() || undefined,
       org_type: orgType,
+      parent: parentId,
     });
   };
 

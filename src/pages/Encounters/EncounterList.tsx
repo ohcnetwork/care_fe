@@ -84,7 +84,7 @@ const buildQueryParams = (
 ) => {
   const params: Record<string, string | undefined> = {};
   if (facilityId) {
-    params.facilityId = facilityId;
+    params.facility = facilityId;
   }
   if (status && ["live", "ended"].includes(status)) {
     params.live = status === "live" ? "true" : undefined;
@@ -181,7 +181,6 @@ export function EncounterList({
   >({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query(routes.encounter.list, {
-      pathParams: { facilityId: facilityId || "" },
       queryParams: {
         ...buildQueryParams(status, facilityId, encounterClass, priority),
         name,
@@ -485,6 +484,19 @@ export function EncounterList({
                       In Progress
                     </TabsTrigger>
                     <TabsTrigger
+                      value="discharged"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          ...{ encounter_class: encounterClass, priority },
+                          status: "discharged",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                      Discharged
+                    </TabsTrigger>
+                    <TabsTrigger
                       value="completed"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() =>
@@ -648,7 +660,7 @@ export function EncounterList({
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
                       <Link
-                        href={`/patient/${encounter.patient.id}`}
+                        href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
                         className="hover:text-primary"
                       >
                         <CardTitle className="group-hover:text-primary transition-colors">

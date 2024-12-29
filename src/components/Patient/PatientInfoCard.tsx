@@ -1,5 +1,6 @@
 import {
   BedSingle,
+  Building,
   ChevronDown,
   CircleCheck,
   CircleDashed,
@@ -24,6 +25,7 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import { Button } from "../ui/button";
+import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -221,6 +223,35 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       {encounter.hospitalization.discharge_disposition}
                     </Badge>
                   )}
+
+                  <ManageEncounterOrganizations
+                    encounter={encounter}
+                    facilityId={encounter.facility.id}
+                    trigger={
+                      <div className="flex flex-wrap gap-2">
+                        {encounter.organizations.map((org) => (
+                          <Badge
+                            key={org.id}
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                            title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
+                          >
+                            <Building className="w-4 h-4 text-blue-400" />
+                            {org.name}
+                          </Badge>
+                        ))}
+                        {encounter.organizations.length === 0 && (
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                          >
+                            <Building className="w-4 h-4 text-blue-400" />
+                            Add Organizations
+                          </Badge>
+                        )}
+                      </div>
+                    }
+                  />
                 </div>
               </div>
             </div>

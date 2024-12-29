@@ -87,7 +87,9 @@ export default function FacilityOrganizationLayout({
           {orgParents.reverse().map((parent) => (
             <>
               <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`/organization/${parent.id}`}>
+                <BreadcrumbLink
+                  href={`/facility/${facilityId}/organization/${parent.id}`}
+                >
                   {parent.name}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -98,7 +100,9 @@ export default function FacilityOrganizationLayout({
           ))}
           <BreadcrumbItem key={org.id}>
             <BreadcrumbLink asChild>
-              <Link href={`/organization/${org.id}`}>{org.name}</Link>
+              <Link href={`/facility/${facilityId}/organization/${org.id}`}>
+                {org.name}
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>

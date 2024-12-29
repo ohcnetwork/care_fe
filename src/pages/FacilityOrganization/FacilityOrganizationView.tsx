@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 
+import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { data: children, isLoading } = useQuery({
-    queryKey: ["facilityOrganization", id, "children"],
+    queryKey: ["facilityOrganization", "list", facilityId, id],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId, organizationId: id },
       queryParams: { parent: id },
@@ -31,6 +32,10 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Organizations</h2>
+          <CreateFacilityOrganizationSheet
+            facilityId={facilityId}
+            parentId={id}
+          />
         </div>
 
         {isLoading ? (
@@ -65,7 +70,9 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                           </div>
                         </div>
                         <Button variant="link" asChild>
-                          <Link href={`/organization/${org.id}`}>
+                          <Link
+                            href={`/facility/${facilityId}/organization/${org.id}`}
+                          >
                             View Details
                             <CareIcon
                               icon="l-arrow-right"
