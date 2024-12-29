@@ -18,7 +18,7 @@ import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
 import { AssignedToObjectModel } from "@/components/Patient/models";
 import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
-import useAuthUser from "@/hooks/useAuthUser";
+import useAuthOrPatientUser from "@/hooks/useAuthOrPatientUser";
 
 import {
   DISCHARGE_REASONS,
@@ -38,8 +38,6 @@ import {
   formatName,
   formatPatientAge,
   humanizeStrings,
-  isAntenatal,
-  isPostPartum,
   relativeDate,
 } from "@/Utils/utils";
 import { PatientModel } from "@/types/emr/patient";
@@ -56,7 +54,7 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
   const [patientData, setPatientData] = useState<PatientModel>({});
 
-  const authUser = useAuthUser();
+  const { user, patient } = useAuthOrPatientUser();
   const { t } = useTranslation();
 
   const [assignedVolunteer, setAssignedVolunteer] = useState<
@@ -84,7 +82,7 @@ export const PatientHome = (props: {
         }
         triggerGoal("Patient Profile Viewed", {
           facilityId: facilityId,
-          userId: authUser.id,
+          userId: user?.id || patient?.id,
         });
       },
     },
@@ -301,32 +299,6 @@ export const PatientHome = (props: {
                       size="small"
                       text={t("transfer_blocked")}
                     />
-                  )}
-
-                  {patientData.gender === 2 && (
-                    <>
-                      {patientData.is_antenatal &&
-                        isAntenatal(
-                          patientData.last_menstruation_start_date,
-                        ) && (
-                          <Chip
-                            variant="custom"
-                            size="small"
-                            className="border-pink-300 bg-pink-100 text-pink-600"
-                            startIcon="l-baby-carriage"
-                            text={t("antenatal")}
-                          />
-                        )}
-                      {isPostPartum(patientData.date_of_delivery) && (
-                        <Chip
-                          variant="custom"
-                          size="small"
-                          className="border-pink-300 bg-pink-100 text-pink-600"
-                          startIcon="l-baby-carriage"
-                          text={t("post_partum")}
-                        />
-                      )}
-                    </>
                   )}
                   {patientData.last_consultation?.is_telemedicine && (
                     <Chip

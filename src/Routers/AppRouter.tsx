@@ -1,25 +1,20 @@
 import careConfig from "@careConfig";
-import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
-import { useEffect, useState } from "react";
+import { Redirect, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
+
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import {
-  DesktopSidebar,
-  MobileSidebar,
-  SIDEBAR_SHRINK_PREFERENCE_KEY,
-  SidebarShrinkContext,
-} from "@/components/Common/Sidebar/Sidebar";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
 import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
 import ScheduleRoutes from "@/components/Schedule/routes";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import { usePluginRoutes } from "@/hooks/useCareApps";
-
-import { BLACKLISTED_PATHS } from "@/common/constants";
 
 import AssetRoutes from "@/Routers/routes/AssetRoutes";
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
@@ -81,7 +76,6 @@ const Routes: AppRoutes = {
 
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
-
   let routes = Routes;
 
   useRedirect("/user", "/users");
@@ -93,97 +87,40 @@ export default function AppRouter() {
   };
 
   const pages = useRoutes(routes) || <ErrorPage />;
-
-  const path = usePath();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-    let flag = false;
-    if (path) {
-      BLACKLISTED_PATHS.forEach((regex: RegExp) => {
-        flag = flag || regex.test(path);
-      });
-      if (!flag) {
-        const pageContainer = window.document.getElementById("pages");
-        pageContainer?.scroll(0, 0);
-      }
-    }
-  }, [path]);
-
-  const [shrinked, setShrinked] = useState(
-    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true",
-  );
-
-  useEffect(() => {
-    localStorage.setItem(
-      SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false",
-    );
-  }, [shrinked]);
+  const user = useAuthUser();
 
   return (
-    <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
-      <div className="flex h-screen overflow-hidden bg-secondary-100 print:overflow-visible">
-        <>
-          <div className="block md:hidden">
-            <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
-          </div>
-          <div className="hidden md:block">
-            <DesktopSidebar />
-          </div>
-        </>
+    <SidebarProvider>
+      <AppSidebar user={user} />
 
-        <div className="relative flex w-full flex-1 flex-col overflow-hidden bg-gray-100 print:overflow-visible">
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="border-r border-secondary-200 px-4 text-secondary-500 focus:bg-secondary-100 focus:text-secondary-600 focus:outline-none md:hidden"
-              aria-label="Open sidebar"
-            >
-              <svg
-                className="h-6 w-6"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h7"
-                />
-              </svg>
-            </button>
-            <a
-              href="/"
-              className="flex h-full w-full items-center px-4 md:hidden"
-            >
-              <img
-                className="h-8 w-auto"
-                src={careConfig.mainLogo?.dark}
-                alt="care logo"
-              />
-            </a>
+      <main
+        id="pages"
+        className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+      >
+        <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+          <div className="flex items-center">
+            <SidebarTrigger className="px-2" />
           </div>
-
-          <main
-            id="pages"
-            className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          <a
+            href="/"
+            className="flex h-full w-full items-center px-4 md:hidden"
           >
-            <div
-              className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
-              data-cui-page
-            >
-              <ErrorBoundary
-                fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}
-              >
-                {pages}
-              </ErrorBoundary>
-            </div>
-          </main>
+            <img
+              className="h-8 w-auto"
+              src={careConfig.mainLogo?.dark}
+              alt="care logo"
+            />
+          </a>
         </div>
-      </div>
-    </SidebarShrinkContext.Provider>
+        <div
+          className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
+          data-cui-page
+        >
+          <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+            {pages}
+          </ErrorBoundary>
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }

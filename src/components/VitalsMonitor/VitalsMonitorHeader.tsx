@@ -4,8 +4,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { PatientAssetBed } from "@/components/Assets/AssetTypes";
 
-import { GENDER_TYPES } from "@/common/constants";
-
 import { formatPatientAge } from "@/Utils/utils";
 
 interface VitalsMonitorHeaderProps {
@@ -33,7 +31,6 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
         {patient && (
           <span className="text-xs font-bold text-secondary-400 md:text-sm">
             {`${formatPatientAge(patient)}; `}
-            {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
           </span>
         )}
       </div>

@@ -140,7 +140,7 @@ export function FacilitiesPage() {
         <FacilityFilter {...advancedFilter} key={window.location.search} />
       </div>
       <FilterBadges
-        badges={({ badge, value, kasp }) => [
+        badges={({ badge, value }) => [
           badge("Facility/District/Pincode", "search"),
           value(
             "District",
@@ -157,7 +157,6 @@ export function FacilitiesPage() {
               : "",
           ),
           value("Pin Code", "pin_code", qParams.pin_code || ""),
-          kasp("Empanelled", "kasp_empanelled"),
         ]}
       />
 

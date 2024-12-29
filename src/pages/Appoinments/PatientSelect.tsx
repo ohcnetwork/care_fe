@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import Loading from "@/components/Common/Loading";
 import {
   Appointment,
   AppointmentCreate,
@@ -41,6 +42,8 @@ export default function PatientSelect({
   );
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
+
   if (!staffUsername) {
     Notification.Error({ msg: "Staff Username Not Found" });
     navigate(`/facility/${facilityId}/`);
@@ -54,18 +57,18 @@ export default function PatientSelect({
     );
   }
 
-  const { data: patientData } = useQuery<PaginatedResponse<AppointmentPatient>>(
-    {
-      queryKey: ["otp-patient"],
-      queryFn: query(routes.otp.getPatient, {
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-          "Content-Type": "application/json",
-        },
-      }),
-      enabled: !!tokenData.token,
-    },
-  );
+  const { data: patientData, isLoading } = useQuery<
+    PaginatedResponse<AppointmentPatient>
+  >({
+    queryKey: ["otp-patient"],
+    queryFn: query(routes.otp.getPatient, {
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
+        "Content-Type": "application/json",
+      },
+    }),
+    enabled: !!tokenData.token,
+  });
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
@@ -78,7 +81,15 @@ export default function PatientSelect({
       })(body),
     onSuccess: (data: Appointment) => {
       Notification.Success({ msg: t("appointment_created_success") });
-      navigate(`/facility/${facilityId}/appointments/${data.id}/success`);
+      queryClient.invalidateQueries({
+        queryKey: [
+          ["patients", tokenData.phoneNumber],
+          ["appointment", tokenData.phoneNumber],
+        ],
+      });
+      navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+        replace: true,
+      });
     },
     onError: (error) => {
       Notification.Error({
@@ -204,9 +215,15 @@ export default function PatientSelect({
       </div>
       <div className="flex flex-col justify-center space-y-4 bg-white rounded-lg shadow-md p-8">
         <h3 className="text-lg font-medium">{t("select_register_patient")}</h3>
-        {(patients?.length ?? 0) > 0
-          ? renderPatientList()
-          : renderNoPatientFound()}
+        {isLoading ? (
+          <div className="flex justify-center items-center">
+            <Loading />
+          </div>
+        ) : (patients?.length ?? 0) > 0 ? (
+          renderPatientList()
+        ) : (
+          renderNoPatientFound()
+        )}
         <Button
           variant="primary_gradient"
           className="w-1/2 self-center"

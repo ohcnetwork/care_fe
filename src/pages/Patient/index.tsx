@@ -1,48 +1,56 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { useContext } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
+import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
 import { Appointment } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
-import { OTPPatientUserContext } from "@/Routers/OTPPatientRouter";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
-import { AppointmentPatient } from "./Utils";
-
-function OTPPatientHome() {
+function PatientIndex() {
   const { t } = useTranslation();
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
 
-  const { selectedUser }: { selectedUser: AppointmentPatient | null } =
-    useContext(OTPPatientUserContext);
+  const [selectedAppointment, setSelectedAppointment] = useState<
+    Appointment | undefined
+  >();
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+
+  const patient = usePatientContext();
+  const selectedPatient = patient?.selectedPatient;
+  const tokenData = patient?.tokenData;
 
   if (!tokenData) {
     navigate("/login");
   }
 
   const { data: appointmentsData, isLoading } = useQuery({
-    queryKey: ["appointment", tokenData.phoneNumber],
+    queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(routes.otp.getAppointments, {
       headers: {
-        Authorization: `Bearer ${tokenData.token}`,
+        Authorization: `Bearer ${tokenData?.token}`,
       },
     }),
-    enabled: !!tokenData.token,
+    enabled: !!tokenData?.token,
   });
 
   const getStatusChip = (status: string) => {
@@ -66,7 +74,7 @@ function OTPPatientHome() {
   }
 
   const appointments = appointmentsData?.results
-    .filter((appointment) => appointment?.patient.id == selectedUser?.id)
+    .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
     .sort(
       (a, b) =>
         new Date(a.token_slot.start_datetime).getTime() -
@@ -80,6 +88,60 @@ function OTPPatientHome() {
   const scheduledAppointments = appointments?.filter((appointment) =>
     dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
   );
+
+  function AppointmentDialog(props: {
+    appointment: Appointment | undefined;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }) {
+    const { appointment, open, onOpenChange } = props;
+    if (!appointment) return <></>;
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="p-0">
+          <DialogHeader className="p-3">
+            <DialogDescription className="mb-4">
+              {t("appointment_details")}
+            </DialogDescription>
+            <div className="flex flex-row justify-between">
+              <div className="space-y-1">
+                <Label className="text-xs">{t("practitioner")}</Label>
+                <p className="text-base font-semibold">
+                  {formatName(appointment.resource)}
+                </p>
+                <p className="text-sm font-semibold text-gray-600">
+                  {formatAppointmentSlotTime(appointment)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{t("patient_name")}</Label>
+                <p className="font-semibold text-base">
+                  {appointment.patient.name}
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {formatPatientAge(appointment.patient as any, true)},{" "}
+                  {t(`GENDER__${appointment.patient.gender}`)}
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row sm:justify-between items-center bg-blue-200 m-0 w-full p-3 rounded-b-lg">
+            <span className="text-sm font-semibold text-blue-700">
+              {t(appointment.status)}
+            </span>
+            <span className="flex flex-row gap-2">
+              <Button variant="destructive">
+                <span>{t("cancel")}</span>
+              </Button>
+              <Button variant="secondary">
+                <span>{t("reschedule")}</span>
+              </Button>
+            </span>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const getAppointmentCard = (appointment: Appointment) => {
     const appointmentTime = dayjs(appointment.token_slot.start_datetime);
@@ -98,7 +160,14 @@ function OTPPatientHome() {
               </span>
             </div>
           </CardTitle>
-          <Button variant="secondary" className="border border-secondary-400">
+          <Button
+            variant="secondary"
+            className="border border-secondary-400"
+            onClick={() => {
+              setSelectedAppointment(appointment);
+              setAppointmentDialogOpen(true);
+            }}
+          >
             <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
             <span>{t("view_details")}</span>
           </Button>
@@ -152,30 +221,42 @@ function OTPPatientHome() {
   };
 
   return (
-    <div className="container mx-auto mt-2">
-      <div className="flex justify-between w-full">
-        <span className="text-xl font-bold">{t("appointments")}</span>
-        <Button variant="primary_gradient" className="sticky right-0" asChild>
-          <Link href="/facilities">
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-            <span>{t("book_appointment")}</span>
-          </Link>
-        </Button>
+    <>
+      <AppointmentDialog
+        appointment={selectedAppointment}
+        open={appointmentDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedAppointment(undefined);
+          }
+          setAppointmentDialogOpen(open);
+        }}
+      />
+      <div className="container mx-auto mt-2">
+        <div className="flex justify-between w-full">
+          <span className="text-xl font-bold">{t("appointments")}</span>
+          <Button variant="primary_gradient" className="sticky right-0" asChild>
+            <Link href="/facilities">
+              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
+              <span>{t("book_appointment")}</span>
+            </Link>
+          </Button>
+        </div>
+        <Tabs defaultValue="scheduled" className="mt-4">
+          <TabsList>
+            <TabsTrigger value="scheduled">{t("scheduled")}</TabsTrigger>
+            <TabsTrigger value="history">{t("history")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="scheduled">
+            {getAppointmentCardContent(scheduledAppointments)}
+          </TabsContent>
+          <TabsContent value="history">
+            {getAppointmentCardContent(pastAppointments)}
+          </TabsContent>
+        </Tabs>
       </div>
-      <Tabs defaultValue="scheduled" className="mt-4">
-        <TabsList>
-          <TabsTrigger value="scheduled">{t("scheduled")}</TabsTrigger>
-          <TabsTrigger value="history">{t("history")}</TabsTrigger>
-        </TabsList>
-        <TabsContent value="scheduled">
-          {getAppointmentCardContent(scheduledAppointments)}
-        </TabsContent>
-        <TabsContent value="history">
-          {getAppointmentCardContent(pastAppointments)}
-        </TabsContent>
-      </Tabs>
-    </div>
+    </>
   );
 }
 
-export default OTPPatientHome;
+export default PatientIndex;

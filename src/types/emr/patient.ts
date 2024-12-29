@@ -15,7 +15,7 @@ export interface PatientModel {
   name?: string;
   allow_transfer?: boolean;
   discharge?: boolean;
-  gender?: number;
+  gender?: string;
   created_date?: string;
   modified_date?: string;
   facility?: string;

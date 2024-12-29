@@ -62,7 +62,6 @@ export const FacilityList = () => {
         district: qParams.district,
         local_body: qParams.local_body,
         facility_type: qParams.facility_type,
-        kasp_empanelled: qParams.kasp_empanelled,
       },
     },
   );
@@ -99,7 +98,6 @@ export const FacilityList = () => {
       qParams.district ||
       qParams.local_body ||
       qParams.facility_type ||
-      qParams.kasp_empanelled ||
       qParams?.search
     );
   };
@@ -198,7 +196,7 @@ export const FacilityList = () => {
 
       <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
-        badges={({ badge, value, kasp }) => [
+        badges={({ badge, value }) => [
           badge("Facility/District Name", "search"),
           value(
             "State",
@@ -220,7 +218,6 @@ export const FacilityList = () => {
             "facility_type",
             findFacilityTypeById(qParams.facility_type) || "",
           ),
-          kasp("Empanelled", "kasp_empanelled"),
         ]}
       />
       <div className="mt-4 pb-4">

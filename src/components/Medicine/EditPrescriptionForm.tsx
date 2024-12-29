@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
-import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 interface Props {
   initial: MedicationRequest;

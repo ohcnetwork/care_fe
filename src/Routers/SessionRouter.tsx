@@ -9,7 +9,7 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 import { PatientRegistration } from "@/pages/Appoinments/PatientRegistration";
 import PatientSelect from "@/pages/Appoinments/PatientSelect";
 import { ScheduleAppointment } from "@/pages/Appoinments/Schedule";
-import OTP from "@/pages/Appoinments/auth/OTP";
+import PatientLogin from "@/pages/Appoinments/auth/PatientLogin";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
@@ -29,7 +29,11 @@ export const routes = {
     staffUsername: string;
     page: string;
   }) => (
-    <OTP facilityId={facilityId} staffUsername={staffUsername} page={page} />
+    <PatientLogin
+      facilityId={facilityId}
+      staffUsername={staffUsername}
+      page={page}
+    />
   ),
   "/facility/:facilityId/appointments/:staffExternalId/book-appointment": ({
     facilityId,

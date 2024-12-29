@@ -23,6 +23,7 @@ import { classNames, formatDateTime, formatTime } from "@/Utils/utils";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
+import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 import { isMedicationDiscontinued } from "./MedicineAdministrationSheet/utils";
 
 interface MedicineAdministeredEvent extends TimelineEvent<"administered"> {
@@ -47,15 +48,15 @@ export default function PrescriptionTimeline({
   onRefetch,
   readonly,
 }: Props) {
-  const consultationId = useSlug("consultation");
-  const patientId = useSlug("patient");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
 
   const { data, refetch, loading } = useTanStackQueryInstead(
     routes.medicationAdministration.list,
     {
-      pathParams: { patientId },
+      pathParams: { patientId: patient!.id },
       query: {
-        encounter: consultationId,
+        encounter: encounterId,
         request: prescription.id,
         occurrence_period_end_after: formatDateTime(
           interval.start,
@@ -129,7 +130,7 @@ const MedicineAdministeredNode = ({
   isLastNode: boolean;
   hideArchive?: boolean;
 }) => {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
@@ -188,7 +189,10 @@ const MedicineAdministeredNode = ({
           setIsArchiving(true);
 
           const { res } = await request(MedicineRoutes.archiveAdministration, {
-            pathParams: { consultation, external_id: event.administration.id! },
+            pathParams: {
+              encounter: encounterId,
+              external_id: event.administration.id!,
+            },
           }); // FIXME: remove archiving or wire up the correct API
 
           if (res?.status === 200) {

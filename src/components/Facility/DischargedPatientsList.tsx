@@ -334,7 +334,6 @@ const DischargedPatientsList = ({
           badges={({
             badge,
             value,
-            kasp,
             phoneNumber,
             dateRange,
             range,
@@ -350,7 +349,6 @@ const DischargedPatientsList = ({
             ...dateRange("Discharged", "last_consultation_discharge_date"),
             // Admitted to type badges
             badge("No. of vaccination doses", "number_of_doses"),
-            kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
             badge("Review Missed", "review_missed"),

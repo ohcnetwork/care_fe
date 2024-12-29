@@ -12,6 +12,7 @@ import { QuestionInput } from "./QuestionInput";
 
 interface QuestionGroupProps {
   question: Question;
+  encounterId?: string;
   questionnaireResponses: QuestionnaireResponse[];
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   errors: QuestionValidationError[];
@@ -22,6 +23,7 @@ interface QuestionGroupProps {
 
 export const QuestionGroup = memo(function QuestionGroup({
   question,
+  encounterId,
   questionnaireResponses,
   updateQuestionnaireResponseCB,
   errors,
@@ -34,6 +36,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       <QuestionInput
         question={question}
         questionnaireResponses={questionnaireResponses}
+        encounterId={encounterId}
         updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
         errors={errors}
         clearError={() => clearError(question.id)}

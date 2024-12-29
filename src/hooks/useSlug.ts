@@ -6,7 +6,7 @@ import { usePath } from "raviger";
  * @returns The slug.
  * @example
  * // Current path: /consultation/94b9a
- * const consultation = useSlug("consultation"); // consultation = "94b9a"
+ * const encounterId = useSlug("encounter"); // consultation = "94b9a"
  */
 export default function useSlug(prefix: string, fallback?: string) {
   const path = usePath() ?? "";

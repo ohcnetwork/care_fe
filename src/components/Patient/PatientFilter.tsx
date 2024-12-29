@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -102,7 +101,6 @@ export default function PatientFilter(props: any) {
       filter.last_consultation__new_discharge_reason || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
-    is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
     last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
@@ -135,18 +133,6 @@ export default function PatientFilter(props: any) {
     prefetch: !!filter.lsgBody,
     onResponse: ({ data }) => setFilterState({ lsgBody_ref: data }),
   });
-
-  const VACCINATED_FILTER = [
-    { id: "0", text: "Unvaccinated" },
-    { id: "1", text: "1st dose only" },
-    { id: "2", text: "Both doses" },
-    { id: "3", text: "Booster dose" },
-  ];
-
-  const DECLARED_FILTER = [
-    { id: "false", text: "Not Declared" },
-    { id: "true", text: "Declared" },
-  ];
 
   const RESPIRATORY_SUPPORT_FILTER = [
     { id: "UNKNOWN", text: "None" },
@@ -202,7 +188,6 @@ export default function PatientFilter(props: any) {
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
-      is_kasp,
       is_declared_positive,
       last_vaccinated_date_before,
       last_vaccinated_date_after,
@@ -259,7 +244,6 @@ export default function PatientFilter(props: any) {
         last_consultation__new_discharge_reason || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
-      is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
@@ -688,107 +672,6 @@ export default function PatientFilter(props: any) {
           </div>
         </div>
       </AccordionV2>
-      <AccordionV2
-        title={
-          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
-            COVID Details based
-          </h1>
-        }
-        expanded={false}
-        className="w-full rounded-md"
-      >
-        <div className="grid w-full grid-cols-1 gap-4">
-          {careConfig.kasp.enabled && (
-            <div className="w-full flex-none">
-              <FieldLabel className="text-sm">
-                {careConfig.kasp.string}
-              </FieldLabel>
-              <SelectMenuV2
-                placeholder="Show all"
-                options={[true, false]}
-                optionLabel={(o) =>
-                  o
-                    ? `Show ${careConfig.kasp.string}`
-                    : `Show Non ${careConfig.kasp.string}`
-                }
-                value={filterState.is_kasp}
-                onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}
-              />
-            </div>
-          )}
-
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">COVID Vaccinated</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={VACCINATED_FILTER}
-              optionLabel={({ text }) => text}
-              optionValue={({ id }) => id}
-              optionIcon={({ id }) => (
-                <>
-                  <CareIcon icon="l-syringe" className="mr-2 w-5" />
-                  <span className="font-bold">{id}</span>
-                </>
-              )}
-              value={filterState.number_of_doses}
-              onChange={(v) =>
-                setFilterState({ ...filterState, number_of_doses: v })
-              }
-            />
-          </div>
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">
-              Declared as COVID Positive
-            </FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={DECLARED_FILTER}
-              optionLabel={(o) => o.text}
-              optionValue={(o) => o.id}
-              value={filterState.is_declared_positive}
-              onChange={(v) =>
-                setFilterState({ ...filterState, is_declared_positive: v })
-              }
-            />
-          </div>
-
-          <div className="w-full flex-none">
-            <TextFormField
-              id="covin_id"
-              name="covin_id"
-              placeholder="Filter by COWIN ID"
-              label={<span className="text-sm">CoWIN ID</span>}
-              value={filterState.covin_id}
-              onChange={handleFormFieldChange}
-              errorClassName="hidden"
-            />
-          </div>
-
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="date_declared_positive"
-            label="Date declared COVID positive"
-            value={{
-              start: getDate(filterState.date_declared_positive_after),
-              end: getDate(filterState.date_declared_positive_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
-
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_vaccinated_date"
-            label="Date of COVID Vaccination"
-            value={{
-              start: getDate(filterState.last_vaccinated_date_after),
-              end: getDate(filterState.last_vaccinated_date_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
-        </div>
-      </AccordionV2>
     </FiltersSlideover>
   );
 }
@@ -944,15 +827,7 @@ export function PatientFilterBadges() {
 
   return (
     <FilterBadges
-      badges={({
-        badge,
-        value,
-        kasp,
-        phoneNumber,
-        dateRange,
-        range,
-        ordering,
-      }) => [
+      badges={({ badge, value, phoneNumber, dateRange, range, ordering }) => [
         phoneNumber("Primary number", "phone_number"),
         phoneNumber("Emergency number", "emergency_phone_number"),
         badge("Patient name", "name"),
@@ -963,7 +838,6 @@ export function PatientFilterBadges() {
         ...dateRange("Discharged", "last_consultation_discharge_date"),
         // Admitted to type badges
         badge("No. of vaccination doses", "number_of_doses"),
-        kasp(),
         badge("COWIN ID", "covin_id"),
         badge("Is Antenatal", "is_antenatal"),
         badge("Review Missed", "review_missed"),

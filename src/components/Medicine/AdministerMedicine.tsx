@@ -30,6 +30,7 @@ import { displayDoseRange } from "@/Utils/utils";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
+import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
@@ -50,8 +51,8 @@ interface Props {
 export default function AdministerMedicine({ prescription, onClose }: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const consultationId = useSlug("consultation");
-  const patientId = useSlug("patient");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
 
   const doseAndRate = prescription.dosage_instruction[0].dose_and_rate![0];
   const requiresDosage = doseAndRate.type === "calculated";
@@ -123,7 +124,7 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
   const { mutate: administerMedication } = useMutation({
     mutationFn: async (body: MedicationAdministration) =>
       mutate(routes.medicationAdministration.create, {
-        pathParams: { patientId },
+        pathParams: { patientId: patient!.id },
         body,
       }),
     onSuccess: () => onClose(true),
@@ -136,7 +137,7 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
       doseAndRate.dose_quantity?.unit ?? doseAndRate.dose_range?.low.unit;
 
     administerMedication({
-      encounter: consultationId,
+      encounter: encounterId,
       request: prescription.id!,
       status: "completed",
       category: "inpatient",

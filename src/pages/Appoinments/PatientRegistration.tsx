@@ -9,7 +9,6 @@ import { z } from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -23,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
+import DateFormField from "@/components/Form/FormFields/DateFormField";
 import {
   Appointment,
   AppointmentCreate,
@@ -93,7 +93,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: z
         .string()
-        .optional()
+        .min(1, t("field_required"))
         .refine((pincode) => {
           if (!pincode) return true;
           return validatePincode(pincode);
@@ -150,14 +150,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     onSuccess: (data: Appointment) => {
       Notification.Success({ msg: t("appointment_created_success") });
       queryClient.invalidateQueries({
-        queryKey: ["patients", tokenData.phoneNumber],
+        queryKey: [
+          ["patients", tokenData.phoneNumber],
+          ["appointment", tokenData.phoneNumber],
+        ],
       });
-      setTimeout(() => {
-        navigate(
-          `/facility/${props.facilityId}/appointments/${data.id}/success`,
-          { replace: true },
-        );
-      }, 100);
+      navigate(
+        `/facility/${props.facilityId}/appointments/${data.id}/success`,
+        {
+          replace: true,
+        },
+      );
     },
     onError: (error) => {
       Notification.Error({
@@ -324,11 +327,24 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                       <FormItem className="flex flex-col">
                         <FormLabel required>{t("date_of_birth")}</FormLabel>
                         <FormControl>
-                          <DatePicker
-                            date={
+                          <DateFormField
+                            name="date_of_birth"
+                            value={
                               field.value ? new Date(field.value) : undefined
                             }
-                            onChange={(date) => field.onChange(date)}
+                            onChange={(dateObj: {
+                              name: string;
+                              value: Date;
+                            }) => {
+                              if (dateObj?.value instanceof Date) {
+                                field.onChange(dateObj.value.toISOString());
+                              } else {
+                                field.onChange(null);
+                              }
+                            }}
+                            disableFuture
+                            min={new Date(1900, 0, 1)}
+                            className="-mb-6"
                           />
                         </FormControl>
                         <FormMessage />
@@ -396,13 +412,11 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="geo_organization"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel required>{t("organization")}</FormLabel>
                     <FormControl>
                       <OrganisationSelector
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {
-                          console.log(value);
                           field.onChange(value);
                         }}
                       />

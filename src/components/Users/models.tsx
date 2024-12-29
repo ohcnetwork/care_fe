@@ -33,6 +33,11 @@ export type UserBareMinimum = {
 
 export type GenderType = "Male" | "Female" | "Transgender";
 
+export type UserFacilityModel = {
+  id: string;
+  name: string;
+};
+
 export type UserModel = UserBareMinimum & {
   external_id: string;
   local_body?: number;
@@ -56,6 +61,7 @@ export type UserModel = UserBareMinimum & {
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
   user_flags?: FeatureFlag[];
+  facilities?: UserFacilityModel[];
 };
 
 export type UserBaseModel = {

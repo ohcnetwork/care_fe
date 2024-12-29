@@ -6,6 +6,7 @@ import ScrollOverlay from "@/CAREUI/interactive/ScrollOverlay";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import MedicineAdministrationTable from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTable";
 import { computeActivityBounds } from "@/components/Medicine/MedicineAdministrationSheet/utils";
 
@@ -24,13 +25,13 @@ interface Props {
 const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 
 const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
-  const consultationId = useSlug("consultation");
-  const patientId = useSlug("patient");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
   const filters = {
-    encounter: consultationId,
+    encounter: encounterId,
     is_prn: isPrn,
     limit: 100,
   };
@@ -38,7 +39,7 @@ const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
   const activeMedicationRequests = useTanStackQueryInstead(
     routes.medicationRequest.list,
     {
-      pathParams: { patientId },
+      pathParams: { patientId: patient!.id },
       query: {
         ...filters,
         status: ["active", "on_hold"],
@@ -49,7 +50,7 @@ const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
   const discontinuedMedicationRequests = useTanStackQueryInstead(
     routes.medicationRequest.list,
     {
-      pathParams: { patientId },
+      pathParams: { patientId: patient!.id },
       query: {
         ...filters,
         status: ["completed", "ended", "stopped", "cancelled"],

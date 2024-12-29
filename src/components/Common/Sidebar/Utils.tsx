@@ -7,9 +7,10 @@ const getRedirectURL = () => {
   return new URLSearchParams(window.location.search).get("redirect");
 };
 
-export const useSignOut = () => {
+export const usePatientSignOut = () => {
   const signOut = useCallback(async () => {
     localStorage.removeItem(CarePatientTokenKey);
+    localStorage.removeItem("selectedPatient");
 
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");

@@ -7,6 +7,7 @@ import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/Authorize
 import { Button } from "@/components/ui/button";
 
 import DialogModal from "@/components/Common/Dialog";
+import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
 import AdministrationEventCell from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
 import AdministrationEventSeperator from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
@@ -43,16 +44,16 @@ export default function MedicineAdministrationTableRow({
   ...props
 }: Props) {
   const { t } = useTranslation();
-  const consultationId = useSlug("consultation");
-  const patientId = useSlug("patient");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
   const [showDetails, setShowDetails] = useState(false);
 
   const medicationAdministrations = useTanStackQueryInstead(
     routes.medicationAdministration.list,
     {
-      pathParams: { patientId },
+      pathParams: { patientId: patient!.id },
       query: {
-        encounter: consultationId,
+        encounter: encounterId,
         request: prescription.id,
         occurrence_period_end_after: formatDateTime(
           props.intervals[0].start,

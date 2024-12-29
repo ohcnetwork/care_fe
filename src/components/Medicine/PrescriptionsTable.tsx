@@ -13,6 +13,8 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { displayCode, displayDoseRange, displayTiming } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
+import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
+
 interface Props {
   is_prn?: boolean;
   category?: MedicationRequest["category"];
@@ -22,17 +24,17 @@ export default function PrescriptionsTable({
   is_prn = false,
   category = "inpatient",
 }: Props) {
-  const consultationId = useSlug("consultation");
-  const patientId = useSlug("patient");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
   const { t } = useTranslation();
   const [detailedViewFor, setDetailedViewFor] = useState<MedicationRequest>();
 
   const { data } = useTanStackQueryInstead(routes.medicationRequest.list, {
-    pathParams: { patientId },
+    pathParams: { patientId: patient!.id },
     query: {
       is_prn,
       category,
-      encounter: consultationId,
+      encounter: encounterId,
       limit: 100,
     },
   });

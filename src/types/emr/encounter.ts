@@ -1,102 +1,137 @@
-import { BedModel, FacilityModel } from "@/components/Facility/models";
-import { UserBareMinimum } from "@/components/Users/models";
-
-import { PatientCategoryID } from "@/common/constants";
-
+import { Patient } from "@/types/emr/newPatient";
 import { UserBase } from "@/types/user/base";
 
-export const ENCOUNTER_SUGGESTIONS = [
-  "A", // Admit
-  "R", // Refer
-  "OP", // Outpatient
-  "DC", // Domiciliary Care
-  "DD", // Death
-] as const;
+export type EncounterStatus =
+  | "planned"
+  | "in_progress"
+  | "on_hold"
+  | "discharged"
+  | "completed"
+  | "cancelled"
+  | "discontinued"
+  | "entered_in_error"
+  | "unknown";
 
-export type EncounterSuggestion = (typeof ENCOUNTER_SUGGESTIONS)[number];
+export type EncounterClass = "imp" | "amb" | "obsenc" | "emer" | "vr" | "hh";
 
-export const ROUTE_TO_FACILITY = [
-  10, // Direct
-  20, // Referred
-  30, // Transfer
-] as const;
+export type EncounterAdmitSources =
+  | "hosp_trans"
+  | "emd"
+  | "outp"
+  | "born"
+  | "gp"
+  | "mp"
+  | "nursing"
+  | "psych"
+  | "rehab"
+  | "other";
 
-export type RouteToFacility = (typeof ROUTE_TO_FACILITY)[number];
+export type EncounterDischargeDisposition =
+  | "home"
+  | "alt_home"
+  | "other_hcf"
+  | "hosp"
+  | "long"
+  | "aadvice"
+  | "exp"
+  | "psy"
+  | "rehab"
+  | "snf"
+  | "oth";
+
+export type EncounterDietPreference =
+  | "vegetarian"
+  | "diary_free"
+  | "nut_free"
+  | "gluten_free"
+  | "vegan"
+  | "halal"
+  | "kosher"
+  | "none";
+
+export type EncounterPriority =
+  | "ASAP"
+  | "callback_results"
+  | "callback_for_scheduling"
+  | "elective"
+  | "emergency"
+  | "preop"
+  | "as_needed"
+  | "routine"
+  | "rush_reporting"
+  | "stat"
+  | "timing_critical"
+  | "use_as_directed"
+  | "urgent";
+
+export type Period = {
+  start?: string;
+  end?: string;
+};
+
+export type Hospitalization = {
+  re_admission: boolean;
+  admit_source: EncounterAdmitSources;
+  discharge_disposition?: EncounterDischargeDisposition;
+  diet_preference?: EncounterDietPreference;
+};
+
+export type History = {
+  status: string;
+  moved_at: string;
+};
+
+export type EncounterClassHistory = {
+  history: History[];
+};
+
+export type StatusHistory = {
+  history: History[];
+};
 
 export interface Encounter {
   id: string;
-  patient: string;
-  facility: string;
+  patient: Patient;
+  facility: {
+    id: string;
+    name: string;
+  };
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization;
+  priority: EncounterPriority;
+  external_identifier?: string;
   created_by: UserBase;
   updated_by: UserBase;
   created_date: string;
-  modified_date: string;
+  updated_date: string;
+  encounter_class_history: EncounterClassHistory;
+  status_history: StatusHistory;
+}
 
-  suggestion: EncounterSuggestion;
-  route_to_facility?: RouteToFacility;
-
-  // Admission details
-  admitted: boolean;
-  admitted_to?: string;
-  category: PatientCategoryID;
-  encounter_date: string;
-  icu_admission_date?: string;
-  discharge_date: string | null;
-  patient_no: string;
-  current_bed?: { bed_object: BedModel };
-
-  // Referral details
-  referred_to?: string;
-  referred_to_object?: FacilityModel;
-  referred_to_external?: string;
-  referred_from_facility?: string;
-  referred_from_facility_object?: FacilityModel;
-  referred_from_facility_external?: string;
-  referred_by_external?: string;
-  transferred_from_location?: string;
-
-  // Doctor details
-  treating_physician: string;
-  treating_physician_object: UserBareMinimum | null;
-  assigned_to?: string;
-  assigned_to_object?: UserBareMinimum;
-
-  // Death details
-  new_discharge_reason?: number;
-  discharge_notes?: string; // cause_of_death
-  death_datetime?: string;
-  death_confirmed_doctor?: string;
-
-  // Other flags
-  kasp_enabled_date: string | null;
+export interface EncounterEditRequest {
+  organizations: string[];
+  patient: string;
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization;
+  priority: EncounterPriority;
+  external_identifier?: string;
+  facility: string;
 }
 
 export interface EncounterRequest {
-  suggestion: EncounterSuggestion;
-  route_to_facility?: RouteToFacility;
-
+  organizations: string[];
   patient: string;
+  status: EncounterStatus;
+  encounter_class: EncounterClass;
+  period: Period;
+  hospitalization?: Hospitalization;
+  priority: EncounterPriority;
+  external_identifier?: string;
   facility: string;
-  admitted: boolean;
-  category: string;
-  encounter_date: string;
-  icu_admission_date?: string;
-  patient_no: string | null;
-  bed?: string;
-
-  referred_to?: string;
-  referred_to_external?: string;
-  referred_from_facility?: string;
-  referred_from_facility_external?: string;
-  referred_by_external?: string;
-  transferred_from_location?: string;
-
-  treating_physician: string;
-  assigned_to?: string;
-
-  // Death details
-  new_discharge_reason?: number;
-  discharge_notes?: string;
-  death_datetime?: string;
-  death_confirmed_doctor?: string;
 }
+
+export const completedEncounterStatus = ["completed", "discharged"];

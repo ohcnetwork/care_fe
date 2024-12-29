@@ -4,8 +4,7 @@ const encounterQuestionnaire: QuestionnaireDetail = {
   id: "encounter",
   slug: "encounter",
   version: "0.0.1",
-  title: "Create Encounter Form",
-  description: "Questionnaire for creating an encounter",
+  title: "Encounter",
   status: "active",
   subject_type: "patient",
   questions: [

@@ -41,7 +41,7 @@ export default function PrescriptionBuilder({
   actions = ["administer", "discontinue"],
 }: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [showCreate, setShowCreate] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
@@ -49,7 +49,7 @@ export default function PrescriptionBuilder({
   const { data, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listPrescriptions,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: {
         dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
         prescription_type,

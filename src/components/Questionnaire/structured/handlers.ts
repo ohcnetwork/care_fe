@@ -3,7 +3,6 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
-import routes from "@/Utils/request/api";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
@@ -130,42 +129,25 @@ const handlers: {
       }),
   },
   encounter: {
-    getRequests: (encounters, { patientId, facilityId }) => {
+    getRequests: (encounters, { patientId, facilityId, encounterId }) => {
+      if (!encounterId) return [];
       console.log("Encounters", encounters, facilityId);
-      if (!encounters.length || !facilityId) return [];
-
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          suggestion: encounter.suggestion,
-          route_to_facility: encounter.route_to_facility,
+          organizations: [],
           patient: patientId,
-          facility: facilityId,
-          admitted: encounter.suggestion === "A",
-          category: encounter.category,
-          encounter_date: new Date().toISOString(),
-          patient_no: encounter.patient_no,
-
-          // Referral details
-          referred_to: encounter.referred_to,
-          referred_to_external: encounter.referred_to_external,
-          referred_from_facility: encounter.referred_from_facility,
-          referred_from_facility_external:
-            encounter.referred_from_facility_external,
-          referred_by_external: encounter.referred_by_external,
-          transferred_from_location: encounter.transferred_from_location,
-
-          // Doctor details
-          treating_physician: encounter.treating_physician,
-
-          // Death details
-          discharge_notes: encounter.discharge_notes,
-          death_datetime: encounter.death_datetime,
-          death_confirmed_doctor: encounter.death_confirmed_doctor,
+          status: encounter.status,
+          encounter_class: encounter.encounter_class,
+          period: encounter.period,
+          hospitalization: encounter.hospitalization,
+          priority: encounter.priority,
+          external_identifier: encounter.external_identifier,
+          facility: encounter.facility.id,
         };
 
         return {
-          url: routes.createConsultation.path,
-          method: "POST",
+          url: `/api/v1/encounter/${encounterId}/`,
+          method: "PUT",
           body,
           reference_id: "encounter",
         };

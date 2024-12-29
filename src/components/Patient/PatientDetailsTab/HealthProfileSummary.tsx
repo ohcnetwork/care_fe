@@ -69,16 +69,6 @@ export const HealthProfileSummary = (props: PatientProps) => {
               <DiagnosisList patientId={id} />
             </div>
 
-            {patientData.gender === 2 && patientData.is_antenatal && (
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  {t("is_pregnant")}
-                </div>
-                <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-                  {t("yes")}
-                </div>
-              </div>
-            )}
             {patientMedHis}
           </div>
         </div>

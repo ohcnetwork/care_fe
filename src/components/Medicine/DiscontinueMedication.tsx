@@ -17,8 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import useSlug from "@/hooks/useSlug";
-
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import {
@@ -26,6 +24,7 @@ import {
   MedicationRequest,
 } from "@/types/emr/medicationRequest";
 
+import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
@@ -54,7 +53,7 @@ export default function DiscontinueMedication({
   onClose,
 }: Props) {
   const { t } = useTranslation();
-  const patientId = useSlug("patient");
+  const { patient } = useEncounter();
 
   const formSchema = z.object({
     reason: z.enum(MEDICATION_REQUEST_STATUS_REASON),
@@ -72,7 +71,7 @@ export default function DiscontinueMedication({
       status_reason: z.infer<typeof formSchema>["reason"];
     }) =>
       mutate(routes.medicationRequest.discontinue, {
-        pathParams: { patientId, id: prescription.id! },
+        pathParams: { patientId: patient!.id, id: prescription.id! },
         body,
       }),
     onSuccess: () => onClose(true),

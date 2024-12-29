@@ -14,6 +14,7 @@ interface QuestionRendererProps {
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
+  encounterId?: string;
 }
 
 export function QuestionRenderer({
@@ -24,6 +25,7 @@ export function QuestionRenderer({
   clearError,
   disabled,
   activeGroupId,
+  encounterId,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -58,6 +60,7 @@ export function QuestionRenderer({
         >
           <QuestionGroup
             question={question}
+            encounterId={encounterId}
             questionnaireResponses={responses}
             updateQuestionnaireResponseCB={handleResponseChange}
             errors={errors}

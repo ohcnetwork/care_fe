@@ -37,7 +37,7 @@ type DosageField = {
 
 export default function MedicineAdministration(props: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [shouldAdminister, setShouldAdminister] = useState<boolean[]>([]);
   const [dosages, setDosages] = useState<DosageField[]>([]);
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
@@ -94,7 +94,10 @@ export default function MedicineAdministration(props: Props) {
     const ok = await Promise.all(
       administrations.map(({ prescription, ...body }) =>
         request(MedicineRoutes.administerPrescription, {
-          pathParams: { consultation, external_id: prescription.id },
+          pathParams: {
+            consultation: encounterId,
+            external_id: prescription.id,
+          },
           body,
         }).then(({ res }) => !!res?.ok),
       ),

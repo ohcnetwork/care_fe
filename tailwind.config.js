@@ -70,6 +70,19 @@ module.exports = {
             fore: colors.red[100],
           },
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+        border: "hsl(var(--sidebar-border))",
+        ring: "hsl(var(--sidebar-ring))",
       },
       scale: {
         25: "0.25",
@@ -85,10 +98,10 @@ module.exports = {
         "7xl": "5rem",
       },
       width: {
-        "[80mm]": "80mm",
+        "80mm": "80mm",
       },
       height: {
-        "[170mm]": "170mm",
+        "170mm": "170mm",
       },
       keyframes: {
         "caret-blink": {

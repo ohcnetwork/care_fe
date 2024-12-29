@@ -17,7 +17,6 @@ export const initialFilterData = {
   patient_phone_number: "",
   offset: 0,
   ordering: null,
-  is_kasp: "",
   assigned_to: "",
   is_antenatal: "",
   breathlessness_level: "",
@@ -55,12 +54,6 @@ export const formatFilter = (params: any) => {
     ordering: filter.ordering || undefined,
     assigned_to: filter.assigned_to || undefined,
     breathlessness_level: filter.breathlessness_level || undefined,
-    is_kasp:
-      (filter.is_kasp && filter.is_kasp) === ""
-        ? ""
-        : filter.is_kasp === "yes"
-          ? "true"
-          : "false",
     is_antenatal:
       (filter.is_antenatal && filter.is_antenatal) === ""
         ? ""
