@@ -12,6 +12,7 @@ import {
   PatientNotesModel,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -50,34 +51,28 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
   };
   const [state, setState] = useState(initialData);
 
-  const onAddNote = async () => {
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    thread,
+  });
+
+  const onAddNote = () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
       return;
     }
-
-    const { res } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
-      body: {
-        note: noteField,
-        thread,
-        reply_to: reply_to?.id,
-      },
+    addNote({
+      note: noteField,
+      reply_to: reply_to?.id,
+      thread,
     });
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setReload(!reload);
-      setState({ ...state, cPage: 1 });
-      setReplyTo(undefined);
-    }
+    setReplyTo(undefined);
+    setNoteField("");
   };
 
   useEffect(() => {
@@ -130,13 +125,21 @@ const PatientNotes = (props: PatientNotesProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                if (thread !== PATIENT_NOTES_THREADS[current]) {
+                  setThread(PATIENT_NOTES_THREADS[current]);
+                  setState(initialData);
+                  setReplyTo(undefined);
+                  setNoteField("");
+                }
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
           ))}
         </div>
         <PatientNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           patientId={patientId}
