@@ -14,10 +14,12 @@ interface DoctorNoteProps {
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
+  hasMore: boolean;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext, setReload, disableEdit, setReplyTo } = props;
+  const { state, handleNext, setReload, disableEdit, setReplyTo, hasMore } =
+    props;
 
   return (
     <div
@@ -27,7 +29,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
       {state.notes.length ? (
         <InfiniteScroll
           next={handleNext}
-          hasMore={state.cPage < state.totalPages}
+          hasMore={hasMore}
           loader={
             <div className="flex items-center justify-center">
               <CircularProgress />
