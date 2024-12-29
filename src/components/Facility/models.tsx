@@ -576,8 +576,6 @@ export interface PatientNoteStateType {
   notes: PatientNotesModel[];
   patientId?: string;
   facilityId?: string;
-  cPage: number;
-  totalPages: number;
 }
 
 export type IFacilityNotificationRequest = {
