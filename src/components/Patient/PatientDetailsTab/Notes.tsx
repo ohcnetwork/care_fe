@@ -12,6 +12,7 @@ import {
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -20,8 +21,6 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
 import { classNames, keysOf } from "@/Utils/utils";
 
 const PatientNotes = (props: PatientProps) => {
@@ -39,43 +38,29 @@ const PatientNotes = (props: PatientProps) => {
   const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
     undefined,
   );
-
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    thread,
+  });
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
   };
   const [state, setState] = useState(initialData);
 
-  const onAddNote = async () => {
+  const onAddNote = () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
       return;
     }
-
-    try {
-      const { res } = await request(routes.addPatientNote, {
-        pathParams: { patientId: patientId },
-        body: {
-          note: noteField,
-          thread,
-          reply_to: reply_to?.id,
-        },
-      });
-      if (res?.status === 201) {
-        setNoteField("");
-        setReload(!reload);
-        setState({ ...state, cPage: 1 });
-        setReplyTo(undefined);
-        Notification.Success({ msg: "Note added successfully" });
-      }
-    } catch (error) {
-      Notification.Error({
-        msg: "Failed to add note. Please try again.",
-      });
-    }
+    addNote({
+      note: noteField,
+      reply_to: reply_to?.id,
+      thread,
+    });
+    setReplyTo(undefined);
+    setNoteField("");
   };
 
   useMessageListener((data) => {
@@ -104,13 +89,21 @@ const PatientNotes = (props: PatientProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                if (thread !== PATIENT_NOTES_THREADS[current]) {
+                  setThread(PATIENT_NOTES_THREADS[current]);
+                  setState(initialData);
+                  setReplyTo(undefined);
+                  setNoteField("");
+                }
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
           ))}
         </div>
         <PatientNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           patientId={patientId}
