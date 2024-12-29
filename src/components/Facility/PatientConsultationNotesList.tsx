@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import DoctorNote from "@/components/Facility/DoctorNote";
@@ -12,7 +13,7 @@ import useSlug from "@/hooks/useSlug";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { callApi } from "@/Utils/request/query";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
@@ -24,80 +25,63 @@ interface PatientNotesProps {
   setReplyTo?: (value: PatientNotesModel | undefined) => void;
 }
 
-const pageSize = RESULTS_PER_PAGE_LIMIT;
-
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const {
     state,
     setState,
-    reload,
     setReload,
     disableEdit,
     thread,
     setReplyTo,
+    reload,
   } = props;
+
   const consultationId = useSlug("consultation") ?? "";
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchNotes = async () => {
-    setIsLoading(true);
-
-    const { data } = await request(routes.getPatientNotes, {
-      pathParams: {
-        patientId: props.state.patientId || "",
-      },
-      query: {
-        consultation: consultationId,
-        thread,
-        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-      },
-    });
-
-    if (data) {
-      if (state.cPage === 1) {
-        setState((prevState) => ({
-          ...prevState,
-          notes: data.results,
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
-      } else {
-        setState((prevState) => ({
-          ...prevState,
-          notes: [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
+  const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    queryKey: ["notes", state.patientId, thread, consultationId],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await callApi(routes.getPatientNotes, {
+        pathParams: { patientId: state.patientId! },
+        queryParams: {
+          thread,
+          offset: pageParam,
+          consultation: consultationId,
+        },
+        signal,
+      });
+      return {
+        results: response?.results ?? [],
+        nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
+        totalResults: response?.count ?? 0,
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const currentResults = allPages.flatMap((page) => page.results).length;
+      if (currentResults < lastPage.totalResults) {
+        return lastPage.nextPage;
       }
-    }
-    setIsLoading(false);
-    setReload?.(false);
-  };
+      return undefined;
+    },
+    initialPageParam: 0,
+  });
 
   useEffect(() => {
-    if (reload) {
-      fetchNotes();
-    }
-  }, [reload]);
+    if (data?.pages) {
+      const allNotes = data.pages.flatMap((page) => page.results);
 
-  useEffect(() => {
-    fetchNotes();
-  }, [thread]);
+      const notesMap = new Map(allNotes.map((note) => [note.id, note]));
 
-  useEffect(() => {
-    setReload?.(true);
-  }, []);
+      const deduplicatedNotes = Array.from(notesMap.values());
 
-  const handleNext = () => {
-    if (state.cPage < state.totalPages) {
       setState((prevState) => ({
         ...prevState,
-        cPage: prevState.cPage + 1,
+        notes: deduplicatedNotes,
       }));
-      setReload?.(true);
     }
-  };
+  }, [data]);
 
-  if (isLoading) {
+  if (isLoading || reload) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
@@ -108,10 +92,11 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   return (
     <DoctorNote
       state={state}
-      handleNext={handleNext}
+      handleNext={fetchNextPage}
       setReload={setReload}
       disableEdit={disableEdit}
       setReplyTo={setReplyTo}
+      hasMore={hasNextPage}
     />
   );
 };
