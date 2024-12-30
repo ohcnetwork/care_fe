@@ -3,13 +3,7 @@ import { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import Select from "@/components/ui/select-util";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -151,87 +145,76 @@ export function EncounterQuestion({
         <Label>Encounter Status</Label>
         <Select
           value={encounter.status}
-          onValueChange={(value) =>
+          onChange={(value) =>
             handleUpdateEncounter({
               status: value as EncounterStatus,
             })
           }
           disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="planned">Planned</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="on_hold">On Hold</SelectItem>
-            <SelectItem value="discharged">Discharged</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="discontinued">Discontinued</SelectItem>
-            <SelectItem value="entered_in_error">Entered in Error</SelectItem>
-            <SelectItem value="unknown">Unknown</SelectItem>
-          </SelectContent>
-        </Select>
+          options={[
+            { value: "planned", label: "Planned" },
+            { value: "in_progress", label: "In Progress" },
+            { value: "on_hold", label: "On Hold" },
+            { value: "discharged", label: "Discharged" },
+            { value: "completed", label: "Completed" },
+            { value: "cancelled", label: "Cancelled" },
+            { value: "discontinued", label: "Discontinued" },
+            { value: "entered_in_error", label: "Entered in Error" },
+            { value: "unknown", label: "Unknown" },
+          ]}
+        />
       </div>
 
       <div className="space-y-2">
         <Label>Encounter Class</Label>
         <Select
           value={encounter.encounter_class}
-          onValueChange={(value) =>
+          onChange={(value) =>
             handleUpdateEncounter({
               encounter_class: value as EncounterClass,
             })
           }
           disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select class" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="imp">Inpatient (IP)</SelectItem>
-            <SelectItem value="amb">Ambulatory (OP)</SelectItem>
-            <SelectItem value="obsenc">Observation Room</SelectItem>
-            <SelectItem value="emer">Emergency</SelectItem>
-            <SelectItem value="vr">Virtual</SelectItem>
-            <SelectItem value="hh">Home Health</SelectItem>
-          </SelectContent>
-        </Select>
+          options={[
+            { value: "imp", label: "Inpatient (IP)" },
+            { value: "amb", label: "Ambulatory (OP)" },
+            { value: "obsenc", label: "Observation Room" },
+            { value: "emer", label: "Emergency" },
+            { value: "vr", label: "Virtual" },
+            { value: "hh", label: "Home Health" },
+          ]}
+        />
       </div>
 
       <div className="space-y-2">
         <Label>Priority</Label>
         <Select
           value={encounter.priority}
-          onValueChange={(value) =>
+          onChange={(value) =>
             handleUpdateEncounter({
               priority: value as EncounterPriority,
             })
           }
           disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ASAP">ASAP</SelectItem>
-            <SelectItem value="callback_results">Callback Results</SelectItem>
-            <SelectItem value="callback_for_scheduling">
-              Callback for Scheduling
-            </SelectItem>
-            <SelectItem value="elective">Elective</SelectItem>
-            <SelectItem value="emergency">Emergency</SelectItem>
-            <SelectItem value="preop">Pre-op</SelectItem>
-            <SelectItem value="as_needed">As Needed</SelectItem>
-            <SelectItem value="routine">Routine</SelectItem>
-            <SelectItem value="rush_reporting">Rush Reporting</SelectItem>
-            <SelectItem value="stat">Stat</SelectItem>
-            <SelectItem value="timing_critical">Timing Critical</SelectItem>
-            <SelectItem value="use_as_directed">Use as Directed</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-          </SelectContent>
-        </Select>
+          options={[
+            { value: "ASAP", label: "ASAP" },
+            { value: "callback_results", label: "Callback Results" },
+            {
+              value: "callback_for_scheduling",
+              label: "Callback for Scheduling",
+            },
+            { value: "elective", label: "Elective" },
+            { value: "emergency", label: "Emergency" },
+            { value: "preop", label: "Pre-op" },
+            { value: "as_needed", label: "As Needed" },
+            { value: "routine", label: "Routine" },
+            { value: "rush_reporting", label: "Rush Reporting" },
+            { value: "stat", label: "Stat" },
+            { value: "timing_critical", label: "Timing Critical" },
+            { value: "use_as_directed", label: "Use as Directed" },
+            { value: "urgent", label: "Urgent" },
+          ]}
+        />
       </div>
 
       <div className="space-y-2">
@@ -280,8 +263,8 @@ export function EncounterQuestion({
             <div className="space-y-2">
               <Label>Admit Source</Label>
               <Select
-                value={encounter.hospitalization?.admit_source}
-                onValueChange={(value) =>
+                value={encounter.hospitalization?.admit_source || "other"}
+                onChange={(value) =>
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
@@ -297,23 +280,20 @@ export function EncounterQuestion({
                   })
                 }
                 disabled={disabled}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select admit source" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hosp_trans">Hospital Transfer</SelectItem>
-                  <SelectItem value="emd">Emergency Department</SelectItem>
-                  <SelectItem value="outp">Outpatient Department</SelectItem>
-                  <SelectItem value="born">Born</SelectItem>
-                  <SelectItem value="gp">General Practitioner</SelectItem>
-                  <SelectItem value="mp">Medical Practitioner</SelectItem>
-                  <SelectItem value="nursing">Nursing Home</SelectItem>
-                  <SelectItem value="psych">Psychiatric Hospital</SelectItem>
-                  <SelectItem value="rehab">Rehabilitation Facility</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: "hosp_trans", label: "Hospital Transfer" },
+                  { value: "emd", label: "Emergency Department" },
+                  { value: "outp", label: "Outpatient Department" },
+                  { value: "born", label: "Born" },
+                  { value: "gp", label: "General Practitioner" },
+                  { value: "mp", label: "Medical Practitioner" },
+                  { value: "nursing", label: "Nursing Home" },
+                  { value: "psych", label: "Psychiatric Hospital" },
+                  { value: "rehab", label: "Rehabilitation Facility" },
+                  { value: "other", label: "Other" },
+                ]}
+                placeholder="Select admit source"
+              />
             </div>
 
             {/* Show discharge disposition only when status is completed */}
@@ -321,8 +301,10 @@ export function EncounterQuestion({
               <div className="space-y-2">
                 <Label>Discharge Disposition</Label>
                 <Select
-                  value={encounter.hospitalization?.discharge_disposition}
-                  onValueChange={(value) =>
+                  value={
+                    encounter.hospitalization?.discharge_disposition || "oth"
+                  }
+                  onChange={(value) =>
                     handleUpdateEncounter({
                       hospitalization: {
                         ...encounter.hospitalization,
@@ -338,36 +320,29 @@ export function EncounterQuestion({
                     })
                   }
                   disabled={disabled}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select discharge disposition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="home">Home</SelectItem>
-                    <SelectItem value="alt_home">Alternate Home</SelectItem>
-                    <SelectItem value="other_hcf">
-                      Other Healthcare Facility
-                    </SelectItem>
-                    <SelectItem value="hosp">Hospice</SelectItem>
-                    <SelectItem value="long">Long Term Care</SelectItem>
-                    <SelectItem value="aadvice">Left Against Advice</SelectItem>
-                    <SelectItem value="exp">Expired</SelectItem>
-                    <SelectItem value="psy">Psychiatric Hospital</SelectItem>
-                    <SelectItem value="rehab">Rehabilitation</SelectItem>
-                    <SelectItem value="snf">
-                      Skilled Nursing Facility
-                    </SelectItem>
-                    <SelectItem value="oth">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                  options={[
+                    { value: "home", label: "Home" },
+                    { value: "alt_home", label: "Alternate Home" },
+                    { value: "other_hcf", label: "Other Healthcare Facility" },
+                    { value: "hosp", label: "Hospice" },
+                    { value: "long", label: "Long Term Care" },
+                    { value: "aadvice", label: "Left Against Advice" },
+                    { value: "exp", label: "Expired" },
+                    { value: "psy", label: "Psychiatric Hospital" },
+                    { value: "rehab", label: "Rehabilitation" },
+                    { value: "snf", label: "Skilled Nursing Facility" },
+                    { value: "oth", label: "Other" },
+                  ]}
+                  placeholder="Select discharge disposition"
+                />
               </div>
             )}
 
             <div className="space-y-2">
               <Label>Diet Preference</Label>
               <Select
-                value={encounter.hospitalization?.diet_preference}
-                onValueChange={(value) =>
+                value={encounter.hospitalization?.diet_preference || "none"}
+                onChange={(value) =>
                   handleUpdateEncounter({
                     hospitalization: {
                       ...encounter.hospitalization,
@@ -383,21 +358,18 @@ export function EncounterQuestion({
                   })
                 }
                 disabled={disabled}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select diet preference" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="diary_free">Dairy Free</SelectItem>
-                  <SelectItem value="nut_free">Nut Free</SelectItem>
-                  <SelectItem value="gluten_free">Gluten Free</SelectItem>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="halal">Halal</SelectItem>
-                  <SelectItem value="kosher">Kosher</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: "vegetarian", label: "Vegetarian" },
+                  { value: "diary_free", label: "Dairy Free" },
+                  { value: "nut_free", label: "Nut Free" },
+                  { value: "gluten_free", label: "Gluten Free" },
+                  { value: "vegan", label: "Vegan" },
+                  { value: "halal", label: "Halal" },
+                  { value: "kosher", label: "Kosher" },
+                  { value: "none", label: "None" },
+                ]}
+                placeholder="Select diet preference"
+              />
             </div>
           </div>
         </div>

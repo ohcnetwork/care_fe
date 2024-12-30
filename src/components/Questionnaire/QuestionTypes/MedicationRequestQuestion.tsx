@@ -17,6 +17,7 @@ import { QuantityInput } from "@/components/Common/QuantityInput";
 import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import ScribeStructuredInput from "@/Utils/scribe";
 import {
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
@@ -102,31 +103,187 @@ export function MedicationRequestQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      {medications.length > 0 && (
-        <div className="rounded-lg border space-y-4">
-          <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
-            {medications.map((medication, index) => (
-              <li key={index}>
-                <MedicationRequestItem
-                  medication={medication}
-                  disabled={disabled}
-                  onUpdate={(medication) =>
-                    handleUpdateMedication(index, medication)
-                  }
-                  onRemove={() => handleRemoveMedication(index)}
-                  index={index}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <ValueSetSelect
-        system="system-medication"
-        placeholder="Search for medications to add"
-        onSelect={handleAddMedication}
-        disabled={disabled}
-      />
+      <ScribeStructuredInput
+        value={medications}
+        onChange={(value) =>
+          value &&
+          updateQuestionnaireResponseCB({
+            ...questionnaireResponse,
+            values: [
+              {
+                type: "medication_request",
+                value,
+              },
+            ],
+          })
+        }
+        name="Medication Request"
+        prompt={`An array of objects of the following type: {
+          status?: "active" | "on-hold" | "ended" | "stopped" | "completed" | "cancelled" | "entered-in-error" | "draft" | "unknown",
+          intent?: "proposal" | "plan" | "order" | "original_order" | "reflex_order" | "filler_order" | "instance_order",
+          category?:  "inpatient" | "outpatient" | "community" | "discharge",
+          priority?: "stat" | "urgent" | "asap" | "routine"
+          do_not_perform?: boolean;
+          medication? : MEDICATION_CODE;
+          authored_on?: ISO time string,
+          dosage_instruction: {
+            sequence?: number;
+            text?: string;
+            additional_instruction?: {
+              system: string;
+              code: string;
+              display?: string;
+            }[];
+            patient_instruction?: string;
+            timing?: {
+              repeat?: {
+                frequency?: number;
+                period: number;
+                period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
+              };
+            };
+            /**
+             * True if it is a PRN medication
+             */
+            as_needed_boolean?: boolean;
+            /**
+             * If it is a PRN medication (as_needed_boolean is true), the indicator.
+             */
+            as_needed_for?: ASNEEDEDFORCODE;
+            site?: SITECODE;
+            route?: ROUTECODE;
+            method?: METHODCODE;
+            /**
+             * One of \`dose_quantity\` or \`dose_range\` must be present.
+             * \`type\` is optional and defaults to \`ordered\`.
+             *
+             * - If \`type\` is \`ordered\`, \`dose_quantity\` must be present.
+             * - If \`type\` is \`calculated\`, \`dose_range\` must be present. This is used for titrated medications.
+             */
+            dose_and_rate?: (
+              | {
+                  type?: "ordered";
+                  dose_quantity?: DosageQuantity;
+                  dose_range?: undefined;
+                }
+              | {
+                  type: "calculated";
+                  dose_range?: {
+                    low: DosageQuantity;
+                    high: DosageQuantity;
+                  };
+                  dose_quantity?: undefined;
+                }
+            )[];
+            max_dose_per_period?: {
+              low: DosageQuantity;
+              high: DosageQuantity;
+            };
+          }[];
+          note?: string
+        }. 
+        
+        DosageQuantity {
+          value?: number;
+          unit?: "mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"
+        }
+
+
+        
+        Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
+        example={[
+          {
+            status: "active",
+            intent: "original_order",
+            category: "inpatient",
+            priority: "urgent",
+            do_not_perform: false,
+            medication: {
+              code: "1214771000202109",
+              display:
+                "Ciprofloxacin and fluocinolone only product in otic dose form",
+              system: "http://snomed.info/sct",
+            },
+            authored_on: "2024-12-29T22:16:45.404Z",
+            dosage_instruction: [
+              {
+                dose_and_rate: [
+                  {
+                    type: "ordered",
+                    dose_quantity: {
+                      unit: "g",
+                      value: 11,
+                    },
+                  },
+                ],
+                route: {
+                  code: "58831000052108",
+                  display: "Subretinal route",
+                  system: "http://snomed.info/sct",
+                },
+                method: {
+                  code: "1231460007",
+                  display: "Dialysis system",
+                  system: "http://snomed.info/sct",
+                },
+                site: {
+                  code: "16217661000119109",
+                  display: "Structure of right deltoid muscle",
+                  system: "http://snomed.info/sct",
+                },
+                as_needed_boolean: true,
+                timing: {
+                  repeat: {
+                    frequency: 1,
+                    period: 1,
+                    period_unit: "d",
+                  },
+                },
+                additional_instruction: [
+                  {
+                    code: "421984009",
+                    display: "Until finished",
+                    system: "http://snomed.info/sct",
+                  },
+                ],
+                as_needed_for: {
+                  code: "972604701000119104",
+                  display:
+                    "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
+                  system: "http://snomed.info/sct",
+                },
+              },
+            ],
+          },
+        ]}
+        className="rounded-lg border p-4"
+      >
+        {medications.length > 0 && (
+          <div className="rounded-lg border space-y-4">
+            <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
+              {medications.map((medication, index) => (
+                <li key={index}>
+                  <MedicationRequestItem
+                    medication={medication}
+                    disabled={disabled}
+                    onUpdate={(medication) =>
+                      handleUpdateMedication(index, medication)
+                    }
+                    onRemove={() => handleRemoveMedication(index)}
+                    index={index}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <ValueSetSelect
+          system="system-medication"
+          placeholder="Search for medications to add"
+          onSelect={handleAddMedication}
+          disabled={disabled}
+        />
+      </ScribeStructuredInput>
     </div>
   );
 }

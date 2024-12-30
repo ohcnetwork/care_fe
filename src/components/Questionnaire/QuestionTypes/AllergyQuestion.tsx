@@ -107,6 +107,11 @@ export function AllergyQuestion({
         onChange={(value) => value && setAllergies(value)}
         name="Allergies"
         prompt={`An array of objects of the following type: {
+          code: {
+            code: string,
+            display: string,
+            system: "http://snomed.info/sct"
+          },
           clinical_status?: "active" | "inactive" | "resolved",
           category?: "food" | "medication" | "environment" | "biologic",
           criticality?: "low" | "high" | "unable-to-assess",
@@ -116,6 +121,11 @@ export function AllergyQuestion({
         }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
         example={[
           {
+            code: {
+              code: "842825221000119100",
+              display: "Anifrolumab",
+              system: "http://snomed.info/sct",
+            },
             clinical_status: "inactive",
             category: "environment",
             criticality: "high",
