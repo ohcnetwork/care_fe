@@ -38,7 +38,6 @@ jobs:
           sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
       - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -63,10 +62,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-
-      - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v3
-        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
-        with:
-          name: cypress-videos
-          path: cypress/videos
