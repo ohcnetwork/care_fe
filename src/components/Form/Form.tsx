@@ -98,11 +98,6 @@ const Form = <T extends FormDetails>({
   return (
     <form
       onSubmit={handleSubmit}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          handleSubmit(e);
-        }
-      }}
       className={classNames(
         "mx-auto w-full",
         !props.noPadding && "px-8 py-5 md:px-16 md:py-11",

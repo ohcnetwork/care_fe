@@ -1,6 +1,7 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -19,7 +20,8 @@ import { USER_TYPES_MAP } from "@/common/constants";
 
 import { Error, Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import {
   classNames,
   formatDateTime,
@@ -29,7 +31,6 @@ import {
 
 const PatientNoteCard = ({
   note,
-  setReload,
   disableEdit,
   setReplyTo,
 }: {
@@ -44,15 +45,25 @@ const PatientNoteCard = ({
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
   const authUser = useAuthUser();
+  const queryClient = useQueryClient();
 
-  const fetchEditHistory = async () => {
-    const { res, data } = await request(routes.getPatientNoteEditHistory, {
+  const { data, refetch } = useQuery({
+    queryKey: [patientId, note.id],
+    queryFn: query(routes.getPatientNoteEditHistory, {
       pathParams: { patientId, noteId: note.id },
-    });
-    if (res?.status === 200) {
-      setEditHistory(data?.results ?? []);
-    }
-  };
+    }),
+  });
+
+  const { mutate: updateNote } = useMutation({
+    mutationFn: mutate(routes.updatePatientNote, {
+      pathParams: { patientId, noteId: note.id },
+    }),
+    onSuccess: () => {
+      Success({ msg: "Note updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["notes", patientId] });
+      setIsEditing(false);
+    },
+  });
 
   const onUpdateNote = async () => {
     if (noteField === note.note) {
@@ -69,20 +80,15 @@ const PatientNoteCard = ({
       return;
     }
 
-    const { res } = await request(routes.updatePatientNote, {
-      pathParams: { patientId, noteId: note.id },
-      body: payload,
-    });
-    if (res?.status === 200) {
-      Success({ msg: "Note updated successfully" });
-      setIsEditing(false);
-      setReload(true);
-    }
+    updateNote(payload);
   };
+
+  useEffect(() => {
+    setEditHistory(data?.results ?? []);
+  }, [data]);
 
   return (
     <>
-      {" "}
       <div
         className={classNames(
           "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",
@@ -119,7 +125,7 @@ const PatientNoteCard = ({
                   <div
                     className="cursor-pointer text-xs text-secondary-600"
                     onClick={() => {
-                      fetchEditHistory();
+                      refetch();
                       setShowEditHistory(true);
                     }}
                   >
@@ -207,7 +213,9 @@ const PatientNoteCard = ({
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-secondary-700">{noteField}</div>
+              <div className="text-sm text-secondary-700 whitespace-pre-wrap">
+                {noteField}
+              </div>
             )}
           </div>
         }

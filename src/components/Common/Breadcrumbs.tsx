@@ -97,6 +97,7 @@ export default function Breadcrumbs({
               <li className="mr-3 flex items-center">
                 <Button
                   variant="link"
+                  type="button"
                   className="rounded bg-gray-200/50 px-1 text-sm font-normal text-gray-800 transition hover:bg-gray-200/75 hover:no-underline"
                   size="xs"
                   onClick={() => {
