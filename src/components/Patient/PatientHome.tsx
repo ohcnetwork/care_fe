@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { AuthorizedButton } from "@/components/Common/AuthorizedButton";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
@@ -36,7 +37,6 @@ import {
   relativeDate,
 } from "../../Utils/utils";
 import { Avatar } from "../Common/Avatar";
-import ButtonV2 from "../Common/ButtonV2";
 import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import { SkillModel, UserBareMinimum } from "../Users/models";
@@ -523,7 +523,7 @@ export const PatientHome = (props: {
 
                     {NonReadOnlyUsers(authUser.user_type) && (
                       <div>
-                        <ButtonV2
+                        <AuthorizedButton
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
@@ -536,12 +536,12 @@ export const PatientHome = (props: {
                               ? t("update_volunteer")
                               : t("assign_to_volunteer")}
                           </span>
-                        </ButtonV2>
+                        </AuthorizedButton>
                       </div>
                     )}
 
                     <div>
-                      <ButtonV2
+                      <AuthorizedButton
                         id="patient-allow-transfer"
                         className="flex w-full flex-row bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         disabled={
@@ -564,7 +564,7 @@ export const PatientHome = (props: {
                             ? t("disable_transfer")
                             : t("allow_transfer")}
                         </span>
-                      </ButtonV2>
+                      </AuthorizedButton>
                     </div>
                   </div>
                 </div>
