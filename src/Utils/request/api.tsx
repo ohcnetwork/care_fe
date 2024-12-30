@@ -101,6 +101,8 @@ import {
   FacilityOrganizationCreate,
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
+import { Message } from "@/types/notes/messages";
+import { Thread } from "@/types/notes/threads";
 import {
   Organization,
   OrganizationResponse,
@@ -1637,6 +1639,35 @@ const routes = {
       path: "/api/v1/role/",
       method: "GET",
       TRes: {} as RoleResponse,
+    },
+  },
+
+  // Notes Routes
+  notes: {
+    patient: {
+      listThreads: {
+        path: "/api/v1/patient/{patientId}/thread/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<Thread>>(),
+        TQuery: Type<{ encounter: string }>(),
+      },
+      createThread: {
+        path: "/api/v1/patient/{patientId}/thread/",
+        method: "POST",
+        TRes: Type<Thread>(),
+        TBody: Type<{ title: string; encounter: string }>(),
+      },
+      getMessages: {
+        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<Message>>(),
+      },
+      postMessage: {
+        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
+        method: "POST",
+        TRes: Type<Message>(),
+        TBody: Type<{ message: string }>(),
+      },
     },
   },
 
