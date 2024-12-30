@@ -102,9 +102,11 @@ const DischargeModal = ({
     enabled: consultationData.id !== undefined,
   });
 
-  if (error) {
-    Notification.Error({ msg: t("ERROR_FETCHING_CONSULTATION") });
-  }
+  useEffect(() => {
+    if (error) {
+      Notification.Error({ msg: t("ERROR_FETCHING_CONSULTATION") });
+    }
+  }, [error]);
 
   const initialDiagnoses = data?.diagnoses ?? [];
 
