@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
@@ -10,6 +9,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { useView } from "@/Utils/useView";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
@@ -17,7 +17,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useView("users");
   const { facilityId } = props;
 
   const { data: facilityData } = useTanStackQueryInstead(
@@ -43,6 +43,10 @@ export default function FacilityUsers(props: { facilityId: number }) {
       prefetch: facilityId !== undefined,
     });
 
+  const handleTabChange = (tab: number) => {
+    setActiveTab(tab === 1 ? "list" : "card");
+  };
+
   return (
     <Page
       title={`${t("users")} - ${facilityData?.name}`}
@@ -61,8 +65,8 @@ export default function FacilityUsers(props: { facilityId: number }) {
         users={userListData?.results ?? []}
         onSearch={(username) => updateQuery({ username })}
         searchValue={qParams.username}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        activeTab={activeTab === "list" ? 1 : 0}
+        onTabChange={handleTabChange}
       />
 
       <Pagination totalCount={userListData?.count ?? 0} />
