@@ -3,6 +3,8 @@ import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
@@ -34,7 +36,6 @@ import CountBlock from "../../CAREUI/display/Count";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { FilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { triggerGoal } from "../../Integrations/Plausible";
 import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
