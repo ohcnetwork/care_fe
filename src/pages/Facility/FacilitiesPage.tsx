@@ -171,7 +171,7 @@ export function FacilitiesPage() {
       >
         {() => (
           <div className="mt-4 flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" id="facility-list">
               <PaginatedList.WhenLoading>
                 <Loading />
               </PaginatedList.WhenLoading>

@@ -139,6 +139,7 @@ export function LandingPage() {
               <div className="flex items-center px-4 h-12">
                 <CareIcon icon="l-search" className="h-5 w-5 text-gray-400" />
                 <input
+                  id="search-district"
                   ref={inputRef}
                   type="text"
                   value={selectedDistrict ? selectedDistrict.name : searchQuery}
@@ -194,6 +195,7 @@ export function LandingPage() {
           {/* Search Button */}
           <div className="flex justify-center">
             <Button
+              id="search-facility-btn"
               variant="primary"
               className="px-6 h-10"
               onClick={handleSearch}

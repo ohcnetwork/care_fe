@@ -37,7 +37,6 @@ jobs:
         chrome-version: latest-stable
 
       - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
