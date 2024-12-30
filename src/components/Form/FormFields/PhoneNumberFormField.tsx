@@ -42,6 +42,13 @@ interface Props extends FormFieldBaseProps<string> {
 const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
   (props, ref) => {
     const field = useFormFieldPropsResolver(props);
+
+    const getStringValue = (value: unknown): string => {
+      if (typeof value === "object" && value !== null && "value" in value) {
+        return (value as { value: string }).value || "";
+      }
+      return (value as string) || "";
+    };
     const [error, setError] = useState<FieldError | undefined>();
     const [country, setCountry] = useState<CountryData>({
       flag: "🇮🇳",
@@ -94,19 +101,21 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       setValue(conditionPhoneCode(value.code));
     };
 
+    const resolvedValue = getStringValue(field.value);
+
     useEffect(() => {
-      if (field.value && field.value.length > 0) {
-        if (field.value.startsWith("1800")) {
+      if (resolvedValue && resolvedValue.length > 0) {
+        if (resolvedValue.startsWith("1800")) {
           setCountry({ flag: "📞", name: "Support", code: "1800" });
           return;
         }
-        if (field.value === "+") {
+        if (resolvedValue === "+") {
           setCountry({ flag: "🌍", name: "Other", code: "+" });
           return;
         }
-        setCountry(phoneCodes[getCountryCode(field.value)!]);
+        setCountry(phoneCodes[getCountryCode(resolvedValue)!]);
       }
-    }, [field.value]);
+    }, [resolvedValue]);
 
     return (
       <FormField
@@ -144,12 +153,17 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
                       field.error && "border-danger-500",
                       field.className,
                     )}
-                    maxLength={field.value?.startsWith("1800") ? 11 : 15}
+                    maxLength={
+                      typeof resolvedValue === "string" &&
+                      resolvedValue?.startsWith("1800")
+                        ? 11
+                        : 15
+                    }
                     placeholder={props.placeholder}
-                    value={formatPhoneNumber(field.value, props.types)}
+                    value={formatPhoneNumber(resolvedValue, props.types)}
                     onChange={(e) => setValue(e.target.value)}
                     disabled={field.disabled}
-                    onBlur={() => setError(validate(field.value, "blur"))}
+                    onBlur={() => setError(validate(resolvedValue, "blur"))}
                     ref={ref}
                   />
                   <PopoverPanel className="w-full">

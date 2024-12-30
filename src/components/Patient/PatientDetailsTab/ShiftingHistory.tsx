@@ -5,7 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { AuthorizedButton } from "@/components/Common/AuthorizedButton";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { ShiftCreate } from "@/components/Patient/ShiftCreate";
+import { ShiftCreate } from "@/components/Patient/ShiftCreate1";
 import { PatientModel } from "@/components/Patient/models";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
 import ShiftingTable from "@/components/Shifting/ShiftingTable";
