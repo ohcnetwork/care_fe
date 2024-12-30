@@ -213,7 +213,7 @@ const PatientNoteCard = ({
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-secondary-700 break-all">
+              <div className="text-sm text-secondary-700 whitespace-pre-wrap">
                 {noteField}
               </div>
             )}
