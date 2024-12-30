@@ -31,10 +31,11 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-        chrome-version: latest-stable
+      - name: Install Specific Chrome Version
+        run: |
+          sudo apt-get install -y wget
+          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
       - name: Cypress run for Non-Forked PRs 🥬
         uses: cypress-io/github-action@v5
@@ -61,10 +62,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-
-      - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v3
-        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
-        with:
-          name: cypress-videos
-          path: cypress/videos
