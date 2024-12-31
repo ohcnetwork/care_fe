@@ -55,7 +55,7 @@ export default function UserSelector({
   const users = data?.results || [];
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className="w-full">
         <Button
           variant="outline"
@@ -88,11 +88,7 @@ export default function UserSelector({
             onValueChange={setSearch}
             className="outline-none border-none ring-0 shadow-none"
           />
-          <CommandList
-            onWheel={(e) => {
-              e.stopPropagation();
-            }}
-          >
+          <CommandList>
             <CommandEmpty>
               {isFetching
                 ? t("searching")
