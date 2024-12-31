@@ -46,7 +46,8 @@ const pluginMapContent = `// Use type assertion for the static import${plugins
     (plugin) =>
       `// @ts-expect-error Remote module will be available at runtime\nimport ${plugin.camelCaseName}Manifest from "${plugin.repo}/manifest";`,
   )
-  .join("\n")}import type { PluginManifest } from "./pluginTypes";
+  .join("\n")}
+import type { PluginManifest } from "./pluginTypes";
 
 const pluginMap: PluginManifest[] = [${plugins.map((plugin) => `${plugin.camelCaseName}Manifest as PluginManifest`).join(",\n  ")}];
 
