@@ -135,6 +135,7 @@ export default function LinkUserSheet({
                 <div className="flex items-start gap-4">
                   <Avatar
                     name={`${selectedUser.first_name} ${selectedUser.last_name}`}
+                    imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
                   <div className="flex flex-col flex-1">
@@ -166,13 +167,13 @@ export default function LinkUserSheet({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Select Role</label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col text-left">
                           <span>{role.name}</span>
                           {role.description && (
                             <span className="text-xs text-gray-500">

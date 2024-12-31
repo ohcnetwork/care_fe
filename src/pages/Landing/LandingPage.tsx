@@ -13,32 +13,32 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
-import { DistrictModel } from "@/components/Facility/models";
-
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { Organization } from "@/types/organization/organization";
 
-const { customLogo, stateLogo, mainLogo } = careConfig;
+const { customLogo, stateLogo, mainLogo, keralaGeoId } = careConfig;
 
-// Todo: Lets read the default state ID from ENV.
-const STATE_ID = "1"; // Kerala's state ID
+const STATE_GEO_ID = keralaGeoId || "";
 
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedDistrict, setSelectedDistrict] =
-    useState<DistrictModel | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<Organization | null>(
+    null,
+  );
 
-  const { data: districtsResponse } = useQuery<RequestResult<DistrictModel[]>>({
-    queryKey: ["districts", STATE_ID],
-    queryFn: () =>
-      request(routes.getDistrictByState, {
-        pathParams: { id: STATE_ID },
+  const { data: districtsResponse } = useQuery<PaginatedResponse<Organization>>(
+    {
+      queryKey: ["districts", STATE_GEO_ID],
+      queryFn: query(routes.organization.getPublicOrganizations, {
+        queryParams: { parent: STATE_GEO_ID },
       }),
-  });
+    },
+  );
 
-  const districts = districtsResponse?.data || [];
+  const districts = districtsResponse?.results || [];
 
   const filteredDistricts = districts.filter((district) =>
     district.name.toLowerCase().includes(searchQuery.toLowerCase()),

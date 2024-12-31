@@ -169,13 +169,13 @@ export default function LinkFacilityUserSheet({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Select Role</label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col text-left">
                           <span>{role.name}</span>
                           {role.description && (
                             <span className="text-xs text-gray-500">

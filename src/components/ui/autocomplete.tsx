@@ -27,6 +27,7 @@ interface AutocompleteProps {
   options: AutoCompleteOption[];
   value: string;
   onChange: (value: string) => void;
+  onSearch?: (value: string) => void;
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
@@ -36,6 +37,7 @@ export default function Autocomplete({
   options,
   value,
   onChange,
+  onSearch,
   placeholder = "Select...",
   noOptionsMessage = "No options found",
   disabled,
@@ -43,7 +45,7 @@ export default function Autocomplete({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           title={
@@ -70,6 +72,7 @@ export default function Autocomplete({
           <CommandInput
             placeholder="Search option..."
             disabled={disabled}
+            onValueChange={onSearch}
             className="outline-none border-none ring-0 shadow-none"
           />
           <CommandList>

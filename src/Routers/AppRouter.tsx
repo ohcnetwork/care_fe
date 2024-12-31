@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useRedirect, useRoutes } from "raviger";
+import { Redirect, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -72,6 +72,7 @@ const Routes: AppRoutes = {
   "/questionnaire/:id": ({ id }) => <QuestionnaireShow id={id} />,
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
+  "/login": () => <Redirect to="/" />,
 };
 
 export default function AppRouter() {

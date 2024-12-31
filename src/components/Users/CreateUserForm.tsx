@@ -79,14 +79,6 @@ const userFormSchema = z
     qualification: z.string().optional(),
     doctor_experience_commenced_on: z.string().optional(),
     doctor_medical_council_registration: z.string().optional(),
-    weekly_working_hours: z
-      .string()
-      .refine(
-        (val) => !val || (Number(val) >= 0 && Number(val) <= 168),
-        "Working hours must be between 0 and 168",
-      )
-      .optional(),
-    video_connect_link: z.string().url().optional(),
     geo_organization: z.string().min(1, "Organization is required"),
   })
   .refine((data) => data.password === data.c_password, {
@@ -426,44 +418,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             </div>
           </>
         )}
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="weekly_working_hours"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weekly Working Hours</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Weekly working hours"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="video_connect_link"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Video Connect Link</FormLabel>
-                <FormControl>
-                  <Input
-                    type="url"
-                    placeholder="https://example.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
         <FormField
           control={form.control}

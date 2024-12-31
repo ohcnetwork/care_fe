@@ -1583,6 +1583,11 @@ const routes = {
       method: "GET",
       TRes: Type<PaginatedResponse<Patient>>(),
     },
+    getPublicOrganizations: {
+      path: "/api/v1/govt/organization/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<Organization>>(),
+    },
   },
 
   facilityOrganization: {

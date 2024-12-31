@@ -131,6 +131,7 @@ export function AllergyList({ patientId }: AllergyListProps) {
                   <Avatar
                     name={allergy.created_by.username}
                     className="w-4 h-4"
+                    imageUrl={allergy.created_by.profile_picture_url}
                   />
                   <span className="text-sm">{allergy.created_by.username}</span>
                 </TableCell>

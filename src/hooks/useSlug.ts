@@ -2,6 +2,8 @@ import { usePath } from "raviger";
 
 /**
  * Returns the slug from the current path.
+ *
+ * @deprecated use `usePathParams` instead
  * @param prefix The prefix of the slug.
  * @returns The slug.
  * @example
@@ -15,6 +17,7 @@ export default function useSlug(prefix: string, fallback?: string) {
 
 /**
  * Returns the slugs from the current path.
+ * * @deprecated use `usePathParams` instead
  * @param prefix The prefixes of the slug.
  * @returns The slugs
  * @example

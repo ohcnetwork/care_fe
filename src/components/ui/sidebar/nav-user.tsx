@@ -64,6 +64,7 @@ export function FacilityNavUser() {
                   <Avatar
                     name={`${user.first_name} ${user.last_name}`}
                     className="h-8 w-8 rounded-lg"
+                    imageUrl={user.read_profile_picture_url}
                   />
                 </div>
               )}

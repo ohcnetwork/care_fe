@@ -120,6 +120,7 @@ const careConfig = {
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
+  keralaGeoId: env.REACT_KERALA_GEO_ID || "",
 } as const;
 
 export default careConfig;

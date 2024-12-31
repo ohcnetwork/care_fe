@@ -20,6 +20,7 @@ export const PAGINATION_LIMIT = 36;
 export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
+  patientTokenKey: "care_patient_token",
 };
 export interface OptionsType {
   id: number | string;
@@ -1771,7 +1772,10 @@ export const HEADER_CONTENT_TYPES = {
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
-export const CarePatientTokenKey = "care_patient_token";
+/**
+ * @deprecated use `LocalStorageKeys.patientTokenKey` instead
+ */
+export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
 
 // organization_levels map based of type. for govt
 // thought: This might be better placed in the organization types files
