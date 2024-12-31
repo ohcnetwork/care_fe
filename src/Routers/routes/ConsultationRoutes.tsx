@@ -1,5 +1,4 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
-import ManagePrescriptions from "@/components/Medicine/ManagePrescriptions";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
 import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
@@ -58,8 +57,6 @@ const consultationRoutes: AppRoutes = {
       type="encounter"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
-    (path) => <ManagePrescriptions {...path} />,
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
     facilityId,
     patientId,
