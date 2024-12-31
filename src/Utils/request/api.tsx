@@ -463,7 +463,7 @@ const routes = {
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserAssignedModel>(),
+    TRes: Type<UserBase>(),
   },
 
   getScheduleAbleFacilityUsers: {
