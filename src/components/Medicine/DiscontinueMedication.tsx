@@ -28,6 +28,7 @@ import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -73,7 +74,7 @@ export default function DiscontinueMedication({
       mutate(routes.medicationRequest.discontinue, {
         pathParams: { patientId: patient!.id, id: prescription.id! },
         body,
-      }),
+      })(body),
     onSuccess: () => onClose(true),
   });
 
@@ -158,12 +159,16 @@ export default function DiscontinueMedication({
                 )}
               />
               <DialogFooter>
-                <Button onClick={() => onClose(false)} variant="secondary">
-                  {t("cancel")}
-                </Button>
-                <Button type="submit" variant="destructive">
-                  {t("discontinue")}
-                </Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    {t("cancel")}
+                  </Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button type="submit" className="bg-danger-500">
+                    {t("discontinue")}
+                  </Button>
+                </DialogClose>
               </DialogFooter>
             </form>
           </Form>

@@ -34,6 +34,7 @@ import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 import { MedicationRequestItem } from "../Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -123,10 +124,10 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
 
   const { mutate: administerMedication } = useMutation({
     mutationFn: async (body: MedicationAdministration) =>
-      mutate(routes.medicationAdministration.create, {
+      await mutate(routes.medicationAdministration.create, {
         pathParams: { patientId: patient!.id },
         body,
-      }),
+      })(body),
     onSuccess: () => onClose(true),
   });
 
@@ -285,12 +286,16 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
                 )}
               />
               <DialogFooter>
-                <Button onClick={() => onClose(false)} variant="secondary">
-                  {t("cancel")}
-                </Button>
-                <Button type="submit" className="bg-primary">
-                  {t("administer")}
-                </Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    {t("cancel")}
+                  </Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button type="submit" className="bg-primary">
+                    {t("administer")}
+                  </Button>
+                </DialogClose>
               </DialogFooter>
             </form>
           </Form>

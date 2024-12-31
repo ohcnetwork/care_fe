@@ -86,28 +86,26 @@ export default function MedicineAdministrationTableRow({
               >
                 {t("close")}
               </Button>
-              <AuthorizedForConsultationRelatedActions>
-                {!props.readonly && (
-                  <>
-                    <DiscontinueMedication
-                      prescription={prescription}
-                      onClose={(success) => {
-                        if (success) {
-                          props.refetch();
-                        }
-                      }}
-                    />
-                    <AdministerMedicine
-                      prescription={prescription}
-                      onClose={(success) => {
-                        if (success) {
-                          props.refetch();
-                        }
-                      }}
-                    />
-                  </>
-                )}
-              </AuthorizedForConsultationRelatedActions>
+              {!props.readonly && (
+                <>
+                  <DiscontinueMedication
+                    prescription={prescription}
+                    onClose={(success) => {
+                      if (success) {
+                        props.refetch();
+                      }
+                    }}
+                  />
+                  <AdministerMedicine
+                    prescription={prescription}
+                    onClose={(success) => {
+                      if (success) {
+                        props.refetch();
+                      }
+                    }}
+                  />
+                </>
+              )}
             </div>
           </div>
         </DialogModal>
