@@ -9,6 +9,7 @@ import { AppRoutes } from "./Routers/AppRouter";
 import { FormContextValue } from "./components/Form/FormContext";
 import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
 import { PatientMeta } from "./components/Patient/models";
+import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
 import { PatientModel } from "./types/emr/patient";
 
@@ -30,7 +31,9 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
   consultation: ConsultationModel;
 }>;
 
-export type ScribeComponentType = React.FC;
+export type ScribeComponentType = React.FC<{
+  questionnaireForm: QuestionnaireFormState[];
+}>;
 export type ManageFacilityOptionsComponentType = React.FC<{
   facility?: FacilityModel;
 }>;

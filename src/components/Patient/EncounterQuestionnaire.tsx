@@ -5,8 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
-import { PLUGIN_Component } from "@/PluginEngine";
-
 interface Props {
   facilityId: string;
   patientId: string;
@@ -23,35 +21,32 @@ export default function EncounterQuestionnaire({
   subjectType,
 }: Props) {
   return (
-    <>
-      <PLUGIN_Component __name="Scribe" />
-      <Page
-        title="Questionnaire"
-        backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
-      >
-        <div className="container mx-auto p-4">
-          <Card>
-            <CardContent className="pt-6">
-              <QuestionnaireForm
-                facilityId={facilityId}
-                patientId={patientId}
-                subjectType={subjectType}
-                encounterId={encounterId}
-                questionnaireSlug={questionnaireSlug}
-                onSubmit={() => {
-                  if (encounterId) {
-                    navigate(
-                      `/facility/${facilityId}/encounter/${encounterId}/updates`,
-                    );
-                  } else {
-                    navigate(`/patient/${patientId}/updates`);
-                  }
-                }}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </Page>
-    </>
+    <Page
+      title="Questionnaire"
+      backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
+    >
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardContent className="pt-6">
+            <QuestionnaireForm
+              facilityId={facilityId}
+              patientId={patientId}
+              subjectType={subjectType}
+              encounterId={encounterId}
+              questionnaireSlug={questionnaireSlug}
+              onSubmit={() => {
+                if (encounterId) {
+                  navigate(
+                    `/facility/${facilityId}/encounter/${encounterId}/updates`,
+                  );
+                } else {
+                  navigate(`/patient/${patientId}/updates`);
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </Page>
   );
 }
