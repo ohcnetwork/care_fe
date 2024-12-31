@@ -72,7 +72,7 @@ const App = () => {
       </Suspense>
 
       {/* Devtools are not included in production builds by default */}
-      <ReactQueryDevtools initialIsOpen={false} position="left" />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
