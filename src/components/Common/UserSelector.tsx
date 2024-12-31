@@ -56,7 +56,7 @@ export default function UserSelector({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild className="w-full">
         <Button
           variant="outline"
           role="combobox"
@@ -77,14 +77,22 @@ export default function UserSelector({
           <CaretDownIcon className="ml-auto" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start">
+      <PopoverContent
+        className="p-0 w-[var(--radix-popover-trigger-width)] max-w-[--radix-popover-content-available-width]"
+        align="start"
+        sideOffset={4}
+      >
         <Command filter={() => 1}>
           <CommandInput
             placeholder={t("search")}
             onValueChange={setSearch}
             className="outline-none border-none ring-0 shadow-none"
           />
-          <CommandList>
+          <CommandList
+            onWheel={(e) => {
+              e.stopPropagation();
+            }}
+          >
             <CommandEmpty>
               {isFetching
                 ? t("searching")
