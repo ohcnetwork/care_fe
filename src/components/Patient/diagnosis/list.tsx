@@ -121,12 +121,12 @@ export function DiagnosisList({ patientId, encounterId }: DiagnosisListProps) {
                 </TableCell>
                 <TableCell className="whitespace-nowrap flex items-center gap-2">
                   <Avatar
-                    name={`${diagnosis.created_by.first_name} ${diagnosis.created_by.last_name}`}
+                    name={`${diagnosis.created_by?.first_name} ${diagnosis.created_by?.last_name}`}
                     className="w-4 h-4"
                   />
                   <span className="text-sm">
-                    {diagnosis.created_by.first_name}{" "}
-                    {diagnosis.created_by.last_name}
+                    {diagnosis.created_by?.first_name}{" "}
+                    {diagnosis.created_by?.last_name}
                   </span>
                 </TableCell>
               </TableRow>

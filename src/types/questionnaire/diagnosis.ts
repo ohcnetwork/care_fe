@@ -39,8 +39,8 @@ export interface Diagnosis {
   onset?: Onset;
   recorded_date?: string;
   note?: string;
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by?: UserBase;
+  updated_by?: UserBase;
 }
 
 export interface DiagnosisRequest {
