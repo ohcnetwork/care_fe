@@ -19,10 +19,8 @@ import {
 } from "@/components/Schedule/types";
 import {
   SkillModel,
-  SkillObjectModel,
   UpdatePasswordForm,
   UserAssignedModel,
-  UserBareMinimum,
   UserModel,
 } from "@/components/Users/models";
 
@@ -308,14 +306,6 @@ const routes = {
     TRes: Type<PNconfigData>(),
   },
 
-  // Skill Endpoints
-
-  getAllSkills: {
-    path: "/api/v1/skill/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<SkillObjectModel>>(),
-  },
-
   // Facility Endpoints
 
   getPermittedFacilities: {
@@ -389,17 +379,6 @@ const routes = {
     TRes: Type<Record<string, never>>(),
   },
 
-  downloadFacility: {
-    path: "/api/v1/facility/?csv",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  downloadPatients: {
-    path: "/api/v1/patient/?csv",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-
   // Patient
 
   searchPatient: {
@@ -460,21 +439,11 @@ const routes = {
   },
 
   //Profile
-  checkUsername: {
-    path: "/api/v1/users/{username}/check_availability/",
-    method: "GET",
-    TRes: Type<Record<string, never>>(),
-  },
 
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
     TRes: Type<UserBase>(),
-  },
-  getUserBareMinimum: {
-    path: "/api/v1/facility/{facilityId}/get_users/{userExternalId}/",
-    method: "GET",
-    TRes: Type<UserBareMinimum>(),
   },
   updateUserDetails: {
     path: "/api/v1/users/",
@@ -624,11 +593,6 @@ const routes = {
   },
 
   valueset: {
-    // list: {
-    //   path: "/api/v1/valueset/",
-    //   method: "GET",
-    //   TRes: Type<PaginatedResponse<ValueSet>>(),
-    // },
     expand: {
       path: "/api/v1/valueset/{system}/expand/",
       method: "POST",
@@ -815,7 +779,6 @@ const routes = {
       TRes: {} as Record<string, never>,
     },
     listPatients: {
-      // TODO: change this to the correct endpoint
       path: "/api/v1/patient/",
       method: "GET",
       TRes: Type<PaginatedResponse<Patient>>(),
