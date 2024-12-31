@@ -25,13 +25,13 @@ const getDate = (value: any) =>
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
-    origin_facility: filter.origin_facility || "",
+    origin_facility: filter.origin_facility || null,
     origin_facility_ref: null,
-    approving_facility: filter.approving_facility || "",
+    approving_facility: filter.approving_facility || null,
     approving_facility_ref: null,
-    assigned_facility: filter.assigned_facility || "",
+    assigned_facility: filter.assigned_facility || null,
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
+    emergency: filter.emergency || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
