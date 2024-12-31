@@ -41,19 +41,14 @@ const plugins = readAppsConfig();
 
 // Generate pluginMap.ts
 const pluginMapPath = path.join(__dirname, "..", "src", "pluginMap.ts");
-const pluginMapContent = `// Use type assertion for the static import
-${plugins
+const pluginMapContent = `// Use type assertion for the static import${plugins
   .map(
     (plugin) =>
       `// @ts-expect-error Remote module will be available at runtime\nimport ${plugin.camelCaseName}Manifest from "${plugin.repo}/manifest";`,
   )
-  .join("\n")}
+  .join("\n")}import type { PluginManifest } from "./pluginTypes";
 
-import type { PluginManifest } from "./pluginTypes";
-
-const pluginMap: PluginManifest[] = [
-  ${plugins.map((plugin) => `${plugin.camelCaseName}Manifest as PluginManifest`).join(",\n  ")}
-];
+const pluginMap: PluginManifest[] = [${plugins.map((plugin) => `${plugin.camelCaseName}Manifest as PluginManifest`).join(",\n  ")}];
 
 export { pluginMap };
 `;

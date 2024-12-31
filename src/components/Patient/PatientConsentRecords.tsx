@@ -55,12 +55,6 @@ export default function PatientConsentRecords(props: {
     },
   });
 
-  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
-    pathParams: {
-      id: patientId,
-    },
-  });
-
   const { data: consentRecordsData, refetch } = useTanStackQueryInstead(
     routes.listConsents,
     {
