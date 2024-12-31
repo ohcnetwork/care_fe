@@ -149,7 +149,7 @@ export const MedicationRequestItem: React.FC<{
 
   return (
     <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h4 className="text-base font-semibold">
           {index + 1}. {medication.medication?.display}
         </h4>
@@ -192,7 +192,7 @@ export const MedicationRequestItem: React.FC<{
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <div className="flex-1">
             <Label className="mb-1 block text-sm font-medium">Dosage</Label>
             <QuantityInput
@@ -280,7 +280,7 @@ export const MedicationRequestItem: React.FC<{
             </div>
           </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <div className="flex-1">
               <Label className="mb-1 block text-sm font-medium">
                 Frequency
