@@ -31,7 +31,7 @@ export function handleHttpError(error: Error) {
   }
 
   if (isBadRequest(error)) {
-    Notifications.BadRequest({ errs: cause });
+    Notifications.BadRequest({ errs: cause?.errors });
     return;
   }
 
