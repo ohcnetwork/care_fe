@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -17,6 +17,7 @@ import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 interface QuestionnaireSearchProps {
   onSelect: (questionnaire: QuestionnaireDetail) => void;
+  selected?: QuestionnaireDetail[];
   subjectType?: string;
   disabled?: boolean;
 }
@@ -28,6 +29,7 @@ interface QuestionnaireListResponse {
 
 export function QuestionnaireSearch({
   onSelect,
+  selected,
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
@@ -42,10 +44,16 @@ export function QuestionnaireSearch({
       }),
     });
 
-  const filteredQuestionnaires = (questionnaires?.results ?? []).filter(
-    (item: QuestionnaireDetail) =>
-      item.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredQuestionnaires = useMemo(() => {
+    return (questionnaires?.results ?? [])
+      .filter(
+        (item: QuestionnaireDetail) =>
+          !selected?.some((selectedItem) => selectedItem.id === item.id),
+      )
+      .filter((item: QuestionnaireDetail) =>
+        item.title.toLowerCase().includes(search.toLowerCase()),
+      );
+  }, [questionnaires, search, selected]);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

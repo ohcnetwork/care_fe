@@ -378,6 +378,7 @@ export function QuestionnaireForm({
           <div className="flex gap-4 items-center">
             <QuestionnaireSearch
               subjectType={subjectType}
+              selected={questionnaireForms.map((form) => form.questionnaire)}
               onSelect={(selected) => {
                 if (
                   questionnaireForms.some(
