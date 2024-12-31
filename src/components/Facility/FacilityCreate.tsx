@@ -186,10 +186,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       const requestData: FacilityRequest = {
         ...data,
         phone_number: parsePhoneNumber(data.phone_number),
-        ward: 5896,
-        local_body: 95,
-        district: 5,
-        state: 1,
       };
 
       const { res, data: responseData } = facilityId

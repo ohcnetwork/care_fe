@@ -35,13 +35,7 @@ export function FacilityCard({ facility, className }: Props) {
               {/* @ts-expect-error Type is not defined properly */}
               {facility.facility_type?.name}
               <p className="text-sm text-muted-foreground truncate">
-                {[
-                  facility.address,
-                  facility.local_body_object?.name,
-                  facility.district_object?.name,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
+                {[facility.address].filter(Boolean).join(", ")}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">

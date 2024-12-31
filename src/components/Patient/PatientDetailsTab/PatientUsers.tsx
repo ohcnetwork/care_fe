@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import UserSelector from "@/components/Common/UserSelector";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -55,12 +55,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { data: roles } = useQuery({
     queryKey: ["roles"],
     queryFn: query(routes.role.list),
-    enabled: open,
-  });
-
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: query(routes.user.list),
     enabled: open,
   });
 
@@ -99,14 +93,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
     });
   };
 
-  const userOptions =
-    users?.results?.map((user: UserBase) => ({
-      label: `${user.first_name} ${user.last_name} (${user.username})`,
-      value: user.id,
-    })) || [];
-
-  const handleUserChange = (value: string) => {
-    const user = users?.results?.find((u: UserBase) => u.id === value);
+  const handleUserChange = (user: UserBase) => {
     setSelectedUser(user);
     setSelectedRole("");
   };
@@ -129,9 +116,8 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Search User</h3>
-            <Autocomplete
-              options={userOptions}
-              value={selectedUser?.id || ""}
+            <UserSelector
+              selected={selectedUser}
               onChange={handleUserChange}
               placeholder="Search users..."
               noOptionsMessage="No users found"

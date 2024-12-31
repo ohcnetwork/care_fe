@@ -71,21 +71,6 @@ export default function ListFilter(props: any) {
     },
   );
 
-  const { loading: assignedFacilityLoading } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      pathParams: { id: filter.assigned_facility },
-      prefetch: filter.assigned_facility !== undefined,
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          setFilterState({
-            assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
-          });
-        }
-      },
-    },
-  );
-
   const setFacility = (selected: any, name: string) => {
     setFilterState({
       ...filterState,
@@ -182,22 +167,6 @@ export default function ListFilter(props: any) {
             name="approving_facility"
             selected={filterState.approving_facility_ref}
             setSelected={(obj) => setFacility(obj, "approving_facility")}
-            className="resource-page-filter-dropdown"
-            errors={""}
-          />
-        )}
-      </div>
-
-      <div>
-        <FieldLabel>Assigned facility</FieldLabel>
-        {filter.approving_facility && assignedFacilityLoading ? (
-          <CircularProgress />
-        ) : (
-          <FacilitySelect
-            multiple={false}
-            name="assigned_facility"
-            selected={filterState.assigned_facility_ref}
-            setSelected={(obj) => setFacility(obj, "assigned_facility")}
             className="resource-page-filter-dropdown"
             errors={""}
           />
