@@ -184,7 +184,7 @@ export function EncounterList({
       queryParams: {
         ...buildQueryParams(status, facilityId, encounterClass, priority),
         name,
-        encounter_id,
+        id: encounter_id,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
