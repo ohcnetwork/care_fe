@@ -15,51 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2, 3, 4]
+        containers: [1]
     env:
-      REACT_CARE_API_URL: http://localhost:9000
-      REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main,ohcnetwork/care_abdm_fe@main"
-      REACT_ENABLE_HCX: true
-      REACT_ENABLE_ABDM: true
+      REACT_CARE_API_URL: https://care-api.do.ohc.network
+
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
-
-      - name: Set backend branch
-        id: backend-branch
-        run: |
-          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
-            echo "branch=staging" >> $GITHUB_OUTPUT
-          else
-            echo "branch=develop" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout care 📥
-        uses: actions/checkout@v3
-        with:
-          repository: ohcnetwork/care
-          path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
-
-      - name: Start care docker containers 🐳
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up 
-          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
-          cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
-
-      - name: Wait for care to be up ♻
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 1
-          max_attempts: 5
-          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
 
       - name: Determine PR Origin
         id: pr_origin
@@ -71,7 +33,7 @@ jobs:
           node-version: "22.11.0"
 
       - name: Install dependencies 📦
-        run: npm run install-all
+        run: npm ci
 
       - name: Build ⚙️
         run: npm run build
