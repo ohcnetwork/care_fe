@@ -23,9 +23,9 @@ export class PatientFileUpload {
     cy.wait(2000);
     cy.get("#start-recording").click();
     cy.wait(2000);
-    cy.get("#stop-recording").click();
-    cy.wait(1000);
-    cy.get("#save-recording").click();
+    cy.get("#stop-recording").should("be.enabled").click();
+    cy.wait(2000);
+    cy.get("#save-recording").should("be.enabled").click();
   }
 
   clickUploadAudioFile() {

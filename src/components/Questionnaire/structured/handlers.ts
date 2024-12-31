@@ -71,7 +71,7 @@ const handlers: {
     getRequests: (medications, { patientId, encounterId }) => {
       return [
         {
-          url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
+          url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
           method: "POST",
           body: {
             datapoints: medications.map((medication) => ({

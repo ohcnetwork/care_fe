@@ -25,6 +25,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
   id: string;
@@ -32,13 +33,12 @@ interface resourceProps {
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
-const initForm: any = {
-  assigned_facility_object: null,
-  emergency: "false",
+const initForm: Partial<UpdateResourceRequest> = {
+  assigned_facility: null,
+  emergency: false,
   title: "",
   reason: "",
-  assigned_facility_type: "",
-  assigned_to: "",
+  assigned_to: null,
 };
 
 const requiredFields: any = {
@@ -149,14 +149,23 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     if (validForm) {
       setIsLoading(true);
 
-      const resourceData = {
+      const resourceData: UpdateResourceRequest = {
+        id: props.id,
         status: state.form.status,
-        origin_facility: state.form.origin_facility_object?.id,
-        assigned_facility: state.form?.assigned_facility_object?.id,
+        origin_facility: state.form.origin_facility?.id,
+        assigned_facility: state.form?.assigned_facility?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         title: state.form.title,
         reason: state.form.reason,
         assigned_to: state.form.assigned_to,
+        category: state.form.category,
+        priority: state.form.priority,
+        referring_facility_contact_number:
+          state.form.referring_facility_contact_number,
+        referring_facility_contact_name:
+          state.form.referring_facility_contact_name,
+        approving_facility: state.form.approving_facility?.id,
+        related_patient: state.form.related_patient?.id,
       };
 
       const { res, data } = await request(routes.updateResource, {

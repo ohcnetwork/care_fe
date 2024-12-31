@@ -59,6 +59,9 @@ export default function CreateFacilityOrganizationSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization", "list", facilityId, parentId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["getCurrentUser"],
+      });
       toast.success("Organization created successfully");
       setOpen(false);
       setName("");

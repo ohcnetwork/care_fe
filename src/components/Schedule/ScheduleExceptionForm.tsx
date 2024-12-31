@@ -29,11 +29,13 @@ import {
 } from "@/components/ui/sheet";
 
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import { UserModel } from "@/components/Users/models";
+
+import useSlug from "@/hooks/useSlug";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 const formSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
@@ -52,11 +54,12 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   onRefresh?: () => void;
-  user: UserModel;
+  user: UserBase;
 }
 
 export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
   const [open, setOpen] = useState(false);
+  const facilityId = useSlug("facility");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -76,7 +79,7 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
     isSuccess,
   } = useMutation({
     mutationFn: mutate(ScheduleAPIs.exceptions.create, {
-      pathParams: { facility_id: user.home_facility_object!.id! },
+      pathParams: { facility_id: facilityId },
     }),
   });
 
@@ -108,7 +111,7 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      resource: user.external_id,
+      resource: user.id,
     });
   }
 

@@ -67,7 +67,11 @@ export default function Autocomplete({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 pointer-events-auto">
         <Command>
-          <CommandInput placeholder="Search option..." disabled={disabled} />
+          <CommandInput
+            placeholder="Search option..."
+            disabled={disabled}
+            className="outline-none border-none ring-0 shadow-none"
+          />
           <CommandList>
             <CommandEmpty>{noOptionsMessage}</CommandEmpty>
             <CommandGroup>

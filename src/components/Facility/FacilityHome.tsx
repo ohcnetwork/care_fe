@@ -1,37 +1,46 @@
 import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
+import { Hospital, MapPin, MoreVertical, Settings, Trash2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Chip from "@/CAREUI/display/Chip";
-import RecordMeta from "@/CAREUI/display/RecordMeta";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Markdown } from "@/components/ui/markdown";
 
+import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import AvatarEditable from "@/components/Common/AvatarEditable";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
-import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
-import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { FACILITY_FEATURE_TYPES, USER_TYPES } from "@/common/constants";
+import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
-import { PLUGIN_Component } from "@/PluginEngine";
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { FacilityData } from "@/types/facility/facility";
+import type {
+  Organization,
+  OrganizationParent,
+} from "@/types/organization/organization";
+import { getOrgLevelLabel } from "@/types/organization/organization";
 
-import { UserModel } from "../Users/models";
+import type { UserModel } from "../Users/models";
 
 export function canUserRegisterPatient(
   authUser: UserModel,
@@ -48,10 +57,45 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <CareIcon icon={feature.icon} className="text-lg" />
+    <Hospital className="h-4 w-4" />
   ) : (
     feature.icon
   );
+};
+
+const renderGeoOrganizations = (geoOrg: Organization) => {
+  const orgParents: OrganizationParent[] = [];
+
+  let currentParent = geoOrg.parent;
+
+  while (currentParent) {
+    if (currentParent.id) {
+      orgParents.push(currentParent);
+    }
+    currentParent = currentParent.parent;
+  }
+
+  const parentDetails = orgParents.map((org) => {
+    return {
+      label: getOrgLevelLabel(org.org_type, org.level_cache),
+      value: org.name,
+    };
+  });
+
+  return parentDetails
+    .reverse()
+    .concat({
+      label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
+      value: geoOrg.name,
+    })
+    .map((org, index) => (
+      <span key={org.value}>
+        <span className="text-muted-foreground">{org.value}</span>
+        {index < parentDetails.length - 1 && (
+          <span className="mx-2 text-muted-foreground/50">→</span>
+        )}
+      </span>
+    ));
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
@@ -62,17 +106,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const {
     data: facilityData,
-    loading: isLoading,
+    isLoading,
     refetch: facilityFetch,
-  } = useTanStackQueryInstead(routes.getPermittedFacility, {
-    pathParams: {
-      id: facilityId,
-    },
-    onResponse: ({ res }) => {
-      if (!res?.ok) {
-        navigate("/not-found");
-      }
-    },
+  } = useQuery<FacilityData>({
+    queryKey: [routes.facility.show.path, facilityId],
+    queryFn: query(routes.facility.show, {
+      pathParams: { id: facilityId },
+    }),
   });
 
   const handleDeleteClose = () => {
@@ -137,23 +177,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
     return <Loading />;
   }
 
-  const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
-  const hasPermissionToEditCoverImage =
-    !(authUser.user_type as string).includes("ReadOnly") &&
-    USER_TYPES.findIndex((type) => type == authUser.user_type) >=
-      StaffUserTypeIndex;
-
+  const hasPermissionToEditCoverImage = true;
   const hasPermissionToDeleteFacility =
     authUser.user_type === "DistrictAdmin" ||
     authUser.user_type === "StateAdmin";
 
   return (
-    <Page
-      title={facilityData?.name || "Facility"}
-      crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
-      focusOnLoad={true}
-      hideBack={false}
-    >
+    <div>
       <ConfirmDialog
         title={t("delete_item", { name: facilityData?.name })}
         description={
@@ -175,80 +205,102 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleDelete={handleCoverImageDelete}
         onClose={() => setEditCoverImage(false)}
       />
+      <div className="container mx-auto p-6">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <Card className="overflow-hidden border-none bg-transparent shadow-none">
+            <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+              {facilityData?.read_cover_image_url ? (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <img
+                    src={facilityData.read_cover_image_url}
+                    alt={facilityData?.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </>
+              ) : (
+                <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
+              )}
 
-      <div className="p-3 transition-all duration-200 ease-in-out md:p-6">
-        <div className="justify-between gap-2 lg:flex">
-          <div className="flex-col justify-between md:flex">
-            <div className="flex flex-1 flex-col">
-              <div className="flex flex-col items-start gap-4 md:flex-row">
-                <AvatarEditable
-                  id="facility-coverimage"
-                  imageUrl={facilityData?.read_cover_image_url}
-                  name={facilityData?.name ?? ""}
-                  editable={hasPermissionToEditCoverImage}
-                  onClick={() => setEditCoverImage(true)}
-                  className="md:mr-2 lg:mr-6 lg:h-80 lg:w-80"
-                />
-                <div
-                  className="mb-6 grid gap-4 md:mb-0"
-                  id="facility-details-card"
-                >
-                  <div className="flex-col justify-between md:flex lg:flex-1">
-                    <div className="mb-4" id="facility-name">
-                      <h1 className="text-3xl font-bold">
-                        {facilityData?.name}
-                      </h1>
-                      {facilityData?.modified_date && (
-                        <RecordMeta
-                          className="mt-1 text-sm text-secondary-700"
-                          prefix={t("updated")}
-                          time={facilityData?.modified_date}
-                        />
-                      )}
-                    </div>
-                    <div className="mb-4" id="address-details-view">
-                      <h1 className="text-base font-semibold text-[#B9B9B9]">
-                        {t("address")}
-                      </h1>
-                      <p className="text-base font-medium">
-                        {facilityData?.address}
-                      </p>
-                    </div>
-
-                    <div className="flex-col md:flex lg:flex-1">
-                      <div className="mb-4">
-                        <h1 className="text-base font-semibold text-[#B9B9B9]">
-                          {t("local_body")}
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                <div className="flex items-center gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        name={facilityData?.name}
+                        className="h-12 w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
+                      />
+                      <div>
+                        <h1 className="text-3xl font-bold text-white">
+                          {facilityData?.name}
                         </h1>
-                        <p className="w-2/3 text-base font-medium md:w-full">
-                          {facilityData?.local_body_object?.name}
-                        </p>
                       </div>
-                      <div className="mb-4 flex flex-col flex-wrap gap-4 md:flex-row">
-                        <div>
-                          <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            {t("ward")}
-                          </h1>
-                          <p className="text-base font-medium">
-                            {facilityData?.ward_object?.number +
-                              ", " +
-                              facilityData?.ward_object?.name}
-                          </p>
-                        </div>
-                        <div>
-                          <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            {t("district")}
-                          </h1>
-                          <p className="text-base font-medium">
-                            {facilityData?.district_object?.name}
-                          </p>
-                        </div>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="bg-white/10 hover:bg-white/20"
+                        >
+                          <MoreVertical className="h-4 w-4 text-white" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        {hasPermissionToEditCoverImage && (
+                          <DropdownMenuItem
+                            onClick={() => setEditCoverImage(true)}
+                          >
+                            <Settings className="mr-2 h-4 w-4" />
+                            {t("edit_cover_photo")}
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/facility/${facilityId}/update`)
+                          }
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          {t("update_facility")}
+                        </DropdownMenuItem>
+                        {hasPermissionToDeleteFacility && (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => setOpenDeleteDialog(true)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t("delete_facility")}
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-2 space-y-2">
+              <Card>
+                <CardContent>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                      <div>
+                        {facilityData?.geo_organization && (
+                          <div className="mt-2 text-sm">
+                            {renderGeoOrganizations(
+                              facilityData?.geo_organization,
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div id="phone-number-view">
-                          <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            {t("phone_number")}
-                          </h1>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className="mt-1">
                           <ContactLink
                             tel={String(facilityData?.phone_number)}
                           />
@@ -256,117 +308,57 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className="flex flex-1 items-center"></div>
-            </div>
-            <div className="mt-10 flex items-center gap-3">
-              <div>
-                {facilityData?.features?.some((feature) =>
-                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
-                ) && (
-                  <h1 className="text-lg font-semibold">
-                    {t("available_features")}
-                  </h1>
-                )}
-                <div
-                  className="mt-5 flex flex-wrap gap-2"
-                  id="facility-available-features"
-                >
-                  {facilityData?.features?.map(
-                    (feature: number, i: number) =>
-                      FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
-                        <Chip
-                          key={i}
-                          size="large"
-                          text={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature,
-                            )[0]?.name
-                          }
-                          startIcon={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature,
-                            )[0]?.icon
-                          }
-                        />
-                      ),
-                  )}
-                </div>
-                {facilityData?.description && (
-                  <div className="mt-8">
-                    <Markdown
-                      content={facilityData.description}
-                      className="mt-4"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex h-80 flex-col justify-between">
-            <div className="w-full md:w-auto">
-              <DropdownMenu
-                id="manage-facility-dropdown"
-                title="Manage Facility"
-                icon={<CareIcon icon="l-setting" className="text-lg" />}
-              >
-                <DropdownItem
-                  id="update-facility"
-                  onClick={() => navigate(`/facility/${facilityId}/update`)}
-                  authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon icon="l-edit-alt" className="text-lg" />}
-                >
-                  {t("update_facility")}
-                </DropdownItem>
-                {/* <DropdownItem
-                  id="configure-facility"
-                  onClick={() => navigate(`/facility/${facilityId}/configure`)}
-                  authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon icon="l-setting" className="text-lg" />}
-                >
-                  {t("configure_facility")}
-                </DropdownItem> */}
-                {/* <DropdownItem
-                  id="inventory-management"
-                  onClick={() => navigate(`/facility/${facilityId}/inventory`)}
-                  icon={<CareIcon icon="l-clipboard-alt" className="w-5" />}
-                >
-                  {t("inventory_management")}
-                </DropdownItem>
-                <DropdownItem
-                  id="location-management"
-                  onClick={() => navigate(`/facility/${facilityId}/location`)}
-                  authorizeFor={NonReadOnlyUsers}
-                  icon={
-                    <CareIcon icon="l-location-point" className="text-lg" />
-                  }
-                >
-                  {t("location_management")}
-                </DropdownItem> */}
+                </CardContent>
+              </Card>
 
-                <PLUGIN_Component
-                  __name="ManageFacilityOptions"
-                  facility={facilityData}
-                />
-                {hasPermissionToDeleteFacility ? (
-                  <DropdownItem
-                    id="delete-facility"
-                    variant="danger"
-                    onClick={() => setOpenDeleteDialog(true)}
-                    className="flex items-center gap-3"
-                    icon={<CareIcon icon="l-trash-alt" className="text-lg" />}
-                  >
-                    {t("delete_facility")}
-                  </DropdownItem>
-                ) : (
-                  <></>
-                )}
-              </DropdownMenu>
+              {facilityData?.features?.some((feature: number) =>
+                FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
+              ) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-medium">
+                      {t("features")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {facilityData?.features?.map(
+                        (feature: number) =>
+                          FACILITY_FEATURE_TYPES.some(
+                            (f) => f.id === feature,
+                          ) && (
+                            <Badge
+                              key={feature}
+                              variant="secondary"
+                              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                            >
+                              {getFacilityFeatureIcon(feature)}
+                              <span>
+                                {
+                                  FACILITY_FEATURE_TYPES.find(
+                                    (f) => f.id === feature,
+                                  )?.name
+                                }
+                              </span>
+                            </Badge>
+                          ),
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {facilityData?.description && (
+                <Card>
+                  <CardContent className="mt-4">
+                    <Markdown content={facilityData.description} />
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
-    </Page>
+    </div>
   );
 };

@@ -7,6 +7,7 @@ import Loading from "@/components/Common/Loading";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { EncounterProvider } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
@@ -16,10 +17,7 @@ import query from "@/Utils/request/query";
 import { keysOf } from "@/Utils/utils";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
-import { EncounterNeurologicalMonitoringTab } from "@/pages/Encounters/tabs/EncounterNeurologicalMonitoringTab";
-import EncounterNursingTab from "@/pages/Encounters/tabs/EncounterNursingTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
-import { EncounterPressureSoreTab } from "@/pages/Encounters/tabs/EncounterPressureSoreTab";
 import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -36,9 +34,9 @@ const defaultTabs = {
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
-  nursing: EncounterNursingTab,
-  neurological_monitoring: EncounterNeurologicalMonitoringTab,
-  pressure_sore: EncounterPressureSoreTab,
+  // nursing: EncounterNursingTab,
+  // neurological_monitoring: EncounterNeurologicalMonitoringTab,
+  // pressure_sore: EncounterPressureSoreTab,
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
@@ -178,7 +176,12 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <div>
+    <EncounterProvider
+      initialContext={{
+        encounter: encounterData,
+        patient: encounterData.patient,
+      }}
+    >
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
           title="Encounter"
@@ -345,7 +348,7 @@ export const EncounterShow = (props: Props) => {
           <SelectedTab {...encounterTabProps} />
         </div>
       </div>
-    </div>
+    </EncounterProvider>
 
     // <DoctorVideoSlideover
     //   facilityId={facilityId}

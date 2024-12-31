@@ -572,8 +572,6 @@ export interface PatientNoteStateType {
   notes: PatientNotesModel[];
   patientId?: string;
   facilityId?: string;
-  cPage: number;
-  totalPages: number;
 }
 
 export type IFacilityNotificationRequest = {
@@ -707,10 +705,10 @@ export interface ResourceModel {
   modified_date: string;
   origin_facility: string;
   origin_facility_object: FacilityModel;
-  priority: number | null;
+  priority: number;
   reason: string;
-  refering_facility_contact_name: string;
-  refering_facility_contact_number: string;
+  referring_facility_contact_name: string;
+  referring_facility_contact_number: string;
   requested_quantity: number;
   status: string;
   sub_category: string;

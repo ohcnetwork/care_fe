@@ -139,105 +139,108 @@ export function EncounterQuestion({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Basic Details */}
-      <div className="space-y-2">
-        <Label>Encounter Status</Label>
-        <Select
-          value={encounter.status}
-          onChange={(value) =>
-            handleUpdateEncounter({
-              status: value as EncounterStatus,
-            })
-          }
-          disabled={disabled}
-          options={[
-            { value: "planned", label: "Planned" },
-            { value: "in_progress", label: "In Progress" },
-            { value: "on_hold", label: "On Hold" },
-            { value: "discharged", label: "Discharged" },
-            { value: "completed", label: "Completed" },
-            { value: "cancelled", label: "Cancelled" },
-            { value: "discontinued", label: "Discontinued" },
-            { value: "entered_in_error", label: "Entered in Error" },
-            { value: "unknown", label: "Unknown" },
-          ]}
-        />
-      </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Basic Details */}
+        <div className="space-y-2">
+          <Label>Encounter Status</Label>
+          <Select
+            value={encounter.status}
+            onChange={(value) =>
+              handleUpdateEncounter({
+                status: value as EncounterStatus,
+              })
+            }
+            disabled={disabled}
+            options={[
+              { value: "planned", label: "Planned" },
+              { value: "in_progress", label: "In Progress" },
+              { value: "on_hold", label: "On Hold" },
+              { value: "discharged", label: "Discharged" },
+              { value: "completed", label: "Completed" },
+              { value: "cancelled", label: "Cancelled" },
+              { value: "discontinued", label: "Discontinued" },
+              { value: "entered_in_error", label: "Entered in Error" },
+              { value: "unknown", label: "Unknown" },
+            ]}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>Encounter Class</Label>
-        <Select
-          value={encounter.encounter_class}
-          onChange={(value) =>
-            handleUpdateEncounter({
-              encounter_class: value as EncounterClass,
-            })
-          }
-          disabled={disabled}
-          options={[
-            { value: "imp", label: "Inpatient (IP)" },
-            { value: "amb", label: "Ambulatory (OP)" },
-            { value: "obsenc", label: "Observation Room" },
-            { value: "emer", label: "Emergency" },
-            { value: "vr", label: "Virtual" },
-            { value: "hh", label: "Home Health" },
-          ]}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>Encounter Class</Label>
+          <Select
+            value={encounter.encounter_class}
+            onChange={(value) =>
+              handleUpdateEncounter({
+                encounter_class: value as EncounterClass,
+              })
+            }
+            disabled={disabled}
+            options={[
+              { value: "imp", label: "Inpatient (IP)" },
+              { value: "amb", label: "Ambulatory (OP)" },
+              { value: "obsenc", label: "Observation Room" },
+              { value: "emer", label: "Emergency" },
+              { value: "vr", label: "Virtual" },
+              { value: "hh", label: "Home Health" },
+            ]}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>Priority</Label>
-        <Select
-          value={encounter.priority}
-          onChange={(value) =>
-            handleUpdateEncounter({
-              priority: value as EncounterPriority,
-            })
-          }
-          disabled={disabled}
-          options={[
-            { value: "ASAP", label: "ASAP" },
-            { value: "callback_results", label: "Callback Results" },
-            {
-              value: "callback_for_scheduling",
-              label: "Callback for Scheduling",
-            },
-            { value: "elective", label: "Elective" },
-            { value: "emergency", label: "Emergency" },
-            { value: "preop", label: "Pre-op" },
-            { value: "as_needed", label: "As Needed" },
-            { value: "routine", label: "Routine" },
-            { value: "rush_reporting", label: "Rush Reporting" },
-            { value: "stat", label: "Stat" },
-            { value: "timing_critical", label: "Timing Critical" },
-            { value: "use_as_directed", label: "Use as Directed" },
-            { value: "urgent", label: "Urgent" },
-          ]}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>Priority</Label>
+          <Select
+            value={encounter.priority}
+            onChange={(value) =>
+              handleUpdateEncounter({
+                priority: value as EncounterPriority,
+              })
+            }
+            disabled={disabled}
+            options={[
+              { value: "ASAP", label: "ASAP" },
+              { value: "callback_results", label: "Callback Results" },
+              {
+                value: "callback_for_scheduling",
+                label: "Callback for Scheduling",
+              },
+              { value: "elective", label: "Elective" },
+              { value: "emergency", label: "Emergency" },
+              { value: "preop", label: "Pre-op" },
+              { value: "as_needed", label: "As Needed" },
+              { value: "routine", label: "Routine" },
+              { value: "rush_reporting", label: "Rush Reporting" },
+              { value: "stat", label: "Stat" },
+              { value: "timing_critical", label: "Timing Critical" },
+              { value: "use_as_directed", label: "Use as Directed" },
+              { value: "urgent", label: "Urgent" },
+            ]}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>Hospital Identifier</Label>
-        <Input
-          value={encounter.external_identifier || ""}
-          onChange={(e) =>
-            handleUpdateEncounter({ external_identifier: e.target.value })
-          }
-          disabled={disabled}
-          placeholder="Ip/op/obs/emr number"
-        />
+        <div className="space-y-2">
+          <Label>Hospital Identifier</Label>
+          <Input
+            value={encounter.external_identifier || ""}
+            onChange={(e) =>
+              handleUpdateEncounter({ external_identifier: e.target.value })
+            }
+            disabled={disabled}
+            placeholder="Ip/op/obs/emr number"
+          />
+        </div>
       </div>
-
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {(encounter.encounter_class === "imp" ||
         encounter.encounter_class === "obsenc" ||
         encounter.encounter_class === "emer") && (
         <div className="col-span-2 border rounded-lg p-4 space-y-4">
-          <h3 className="text-lg font-semibold">Hospitalization Details</h3>
+          <h3 className="text-lg font-semibold break-words">
+            Hospitalization Details
+          </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 overflow-x-auto">
               <Switch
                 checked={encounter.hospitalization?.re_admission || false}
                 onCheckedChange={(checked: boolean) =>

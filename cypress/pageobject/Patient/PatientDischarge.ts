@@ -6,7 +6,19 @@ class PatientDischarge {
   }
 
   selectDischargeReason(reason: string) {
-    cy.clickAndSelectOption("#discharge_reason", reason);
+    if (reason == "Recovered") {
+      cy.intercept("GET", "**/api/v1/consultation/*/prescriptions/*").as(
+        "getPrescriptions",
+      );
+      cy.clickAndSelectOption("#discharge_reason", reason);
+      cy.wait("@getPrescriptions").its("response.statusCode").should("eq", 200);
+    } else if (reason == "Referred") {
+      cy.intercept("GET", "**/api/v1/getallfacilities/**").as("getFacilities");
+      cy.clickAndSelectOption("#discharge_reason", reason);
+      cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    } else {
+      cy.clickAndSelectOption("#discharge_reason", reason);
+    }
   }
 
   typeDischargeNote(note: string) {
@@ -23,6 +35,16 @@ class PatientDischarge {
 
   typeDoctorName(doctorName: string) {
     cy.get("#death_confirmed_by").type(doctorName);
+  }
+
+  interceptDischargePatient() {
+    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
+      "postDischarge",
+    );
+  }
+
+  verifyDischargePatient() {
+    cy.wait("@postDischarge").its("response.statusCode").should("eq", 200);
   }
 }
 

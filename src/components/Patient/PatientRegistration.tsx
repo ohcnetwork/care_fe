@@ -112,7 +112,7 @@ export default function PatientRegistration(
     ),
     date_of_birth:
       ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
-    year_of_birth: ageDob === "age" ? form.year_of_birth : undefined,
+    age: ageDob === "age" ? form.age : undefined,
     meta_info: {
       ...(form.meta_info as any),
       occupation:
@@ -135,7 +135,7 @@ export default function PatientRegistration(
           year_of_birth:
             ageDob === "dob"
               ? new Date(resp.date_of_birth!).getFullYear()
-              : resp.year_of_birth,
+              : new Date().getFullYear() - Number(resp.age!),
           partial_id: resp?.id?.slice(0, 5),
         },
       });
@@ -446,12 +446,15 @@ export default function PatientRegistration(
               </TabsList>
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
-                  <div>
+                  <div className="flex-1">
                     <InputWithError label={t("day")} required>
                       <Input
                         placeholder="DD"
                         type="number"
                         value={form.date_of_birth?.split("-")[2] || ""}
+                        maxLength={2}
+                        max={31}
+                        min={1}
                         onChange={(e) =>
                           setForm((f) => ({
                             ...f,
@@ -461,12 +464,15 @@ export default function PatientRegistration(
                       />
                     </InputWithError>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <InputWithError label={t("month")} required>
                       <Input
                         placeholder="MM"
                         type="number"
                         value={form.date_of_birth?.split("-")[1] || ""}
+                        maxLength={2}
+                        max={12}
+                        min={1}
                         onChange={(e) =>
                           setForm((f) => ({
                             ...f,
@@ -476,12 +482,15 @@ export default function PatientRegistration(
                       />
                     </InputWithError>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <InputWithError label={t("year")} required>
                       <Input
                         type="number"
                         placeholder="YYYY"
                         value={form.date_of_birth?.split("-")[0] || ""}
+                        maxLength={4}
+                        max={new Date().getFullYear()}
+                        min={1900}
                         onChange={(e) =>
                           setForm((f) => ({
                             ...f,
@@ -509,14 +518,11 @@ export default function PatientRegistration(
                     errors={errors["year_of_birth"]}
                   >
                     <Input
-                      value={
-                        form.year_of_birth
-                          ? new Date().getFullYear() - (form.year_of_birth || 0)
-                          : undefined
-                      }
+                      value={form.age ? form.age : undefined}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
+                          age: e.target.value,
                           year_of_birth: e.target.value
                             ? new Date().getFullYear() - Number(e.target.value)
                             : undefined,

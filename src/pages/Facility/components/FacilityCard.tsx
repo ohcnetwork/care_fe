@@ -32,6 +32,8 @@ export function FacilityCard({ facility, className }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {facility.name}
               </h3>
+              {/* @ts-expect-error Type is not defined properly */}
+              {facility.facility_type?.name}
               <p className="text-sm text-muted-foreground truncate">
                 {[
                   facility.address,

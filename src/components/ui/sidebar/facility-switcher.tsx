@@ -56,6 +56,11 @@ export function FacilitySwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
+            <DropdownMenuItem onClick={() => navigate("/")}>
+              <DashboardIcon className="size-4" />
+              View Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuLabel>Facilities</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
@@ -71,12 +76,6 @@ export function FacilitySwitcher({
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem onClick={() => navigate("/")}>
-              <DashboardIcon className="size-4" />
-              View Dashboard
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

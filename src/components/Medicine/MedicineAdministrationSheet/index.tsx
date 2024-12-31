@@ -1,84 +1,96 @@
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ScrollOverlay from "@/CAREUI/interactive/ScrollOverlay";
-import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import MedicineAdministrationTable from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTable";
-import BulkAdminister from "@/components/Medicine/MedicineAdministrationSheet/BulkAdminister";
 import { computeActivityBounds } from "@/components/Medicine/MedicineAdministrationSheet/utils";
-import MedicineRoutes from "@/components/Medicine/routes";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useRangePagination from "@/hooks/useRangePagination";
 import useSlug from "@/hooks/useSlug";
 
+import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   readonly?: boolean;
-  is_prn: boolean;
+  isPrn: boolean;
 }
 
 const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 
-const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
-  const { t } = useTranslation();
+const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
   const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
   const filters = {
-    dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
-    prescription_type: "REGULAR",
+    encounter: encounterId,
+    is_prn: isPrn,
     limit: 100,
   };
 
-  const { data, loading, refetch } = useTanStackQueryInstead(
-    MedicineRoutes.listPrescriptions,
+  const activeMedicationRequests = useTanStackQueryInstead(
+    routes.medicationRequest.list,
     {
-      pathParams: { consultation: encounterId },
-      query: { ...filters, discontinued: false },
+      pathParams: { patientId: patient!.id },
+      query: {
+        ...filters,
+        status: ["active", "on_hold"],
+      },
     },
   );
 
-  const discontinuedPrescriptions = useTanStackQueryInstead(
-    MedicineRoutes.listPrescriptions,
+  const discontinuedMedicationRequests = useTanStackQueryInstead(
+    routes.medicationRequest.list,
     {
-      pathParams: { consultation: encounterId },
+      pathParams: { patientId: patient!.id },
       query: {
         ...filters,
-        limit: 100,
-        discontinued: true,
+        status: ["completed", "ended", "stopped", "cancelled"],
       },
       prefetch: !showDiscontinued,
     },
   );
 
-  const discontinuedCount = discontinuedPrescriptions.data?.count;
+  const discontinuedCount = discontinuedMedicationRequests.data?.count;
 
-  const prescriptionList = [
-    ...(data?.results ?? []),
-    ...(showDiscontinued
-      ? (discontinuedPrescriptions.data?.results ?? [])
-      : []),
-  ];
+  const { activityTimelineBounds, prescriptions } = useMemo(() => {
+    const prescriptionList = [
+      ...(activeMedicationRequests.data?.results.map((request) => ({
+        ...request,
+        discontinued: false,
+      })) ?? []),
+    ];
 
-  const { activityTimelineBounds, prescriptions } = useMemo(
-    () => ({
+    if (showDiscontinued) {
+      prescriptionList.push(
+        ...(discontinuedMedicationRequests.data?.results.map((request) => ({
+          ...request,
+          discontinued: true,
+        })) ?? []),
+      );
+    }
+
+    return {
       prescriptions: prescriptionList.sort(
         (a, b) => +a.discontinued - +b.discontinued,
       ),
       activityTimelineBounds: prescriptionList
         ? computeActivityBounds(prescriptionList)
         : undefined,
-    }),
-    [prescriptionList],
-  );
+    };
+  }, [
+    activeMedicationRequests.data,
+    discontinuedMedicationRequests.data,
+    showDiscontinued,
+  ]);
 
   const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });
   const pagination = useRangePagination({
@@ -91,47 +103,53 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   return (
     <div>
       <SubHeading
-        title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
-        lastModified={
-          prescriptions?.[0]?.last_administration?.created_date ??
-          prescriptions?.[0]?.modified_date
-        }
-        options={
-          !readonly &&
-          !!data?.results && (
-            <>
-              <AuthorizedForConsultationRelatedActions>
-                <ButtonV2
-                  id="edit-prescription"
-                  variant="secondary"
-                  border
-                  href="prescriptions"
-                  className="w-full"
-                >
-                  <CareIcon icon="l-pen" className="text-lg" />
-                  <span className="hidden lg:block">
-                    {t("edit_prescriptions")}
-                  </span>
-                  <span className="block lg:hidden">{t("edit")}</span>
-                </ButtonV2>
-                <BulkAdminister
-                  prescriptions={data.results}
-                  onDone={() => refetch()}
-                />
-              </AuthorizedForConsultationRelatedActions>
-              <ButtonV2
-                href="prescriptions/print"
-                ghost
-                border
-                disabled={!data.results.length}
-                className="w-full"
-              >
-                <CareIcon icon="l-print" className="text-lg" />
-                Print
-              </ButtonV2>
-            </>
-          )
-        }
+        title={isPrn ? "PRN Prescriptions" : "Prescriptions"}
+        // lastModified={
+        //   prescriptions?.[0]?.last_administration?.created_date ??
+        //   prescriptions?.[0]?.modified_date
+        // }
+        /**
+         *  TODO: Wire this later
+         *    - edit medication request
+         *    - print prescription
+         *    - bulk administer
+         */
+        // options={
+        //   !readonly &&
+        //   !!activeMedicationRequests.data?.results && (
+        //     <>
+        //       <AuthorizedForConsultationRelatedActions>
+        //         <ButtonV2
+        //           id="edit-prescription"
+        //           variant="secondary"
+        //           border
+        //           href="prescriptions"
+        //           className="w-full"
+        //         >
+        //           <CareIcon icon="l-pen" className="text-lg" />
+        //           <span className="hidden lg:block">
+        //             {t("edit_prescriptions")}
+        //           </span>
+        //           <span className="block lg:hidden">{t("edit")}</span>
+        //         </ButtonV2>
+        //         <BulkAdminister
+        //           prescriptions={activeMedicationRequests.data.results}
+        //           onDone={() => activeMedicationRequests.refetch()}
+        //         />
+        //       </AuthorizedForConsultationRelatedActions>
+        //       <ButtonV2
+        //         href="prescriptions/print"
+        //         ghost
+        //         border
+        //         disabled={!activeMedicationRequests.data.results.length}
+        //         className="w-full"
+        //       >
+        //         <CareIcon icon="l-print" className="text-lg" />
+        //         Print
+        //       </ButtonV2>
+        //     </>
+        //   )
+        // }
       />
       <div className="rounded-lg border shadow">
         <ScrollOverlay
@@ -145,23 +163,25 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             </div>
           }
           disableOverlay={
-            loading || !prescriptions?.length || !(prescriptions?.length > 1)
+            activeMedicationRequests.loading ||
+            !prescriptions?.length ||
+            !(prescriptions?.length > 1)
           }
         >
-          {loading ? (
+          {activeMedicationRequests.loading ? (
             <div className="min-h-screen">
               <Loading />
             </div>
           ) : (
             <>
-              {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
+              {prescriptions?.length === 0 && <NoPrescriptions prn={isPrn} />}
               {!!prescriptions?.length && (
                 <MedicineAdministrationTable
                   prescriptions={prescriptions}
                   pagination={pagination}
                   onRefetch={() => {
-                    refetch();
-                    discontinuedPrescriptions.refetch();
+                    activeMedicationRequests.refetch();
+                    discontinuedMedicationRequests.refetch();
                   }}
                   readonly={readonly || false}
                 />
@@ -174,7 +194,10 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             id="discontinued-medicine"
             variant="secondary"
             className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-secondary-100"
-            disabled={loading || discontinuedPrescriptions.loading}
+            disabled={
+              activeMedicationRequests.loading ||
+              discontinuedMedicationRequests.loading
+            }
             onClick={() => setShowDiscontinued(!showDiscontinued)}
           >
             <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
@@ -195,8 +218,6 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   );
 };
 
-export default MedicineAdministrationSheet;
-
 const NoPrescriptions = ({ prn }: { prn: boolean }) => {
   return (
     <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
@@ -209,3 +230,5 @@ const NoPrescriptions = ({ prn }: { prn: boolean }) => {
     </div>
   );
 };
+
+export default MedicineAdministrationSheet;

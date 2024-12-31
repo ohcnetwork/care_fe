@@ -13,13 +13,15 @@ import { Button } from "@/components/ui/button";
 import Loading from "@/components/Common/Loading";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { ScheduleException } from "@/components/Schedule/types";
-import { UserModel } from "@/components/Users/models";
+
+import useSlug from "@/hooks/useSlug";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 interface Props {
-  user: UserModel;
+  user: UserBase;
   items?: ScheduleException[];
 }
 
@@ -51,16 +53,17 @@ export default function ScheduleExceptionsList({ user, items }: Props) {
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { user: UserModel },
+  props: ScheduleException & { user: UserBase },
 ) => {
   const { t } = useTranslation();
+  const facilityId = useSlug("facility");
   const queryClient = useQueryClient();
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(ScheduleAPIs.exceptions.delete, {
       pathParams: {
         id: props.id,
-        facility_id: props.user.home_facility_object!.id!,
+        facility_id: facilityId,
       },
     }),
     onSuccess: () => {

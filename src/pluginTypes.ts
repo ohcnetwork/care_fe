@@ -1,6 +1,5 @@
 import { LazyExoticComponent } from "react";
 
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
@@ -63,7 +62,7 @@ export type SupportedPluginComponents = {
   AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
   Scribe: ScribeComponentType;
   ManageFacilityOptions: ManageFacilityOptionsComponentType;
-  ConsultationContextEnabler: React.FC;
+  EncounterContextEnabler: React.FC;
   ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
   ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType;
 };
@@ -88,7 +87,7 @@ export type PluginManifest = {
   routes: AppRoutes;
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
-  navItems: INavItem[];
+  // navItems: INavItem[];
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
 };
 

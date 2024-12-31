@@ -10,7 +10,7 @@ import {
 import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Writable, WritableOnly } from "@/Utils/types";
-import { UserBase } from "@/types/user/base";
+import { UserBase } from "@/types/user/user";
 
 export const ScheduleAPIs = {
   templates: {

@@ -1,3 +1,5 @@
+import { PatientConsultationPage } from "pageobject/Patient/PatientConsultation";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import {
   PatientData,
@@ -6,7 +8,11 @@ import {
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
-import { generatePhoneNumber } from "../../pageobject/utils/constants";
+import {
+  generatePatientName,
+  generatePhoneNumber,
+  generateRandomAddress,
+} from "../../pageobject/utils/constants";
 
 const yearOfBirth = "2001";
 
@@ -15,38 +21,21 @@ const calculateAge = () => {
   return currentYear - parseInt(yearOfBirth);
 };
 
-const getRelativeDateString = (deltaDays = 0) => {
-  const date = new Date();
-  if (deltaDays) {
-    date.setDate(date.getDate() + deltaDays);
-  }
-  return date
-    .toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace(/\//g, "");
-};
-
 describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const patientTransfer = new PatientTransfer();
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
+  const patientConsultationPage = new PatientConsultationPage();
   const phone_number = generatePhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
-  const patientMenstruationStartDate = getRelativeDateString(-10);
-  const patientDateOfDelivery = getRelativeDateString(-20);
-  const patientOneName = "Great Napolean 14";
+  const patientOneName = generatePatientName();
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
-  const patientOneAddress = `149/J, 3rd Block,
-  Aluva
-  Ernakulam, Kerala - 682001`;
+  const patientOneAddress = generateRandomAddress(true);
   const patientOnePincode = "682001";
   const patientOneState = "Kerala";
   const patientOneDistrict = "Ernakulam";
@@ -115,14 +104,11 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with all field in registration form and no consultation", () => {
     patientPage.createPatientWithData(newPatientData);
-    // Verify the patient details
     patientPage.clickCancelButton();
-    cy.wait(3000);
-    patientPage.savePatientUrl();
+    // Verify the patient details
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
       age,
-      patientOneName,
       phone_number,
       phone_number,
       yearOfBirth,
@@ -150,21 +136,15 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyPatientNameList(patientOneName);
   });
 
-  it("Edit the patient details with no consultation and verify", () => {
-    patientPage.interceptFacilities();
-    patientPage.visitUpdatePatientUrl();
-    patientPage.verifyStatusCode();
-    patientPage.patientformvisibility();
-    // change the gender to female and input data to related changed field
-    cy.wait(3000);
+  it("Edit the patient details and verify its reflection", () => {
+    const patientName = "Dummy Patient Two";
+    patientPage.visitPatient(patientName);
+    patientConsultationPage.clickPatientDetails();
+    patientPage.clickPatientUpdateDetails();
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
-    patientPage.clickPatientAntenatalStatusYes();
-    patientPage.typeLastMenstruationStartDate(patientMenstruationStartDate);
-    patientPage.clickPatientPostPartumStatusYes();
-    patientPage.typeDateOfDelivery(patientDateOfDelivery);
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
-    // Edit the patient consultation , select none medical history and multiple health ID
+    // select none medical history and add multiple health ID
     patientMedicalHistory.clickNoneMedicialHistory();
     patientInsurance.clickAddInsruanceDetails();
     patientInsurance.typePatientInsuranceDetail(
@@ -197,28 +177,13 @@ describe("Patient Creation with consultation", () => {
       patientOneSecondInsurerName,
     );
     patientPage.clickUpdatePatient();
-    cy.wait(3000);
     patientPage.verifyPatientUpdated();
-    patientPage.visitPatientUrl();
-    // Verify Female Gender change reflection, No Medical History and Insurance Details
-    cy.wait(5000);
-    patientPage.verifyPatientDashboardDetails(
-      patientOneUpdatedGender,
-      age,
-      patientOneName,
-      phone_number,
-      phone_number,
-      yearOfBirth,
-      patientOneUpdatedBloodGroup,
-      patientOccupation,
-    );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
       .contains("Member ID")
       .scrollIntoView();
-    cy.wait(2000);
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
@@ -249,7 +214,7 @@ describe("Patient Creation with consultation", () => {
     // allow the transfer button of a patient
     patientTransfer.clickAllowPatientTransferButton();
     // Verify the patient error message for the same facility
-    cy.awaitUrl("/patients");
+    cy.visit("/patients");
     patientPage.createPatient();
     patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();

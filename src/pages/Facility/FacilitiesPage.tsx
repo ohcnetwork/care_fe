@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,28 +13,27 @@ import { Card } from "@/components/ui/card";
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import FacilityFilter from "@/components/Facility/FacilityFilter";
-import {
-  DistrictModel,
-  FacilityModel,
-  LocalBodyModel,
-} from "@/components/Facility/models";
+import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
 import { CarePatientTokenKey } from "@/common/constants";
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
 import { FacilityCard } from "./components/FacilityCard";
 
+const STATE_GEO_ID = careConfig.keralaGeoId;
+
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
-  const { qParams, updateQuery, FilterBadges, advancedFilter, clearSearch } =
+  const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
     useFilters({
-      limit: 14,
+      limit: RESULTS_PER_PAGE_LIMIT,
     });
 
   const tokenData: TokenData = JSON.parse(
@@ -44,30 +42,36 @@ export function FacilitiesPage() {
 
   const { t } = useTranslation();
 
-  const { data: districtResponse } = useQuery<RequestResult<DistrictModel>>({
-    queryKey: ["district", qParams.district],
-    queryFn: () =>
-      request(routes.getDistrict, {
-        pathParams: { id: qParams.district || "" },
-      }),
-    enabled: !!qParams.district,
-  });
-
-  const { data: localBodyResponse } = useQuery<RequestResult<LocalBodyModel>>({
-    queryKey: ["localBody", qParams.local_body],
-    queryFn: () =>
-      request(routes.getLocalBody, {
-        pathParams: { id: qParams.local_body || "" },
-      }),
-    enabled: !!qParams.local_body,
+  const { data: facilitiesResponse, isLoading } = useQuery<
+    PaginatedResponse<FacilityModel>
+  >({
+    queryKey: ["facilities", qParams],
+    queryFn: query(routes.getAllFacilities, {
+      queryParams: {
+        geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        page: qParams.page,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
+        ...advancedFilter.filter,
+      },
+    }),
+    enabled: !!qParams.geo_organization || !!STATE_GEO_ID,
   });
 
   useEffect(() => {
+    if (qParams.district) {
+      updateQuery({ geo_organization: qParams.district });
+    } else {
+      updateQuery({ geo_organization: STATE_GEO_ID });
+    }
+  }, [qParams.district, STATE_GEO_ID]);
+
+  /*   useEffect(() => {
     if (!qParams.district && qParams.local_body) {
       advancedFilter.removeFilters(["local_body"]);
     }
   }, [advancedFilter, qParams]);
-
+ */
   const GetLoginHeader = () => {
     if (
       tokenData &&
@@ -139,7 +143,7 @@ export function FacilitiesPage() {
         </Button>
         <FacilityFilter {...advancedFilter} key={window.location.search} />
       </div>
-      <FilterBadges
+      {/* <FilterBadges
         badges={({ badge, value }) => [
           badge("Facility/District/Pincode", "search"),
           value(
@@ -158,44 +162,31 @@ export function FacilitiesPage() {
           ),
           value("Pin Code", "pin_code", qParams.pin_code || ""),
         ]}
-      />
+      /> */}
 
-      <PaginatedList
-        route={routes.getAllFacilities}
-        query={{
-          search_text: qParams.search,
-          state: qParams.state,
-          district: qParams.district,
-          local_body: qParams.local_body,
-        }}
-      >
-        {() => (
-          <div className="mt-4 flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-4">
-              <PaginatedList.WhenLoading>
-                <Loading />
-              </PaginatedList.WhenLoading>
-              <PaginatedList.WhenEmpty>
-                <Card className="p-6">
-                  <div className="text-lg font-medium text-muted-foreground">
-                    {t("no_facilities_found")}
-                  </div>
-                </Card>
-              </PaginatedList.WhenEmpty>
-
-              <PaginatedList.Items<FacilityModel> className="grid gap-4 grid-cols-1 md:grid-cols-2 3xl:grid-cols-3">
-                {(facility) => (
-                  <FacilityCard key={facility.id} facility={facility} />
-                )}
-              </PaginatedList.Items>
-
-              <div className="flex w-full items-center justify-center">
-                <PaginatedList.Paginator hideIfSinglePage />
-              </div>
+      <div className="mt-4 flex w-full flex-col gap-4">
+        {isLoading ? (
+          <Loading />
+        ) : !facilitiesResponse?.results.length ? (
+          <Card className="p-6">
+            <div className="text-lg font-medium text-muted-foreground">
+              {t("no_facilities_found")}
             </div>
-          </div>
+          </Card>
+        ) : (
+          <>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 3xl:grid-cols-3">
+              {facilitiesResponse.results.map((facility) => (
+                <FacilityCard key={facility.id} facility={facility} />
+              ))}
+            </div>
+
+            <div className="flex w-full items-center justify-center">
+              <Pagination totalCount={facilitiesResponse.count} />
+            </div>
+          </>
         )}
-      </PaginatedList>
+      </div>
     </div>
   );
 }

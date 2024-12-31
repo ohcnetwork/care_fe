@@ -1,3 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { PatientNotesModel } from "@/components/Facility/models";
+
+import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import { PatientModel } from "@/types/emr/patient";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
@@ -34,4 +40,25 @@ export const getPatientUrl = (patient: PatientModel) => {
     patientUrl = `/patient/${patient.id}`;
   }
   return patientUrl;
+};
+
+export const useAddPatientNote = (options: {
+  patientId: string;
+  thread: PatientNotesModel["thread"];
+  consultationId?: string;
+}) => {
+  const queryClient = useQueryClient();
+  const { patientId, thread, consultationId } = options;
+
+  return useMutation({
+    mutationFn: mutate(routes.addPatientNote, {
+      pathParams: { patientId },
+    }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["notes", patientId, thread, consultationId],
+      });
+      return data;
+    },
+  });
 };

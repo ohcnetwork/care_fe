@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck - File not in use
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 

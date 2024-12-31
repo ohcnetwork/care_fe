@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,6 +15,7 @@ import { OrganizationUserRole } from "@/types/organization/organization";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
+import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -22,6 +24,14 @@ interface Props {
 }
 
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
+  const [qParams, setQueryParams] = useQueryParams<{
+    sheet: string;
+    username: string;
+  }>();
+
+  const openAddUserSheet = qParams.sheet === "add";
+  const openLinkUserSheet = qParams.sheet === "link";
+
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["organizationUsers", id],
     queryFn: query(routes.organization.listUsers, {
@@ -61,10 +71,28 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Users</h2>
-          <AddUserSheet organizationId={id} />
+          <div className="flex gap-2">
+            <AddUserSheet
+              open={openAddUserSheet}
+              setOpen={(open) => {
+                setQueryParams({ sheet: open ? "add" : "", username: "" });
+              }}
+              onUserCreated={(user) => {
+                setQueryParams({ sheet: "link", username: user.username });
+              }}
+            />
+            <LinkUserSheet
+              organizationId={id}
+              open={openLinkUserSheet}
+              setOpen={(open) => {
+                setQueryParams({ sheet: open ? "link" : "", username: "" });
+              }}
+              preSelectedUsername={qParams.username}
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {users?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
@@ -74,76 +102,71 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
           ) : (
             users?.results?.map((userRole: OrganizationUserRole) => (
               <Card key={userRole.id} className="h-full">
-                <CardContent className="p-6">
-                  <div className="flex flex-col h-full">
-                    <div className="flex flex-col gap-4 w-full">
-                      <div className="flex flex-col gap-4 sm:flex-row w-full">
-                        <div className="flex flex-col items-center gap-4 min-[400px]:flex-row sm:items-start">
-                          <Avatar
-                            name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                            className="h-16 w-16 text-2xl"
-                          />
-                        </div>
-                        <div className="flex flex-col w-full">
-                          <div>
-                            <div className="flex flex-row justify-between gap-x-3">
-                              <div className="flex flex-col">
-                                <div className="flex items-center gap-x-3">
-                                  <h1 className="text-base font-bold">
-                                    {userRole.user.first_name}{" "}
-                                    {userRole.user.last_name}
-                                  </h1>
-                                  <Badge
-                                    variant="secondary"
-                                    className="bg-green-100"
-                                  >
-                                    <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
-                                    <span className="text-xs text-green-700">
-                                      online
-                                    </span>
-                                  </Badge>
-                                </div>
-                                <span className="text-sm text-gray-500">
-                                  {userRole.user.username}
-                                </span>
-                              </div>
-                              <div>
-                                <EditUserRoleSheet
-                                  organizationId={id}
-                                  userRole={userRole}
-                                  trigger={
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="gap-2"
-                                    >
-                                      <CareIcon
-                                        icon="l-arrow-up-right"
-                                        className="h-4 w-4"
-                                      />
-                                      <span>More details</span>
-                                    </Button>
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
-                            <div className="text-sm">
-                              <div className="text-gray-500">Role</div>
-                              <div className="font-medium">
-                                {userRole.role.name}
-                              </div>
-                            </div>
-                            <div className="text-sm">
-                              <div className="text-gray-500">Email</div>
-                              <div className="font-medium">
-                                {userRole.user.email}
-                              </div>
-                            </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col h-full gap-4">
+                    <div className="flex gap-4">
+                      <Avatar
+                        name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                        imageUrl={userRole.user.profile_picture_url}
+                        className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
+                      />
+
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex flex-col gap-1">
+                          <h1 className="text-base font-bold break-words pr-2">
+                            {userRole.user.first_name} {userRole.user.last_name}
+                          </h1>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm text-gray-500 truncate">
+                              {userRole.user.username}
+                            </span>
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-100 whitespace-nowrap"
+                            >
+                              <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
+                              <span className="text-xs text-green-700">
+                                online
+                              </span>
+                            </Badge>
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-500">Role</div>
+                        <div className="font-medium truncate">
+                          {userRole.role.name}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">Phone Number</div>
+                        <div className="font-medium truncate">
+                          {userRole.user.phone_number}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-2">
+                      <EditUserRoleSheet
+                        organizationId={id}
+                        userRole={userRole}
+                        trigger={
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="w-full gap-2"
+                          >
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="h-4 w-4"
+                            />
+                            <span>More details</span>
+                          </Button>
+                        }
+                      />
                     </div>
                   </div>
                 </CardContent>

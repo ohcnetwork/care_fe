@@ -29,21 +29,22 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { parsePhoneNumber } from "@/Utils/utils";
+import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
   facilityId: number;
 }
 
-const initForm: any = {
+const initForm: Partial<CreateResourceRequest> = {
   category: "",
-  sub_category: 1000,
-  assigned_facility: null,
-  emergency: "false",
+  assigned_facility: undefined,
+  emergency: false,
   title: "",
   reason: "",
-  refering_facility_contact_name: "",
-  refering_facility_contact_number: "+91",
-  related_patient: null,
+  referring_facility_contact_name: "",
+  referring_facility_contact_number: "+91",
+  related_patient: undefined,
+  priority: 1,
 };
 
 const requiredFields: any = {
@@ -56,10 +57,10 @@ const requiredFields: any = {
   assigned_facility: {
     errorText: "Name of the facility",
   },
-  refering_facility_contact_name: {
+  referring_facility_contact_name: {
     errorText: "Name of contact of the referring facility",
   },
-  refering_facility_contact_number: {
+  referring_facility_contact_number: {
     errorText: "Phone number of contact of the referring facility",
     invalidText: "Please enter valid phone number",
   },
@@ -120,21 +121,12 @@ export default function ResourceCreate(props: resourceProps) {
     enabled: !!facilityId,
   });
 
-  const { data: patientData } = useQuery({
-    queryKey: ["patient", related_patient],
-    queryFn: () =>
-      query(routes.getPatient, {
-        pathParams: { id: related_patient || "" },
-      }),
-    enabled: !!related_patient,
-  });
-
   const validateForm = () => {
     const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
-        case "refering_facility_contact_number": {
+        case "referring_facility_contact_number": {
           const phoneNumber = parsePhoneNumber(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
@@ -187,21 +179,21 @@ export default function ResourceCreate(props: resourceProps) {
     if (validForm) {
       setIsLoading(true);
 
-      const resourceData = {
+      const resourceData: CreateResourceRequest = {
         status: "PENDING",
         category: state.form.category,
-        sub_category: state.form.sub_category,
         origin_facility: String(props.facilityId),
         assigned_facility: (state.form.assigned_facility || {}).id,
+        approving_facility: null,
         emergency: state.form.emergency === "true",
         title: state.form.title,
         reason: state.form.reason,
-        refering_facility_contact_name:
-          state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumber(
-          state.form.refering_facility_contact_number,
-        ),
+        referring_facility_contact_name:
+          state.form.referring_facility_contact_name,
+        referring_facility_contact_number:
+          parsePhoneNumber(state.form.referring_facility_contact_number) ?? "",
         related_patient: related_patient,
+        priority: state.form.priority,
       };
 
       const { res, data } = await request(routes.createResource, {
@@ -234,13 +226,13 @@ export default function ResourceCreate(props: resourceProps) {
       backUrl={`/facility/${facilityId}`}
     >
       <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        {patientData && (
+        {related_patient && (
           <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 md:col-span-2">
             <div className="flex items-center gap-2">
               <CareIcon icon="l-user" className="text-lg text-blue-700" />
               <span className="text-sm text-blue-700">
                 Linked Patient:{" "}
-                <span className="font-medium">{patientData.name}</span>
+                <span className="font-medium">{related_patient}</span>
               </span>
             </div>
           </div>
@@ -308,18 +300,18 @@ export default function ResourceCreate(props: resourceProps) {
         <TextFormField
           required
           label={t("contact_person")}
-          name="refering_facility_contact_name"
-          value={state.form.refering_facility_contact_name}
+          name="referring_facility_contact_name"
+          value={state.form.referring_facility_contact_name}
           onChange={handleChange}
-          error={state.errors.refering_facility_contact_name}
+          error={state.errors.referring_facility_contact_name}
         />
         <PhoneNumberFormField
           label={t("contact_phone")}
-          name="refering_facility_contact_number"
+          name="referring_facility_contact_number"
           required
-          value={state.form.refering_facility_contact_number}
+          value={state.form.referring_facility_contact_number}
           onChange={handleFormFieldChange}
-          error={state.errors.refering_facility_contact_number}
+          error={state.errors.referring_facility_contact_number}
           types={["mobile", "landline"]}
         />
 

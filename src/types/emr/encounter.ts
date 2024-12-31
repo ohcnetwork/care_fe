@@ -1,5 +1,5 @@
 import { Patient } from "@/types/emr/newPatient";
-import { UserBase } from "@/types/user/base";
+import { UserBase } from "@/types/user/user";
 
 import { FacilityOrganization } from "../facilityOrganization/facilityOrganization";
 

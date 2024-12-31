@@ -196,7 +196,9 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify the bed capacity badge reflection", () => {
+    facilityHome.interceptFacilitySearchReq();
     facilityHome.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityHome.verifyFacilitySearchReq();
     facilityHome.assertFacilityInCard(facilityWithNoAvailableBeds);
     cy.url().then((url) => {
       const facilityUrl = url.toString();

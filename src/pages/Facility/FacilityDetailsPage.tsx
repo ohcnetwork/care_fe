@@ -10,11 +10,11 @@ import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { usePatientSignOut } from "@/components/Common/Sidebar/Utils";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import useFilters from "@/hooks/useFilters";
+import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
@@ -50,9 +50,9 @@ export function FacilityDetailsPage({ id }: Props) {
   const { data: docResponse } = useQuery<
     RequestResult<PaginatedResponse<UserAssignedModel>>
   >({
-    queryKey: [routes.getFacilityUsers, id],
+    queryKey: [routes.getScheduleAbleFacilityUsers, id],
     queryFn: async () => {
-      const response = await request(routes.getFacilityUsers, {
+      const response = await request(routes.getScheduleAbleFacilityUsers, {
         pathParams: { facility_id: id },
         silent: true,
       });

@@ -1,4 +1,4 @@
-import { ChevronRight, Settings } from "lucide-react";
+import { ChevronRight, LogOut, Settings } from "lucide-react";
 import { Link } from "raviger";
 
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import useAuthUser from "@/hooks/useAuthUser";
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
 import { getOrgLevel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
   const user = useAuthUser();
+  const { signOut } = useAuthContext();
   const facilities = user.facilities || [];
   const organizations = user.organizations || [];
 
@@ -22,6 +23,7 @@ export default function UserDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
             name={user.first_name}
+            imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
           <div className="space-y-1">
@@ -45,10 +47,22 @@ export default function UserDashboard() {
             className="w-full sm:w-auto"
             asChild
           >
-            <Link href={`/users/${user.username}`} className="gap-2">
+            <Link
+              href={`/users/${user.username}`}
+              className="gap-2 text-inherit"
+            >
               <Settings className="h-4 w-4" />
               Edit Profile
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={() => signOut()}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
           </Button>
         </div>
       </div>

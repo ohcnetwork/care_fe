@@ -19,13 +19,11 @@ class PatientTransfer {
 
   clickTransferSubmitButton() {
     cy.get("#submit-transferpatient").click();
-    cy.wait(2000);
   }
 
   clickConsultationCancelButton() {
     cy.get("#cancel").scrollIntoView();
     cy.get("#cancel").click();
-    cy.wait(2000);
   }
 
   clickAllowPatientTransferButton() {

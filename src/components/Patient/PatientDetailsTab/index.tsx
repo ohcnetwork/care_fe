@@ -1,13 +1,13 @@
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
-import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 
 import { Patient } from "@/types/emr/newPatient";
 
 import { Appointments } from "./Appointments";
+import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
 
 export interface PatientProps {
@@ -37,10 +37,10 @@ export const patientTabs = [
     route: "updates",
     component: Updates,
   },
-  {
-    route: "shift",
-    component: ShiftingHistory,
-  },
+  // {
+  //   route: "shift",
+  //   component: ShiftingHistory,
+  // },
   {
     route: "resource_requests",
     component: ResourceRequests,
@@ -48,5 +48,9 @@ export const patientTabs = [
   {
     route: "patient-notes",
     component: PatientNotes,
+  },
+  {
+    route: "users",
+    component: PatientUsers,
   },
 ];

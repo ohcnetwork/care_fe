@@ -5,12 +5,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAddEditForm";
-import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
+import { validateRule } from "@/components/Users/UserFormValidations";
+import { UpdatePasswordForm } from "@/components/Users/models";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { UserBase } from "@/types/user/user";
 
 import ButtonV2 from "../Common/ButtonV2";
 
@@ -24,7 +25,7 @@ interface PasswordForm {
 export default function UserResetPassword({
   userData,
 }: {
-  userData: UserModel;
+  userData: UserBase;
 }) {
   const { t } = useTranslation();
   const [isSubmitting, setisSubmitting] = useState(false);
@@ -88,7 +89,7 @@ export default function UserResetPassword({
     });
 
     if (res?.ok) {
-      Notification.Success({ msg: data?.message });
+      Notification.Success({ msg: data?.message as string });
     } else {
       Notification.Error({
         msg: error?.message ?? t("password_update_error"),

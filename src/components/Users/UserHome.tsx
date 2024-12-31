@@ -6,12 +6,9 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { userChildProps } from "@/components/Common/UserColumns";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import LinkedFacilitiesTab from "@/components/Users/LinkedFacilitiesTab";
-import LinkedSkillsTab from "@/components/Users/LinkedSkillsTab";
 import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserSummaryTab from "@/components/Users/UserSummary";
-import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -20,12 +17,14 @@ import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 export interface UserHomeProps {
   username?: string;
   tab: string;
+  facilityId?: string;
 }
-export interface tabChildProp {
+export interface TabChildProp {
   body: (childProps: userChildProps) => JSX.Element | undefined;
   hidden?: boolean;
 }
@@ -33,12 +32,13 @@ export interface tabChildProp {
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
   let { username } = props;
-  const [userData, setUserData] = useState<UserModel>();
+  const [userData, setUserData] = useState<UserBase>();
   const { t } = useTranslation();
   const authUser = useAuthUser();
   if (!username) {
     username = authUser.username;
   }
+  const loggedInUser = username === authUser.username;
 
   const { loading, refetch: refetchUserDetails } = useTanStackQueryInstead(
     routes.getUserDetails,
@@ -60,6 +60,8 @@ export default function UserHome(props: UserHomeProps) {
     },
   );
 
+  console.log(userData);
+
   if (loading || !userData) {
     return <Loading />;
   }
@@ -71,19 +73,11 @@ export default function UserHome(props: UserHomeProps) {
       body: UserSummaryTab,
       hidden: false,
     },
-    SKILLS: {
-      body: LinkedSkillsTab,
-      hidden: !editPermissions,
-    },
-    FACILITIES: {
-      body: LinkedFacilitiesTab,
-      hidden: !editPermissions,
-    },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !editPermissions || !userData.home_facility_object,
+      hidden: !editPermissions || !props.facilityId,
     },
-  } satisfies Record<string, tabChildProp>;
+  } satisfies Record<string, TabChildProp>;
 
   const normalizedTab = tab.toUpperCase();
   const isValidTab = (tab: string): tab is keyof typeof TABS =>
@@ -100,7 +94,11 @@ export default function UserHome(props: UserHomeProps) {
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={{ [username]: { name: username } }}
+        crumbsReplacements={
+          loggedInUser
+            ? { [username]: { name: "Profile" } }
+            : { [username]: { name: username } }
+        }
         focusOnLoad={true}
         backUrl="/users"
         hideTitleOnPage
@@ -127,7 +125,7 @@ export default function UserHome(props: UserHomeProps) {
                                 ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
                                 : "text-secondary-700 hover:text-secondary-700",
                             )}
-                            href={`/users/${username}/${p.toLocaleLowerCase()}`}
+                            href={`/facility/${props.facilityId}/users/${username}/${p.toLocaleLowerCase()}`}
                           >
                             <div className="px-3 py-1.5" id={p.toLowerCase()}>
                               {t(`USERMANAGEMENT_TAB__${p}`)}

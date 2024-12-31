@@ -118,7 +118,7 @@ export function QuestionInput({
     });
   };
 
-  const renderSingleInput = () => {
+  const renderSingleInput = (index: number = 0) => {
     const isEnabled = isQuestionEnabled();
 
     const commonProps = {
@@ -128,6 +128,7 @@ export function QuestionInput({
       updateQuestionnaireResponseCB,
       disabled: !isEnabled || disabled,
       clearError,
+      index,
     };
 
     switch (question.type) {
@@ -205,7 +206,7 @@ export function QuestionInput({
 
           return (
             <div key={index} className="mt-2 gap-2">
-              <div>{renderSingleInput()}</div>
+              <div>{renderSingleInput(index)}</div>
               {removeButton}
             </div>
           );

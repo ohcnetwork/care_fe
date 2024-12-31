@@ -11,7 +11,6 @@ describe("Patient Discussion notes in the consultation page", () => {
   const patientNurseReplyNote = "Test nurse reply Notes";
   const discussionNotesSubscribeWarning =
     "Please subscribe to notifications to get live updates on discussion notes.";
-  const discussionNotesSuccessMessage = "Note added successfully";
 
   before(() => {
     loginPage.loginByRole("districtAdmin");
@@ -34,8 +33,6 @@ describe("Patient Discussion notes in the consultation page", () => {
     patientDoctorNotes.selectNurseDiscussion();
     patientDoctorNotes.addDiscussionNotes(patientNurseNote);
     patientDoctorNotes.postDiscussionNotes();
-    cy.verifyNotification(discussionNotesSuccessMessage);
-    cy.closeNotification();
     // verify the auto-switching of tab to nurse notes if the user is a nurse
     patientDoctorNotes.signout();
     loginPage.loginManuallyAsNurse();
@@ -50,8 +47,6 @@ describe("Patient Discussion notes in the consultation page", () => {
     // Post a reply comment to the message
     patientDoctorNotes.addDiscussionNotes(patientNurseReplyNote);
     patientDoctorNotes.postDiscussionNotes();
-    cy.verifyNotification(discussionNotesSuccessMessage);
-    cy.closeNotification();
     patientDoctorNotes.verifyDiscussionMessage(patientNurseReplyNote);
   });
 

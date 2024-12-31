@@ -15,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { Organization } from "@/types/organization/organization";
@@ -28,6 +29,8 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
+  const { isMobile } = useSidebar();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -52,7 +55,16 @@ export function OrganizationSwitcher({
           </SidebarMenuItem>
         </SidebarMenu>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent
+        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+        align="start"
+        side={isMobile ? "bottom" : "right"}
+        sideOffset={4}
+      >
+        <DropdownMenuItem onClick={() => navigate("/")}>
+          <DashboardIcon className="size-4" />
+          View Dashboard
+        </DropdownMenuItem>
         <DropdownMenuLabel>Organizations</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {organizations.map((org) => (
@@ -63,11 +75,6 @@ export function OrganizationSwitcher({
             {org.name}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate("/")}>
-          <DashboardIcon className="size-4" />
-          View Dashboard
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

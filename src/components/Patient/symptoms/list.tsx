@@ -123,6 +123,7 @@ export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
                   <Avatar
                     name={`${symptom.created_by?.first_name} ${symptom.created_by?.last_name}`}
                     className="w-4 h-4"
+                    imageUrl={symptom.created_by?.profile_picture_url}
                   />
                   <span className="text-sm">
                     {symptom.created_by?.first_name}{" "}

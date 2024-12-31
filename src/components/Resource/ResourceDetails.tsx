@@ -18,8 +18,12 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
-function PatientCard({ patient }: { patient: any }) {
+import { FacilityModel } from "../Facility/models";
+
+function PatientCard({ patient }: { patient: PatientModel }) {
   const { t } = useTranslation();
   return (
     <Card>
@@ -64,15 +68,7 @@ function PatientCard({ patient }: { patient: any }) {
           <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium">{t("address")}</p>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {[
-                patient.address,
-                patient.ward_object?.name,
-                patient.local_body_object?.name,
-                patient.district_object?.name,
-                patient.state_object?.name,
-              ]
-                .filter(Boolean)
-                .join(", ") || "--"}
+              {[patient.address].filter(Boolean).join(", ") || "--"}
             </p>
           </div>
         </div>
@@ -86,7 +82,7 @@ function FacilityCard({
   facilityData,
 }: {
   title: string;
-  facilityData: any;
+  facilityData: FacilityModel;
 }) {
   const { t } = useTranslation();
   return (
@@ -102,37 +98,13 @@ function FacilityCard({
               {facilityData?.name || "--"}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{t("facility_type")}</p>
-            <p className="text-sm text-muted-foreground">
-              {facilityData?.facility_type?.name || "--"}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{t("district")}</p>
-            <p className="text-sm text-muted-foreground">
-              {facilityData?.district_object?.name || "--"}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{t("local_body")}</p>
-            <p className="text-sm text-muted-foreground">
-              {facilityData?.local_body_object?.name || "--"}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{t("state")}</p>
-            <p className="text-sm text-muted-foreground">
-              {facilityData?.state_object?.name || "--"}
-            </p>
-          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-const RequestLetter = (data: any) => {
+const RequestLetter = (data: ResourceRequest) => {
   const { t } = useTranslation();
   return (
     <div id="section-to-print" className="print bg-white">
@@ -155,18 +127,7 @@ const RequestLetter = (data: any) => {
         {/* From Address */}
         <div className="mb-6">
           <div className="font-semibold">{t("from")}:</div>
-          <div className="mt-1">
-            {data.origin_facility_object?.name}
-            {data.origin_facility_object?.facility_type?.name && (
-              <div>{data.origin_facility_object.facility_type.name}</div>
-            )}
-            {data.origin_facility_object?.district_object?.name && (
-              <div>{data.origin_facility_object.district_object.name}</div>
-            )}
-            {data.origin_facility_object?.state_object?.name && (
-              <div>{data.origin_facility_object.state_object.name}</div>
-            )}
-          </div>
+          <div className="mt-1">{data.origin_facility.name}</div>
         </div>
 
         {/* Subject Line */}
@@ -198,12 +159,6 @@ const RequestLetter = (data: any) => {
               <span className="font-semibold">{t("quantity_required")}:</span>{" "}
               {data.requested_quantity}
             </div>
-            {data.assigned_quantity && (
-              <div>
-                <span className="font-semibold">{t("quantity_approved")}:</span>{" "}
-                {data.assigned_quantity}
-              </div>
-            )}
             <div className="mt-2">
               <span className="font-semibold">{t("reason_for_request")}:</span>
               <p className="mt-1">{data.reason || "--"}</p>
@@ -222,7 +177,7 @@ const RequestLetter = (data: any) => {
           <div>
             <div className="mb-20">
               <div className="font-semibold">{t("requested_by")}:</div>
-              <div>{formatName(data.created_by_object)}</div>
+              <div>{formatName(data.created_by)}</div>
               <div className="text-sm text-gray-600">
                 {formatDateTime(data.created_date)}
               </div>
@@ -236,7 +191,7 @@ const RequestLetter = (data: any) => {
                   {data.status === "REJECTED" ? t("rejected") : t("approved")}
                   {t("by")}:
                 </div>
-                <div>{formatName(data.last_edited_by_object)}</div>
+                <div>{formatName(data.updated_by)}</div>
                 <div className="text-sm text-gray-600">
                   {formatDateTime(data.modified_date)}
                 </div>
@@ -316,21 +271,21 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("contact_person")}</p>
                 <p className="text-sm text-muted-foreground">
-                  {data.refering_facility_contact_name || "--"}
+                  {data.referring_facility_contact_name || "--"}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("contact_number")}</p>
-                {data.refering_facility_contact_number ? (
+                {data.referring_facility_contact_number ? (
                   <div className="flex items-center gap-2">
                     <a
-                      href={`tel:${data.refering_facility_contact_number}`}
+                      href={`tel:${data.referring_facility_contact_number}`}
                       className="text-sm text-primary hover:underline"
                     >
-                      {data.refering_facility_contact_number}
+                      {data.referring_facility_contact_number}
                     </a>
                     <a
-                      href={`https://wa.me/${data.refering_facility_contact_number?.replace(/\D+/g, "")}`}
+                      href={`https://wa.me/${data.referring_facility_contact_number?.replace(/\D+/g, "")}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-sky-600 hover:text-sky-700"
@@ -356,20 +311,18 @@ export default function ResourceDetails(props: { id: string }) {
         </Card>
 
         {/* Patient Details */}
-        {data.related_patient_object && (
-          <PatientCard patient={data.related_patient_object} />
-        )}
+        {data.related_patient && <PatientCard patient={data.related_patient} />}
 
         {/* Facilities */}
         <div className="grid gap-6 md:grid-cols-2">
           <FacilityCard
             title={t("origin_facility")}
-            facilityData={data.origin_facility_object}
+            facilityData={data.origin_facility}
           />
-          {data.assigned_facility_object && (
+          {data.assigned_facility && (
             <FacilityCard
               title={t("assigned_facility")}
-              facilityData={data.assigned_facility_object}
+              facilityData={data.assigned_facility}
             />
           )}
         </div>
@@ -381,11 +334,11 @@ export default function ResourceDetails(props: { id: string }) {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              {data.created_by_object && (
+              {data.created_by && (
                 <div className="space-y-1">
                   <p className="text-sm font-medium">{t("created_by")}</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatName(data.created_by_object)}
+                    {formatName(data.created_by)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDateTime(data.created_date)}
@@ -395,7 +348,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("last_modified_by")}</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatName(data.last_edited_by_object)}
+                  {formatName(data.updated_by)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDateTime(data.modified_date)}

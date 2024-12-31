@@ -6,9 +6,6 @@
 @import "@fontsource/figtree/800.css";
 @import "@fontsource/figtree/900.css";
 
-@import "@pnotify/core/dist/PNotify.css";
-@import "@pnotify/mobile/dist/PNotifyMobile.css";
-@import "@pnotify/core/dist/BrightTheme.css";
 @import "./CAREUI.css";
 
 @tailwind base;

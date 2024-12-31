@@ -31,7 +31,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
   }, [isCopied]);
 
   return (
-    <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
+    <div className="warranty-card relative z-10 flex h-full w-full flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 rounded-xl xl:w-96">
       <div className="mb-3 text-right text-lg font-bold italic">
         {asset.manufacturer}
       </div>
@@ -78,7 +78,10 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               ["Phone", asset.support_phone, "l-phone"],
               ["Email", asset.support_email, "l-envelope"],
             ].map((item) => (
-              <div className="flex items-center">
+              <div
+                key={`support-${item[0]}`}
+                className="flex flex-wrap items-center"
+              >
                 {item[1] && (
                   <>
                     <div className="w-16 italic text-secondary-200">

@@ -1,8 +1,7 @@
 import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-import * as Notification from "@/Utils/Notifications";
+import { toast } from "sonner";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
@@ -20,7 +19,7 @@ export default function ErrorPage({
   const { t } = useTranslation();
 
   useEffect(() => {
-    Notification.closeAllNotifications();
+    toast.dismiss();
   }, []);
 
   const errorContent = {

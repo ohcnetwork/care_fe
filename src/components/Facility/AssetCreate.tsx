@@ -107,8 +107,6 @@ const AssetCreate = (props: AssetProps) => {
   const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
-  let assetClassInitial: AssetClass;
-
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
   const [asset_class, setAssetClass] = useState<AssetClass>();
@@ -286,7 +284,7 @@ const AssetCreate = (props: AssetProps) => {
     setName("");
     setDescription("");
     setLocation("");
-    setAssetClass(assetClassInitial);
+    setAssetClass(AssetClass.NONE);
     setIsWorking(undefined);
     setNotWorkingReason("");
     setSerialNumber("");

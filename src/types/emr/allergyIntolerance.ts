@@ -1,5 +1,5 @@
 import { Code } from "../questionnaire/code";
-import { UserBase } from "../user/base";
+import { UserBase } from "../user/user";
 
 // Base type for allergy data
 export interface AllergyIntolerance {

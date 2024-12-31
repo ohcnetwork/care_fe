@@ -62,7 +62,7 @@ function generateFacilityLinks(
     // { name: t("shifting"), url: "/shifting", icon: "d-ambulance" },
     { name: t("resource"), url: "/resource", icon: "d-book-open" },
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
-    { name: t("All users"), url: "/users", icon: "d-people" },
+    // { name: t("All users"), url: "/users", icon: "d-people" },
     {
       name: t("Organization"),
       url: `${baseUrl}/organization`,

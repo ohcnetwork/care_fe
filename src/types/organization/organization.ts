@@ -2,6 +2,8 @@ import { ORGANIZATION_LEVELS } from "@/common/constants";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import { UserBase } from "../user/user";
+
 type org_type = "team" | "govt" | "role" | "other";
 
 export interface OrganizationParent {
@@ -28,15 +30,7 @@ export interface Organization {
 
 export interface OrganizationUserRole {
   id: string;
-  user: {
-    id: string;
-    username: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    last_login: string;
-    profile_picture_url: string;
-  };
+  user: UserBase;
   role: {
     id: string;
     name: string;

@@ -18,20 +18,25 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
-export default function UserAvatar({ username }: { username: string }) {
+export default function UserAvatar({
+  username,
+  refetchUserData,
+}: {
+  username: string;
+  refetchUserData?: () => void;
+}) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
 
-  const {
-    data: userData,
-    loading: isLoading,
-    refetch: refetchUserData,
-  } = useTanStackQueryInstead(routes.getUserDetails, {
-    pathParams: {
-      username: username,
+  const { data: userData, loading: isLoading } = useTanStackQueryInstead(
+    routes.getUserDetails,
+    {
+      pathParams: {
+        username: username,
+      },
     },
-  });
+  );
 
   if (isLoading || !userData) {
     return <Loading />;
@@ -42,7 +47,7 @@ export default function UserAvatar({ username }: { username: string }) {
     formData.append("profile_picture", file);
     const url = `${careConfig.apiUrl}/api/v1/users/${userData.username}/profile_picture/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
@@ -50,7 +55,7 @@ export default function UserAvatar({ username }: { username: string }) {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          refetchUserData();
+          refetchUserData?.();
           Notification.Success({ msg: t("avatar_updated_success") });
           setEditAvatar(false);
         }
@@ -68,7 +73,7 @@ export default function UserAvatar({ username }: { username: string }) {
     });
     if (res?.ok) {
       Notification.Success({ msg: "Profile picture deleted" });
-      await refetchUserData();
+      refetchUserData?.();
       setEditAvatar(false);
     } else {
       onError();
@@ -80,7 +85,7 @@ export default function UserAvatar({ username }: { username: string }) {
       <AvatarEditModal
         title={t("edit_avatar")}
         open={editAvatar}
-        imageUrl={userData?.read_profile_picture_url}
+        imageUrl={userData?.profile_picture_url}
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
@@ -89,7 +94,7 @@ export default function UserAvatar({ username }: { username: string }) {
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
-              imageUrl={userData?.read_profile_picture_url}
+              imageUrl={userData?.profile_picture_url}
               name={formatDisplayName(userData)}
               className="h-20 w-20"
             />

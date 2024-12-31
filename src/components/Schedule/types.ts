@@ -1,7 +1,7 @@
 import { DayOfWeekValue } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Time } from "@/Utils/types";
-import { UserBase } from "@/types/user/base";
+import { UserBase } from "@/types/user/user";
 
 export interface ScheduleTemplate {
   readonly id: string;

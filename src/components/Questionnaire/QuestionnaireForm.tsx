@@ -3,6 +3,8 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -303,7 +305,7 @@ export function QuestionnaireForm({
               key={`${form.questionnaire.id}-${index}`}
               className="border rounded-lg p-6 space-y-6"
             >
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap">
                 <div className="space-y-1">
                   <h2 className="text-xl font-semibold">
                     {form.questionnaire.title}
@@ -320,6 +322,7 @@ export function QuestionnaireForm({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="self-end"
                     onClick={() => {
                       setQuestionnaireForms((prev) =>
                         prev.filter(
@@ -329,7 +332,8 @@ export function QuestionnaireForm({
                     }}
                     disabled={isProcessing}
                   >
-                    Remove
+                    <CareIcon icon="l-times-circle" />
+                    <span>Remove</span>
                   </Button>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -39,15 +39,14 @@ import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/components/Schedule/helpers";
-import {
-  ScheduleSlotTypes,
-  ScheduleTemplate,
-} from "@/components/Schedule/types";
-import { UserModel } from "@/components/Users/models";
+import { ScheduleSlotTypes } from "@/components/Schedule/types";
 
-import request from "@/Utils/request/request";
-import { Time, WritableOnly } from "@/Utils/types";
+import useSlug from "@/hooks/useSlug";
+
+import mutate from "@/Utils/request/mutate";
+import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -81,10 +80,11 @@ const formSchema = z.object({
 
 interface Props {
   onRefresh?: () => void;
-  user: UserModel;
+  user: UserBase;
 }
 
 export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
+  const facilityId = useSlug("facility");
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -109,28 +109,31 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
     },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (body: WritableOnly<ScheduleTemplate>) =>
-      request(ScheduleAPIs.templates.create, {
-        pathParams: { facility_id: user.home_facility_object!.id! },
-        body,
-        onResponse: ({ res }) => {
-          if (res?.ok) {
-            toast.success("Schedule template created successfully");
-            setOpen(false);
-            form.reset();
-            onRefresh?.();
-          }
-        },
-      }),
+  const {
+    mutate: createTemplate,
+    isPending,
+    isSuccess,
+  } = useMutation({
+    mutationFn: mutate(ScheduleAPIs.templates.create, {
+      pathParams: { facility_id: facilityId },
+    }),
   });
 
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Schedule template created successfully");
+      setOpen(false);
+      form.reset();
+      onRefresh?.();
+    }
+  }, [isSuccess]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    mutate({
+    createTemplate({
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       name: values.name,
-      resource: user.external_id,
+      resource: user.id as unknown as string,
       availabilities: values.availabilities.map((availability) => ({
         name: availability.name,
         slot_type: availability.slot_type,

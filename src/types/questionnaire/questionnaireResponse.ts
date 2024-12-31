@@ -1,4 +1,4 @@
-import { UserBase } from "../user/base";
+import { UserBase } from "../user/user";
 import { QuestionnaireResponse as Response } from "./form";
 import { StructuredQuestionType } from "./question";
 import { QuestionnaireDetail } from "./questionnaire";

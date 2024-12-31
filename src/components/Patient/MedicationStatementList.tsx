@@ -17,6 +17,9 @@ import {
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
+
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface MedicationStatementListProps {
   patientId: string;
@@ -94,28 +97,70 @@ export function MedicationStatementList({
             {medications.results.map((statement) => (
               <TableRow>
                 <TableCell className="font-medium">
-                  {statement.medication.display ?? statement.medication.code}
+                  <Tooltip>
+                    <TooltipTrigger asChild className="max-w-60 truncate">
+                      <p>
+                        {statement.medication.display ??
+                          statement.medication.code}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {statement.medication.display ??
+                          statement.medication.code}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
                 </TableCell>
-                <TableCell>{statement.dosage_text}</TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="max-w-36 truncate">
+                      <p>{statement.dosage_text}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{statement.dosage_text}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant="outline"
                     className={cn(
-                      "whitespace-nowrap",
+                      "whitespace-nowrap capitalize",
                       getStatusBadgeStyle(statement.status),
                     )}
                   >
                     {statement.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {[
                     statement.effective_period?.start,
                     statement.effective_period?.end,
-                  ].join(" - ")}
+                  ]
+                    .map((date) => formatDateTime(date))
+                    .join(" - ")}
                 </TableCell>
-                <TableCell>{statement.reason}</TableCell>
-                <TableCell>{statement.note}</TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="max-w-60 truncate">
+                      <p>{statement.reason ?? "-"}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{statement.reason ?? "Not Specified"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="max-w-60 truncate">
+                      <p>{statement.note ?? "-"}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{statement.note ?? "Not Specified"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

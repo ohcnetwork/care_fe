@@ -15,13 +15,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { ResourceModel } from "@/components/Facility/models";
-
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 import { PatientProps } from ".";
 
@@ -39,8 +38,8 @@ export const ResourceRequests = (props: PatientProps) => {
     enabled: !!id,
   });
 
-  const getStatusBadge = (status: ResourceModel["status"]) => {
-    const statusColors: Record<ResourceModel["status"], string> = {
+  const getStatusBadge = (status: ResourceRequest["status"]) => {
+    const statusColors: Record<ResourceRequest["status"], string> = {
       PENDING: "bg-yellow-100 text-yellow-800",
       APPROVED: "bg-green-100 text-green-800",
       REJECTED: "bg-red-100 text-red-800",

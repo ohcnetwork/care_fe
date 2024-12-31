@@ -75,8 +75,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", staffExternalId],
     queryFn: () =>
-      request(routes.getUserBareMinimum, {
-        pathParams: { facilityId: facilityId, userExternalId: staffExternalId },
+      request(routes.getScheduleAbleFacilityUser, {
+        pathParams: { facilityId: facilityId, user_id: staffExternalId },
       }),
     enabled: !!staffExternalId,
   });

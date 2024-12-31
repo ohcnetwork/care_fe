@@ -27,21 +27,24 @@ import {
   isDateInRange,
 } from "@/components/Schedule/helpers";
 import { ScheduleAvailability } from "@/components/Schedule/types";
-import { UserModel } from "@/components/Users/models";
+
+import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { formatTimeShort } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
 type Props = {
-  userData: UserModel;
+  userData: UserBase;
 };
 
 export default function UserAvailabilityTab({ userData: user }: Props) {
   const [view, setView] = useState<"schedule" | "exceptions">("schedule");
   const [month, setMonth] = useState(new Date());
 
-  const facilityId = user.home_facility_object?.id;
+  const facilityId = useSlug("facility");
 
+  // TODO: remove this once we have a way to get the facilityId
   useEffect(() => {
     if (!facilityId) {
       toast.error("User needs to be linked to a home facility");
@@ -52,7 +55,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     queryKey: ["user-availability-templates", user.username],
     queryFn: query(ScheduleAPIs.templates.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { resource: user.external_id },
+      queryParams: { resource: user.id },
     }),
     enabled: !!facilityId,
   });
@@ -61,7 +64,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     queryKey: ["user-availability-exceptions", user.username],
     queryFn: query(ScheduleAPIs.exceptions.list, {
       pathParams: { facility_id: facilityId! },
-      queryParams: { resource: user.external_id },
+      queryParams: { resource: user.id },
     }),
   });
 

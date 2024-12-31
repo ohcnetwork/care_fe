@@ -15,6 +15,7 @@ interface ChoiceQuestionProps {
   ) => void;
   disabled?: boolean;
   clearError: () => void;
+  index?: number;
 }
 
 export const ChoiceQuestion = memo(function ChoiceQuestion({
@@ -23,20 +24,22 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   updateQuestionnaireResponseCB,
   disabled = false,
   clearError,
+  index = 0,
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
-  const currentValue = questionnaireResponse.values[0]?.value?.toString();
+  const currentValue = questionnaireResponse.values[index]?.value?.toString();
 
   const handleValueChange = (newValue: string) => {
     clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "string",
+      value: newValue,
+    };
+
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
-      values: [
-        {
-          type: "string",
-          value: newValue,
-        },
-      ],
+      values: newValues,
     });
   };
 

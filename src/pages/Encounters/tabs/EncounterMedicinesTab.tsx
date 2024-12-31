@@ -1,5 +1,4 @@
 import MedicineAdministrationSheet from "@/components/Medicine/MedicineAdministrationSheet";
-import { MedicinePrescriptionSummary } from "@/components/Medicine/MedicinePrescriptionSummary";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
@@ -9,9 +8,9 @@ export const EncounterMedicinesTab = (props: EncounterTabProps) => {
   );
   return (
     <div className="flex flex-col gap-16">
-      <MedicineAdministrationSheet readonly={isDischarged} is_prn={false} />
-      <MedicineAdministrationSheet is_prn={true} readonly={isDischarged} />
-      <MedicinePrescriptionSummary consultation={props.encounter.id} />
+      <MedicineAdministrationSheet readonly={isDischarged} isPrn={false} />
+      <MedicineAdministrationSheet isPrn={true} readonly={isDischarged} />
+      {/* <MedicinePrescriptionSummary consultation={props.encounter.id} /> */}
     </div>
   );
 };

@@ -22,9 +22,9 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { usePatientSignOut } from "@/components/Common/Sidebar/Utils";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 
@@ -64,6 +64,7 @@ export function FacilityNavUser() {
                   <Avatar
                     name={`${user.first_name} ${user.last_name}`}
                     className="h-8 w-8 rounded-lg"
+                    imageUrl={user.read_profile_picture_url}
                   />
                 </div>
               )}

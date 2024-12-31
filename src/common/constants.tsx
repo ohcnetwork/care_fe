@@ -20,6 +20,7 @@ export const PAGINATION_LIMIT = 36;
 export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
+  patientTokenKey: "care_patient_token",
 };
 export interface OptionsType {
   id: number | string;
@@ -482,7 +483,7 @@ export const BLOOD_GROUPS = [
 ];
 
 export const BLOOD_GROUP_CHOICES = [
-  { id: "UNK", text: "Unknown" },
+  { id: "unknown", text: "Unknown" },
   { id: "A_positive", text: "A+" },
   { id: "A_negative", text: "A-" },
   { id: "B_positive", text: "B+" },
@@ -900,6 +901,25 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   },
 ];
 
+// FEATURE_CHOICES = [
+//   (1, "CT Scan Facility"),
+//   (2, "Maternity Care"),
+//   (3, "X-Ray facility"),
+//   (4, "Neonatal care"),
+//   (5, "Operation theater"),
+//   (6, "Blood Bank"),
+//   (7, "Emergency Services"),
+//   (8, "Inpatient Services"),
+//   (9, "Outpatient Services"),
+//   (10, "Intensive Care Units"),
+//   (11, "Pharmacy"),
+//   (12, "Rehabilitation Services"),
+//   (13, "Home Care Services"),
+//   (14, "Psychosocial Support"),
+//   (15, "Respite Care"),
+//   (16, "Daycare Programs"),
+// ]
+
 // in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
 export const FACILITY_FEATURE_TYPES: {
   id: number;
@@ -942,6 +962,66 @@ export const FACILITY_FEATURE_TYPES: {
     name: "Blood Bank",
     icon: "l-medical-drip",
     variant: "orange",
+  },
+  {
+    id: 7,
+    name: "Emergency Services",
+    icon: "l-ambulance",
+    variant: "red",
+  },
+  {
+    id: 8,
+    name: "Inpatient Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 9,
+    name: "Outpatient Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 10,
+    name: "Intensive Care Units",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 11,
+    name: "Pharmacy",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 12,
+    name: "Rehabilitation Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 13,
+    name: "Home Care Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 14,
+    name: "Psychosocial Support",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 15,
+    name: "Respite Care",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 16,
+    name: "Daycare Programs",
+    icon: "l-hospital",
+    variant: "red",
   },
 ];
 
@@ -1692,7 +1772,10 @@ export const HEADER_CONTENT_TYPES = {
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
-export const CarePatientTokenKey = "care_patient_token";
+/**
+ * @deprecated use `LocalStorageKeys.patientTokenKey` instead
+ */
+export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
 
 // organization_levels map based of type. for govt
 // thought: This might be better placed in the organization types files

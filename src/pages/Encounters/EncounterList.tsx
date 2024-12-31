@@ -307,24 +307,69 @@ export function EncounterList({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="stat">
-                      <div className="flex items-center">
-                        <span className="mr-2">🔴</span> STAT
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="urgent">
-                      <div className="flex items-center">
-                        <span className="mr-2">🟠</span> Urgent
-                      </div>
-                    </SelectItem>
                     <SelectItem value="asap">
                       <div className="flex items-center">
                         <span className="mr-2">🟡</span> ASAP
                       </div>
                     </SelectItem>
+                    <SelectItem value="callback_results">
+                      <div className="flex items-center">
+                        <span className="mr-2">🔵</span> Callback Results
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="callback_for_scheduling">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟣</span> Callback for Scheduling
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="elective">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟤</span> Elective
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="emergency">
+                      <div className="flex items-center">
+                        <span className="mr-2">🔴</span> Emergency
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="preop">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟠</span> Pre-op
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="as_needed">
+                      <div className="flex items-center">
+                        <span className="mr-2">⚫️</span> As Needed
+                      </div>
+                    </SelectItem>
                     <SelectItem value="routine">
                       <div className="flex items-center">
                         <span className="mr-2">⚪️</span> Routine
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="rush_reporting">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟤</span> Rush Reporting
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="stat">
+                      <div className="flex items-center">
+                        <span className="mr-2">🔴</span> Stat
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="timing_critical">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟡</span> Timing Critical
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="use_as_directed">
+                      <div className="flex items-center">
+                        <span className="mr-2">🔵</span> Use as Directed
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="urgent">
+                      <div className="flex items-center">
+                        <span className="mr-2">🟠</span> Urgent
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -677,13 +722,22 @@ export function EncounterList({
                   <CardContent className="">
                     <div className="flex flex-col space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className={getStatusColor(encounter.status)}>
+                        <Badge
+                          className={getStatusColor(encounter.status)}
+                          variant="outline"
+                        >
                           {t(`encounter_status__${encounter.status}`)}
                         </Badge>
-                        <Badge className="bg-gray-100 text-gray-800">
+                        <Badge
+                          className="bg-gray-100 text-gray-800"
+                          variant="outline"
+                        >
                           {t(`encounter_class__${encounter.encounter_class}`)}
                         </Badge>
-                        <Badge className={getPriorityColor(encounter.priority)}>
+                        <Badge
+                          className={getPriorityColor(encounter.priority)}
+                          variant="outline"
+                        >
                           {t(`encounter_priority__${encounter.priority}`)}
                         </Badge>
                       </div>

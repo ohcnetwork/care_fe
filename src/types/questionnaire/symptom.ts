@@ -1,4 +1,4 @@
-import { UserBase } from "../user/base";
+import { UserBase } from "../user/user";
 import { Code } from "./code";
 
 export const SYMPTOM_CLINICAL_STATUS = [

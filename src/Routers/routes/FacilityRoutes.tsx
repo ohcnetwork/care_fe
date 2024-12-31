@@ -1,9 +1,10 @@
+import { Redirect } from "raviger";
+
 import CentralNursingStation from "@/components/Facility/CentralNursingStation";
 import DischargedPatientsList from "@/components/Facility/DischargedPatientsList";
 import { FacilityConfigure } from "@/components/Facility/FacilityConfigure";
 import { FacilityCreate } from "@/components/Facility/FacilityCreate";
 import { FacilityHome } from "@/components/Facility/FacilityHome";
-import { FacilityList } from "@/components/Facility/FacilityList";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
 
@@ -15,7 +16,7 @@ import FacilityOrganizationUsers from "@/pages/FacilityOrganization/FacilityOrga
 import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrganizationView";
 
 const FacilityRoutes: AppRoutes = {
-  "/facility": () => <FacilityList />,
+  "/facility": () => <Redirect to="/" />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }) => (
     <FacilityCreate facilityId={facilityId} />

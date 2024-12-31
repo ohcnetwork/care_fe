@@ -37,7 +37,10 @@ const DateFormField = (props: Props) => {
   return (
     <FormField field={field}>
       <DateInputV2
-        className={classNames(field.error && "border-red-500")}
+        className={classNames(
+          field.error && "border-red-500",
+          "mr-9 text-ellipsis",
+        )}
         containerClassName={props.containerClassName}
         id={field.id}
         name={field.name}
