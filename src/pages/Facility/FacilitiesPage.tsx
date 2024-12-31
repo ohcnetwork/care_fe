@@ -5,14 +5,11 @@ import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import FacilityFilter from "@/components/Facility/FacilityFilter";
 import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
@@ -31,10 +28,9 @@ const STATE_GEO_ID = careConfig.keralaGeoId;
 
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
-  const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
-    useFilters({
-      limit: RESULTS_PER_PAGE_LIMIT,
-    });
+  const { qParams, updateQuery, clearSearch, Pagination } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
+  });
 
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(CarePatientTokenKey) || "{}",
@@ -48,30 +44,24 @@ export function FacilitiesPage() {
     queryKey: ["facilities", qParams],
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
-        geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        geo_organization: qParams.geo_organization,
+        name: qParams.search ? qParams.search : undefined,
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
-        ...advancedFilter.filter,
       },
     }),
-    enabled: !!qParams.geo_organization || !!STATE_GEO_ID,
+    enabled: !!qParams.geo_organization,
   });
 
   useEffect(() => {
-    if (qParams.district) {
-      updateQuery({ geo_organization: qParams.district });
+    if (qParams.geo_organization) {
+      updateQuery({ geo_organization: qParams.geo_organization });
     } else {
       updateQuery({ geo_organization: STATE_GEO_ID });
     }
-  }, [qParams.district, STATE_GEO_ID]);
+  }, [qParams.geo_organization, qParams.search]);
 
-  /*   useEffect(() => {
-    if (!qParams.district && qParams.local_body) {
-      advancedFilter.removeFilters(["local_body"]);
-    }
-  }, [advancedFilter, qParams]);
- */
   const GetLoginHeader = () => {
     if (
       tokenData &&
@@ -121,9 +111,9 @@ export function FacilitiesPage() {
           id="facility-search"
           options={[
             {
-              key: "facility_district_pincode",
+              key: "facility_district",
               type: "text" as const,
-              placeholder: t("facility_search_placeholder_pincode"),
+              placeholder: t("facility_search_placeholder"),
               value: qParams.search || "",
               shortcutKey: "f",
             },
@@ -133,15 +123,14 @@ export function FacilitiesPage() {
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
-        <Button
+        {/*         <Button
           variant="white"
           onClick={() => advancedFilter.setShow(true)}
           className="flex items-center gap-2 p-5"
         >
           <CareIcon icon="l-filter" className="h-4 w-4 text-gray-400" />
           <span className="text-sm font-medium text-gray-400">Filter</span>
-        </Button>
-        <FacilityFilter {...advancedFilter} key={window.location.search} />
+        </Button> */}
       </div>
       {/* <FilterBadges
         badges={({ badge, value }) => [
