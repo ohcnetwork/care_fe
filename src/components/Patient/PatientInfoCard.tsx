@@ -274,8 +274,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           )}
         </div>
       </section>
-
-      <PLUGIN_Component __name="ExtendPatientInfoCard" {...props} />
     </>
   );
 }

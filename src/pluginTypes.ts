@@ -1,13 +1,12 @@
 import { LazyExoticComponent } from "react";
 
-import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
+import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 import { AppRoutes } from "./Routers/AppRouter";
 import { FormContextValue } from "./components/Form/FormContext";
-import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
 import { PatientMeta } from "./components/Patient/models";
 import { pluginMap } from "./pluginMap";
 import { PatientModel } from "./types/emr/patient";
@@ -17,17 +16,6 @@ export type PatientForm = PatientModel &
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
-}>;
-
-export type ExtendPatientInfoCardComponentType = React.FC<PatientInfoCardProps>;
-
-export type ManagePatientOptionsComponentType = React.FC<{
-  consultation: ConsultationModel | undefined;
-  patient: PatientModel;
-}>;
-
-export type AdditionalDischargeProceduresComponentType = React.FC<{
-  consultation: ConsultationModel;
 }>;
 
 export type ScribeComponentType = React.FC;
@@ -57,9 +45,6 @@ export type ExtendPatientRegisterFormComponentType = React.FC<{
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
-  ExtendPatientInfoCard: ExtendPatientInfoCardComponentType;
-  ManagePatientOptions: ManagePatientOptionsComponentType;
-  AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
   Scribe: ScribeComponentType;
   ManageFacilityOptions: ManageFacilityOptionsComponentType;
   EncounterContextEnabler: React.FC;

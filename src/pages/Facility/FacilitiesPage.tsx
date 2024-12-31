@@ -12,7 +12,6 @@ import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import FacilityFilter from "@/components/Facility/FacilityFilter";
 import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
@@ -141,7 +140,6 @@ export function FacilitiesPage() {
           <CareIcon icon="l-filter" className="h-4 w-4 text-gray-400" />
           <span className="text-sm font-medium text-gray-400">Filter</span>
         </Button>
-        <FacilityFilter {...advancedFilter} key={window.location.search} />
       </div>
       {/* <FilterBadges
         badges={({ badge, value }) => [
