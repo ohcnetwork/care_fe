@@ -141,7 +141,7 @@ export function DiagnosisQuestion({
 const DiagnosisItem: React.FC<{
   diagnosis: Diagnosis;
   disabled?: boolean;
-  onUpdate: (medication: Partial<Diagnosis>) => void;
+  onUpdate: (diagnosis: Partial<Diagnosis>) => void;
   onRemove: () => void;
   index: number;
 }> = ({ diagnosis, disabled, onUpdate, onRemove, index }) => {
@@ -212,8 +212,8 @@ const DiagnosisItem: React.FC<{
           </Select>
         </div>
 
-        <div>
-          <Label className="sr-only">{t("onset_datetime")}</Label>
+        <div className="flex-1 flex flex-col gap-1">
+          <Label>{t("onset_datetime")}</Label>
           <DateTimePicker
             value={
               diagnosis.onset?.onset_datetime

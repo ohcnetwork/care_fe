@@ -139,7 +139,7 @@ export function SymptomQuestion({
 const SymptomItem: React.FC<{
   symptom: Symptom;
   disabled?: boolean;
-  onUpdate: (medication: Partial<Symptom>) => void;
+  onUpdate: (symptom: Partial<Symptom>) => void;
   onRemove: () => void;
   index: number;
 }> = ({ symptom, disabled, onUpdate, onRemove, index }) => {
@@ -241,8 +241,8 @@ const SymptomItem: React.FC<{
           </div>
         </div>
 
-        <div>
-          <Label className="sr-only">{t("onset_datetime")}</Label>
+        <div className="flex-1 flex flex-col gap-1">
+          <Label>{t("onset_datetime")}</Label>
           <DateTimePicker
             value={
               symptom.onset?.onset_datetime
