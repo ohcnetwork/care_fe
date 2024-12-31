@@ -35,7 +35,10 @@ interface DiagnosisQuestionProps {
   disabled?: boolean;
 }
 
-const DIAGNOSIS_INITIAL_VALUE: Omit<Diagnosis, "code"> = {
+const DIAGNOSIS_INITIAL_VALUE: Omit<
+  Diagnosis,
+  "code" | "created_by" | "updated_by"
+> = {
   clinical_status: "active",
   verification_status: "confirmed",
   onset: {
@@ -57,7 +60,10 @@ export function DiagnosisQuestion({
   });
 
   const handleAddDiagnosis = (code: Code) => {
-    const newDiagnoses = [...diagnoses, { ...DIAGNOSIS_INITIAL_VALUE, code }];
+    const newDiagnoses = [
+      ...diagnoses,
+      { ...DIAGNOSIS_INITIAL_VALUE, code },
+    ] as Diagnosis[];
     setDiagnoses(newDiagnoses);
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,

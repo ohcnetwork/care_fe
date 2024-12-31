@@ -37,7 +37,10 @@ interface SymptomQuestionProps {
   disabled?: boolean;
 }
 
-const SYMPTOM_INITIAL_VALUE: Omit<Symptom, "code"> = {
+const SYMPTOM_INITIAL_VALUE: Omit<
+  Symptom,
+  "code" | "created_by" | "updated_by"
+> = {
   clinical_status: "active",
   verification_status: "confirmed",
   severity: "mild",
@@ -60,7 +63,10 @@ export function SymptomQuestion({
   });
 
   const handleAddSymptom = (code: Code) => {
-    const newSymptoms = [...symptoms, { ...SYMPTOM_INITIAL_VALUE, code }];
+    const newSymptoms = [
+      ...symptoms,
+      { ...SYMPTOM_INITIAL_VALUE, code },
+    ] as Symptom[];
     setSymptoms(newSymptoms);
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
