@@ -274,7 +274,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="+91XXXXXXXXXX" {...field} />
+                  <Input type="tel" placeholder="+91XXXXXXXXXX" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -290,6 +290,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 <FormControl>
                   <Input
                     placeholder="+91XXXXXXXXXX"
+                    type="tel"
                     {...field}
                     disabled={isWhatsApp}
                   />
