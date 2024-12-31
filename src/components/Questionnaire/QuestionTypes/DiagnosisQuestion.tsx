@@ -120,7 +120,18 @@ export function DiagnosisQuestion({
       </Label>
       <ScribeStructuredInput
         value={diagnoses}
-        onChange={(value) => value && setDiagnoses(value)}
+        onChange={(value) =>
+          value &&
+          updateQuestionnaireResponseCB({
+            ...questionnaireResponse,
+            values: [
+              {
+                type: "diagnosis",
+                value,
+              },
+            ],
+          })
+        }
         name="Diagnoses"
         prompt={`An array of objects of the following type: {
           code?: {"code" : string, "display" : string, "system" : "http://snomed.info/sct"},

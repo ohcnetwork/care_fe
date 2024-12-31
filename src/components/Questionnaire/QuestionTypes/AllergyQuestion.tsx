@@ -104,7 +104,18 @@ export function AllergyQuestion({
       </Label>
       <ScribeStructuredInput
         value={allergies}
-        onChange={(value) => value && setAllergies(value)}
+        onChange={(value) =>
+          value &&
+          updateQuestionnaireResponseCB({
+            ...questionnaireResponse,
+            values: [
+              {
+                type: "allergy_intolerance",
+                value: value,
+              },
+            ],
+          })
+        }
         name="Allergies"
         prompt={`An array of objects of the following type: {
           code: {

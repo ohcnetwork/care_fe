@@ -11,7 +11,7 @@ import {
 } from "./select";
 
 export default function Select(props: {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   options: {

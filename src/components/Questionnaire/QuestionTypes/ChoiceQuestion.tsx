@@ -1,18 +1,11 @@
-import { memo, useCallback, useState } from "react";
+import { memo } from "react";
 
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import Select from "@/components/ui/select-util";
 
-import { useValueInjection } from "@/Utils/useValueInjectionObserver";
 import { properCase } from "@/Utils/utils";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { AnswerOption, Question } from "@/types/questionnaire/question";
+import type { Question } from "@/types/questionnaire/question";
 
 interface ChoiceQuestionProps {
   question: Question;
@@ -33,11 +26,6 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const currentValue = questionnaireResponse.values[0]?.value?.toString();
-  const [element, setElement] = useState<HTMLElement | null>(null);
-  const callbackRef = useCallback(
-    (node: HTMLElement | null) => setElement(node),
-    [],
-  );
 
   const handleValueChange = (newValue: string) => {
     clearError();
@@ -52,12 +40,6 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     });
   };
 
-  useValueInjection<string>({
-    targetElement: element,
-    attribute: "data-cui-listbox-value",
-    onChange: (value) => value && handleValueChange(value),
-  });
-
   return (
     <div className="space-y-2">
       <Label className="text-base font-medium">
@@ -66,31 +48,13 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       </Label>
       <Select
         value={currentValue}
-        onValueChange={handleValueChange}
+        onChange={handleValueChange}
         disabled={disabled}
-      >
-        <SelectTrigger
-          className="w-full"
-          ref={callbackRef}
-          data-cui-listbox
-          data-cui-listbox-options={JSON.stringify(
-            options.map((option) => [option.value, option.value?.toString()]),
-          )}
-          data-cui-listbox-value={JSON.stringify(currentValue)}
-        >
-          <SelectValue placeholder="Select an option" />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option: AnswerOption) => (
-            <SelectItem
-              key={option.value.toString()}
-              value={option.value.toString()}
-            >
-              {properCase(option.display || option.value)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        options={options.map((option) => ({
+          label: properCase(option.display || option.value),
+          value: option.value.toString(),
+        }))}
+      />
     </div>
   );
 });

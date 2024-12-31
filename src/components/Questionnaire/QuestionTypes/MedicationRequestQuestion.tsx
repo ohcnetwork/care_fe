@@ -124,7 +124,7 @@ export function MedicationRequestQuestion({
           category?:  "inpatient" | "outpatient" | "community" | "discharge",
           priority?: "stat" | "urgent" | "asap" | "routine"
           do_not_perform?: boolean;
-          medication? : MEDICATION_CODE;
+          medication? : CodeType;
           authored_on?: ISO time string,
           dosage_instruction: {
             sequence?: number;
@@ -138,7 +138,7 @@ export function MedicationRequestQuestion({
             timing?: {
               repeat?: {
                 frequency?: number;
-                period: number;
+                period: number; // number of units (ex. 12 days would mean 12 with unit "d")
                 period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
               };
             };
@@ -149,10 +149,10 @@ export function MedicationRequestQuestion({
             /**
              * If it is a PRN medication (as_needed_boolean is true), the indicator.
              */
-            as_needed_for?: ASNEEDEDFORCODE;
-            site?: SITECODE;
-            route?: ROUTECODE;
-            method?: METHODCODE;
+            as_needed_for?: CodeType;
+            site?: CodeType;
+            route?: CodeType;
+            method?: CodeType;
             /**
              * One of \`dose_quantity\` or \`dose_range\` must be present.
              * \`type\` is optional and defaults to \`ordered\`.
@@ -188,7 +188,11 @@ export function MedicationRequestQuestion({
           unit?: "mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"
         }
 
-
+        CodeType {
+          code: string,
+          display: string,
+          system: "http://snomed.info/sct"
+        }
         
         Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
         example={[
