@@ -11,13 +11,13 @@ import {
 } from "@/components/Diagnosis/types";
 import { ConsultationModel } from "@/components/Facility/models";
 import MedicineRoutes from "@/components/Medicine/routes";
-import { PatientModel } from "@/components/Patient/models";
 
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDate, formatDateTime, formatPatientAge } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;

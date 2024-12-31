@@ -53,6 +53,7 @@ export default function LogUpdatesList({ consultation, query }: Props) {
                             type: "created",
                             timestamp: item.taken_at?.toString() ?? "",
                             by: {
+                              external_id: "external-id-unavailable",
                               user_type:
                                 "Virtual Nursing Assistant" as UserRole,
                               first_name: "Virtual",

@@ -9,19 +9,12 @@ import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
-import {
-  UserBasicInfoView,
-  UserContactInfoView,
-  UserProfessionalInfoView,
-} from "@/components/Users/UserEditDetails";
 import UserResetPassword from "@/components/Users/UserResetPassword";
 import UserSoftwareUpdate from "@/components/Users/UserSoftwareUpdate";
 import {
   BasicInfoDetails,
   ContactInfoDetails,
-  ProfessionalInfoDetails,
 } from "@/components/Users/UserViewDetails";
-import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -34,12 +27,13 @@ import {
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { UserBase } from "@/types/user/user";
 
 export default function UserSummaryTab({
   userData,
   refetchUserData,
 }: {
-  userData?: UserModel;
+  userData?: UserBase;
   refetchUserData?: () => void;
 }) {
   const { t } = useTranslation();
@@ -82,15 +76,6 @@ export default function UserSummaryTab({
   const editPermissions = editUserPermissions(authUser, userData);
 
   const renderBasicInformation = () => {
-    if (editPermissions) {
-      return (
-        <UserBasicInfoView
-          username={userData.username}
-          userData={userData}
-          onSubmitSuccess={refetchUserData}
-        />
-      );
-    }
     return (
       <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
         <BasicInfoDetails user={userData} />
@@ -99,35 +84,9 @@ export default function UserSummaryTab({
   };
 
   const renderContactInformation = () => {
-    if (editPermissions) {
-      return (
-        <UserContactInfoView
-          username={userData.username}
-          userData={userData}
-          onSubmitSuccess={refetchUserData}
-        />
-      );
-    }
     return (
       <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
         <ContactInfoDetails user={userData} />
-      </div>
-    );
-  };
-
-  const renderProfessionalInformation = () => {
-    if (editPermissions) {
-      return (
-        <UserProfessionalInfoView
-          username={userData.username}
-          userData={userData}
-          onSubmitSuccess={refetchUserData}
-        />
-      );
-    }
-    return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
-        <ProfessionalInfoDetails user={userData} />
       </div>
     );
   };
@@ -178,18 +137,6 @@ export default function UserSummaryTab({
                 : t("contact_info_note_view")
           }
           Child={renderContactInformation}
-          childProps={userColumnsData}
-        />
-        <UserColumns
-          heading={t("professional_info")}
-          note={
-            authUser.username === userData.username
-              ? t("professional_info_note_self")
-              : editPermissions
-                ? t("professional_info_note")
-                : t("professional_info_note_view")
-          }
-          Child={renderProfessionalInformation}
           childProps={userColumnsData}
         />
         {passwordResetPermitted && (

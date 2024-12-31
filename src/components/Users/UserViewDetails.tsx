@@ -1,11 +1,9 @@
 import { useTranslation } from "react-i18next";
 
-import { formatDate } from "@/Utils/utils";
-
-import { UserModel } from "./models";
+import { UserBase } from "@/types/user/user";
 
 interface UserViewDetailsProps {
-  user: UserModel;
+  user: UserBase;
 }
 
 const LabelValue = ({
@@ -61,11 +59,6 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <LabelValue id="username" label={t("username")} value={user.username} />
         <LabelValue
-          id="user_type"
-          label={t("user_type")}
-          value={user.user_type}
-        />
-        <LabelValue
           id="first_name"
           label={t("first_name")}
           value={user.first_name}
@@ -76,11 +69,6 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
           value={user.last_name}
         />
         <LabelValue id="gender" label={t("gender")} value={user.gender} />
-        <LabelValue
-          id="date_of_birth"
-          label={t("date_of_birth")}
-          value={user.date_of_birth ? formatDate(user.date_of_birth) : null}
-        />
       </div>
     </div>
   );
@@ -98,54 +86,6 @@ export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
           id="phone_number"
           label={t("phone_number")}
           value={user.phone_number}
-        />
-        <LabelValue
-          id="whatsapp_number"
-          label={t("whatsapp_number")}
-          value={user.alt_phone_number}
-        />
-      </div>
-    </div>
-  );
-};
-
-export const ProfessionalInfoDetails = ({ user }: UserViewDetailsProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="pt-2 pb-5">
-      <Badge text={t("professional_info")} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {(user.user_type === "Doctor" || user.user_type === "Nurse") && (
-          <LabelValue
-            id="qualification"
-            label={t("qualification")}
-            value={user.qualification}
-          />
-        )}
-        {user.user_type === "Doctor" && (
-          <>
-            <LabelValue
-              id="years_of_experience"
-              label={t("years_of_experience")}
-              value={user.doctor_experience_commenced_on}
-            />
-            <LabelValue
-              id="doctor_medical_council_registration"
-              label={t("medical_council_registration")}
-              value={user.doctor_medical_council_registration}
-            />
-          </>
-        )}
-        <LabelValue
-          id="average_weekly_working_hours"
-          label={t("average_weekly_working_hours")}
-          value={user.weekly_working_hours?.toString()}
-        />
-        <LabelValue
-          id="video_conference_link"
-          label={t("video_conference_link")}
-          value={user.video_connect_link}
         />
       </div>
     </div>

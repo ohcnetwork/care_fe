@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck - File not in use
+// TODO: Replace this with Question Form
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +11,7 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
 import CreatePrescriptionForm from "@/components/Medicine/CreatePrescriptionForm";
-import DiscontinuePrescription from "@/components/Medicine/DiscontinuePrescription";
+import DiscontinuePrescription from "@/components/Medicine/DiscontinueMedication";
 import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
 import {
   NormalPrescription,
@@ -38,7 +41,7 @@ export default function PrescriptionBuilder({
   actions = ["administer", "discontinue"],
 }: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const [showCreate, setShowCreate] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
@@ -46,7 +49,7 @@ export default function PrescriptionBuilder({
   const { data, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listPrescriptions,
     {
-      pathParams: { consultation },
+      pathParams: { consultation: encounterId },
       query: {
         dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
         prescription_type,

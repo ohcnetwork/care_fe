@@ -1,0 +1,307 @@
+[
+    {
+        "id": "primary-parameters",
+        "name": "Primary Parameters",
+        "groups": [
+            {
+                "title": "Blood Pressure",
+                "codes": [
+                    {
+                        "code": "8480-6",
+                        "system": "http://loinc.org",
+                        "display": "Systolic"
+                    },
+                    {
+                        "code": "8462-4",
+                        "system": "http://loinc.org",
+                        "display": "Diastolic"
+                    }
+                ]
+            },
+            {
+                "title": "Pulse",
+                "codes": [
+                    {
+                        "code": "8867-4",
+                        "system": "http://loinc.org",
+                        "display": "Pulse"
+                    }
+                ]
+            },
+            {
+                "title": "Temperature",
+                "codes": [
+                    {
+                        "code": "8310-5",
+                        "system": "http://loinc.org",
+                        "display": "Temperature"
+                    }
+                ]
+            },
+            {
+                "title": "Respiratory Rate",
+                "codes": [
+                    {
+                        "code": "9279-1",
+                        "system": "http://loinc.org",
+                        "display": "Respiratory Rate"
+                    }
+                ]
+            },
+            {
+                "title": "SpO2",
+                "codes": [
+                    {
+                        "code": "2708-6",
+                        "system": "http://loinc.org",
+                        "display": "SpO2"
+                    }
+                ]
+            },
+            {
+                "title": "FiO2",
+                "codes": [
+                    {
+                        "code": "3151-8",
+                        "system": "http://loinc.org",
+                        "display": "FiO2"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "abg-analysis",
+        "name": "ABG Analysis",
+        "groups": [
+            {
+                "title": "PH",
+                "codes": [
+                    {
+                        "code": "24336-0",
+                        "system": "http://loinc.org",
+                        "display": "PH"
+                    }
+                ]
+            },
+            {
+                "title": "PCO2",
+                "codes": [
+                    {
+                        "code": "2019-8",
+                        "system": "http://loinc.org",
+                        "display": "PCO2"
+                    }
+                ]
+            },
+            {
+                "title": "PO2",
+                "codes": [
+                    {
+                        "code": "2703-7",
+                        "system": "http://loinc.org",
+                        "display": "PO2"
+                    }
+                ]
+            },
+            {
+                "title": "HCO3",
+                "codes": [
+                    {
+                        "code": "1960-4",
+                        "system": "http://loinc.org",
+                        "display": "HCO3"
+                    }
+                ]
+            },
+            {
+                "title": "Base Excess",
+                "codes": [
+                    {
+                        "code": "1925-7",
+                        "system": "http://loinc.org",
+                        "display": "Base Excess"
+                    }
+                ]
+            },
+            {
+                "title": "Lactate",
+                "codes": [
+                    {
+                        "code": "30242-2",
+                        "system": "http://loinc.org",
+                        "display": "Lactate"
+                    }
+                ]
+            },
+            {
+                "title": "Sodium",
+                "codes": [
+                    {
+                        "code": "32717-1",
+                        "system": "http://loinc.org",
+                        "display": "Sodium"
+                    }
+                ]
+            },
+            {
+                "title": "Potassium",
+                "codes": [
+                    {
+                        "code": "32713-0",
+                        "system": "http://loinc.org",
+                        "display": "Potassium"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "ventilation",
+        "name": "Respiratory Support",
+        "groups": [
+            {
+                "title": "PIP",
+                "codes": [
+                    {
+                        "code": "20102-0",
+                        "system": "http://loinc.org",
+                        "display": "PIP"
+                    }
+                ]
+            },
+            {
+                "title": "Mean Airway Pressure",
+                "codes": [
+                    {
+                        "code": "76530-5",
+                        "system": "http://loinc.org",
+                        "display": ""
+                    }
+                ]
+            },
+            {
+                "title": "Resp Rate",
+                "codes": [
+                    {
+                        "code": "19834-1",
+                        "system": "http://loinc.org",
+                        "display": "Resp Rate"
+                    }
+                ]
+            },
+            {
+                "title": "Pressure Support",
+                "codes": [
+                    {
+                        "code": "20079-0",
+                        "system": "http://loinc.org",
+                        "display": "Pressure Support"
+                    }
+                ]
+            },
+            {
+                "title": "Tidal Volume",
+                "codes": [
+                    {
+                        "code": "76222-9",
+                        "system": "http://loinc.org",
+                        "display": "Tidal Volume"
+                    }
+                ]
+            },
+            {
+                "title": "PEEP",
+                "codes": [
+                    {
+                        "code": "76248-4",
+                        "system": "http://loinc.org",
+                        "display": "PEEP"
+                    }
+                ]
+            },
+            {
+                "title": "FiO2",
+                "codes": [
+                    {
+                        "code": "19996-8",
+                        "system": "http://loinc.org",
+                        "display": "FiO2"
+                    }
+                ]
+            },
+            {
+                "title": "SpO2",
+                "codes": [
+                    {
+                        "code": "",
+                        "system": "http://loinc.org",
+                        "display": "SpO2 -- TODO"
+                    }
+                ]
+            },
+            {
+                "title": "Oxygen Modality Flow Rate",
+                "codes": [
+                    {
+                        "code": "",
+                        "system": "http://loinc.org",
+                        "display": "Oxygen Modality Flow Rate -- TODO"
+                    }
+                ]
+            },
+            {
+                "title": "Oxygen Modality Oxygen Rate",
+                "codes": [
+                    {
+                        "code": "",
+                        "system": "http://loinc.org",
+                        "display": "Oxygen Modality Oxygen Rate -- TODO"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "nutrition",
+        "name": "Nutrition",
+        "groups": [
+            {
+                "title": "Fluid intake total Measured",
+                "codes": [
+                    {
+                        "code": "9103-3",
+                        "system": "http://loinc.org",
+                        "display": "Total Intake"
+                    }
+                ]
+            },
+            {
+                "title": "Fluid output total Measured",
+                "codes": [
+                    {
+                        "code": "9257-7",
+                        "system": "http://loinc.org",
+                        "display": "Total Output"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "dialysis",
+        "name": "Dialysis",
+        "groups": [
+            {
+                "title": "Dialysis Fluid Balance",
+                "codes": [
+                    {
+                        "code": "104103-7",
+                        "system": "http://loinc.org",
+                        "display": "Dialysis Fluid Balance"
+                    }
+                ]
+            }
+        ]
+    }
+]

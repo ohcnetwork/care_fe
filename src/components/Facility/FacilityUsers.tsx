@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
@@ -8,12 +9,13 @@ import UserListView from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { useView } from "@/Utils/useView";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery, Pagination } = useFilters({
     limit: 18,
     cacheBlacklist: ["username"],
   });
@@ -30,18 +32,20 @@ export default function FacilityUsers(props: { facilityId: number }) {
     },
   );
 
-  const { data: userListData, loading: userListLoading } =
-    useTanStackQueryInstead(routes.getFacilityUsers, {
-      query: {
-        limit: resultsPerPage,
-        offset: (
-          (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
-        ).toString(),
-        username: qParams.username,
-      },
+  const { data: userListData, isLoading: userListLoading } = useQuery({
+    queryKey: ["facilityUsers", facilityId],
+    queryFn: query(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
-      prefetch: facilityId !== undefined,
-    });
+    }),
+    enabled: !!facilityId,
+  });
+
+  if (userListLoading) {
+    return <div>Loading...</div>;
+  }
+  if (!userListData) {
+    return <div>No users found</div>;
+  }
 
   const handleTabChange = (tab: number) => {
     setActiveTab(tab === 1 ? "list" : "card");
@@ -55,7 +59,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     >
       <CountBlock
         text={t("total_users")}
-        count={userListData?.count ?? 0}
+        count={userListData.count}
         loading={userListLoading}
         icon="d-people"
         className="my-3 flex flex-col items-center sm:items-start"
@@ -69,7 +73,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
         onTabChange={handleTabChange}
       />
 
-      <Pagination totalCount={userListData?.count ?? 0} />
+      <Pagination totalCount={userListData.count} />
     </Page>
   );
 }

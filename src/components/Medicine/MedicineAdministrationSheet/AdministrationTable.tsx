@@ -4,14 +4,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import MedicineAdministrationTableRow from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTableRow";
-import { Prescription } from "@/components/Medicine/models";
 
 import useRangePagination from "@/hooks/useRangePagination";
 
 import { classNames, formatDateTime } from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 interface Props {
-  prescriptions: Prescription[];
+  prescriptions: MedicationRequest[];
   pagination: ReturnType<typeof useRangePagination>;
   onRefetch: () => void;
   readonly: boolean;
@@ -37,7 +37,7 @@ export default function MedicineAdministrationTable({
               <span className="hidden px-2 text-center text-xs leading-none lg:block">
                 <p>{t("dosage")} &</p>
                 <p>
-                  {prescriptions[0]?.dosage_type !== "PRN"
+                  {!prescriptions[0]?.dosage_instruction.as_needed_boolean
                     ? t("frequency")
                     : t("indicator")}
                 </p>

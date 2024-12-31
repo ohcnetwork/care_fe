@@ -30,7 +30,6 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 
 interface SearchOption {
   key: string;
-  label: string;
   type: "text" | "phone";
   placeholder: string;
   value: string;
@@ -47,12 +46,11 @@ interface SearchByMultipleFieldsProps {
   inputClassName?: string;
   buttonClassName?: string;
   clearSearch?: { value: boolean; params?: string[] };
+  enableOptionButtons?: boolean;
+  onFieldChange?: (options: SearchOption) => void;
 }
 
-type EventType = {
-  value: string;
-  target?: { value: string };
-};
+type EventType = React.ChangeEvent<HTMLInputElement> | { value: string };
 
 const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   id,
@@ -63,19 +61,25 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   inputClassName,
   buttonClassName,
   clearSearch,
+  onFieldChange,
+  enableOptionButtons = true,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(
     initialOptionIndex || 0,
   );
   const selectedOption = options[selectedOptionIndex];
-  const [searchValue, setSearchValue] = useState(
-    options[selectedOptionIndex].value || "",
-  );
+  const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
+
+  useEffect(() => {
+    if (!(selectedOption.type === "phone" && searchValue.length < 13)) {
+      setSearchValue(options[selectedOptionIndex].value);
+    }
+  }, [options]);
 
   useEffect(() => {
     if (clearSearch?.value) {
@@ -97,6 +101,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       inputRef.current?.focus();
       setError(false);
       onSearch(option.key, option.value);
+      onFieldChange?.(options[index]);
     },
     [onSearch],
   );
@@ -161,24 +166,21 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     return () => clearTimeout(timeout);
   }, [searchValue]);
 
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchValue(value);
-    },
-    [selectedOption, onSearch],
-  );
+  const handleSearchChange = useCallback((event: EventType) => {
+    const value = "target" in event ? event.target.value : event.value;
+    setSearchValue(value);
+  }, []);
 
   const renderSearchInput = useMemo(() => {
     const commonProps = {
       ref: inputRef,
       value: searchValue,
-      onChange: (e: EventType) =>
-        handleSearchChange(e.target ? e.target.value : e.value),
+      onChange: handleSearchChange,
       className: cn(
         "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
         inputClassName,
       ),
-    };
+    } as const;
 
     switch (selectedOption.type) {
       case "phone":
@@ -186,7 +188,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <PhoneNumberFormField
             id={id}
             name={selectedOption.key}
-            placeholder={t(selectedOption.placeholder)}
+            placeholder={selectedOption.placeholder}
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
@@ -199,7 +201,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <Input
             id={id}
             type="text"
-            placeholder={t(selectedOption.placeholder)}
+            placeholder={selectedOption.placeholder}
             {...commonProps}
           />
         );
@@ -247,7 +249,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
                       <span className="flex-1">{t(option.key)}</span>
                       <kbd className="ml-auto text-xs text-gray-400">
-                        {option.label.charAt(0).toUpperCase()}
+                        {option.shortcutKey}
                       </kbd>
                     </CommandItem>
                   ))}
@@ -256,32 +258,34 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             </Command>
           </PopoverContent>
         </Popover>
-        {renderSearchInput}
+        <div className="w-full">{renderSearchInput}</div>
       </div>
       {error && (
         <div className="error-text px-2 mb-1 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
           {t("invalid_phone_number")}
         </div>
       )}
-      <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
-        {options.map((option, i) => (
-          <Button
-            key={option.key}
-            onClick={() => handleOptionChange(i)}
-            variant="outline"
-            size="xs"
-            data-test-id={id + "__" + option.key}
-            className={cn(
-              selectedOption.key === option.key
-                ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-              buttonClassName,
-            )}
-          >
-            {t(option.key)}
-          </Button>
-        ))}
-      </div>
+      {enableOptionButtons && (
+        <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
+          {options.map((option, i) => (
+            <Button
+              key={option.key}
+              onClick={() => handleOptionChange(i)}
+              variant="outline"
+              size="xs"
+              data-test-id={id + "__" + option.key}
+              className={cn(
+                selectedOption.key === option.key
+                  ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                buttonClassName,
+              )}
+            >
+              {t(option.key)}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

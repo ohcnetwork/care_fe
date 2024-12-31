@@ -1,9 +1,8 @@
-import { RefObject, useContext, useEffect } from "react";
+import { RefObject } from "react";
 
 import { cn } from "@/lib/utils";
 
 import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
-import { SidebarShrinkContext } from "@/components/Common/Sidebar/Sidebar";
 
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];
@@ -21,21 +20,21 @@ interface PageProps extends PageTitleProps {
 }
 
 export default function Page(props: PageProps) {
-  const sidebar = useContext(SidebarShrinkContext);
+  // const sidebar = useContext(SidebarShrinkContext);
 
-  useEffect(() => {
-    if (!props.collapseSidebar) return;
+  // useEffect(() => {
+  //   if (!props.collapseSidebar) return;
 
-    sidebar.setShrinked(true);
-    return () => {
-      sidebar.setShrinked(sidebar.shrinked);
-    };
-  }, [props.collapseSidebar]);
+  //   sidebar.setShrinked(true);
+  //   return () => {
+  //     sidebar.setShrinked(sidebar.shrinked);
+  //   };
+  // }, [props.collapseSidebar]);
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "py-3 md:px-6";
-    else padding = "px-6 py-5";
+    if (!props.hideBack || props.componentRight) padding = "py-0 md:px-6";
+    else padding = "px-6 py-0";
   }
 
   return (

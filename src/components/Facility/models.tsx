@@ -12,7 +12,6 @@ import {
   DailyRoundsModel,
   FacilityNameModel,
   FileUploadModel,
-  PatientModel,
 } from "@/components/Patient/models";
 import { EncounterSymptom } from "@/components/Symptoms/types";
 import { UserBareMinimum } from "@/components/Users/models";
@@ -28,6 +27,7 @@ import {
 } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
+import { PatientModel } from "@/types/emr/patient";
 
 export interface LocalBodyModel {
   id: number;
@@ -63,6 +63,7 @@ export interface FacilityModel {
   facility_type?: string;
   address?: string;
   features?: number[];
+  description?: string;
   location?: {
     latitude: number;
     longitude: number;
@@ -75,17 +76,15 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
-  state?: number;
-  district?: number;
-  local_body?: number;
-  ward?: number;
+  geo_organization?: string;
   pincode?: string;
   facility_flags?: FeatureFlag[];
   latitude?: string;
   longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: number;
-  bed_count?: number;
+  ward?: number;
+  local_body?: number;
+  district?: number;
+  state?: number;
 }
 
 export enum SpokeRelationship {
@@ -165,8 +164,6 @@ export interface ConsultationModel {
   suggestion?: ConsultationSuggestionValue;
   patient_no?: string;
   route_to_facility?: RouteToFacility;
-  is_kasp?: boolean;
-  kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
   readonly symptoms?: EncounterSymptom[];
@@ -204,14 +201,13 @@ export interface ConsultationModel {
 }
 
 export interface DupPatientModel {
-  id: number;
+  id: string;
   gender: string;
   phone_number: string;
   patient_id: string;
   name: string;
   date_of_birth: string;
   year_of_birth: number;
-  state_id: number;
   is_expired: boolean;
 }
 
@@ -642,7 +638,7 @@ export type InventoryLogResponse = InventorySummaryResponse & {
 };
 
 export type PatientTransferRequest = {
-  facility: string;
+  phone_number: string;
   year_of_birth: string;
 };
 
@@ -674,7 +670,6 @@ export interface ShiftingModel {
   assigned_to_object?: AssignedToObjectModel;
   refering_facility_contact_name: string;
   refering_facility_contact_number: string;
-  is_kasp: boolean;
   vehicle_preference: string;
   preferred_vehicle_choice: string;
   assigned_facility_type: string;
@@ -710,10 +705,10 @@ export interface ResourceModel {
   modified_date: string;
   origin_facility: string;
   origin_facility_object: FacilityModel;
-  priority: number | null;
+  priority: number;
   reason: string;
-  refering_facility_contact_name: string;
-  refering_facility_contact_number: string;
+  referring_facility_contact_name: string;
+  referring_facility_contact_number: string;
   requested_quantity: number;
   status: string;
   sub_category: string;
@@ -722,6 +717,7 @@ export interface ResourceModel {
   created_by_object: UserBareMinimum | null;
   created_date: string;
   last_edited_by_object: UserBareMinimum;
+  related_patient_object: PatientModel | null;
 }
 
 export interface CommentModel {

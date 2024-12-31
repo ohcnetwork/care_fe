@@ -1,16 +1,14 @@
 /* eslint-disable i18next/no-literal-string */
 import { t } from "i18next";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import iconPaths from "@/CAREUI/icons/UniconPaths.json";
 
 import PageTitle from "@/components/Common/PageTitle";
 
-import { useToast } from "@/hooks/useToast";
-
 const IconIndex: React.FC = () => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredIcons = Object.keys(iconPaths).filter((iconName) =>
@@ -19,11 +17,7 @@ const IconIndex: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-
-    toast({
-      description: "Icon copied to clipboard successfully",
-      variant: "success",
-    });
+    toast.success("Icon copied to clipboard successfully");
   };
 
   return (

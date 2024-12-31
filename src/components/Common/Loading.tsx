@@ -15,11 +15,9 @@ const Loading = () => {
     calculateOffset();
 
     window.addEventListener("resize", calculateOffset);
-    window.addEventListener("scroll", calculateOffset, true);
 
     return () => {
       window.removeEventListener("resize", calculateOffset);
-      window.removeEventListener("scroll", calculateOffset, true);
     };
   }, []);
 

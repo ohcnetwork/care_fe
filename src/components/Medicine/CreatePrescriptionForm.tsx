@@ -26,9 +26,9 @@ export default function CreatePrescriptionForm(props: {
   onDone: () => void;
 }) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
   const mutation = useDeprecatedMutation(MedicineRoutes.createPrescription, {
-    pathParams: { consultation },
+    pathParams: { consultation: encounterId },
   });
 
   return (

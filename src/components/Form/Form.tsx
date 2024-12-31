@@ -35,12 +35,17 @@ type Props<T extends FormDetails> = {
   resetFormValsOnCancel?: boolean;
   resetFormValsOnSubmit?: boolean;
   hideCancelButton?: boolean;
+  submitButtonClassName?: string;
+  hideSubmitButton?: boolean;
+  disableMarginOnChildren?: boolean;
 };
 
 const Form = <T extends FormDetails>({
   asyncGetDefaults,
   validate,
   hideCancelButton = false,
+  hideSubmitButton = false,
+  disableMarginOnChildren = false,
   ...props
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
@@ -131,23 +136,28 @@ const Form = <T extends FormDetails>({
             };
           }}
         >
-          <div className="my-6">
+          <div className={classNames(!disableMarginOnChildren && "my-6")}>
             <Consumer>{props.children}</Consumer>
           </div>
-          <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-            {!hideCancelButton && (
-              <Cancel
-                onClick={handleCancel}
-                label={props.cancelLabel ?? "Cancel"}
-              />
-            )}
-            <Submit
-              data-testid="submit-button"
-              type="submit"
-              disabled={disabled}
-              label={props.submitLabel ?? "Submit"}
-            />
-          </div>
+          {(!hideCancelButton || !hideSubmitButton) && (
+            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+              {!hideCancelButton && (
+                <Cancel
+                  onClick={handleCancel}
+                  label={props.cancelLabel ?? "Cancel"}
+                />
+              )}
+              {!hideSubmitButton && (
+                <Submit
+                  data-testid="submit-button"
+                  type="submit"
+                  disabled={disabled}
+                  label={props.submitLabel ?? "Submit"}
+                  className={props?.submitButtonClassName}
+                />
+              )}
+            </div>
+          )}
         </Provider>
       </DraftSection>
     </form>

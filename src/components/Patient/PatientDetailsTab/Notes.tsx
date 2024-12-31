@@ -3,7 +3,8 @@ import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientNotesList from "@/components/Facility/PatientNotesList";
 import {
@@ -19,7 +20,6 @@ import { useMessageListener } from "@/hooks/useMessageListener";
 
 import { PATIENT_NOTES_THREADS } from "@/common/constants";
 
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import { classNames, keysOf } from "@/Utils/utils";
 
@@ -128,19 +128,16 @@ const PatientNotes = (props: PatientProps) => {
               errorClassName="hidden"
               innerClassName="pr-10"
               placeholder={t("notes_placeholder")}
-              disabled={!patientData.is_active}
+              disabled={!!patientData.death_datetime}
             />
-            <ButtonV2
+            <Button
               onClick={onAddNote}
-              border={false}
               className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientData.is_active}
-              authorizeFor={NonReadOnlyUsers}
+              variant="ghost"
+              disabled={!!patientData.death_datetime}
             >
               <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
+            </Button>
           </div>
         </DoctorNoteReplyPreviewCard>
       </div>

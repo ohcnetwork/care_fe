@@ -7,10 +7,10 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 export default function FileUploadPage(props: {
   facilityId: string;
   patientId: string;
-  consultationId?: string;
-  type: "CONSULTATION" | "PATIENT";
+  encounterId?: string;
+  type: "encounter" | "patient";
 }) {
-  const { facilityId, patientId, consultationId, type } = props;
+  const { facilityId, patientId, encounterId, type } = props;
   const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
@@ -24,14 +24,14 @@ export default function FileUploadPage(props: {
         [patientId]: { name: patient?.name },
       }}
       backUrl={
-        type === "CONSULTATION"
-          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+        type === "encounter"
+          ? `/facility/${facilityId}/encounter/${encounterId}`
           : `/facility/${facilityId}/patient/${patientId}`
       }
     >
       <FileUpload
         patientId={patientId}
-        consultationId={consultationId}
+        encounterId={encounterId}
         type={type}
         allowAudio={true}
       />

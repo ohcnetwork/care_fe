@@ -8,6 +8,7 @@ import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 
 import { SupportedPluginComponents, pluginMap } from "@/pluginTypes";
 
+// Import the remote component synchronously
 export default function PluginEngine({
   children,
 }: {
@@ -18,11 +19,12 @@ export default function PluginEngine({
       <ErrorBoundary
         fallback={
           <div className="flex h-screen w-screen items-center justify-center">
-            Error loading plugins
+            Care has encountered an unexpected error.
           </div>
         }
       >
         <CareAppsContext.Provider value={pluginMap}>
+          <Suspense fallback={<Loading />}></Suspense>
           {children}
         </CareAppsContext.Provider>
       </ErrorBoundary>

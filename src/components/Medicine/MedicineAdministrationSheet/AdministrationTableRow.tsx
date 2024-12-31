@@ -4,24 +4,35 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
 
-import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
+import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
-import DiscontinuePrescription from "@/components/Medicine/DiscontinuePrescription";
-import EditPrescriptionForm from "@/components/Medicine/EditPrescriptionForm";
 import AdministrationEventCell from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
 import AdministrationEventSeperator from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
-import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
-import { Prescription } from "@/components/Medicine/models";
-import MedicineRoutes from "@/components/Medicine/routes";
+import { MedicationRequestItem } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
 import useSlug from "@/hooks/useSlug";
 
+import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { classNames, formatDateTime } from "@/Utils/utils";
+import {
+  classNames,
+  displayCode,
+  displayDoseRange,
+  displayQuantity,
+  displayTiming,
+  formatDateTime,
+} from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { Quantity } from "@/types/questionnaire/quantity";
+
+import DiscontinueMedication from "../DiscontinueMedication";
+import { isMedicationDiscontinued } from "./utils";
 
 interface Props {
-  prescription: Prescription;
+  prescription: MedicationRequest;
   intervals: { start: Date; end: Date }[];
   refetch: () => void;
   readonly: boolean;
@@ -33,76 +44,31 @@ export default function MedicineAdministrationTableRow({
   ...props
 }: Props) {
   const { t } = useTranslation();
-  const consultation = useSlug("consultation");
-  // const [showActions, setShowActions] = useState(false);
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
   const [showDetails, setShowDetails] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showAdminister, setShowAdminister] = useState(false);
-  const [showDiscontinue, setShowDiscontinue] = useState(false);
 
-  const { data, loading, refetch } = useTanStackQueryInstead(
-    MedicineRoutes.listAdministrations,
+  const medicationAdministrations = useTanStackQueryInstead(
+    routes.medicationAdministration.list,
     {
-      pathParams: { consultation },
+      pathParams: { patientId: patient!.id },
       query: {
-        prescription: prescription.id,
-        administered_date_after: formatDateTime(
+        encounter: encounterId,
+        request: prescription.id,
+        occurrence_period_end_after: formatDateTime(
           props.intervals[0].start,
           "YYYY-MM-DD",
         ),
-        administered_date_before: formatDateTime(
+        occurrence_period_end_before: formatDateTime(
           props.intervals[props.intervals.length - 1].end,
           "YYYY-MM-DD",
         ),
-        archived: false,
       },
-      key: `${prescription.last_administration?.administered_date}`,
     },
-  );
-  const DosageFrequencyInfo = () => (
-    <div className="flex justify-center">
-      <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
-        {prescription.dosage_type !== "TITRATED" ? (
-          <p>{prescription.base_dosage}</p>
-        ) : (
-          <p>
-            {prescription.base_dosage} - {prescription.target_dosage}
-          </p>
-        )}
-
-        <p className="max-w-[6rem] truncate">
-          {prescription.dosage_type !== "PRN"
-            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-            : prescription.indicator}
-        </p>
-      </div>
-    </div>
   );
 
   return (
     <>
-      {showDiscontinue && (
-        <DiscontinuePrescription
-          prescription={prescription}
-          onClose={(success) => {
-            setShowDiscontinue(false);
-            if (success) {
-              props.refetch();
-            }
-          }}
-        />
-      )}
-      {showAdminister && (
-        <AdministerMedicine
-          prescription={prescription}
-          onClose={(success) => {
-            setShowAdminister(false);
-            if (success) {
-              props.refetch();
-            }
-          }}
-        />
-      )}
       {showDetails && (
         <DialogModal
           title={t("prescription_details")}
@@ -111,51 +77,34 @@ export default function MedicineAdministrationTableRow({
           show
         >
           <div className="mt-4 flex flex-col gap-4">
-            <PrescriptionDetailCard prescription={prescription} readonly />
+            <MedicationRequestItem medication={prescription} disabled />
             <div className="flex w-full flex-col items-center justify-end gap-2 md:flex-row">
-              <Cancel
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setShowDetails(false)}
-                label={t("close")}
-              />
+              >
+                {t("close")}
+              </Button>
               <AuthorizedForConsultationRelatedActions>
                 {!props.readonly && (
                   <>
-                    <Submit
-                      disabled={
-                        prescription.discontinued ||
-                        prescription.prescription_type === "DISCHARGE"
-                      }
-                      variant="danger"
-                      onClick={() => setShowDiscontinue(true)}
-                    >
-                      <CareIcon icon="l-ban" className="text-lg" />
-                      {t("discontinue")}
-                    </Submit>
-                    <Submit
-                      disabled={
-                        prescription.discontinued ||
-                        prescription.prescription_type === "DISCHARGE"
-                      }
-                      variant="secondary"
-                      border
-                      onClick={() => {
-                        setShowDetails(false);
-                        setShowEdit(true);
+                    <DiscontinueMedication
+                      prescription={prescription}
+                      onClose={(success) => {
+                        if (success) {
+                          props.refetch();
+                        }
                       }}
-                    >
-                      <CareIcon icon="l-pen" className="text-lg" />
-                      {t("edit")}
-                    </Submit>
-                    <Submit
-                      disabled={
-                        prescription.discontinued ||
-                        prescription.prescription_type === "DISCHARGE"
-                      }
-                      onClick={() => setShowAdminister(true)}
-                    >
-                      <CareIcon icon="l-syringe" className="text-lg" />
-                      {t("administer")}
-                    </Submit>
+                    />
+                    <AdministerMedicine
+                      prescription={prescription}
+                      onClose={(success) => {
+                        if (success) {
+                          props.refetch();
+                        }
+                      }}
+                    />
                   </>
                 )}
               </AuthorizedForConsultationRelatedActions>
@@ -163,40 +112,12 @@ export default function MedicineAdministrationTableRow({
           </div>
         </DialogModal>
       )}
-      {showEdit && (
-        <DialogModal
-          onClose={() => setShowEdit(false)}
-          show={showEdit}
-          title={`${t("edit")} ${t(
-            prescription.dosage_type === "PRN"
-              ? "prn_prescription"
-              : "prescription_medication",
-          )}: ${
-            prescription.medicine_object?.name ?? prescription.medicine_old
-          }`}
-          description={
-            <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
-              <CareIcon icon="l-info-circle" className="text-base" />
-              <span>{t("edit_caution_note")}</span>
-            </div>
-          }
-          className="w-full max-w-4xl lg:min-w-[768px]"
-        >
-          <EditPrescriptionForm
-            initial={prescription}
-            onDone={(success) => {
-              setShowEdit(false);
-              if (success) {
-                props.refetch();
-              }
-            }}
-          />
-        </DialogModal>
-      )}
       <tr
         className={classNames(
           "group transition-all duration-200 ease-in-out",
-          loading ? "bg-secondary-300" : "bg-white hover:bg-primary-100",
+          medicationAdministrations.loading
+            ? "bg-secondary-300"
+            : "bg-white hover:bg-primary-100",
         )}
         id={props.id}
       >
@@ -210,38 +131,34 @@ export default function MedicineAdministrationTableRow({
                 <span
                   className={classNames(
                     "text-sm font-semibold uppercase",
-                    prescription.discontinued
+                    isMedicationDiscontinued(prescription)
                       ? "text-secondary-700"
                       : "text-secondary-900",
                   )}
                 >
-                  {prescription.medicine_object?.name ??
-                    prescription.medicine_old}
+                  {displayCode(prescription.medication)}
                 </span>
 
-                {prescription.discontinued && (
+                {isMedicationDiscontinued(prescription) && (
                   <span className="hidden rounded-full border border-secondary-500 bg-secondary-200 px-1.5 text-xs font-medium text-secondary-700 lg:block">
                     {t("discontinued")}
                   </span>
                 )}
 
-                {prescription.route && (
+                {prescription.dosage_instruction.route && (
                   <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
-                    {t(prescription.route)}
+                    {displayCode(prescription.dosage_instruction.route)}
                   </span>
                 )}
               </div>
-              <span className="text-xs font-medium capitalize text-secondary-700">
-                {prescription.medicine_object?.generic}
-              </span>
             </div>
             <div className="block lg:hidden">
-              <DosageFrequencyInfo />
+              <DosageFrequencyInfo prescription={prescription} />
             </div>
           </div>
         </td>
         <td className="hidden lg:table-cell">
-          <DosageFrequencyInfo />
+          <DosageFrequencyInfo prescription={prescription} />
         </td>
 
         <td />
@@ -254,17 +171,17 @@ export default function MedicineAdministrationTableRow({
             </td>
 
             <td key={`event-socket-${index}`} className="text-center">
-              {!data?.results ? (
+              {!medicationAdministrations.data?.results ? (
                 <CareIcon
                   icon="l-spinner"
                   className="animate-spin text-lg text-secondary-500"
                 />
               ) : (
                 <AdministrationEventCell
-                  administrations={data.results}
+                  administrations={medicationAdministrations.data.results}
                   interval={{ start, end }}
                   prescription={prescription}
-                  refetch={refetch}
+                  refetch={medicationAdministrations.refetch}
                   readonly={props.readonly}
                 />
               )}
@@ -277,20 +194,52 @@ export default function MedicineAdministrationTableRow({
         <td className="space-x-1 pr-2 text-right">
           <AuthorizedForConsultationRelatedActions>
             {!props.readonly && (
-              <ButtonV2
-                type="button"
-                size="small"
-                disabled={prescription.discontinued}
-                ghost
-                border
-                onClick={() => setShowAdminister(true)}
-              >
-                {t("administer")}
-              </ButtonV2>
+              <AdministerMedicine
+                prescription={prescription}
+                onClose={(success) => {
+                  if (success) {
+                    props.refetch();
+                  }
+                }}
+              />
             )}
           </AuthorizedForConsultationRelatedActions>
         </td>
       </tr>
     </>
+  );
+}
+
+type DosageFrequencyInfoProps = {
+  prescription: MedicationRequest;
+};
+
+export function DosageFrequencyInfo({
+  prescription,
+}: DosageFrequencyInfoProps) {
+  const dosageInstruction = prescription.dosage_instruction;
+
+  return (
+    <div className="flex justify-center">
+      <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
+        {dosageInstruction.dose_and_rate?.dose_quantity && (
+          <p>
+            {displayQuantity(
+              dosageInstruction.dose_and_rate?.dose_quantity as Quantity,
+            )}
+          </p>
+        )}
+
+        {dosageInstruction.dose_and_rate?.dose_range && (
+          <p>{displayDoseRange(dosageInstruction.dose_and_rate?.dose_range)}</p>
+        )}
+
+        <p className="max-w-[6rem] truncate">
+          {dosageInstruction.as_needed_boolean
+            ? displayCode(dosageInstruction.as_needed_for)
+            : displayTiming(dosageInstruction.timing)}
+        </p>
+      </div>
+    </div>
   );
 }

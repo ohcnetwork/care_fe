@@ -1,7 +1,5 @@
 import { createContext, useContext } from "react";
 
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
-
 import { PluginManifest } from "@/pluginTypes";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
@@ -16,19 +14,19 @@ export const useCareApps = () => {
   return ctx;
 };
 
-export const useCareAppNavItems = () => {
-  const careApps = useCareApps();
-  const navItems = careApps.reduce<INavItem[]>((acc, plugin) => {
-    return [...acc, ...(plugin.navItems || [])];
-  }, []);
-  return navItems;
-};
+// export const useCareAppNavItems = () => {
+//   const careApps = useCareApps();
+//   const navItems = careApps.reduce<INavItem[]>((acc, plugin) => {
+//     return [...acc, ...(plugin.navItems || [])];
+//   }, []);
+//   return navItems;
+// };
 
 export const useCareAppConsultationTabs = () => {
   const careApps = useCareApps();
 
   return careApps.reduce((acc, app) => {
-    return { ...acc, ...(app.consultationTabs ?? {}) };
+    return { ...acc, ...(app.encounterTabs ?? {}) };
   }, {});
 };
 

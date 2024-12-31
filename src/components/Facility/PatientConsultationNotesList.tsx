@@ -36,17 +36,17 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     reload,
   } = props;
 
-  const consultationId = useSlug("consultation") ?? "";
+  const encounterId = useSlug("encounter") ?? "";
 
   const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
-    queryKey: ["notes", state.patientId, thread, consultationId],
+    queryKey: ["notes", state.patientId, thread, encounterId],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await callApi(routes.getPatientNotes, {
         pathParams: { patientId: state.patientId! },
         queryParams: {
           thread,
           offset: pageParam,
-          consultation: consultationId,
+          consultation: encounterId,
         },
         signal,
       });

@@ -14,8 +14,8 @@ export interface QueryOptions<TData> extends RequestOptions<TData> {
 /**
  * @deprecated use `useQuery` from `@tanstack/react-query` instead.
  */
-export default function useTanStackQueryInstead<TData>(
-  route: QueryRoute<TData>,
+export default function useTanStackQueryInstead<TData, TBody = unknown>(
+  route: QueryRoute<TData, TBody>,
   options?: QueryOptions<TData>,
 ) {
   const overridesRef = useRef<QueryOptions<TData>>();

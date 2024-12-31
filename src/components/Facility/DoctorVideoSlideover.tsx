@@ -37,9 +37,10 @@ const courtesyTitle = (user: UserAssignedModel) => {
   }
 
   return {
-    1: "Mr.",
-    2: "Ms.",
-    3: "Hey",
+    male: "Mr.",
+    female: "Ms.",
+    transgender: "Hey",
+    non_binary: "Hey",
   }[user.gender!];
 };
 

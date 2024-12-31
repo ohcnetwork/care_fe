@@ -4,22 +4,39 @@ import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/Autoc
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
-interface LocationSelectProps {
+// Common props shared between single and multiple select
+interface BaseLocationSelectProps {
   name: string;
   disabled?: boolean;
   margin?: string;
   errors?: string;
   className?: string;
   searchAll?: boolean;
-  multiple?: boolean;
   facilityId: string;
   showAll?: boolean;
-  selected: string | string[] | null;
-  setSelected: (selected: string | string[] | null) => void;
   errorClassName?: string;
   bedIsOccupied?: boolean;
   disableOnOneOrFewer?: boolean;
 }
+
+// Props specific to single select
+interface SingleLocationSelectProps extends BaseLocationSelectProps {
+  multiple?: false | undefined;
+  selected: string | null;
+  setSelected: (selected: string | null) => void;
+}
+
+// Props specific to multiple select
+interface MultipleLocationSelectProps extends BaseLocationSelectProps {
+  multiple: true;
+  selected: string[];
+  setSelected: (selected: string[]) => void;
+}
+
+// Combined type using discriminated union
+type LocationSelectProps =
+  | SingleLocationSelectProps
+  | MultipleLocationSelectProps;
 
 export const LocationSelect = (props: LocationSelectProps) => {
   const { data, loading, refetch } = useTanStackQueryInstead(

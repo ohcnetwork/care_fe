@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "@/components/Facility/models";
@@ -28,7 +31,7 @@ const FacilitiesSelectDialog = (props: Props) => {
     >
       <FacilitySelect
         name="facilities"
-        selected={selectedFacility}
+        selected={selectedFacility ?? null}
         setSelected={setSelected}
         errors=""
         showAll={false}
@@ -45,13 +48,19 @@ const FacilitiesSelectDialog = (props: Props) => {
         }
       />
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <Cancel onClick={handleCancel} />
-        <Submit
+        <Button onClick={handleCancel} className="gap-1" variant={"secondary"}>
+          <CareIcon icon="l-times" className="text-lg" />
+          {t("cancel")}
+        </Button>
+        <Button
           onClick={handleOk}
-          disabled={!selectedFacility?.id}
-          label={t("select")}
+          variant={"primary"}
           data-testid="submit-button"
-        />
+          disabled={!selectedFacility?.id}
+        >
+          <CareIcon icon="l-check" className="text-lg mr-1" />
+          {t("select")}
+        </Button>
       </div>
     </DialogModal>
   );

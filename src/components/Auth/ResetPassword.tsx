@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAddEditForm";
+import { validateRule } from "@/components/Users/UserFormValidations";
 
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";

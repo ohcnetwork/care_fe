@@ -22,7 +22,6 @@ import {
   FILTER_BY_DIAGNOSES_KEYS,
 } from "@/components/Patient/DiagnosesFilter";
 import PatientFilter from "@/components/Patient/PatientFilter";
-import { PatientModel } from "@/components/Patient/models";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -39,6 +38,7 @@ import { parseOptionId } from "@/common/utils";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
+import { PatientModel } from "@/types/emr/patient";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -319,7 +319,6 @@ const DischargedPatientsList = ({
           badges={({
             badge,
             value,
-            kasp,
             phoneNumber,
             dateRange,
             range,
@@ -335,7 +334,6 @@ const DischargedPatientsList = ({
             ...dateRange("Discharged", "last_consultation_discharge_date"),
             // Admitted to type badges
             badge("No. of vaccination doses", "number_of_doses"),
-            kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
             badge("Review Missed", "review_missed"),

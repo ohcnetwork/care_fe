@@ -4,19 +4,19 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import DialogModal from "@/components/Common/Dialog";
 import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
-import PrescrpitionActivityTimeline from "@/components/Medicine/PrescrpitionTimeline";
-import {
-  MedicineAdministrationRecord,
-  Prescription,
-} from "@/components/Medicine/models";
+import PrescriptionActivityTimeline from "@/components/Medicine/PrescriptionTimeline";
 
 import dayjs from "@/Utils/dayjs";
 import { classNames, formatDateTime } from "@/Utils/utils";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+
+import { isMedicationDiscontinued } from "./utils";
 
 interface Props {
-  administrations: MedicineAdministrationRecord[];
+  administrations: MedicationAdministration[];
   interval: { start: Date; end: Date };
-  prescription: Prescription;
+  prescription: MedicationRequest;
   refetch: () => void;
   readonly?: boolean;
 }
@@ -32,15 +32,20 @@ export default function AdministrationEventCell({
   // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.administered_date).isBetween(start, end, null, "[)"),
+      dayjs(administration.occurrence_period_end).isBetween(
+        start,
+        end,
+        null,
+        "[)",
+      ),
     )
     .sort(
       (a, b) =>
-        new Date(a.administered_date!).getTime() -
-        new Date(b.administered_date!).getTime(),
+        new Date(a.occurrence_period_end!).getTime() -
+        new Date(b.occurrence_period_end!).getTime(),
     );
 
-  const hasComment = administered.some((obj) => !!obj.notes);
+  const hasComment = administered.some((obj) => !!obj.note);
 
   if (administered.length) {
     return (
@@ -59,7 +64,7 @@ export default function AdministrationEventCell({
               {formatDateTime(start, "DD/MM/YYYY")}
             </span>
           </div>
-          <PrescrpitionActivityTimeline
+          <PrescriptionActivityTimeline
             interval={{ start, end }}
             prescription={prescription}
             showPrescriptionDetails
@@ -91,8 +96,8 @@ export default function AdministrationEventCell({
     );
   }
 
-  // Check if cell belongs to after prescription.created_date
-  if (dayjs(start).isAfter(prescription.created_date)) {
+  // Check if cell belongs to after prescription.authored_on
+  if (dayjs(start).isAfter(prescription.authored_on)) {
     return (
       <CareIcon icon="l-minus-circle" className="text-xl text-secondary-400" />
     );
@@ -100,10 +105,10 @@ export default function AdministrationEventCell({
 
   // Check if cell belongs to a discontinued prescription
   if (
-    prescription.discontinued &&
-    dayjs(end).isAfter(prescription.discontinued_date)
+    isMedicationDiscontinued(prescription) &&
+    dayjs(end).isAfter(prescription.status_changed)
   ) {
-    if (!dayjs(prescription.discontinued_date).isBetween(start, end)) return;
+    if (!dayjs(prescription.status_changed).isBetween(start, end)) return;
 
     return (
       <div className="tooltip">
@@ -111,7 +116,7 @@ export default function AdministrationEventCell({
           icon="l-ban"
           className={classNames(
             "text-xl",
-            dayjs(prescription.discontinued_date).isBetween(start, end)
+            dayjs(prescription.status_changed).isBetween(start, end)
               ? "text-danger-700"
               : "text-secondary-400",
           )}
@@ -119,12 +124,12 @@ export default function AdministrationEventCell({
         <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
           <p>
             Discontinued on{" "}
-            <strong>{formatDateTime(prescription.discontinued_date)}</strong>
+            <strong>{formatDateTime(prescription.status_changed)}</strong>
           </p>
           <p>
             Reason:{" "}
-            {prescription.discontinued_reason ? (
-              <strong>{prescription.discontinued_reason}</strong>
+            {prescription.status_reason ? (
+              <strong>{prescription.status_reason}</strong>
             ) : (
               <span className="italic">Not specified</span>
             )}
