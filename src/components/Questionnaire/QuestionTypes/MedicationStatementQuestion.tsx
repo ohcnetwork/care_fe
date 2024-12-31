@@ -155,7 +155,7 @@ const MedicationStatementItem: React.FC<{
 
   return (
     <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h4 className="text-base font-semibold">
           {index + 1}. {medication.medication?.display}
         </h4>
@@ -254,7 +254,7 @@ const MedicationStatementItem: React.FC<{
               disabled={disabled}
             />
           </div>
-          <div className="flex-[2]">
+          <div className="flex-[2] max-w-full">
             <Label className="mb-1 block text-sm font-medium truncate">
               {t("medication_taken_between")}
             </Label>
@@ -306,7 +306,7 @@ const MedicationStatementItem: React.FC<{
           </div>
         )}
 
-        <div className="flex gap-3 flex-wrap mt-2">
+        <div className="flex gap-3 flex-wrap mt-2 max-w-full">
           {medication.reason === undefined && (
             <Button
               onClick={() =>
@@ -329,7 +329,7 @@ const MedicationStatementItem: React.FC<{
                 })
               }
               variant="secondary"
-              className="flex gap-1.5 items-center"
+              className="flex gap-1.5 items-center justify-start"
             >
               <TextAlignLeftIcon className="size-4" />
               {t("additional_information")}
