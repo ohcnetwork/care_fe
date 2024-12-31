@@ -35,9 +35,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
               {facility.name}
             </h3>
             <div className="text-sm text-gray-600">
-              <span>
-                {facility.local_body_object?.name} - {facility.pincode},{" "}
-              </span>
+              <span>{facility.pincode}, </span>
               <span>{`Ph.: ${facility.phone_number}`}</span>
             </div>
           </div>

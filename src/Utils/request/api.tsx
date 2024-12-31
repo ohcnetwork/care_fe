@@ -1,19 +1,9 @@
 import {
   CommentModel,
-  DistrictModel,
   FacilityModel,
   FacilityRequest,
-  FacilitySpokeModel,
-  FacilitySpokeRequest,
   IUserFacilityRequest,
-  InventoryItemsModel,
-  InventoryLogResponse,
-  InventorySummaryResponse,
-  LocalBodyModel,
-  MinimumQuantityItemResponse,
   PatientConsentModel,
-  StateModel,
-  WardModel,
 } from "@/components/Facility/models";
 import { Prescription } from "@/components/Medicine/models";
 import { PNconfigData } from "@/components/Notifications/models";
@@ -371,44 +361,6 @@ const routes = {
     TBody: Type<Partial<FacilityModel>>(),
   },
 
-  getFacilityHubs: {
-    path: "/api/v1/facility/{id}/hubs",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
-  },
-
-  getFacilitySpokes: {
-    path: "/api/v1/facility/{id}/spokes/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
-  },
-
-  updateFacilitySpokes: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "PATCH",
-    TRes: Type<FacilitySpokeModel>(),
-    TBody: Type<FacilitySpokeRequest>(),
-  },
-
-  getFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "GET",
-    TRes: Type<FacilitySpokeModel>(),
-  },
-
-  createFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/",
-    method: "POST",
-    TRes: Type<FacilitySpokeModel>(),
-    TBody: Type<Partial<FacilitySpokeRequest>>(),
-  },
-
-  deleteFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
   deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
@@ -481,155 +433,6 @@ const routes = {
     method: "PATCH",
     TBody: Type<Partial<PatientModel>>(),
     TRes: Type<PatientModel>(),
-  },
-
-  // States
-  statesList: {
-    path: "/api/v1/state/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<StateModel>>(),
-  },
-
-  getState: {
-    path: "/api/v1/state/{id}/",
-    TRes: Type<StateModel>(),
-  },
-
-  // Districts
-
-  getDistrict: {
-    path: "/api/v1/district/{id}/",
-    method: "GET",
-    TRes: Type<DistrictModel>(),
-  },
-  getDistrictByState: {
-    path: "/api/v1/state/{id}/districts/",
-    method: "GET",
-    TRes: Type<DistrictModel[]>(),
-  },
-  getDistrictByName: {
-    path: "/api/v1/district/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<DistrictModel>>(),
-  },
-  getAllLocalBodyByDistrict: {
-    path: "/api/v1/district/{id}/get_all_local_body/",
-    method: "GET",
-    TRes: Type<LocalBodyModel[]>(),
-  },
-  getLocalbodyByDistrict: {
-    path: "/api/v1/district/{id}/local_bodies/",
-    method: "GET",
-    TRes: Type<LocalBodyModel[]>(),
-  },
-
-  // Local Body
-  getLocalBody: {
-    path: "/api/v1/local_body/{id}/",
-    TRes: Type<LocalBodyModel>(),
-  },
-  getAllLocalBody: {
-    path: "/api/v1/local_body/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<LocalBodyModel>>(),
-  },
-  getLocalbodyByName: {
-    path: "/api/v1/local_body/",
-  },
-
-  // ward
-  getWard: {
-    path: "/api/v1/ward/{id}/",
-  },
-  getWards: {
-    path: "/api/v1/ward/",
-  },
-  getWardByLocalBody: {
-    path: "/api/v1/ward/?local_body={id}",
-    method: "GET",
-    TRes: Type<PaginatedResponse<WardModel>>(),
-  },
-
-  //inventory
-  getItems: {
-    path: "/api/v1/items/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventoryItemsModel>>(),
-  },
-  createInventory: {
-    path: "/api/v1/facility/{facilityId}/inventory/",
-    method: "POST",
-    TRes: Type<InventoryLogResponse>(),
-  },
-  getInventoryLog: {
-    path: "/api/v1/facility/{facilityId}/inventory/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
-  },
-  setMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/",
-    method: "POST",
-    TRes: Type<MinimumQuantityItemResponse>(),
-  },
-  getMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
-  },
-  getMinQuantityItem: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
-    method: "GET",
-    TRes: Type<MinimumQuantityItemResponse>(),
-  },
-  updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
-    method: "PATCH",
-    TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
-  },
-  getInventorySummary: {
-    path: "/api/v1/facility/{facility_external_id}/inventorysummary/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
-  },
-  getItemName: {
-    path: "/api/v1/items/",
-    method: "GET",
-  },
-  flagInventoryItem: {
-    path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
-    method: "PUT",
-    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
-  },
-  deleteLastInventoryLog: {
-    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-  dischargeSummaryGenerate: {
-    path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
-    method: "POST",
-    TRes: Type<never>(),
-  },
-  dischargeSummaryPreview: {
-    path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
-    method: "GET",
-    TRes: Type<{ read_signed_url: string }>(),
-  },
-  dischargeSummaryEmail: {
-    path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
-    method: "POST",
-    TRes: Type<never>(),
-  },
-  dischargePatient: {
-    path: "/api/v1/consultation/{id}/discharge_patient/",
-    method: "POST",
-    TBody: Type<object>(),
-    TRes: Type<object>(),
-  },
-  listFacilityDischargedPatients: {
-    path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientModel>>(),
   },
 
   // Consents

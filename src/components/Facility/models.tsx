@@ -1,7 +1,4 @@
-import {
-  FacilityNameModel,
-  FileUploadModel,
-} from "@/components/Patient/models";
+import { FileUploadModel } from "@/components/Patient/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import {
@@ -12,33 +9,6 @@ import {
 
 import { FeatureFlag } from "@/Utils/featureFlags";
 import { PatientModel } from "@/types/emr/patient";
-
-export interface LocalBodyModel {
-  id: number;
-  name: string;
-  body_type: number;
-  localbody_code: string;
-  district: number;
-}
-
-export interface DistrictModel {
-  id: number;
-  name: string;
-  state: number;
-}
-
-export interface StateModel {
-  id: number;
-  name: string;
-}
-
-export interface WardModel {
-  id: number;
-  name: string;
-  number: number;
-  panchayath: string;
-  local_body_id: LocalBodyModel["id"];
-}
 
 export interface FacilityModel {
   id?: string;
@@ -54,10 +24,6 @@ export interface FacilityModel {
   };
   phone_number?: string;
   middleware_address?: string;
-  local_body_object?: LocalBodyModel;
-  district_object?: DistrictModel;
-  state_object?: StateModel;
-  ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
   geo_organization?: string;
@@ -65,30 +31,7 @@ export interface FacilityModel {
   facility_flags?: FeatureFlag[];
   latitude?: string;
   longitude?: string;
-  ward?: number;
-  local_body?: number;
-  district?: number;
-  state?: number;
 }
-
-export enum SpokeRelationship {
-  REGULAR = 1,
-  TELE_ICU = 2,
-}
-
-export interface FacilitySpokeModel {
-  id: string;
-  hub_object: FacilityNameModel;
-  spoke_object: FacilityNameModel;
-  relationship: SpokeRelationship;
-}
-
-export interface FacilitySpokeRequest {
-  spoke?: string;
-  relationship?: SpokeRelationship;
-}
-
-export interface FacilitySpokeErrors {}
 
 export interface OptionsType {
   id: number;
