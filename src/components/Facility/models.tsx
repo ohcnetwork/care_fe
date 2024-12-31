@@ -1,20 +1,12 @@
 import {
-  AssignedToObjectModel,
-  BloodPressure,
-  DailyRoundsModel,
   FacilityNameModel,
   FileUploadModel,
 } from "@/components/Patient/models";
-import { EncounterSymptom } from "@/components/Symptoms/types";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
-  ConsultationSuggestionValue,
-  DISCHARGE_REASONS,
-  PATIENT_NOTES_THREADS,
-  SHIFTING_CHOICES_PEACETIME,
   UserRole,
 } from "@/common/constants";
 
