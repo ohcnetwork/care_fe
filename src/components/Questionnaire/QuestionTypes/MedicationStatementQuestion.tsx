@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import ScribeStructuredInput from "@/Utils/scribe";
+import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatement,
@@ -116,7 +116,7 @@ export function MedicationStatementQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ScribeStructuredInput
+      <ValueInjection
         value={medications}
         onChange={(value) => {
           if (value) {
@@ -131,41 +131,7 @@ export function MedicationStatementQuestion({
             });
           }
         }}
-        name="Medication Statement"
-        prompt={`An array of objects of the following type: {
-          status?: ${MEDICATION_STATEMENT_STATUS.join(" | ")},
-          dosage_text?: string,
-          information_source?: "patient" | "user" | "related_person"
-          medication?: {
-            code: string,
-            display: string,
-            system: "http://snomed.info/sct"
-          },
-          note?: string,
-          reason?: string,
-          effective_period?: {
-            start: ISO date string,
-            end: ISO date string
-          }
-        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
-        example={[
-          {
-            status: "completed",
-            dosage_text: "10 ml",
-            information_source: "patient",
-            medication: {
-              code: "1213681000202103",
-              display: "Cabotegravir only product in oral dose form",
-              system: "http://snomed.info/sct",
-            },
-            note: "a note",
-            reason: "patient was feeling dizzy",
-            effective_period: {
-              start: "2024-12-12T18:30:00.000Z",
-              end: "2025-01-07T18:30:00.000Z",
-            },
-          },
-        ]}
+        data-structured-input="qn-medication-statement"
         className="rounded-lg border p-4"
       >
         {medications.length > 0 && (
@@ -187,7 +153,7 @@ export function MedicationStatementQuestion({
             </ul>
           </div>
         )}
-      </ScribeStructuredInput>
+      </ValueInjection>
 
       <ValueSetSelect
         system="system-medication"

@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import ScribeStructuredInput from "@/Utils/scribe";
+import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
@@ -93,47 +93,44 @@ export function DateTimeQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ScribeStructuredInput
+      <ValueInjection
         value={currentValue?.toISOString()}
         onChange={(value) => value && handleUpdate(dayjs(value).toDate())}
-        name={question.text}
-        prompt={`A date in ISO format, minus 5 hour 30 minutes. Current time for your reference is ${new Date().toISOString()}`}
-        example={new Date().toISOString()}
+        data-cui-datetime-input
+        className="flex gap-2"
       >
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "flex-1 justify-start text-left font-normal",
-                  !currentValue && "text-muted-foreground",
-                  classes,
-                )}
-                disabled={disabled}
-              >
-                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-                {currentValue ? format(currentValue, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={currentValue}
-                onSelect={handleSelect}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <Input
-            type="time"
-            className="w-[150px]"
-            value={formatTime(currentValue)}
-            onChange={handleTimeChange}
-            disabled={disabled || !currentValue}
-          />
-        </div>
-      </ScribeStructuredInput>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "flex-1 justify-start text-left font-normal",
+                !currentValue && "text-muted-foreground",
+                classes,
+              )}
+              disabled={disabled}
+            >
+              <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+              {currentValue ? format(currentValue, "PPP") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={currentValue}
+              onSelect={handleSelect}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        <Input
+          type="time"
+          className="w-[150px]"
+          value={formatTime(currentValue)}
+          onChange={handleTimeChange}
+          disabled={disabled || !currentValue}
+        />
+      </ValueInjection>
     </div>
   );
 }

@@ -259,7 +259,8 @@ export function QuestionnaireForm({
     <>
       <PLUGIN_Component
         __name="Scribe"
-        questionnaireForm={questionnaireForms}
+        formState={questionnaireForms}
+        setFormState={setQuestionnaireForms}
       />
 
       <div className="flex gap-4" data-scribe-form>

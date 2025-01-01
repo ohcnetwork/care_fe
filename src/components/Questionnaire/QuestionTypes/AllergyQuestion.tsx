@@ -23,7 +23,7 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import ScribeStructuredInput from "@/Utils/scribe";
+import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 
@@ -102,7 +102,7 @@ export function AllergyQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ScribeStructuredInput
+      <ValueInjection
         value={allergies}
         onChange={(value) =>
           value &&
@@ -116,34 +116,7 @@ export function AllergyQuestion({
             ],
           })
         }
-        name="Allergies"
-        prompt={`An array of objects of the following type: {
-          code: {
-            code: string,
-            display: string,
-            system: "http://snomed.info/sct"
-          },
-          clinical_status?: "active" | "inactive" | "resolved",
-          category?: "food" | "medication" | "environment" | "biologic",
-          criticality?: "low" | "high" | "unable-to-assess",
-          verification?: "unconfirmed" | "presumed" | "confirmed" | "refuted" | "entered-in-error"
-          last_occurrence?: YYYY-MM-DD string,
-          note?: string
-        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
-        example={[
-          {
-            code: {
-              code: "842825221000119100",
-              display: "Anifrolumab",
-              system: "http://snomed.info/sct",
-            },
-            clinical_status: "inactive",
-            category: "environment",
-            criticality: "high",
-            last_occurrence: "2024-12-11",
-            note: "212",
-          },
-        ]}
+        data-structured-input="qn-allergies"
         className="rounded-lg border p-4"
       >
         <div className="overflow-x-auto">
@@ -305,7 +278,7 @@ export function AllergyQuestion({
           <PlusIcon className="mr-2 h-4 w-4" />
           Add Allergy
         </Button>
-      </ScribeStructuredInput>
+      </ValueInjection>
     </div>
   );
 }

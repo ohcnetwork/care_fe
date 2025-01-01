@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * A custom React hook that observes changes to a specific attribute of a DOM element
@@ -59,7 +59,11 @@ export function useValueInjection<T = unknown>(options: {
   attribute?: string;
   onChange: (value: T | undefined) => void;
 }) {
-  const { targetElement, attribute = "data-scribe-value", onChange } = options;
+  const {
+    targetElement,
+    attribute = "data-injected-value",
+    onChange,
+  } = options;
 
   const domValue = useValueInjectionObserver<T>({
     targetElement,
@@ -67,8 +71,40 @@ export function useValueInjection<T = unknown>(options: {
   });
 
   useEffect(() => {
+    console.log("DOMVALUE", domValue);
     onChange(domValue);
   }, [domValue, targetElement, attribute]);
 
   return null;
+}
+
+export function ValueInjection<T = unknown>(
+  props: Omit<React.HTMLProps<HTMLDivElement>, "onChange" | "value" | "ref"> & {
+    value: T;
+    onChange: (value: T | undefined) => void;
+  },
+) {
+  const { value, onChange, children, ...rest } = props;
+
+  const [element, setElement] = useState<HTMLElement | null>(null);
+
+  const callbackRef = useCallback(
+    (node: HTMLElement | null) => setElement(node),
+    [],
+  );
+
+  useValueInjection<T>({
+    targetElement: element,
+    onChange,
+  });
+
+  return (
+    <div
+      {...rest}
+      ref={callbackRef}
+      data-injected-value={JSON.stringify(value)}
+    >
+      {children}
+    </div>
+  );
 }

@@ -34,7 +34,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-import ScribeStructuredInput from "@/Utils/scribe";
+import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
@@ -118,7 +118,7 @@ export function DiagnosisQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ScribeStructuredInput
+      <ValueInjection
         value={diagnoses}
         onChange={(value) =>
           value &&
@@ -132,31 +132,7 @@ export function DiagnosisQuestion({
             ],
           })
         }
-        name="Diagnoses"
-        prompt={`An array of objects of the following type: {
-          code?: {"code" : string, "display" : string, "system" : "http://snomed.info/sct"},
-          clinical_status?: "active" | "recurrence" | "relapse" | "inactive" | "remission" | "resolved",
-          verification_status?: "unconfirmed" | "provisional" | "differential" | "confirmed" | "refuted" | "entered-in-error",
-          onset?: {
-            onset_datetime: YYYY-MM-DD string
-          },
-          note?: string
-        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
-        example={[
-          {
-            code: {
-              code: "972900701000119109",
-              display: "Venous ulcer of toe of left foot",
-              system: "http://snomed.info/sct",
-            },
-            clinical_status: "recurrence",
-            verification_status: "provisional",
-            onset: {
-              onset_datetime: "2024-12-03",
-            },
-            note: "Note here",
-          },
-        ]}
+        data-structured-input="qn-diagnoses"
         className="rounded-lg border p-4"
       >
         <div className="overflow-auto max-w-full">
@@ -334,7 +310,7 @@ export function DiagnosisQuestion({
           <PlusIcon className="mr-2 h-4 w-4" />
           Add Diagnosis
         </Button>
-      </ScribeStructuredInput>
+      </ValueInjection>
     </div>
   );
 }

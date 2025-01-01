@@ -32,7 +32,8 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
 }>;
 
 export type ScribeComponentType = React.FC<{
-  questionnaireForm: QuestionnaireFormState[];
+  formState: QuestionnaireFormState[];
+  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
 }>;
 export type ManageFacilityOptionsComponentType = React.FC<{
   facility?: FacilityModel;
