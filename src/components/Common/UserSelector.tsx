@@ -46,7 +46,7 @@ export default function UserSelector({
   const [search, setSearch] = useDebouncedState("", 500);
 
   const { data, isFetching } = useQuery({
-    queryKey: ["usermrs", search],
+    queryKey: ["users", search],
     queryFn: query(UserRoutes.list, {
       queryParams: { search_text: search },
     }),
