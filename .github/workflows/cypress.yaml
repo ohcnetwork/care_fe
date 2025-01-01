@@ -38,12 +38,6 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Install Specific Chrome Version
-        run: |
-          sudo apt-get install -y wget
-          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install ./google-chrome-stable_current_amd64.deb
-
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v5
@@ -53,10 +47,8 @@ jobs:
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
-          browser: chrome
           record: true
           parallel: true
-          group: "UI-Chrome"
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,10 +65,8 @@ jobs:
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
-          browser: chrome
           record: true
           parallel: true
-          group: "UI-Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
