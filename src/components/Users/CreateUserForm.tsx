@@ -26,10 +26,10 @@ import {
 import { GENDER_TYPES } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
+import { UserRoutes } from "@/types/user/userApi";
 
 const userFormSchema = z
   .object({
@@ -122,7 +122,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         res,
         data: user,
         error,
-      } = await request(routes.user.create, {
+      } = await request(UserRoutes.create, {
         body: {
           ...data,
           // Omit c_password as it's not needed in the API

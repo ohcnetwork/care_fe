@@ -90,7 +90,13 @@ export interface LoginCredentials {
   password: string;
 }
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export enum HttpMethod {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
+}
 
 export const API = <TResponse = undefined, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
@@ -920,26 +926,6 @@ const routes = {
         year_of_birth: string;
         partial_id: string;
       }>(),
-    },
-  },
-
-  // New user routes
-  user: {
-    list: {
-      path: "/api/v1/users/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-    create: {
-      path: "/api/v1/users/",
-      method: "POST",
-      TRes: Type<UserBase>(),
-      TBody: Type<UserBase>(),
-    },
-    get: {
-      path: "/api/v1/users/{username}/",
-      method: "GET",
-      TRes: Type<UserBase>(),
     },
   },
 
