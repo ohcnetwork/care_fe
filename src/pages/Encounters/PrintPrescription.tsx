@@ -250,11 +250,8 @@ export const PrintPrescription = (props: {
         <div className="mt-8 space-y-4">
           <div className="flex justify-end">
             <div className="w-48 space-y-1 text-center">
-              <Separator />
-              <p className="text-sm font-medium">
-                {encounter?.created_by &&
-                  `Dr. ${encounter.created_by.first_name} ${encounter.created_by.last_name}`}
-              </p>
+              <Separator className="mt-6" />
+
               <p className="text-xs text-muted-foreground">
                 Sign of the Consulting Doctor
               </p>
@@ -325,27 +322,24 @@ const PrescriptionEntry = ({
       <div className="ml-6 space-y-2">
         <div className="flex items-start justify-between">
           <div>
-            <h4 className="font-medium uppercase">
+            <h4 className="font-medium text-smuppercase">
               {medication.medication?.display}
             </h4>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               {medication.medication?.code} ({medication.medication?.system})
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <Badge
-              variant={medication.status === "active" ? "default" : "secondary"}
+              variant={medication.status === "active" ? "outline" : "secondary"}
             >
               {medication.status}
             </Badge>
-            {medication.priority && (
-              <Badge variant="outline">{medication.priority}</Badge>
-            )}
           </div>
         </div>
 
         {/* Dosage and Instructions */}
-        <div className="flex flex-col gap-1 rounded-md bg-secondary/10 px-2 py-1.5">
+        <div className="flex flex-col gap-1 rounded-md bg-gray-50 px-2 py-1">
           <div className="flex items-baseline gap-2 text-sm">
             <span className="font-medium">Dosage:</span>
             <span>{dosage}</span>
@@ -372,7 +366,6 @@ const PrescriptionEntry = ({
                 key={idx}
                 className="flex items-baseline gap-2 text-muted-foreground"
               >
-                <span>•</span>
                 <span>{instr.display}</span>
               </div>
             ))}
