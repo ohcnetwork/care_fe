@@ -154,6 +154,11 @@ const handlers: {
       });
     },
   },
+  follow_up_appointment: {
+    getRequests: () => {
+      return [];
+    },
+  },
 };
 
 export const getStructuredRequests = <T extends StructuredQuestionType>(

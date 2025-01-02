@@ -106,6 +106,6 @@ export interface AvailabilityHeatmap {
 }
 
 export interface FollowUpAppointmentQuestionRequest {
-  resource: UserBase["id"];
   reason_for_visit: string;
+  slot_id: string;
 }

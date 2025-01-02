@@ -678,26 +678,40 @@ const AppointmentStatusDropdown = ({
 
 interface SlotFilterProps {
   slots: SlotAvailability[];
+  disableInline?: boolean;
+  disabled?: boolean;
   selectedSlot: string | undefined;
   onSelect: (slot: string) => void;
 }
 
-function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
+export const SlotFilter = ({
+  selectedSlot,
+  onSelect,
+  ...props
+}: SlotFilterProps) => {
   const { t } = useTranslation();
   const slots = props.slots.filter((slot) => slot.allocated > 0);
 
   const resolvedSlot =
     selectedSlot && slots.find((slot) => slot.id === selectedSlot);
 
-  if (slots.length <= 3) {
+  if (slots.length <= 3 && !props.disableInline) {
     return (
       <Tabs value={selectedSlot ?? "all"} onValueChange={onSelect}>
         <TabsList>
-          <TabsTrigger value="all" className="uppercase">
+          <TabsTrigger
+            value="all"
+            className="uppercase"
+            disabled={props.disabled}
+          >
             {t("all")}
           </TabsTrigger>
           {slots.map((slot) => (
-            <TabsTrigger key={slot.id} value={slot.id}>
+            <TabsTrigger
+              key={slot.id}
+              value={slot.id}
+              disabled={props.disabled}
+            >
               {format(slot.start_datetime, "h:mm a").replace(":00", "")}
               {" - "}
               {format(slot.end_datetime, "h:mm a").replace(":00", "")}
@@ -717,6 +731,7 @@ function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
           variant="outline"
           role="combobox"
           className="min-w-60 justify-start"
+          disabled={props.disabled}
         >
           {resolvedSlot ? (
             <div className="flex items-center gap-2">
@@ -797,4 +812,4 @@ function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
       </SelectContent>
     </Select>
   );
-}
+};
