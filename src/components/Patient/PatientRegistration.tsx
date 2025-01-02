@@ -313,7 +313,10 @@ export default function PatientRegistration(
           className="md:w-[500px]"
           onSubmit={handleFormSubmit}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (
+              e.key === "Enter" &&
+              !(e.target instanceof HTMLTextAreaElement)
+            ) {
               handleFormSubmit(e);
             }
           }}
