@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -490,7 +490,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
       >
         <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between">
           <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
-            <TabsList className="flex flex-row flex-wrap gap-2 h-auto">
+            {/* <TabsList className="flex flex-row flex-wrap gap-2 h-auto">
               {fileCategories.map((category) => (
                 <TabsTrigger
                   key={category.value}
@@ -500,7 +500,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
                   {category.label}
                 </TabsTrigger>
               ))}
-            </TabsList>
+            </TabsList> */}
             <FilterButton />
           </div>
           <FileUploadButtons />

@@ -21,6 +21,7 @@ import {
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
@@ -70,7 +71,7 @@ export function QuestionnaireForm({
     data: questionnaireData,
     loading: isQuestionnaireLoading,
     error: questionnaireError,
-  } = useQuery(routes.questionnaire.detail, {
+  } = useQuery(questionnaireApi.detail, {
     pathParams: { id: questionnaireSlug ?? "" },
     prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
@@ -304,7 +305,7 @@ export function QuestionnaireForm({
             key={`${form.questionnaire.id}-${index}`}
             className="border rounded-lg p-6 space-y-6"
           >
-            <div className="flex justify-between items-center flex-wrap">
+            <div className="flex justify-between items-center">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -321,7 +322,6 @@ export function QuestionnaireForm({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="self-end"
                   onClick={() => {
                     setQuestionnaireForms((prev) =>
                       prev.filter(

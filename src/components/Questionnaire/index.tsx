@@ -3,15 +3,15 @@ import { useNavigate } from "raviger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import Loading from "../Common/Loading";
 
 export function QuestionnaireList() {
   const navigate = useNavigate();
-  const { data: response, loading } = useQuery(routes.questionnaire.list);
+  const { data: response, loading } = useQuery(questionnaireApi.list);
 
   if (loading) {
     return <Loading />;

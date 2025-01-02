@@ -23,12 +23,11 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
-import { QuestionnaireList } from "../components/Questionnaire";
-import { QuestionnaireShow } from "../components/Questionnaire/show";
 import OrganizationRoutes from "./routes/OrganizationRoutes";
+import QuestionnaireRoutes from "./routes/questionnaireRoutes";
 
 // List of paths where the sidebar should be hidden
-const PATHS_WITHOUT_SIDEBAR = ["/"];
+const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -55,6 +54,7 @@ const Routes: AppRoutes = {
   ...ScheduleRoutes,
   ...UserRoutes,
   ...OrganizationRoutes,
+  ...QuestionnaireRoutes,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,
@@ -63,9 +63,6 @@ const Routes: AppRoutes = {
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 
-  // Questionnaire Routes
-  "/questionnaire": () => <QuestionnaireList />,
-  "/questionnaire/:id": ({ id }) => <QuestionnaireShow id={id} />,
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   "/login": () => <Redirect to="/" />,

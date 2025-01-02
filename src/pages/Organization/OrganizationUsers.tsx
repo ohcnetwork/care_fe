@@ -9,9 +9,9 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { OrganizationUserRole } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
@@ -34,7 +34,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["organizationUsers", id],
-    queryFn: query(routes.organization.listUsers, {
+    queryFn: query(organizationApi.listUsers, {
       pathParams: { id },
     }),
     enabled: !!id,

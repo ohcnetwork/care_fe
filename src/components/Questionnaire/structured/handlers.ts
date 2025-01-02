@@ -129,9 +129,8 @@ const handlers: {
       }),
   },
   encounter: {
-    getRequests: (encounters, { patientId, facilityId, encounterId }) => {
+    getRequests: (encounters, { patientId, encounterId }) => {
       if (!encounterId) return [];
-      console.log("Encounters", encounters, facilityId);
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
           organizations: [],
@@ -152,6 +151,22 @@ const handlers: {
           reference_id: "encounter",
         };
       });
+    },
+  },
+  follow_up_appointment: {
+    getRequests: (followUpAppointment, { facilityId, patientId }) => {
+      const { reason_for_visit, slot_id } = followUpAppointment[0];
+      return [
+        {
+          url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
+          method: "POST",
+          body: {
+            reason_for_visit,
+            patient: patientId,
+          },
+          reference_id: "follow_up_appointment",
+        },
+      ];
     },
   },
 };
