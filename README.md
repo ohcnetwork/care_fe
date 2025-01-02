@@ -35,8 +35,9 @@
 #### Install the required dependencies
 
 ```sh
-npm run install-all
+npm install
 ```
+
 #### First-time setup
 
 For first-time setup, run the following command to generate the pluginMap and install plugin configurations:

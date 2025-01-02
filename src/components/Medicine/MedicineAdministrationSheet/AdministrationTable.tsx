@@ -37,7 +37,7 @@ export default function MedicineAdministrationTable({
               <span className="hidden px-2 text-center text-xs leading-none lg:block">
                 <p>{t("dosage")} &</p>
                 <p>
-                  {!prescriptions[0]?.dosage_instruction.as_needed_boolean
+                  {!prescriptions[0]?.dosage_instruction[0]?.as_needed_boolean
                     ? t("frequency")
                     : t("indicator")}
                 </p>

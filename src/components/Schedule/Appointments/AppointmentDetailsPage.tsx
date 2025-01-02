@@ -11,7 +11,9 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isPast } from "date-fns";
+import { differenceInYears, format, isSameDay } from "date-fns";
+import { PrinterIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -36,7 +38,10 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FacilityModel } from "@/components/Facility/models";
 import { AppointmentTokenCard } from "@/components/Schedule/Appointments/AppointmentTokenCard";
-import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
+import {
+  formatAppointmentSlotTime,
+  printAppointment,
+} from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { Appointment, AppointmentStatuses } from "@/components/Schedule/types";
 
@@ -77,17 +82,34 @@ export default function AppointmentDetailsPage(props: Props) {
     }),
   });
 
-  const { mutate: updateAppointment, isPending } = useMutation({
+  const redirectToPatientPage = () => {
+    navigate(`/facility/${props.facilityId}/patients/verify`, {
+      query: {
+        phone_number: patient.phone_number,
+        year_of_birth: patient.year_of_birth,
+        partial_id: patient.id.slice(0, 5),
+      },
+    });
+  };
+
+  const { mutate: updateAppointment, isPending } = useMutation<
+    Appointment,
+    unknown,
+    { status: Appointment["status"] }
+  >({
     mutationFn: mutate(ScheduleAPIs.appointments.update, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
       },
     }),
-    onSuccess: () => {
+    onSuccess: (_, request) => {
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
+      if (request.status === "in_consultation") {
+        redirectToPatientPage();
+      }
     },
   });
 
@@ -128,8 +150,14 @@ export default function AppointmentDetailsPage(props: Props) {
                 facility={facilityQuery.data}
               />
             </div>
-            <div className="flex justify-end px-6">
-              {/* TODO: use navigator.share */}
+            <div className="flex gap-2 justify-end px-6">
+              <Button
+                variant="outline"
+                onClick={() => printAppointment({ t, facility, appointment })}
+              >
+                <PrinterIcon className="size-4 mr-2" />
+                <span>{t("print")}</span>
+              </Button>
               <Button
                 variant="default"
                 onClick={async () => {
@@ -149,6 +177,7 @@ export default function AppointmentDetailsPage(props: Props) {
               <AppointmentActions
                 appointment={appointment}
                 onChange={(status) => updateAppointment({ status })}
+                onViewPatient={redirectToPatientPage}
               />
             </div>
           </div>
@@ -330,15 +359,17 @@ const AppointmentDetails = ({
 interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
+  onViewPatient: () => void;
 }
 
 const AppointmentActions = ({
   appointment,
   onChange,
+  onViewPatient,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const currentStatus = appointment.status;
-  const hasStarted = isPast(appointment.token_slot.start_datetime);
+  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
   if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
     return null;
@@ -367,21 +398,27 @@ const AppointmentActions = ({
 
   return (
     <div className="flex flex-col gap-2 w-64 mx-auto">
+      <Button variant="outline" onClick={onViewPatient} size="lg">
+        <PersonIcon className="size-4 mr-2" />
+        {t("view_patient")}
+      </Button>
       {currentStatus === "booked" && (
-        <Button
-          disabled={!hasStarted}
-          variant="outline_primary"
-          onClick={() => onChange("checked_in")}
-          size="lg"
-        >
-          <EnterIcon className="size-4 mr-2" />
-          {t("check_in")}
-        </Button>
+        <>
+          <Button
+            disabled={!isToday}
+            variant="outline_primary"
+            onClick={() => onChange("checked_in")}
+            size="lg"
+          >
+            <EnterIcon className="size-4 mr-2" />
+            {t("check_in")}
+          </Button>
+        </>
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
-          disabled={!hasStarted}
+          disabled={!isToday}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
@@ -395,7 +432,7 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!hasStarted}
+          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"

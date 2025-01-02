@@ -305,7 +305,7 @@ export function QuestionnaireForm({
             key={`${form.questionnaire.id}-${index}`}
             className="border rounded-lg p-6 space-y-6"
           >
-            <div className="flex justify-between items-center flex-wrap">
+            <div className="flex justify-between items-center">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -322,7 +322,6 @@ export function QuestionnaireForm({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="self-end"
                   onClick={() => {
                     setQuestionnaireForms((prev) =>
                       prev.filter(

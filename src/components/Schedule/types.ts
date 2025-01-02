@@ -104,3 +104,8 @@ export interface Appointment {
 export interface AvailabilityHeatmap {
   [date: string]: { total_slots: number; booked_slots: number };
 }
+
+export interface FollowUpAppointmentRequest {
+  reason_for_visit: string;
+  slot_id: string;
+}
