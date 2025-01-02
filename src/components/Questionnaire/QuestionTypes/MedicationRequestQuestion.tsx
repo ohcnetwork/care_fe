@@ -1,5 +1,5 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
-import React from "react";
+import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,8 +51,11 @@ export function MedicationRequestQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: MedicationRequestQuestionProps) {
-  const medications =
-    (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
+  const [medications, setMedications] = useState<MedicationRequest[]>(() => {
+    return (
+      (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || []
+    );
+  });
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
@@ -105,18 +108,20 @@ export function MedicationRequestQuestion({
       </Label>
       <ScribeStructuredInput
         value={medications}
-        onChange={(value) =>
-          value &&
-          updateQuestionnaireResponseCB({
-            ...questionnaireResponse,
-            values: [
-              {
-                type: "medication_request",
-                value,
-              },
-            ],
-          })
-        }
+        onChange={(value) => {
+          if (value) {
+            setMedications(value);
+            updateQuestionnaireResponseCB({
+              ...questionnaireResponse,
+              values: [
+                {
+                  type: "medication_request",
+                  value,
+                },
+              ],
+            });
+          }
+        }}
         name="Medication Request"
         prompt={`An array of objects of the following type: {
           status?: "active" | "on-hold" | "ended" | "stopped" | "completed" | "cancelled" | "entered-in-error" | "draft" | "unknown",

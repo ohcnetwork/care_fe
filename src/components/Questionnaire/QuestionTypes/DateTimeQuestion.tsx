@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import dayjs from "dayjs";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -36,9 +37,11 @@ export function DateTimeQuestion({
   clearError,
   classes,
 }: DateTimeQuestionProps) {
-  const currentValue = questionnaireResponse.values[0]?.value
-    ? new Date(questionnaireResponse.values[0].value as string)
-    : undefined;
+  const [currentValue, setCurrentValue] = useState(() => {
+    return questionnaireResponse.values[0]?.value
+      ? new Date(questionnaireResponse.values[0].value as string)
+      : undefined;
+  });
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) {
@@ -93,12 +96,19 @@ export function DateTimeQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ScribeStructuredInput
-        value={currentValue?.toISOString()}
-        onChange={(value) => value && handleUpdate(dayjs(value).toDate())}
+      <ScribeStructuredInput<{ date: string }>
+        value={{ date: currentValue?.toISOString() || "" }}
+        onChange={(value) => {
+          if (value?.date) {
+            const date = dayjs(value.date).toDate();
+            console.log(value, date);
+            setCurrentValue(date);
+            handleUpdate(date);
+          }
+        }}
         name={question.text}
-        prompt={`A date in ISO format, minus 5 hour 30 minutes. Current time for your reference is ${new Date().toISOString()}`}
-        example={new Date().toISOString()}
+        prompt={`A date in ISO format, minus 5 hour 30 minutes in the following format : {date: datestring}. Current time for your reference is ${new Date().toISOString()}`}
+        example={{ date: new Date().toISOString() }}
       >
         <div className="flex gap-2">
           <Popover>
