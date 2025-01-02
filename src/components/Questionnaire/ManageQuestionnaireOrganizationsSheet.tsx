@@ -63,11 +63,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
     });
 
   const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
-    mutationFn: (organizations: string[]) =>
-      mutate(questionnaireApi.setOrganizations, {
-        pathParams: { id: questionnaireId },
-        body: { organizations: organizations },
-      })({ organizations: organizations }),
+    mutationFn: mutate(questionnaireApi.setOrganizations, {
+      pathParams: { id: questionnaireId },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["questionnaire", questionnaireId, "organizations"],
@@ -93,16 +91,18 @@ export default function ManageQuestionnaireOrganizationsSheet({
   };
 
   const handleSave = () => {
-    setOrganizations(selectedIds);
+    setOrganizations({ organizations: selectedIds });
   };
 
   const selectedOrganizations = organizations?.results.filter((org) =>
     selectedIds.includes(org.id),
   );
 
-  const hasChanges =
-    JSON.stringify(organizations?.results.map((org) => org.id).sort()) !==
-    JSON.stringify(selectedIds.sort());
+  const hasChanges = !organizations?.results
+    ? false
+    : new Set(organizations.results.map((org) => org.id)).size !==
+        new Set(selectedIds).size ||
+      !organizations.results.every((org) => selectedIds.includes(org.id));
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
