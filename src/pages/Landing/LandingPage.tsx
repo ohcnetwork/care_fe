@@ -33,7 +33,7 @@ export function LandingPage() {
     {
       queryKey: ["districts", STATE_GEO_ID],
       queryFn: query(organizationApi.getPublicOrganizations, {
-        queryParams: { parent: STATE_GEO_ID },
+        queryParams: { parent: STATE_GEO_ID, limit: 100 },
       }),
     },
   );

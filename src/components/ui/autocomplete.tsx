@@ -31,6 +31,7 @@ interface AutocompleteProps {
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
+  align?: "start" | "center" | "end";
 }
 
 export default function Autocomplete({
@@ -41,6 +42,7 @@ export default function Autocomplete({
   placeholder = "Select...",
   noOptionsMessage = "No options found",
   disabled,
+  align = "center",
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -67,7 +69,7 @@ export default function Autocomplete({
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 pointer-events-auto">
+      <PopoverContent className="w-full p-0 pointer-events-auto" align={align}>
         <Command>
           <CommandInput
             placeholder="Search option..."

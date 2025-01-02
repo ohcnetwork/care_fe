@@ -5,8 +5,6 @@ import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -24,6 +22,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
+import OrganizationFilter from "../Organization/components/OrganizationFilter";
 import { FacilityCard } from "./components/FacilityCard";
 
 const STATE_GEO_ID = careConfig.keralaGeoId;
@@ -47,7 +46,9 @@ export function FacilitiesPage() {
     queryKey: ["facilities", qParams],
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
+        name: qParams.search,
         geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        facility_type: qParams.facility_type,
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
@@ -65,12 +66,6 @@ export function FacilitiesPage() {
     }
   }, [qParams.district, STATE_GEO_ID]);
 
-  /*   useEffect(() => {
-    if (!qParams.district && qParams.local_body) {
-      advancedFilter.removeFilters(["local_body"]);
-    }
-  }, [advancedFilter, qParams]);
- */
   const GetLoginHeader = () => {
     if (
       tokenData &&
@@ -116,13 +111,18 @@ export function FacilitiesPage() {
         <GetLoginHeader />
       </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
+        <OrganizationFilter
+          value={STATE_GEO_ID}
+          onChange={updateQuery}
+          className="flex flex-row w-full"
+        />
         <SearchByMultipleFields
           id="facility-search"
           options={[
             {
-              key: "facility_district_pincode",
+              key: "facility_search_placeholder",
               type: "text" as const,
-              placeholder: t("facility_search_placeholder_pincode"),
+              placeholder: t("facility_search_placeholder"),
               value: qParams.search || "",
               shortcutKey: "f",
             },
@@ -132,14 +132,6 @@ export function FacilitiesPage() {
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
-        <Button
-          variant="white"
-          onClick={() => advancedFilter.setShow(true)}
-          className="flex items-center gap-2 p-5"
-        >
-          <CareIcon icon="l-filter" className="h-4 w-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-400">Filter</span>
-        </Button>
       </div>
       {/* <FilterBadges
         badges={({ badge, value }) => [

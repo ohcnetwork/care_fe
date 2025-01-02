@@ -146,7 +146,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             className="border border-secondary-400"
           >
             <Link href={`/facility/${facilityId}`}>
-              <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
               <span className="text-sm underline">{t("back")}</span>
             </Link>
           </Button>
@@ -249,6 +248,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 className="flex flex-col items-center group py-6 gap-1"
                               >
                                 <span className="font-semibold">
+                                  {slot.start_datetime}{" "}
                                   {format(slot.start_datetime, "HH:mm")}
                                 </span>
                                 <span
