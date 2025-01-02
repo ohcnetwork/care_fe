@@ -1237,6 +1237,7 @@
   "no_staff": "No staff found",
   "no_tests_taken": "No tests taken",
   "no_treating_physicians_available": "This facility does not have any home facility doctors. Please contact your admin.",
+  "no_user_assigned": "No User Assinged to this patient",
   "no_users_found": "No Users Found",
   "no_vitals_present": "No Vitals Monitor present in this location or facility",
   "none": "None",

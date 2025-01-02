@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -237,66 +238,72 @@ export const PatientUsers = (props: PatientProps) => {
             </div>
             <AddUserSheet patientId={id} />
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {users?.results?.map((user: UserBase) => (
-              <div
-                key={user.id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
-                    <Avatar
-                      name={`${user.first_name} ${user.last_name}`}
-                      className="h-10 w-10"
-                      imageUrl={user.profile_picture_url}
-                    />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        {user.first_name} {user.last_name}
-                      </h3>
-                      <p className="text-sm text-gray-500">{user.username}</p>
+          {users?.results?.length === 0 ? (
+            <div className="h-full space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
+              {t("no_user_assigned")}
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {users?.results.map((user: UserBase) => (
+                <div
+                  key={user.id}
+                  className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4">
+                      <Avatar
+                        name={`${user.first_name} ${user.last_name}`}
+                        className="h-10 w-10"
+                        imageUrl={user.profile_picture_url}
+                      />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">
+                          {user.first_name} {user.last_name}
+                        </h3>
+                        <p className="text-sm text-gray-500">{user.username}</p>
+                      </div>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <CareIcon icon="l-trash" className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Remove User</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to remove {user.first_name}{" "}
+                            {user.last_name} from this patient? This action
+                            cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => removeUser(user.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Remove
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div className="text-sm">
+                      <div className="text-gray-500">Phone Number</div>
+                      <div className="font-medium">{user.phone_number}</div>
+                    </div>
+                    <div className="text-sm">
+                      <div className="text-gray-500">User Type</div>
+                      <div className="font-medium">{user.user_type}</div>
                     </div>
                   </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <CareIcon icon="l-trash" className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Remove User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to remove {user.first_name}{" "}
-                          {user.last_name} from this patient? This action cannot
-                          be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeUser(user.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Remove
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                  <div className="text-sm">
-                    <div className="text-gray-500">Phone Number</div>
-                    <div className="font-medium">{user.phone_number}</div>
-                  </div>
-                  <div className="text-sm">
-                    <div className="text-gray-500">User Type</div>
-                    <div className="font-medium">{user.user_type}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
