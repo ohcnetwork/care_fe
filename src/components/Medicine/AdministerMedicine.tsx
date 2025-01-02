@@ -27,7 +27,6 @@ import useSlug from "@/hooks/useSlug";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { displayDoseRange } from "@/Utils/utils";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
@@ -123,11 +122,9 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
   });
 
   const { mutate: administerMedication } = useMutation({
-    mutationFn: async (body: MedicationAdministration) =>
-      await mutate(routes.medicationAdministration.create, {
-        pathParams: { patientId: patient!.id },
-        body,
-      })(body),
+    mutationFn: mutate(routes.medicationAdministration.create, {
+      pathParams: { patientId: patient!.id },
+    }),
     onSuccess: () => onClose(true),
   });
 

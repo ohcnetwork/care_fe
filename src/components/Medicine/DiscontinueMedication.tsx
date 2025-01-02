@@ -68,13 +68,9 @@ export default function DiscontinueMedication({
   });
 
   const { mutate: discontinueMedication } = useMutation({
-    mutationFn: async (body: {
-      status_reason: z.infer<typeof formSchema>["reason"];
-    }) =>
-      mutate(routes.medicationRequest.discontinue, {
-        pathParams: { patientId: patient!.id, id: prescription.id! },
-        body,
-      })(body),
+    mutationFn: mutate(routes.medicationRequest.discontinue, {
+      pathParams: { patientId: patient!.id, id: prescription.id! },
+    }),
     onSuccess: () => onClose(true),
   });
 
