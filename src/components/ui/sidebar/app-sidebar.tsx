@@ -41,11 +41,13 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 function generateFacilityLinks(
   selectedFacility: UserFacilityModel | null,
   t: TFunction,
-): NavigationLink[] {
+  // TODO: switch to UserBase once getcurrentuser serializer is updated
+  user?: UserModel,
+) {
   if (!selectedFacility) return [];
 
   const baseUrl = `/facility/${selectedFacility.id}`;
-  return [
+  const links: NavigationLink[] = [
     { name: t("facility"), url: baseUrl, icon: "d-hospital" },
     {
       name: t("appointments"),
@@ -53,7 +55,7 @@ function generateFacilityLinks(
       icon: "d-calendar",
     },
     {
-      name: t("Search Patients"),
+      name: t("search_patients"),
       url: `${baseUrl}/patients`,
       icon: "d-patient",
     },
@@ -64,11 +66,21 @@ function generateFacilityLinks(
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
     // { name: t("All users"), url: "/users", icon: "d-people" },
     {
-      name: t("Organization"),
+      name: t("organization"),
       url: `${baseUrl}/organization`,
       icon: "d-book-open",
     },
   ];
+
+  if (user) {
+    links.push({
+      name: t("schedules"),
+      url: `${baseUrl}/users/${user.username}/availability`,
+      icon: "d-calendar",
+    });
+  }
+
+  return links;
 }
 
 function generateOrganizationLinks(
@@ -171,7 +183,7 @@ export function AppSidebar({
 
       <SidebarContent>
         {facilitySidebar && !selectedOrganization && (
-          <NavMain links={generateFacilityLinks(selectedFacility, t)} />
+          <NavMain links={generateFacilityLinks(selectedFacility, t, user)} />
         )}
         {selectedOrganization && (
           <NavMain

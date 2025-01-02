@@ -19,7 +19,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -274,8 +273,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           )}
         </div>
       </section>
-
-      <PLUGIN_Component __name="ExtendPatientInfoCard" {...props} />
     </>
   );
 }
