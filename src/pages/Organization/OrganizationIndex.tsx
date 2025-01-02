@@ -16,15 +16,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import type { Organization } from "@/types/organization/organization";
 import { getOrgLevel } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 export default function OrganizationIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["organization", "mine"],
-    queryFn: query(routes.organization.listMine),
+    queryFn: query(organizationApi.listMine),
   });
 
   if (isLoading) {

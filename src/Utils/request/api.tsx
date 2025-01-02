@@ -49,10 +49,7 @@ import {
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
 import {
-  Organization,
-  OrganizationResponse,
   OrganizationUserRole,
-  OrganizationUserRoleResponse,
   RoleResponse,
 } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
@@ -745,57 +742,6 @@ const routes = {
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
 
-  // Organization Routes
-  organization: {
-    listMine: {
-      path: "/api/v1/organization/mine/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    list: {
-      path: "/api/v1/organization/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    get: {
-      path: "/api/v1/organization/{id}/",
-      method: "GET",
-      TRes: {} as Organization,
-    },
-    listUsers: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
-    },
-    assignUser: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "POST",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    updateUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "PUT",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    removeUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "DELETE",
-      TRes: {} as Record<string, never>,
-    },
-    listPatients: {
-      path: "/api/v1/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Patient>>(),
-    },
-    getPublicOrganizations: {
-      path: "/api/v1/govt/organization/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Organization>>(),
-    },
-  },
-
   facilityOrganization: {
     list: {
       path: "/api/v1/facility/{facilityId}/organizations/",
@@ -816,7 +762,7 @@ const routes = {
     listUsers: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
       method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
+      TRes: {} as PaginatedResponse<OrganizationUserRole>,
     },
     assignUser: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",

@@ -45,7 +45,6 @@ export interface Role {
   updated_at: string;
 }
 
-export type OrganizationResponse = PaginatedResponse<Organization>;
 export type OrganizationUserRoleResponse =
   PaginatedResponse<OrganizationUserRole>;
 export type RoleResponse = PaginatedResponse<Role>;

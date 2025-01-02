@@ -27,6 +27,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import organizationApi from "@/types/organization/organizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -69,7 +70,7 @@ export default function LinkUserSheet({
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.organization.assignUser, {
+      mutate(organizationApi.assignUser, {
         pathParams: { id: organizationId },
         body,
       })(body),

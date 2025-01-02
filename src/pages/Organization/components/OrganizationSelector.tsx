@@ -11,13 +11,9 @@ import useDebouncedState from "@/hooks/useDebouncedState";
 
 import { ORGANIZATION_LEVELS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import {
-  Organization,
-  OrganizationResponse,
-  getOrgLevel,
-} from "@/types/organization/organization";
+import { Organization, getOrgLevel } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationSelectorProps {
   value?: string;
@@ -44,9 +40,9 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       }
     : {};
 
-  const { data: getAllOrganizations } = useQuery<OrganizationResponse>({
+  const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
-    queryFn: query(routes.organization.list, {
+    queryFn: query(organizationApi.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
@@ -64,7 +60,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       selectedLevels[selectedLevels.length - 1]?.id,
       searchQuery,
     ],
-    queryFn: query(routes.organization.list, {
+    queryFn: query(organizationApi.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
@@ -81,7 +77,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         ? getAllOrganizations?.results
         : currentLevelOrganizations?.results;
 
-    const selectedOrg = orgList?.find((org) => org.id === value);
+    const selectedOrg = orgList?.find((org: Organization) => org.id === value);
     if (!selectedOrg) return;
 
     const newLevels = selectedLevels.slice(0, level);
