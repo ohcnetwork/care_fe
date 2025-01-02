@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { conditionalAttribute } from "@/Utils/utils";
 import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   onSelect: (questionnaire: QuestionnaireDetail) => void;
@@ -36,9 +37,14 @@ export function QuestionnaireSearch({
 
   const { data: questionnaires, isLoading } =
     useQuery<QuestionnaireListResponse>({
-      queryKey: ["questionnaires", "list"],
-      queryFn: query(routes.questionnaire.list, {
-        queryParams: subjectType ? { subject_type: subjectType } : undefined,
+      queryKey: ["questionnaires", "list", search, subjectType],
+      queryFn: query(questionnaireApi.list, {
+        queryParams: {
+          title: search,
+          ...conditionalAttribute(!!subjectType, {
+            subject_type: subjectType,
+          }),
+        },
       }),
     });
 

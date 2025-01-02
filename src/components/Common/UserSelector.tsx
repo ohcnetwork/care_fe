@@ -23,10 +23,10 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useDebouncedState from "@/hooks/useDebouncedState";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
+import UserApi from "@/types/user/userApi";
 
 interface Props {
   selected?: UserBase;
@@ -47,7 +47,7 @@ export default function UserSelector({
 
   const { data, isFetching } = useQuery({
     queryKey: ["users", search],
-    queryFn: query(routes.user.list, {
+    queryFn: query(UserApi.list, {
       queryParams: { search_text: search },
     }),
   });

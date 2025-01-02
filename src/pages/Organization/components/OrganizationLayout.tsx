@@ -14,13 +14,13 @@ import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   Organization,
   OrganizationParent,
   getOrgLevel,
 } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
@@ -70,7 +70,7 @@ export default function OrganizationLayout({
 
   const { data: org, isLoading } = useQuery<Organization>({
     queryKey: ["organization", id],
-    queryFn: query(routes.organization.get, {
+    queryFn: query(organizationApi.get, {
       pathParams: { id },
     }),
   });

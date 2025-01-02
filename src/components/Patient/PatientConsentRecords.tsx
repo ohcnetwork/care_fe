@@ -23,7 +23,6 @@ import {
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatDateTime } from "@/Utils/utils";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -53,12 +52,6 @@ export default function PatientConsentRecords(props: {
     },
     onEdit: async () => {
       refetch();
-    },
-  });
-
-  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
-    pathParams: {
-      id: patientId,
     },
   });
 
@@ -112,22 +105,6 @@ export default function PatientConsentRecords(props: {
   return (
     <Page
       title={"Patient Consent Records"}
-      crumbsReplacements={{
-        [facilityId]: { name: patient?.facility_object?.name },
-        [patientId]: { name: patient?.name },
-        consultation: {
-          name: "Consultation",
-          uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
-        },
-        [consultationId]: {
-          name:
-            patient?.last_consultation?.suggestion === "A"
-              ? `Admitted on ${formatDateTime(
-                  patient?.last_consultation?.encounter_date,
-                )}`
-              : patient?.last_consultation?.suggestion_text,
-        },
-      }}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`}
     >
       {fileUpload.Dialogues}

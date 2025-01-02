@@ -1,10 +1,8 @@
-import ManageUsers from "@/components/Users/ManageUsers";
 import UserHome from "@/components/Users/UserHome";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const UserRoutes: AppRoutes = {
-  "/users": () => <ManageUsers />,
   "/facility/:facilityId/users/:username": ({ facilityId, username }) => (
     <UserHome facilityId={facilityId} username={username} tab="profile" />
   ),
