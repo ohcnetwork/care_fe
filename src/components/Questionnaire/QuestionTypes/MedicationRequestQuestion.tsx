@@ -1,6 +1,8 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import React from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -148,7 +150,12 @@ export const MedicationRequestItem: React.FC<{
   };
 
   return (
-    <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
+    <div
+      className={cn(
+        "p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2",
+        disabled && "opacity-70 pointer-events-none",
+      )}
+    >
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h4 className="text-base font-semibold">
           {index + 1}. {medication.medication?.display}
@@ -161,7 +168,6 @@ export const MedicationRequestItem: React.FC<{
               onValueChange={(value: MedicationRequestIntent) =>
                 onUpdate?.({ intent: value })
               }
-              disabled={disabled}
             >
               <SelectTrigger className="capitalize">
                 <SelectValue placeholder="Select intent" />
@@ -180,12 +186,7 @@ export const MedicationRequestItem: React.FC<{
             </Select>
           </div>
           {onRemove && (
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={onRemove}
-              disabled={disabled}
-            >
+            <Button variant="secondary" size="icon" onClick={onRemove}>
               <MinusCircledIcon className="size-4" />
             </Button>
           )}
@@ -205,7 +206,6 @@ export const MedicationRequestItem: React.FC<{
                   dose_and_rate: { type: "ordered", dose_quantity: value },
                 })
               }
-              disabled={disabled}
             />
           </div>
           <div className="flex-[2]">
@@ -215,7 +215,6 @@ export const MedicationRequestItem: React.FC<{
               value={medication.dosage_instruction?.route}
               onSelect={(route) => handleUpdateDosageInstruction({ route })}
               placeholder="Select route"
-              disabled={disabled}
             />
           </div>
           <div className="flex-1">
@@ -227,7 +226,6 @@ export const MedicationRequestItem: React.FC<{
               value={medication.dosage_instruction?.method}
               onSelect={(method) => handleUpdateDosageInstruction({ method })}
               placeholder="Select method"
-              disabled={disabled}
               count={20}
             />
           </div>
@@ -241,7 +239,6 @@ export const MedicationRequestItem: React.FC<{
               value={medication.dosage_instruction?.site}
               onSelect={(site) => handleUpdateDosageInstruction({ site })}
               placeholder="Select site"
-              disabled={disabled}
             />
           </div>
         </div>
@@ -275,7 +272,6 @@ export const MedicationRequestItem: React.FC<{
                   handleUpdateDosageInstruction({ as_needed_for: reason })
                 }
                 placeholder="Select reason or indicator for PRN"
-                disabled={disabled}
               />
             </div>
           </div>
@@ -292,7 +288,6 @@ export const MedicationRequestItem: React.FC<{
                     timing: FREQUENCY_OPTIONS[value].timing,
                   })
                 }
-                disabled={disabled}
               >
                 <SelectTrigger className="capitalize">
                   <SelectValue placeholder="Select frequency" />
@@ -329,7 +324,6 @@ export const MedicationRequestItem: React.FC<{
                   },
                 })
               }
-              disabled={disabled}
             />
           </div>
         </div>
