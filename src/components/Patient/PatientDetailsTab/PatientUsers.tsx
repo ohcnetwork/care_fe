@@ -243,7 +243,7 @@ export const PatientUsers = (props: PatientProps) => {
     }
     return (
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {users?.results.map((user: UserBase) => (
+        {users?.results.map((user) => (
           <div
             key={user.id}
             className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
