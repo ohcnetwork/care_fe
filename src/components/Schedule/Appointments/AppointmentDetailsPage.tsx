@@ -82,17 +82,34 @@ export default function AppointmentDetailsPage(props: Props) {
     }),
   });
 
-  const { mutate: updateAppointment, isPending } = useMutation({
+  const redirectToPatientPage = () => {
+    navigate(`/facility/${props.facilityId}/patients/verify`, {
+      query: {
+        phone_number: patient.phone_number,
+        year_of_birth: patient.year_of_birth,
+        partial_id: patient.id.slice(0, 5),
+      },
+    });
+  };
+
+  const { mutate: updateAppointment, isPending } = useMutation<
+    Appointment,
+    unknown,
+    { status: Appointment["status"] }
+  >({
     mutationFn: mutate(ScheduleAPIs.appointments.update, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
       },
     }),
-    onSuccess: () => {
+    onSuccess: (_, request) => {
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
+      if (request.status === "in_consultation") {
+        redirectToPatientPage();
+      }
     },
   });
 
@@ -160,15 +177,7 @@ export default function AppointmentDetailsPage(props: Props) {
               <AppointmentActions
                 appointment={appointment}
                 onChange={(status) => updateAppointment({ status })}
-                onViewPatient={() => {
-                  navigate(`/facility/${props.facilityId}/patients/verify`, {
-                    query: {
-                      phone_number: patient.phone_number,
-                      year_of_birth: patient.year_of_birth,
-                      partial_id: patient.id.slice(0, 5),
-                    },
-                  });
-                }}
+                onViewPatient={redirectToPatientPage}
               />
             </div>
           </div>
