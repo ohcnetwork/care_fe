@@ -10,6 +10,16 @@ export default function Plausible() {
   });
 
   useEffect(() => {
+    const missingConfig = [];
+    if (!careConfig.plausible.domain) missingConfig.push("domain");
+    if (!careConfig.plausible.server) missingConfig.push("server");
+    if (missingConfig.length > 0) {
+      console.error(
+        `Plausible analytics disabled. Missing configuration: ${missingConfig.join(", ")}`,
+      );
+      return;
+    }
+
     plausible("pageview");
   }, []);
 

@@ -11,7 +11,7 @@ import { FileManagerResult } from "@/hooks/useFileManager";
 import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export interface FileBlockProps {
   file: FileUploadModel;
@@ -32,7 +32,7 @@ export default function FileBlock(props: FileBlockProps) {
 
   const filetype = fileManager.getFileType(file);
 
-  const fileData = useQuery(routes.retrieveUpload, {
+  const fileData = useTanStackQueryInstead(routes.retrieveUpload, {
     query: { file_type: fileManager.type, associating_id },
     pathParams: { id: file.id || "" },
     prefetch: filetype === "AUDIO" && !file.is_archived,

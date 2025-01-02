@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import DialogModal from "@/components/Common/Dialog";
-import { DupPatientModel } from "@/components/Facility/models";
+
+import { PartialPatientModel } from "@/types/emr/newPatient";
+
+import { Button } from "../ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 interface Props {
-  patientList: Array<DupPatientModel>;
+  patientList: Array<PartialPatientModel>;
   handleOk: (action: string) => void;
   handleCancel: () => void;
 }
-
-const tdClass = "border border-secondary-400 p-2 text-left";
 
 const DuplicatePatientDialog = (props: Props) => {
   const { t } = useTranslation();
@@ -20,7 +30,7 @@ const DuplicatePatientDialog = (props: Props) => {
 
   return (
     <DialogModal
-      title="Patient Records Found"
+      title={t("patient_records_found")}
       show={true}
       onClose={handleCancel}
       className="w-3/4 md:w-1/2"
@@ -28,44 +38,40 @@ const DuplicatePatientDialog = (props: Props) => {
       <div className="grid grid-cols-1 gap-4">
         <div>
           <p className="text-sm leading-relaxed">
-            It appears that there are patient records that contain the same
-            phone number as the one you just entered. (
+            {t("patient_records_found_description")}(
             <span className="font-bold">{patientList[0].phone_number}</span>)
           </p>
         </div>
         <div>
-          <div className="max-h-[200px] overflow-auto rounded border border-y-secondary-400">
-            <table className="relative w-full border-collapse">
-              <thead>
-                <tr className="border-separate">
-                  {["Patient Name and ID", "Gender"].map((heading, i) => (
-                    <th
-                      key={i}
-                      className={tdClass + " sticky top-0 bg-white/90"}
-                    >
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
+          <div className="max-h-[200px] overflow-auto ">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {[`${t("patient_name")} / ID`, t("gender")].map(
+                    (heading, i) => (
+                      <TableHead key={i}>{heading}</TableHead>
+                    ),
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {patientList.map((patient, i) => {
                   return (
-                    <tr key={i}>
-                      <td className={tdClass}>
+                    <TableRow key={i}>
+                      <TableCell>
                         <div className="font-semibold capitalize">
                           {patient.name}
                         </div>
                         <div className="break-words text-xs">
-                          ID : {patient.patient_id}
+                          ID : {patient.id}
                         </div>
-                      </td>
-                      <td className={tdClass}>{patient.gender}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell>{patient.gender}</TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
         <div className="flex flex-col">
@@ -107,17 +113,18 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
       </div>
       <div className="mt-4 flex flex-col justify-between sm:flex-row">
-        <Cancel
-          onClick={handleCancel}
-          className="mb-2 sm:mb-0"
-          label={"Close"}
-        />
-        <Submit
-          id="submit-continue-button"
+        <Button onClick={handleCancel} className="gap-1" variant={"secondary"}>
+          <CareIcon icon="l-times" className="text-lg" />
+          {t("close")}
+        </Button>
+        <Button
           onClick={() => handleOk(action)}
           disabled={!action}
-          label="Continue"
-        />
+          variant={"primary"}
+        >
+          <CareIcon icon="l-check" className="text-lg mr-1" />
+          {t("continue")}
+        </Button>
       </div>
     </DialogModal>
   );

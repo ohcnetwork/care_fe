@@ -19,7 +19,7 @@ import useSlug from "@/hooks/useSlug";
 
 import { Success } from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { Writable } from "@/Utils/types";
 import { classNames, dateQueryString } from "@/Utils/utils";
 
@@ -76,11 +76,11 @@ export const EncounterSymptomsBuilder = (props: {
   showAll?: boolean;
   onChange?: () => void;
 }) => {
-  const consultationId = useSlug("consultation");
+  const encounterId = useSlug("encounter");
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const { data, loading, refetch } = useQuery(SymptomsApi.list, {
-    pathParams: { consultationId },
+  const { data, loading, refetch } = useTanStackQueryInstead(SymptomsApi.list, {
+    pathParams: { consultationId: encounterId },
     query: { limit: 100 },
   });
 
@@ -101,7 +101,10 @@ export const EncounterSymptomsBuilder = (props: {
   }
 
   return (
-    <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
+    <div
+      className="flex w-full flex-col items-start rounded-lg border border-secondary-400"
+      data-scribe-subform="Symptoms"
+    >
       <ul
         className={classNames(
           "flex w-full flex-col p-4",
@@ -112,7 +115,10 @@ export const EncounterSymptomsBuilder = (props: {
           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
             setIsProcessing(true);
             const { res } = await request(SymptomsApi.partialUpdate, {
-              pathParams: { consultationId, external_id: symptom.id },
+              pathParams: {
+                consultationId: encounterId,
+                external_id: symptom.id,
+              },
               body: { [event.name]: event.value },
             });
             if (res?.ok) {
@@ -125,7 +131,10 @@ export const EncounterSymptomsBuilder = (props: {
           const handleMarkAsEnteredInError = async () => {
             setIsProcessing(true);
             const { res } = await request(SymptomsApi.markAsEnteredInError, {
-              pathParams: { consultationId, external_id: symptom.id },
+              pathParams: {
+                consultationId: encounterId,
+                external_id: symptom.id,
+              },
             });
             if (res?.ok) {
               props.onChange?.();
@@ -138,6 +147,7 @@ export const EncounterSymptomsBuilder = (props: {
             <li
               key={symptom.id}
               className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+              data-scribe-subform-entry
             >
               <SymptomEntry
                 value={symptom}
@@ -159,7 +169,7 @@ export const EncounterSymptomsBuilder = (props: {
       <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
         <AddSymptom
           existing={data.results}
-          consultationId={consultationId}
+          encounterId={encounterId}
           onAdd={() => {
             props.onChange?.();
             refetch();
@@ -247,7 +257,7 @@ const AddSymptom = (props: {
   disabled?: boolean;
   existing: (Writable<EncounterSymptom> | EncounterSymptom)[];
   onAdd?: (value: Writable<EncounterSymptom>[]) => void;
-  consultationId?: string;
+  encounterId?: string;
 }) => {
   const [processing, setProcessing] = useState(false);
   const [selected, setSelected] = useState<EncounterSymptom["symptom"][]>([]);
@@ -268,12 +278,12 @@ const AddSymptom = (props: {
       };
     });
 
-    if (props.consultationId) {
+    if (props.encounterId) {
       const responses = await Promise.all(
         objects.map((body) =>
           request(SymptomsApi.add, {
             body,
-            pathParams: { consultationId: props.consultationId! },
+            pathParams: { consultationId: props.encounterId! },
           }),
         ),
       );
@@ -294,7 +304,10 @@ const AddSymptom = (props: {
     : true;
 
   return (
-    <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
+    <div
+      className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap"
+      data-scribe-subform-creator
+    >
       <DateFormField
         name="onset_date"
         id="symptoms_onset_date"
@@ -378,18 +391,28 @@ export const SymptomText = (props: {
 
   const isOtherSymptom = symptom.id === OTHER_SYMPTOM_CHOICE.id;
 
-  return isOtherSymptom ? (
+  return (
     <>
-      <span className="font-normal">Other: </span>
-      <span
-        className={classNames(
-          !props.value.other_symptom?.trim() && "italic text-secondary-700",
-        )}
-      >
-        {props.value.other_symptom || "Not specified"}
-      </span>
+      {isOtherSymptom ? (
+        <>
+          <span className="font-normal">Other: </span>
+          <span
+            className={classNames(
+              !props.value.other_symptom?.trim() && "italic text-secondary-700",
+            )}
+          >
+            {props.value.other_symptom || "Not specified"}
+          </span>
+        </>
+      ) : (
+        symptom.text
+      )}
+      <input
+        type="hidden"
+        name="symptom"
+        value={`${isOtherSymptom ? "Other: " + props.value.other_symptom : symptom.text}`}
+        readOnly
+      />
     </>
-  ) : (
-    symptom.text
   );
 };

@@ -1,5 +1,6 @@
 files:
-  - source: /src/Locale/en/*.json
-    translation: /src/Locale/%two_letters_code%/%original_file_name%
+  - source: /public/locale/{{lang}}.json
+    translation: /public/locale/%two_letters_code%/%original_file_name%
 bundles:
   - 2
+

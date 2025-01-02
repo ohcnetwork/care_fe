@@ -7,7 +7,7 @@ import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
-interface FacilitySelectProps {
+interface BaseFacilitySelectProps {
   name: string;
   exclude_user?: string;
   errors?: string | undefined;
@@ -22,36 +22,50 @@ interface FacilitySelectProps {
   showAll?: boolean;
   showNOptions?: number | undefined;
   freeText?: boolean;
-  selected?: FacilityModel | FacilityModel[] | null;
-  setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
   allowNone?: boolean;
   placeholder?: string;
   filter?: (facilities: FacilityModel) => boolean;
+  id?: string;
 }
 
-export const FacilitySelect = (props: FacilitySelectProps) => {
-  const {
-    name,
-    exclude_user,
-    required,
-    multiple,
-    selected,
-    setSelected,
-    searchAll,
-    disabled = false,
-    showAll = true,
-    showNOptions,
-    className = "",
-    facilityType,
-    district,
-    state,
-    allowNone = false,
-    freeText = false,
-    errors = "",
-    placeholder,
-    filter,
-  } = props;
+interface SingleFacilitySelectProps extends BaseFacilitySelectProps {
+  multiple?: false;
+  selected: FacilityModel | null;
+  setSelected: (selected: FacilityModel | null) => void;
+}
 
+interface MultipleFacilitySelectProps extends BaseFacilitySelectProps {
+  multiple: true;
+  selected: FacilityModel[];
+  setSelected: (selected: FacilityModel[] | null) => void;
+}
+
+type FacilitySelectProps =
+  | SingleFacilitySelectProps
+  | MultipleFacilitySelectProps;
+
+export const FacilitySelect = ({
+  name,
+  exclude_user,
+  required,
+  multiple,
+  selected,
+  setSelected,
+  searchAll,
+  disabled = false,
+  showAll = true,
+  showNOptions,
+  className = "",
+  facilityType,
+  district,
+  state,
+  allowNone = false,
+  freeText = false,
+  errors = "",
+  placeholder,
+  filter,
+  id,
+}: FacilitySelectProps) => {
   const facilitySearch = useCallback(
     async (text: string) => {
       const query = {
@@ -88,6 +102,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
   return (
     <AutoCompleteAsync
+      id={id}
       placeholder={placeholder}
       name={name}
       required={required}

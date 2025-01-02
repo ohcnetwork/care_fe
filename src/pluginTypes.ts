@@ -1,38 +1,55 @@
 import { LazyExoticComponent } from "react";
 
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
-import { ConsultationModel } from "@/components/Facility/models";
-import { PatientModel } from "@/components/Patient/models";
+import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
-import { AppRoutes } from "@/Routers/AppRouter";
-import { pluginMap } from "@/pluginMap";
+import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
-// Define the available plugins
-export type AvailablePlugin = "@apps/care_livekit_fe" | "@apps/care_hcx_fe";
+import { AppRoutes } from "./Routers/AppRouter";
+import { FormContextValue } from "./components/Form/FormContext";
+import { PatientMeta } from "./components/Patient/models";
+import { pluginMap } from "./pluginMap";
+import { PatientModel } from "./types/emr/patient";
 
-export type AvailablePluginManifest =
-  | "@app-manifest/care_livekit_fe"
-  | "@app-manifest/care_hcx_fe";
+export type PatientForm = PatientModel &
+  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
 
-export type ManagePatientOptionsComponentType = React.FC<{
-  consultation: ConsultationModel | undefined;
-  patient: PatientModel;
+export type ScribeComponentType = React.FC;
+export type ManageFacilityOptionsComponentType = React.FC<{
+  facility?: FacilityModel;
 }>;
 
-export type AdditionalDischargeProceduresComponentType = React.FC<{
-  consultation: ConsultationModel;
+export type ExtendFacilityConfigureComponentType = React.FC<{
+  facilityId: string;
+}>;
+
+export type ExtendPatientRegisterFormComponentType = React.FC<{
+  facilityId: string;
+  patientId?: string;
+  state: {
+    form: {
+      [key: string]: any;
+    };
+    errors: {
+      [key: string]: string;
+    };
+  };
+  dispatch: React.Dispatch<any>;
+  field: FormContextValue<PatientForm>;
 }>;
 
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
-  ManagePatientOptions: ManagePatientOptionsComponentType;
-  AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
+  Scribe: ScribeComponentType;
+  ManageFacilityOptions: ManageFacilityOptionsComponentType;
+  EncounterContextEnabler: React.FC;
+  ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
+  ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -55,17 +72,8 @@ export type PluginManifest = {
   routes: AppRoutes;
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
-  navItems: INavItem[];
-};
-
-// Create a type that ensures only available plugins can be used
-export type EnabledPluginConfig = {
-  plugin: string;
-  manifestPath: AvailablePluginManifest;
-  path: AvailablePlugin;
-  manifest: Promise<PluginManifest>;
-  // Components are a dictionary, with the key being the component name, and the value being the component type
-  components: PluginComponentMap;
+  // navItems: INavItem[];
+  encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
 };
 
 export { pluginMap };

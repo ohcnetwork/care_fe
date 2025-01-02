@@ -19,7 +19,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
@@ -42,7 +42,7 @@ export const LinearProgressWithLabel = (props: { value: number }) => {
 interface FileUploadProps {
   type: string;
   patientId?: string;
-  consultationId?: string;
+  encounterId?: string;
   consentId?: string;
   allowAudio?: boolean;
   sampleId?: string;
@@ -69,12 +69,14 @@ export interface StateInterface {
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
   rotation: number;
+  id?: string;
+  associating_id?: string;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const {
-    consultationId,
+    encounterId,
     patientId,
     consentId,
     type,
@@ -111,12 +113,12 @@ export const FileUpload = (props: FileUploadProps) => {
     {
       PATIENT: patientId,
       CONSENT_RECORD: consentId,
-      CONSULTATION: consultationId,
+      ENCOUNTER: encounterId,
       SAMPLE_MANAGEMENT: sampleId,
       CLAIM: claimId,
     }[type] || "";
 
-  const activeFilesQuery = useQuery(routes.viewUpload, {
+  const activeFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -126,7 +128,7 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const archivedFilesQuery = useQuery(routes.viewUpload, {
+  const archivedFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -136,15 +138,15 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const dischargeSummaryQuery = useQuery(routes.viewUpload, {
+  const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
-      file_type: "DISCHARGE_SUMMARY",
+      file_type: "discharge_summary",
       associating_id: associatedId,
       is_archived: false,
       limit: RESULTS_PER_PAGE_LIMIT,
       offset: offset,
     },
-    prefetch: type === "CONSULTATION",
+    prefetch: type === "consultation",
     silent: true,
   });
 
@@ -208,8 +210,15 @@ export const FileUpload = (props: FileUploadProps) => {
     type,
     onArchive: refetchAll,
     onEdit: refetchAll,
+    uploadedFiles:
+      fileQuery?.data?.results
+        .slice()
+        .reverse()
+        .map((file) => ({
+          ...file,
+          associating_id: associatedId,
+        })) || [],
   });
-
   const dischargeSummaryFileManager = useFileManager({
     type: "DISCHARGE_SUMMARY",
     onArchive: refetchAll,
@@ -244,7 +253,6 @@ export const FileUpload = (props: FileUploadProps) => {
       id: "record-audio",
     },
   ];
-
   return (
     <div className={`md:p-4 ${props.className}`}>
       {fileUpload.Dialogues}

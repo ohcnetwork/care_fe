@@ -1,9 +1,8 @@
-import { RefObject, useContext, useEffect } from "react";
+import { RefObject } from "react";
+
+import { cn } from "@/lib/utils";
 
 import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
-import { SidebarShrinkContext } from "@/components/Common/Sidebar/Sidebar";
-
-import { classNames } from "@/Utils/utils";
 
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];
@@ -17,29 +16,30 @@ interface PageProps extends PageTitleProps {
    * @default false
    **/
   collapseSidebar?: boolean;
+  hideTitleOnPage?: boolean;
 }
 
 export default function Page(props: PageProps) {
-  const sidebar = useContext(SidebarShrinkContext);
+  // const sidebar = useContext(SidebarShrinkContext);
 
-  useEffect(() => {
-    if (!props.collapseSidebar) return;
+  // useEffect(() => {
+  //   if (!props.collapseSidebar) return;
 
-    sidebar.setShrinked(true);
-    return () => {
-      sidebar.setShrinked(sidebar.shrinked);
-    };
-  }, [props.collapseSidebar]);
+  //   sidebar.setShrinked(true);
+  //   return () => {
+  //     sidebar.setShrinked(sidebar.shrinked);
+  //   };
+  // }, [props.collapseSidebar]);
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "md:px-6 px-3 py-1";
-    else padding = "px-6 py-5";
+    if (!props.hideBack || props.componentRight) padding = "py-0 md:px-6";
+    else padding = "px-6 py-0";
   }
 
   return (
-    <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
+    <div className={cn(padding, props.className)} ref={props.ref}>
+      <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}
@@ -51,6 +51,7 @@ export default function Page(props: PageProps) {
           focusOnLoad={props.focusOnLoad}
           onBackClick={props.onBackClick}
           isInsidePage={true}
+          hideTitleOnPage={props.hideTitleOnPage}
         />
         {props.options}
       </div>

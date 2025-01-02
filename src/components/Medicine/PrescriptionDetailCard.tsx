@@ -6,13 +6,20 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
-import ReadMore from "@/components/Common/Readmore";
-import { Prescription } from "@/components/Medicine/models";
 
-import { classNames } from "@/Utils/utils";
+import {
+  classNames,
+  displayCode,
+  displayQuantity,
+  displayTiming,
+} from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+import { Quantity } from "@/types/questionnaire/quantity";
+
+import { isMedicationDiscontinued } from "./MedicineAdministrationSheet/utils";
 
 interface Props {
-  prescription: Prescription;
+  prescription: MedicationRequest;
   readonly?: boolean;
   children?: React.ReactNode;
   onDiscontinueClick?: () => void;
@@ -30,10 +37,8 @@ export default function PrescriptionDetailCard({
 }: Props) {
   const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(
-    collapsible && prescription.discontinued,
+    collapsible && isMedicationDiscontinued(prescription),
   );
-
-  const medicine = prescription.medicine_object;
 
   return (
     <div
@@ -42,7 +47,7 @@ export default function PrescriptionDetailCard({
         props.selected
           ? "border-primary-500"
           : "border-spacing-2 border-dashed border-secondary-500",
-        prescription.discontinued && "bg-secondary-200 opacity-80",
+        isMedicationDiscontinued(prescription) && "bg-secondary-200 opacity-80",
         collapsible && "cursor-pointer hover:border-secondary-900",
       )}
     >
@@ -64,13 +69,13 @@ export default function PrescriptionDetailCard({
                 )}
               >
                 {isCollapsed ? (
-                  (medicine?.name ?? prescription.medicine_old)
+                  displayCode(prescription.medication)
                 ) : (
                   <>
-                    {prescription.prescription_type === "DISCHARGE" &&
+                    {prescription.category === "discharge" &&
                       `${t("discharge")} `}
                     {t(
-                      prescription.dosage_type === "PRN"
+                      prescription.dosage_instruction.as_needed_boolean
                         ? "prn_prescription"
                         : "prescription",
                     )}
@@ -78,21 +83,21 @@ export default function PrescriptionDetailCard({
                   </>
                 )}
               </h3>
-              {prescription.discontinued && (
+              {isMedicationDiscontinued(prescription) && (
                 <span className="rounded-full bg-secondary-700 px-2 py-1 text-xs font-semibold uppercase text-white">
                   {t("discontinued")}
                 </span>
               )}
             </div>
 
-            {!props.readonly &&
-              prescription.prescription_type !== "DISCHARGE" && (
-                <AuthorizedForConsultationRelatedActions>
-                  <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                    {!prescription.discontinued && onAdministerClick && (
+            {!props.readonly && prescription.category === "discharge" && (
+              <AuthorizedForConsultationRelatedActions>
+                <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
+                  {!isMedicationDiscontinued(prescription) &&
+                    onAdministerClick && (
                       <ButtonV2
                         id="administer-medicine"
-                        disabled={prescription.discontinued}
+                        disabled={isMedicationDiscontinued(prescription)}
                         onClick={(e) => {
                           e.stopPropagation();
                           onAdministerClick();
@@ -107,7 +112,8 @@ export default function PrescriptionDetailCard({
                         {t("administer")}
                       </ButtonV2>
                     )}
-                    {!prescription.discontinued && onDiscontinueClick && (
+                  {!isMedicationDiscontinued(prescription) &&
+                    onDiscontinueClick && (
                       <ButtonV2
                         type="button"
                         size="small"
@@ -123,9 +129,9 @@ export default function PrescriptionDetailCard({
                         {t("discontinue")}
                       </ButtonV2>
                     )}
-                  </div>
-                </AuthorizedForConsultationRelatedActions>
-              )}
+                </div>
+              </AuthorizedForConsultationRelatedActions>
+            )}
           </div>
         </div>
         {!isCollapsed && (
@@ -134,39 +140,38 @@ export default function PrescriptionDetailCard({
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-3">
                   <span className="font-semibold uppercase">
-                    {medicine?.name ?? prescription.medicine_old}
+                    {displayCode(prescription.medication)}
                   </span>
                 </div>
-                {medicine?.type === "brand" && (
-                  <span className="text-xs text-secondary-600">
-                    Generic:{" "}
-                    <span className="capitalize text-secondary-800">
-                      {medicine.generic}
-                    </span>
-                    ; Brand:{" "}
-                    <span className="capitalize text-secondary-800">
-                      {medicine.company}
-                    </span>
-                  </span>
-                )}
               </div>
             </Detail>
 
-            {prescription.dosage_type === "TITRATED" ? (
+            {prescription.dosage_instruction.dose_and_rate?.dose_range && (
               <>
                 <Detail className="col-span-5" label={t("start_dosage")}>
-                  {prescription.base_dosage}
+                  {displayQuantity(
+                    prescription.dosage_instruction.dose_and_rate?.dose_range
+                      ?.low as Quantity,
+                  )}
                 </Detail>
                 <Detail className="col-span-5" label={t("target_dosage")}>
-                  {prescription.target_dosage}
+                  {displayQuantity(
+                    prescription.dosage_instruction.dose_and_rate?.dose_range
+                      ?.high as Quantity,
+                  )}
                 </Detail>
               </>
-            ) : (
+            )}
+
+            {prescription.dosage_instruction.dose_and_rate?.dose_quantity && (
               <Detail
                 className="col-span-10 sm:col-span-6 md:col-span-4"
                 label={t("dosage")}
               >
-                {prescription.base_dosage}
+                {displayQuantity(
+                  prescription.dosage_instruction.dose_and_rate
+                    ?.dose_quantity as Quantity,
+                )}
               </Detail>
             )}
 
@@ -174,71 +179,34 @@ export default function PrescriptionDetailCard({
               className="col-span-10 break-all sm:col-span-6"
               label={t("route")}
             >
-              {prescription.route &&
-                t("PRESCRIPTION_ROUTE_" + prescription.route)}
+              {displayCode(prescription.dosage_instruction.route)}
             </Detail>
 
-            {prescription.dosage_type === "PRN" ? (
-              <>
-                <Detail
-                  className="col-span-10 md:col-span-4"
-                  label={t("indicator")}
-                >
-                  {prescription.indicator}
-                </Detail>
-                <Detail
-                  className="col-span-10 md:col-span-3"
-                  label={t("max_dosage_24_hrs")}
-                >
-                  {prescription.max_dosage}
-                </Detail>
-                <Detail
-                  className="col-span-10 md:col-span-3"
-                  label={t("min_time_bw_doses")}
-                >
-                  {prescription.min_hours_between_doses &&
-                    prescription.min_hours_between_doses + " hrs."}
-                </Detail>
-              </>
-            ) : (
-              <>
-                <Detail className="col-span-5" label={t("frequency")}>
-                  {prescription.frequency &&
-                    t(
-                      "PRESCRIPTION_FREQUENCY_" +
-                        prescription.frequency.toUpperCase(),
-                    )}
-                </Detail>
-                <Detail className="col-span-5" label={t("days")}>
-                  {prescription.days}
-                </Detail>
-              </>
-            )}
-
-            {prescription.instruction_on_titration && (
+            {prescription.dosage_instruction.as_needed_boolean ? (
               <Detail
-                className="col-span-10"
-                label={t("instruction_on_titration")}
+                className="col-span-10 md:col-span-4"
+                label={t("indicator")}
               >
-                <ReadMore
-                  text={prescription.instruction_on_titration}
-                  minChars={120}
-                />
+                {displayCode(prescription.dosage_instruction.as_needed_for)}
+              </Detail>
+            ) : (
+              <Detail className="col-span-5" label={t("frequency")}>
+                {displayTiming(prescription.dosage_instruction.timing)}
               </Detail>
             )}
 
-            {prescription.notes && (
+            {prescription.note && (
               <Detail className="col-span-10" label={t("notes")}>
-                {prescription.notes}
+                {prescription.note}
               </Detail>
             )}
 
-            {prescription.discontinued && (
+            {isMedicationDiscontinued(prescription) && (
               <Detail
                 className="col-span-10"
                 label={t("reason_for_discontinuation")}
               >
-                {prescription.discontinued_reason}
+                {prescription.status_reason}
               </Detail>
             )}
           </div>
@@ -247,15 +215,15 @@ export default function PrescriptionDetailCard({
           <span className="flex gap-1 font-medium">
             Prescribed
             <RecordMeta
-              time={prescription.created_date}
-              user={prescription.prescribed_by}
+              time={prescription.authored_on}
+              user={prescription.created_by}
               inlineUser
             />
           </span>
-          {prescription.discontinued && (
+          {isMedicationDiscontinued(prescription) && (
             <span className="flex gap-1">
               and was discontinued
-              <RecordMeta time={prescription.discontinued_date} />
+              <RecordMeta time={prescription.status_changed} />
             </span>
           )}
         </div>

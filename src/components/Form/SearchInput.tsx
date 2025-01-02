@@ -87,7 +87,7 @@ const SearchInput = ({
       className={className}
       leading={
         props.leading || (
-          <CareIcon icon="l-search-alt" className="text-secondary-600" />
+          <CareIcon icon="l-search-alt" className="text-secondary-600 z-10" />
         )
       }
       trailing={

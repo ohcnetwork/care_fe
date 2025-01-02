@@ -58,9 +58,9 @@ Once the development server has started, open [localhost:4000](http://localhost:
 Authenticate to staging API with any of the following credentials
 
 ```yaml
-- username: dev-districtadmin
+- username: devdistrictadmin
   password: Coronasafe@123
-  role: District Admin
+  role: Administrator
 
 - username: staffdev
   password: Coronasafe@123

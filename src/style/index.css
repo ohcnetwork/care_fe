@@ -6,9 +6,6 @@
 @import "@fontsource/figtree/800.css";
 @import "@fontsource/figtree/900.css";
 
-@import "@pnotify/core/dist/PNotify.css";
-@import "@pnotify/mobile/dist/PNotifyMobile.css";
-@import "@pnotify/core/dist/BrightTheme.css";
 @import "./CAREUI.css";
 
 @tailwind base;
@@ -1310,8 +1307,47 @@ input[type="number"] {
     font-size: 1rem;
 }
 
+
+.grid-2-col, .grid-3-col, .grid-2-1-col, .grid-3-1-col, .grid-1-2-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid-2-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .grid-3-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .grid-2-1-col {
+        grid-template-columns: 2fr 1fr;
+    }
+    .grid-1-2-col {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+.input-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.col-span-all {
+    grid-column: 1 / -1;
+}
+
 @layer base {
   :root {
         --radius:  0.5rem;
+        --sidebar-background: 220 14.3% 95.9%;
+        --sidebar-foreground:  240 5.3% 26.1%;
+        --sidebar-primary:  240 5.9% 10%;
+        --sidebar-primary-foreground:  0 0% 98%;
+        --sidebar-accent:  240 4.8% 95.9%;
+        --sidebar-accent-foreground:  240 5.9% 10%;
+        --sidebar-border: transparent;
+        --sidebar-ring:  217.2 91.2% 59.8%;
     }
 }

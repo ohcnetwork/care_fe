@@ -8,7 +8,7 @@ export default function Tabs(props: {
   className?: string;
   currentTab: string | number;
   onTabChange: (value: string | number) => void;
-  tabs: { text: ReactNode; value: string | number }[];
+  tabs: { text: ReactNode; value: string | number; id?: string }[];
 }) {
   const { className, currentTab, onTabChange, tabs } = props;
   const ref = useRef<HTMLDivElement>(null);
@@ -60,6 +60,7 @@ export default function Tabs(props: {
         {tabs.map((tab, i) => (
           <button
             key={i}
+            id={tab?.id}
             onClick={() => onTabChange(tab.value)}
             className={`${currentTab === tab.value ? "text-white" : "text-primary-500 hover:text-primary-600"} flex-1 whitespace-nowrap px-6 py-2 text-sm font-semibold transition-all`}
           >

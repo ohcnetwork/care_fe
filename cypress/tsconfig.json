@@ -2,9 +2,18 @@
   "compilerOptions": {
     "baseUrl": "./",
     "target": "es5",
-    "lib": ["es5", "dom", "es2015", "es2016", "es2017", "es2018", "es2019", "es2020"],
+    "lib": [
+      "es5",
+      "dom",
+      "es2015",
+      "es2016",
+      "es2017",
+      "es2018",
+      "es2019",
+      "es2020"
+    ],
     "typeRoots": ["./support"],
     "resolveJsonModule": true
   },
-  "include": ["**/*.cy.ts", "support/commands.ts","**/*.ts"],
+  "include": ["**/*.cy.ts", "support/commands.ts", "**/*.ts"]
 }

@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,13 +18,15 @@ import {
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 export interface FileManagerOptions {
   type: string;
   onArchive?: () => void;
   onEdit?: () => void;
+  uploadedFiles?: FileUploadModel[];
 }
 export interface FileManagerResult {
   viewFile: (file: FileUploadModel, associating_id: string) => void;
@@ -48,7 +51,7 @@ export interface FileManagerResult {
 export default function useFileManager(
   options: FileManagerOptions,
 ): FileManagerResult {
-  const { type: fileType, onArchive, onEdit } = options;
+  const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
 
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
@@ -72,6 +75,8 @@ export default function useFileManager(
   const [editDialogueOpen, setEditDialogueOpen] =
     useState<FileUploadModel | null>(null);
   const [editError, setEditError] = useState("");
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const queryClient = useQueryClient();
 
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
@@ -79,16 +84,30 @@ export default function useFileManager(
     return ext;
   };
 
+  const retrieveUpload = async (
+    file: FileUploadModel,
+    associating_id: string,
+  ) => {
+    return queryClient.fetchQuery({
+      queryKey: [`${fileType}-files`, associating_id, file.id],
+      queryFn: () =>
+        query(routes.retrieveUpload, {
+          queryParams: {
+            file_type: fileType,
+            associating_id,
+          },
+          pathParams: { id: file.id || "" },
+        })({} as any),
+    });
+  };
+
   const viewFile = async (file: FileUploadModel, associating_id: string) => {
+    const index = uploadedFiles?.findIndex((f) => f.id === file.id) ?? -1;
+    setCurrentIndex(index);
     setFileUrl("");
     setFileState({ ...file_state, open: true });
-    const { data } = await request(routes.retrieveUpload, {
-      query: {
-        file_type: fileType,
-        associating_id,
-      },
-      pathParams: { id: file.id || "" },
-    });
+
+    const data = await retrieveUpload(file, associating_id);
 
     if (!data) return;
 
@@ -126,30 +145,35 @@ export default function useFileManager(
     }
   };
 
+  const { mutateAsync: archiveUpload } = useMutation({
+    mutationFn: (body: { id: string; archive_reason: string }) =>
+      query(routes.archiveUpload, {
+        body: { archive_reason: body.archive_reason },
+        pathParams: { id: body.id },
+      })({} as any),
+    onSuccess: () => {
+      Notification.Success({ msg: "File archived successfully" });
+      queryClient.invalidateQueries({
+        queryKey: [`${fileType}-files`, archiveDialogueOpen?.associating_id],
+      });
+    },
+  });
+
   const handleFileArchive = async (archiveFile: typeof archiveDialogueOpen) => {
     if (!validateArchiveReason(archiveReason)) {
       setArchiving(false);
       return;
     }
 
-    const { res } = await request(routes.editUpload, {
-      body: { is_archived: true, archive_reason: archiveReason },
-      pathParams: {
-        id: archiveFile?.id || "",
-        fileType,
-        associatingId: archiveFile?.associating_id || "",
-      },
+    await archiveUpload({
+      id: archiveFile?.id || "",
+      archive_reason: archiveReason,
     });
-
-    if (res?.ok) {
-      Notification.Success({ msg: "File archived successfully" });
-    }
 
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
     onArchive && onArchive();
-    return res;
   };
 
   const archiveFile = (
@@ -190,26 +214,34 @@ export default function useFileManager(
     }
   };
 
+  const { mutateAsync: editUpload } = useMutation({
+    mutationFn: (body: { id: string; name: string; associating_id: string }) =>
+      mutate(routes.editUpload, {
+        body: { name: body.name },
+        pathParams: { id: body.id },
+      })(body),
+    onSuccess: (_, { associating_id }) => {
+      Notification.Success({ msg: "File name changed successfully" });
+      setEditDialogueOpen(null);
+      onEdit && onEdit();
+      queryClient.invalidateQueries({
+        queryKey: [`${fileType}-files`, associating_id],
+      });
+    },
+  });
+
   const partialupdateFileName = async (file: FileUploadModel) => {
     if (!validateEditFileName(file.name || "")) {
       setEditing(false);
       return;
     }
 
-    const { res } = await request(routes.editUpload, {
-      body: { name: file.name },
-      pathParams: {
-        id: file.id || "",
-        fileType,
-        associatingId: file.associating_id || "",
-      },
+    await editUpload({
+      id: file.id || "",
+      name: file.name || "",
+      associating_id: file.associating_id || "",
     });
 
-    if (res?.ok) {
-      Notification.Success({ msg: "File name changed successfully" });
-      setEditDialogueOpen(null);
-      onEdit && onEdit();
-    }
     setEditing(false);
   };
 
@@ -225,9 +257,12 @@ export default function useFileManager(
         file_state={file_state}
         setFileState={setFileState}
         downloadURL={downloadURL}
+        uploadedFiles={uploadedFiles}
         onClose={handleFilePreviewClose}
         fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
+        loadFile={viewFile}
+        currentIndex={currentIndex}
       />
       <DialogModal
         show={
@@ -438,10 +473,7 @@ export default function useFileManager(
     try {
       if (!file.id) return;
       Notification.Success({ msg: "Downloading file..." });
-      const { data: fileData } = await request(routes.retrieveUpload, {
-        query: { file_type: fileType, associating_id },
-        pathParams: { id: file.id },
-      });
+      const fileData = await retrieveUpload(file, associating_id);
       const response = await fetch(fileData?.read_signed_url || "");
       if (!response.ok) throw new Error("Network response was not ok.");
 

@@ -8,6 +8,7 @@ const useSegmentedRecording = () => {
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
   const [audioBlobs, setAudioBlobs] = useState<Blob[]>([]);
   const [restart, setRestart] = useState(false);
+  const [microphoneAccess, setMicrophoneAccess] = useState(false); // New state
   const { t } = useTranslation();
 
   const bufferInterval = 1 * 1000;
@@ -25,6 +26,7 @@ const useSegmentedRecording = () => {
         requestRecorder().then(
           (newRecorder) => {
             setRecorder(newRecorder);
+            setMicrophoneAccess(true); // Set access to true on success
             if (restart) {
               setIsRecording(true);
             }
@@ -34,6 +36,7 @@ const useSegmentedRecording = () => {
               msg: t("audio__permission_message"),
             });
             setIsRecording(false);
+            setMicrophoneAccess(false); // Set access to false on failure
           },
         );
       }
@@ -98,8 +101,16 @@ const useSegmentedRecording = () => {
     return () => recorder.removeEventListener("dataavailable", handleData);
   }, [recorder, isRecording, bufferInterval, audioBlobs, restart]);
 
-  const startRecording = () => {
-    setIsRecording(true);
+  const startRecording = async () => {
+    try {
+      const newRecorder = await requestRecorder();
+      setRecorder(newRecorder);
+      setMicrophoneAccess(true);
+      setIsRecording(true);
+    } catch (error) {
+      setMicrophoneAccess(false);
+      throw new Error("Microphone access denied");
+    }
   };
 
   const stopRecording = () => {
@@ -116,6 +127,7 @@ const useSegmentedRecording = () => {
     stopRecording,
     resetRecording,
     audioBlobs,
+    microphoneAccess, // Return microphoneAccess
   };
 };
 

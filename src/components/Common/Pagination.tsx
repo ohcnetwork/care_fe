@@ -71,7 +71,7 @@ const Pagination = ({
   };
 
   const totalCount = data.totalCount;
-  if (!totalCount) {
+  if (!totalCount || totalCount <= rowsPerPage) {
     return null;
   }
   const totalPage = Math.ceil(totalCount / rowsPerPage);

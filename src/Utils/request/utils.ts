@@ -30,9 +30,14 @@ const makeQueryParams = (query: QueryParams) => {
   const qParams = new URLSearchParams();
 
   Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined) {
-      qParams.set(key, `${value}`);
+    if (value === undefined) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((v) => qParams.append(key, `${v}`));
+      return;
     }
+
+    qParams.set(key, `${value}`);
   });
 
   return qParams.toString();
@@ -50,28 +55,25 @@ const ensurePathNotMissingReplacements = (path: string) => {
   }
 };
 
-export function makeHeaders(noAuth: boolean) {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  });
+export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
+  const headers = new Headers(additionalHeaders);
 
-  if (!noAuth) {
-    const token = getAuthorizationHeader();
+  headers.set("Content-Type", "application/json");
+  headers.append("Accept", "application/json");
 
-    if (token) {
-      headers.append("Authorization", token);
-    }
+  const authorizationHeader = getAuthorizationHeader();
+  if (authorizationHeader && !noAuth) {
+    headers.append("Authorization", authorizationHeader);
   }
 
   return headers;
 }
 
 export function getAuthorizationHeader() {
-  const bearerToken = localStorage.getItem(LocalStorageKeys.accessToken);
+  const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
 
-  if (bearerToken) {
-    return `Bearer ${bearerToken}`;
+  if (accessToken) {
+    return `Bearer ${accessToken}`;
   }
 
   return null;

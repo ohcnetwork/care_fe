@@ -5,8 +5,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { debounce } from "lodash-es";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -16,6 +15,8 @@ import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "@/components/Form/MultiSelectMenuV2";
+
+import useDebounce from "@/hooks/useDebounce";
 
 import { classNames } from "@/Utils/utils";
 
@@ -69,27 +70,29 @@ const AutoCompleteAsync = (props: Props) => {
   const hasSelection =
     (!multiple && selected) || (multiple && selected?.length > 0);
 
-  const fetchDataAsync = useMemo(
-    () =>
-      debounce(async (query: string) => {
-        setLoading(true);
-        const data = ((await fetchData(query)) || [])?.filter((d: any) =>
-          filter ? filter(d) : true,
-        );
+  const fetchDataDebounced = useDebounce(async (searchQuery: string) => {
+    setLoading(true);
+    try {
+      const fetchedData = (await fetchData(searchQuery)) || [];
+      const filteredData = filter
+        ? fetchedData.filter((item: any) => filter(item))
+        : fetchedData;
 
-        if (showNOptions !== undefined) {
-          setData(data.slice(0, showNOptions));
-        } else {
-          setData(data);
-        }
-        setLoading(false);
-      }, debounceTime),
-    [fetchData, showNOptions, debounceTime],
-  );
+      setData(
+        showNOptions !== undefined
+          ? filteredData.slice(0, showNOptions)
+          : filteredData,
+      );
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, debounceTime);
 
   useEffect(() => {
-    fetchDataAsync(query);
-  }, [query, fetchDataAsync]);
+    fetchDataDebounced(query);
+  }, [query]);
 
   return (
     <div className={className}>

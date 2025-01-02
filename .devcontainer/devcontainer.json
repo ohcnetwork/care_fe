@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
   "name": "care_fe",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-18-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": true,

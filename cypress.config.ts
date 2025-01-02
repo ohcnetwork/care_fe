@@ -1,6 +1,9 @@
 import { defineConfig } from "cypress";
 import cypressSplit from "cypress-split";
+import * as dotenv from "dotenv";
 import fs from "fs";
+
+dotenv.config();
 
 export default defineConfig({
   projectId: "wf7d2m",
@@ -32,7 +35,7 @@ export default defineConfig({
     requestTimeout: 15000,
   },
   env: {
-    API_URL: process.env.REACT_CARE_API_URL ?? "http://localhost:9000",
+    API_URL: process.env.REACT_CARE_API_URL,
     ENABLE_HCX: process.env.REACT_ENABLE_HCX ?? false,
   },
 });

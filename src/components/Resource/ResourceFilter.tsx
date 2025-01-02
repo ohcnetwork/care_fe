@@ -16,7 +16,7 @@ import { RESOURCE_FILTER_ORDER } from "@/common/constants";
 import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
@@ -25,13 +25,13 @@ const getDate = (value: any) =>
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
-    origin_facility: filter.origin_facility || "",
+    origin_facility: filter.origin_facility || null,
     origin_facility_ref: null,
-    approving_facility: filter.approving_facility || "",
+    approving_facility: filter.approving_facility || null,
     approving_facility_ref: null,
-    assigned_facility: filter.assigned_facility || "",
+    assigned_facility: filter.assigned_facility || null,
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
+    emergency: filter.emergency || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -40,41 +40,36 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
   });
 
-  const { loading: orginFacilityLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.origin_facility !== undefined,
-    pathParams: { id: filter.origin_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          origin_facility_ref: filter.origin_facility === "" ? "" : data,
-        });
-      }
+  const { loading: orginFacilityLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: filter.origin_facility !== undefined,
+      pathParams: { id: filter.origin_facility },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          setFilterState({
+            origin_facility_ref: filter.origin_facility === "" ? "" : data,
+          });
+        }
+      },
     },
-  });
+  );
 
-  const { loading: resourceFacilityLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.approving_facility !== undefined,
-    pathParams: { id: filter.approving_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          approving_facility_ref: filter.approving_facility === "" ? "" : data,
-        });
-      }
+  const { loading: resourceFacilityLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: filter.approving_facility !== undefined,
+      pathParams: { id: filter.approving_facility },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          setFilterState({
+            approving_facility_ref:
+              filter.approving_facility === "" ? "" : data,
+          });
+        }
+      },
     },
-  });
-
-  const { loading: assignedFacilityLoading } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: filter.assigned_facility },
-    prefetch: filter.assigned_facility !== undefined,
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
-        });
-      }
-    },
-  });
+  );
 
   const setFacility = (selected: any, name: string) => {
     setFilterState({
@@ -163,7 +158,7 @@ export default function ListFilter(props: any) {
       </div>
 
       <div>
-        <FieldLabel>Resource approving facility</FieldLabel>
+        <FieldLabel>Request approving facility</FieldLabel>
         {filter.approving_facility && resourceFacilityLoading ? (
           <CircularProgress />
         ) : (
@@ -172,22 +167,6 @@ export default function ListFilter(props: any) {
             name="approving_facility"
             selected={filterState.approving_facility_ref}
             setSelected={(obj) => setFacility(obj, "approving_facility")}
-            className="resource-page-filter-dropdown"
-            errors={""}
-          />
-        )}
-      </div>
-
-      <div>
-        <FieldLabel>Assigned facility</FieldLabel>
-        {filter.approving_facility && assignedFacilityLoading ? (
-          <CircularProgress />
-        ) : (
-          <FacilitySelect
-            multiple={false}
-            name="assigned_facility"
-            selected={filterState.assigned_facility_ref}
-            setSelected={(obj) => setFacility(obj, "assigned_facility")}
             className="resource-page-filter-dropdown"
             errors={""}
           />

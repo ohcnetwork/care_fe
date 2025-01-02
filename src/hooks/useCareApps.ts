@@ -1,7 +1,5 @@
 import { createContext, useContext } from "react";
 
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
-
 import { PluginManifest } from "@/pluginTypes";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
@@ -16,12 +14,20 @@ export const useCareApps = () => {
   return ctx;
 };
 
-export const useCareAppNavItems = () => {
+// export const useCareAppNavItems = () => {
+//   const careApps = useCareApps();
+//   const navItems = careApps.reduce<INavItem[]>((acc, plugin) => {
+//     return [...acc, ...(plugin.navItems || [])];
+//   }, []);
+//   return navItems;
+// };
+
+export const useCareAppConsultationTabs = () => {
   const careApps = useCareApps();
-  const navItems = careApps.reduce<INavItem[]>((acc, plugin) => {
-    return [...acc, ...(plugin.navItems || [])];
-  }, []);
-  return navItems;
+
+  return careApps.reduce((acc, app) => {
+    return { ...acc, ...(app.encounterTabs ?? {}) };
+  }, {});
 };
 
 // If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => JSX.Element>

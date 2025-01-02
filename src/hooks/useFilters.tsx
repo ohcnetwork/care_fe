@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +33,10 @@ export default function useFilters({
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, _setQueryParams] = useQueryParams();
+  const [clearSearch, setClearSearch] = useState<{
+    value: boolean;
+    params?: string[];
+  }>({ value: false });
 
   const updateCache = (query: QueryParam) => {
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
@@ -63,6 +66,7 @@ export default function useFilters({
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
     setQueryParams(Object.assign({}, qParams, filter), { replace: true });
+    setClearSearch({ value: false });
   };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
@@ -71,6 +75,7 @@ export default function useFilters({
   const removeFilters = (params?: string[]) => {
     params ??= Object.keys(qParams);
     setQueryParams(removeFromQuery(qParams, params));
+    setClearSearch({ value: true, params: params });
   };
   const removeFilter = (param: string) => removeFilters([param]);
 
@@ -168,12 +173,6 @@ export default function useFilters({
         "";
       return { name, value, paramKey };
     },
-    kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const { kasp } = careConfig;
-      const name = nameSuffix ? kasp.string + " " + nameSuffix : kasp.string;
-      const [trueLabel, falseLabel] = [kasp.string, "Non " + kasp.string];
-      return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
-    },
   };
 
   const FilterBadges = ({
@@ -203,7 +202,7 @@ export default function useFilters({
 
     return (
       <div
-        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
+        className={`col-span-3 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
       >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
@@ -268,6 +267,7 @@ export default function useFilters({
      * @param param is the key of the filter to be removed.
      */
     removeFilter,
+    clearSearch,
 
     /**
      * Removes multiple filters from query param

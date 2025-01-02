@@ -39,7 +39,7 @@ const RadioFormField = <T, V extends string>(props: Props<T, V>) => {
               type="radio"
               id="none"
               name={props.name}
-              value={undefined}
+              value={"__NULL__"}
               checked={field.value == null}
               onChange={() => field.handleChange(null)}
             />
