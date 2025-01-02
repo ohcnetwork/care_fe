@@ -8,7 +8,7 @@ import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 
 const consultationRoutes: AppRoutes = {
-  "/facility/:facilityId/encounter/:encounterId/prescriptions": ({
+  "/facility/:facilityId/encounter/:encounterId/prescriptions/print": ({
     facilityId,
     encounterId,
   }) => <PrintPrescription facilityId={facilityId} encounterId={encounterId} />,
