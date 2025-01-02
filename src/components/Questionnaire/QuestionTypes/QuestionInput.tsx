@@ -2,7 +2,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { FollowUpVisitQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpVisitQuestion";
+import { FollowUpAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpAppointmentQuestion";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
@@ -164,7 +164,7 @@ export function QuestionInput({
           case "diagnosis":
             return <DiagnosisQuestion {...commonProps} />;
           case "follow_up_appointment":
-            return <FollowUpVisitQuestion {...commonProps} />;
+            return <FollowUpAppointmentQuestion {...commonProps} />;
           case "encounter":
             if (encounterId) {
               return (

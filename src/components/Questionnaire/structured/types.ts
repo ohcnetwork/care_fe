@@ -1,4 +1,7 @@
-import { FollowUpAppointmentQuestionRequest } from "@/components/Schedule/types";
+import {
+  AppointmentCreate,
+  FollowUpAppointmentQuestionRequest,
+} from "@/components/Schedule/types";
 
 import {
   AllergyIntolerance,
@@ -30,7 +33,7 @@ export interface StructuredRequestMap {
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
   encounter: EncounterEditRequest;
-  follow_up_appointment: FollowUpAppointmentQuestionRequest;
+  follow_up_appointment: AppointmentCreate;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =
