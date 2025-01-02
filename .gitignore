@@ -63,3 +63,6 @@ cypress/fixtures/token.json
 /apps/*
 src/pluginMap.ts
 /apps_backup/*
+
+# Federation Temp files
+/.__mf__temp

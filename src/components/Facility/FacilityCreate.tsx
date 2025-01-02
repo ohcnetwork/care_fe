@@ -1,37 +1,50 @@
-import careConfig from "@careConfig";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as z from "zod";
 
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+
 import GLocationPicker from "@/components/Common/GLocationPicker";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import SpokeFacilityEditor from "@/components/Facility/SpokeFacilityEditor";
-import { DistrictModel, FacilityRequest } from "@/components/Facility/models";
+import { FacilityRequest } from "@/components/Facility/models";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "@/components/Form/FormFields/RadioFormField";
-import {
-  MultiSelectFormField,
-  SelectFormField,
-} from "@/components/Form/FormFields/SelectFormField";
+import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import { FormAction } from "@/components/Form/Utils";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import {
@@ -41,248 +54,113 @@ import {
   validatePincode,
 } from "@/common/validation";
 
-import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import {
-  compareBy,
-  getPincodeDetails,
-  includesIgnoreCase,
-  parsePhoneNumber,
-} from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
+import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 
 interface FacilityProps {
   facilityId?: string;
 }
-
-type FacilityForm = {
-  facility_type?: string;
-  name: string;
-  state: number;
-  district: number;
-  local_body: number;
-  features: number[];
-  ward: number;
-  kasp_empanelled: string;
-  address: string;
-  phone_number: string;
-  latitude: string;
-  longitude: string;
-  pincode: string;
-};
-
-const initForm: FacilityForm = {
-  facility_type: undefined,
-  name: "",
-  state: 0,
-  district: 0,
-  local_body: 0,
-  ward: 0,
-  kasp_empanelled: "false",
-  features: [],
-  address: "",
-  phone_number: "",
-  latitude: "",
-  longitude: "",
-  pincode: "",
-};
-
-const initError: Record<keyof FacilityForm, string> = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
-);
-
-const initialState = {
-  form: { ...initForm },
-  errors: { ...initError },
-};
-
-const facilityCreateReducer = (state = initialState, action: FormAction) => {
-  switch (action.type) {
-    case "set_form":
-      return { ...state, form: action.form };
-    case "set_errors":
-      return { ...state, errors: action.errors };
-    case "set_state": {
-      if (action.state) return action.state;
-      return state;
-    }
-  }
-};
-
 export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-
-  const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
-    facilityCreateReducer,
-    initialState,
-  );
   const [isLoading, setIsLoading] = useState(false);
-
-  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
-  const [stateId, setStateId] = useState<number>();
-  const [districtId, setDistrictId] = useState<number>();
-  const [localBodyId, setLocalBodyId] = useState<number>();
   const { goBack } = useAppHistory();
-  const headerText = !facilityId ? "Create Facility" : "Update Facility";
-  const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
-  const authUser = useAuthUser();
+  const facilityFormSchema = z.object({
+    facility_type: z.string().min(1, { message: t("required") }),
+    name: z.string().min(1, { message: t("required") }),
+    description: z.string().optional(),
+    features: z.array(z.number()).default([]),
+    pincode: z.string().refine(validatePincode, {
+      message: t("invalid_pincode"),
+    }),
+    geo_organization: z.string().min(1, { message: t("required") }),
+    address: z.string().min(1, { message: t("required") }),
+    phone_number: z
+      .string()
+      .min(1, { message: t("required") })
+      .refine(
+        (val: string) => {
+          if (
+            !PhoneNumberValidator(["mobile", "landline"])(val) === undefined ||
+            !phonePreg(val)
+          ) {
+            return false;
+          }
+          return true;
+        },
+        {
+          message: t("invalid_phone_number"),
+        },
+      ),
+    latitude: z
+      .string()
+      .min(1, { message: t("required") })
+      .refine((val) => !val || validateLatitude(val), {
+        message: t("latitude_invalid"),
+      }),
+    longitude: z
+      .string()
+      .min(1, { message: t("required") })
+      .refine((val) => !val || validateLongitude(val), {
+        message: t("longitude_invalid"),
+      }),
+  });
+
+  type FacilityFormValues = z.infer<typeof facilityFormSchema>;
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId || "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const form = useForm<FacilityFormValues>({
+    resolver: zodResolver(facilityFormSchema),
+    defaultValues: {
+      facility_type: "",
+      name: "",
+      description: "",
+      features: [],
+      pincode: "",
+      geo_organization: "",
+      address: "",
+      phone_number: "",
+      latitude: "",
+      longitude: "",
+    },
+  });
+
+  // Update form when facility data is loaded
   useEffect(() => {
-    if (
-      authUser &&
-      authUser.user_type !== "StateAdmin" &&
-      authUser.user_type !== "DistrictAdmin" &&
-      authUser.user_type !== "DistrictLabAdmin"
-    ) {
-      navigate("/facility");
-      Notification.Error({
-        msg: "You don't have permission to perform this action. Contact the admin",
+    if (facilityData) {
+      console.log(facilityData);
+      form.reset({
+        facility_type: facilityData.facility_type,
+        name: facilityData.name,
+        description: facilityData.description || "",
+        features: facilityData.features || [],
+        pincode: facilityData.pincode,
+        geo_organization: facilityData.geo_organization,
+        address: facilityData.address,
+        phone_number: facilityData.phone_number,
+        latitude: facilityData.latitude?.toString() || "",
+        longitude: facilityData.longitude?.toString() || "",
       });
     }
-  }, [authUser]);
-
-  const {
-    data: districtData,
-    refetch: districtFetch,
-    loading: isDistrictLoading,
-  } = useTanStackQueryInstead(routes.getDistrictByState, {
-    pathParams: {
-      id: String(stateId),
-    },
-    prefetch: !!stateId,
-  });
-
-  const { data: localbodyData, loading: isLocalbodyLoading } =
-    useTanStackQueryInstead(routes.getLocalbodyByDistrict, {
-      pathParams: {
-        id: String(districtId),
-      },
-      prefetch: !!districtId,
-    });
-
-  const { data: wardData, loading: isWardLoading } = useTanStackQueryInstead(
-    routes.getWardByLocalBody,
-    {
-      pathParams: {
-        id: String(localBodyId),
-      },
-      prefetch: !!localBodyId,
-    },
-  );
-
-  const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
-    pathParams: {
-      id: facilityId!,
-    },
-    prefetch: !!facilityId,
-    onResponse: ({ res, data }) => {
-      if (facilityId) {
-        setIsLoading(true);
-        if (res?.ok && data) {
-          const formData = {
-            facility_type: data.facility_type ? data.facility_type : "",
-            name: data.name ? data.name : "",
-            state: data.state ? data.state : 0,
-            district: data.district ? data.district : 0,
-            local_body: data.local_body ? data.local_body : 0,
-            features: data.features || [],
-            ward: data.ward_object ? data.ward_object.id : 0,
-            kasp_empanelled: "",
-            address: data.address ? data.address : "",
-            pincode: data.pincode ? data.pincode : "",
-            phone_number: data.phone_number
-              ? data.phone_number.length == 10
-                ? "+91" + data.phone_number
-                : data.phone_number
-              : "",
-            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : "",
-            longitude: data.longitude
-              ? parseFloat(data.longitude).toFixed(7)
-              : "",
-          };
-          dispatch({ type: "set_form", form: formData });
-          setStateId(data.state);
-          setDistrictId(data.district);
-          setLocalBodyId(data.local_body);
-        } else {
-          navigate(`/facility/${facilityId}`);
-        }
-        setIsLoading(false);
-      }
-    },
-  });
-
-  const { data: stateData, loading: isStateLoading } = useTanStackQueryInstead(
-    routes.statesList,
-  );
-
-  const handleChange = (e: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [e.name]: e.value },
-    });
-  };
+  }, [facilityData, form]);
 
   const handleLocationChange = (location: google.maps.LatLng | undefined) => {
     if (location) {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          latitude: location.lat().toFixed(7),
-          longitude: location.lng().toFixed(7),
-        },
-      });
+      form.setValue("latitude", location.lat().toFixed(7));
+      form.setValue("longitude", location.lng().toFixed(7));
     }
-  };
-
-  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
-    handleChange(e);
-
-    if (!validatePincode(e.value)) return;
-
-    const pincodeDetails = await getPincodeDetails(
-      e.value,
-      careConfig.govDataApiKey,
-    );
-    if (!pincodeDetails) return;
-
-    const matchedState = (stateData ? stateData.results : []).find((state) => {
-      return includesIgnoreCase(state.name, pincodeDetails.statename);
-    });
-    if (!matchedState) return;
-
-    const newDistrictDataResult: RequestResult<DistrictModel[]> =
-      await districtFetch({ pathParams: { id: String(matchedState.id) } });
-    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
-
-    if (!fetchedDistricts) return;
-
-    const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.districtname);
-    });
-    if (!matchedDistrict) return;
-
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        state: matchedState.id,
-        district: matchedDistrict.id,
-        pincode: e.value,
-      },
-    });
-
-    setDistrictId(matchedDistrict.id);
-    setShowAutoFilledPincode(true);
-    setTimeout(() => {
-      setShowAutoFilledPincode(false);
-    }, 2000);
   };
 
   const handleSelectCurrentLocation = (
@@ -290,353 +168,319 @@ export const FacilityCreate = (props: FacilityProps) => {
   ) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
-            latitude: String(position.coords.latitude),
-            longitude: String(position.coords.longitude),
-          },
-        });
-
+        form.setValue("latitude", String(position.coords.latitude));
+        form.setValue("longitude", String(position.coords.longitude));
         setCenter?.(position.coords.latitude, position.coords.longitude);
       });
     }
   };
 
-  const validateForm = () => {
-    const errors = { ...initError };
-    let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
-      switch (field) {
-        case "facility_type":
-        case "name":
-        case "address":
-          if (!state.form[field]) {
-            errors[field] = t("required");
-            invalidForm = true;
-          }
-          return;
-
-        case "district":
-        case "state":
-        case "local_body":
-        case "ward":
-          if (!Number(state.form[field])) {
-            errors[field] = t("required");
-            invalidForm = true;
-          }
-          return;
-
-        case "pincode":
-          if (!validatePincode(state.form[field])) {
-            errors[field] = t("invalid_pincode");
-            invalidForm = true;
-          }
-          return;
-        case "phone_number":
-          // eslint-disable-next-line no-case-declarations
-          const phoneNumber = state.form[field];
-          if (
-            !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
-            !phonePreg(phoneNumber)
-          ) {
-            errors[field] = t("invalid_phone_number");
-            invalidForm = true;
-          }
-          return;
-        case "latitude":
-          if (!!state.form.latitude && !validateLatitude(state.form[field])) {
-            errors[field] = t("latitude_invalid");
-            invalidForm = true;
-          }
-          return;
-        case "longitude":
-          if (!!state.form.longitude && !validateLongitude(state.form[field])) {
-            errors[field] = t("longitude_invalid");
-            invalidForm = true;
-          }
-          return;
-
-        default:
-          return;
-      }
-    });
-    if (invalidForm) {
-      dispatch({ type: "set_errors", errors });
-      return false;
-    }
-    dispatch({ type: "set_errors", errors });
-    return true;
+  const handleFeatureChange = (value: any) => {
+    const { value: features }: { value: Array<number> } = value;
+    form.setValue("features", features);
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const validated = validateForm();
-    if (validated) {
-      setIsLoading(true);
-      const data: FacilityRequest = {
-        facility_type: state.form.facility_type,
-        name: state.form.name,
-        district: state.form.district,
-        state: state.form.state,
-        address: state.form.address,
-        local_body: state.form.local_body,
-        features: state.form.features,
-        ward: state.form.ward,
-        pincode: state.form.pincode,
-        latitude: state.form.latitude,
-        longitude: state.form.longitude,
-        phone_number: parsePhoneNumber(state.form.phone_number),
+  const onSubmit = async (data: FacilityFormValues) => {
+    setIsLoading(true);
+    try {
+      const requestData: FacilityRequest = {
+        ...data,
+        phone_number: parsePhoneNumber(data.phone_number),
       };
 
-      const { res, data: requestData } = facilityId
+      const { res, data: responseData } = facilityId
         ? await request(routes.updateFacility, {
-            body: data,
-            pathParams: {
-              id: facilityId,
-            },
+            body: requestData,
+            pathParams: { id: facilityId },
           })
         : await request(routes.createFacility, {
-            body: data,
+            body: requestData,
           });
 
-      if (res?.ok && requestData) {
-        const id = requestData.id;
-        dispatch({ type: "set_form", form: initForm });
-        if (!facilityId) {
-          Notification.Success({
-            msg: "Facility added successfully",
-          });
-        } else {
-          Notification.Success({
-            msg: "Facility updated successfully",
-          });
-        }
-        navigate(`/facility/${id}`);
+      if (res?.ok && responseData) {
+        Notification.Success({
+          msg: facilityId
+            ? "Facility updated successfully"
+            : "Facility added successfully",
+        });
+        navigate(`/facility/${responseData.id}`);
       }
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  const field = (name: string) => {
-    return {
-      name,
-      id: name,
-      label: t(name),
-      value: (state.form as any)[name],
-      error: (state.errors as any)[name],
-      onChange: handleChange,
-    };
-  };
-
   return (
     <Page
-      title={headerText}
+      title={facilityId ? "Update Facility" : "Create Facility"}
       crumbsReplacements={{
-        [facilityId || "????"]: { name: state.form.name },
+        [facilityId || "????"]: { name: form.watch("name") },
       }}
     >
       <Card className="mt-4">
         <div className="md:p-4">
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <DraftSection
-              handleDraftSelect={(newState: any) => {
-                dispatch({ type: "set_state", state: newState });
-                setStateId(newState.form.state);
-                setDistrictId(newState.form.district);
-                setLocalBodyId(newState.form.local_body);
-              }}
-              formData={state.form}
-            />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <SelectFormField
-                {...field("facility_type")}
-                required
-                options={FACILITY_TYPES}
-                optionLabel={(o) => o.text}
-                optionValue={(o) => o.text}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="facility_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("facility_type")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select facility type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {FACILITY_TYPES.map((type) => (
+                            <SelectItem key={type.text} value={type.text}>
+                              {type.text}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("facility_name")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("description")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder={t("markdown_supported")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <TextFormField
-                {...field("name")}
-                required
-                label={t("facility_name")}
-              />
-              <MultiSelectFormField
-                {...field("features")}
-                placeholder={t("features")}
-                options={FACILITY_FEATURE_TYPES}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
+
+              <FormField
+                control={form.control}
+                name="features"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("features")}</FormLabel>
+                    <FormControl>
+                      <MultiSelectFormField
+                        name={field.name}
+                        value={field.value}
+                        placeholder={t("features")}
+                        options={FACILITY_FEATURE_TYPES}
+                        optionLabel={(o) => o.name}
+                        optionValue={(o) => o.id}
+                        onChange={handleFeatureChange}
+                        error={form.formState.errors.features?.message}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
               <div>
-                <TextFormField
-                  {...field("pincode")}
-                  required
-                  onChange={handlePincodeChange}
-                />
-                {showAutoFilledPincode && (
-                  <div className="flex items-center gap-2 text-primary-500">
-                    <CareIcon icon="l-check-circle" />
-                    <span className="text-sm">
-                      State and district auto-filled from pincode
-                    </span>
-                  </div>
-                )}
-              </div>
-              <SelectFormField
-                {...field("state")}
-                required
-                placeholder="Choose State"
-                className={isStateLoading ? "animate-pulse" : ""}
-                disabled={isStateLoading}
-                options={stateData ? stateData.results : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setStateId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("district")}
-                placeholder="Choose District"
-                required
-                className={isDistrictLoading ? "animate-pulse" : ""}
-                disabled={isDistrictLoading}
-                options={districtData ? districtData : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setDistrictId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("local_body")}
-                required
-                className={isLocalbodyLoading ? "animate-pulse" : ""}
-                disabled={isLocalbodyLoading}
-                placeholder="Choose Local Body"
-                options={localbodyData ? localbodyData : []}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(event) => {
-                  handleChange(event);
-                  if (!event) return;
-                  setLocalBodyId(event.value);
-                }}
-              />
-              <SelectFormField
-                {...field("ward")}
-                required
-                className={isWardLoading ? "animate-pulse" : ""}
-                disabled={isWardLoading}
-                placeholder="Choose Ward"
-                options={(wardData ? wardData.results : [])
-                  .sort(compareBy("number"))
-                  .map((e) => {
-                    return {
-                      id: e.id,
-                      name: e.number + ": " + e.name,
-                    };
-                  })}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-              />
-              <TextAreaFormField {...field("address")} required />
-              <PhoneNumberFormField
-                {...field("phone_number")}
-                label={t("emergency_contact_number")}
-                required
-                types={["mobile", "landline"]}
-              />
-              {facilityId && (
-                <div className="py-4 md:col-span-2">
-                  <h4 className="mb-4">{t("spokes")}</h4>
-                  <SpokeFacilityEditor
-                    facility={{ ...facilityQuery.data, id: facilityId }}
-                  />
-                </div>
-              )}
-              {careConfig.kasp.enabled && (
-                <RadioFormField
-                  {...field("kasp_empanelled")}
-                  label={`Is this facility ${careConfig.kasp.string} empanelled?`}
-                  options={[true, false]}
-                  optionLabel={(o) => (o ? "Yes" : "No")}
-                  optionValue={(o) => String(o)}
-                />
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <TextFormField
-                className="flex-1"
-                {...field("latitude")}
-                label={t("location")}
-                placeholder="Latitude"
-              />
-
-              <div className="flex flex-col justify-center md:block">
-                <Popover id="map-popover" className="relative">
-                  <>
-                    <PopoverButton>
-                      <ButtonV2
-                        circle
-                        type="button"
-                        id="facility-location-button"
-                        className="tooltip p-2"
-                      >
-                        <CareIcon icon="l-map-marker" className="text-xl" />
-                        <span className="tooltip-text tooltip-bottom">
-                          Select location from map
-                        </span>
-                      </ButtonV2>
-                    </PopoverButton>
-
-                    <Transition
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 translate-y-1"
-                      enterTo="opacity-100 translate-y-0"
-                      leave="transition ease-in duration-150"
-                      leaveFrom="opacity-100 translate-y-0"
-                      leaveTo="opacity-0 translate-y-1"
-                    >
-                      <PopoverPanel className="absolute -right-36 bottom-10 sm:-right-48">
-                        <GLocationPicker
-                          lat={Number(state.form.latitude)}
-                          lng={Number(state.form.longitude)}
-                          handleOnChange={handleLocationChange}
-                          handleOnClose={() => null}
-                          handleOnSelectCurrentLocation={
-                            handleSelectCurrentLocation
-                          }
+                <FormField
+                  control={form.control}
+                  name="pincode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("pincode")}</FormLabel>
+                      <FormControl>
+                        <TextFormField
+                          {...field}
+                          required
+                          onChange={(value) => {
+                            field.onChange(value.value);
+                          }}
+                          error={form.formState.errors.pincode?.message}
                         />
-                      </PopoverPanel>
-                    </Transition>
-                  </>
-                </Popover>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <TextFormField
-                className="flex-1"
-                {...field("longitude")}
-                label={<br />}
-                placeholder="Longitude"
-              />
-            </div>
-            <div className="mt-12 flex flex-col-reverse justify-end gap-3 sm:flex-row">
-              <Cancel onClick={() => goBack()} />
-              <Submit type="button" onClick={handleSubmit} label={buttonText} />
-            </div>
-          </form>
+              <div className="col-span-2 grid grid-cols-2 gap-5">
+                <OrganizationSelector
+                  required={true}
+                  onChange={(value) => form.setValue("geo_organization", value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-3">
+                      <FormLabel>{t("address")}</FormLabel>
+                      <FormControl>
+                        <TextAreaFormField
+                          {...field}
+                          required
+                          onChange={(value) => {
+                            field.onChange(value.value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone_number"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormControl>
+                        <PhoneNumberFormField
+                          label={
+                            <FormLabel>
+                              {t("emergency_contact_number")}
+                            </FormLabel>
+                          }
+                          {...field}
+                          types={["mobile", "landline"]}
+                          onChange={(value) => {
+                            field.onChange(value.value);
+                          }}
+                          error={form.formState.errors.phone_number?.message}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-row items-center gap-3">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>{t("location")}</FormLabel>
+                      <FormControl>
+                        <TextFormField
+                          className="flex-1"
+                          {...field}
+                          placeholder="Latitude"
+                          onChange={(value) => {
+                            field.onChange(value.value);
+                          }}
+                          error={form.formState.errors.latitude?.message}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex flex-col justify-center md:block">
+                  <Popover id="map-popover" className="relative">
+                    <>
+                      <PopoverButton>
+                        <Button
+                          variant="primary"
+                          type="button"
+                          id="facility-location-button"
+                          className="tooltip p-2 rounded-3xl"
+                        >
+                          <CareIcon icon="l-map-marker" className="text-xl" />
+                          <span className="tooltip-text tooltip-bottom">
+                            Select location from map
+                          </span>
+                        </Button>
+                      </PopoverButton>
+
+                      <Transition
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <PopoverPanel className="absolute -right-36 bottom-10 sm:-right-48">
+                          <GLocationPicker
+                            lat={Number(form.getValues("latitude"))}
+                            lng={Number(form.getValues("longitude"))}
+                            handleOnChange={handleLocationChange}
+                            handleOnClose={() => null}
+                            handleOnSelectCurrentLocation={
+                              handleSelectCurrentLocation
+                            }
+                          />
+                        </PopoverPanel>
+                      </Transition>
+                    </>
+                  </Popover>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>{t("location")}</FormLabel>
+                      <FormControl>
+                        <TextFormField
+                          className="flex-1"
+                          {...field}
+                          placeholder="Longitude"
+                          onChange={(value) => {
+                            field.onChange(value.value);
+                          }}
+                          error={form.formState.errors.longitude?.message}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="mt-6 flex flex-col-reverse justify-end gap-3 sm:flex-row">
+                <Button
+                  variant="outline"
+                  onClick={() => goBack()}
+                  type="button"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button variant="primary" type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <Loading />
+                  ) : facilityId ? (
+                    t("update_facility")
+                  ) : (
+                    t("save_facility")
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </Card>
     </Page>

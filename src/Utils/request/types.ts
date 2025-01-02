@@ -1,4 +1,10 @@
-type QueryParamValue = string | number | boolean | null | undefined;
+type QueryParamValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Array<string | number | boolean | null | undefined>;
 
 export type QueryParams = Record<string, QueryParamValue>;
 
@@ -8,8 +14,9 @@ interface RouteBase<TData> {
   noAuth?: boolean;
 }
 
-export interface QueryRoute<TData> extends RouteBase<TData> {
-  method?: "GET";
+export interface QueryRoute<TData, TBody = unknown> extends RouteBase<TData> {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  TBody?: TBody;
 }
 
 export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
@@ -18,7 +25,7 @@ export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
 }
 
 export type Route<TData, TBody> =
-  | QueryRoute<TData>
+  | QueryRoute<TData, TBody>
   | MutationRoute<TData, TBody>;
 
 export interface RequestResult<TData> {

@@ -33,3 +33,9 @@ General Guidelines
 
 - Care uses TanStack Query for data fetching from the API along with query and mutate utilities for the queryFn and mutationFn. (Docs @ /Utils/request/README.md)
 - APIs are defined in the api.tsx file.
+- Use raviger for routing.
+- Add and reuse proper translations for the components in the en.json file.
+
+# Testing Guidelines
+
+For Cypress testing guidelines, refer to cypress/docs/cypress.md

@@ -1,71 +1,57 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
 
-import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { parseOccupation } from "@/components/Patient/PatientHome";
-import { AssignedToObjectModel } from "@/components/Patient/models";
-
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
+import {
+  Organization,
+  OrganizationParent,
+  getOrgLevelLabel,
+} from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
-  const authUser = useAuthUser();
   const { t } = useTranslation();
-  const [_assignedVolunteerObject, setAssignedVolunteerObject] =
-    useState<AssignedToObjectModel>();
 
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSection, _setActiveSection] = useState<string | null>(null);
 
-  useEffect(() => {
-    setAssignedVolunteerObject(patientData.assigned_to_object);
+  // useEffect(() => {
+  //   setAssignedVolunteerObject(patientData.assigned_to_object);
 
-    const observedSections: Element[] = [];
-    const sections = document.querySelectorAll("div[id]");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        threshold: 0.6,
-      },
-    );
+  //   const observedSections: Element[] = [];
+  //   const sections = document.querySelectorAll("div[id]");
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       entries.forEach((entry) => {
+  //         if (entry.isIntersecting) {
+  //           setActiveSection(entry.target.id);
+  //         }
+  //       });
+  //     },
+  //     {
+  //       threshold: 0.6,
+  //     },
+  //   );
 
-    sections.forEach((section) => {
-      observer.observe(section);
-      observedSections.push(section);
-    });
+  //   sections.forEach((section) => {
+  //     observer.observe(section);
+  //     observedSections.push(section);
+  //   });
 
-    return () => {
-      observedSections.forEach((section) => observer.unobserve(section));
-    };
-  }, [patientData.assigned_to_object]);
-
-  const { data: insuranceDetials } = useTanStackQueryInstead(
-    routes.hcx.policies.list,
-    {
-      query: { patient: id },
-    },
-  );
+  //   return () => {
+  //     observedSections.forEach((section) => observer.unobserve(section));
+  //   };
+  // }, [patientData.assigned_to_object]);
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
@@ -85,16 +71,7 @@ export const Demography = (props: PatientProps) => {
   };
 
   const hasEditPermission = () => {
-    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-    if (
-      !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.id !== patientData.facility
-    ) {
-      Notification.Error({
-        msg: "Oops! Non-Home facility users don't have permission to perform this action.",
-      });
-      return false;
-    }
+    // Todo: Wire updated Permissions
     return true;
   };
 
@@ -160,6 +137,38 @@ export const Demography = (props: PatientProps) => {
     details: (React.ReactNode | { label: string; value: React.ReactNode })[];
   };
 
+  // const orgParents: OrganizationParent[] = [];
+  // let currentParent = org.parent;
+  // while (currentParent) {
+  //   if (currentParent.id) {
+  //     orgParents.push(currentParent);
+  //   }
+  //   currentParent = currentParent.parent;
+  // }
+
+  const getGeoOrgDetails = (geoOrg: Organization) => {
+    const orgParents: OrganizationParent[] = [];
+    let currentParent = geoOrg.parent;
+    while (currentParent) {
+      if (currentParent.id) {
+        orgParents.push(currentParent);
+      }
+      currentParent = currentParent.parent;
+    }
+
+    const parentDetails = orgParents.map((org) => {
+      return {
+        label: getOrgLevelLabel(org.org_type, org.level_cache),
+        value: org.name,
+      };
+    });
+
+    return parentDetails.reverse().concat({
+      label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
+      value: geoOrg.name,
+    });
+  };
+
   const data: Data[] = [
     {
       id: "general-info",
@@ -220,113 +229,53 @@ export const Demography = (props: PatientProps) => {
           label: t("permanent_address"),
           value: patientData.permanent_address,
         },
-        {
-          label: t("nationality"),
-          value: patientData.nationality,
-        },
-        {
-          label: t("state"),
-          value: patientData.state,
-        },
-        {
-          label: t("district"),
-          value: patientData.district_object?.name,
-        },
-        {
-          label: t("local_body"),
-          value: patientData.local_body_object?.name,
-        },
-        {
-          label: t("ward"),
-          value: (
-            <>
-              {(patientData.ward_object &&
-                patientData.ward_object.number +
-                  ", " +
-                  patientData.ward_object.name) ||
-                "-"}
-            </>
-          ),
-        },
-        {
-          label: t("village"),
-          value: patientData.village,
-        },
+        ...getGeoOrgDetails(patientData.geo_organization),
+
+        // TODO: Replace with Geo_Org
+        // {
+        //   label: t("nationality"),
+        //   value: patientData.nationality,
+        // },
+        // {
+        //   label: t("state"),
+        //   value: patientData.state,
+        // },
+        // {
+        //   label: t("district"),
+        //   value: patientData.district_object?.name,
+        // },
+        // {
+        //   label: t("local_body"),
+        //   value: patientData.local_body_object?.name,
+        // },
+        // {
+        //   label: t("ward"),
+        //   value: (
+        //     <>
+        //       {(patientData.ward_object &&
+        //         patientData.ward_object.number +
+        //           ", " +
+        //           patientData.ward_object.name) ||
+        //         "-"}
+        //     </>
+        //   ),
+        // },
       ],
     },
-    {
-      id: "social-profile",
-      allowEdit: true,
-      details: [
-        {
-          label: t("occupation"),
-          value: parseOccupation(patientData.meta_info?.occupation),
-        },
-        {
-          label: t("ration_card_category"),
-          value:
-            !!patientData.ration_card_category &&
-            t(`ration_card__${patientData.ration_card_category}`),
-        },
-        {
-          label: t("socioeconomic_status"),
-          value:
-            patientData.meta_info?.socioeconomic_status &&
-            t(
-              `SOCIOECONOMIC_STATUS__${patientData.meta_info?.socioeconomic_status}`,
-            ),
-        },
-        {
-          label: t("domestic_healthcare_support"),
-          value:
-            patientData.meta_info?.domestic_healthcare_support &&
-            t(
-              `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info?.domestic_healthcare_support}`,
-            ),
-        },
-      ],
-    },
-    {
-      id: "volunteer-contact",
-      hidden: !patientData.assigned_to_object,
-      details: [
-        <EmergencyContact
-          number={patientData.assigned_to_object?.alt_phone_number}
-          name={
-            patientData.assigned_to_object
-              ? formatName(patientData.assigned_to_object)
-              : undefined
-          }
-        />,
-      ],
-    },
-    {
-      id: "insurance-details",
-      details: [
-        <div className="w-full md:col-span-2">
-          {insuranceDetials?.results.map((insurance) => (
-            <InsuranceDetailsCard key={insurance.id} data={insurance} />
-          ))}
-          {!!insuranceDetials?.results &&
-            insuranceDetials.results.length === 0 && (
-              <div className="text-gray-500 text-sm flex items-center justify-center py-10">
-                {t("no_data_found")}
-              </div>
-            )}
-          <Button
-            variant="outline_primary"
-            className="mt-4"
-            disabled={!patientData.is_active}
-            onClick={withPermissionCheck(() =>
-              handleEditClick("insurance-details"),
-            )}
-          >
-            <CareIcon icon="l-plus" className="" />
-            {t("add_insurance_details")}
-          </Button>
-        </div>,
-      ],
-    },
+    // {
+    //   id: "volunteer-contact",
+    //   hidden: !patientData.assigned_to_object,
+    //   details: [
+    //     <EmergencyContact
+    //       number={patientData.assigned_to_object?.alt_phone_number}
+    //       name={
+    //         patientData.assigned_to_object
+    //           ? formatName(patientData.assigned_to_object)
+    //           : undefined
+    //       }
+    //     />,
+    //   ],
+    // },
   ];
 
   return (
@@ -356,24 +305,18 @@ export const Demography = (props: PatientProps) => {
         <div className="lg:basis-4/5">
           <div className="mb-2 flex flex-row justify-between">
             <div>
-              <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
-                {({ isAuthorized }) => (
-                  <Button
-                    id="update-patient-details"
-                    variant="outline"
-                    className="mt-4"
-                    disabled={!patientData.is_active || !isAuthorized}
-                    onClick={withPermissionCheck(() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/update`,
-                      ),
-                    )}
-                  >
-                    <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
-                    {t("edit_profile")}
-                  </Button>
+              <Button
+                id="update-patient-details"
+                variant="outline"
+                className="mt-4"
+                disabled={!!patientData.death_datetime}
+                onClick={withPermissionCheck(() =>
+                  navigate(`/facility/${id}/patient/${id}/update`),
                 )}
-              </AuthorizedChild>
+              >
+                <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
+                {t("edit_profile")}
+              </Button>
             </div>
           </div>
           {/* <div className="mt-4 rounded-md border border-blue-400 bg-blue-50 p-5 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
@@ -406,7 +349,7 @@ export const Demography = (props: PatientProps) => {
                     {subtab.allowEdit && (
                       <Button
                         variant="outline"
-                        disabled={!patientData.is_active}
+                        disabled={!!patientData.death_datetime}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
                         )}

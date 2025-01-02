@@ -1,46 +1,46 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import RecordMeta from "@/CAREUI/display/RecordMeta";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Cancel } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
 import ResponsiveMedicineTable from "@/components/Medicine/ResponsiveMedicineTables";
-import { Prescription } from "@/components/Medicine/models";
-import MedicineRoutes from "@/components/Medicine/routes";
 
 import useSlug from "@/hooks/useSlug";
 
+import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatDateTime } from "@/Utils/utils";
+import { displayCode, displayDoseRange, displayTiming } from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
+
+import { useEncounter } from "../Facility/ConsultationDetails/EncounterContext";
 
 interface Props {
   is_prn?: boolean;
-  prescription_type?: Prescription["prescription_type"];
+  category?: MedicationRequest["category"];
 }
 
 export default function PrescriptionsTable({
   is_prn = false,
-  prescription_type = "REGULAR",
+  category = "inpatient",
 }: Props) {
-  const consultation = useSlug("consultation");
+  const encounterId = useSlug("encounter");
+  const { patient } = useEncounter();
   const { t } = useTranslation();
-  const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
+  const [detailedViewFor, setDetailedViewFor] = useState<MedicationRequest>();
 
-  const { data } = useTanStackQueryInstead(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation },
+  const { data } = useTanStackQueryInstead(routes.medicationRequest.list, {
+    pathParams: { patientId: patient!.id },
     query: {
-      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
-      prescription_type,
+      is_prn,
+      category,
+      encounter: encounterId,
       limit: 100,
     },
   });
 
-  const lastModified = data?.results[0]?.modified_date;
   const tkeys =
-    prescription_type === "REGULAR"
+    category === "inpatient"
       ? is_prn
         ? REGULAR_PRN_TKEYS
         : REGULAR_NORMAL_TKEYS
@@ -77,12 +77,6 @@ export default function PrescriptionsTable({
           <span className="mr-3 text-lg">
             {is_prn ? "PRN Prescriptions" : "Prescriptions"}
           </span>
-          <div className="text-secondary-600">
-            <CareIcon icon="l-history-alt" className="pr-2" />
-            <span className="text-xs">
-              {lastModified && formatDateTime(lastModified)}
-            </span>
-          </div>
         </div>
       </div>
       <div className="flex flex-col">
@@ -95,24 +89,21 @@ export default function PrescriptionsTable({
               list={
                 data?.results.map((obj) => ({
                   ...obj,
-                  medicine: obj.medicine_object?.name ?? obj.medicine_old,
+                  medicine: displayCode(obj.medication),
                   route__pretty:
-                    obj.route && t("PRESCRIPTION_ROUTE_" + obj.route),
+                    obj.dosage_instruction.route &&
+                    displayCode(obj.dosage_instruction.route),
                   frequency__pretty:
-                    obj.frequency &&
-                    t("PRESCRIPTION_FREQUENCY_" + obj.frequency.toUpperCase()),
-                  days__pretty: obj.days && obj.days + " day(s)",
-                  min_hours_between_doses__pretty:
-                    obj.min_hours_between_doses &&
-                    obj.min_hours_between_doses + " hour(s)",
-                  last_administered__pretty: obj.last_administration
-                    ?.administered_date ? (
-                    <RecordMeta
-                      time={obj.last_administration?.administered_date}
-                    />
-                  ) : (
-                    "never"
-                  ),
+                    obj.dosage_instruction.timing &&
+                    displayTiming(obj.dosage_instruction.timing),
+                  max_dose_per_period__pretty:
+                    obj.dosage_instruction.max_dose_per_period &&
+                    displayDoseRange(
+                      obj.dosage_instruction.max_dose_per_period,
+                    ),
+                  indicator:
+                    obj.dosage_instruction.as_needed_for &&
+                    displayCode(obj.dosage_instruction.as_needed_for),
                 })) || []
               }
               objectKeys={Object.values(tkeys)}
@@ -134,36 +125,27 @@ const COMMON_TKEYS = {
   medicine: "medicine",
   route: "route__pretty",
   base_dosage: "base_dosage",
+  notes: "note",
 };
 
 const REGULAR_NORMAL_TKEYS = {
   ...COMMON_TKEYS,
   frequency: "frequency__pretty",
-  days: "days__pretty",
-  notes: "notes",
-  last_administered: "last_administered__pretty",
 };
 
 const REGULAR_PRN_TKEYS = {
   ...COMMON_TKEYS,
   indicator: "indicator",
-  max_dosage_24_hrs: "max_dosage",
-  min_time_bw_doses: "min_hours_between_doses__pretty",
-  notes: "notes",
-  last_administered: "last_administered__pretty",
+  max_dose_per_period__pretty: "max_dose_per_period__pretty",
 };
 
 const DISCHARGE_NORMAL_TKEYS = {
   ...COMMON_TKEYS,
   frequency: "frequency__pretty",
-  days: "days__pretty",
-  notes: "notes",
 };
 
 const DISCHARGE_PRN_TKEYS = {
   ...COMMON_TKEYS,
   indicator: "indicator",
-  max_dosage_24_hrs: "max_dosage",
-  min_time_bw_doses: "min_hours_between_doses__pretty",
-  notes: "notes",
+  max_dose_per_period__pretty: "max_dose_per_period__pretty",
 };

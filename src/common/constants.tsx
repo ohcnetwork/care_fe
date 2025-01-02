@@ -1,10 +1,7 @@
 import { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { SortOption } from "@/components/Common/SortDropdown";
-import {
-  PatientCategory,
-  SpokeRelationship,
-} from "@/components/Facility/models";
+import { PatientCategory } from "@/components/Facility/models";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 
 import { dateQueryString } from "@/Utils/utils";
@@ -20,6 +17,7 @@ export const PAGINATION_LIMIT = 36;
 export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
+  patientTokenKey: "care_patient_token",
 };
 export interface OptionsType {
   id: number | string;
@@ -138,6 +136,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1200, text: "Second Line Treatment Center" },
   // { id: 1400, text: "Covid Management Center" },
   // { id: 1600, text: "District War Room" },
+  { id: 3000, text: "Non Governmental Organization" },
+  { id: 4000, text: "Community Based Organization" },
 ];
 
 export const SHIFTING_CHOICES_WARTIME: Array<OptionsType> = [
@@ -358,9 +358,10 @@ export const OXYGEN_MODALITY_OPTIONS = [
 ] as const;
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: "M" },
-  { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Transgender", icon: "TRANS" },
+  { id: "male", text: "Male", icon: "M" },
+  { id: "female", text: "Female", icon: "F" },
+  { id: "transgender", text: "Transgender", icon: "TRANS" },
+  { id: "non_binary", text: "Non Binary", icon: "TRANS" },
 ] as const;
 
 export const CONSULTATION_SUGGESTION = [
@@ -476,6 +477,18 @@ export const BLOOD_GROUPS = [
   "AB-",
   "O+",
   "O-",
+];
+
+export const BLOOD_GROUP_CHOICES = [
+  { id: "unknown", text: "Unknown" },
+  { id: "A_positive", text: "A+" },
+  { id: "A_negative", text: "A-" },
+  { id: "B_positive", text: "B+" },
+  { id: "B_negative", text: "B-" },
+  { id: "AB_positive", text: "AB+" },
+  { id: "AB_negative", text: "AB-" },
+  { id: "O_positive", text: "O+" },
+  { id: "O_negative", text: "O-" },
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
@@ -631,7 +644,13 @@ export const BREATHLESSNESS_LEVEL = [
   "SEVERE",
 ];
 
-export const RESOURCE_CATEGORY_CHOICES = ["OXYGEN"];
+export const RESOURCE_CATEGORY_CHOICES = [
+  { id: "PATIENT_CARE", text: "Clinical Care and Social Support" },
+  { id: "COMFORT_DEVICES", text: "Comfort Devices" },
+  { id: "MEDICINES", text: "Medicines" },
+  { id: "FINANCIAL", text: "Financial" },
+  { id: "OTHERS", text: "Other" },
+];
 
 export const RESOURCE_CHOICES: Array<OptionsType> = [
   { id: 10, text: "PENDING" },
@@ -641,13 +660,6 @@ export const RESOURCE_CHOICES: Array<OptionsType> = [
   { id: 55, text: "TRANSPORTATION TO BE ARRANGED" },
   { id: 70, text: "TRANSFER IN PROGRESS" },
   { id: 80, text: "COMPLETED" },
-];
-export const RESOURCE_SUBCATEGORIES: Array<OptionsType> = [
-  { id: 110, text: "LMO in KL" },
-  { id: 120, text: "B TYPE OXYGEN CYLINDER" },
-  { id: 130, text: "C TYPE OXYGEN CYLINDER" },
-  { id: 140, text: "JUMBO D TYPE OXYGEN CYLINDER" },
-  { id: 1000, text: "UNSPECIFIED" },
 ];
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
@@ -886,41 +898,127 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   },
 ];
 
+// FEATURE_CHOICES = [
+//   (1, "CT Scan Facility"),
+//   (2, "Maternity Care"),
+//   (3, "X-Ray facility"),
+//   (4, "Neonatal care"),
+//   (5, "Operation theater"),
+//   (6, "Blood Bank"),
+//   (7, "Emergency Services"),
+//   (8, "Inpatient Services"),
+//   (9, "Outpatient Services"),
+//   (10, "Intensive Care Units"),
+//   (11, "Pharmacy"),
+//   (12, "Rehabilitation Services"),
+//   (13, "Home Care Services"),
+//   (14, "Psychosocial Support"),
+//   (15, "Respite Care"),
+//   (16, "Daycare Programs"),
+// ]
+
 // in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
 export const FACILITY_FEATURE_TYPES: {
   id: number;
   name: string;
   icon: IconName;
+  variant: string;
 }[] = [
   {
     id: 1,
     name: "CT Scan",
     icon: "l-compact-disc",
+    variant: "green",
   },
   {
     id: 2,
     name: "Maternity Care",
     icon: "l-baby-carriage",
+    variant: "blue",
   },
   {
     id: 3,
     name: "X-Ray",
     icon: "l-clipboard-alt",
+    variant: "amber",
   },
   {
     id: 4,
     name: "Neonatal Care",
     icon: "l-baby-carriage",
+    variant: "teal",
   },
   {
     id: 5,
     name: "Operation Theater",
     icon: "l-syringe",
+    variant: "red",
   },
   {
     id: 6,
     name: "Blood Bank",
     icon: "l-medical-drip",
+    variant: "orange",
+  },
+  {
+    id: 7,
+    name: "Emergency Services",
+    icon: "l-ambulance",
+    variant: "red",
+  },
+  {
+    id: 8,
+    name: "Inpatient Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 9,
+    name: "Outpatient Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 10,
+    name: "Intensive Care Units",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 11,
+    name: "Pharmacy",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 12,
+    name: "Rehabilitation Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 13,
+    name: "Home Care Services",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 14,
+    name: "Psychosocial Support",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 15,
+    name: "Respite Care",
+    icon: "l-hospital",
+    variant: "red",
+  },
+  {
+    id: 16,
+    name: "Daycare Programs",
+    icon: "l-hospital",
+    variant: "red",
   },
 ];
 
@@ -1374,17 +1472,6 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
 ];
 
-export const SPOKE_RELATION_TYPES = [
-  {
-    text: "Regular",
-    value: SpokeRelationship.REGULAR,
-  },
-  {
-    text: "Tele ICU",
-    value: SpokeRelationship.TELE_ICU,
-  },
-];
-
 export const HumanBodyPaths = {
   anterior: [
     {
@@ -1670,3 +1757,17 @@ export const HEADER_CONTENT_TYPES = {
 } as const;
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
+
+/**
+ * @deprecated use `LocalStorageKeys.patientTokenKey` instead
+ */
+export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
+
+// organization_levels map based of type. for govt
+// thought: This might be better placed in the organization types files
+export const ORGANIZATION_LEVELS = {
+  govt: ["State", "District", "LocalBody", "Ward"],
+  team: ["Team"],
+  role: ["Role"],
+  other: ["Other"],
+};

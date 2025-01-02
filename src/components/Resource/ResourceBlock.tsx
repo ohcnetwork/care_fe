@@ -4,11 +4,10 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { ResourceModel } from "@/components/Facility/models";
-
 import { classNames, formatDateTime, formatName } from "@/Utils/utils";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
-export default function ResourceBlock(props: { resource: ResourceModel }) {
+export default function ResourceBlock(props: { resource: ResourceRequest }) {
   const { resource } = props;
   const { t } = useTranslation();
 
@@ -33,19 +32,18 @@ export default function ResourceBlock(props: { resource: ResourceModel }) {
               {
                 title: "origin_facility",
                 icon: "l-plane-departure",
-                data: resource.origin_facility_object.name,
+                data: resource?.origin_facility?.name,
               },
               {
                 title: "resource_approving_facility",
                 icon: "l-user-check",
-                data: resource.approving_facility_object?.name,
+                data: resource?.approving_facility?.name,
               },
               {
                 title: "assigned_facility",
                 icon: "l-plane-arrival",
                 data:
-                  resource.assigned_facility_object?.name ||
-                  t("yet_to_be_decided"),
+                  resource.assigned_facility?.name || t("yet_to_be_decided"),
               },
               {
                 title: "last_modified",
@@ -53,17 +51,17 @@ export default function ResourceBlock(props: { resource: ResourceModel }) {
                 data: formatDateTime(resource.modified_date),
                 className: dayjs()
                   .subtract(2, "hours")
-                  .isBefore(resource.modified_date)
+                  .isBefore(resource?.modified_date)
                   ? "text-secondary-900"
                   : "rounded bg-red-500 border border-red-600 text-white w-full font-bold",
               },
               {
                 title: "assigned_to",
                 icon: "l-user",
-                data: resource.assigned_to_object
-                  ? formatName(resource.assigned_to_object) +
+                data: resource?.assigned_to
+                  ? formatName(resource.assigned_to) +
                     " - " +
-                    resource.assigned_to_object.user_type
+                    resource.assigned_to.user_type
                   : undefined,
               },
             ] as const

@@ -1,6 +1,11 @@
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
@@ -36,6 +41,8 @@ interface ExportButtonProps {
   route?: Route<string | { results: object[] }, unknown>;
   parse?: (data: string) => string;
   filenamePrefix: string;
+  className?: string;
+  variant?: "primary_gradient" | "secondary";
 }
 
 export const ExportMenu = ({
@@ -44,12 +51,15 @@ export const ExportMenu = ({
   exportItems,
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
+  const { t } = useTranslation();
 
   if (exportItems.length === 1) {
     const item = exportItems[0];
 
     return (
-      <ButtonV2
+      <Button
+        variant={"primary_gradient"}
+        className="gap-2"
         disabled={isExporting || disabled}
         onClick={() => {
           let action = item.action;
@@ -63,13 +73,10 @@ export const ExportMenu = ({
             exportFile(action, item.filePrefix, item.type, item.parse);
           }
         }}
-        border
-        ghost
-        className="py-2.5"
       >
         <CareIcon icon="l-export" />
-        {isExporting ? "Exporting..." : label}
-      </ButtonV2>
+        {isExporting ? `${t("exporting")}...` : label}
+      </Button>
     );
   }
 
@@ -108,15 +115,19 @@ export const ExportMenu = ({
 
 export const ExportButton = ({
   tooltipClassName = "tooltip-bottom -translate-x-7",
+  variant,
   type = "csv",
+  className,
   parse,
   ...props
 }: ExportButtonProps) => {
   const { isExporting, exportFile } = useExport();
+  const { t } = useTranslation();
 
   return (
     <>
-      <ButtonV2
+      <Button
+        variant={variant || "primary_gradient"}
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -130,10 +141,10 @@ export const ExportButton = ({
             exportFile(action, props.filenamePrefix, type, parse);
           }
         }}
-        className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
-        variant="secondary"
-        ghost
-        circle
+        className={cn(
+          "tooltip gap-2 text-lg text-white disabled:bg-transparent disabled:text-secondary-500",
+          className,
+        )}
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
@@ -141,9 +152,9 @@ export const ExportButton = ({
           <CareIcon icon="l-export" />
         )}
         <span className={`tooltip-text ${tooltipClassName}`}>
-          {props.tooltip || "Export"}
+          {props.tooltip || t("export")}
         </span>
-      </ButtonV2>
+      </Button>
     </>
   );
 };
