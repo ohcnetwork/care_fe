@@ -29,7 +29,7 @@ import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
-import { UserRoutes } from "@/types/user/userApi";
+import UserApi from "@/types/user/userApi";
 
 const userFormSchema = z
   .object({
@@ -122,7 +122,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         res,
         data: user,
         error,
-      } = await request(UserRoutes.create, {
+      } = await request(UserApi.create, {
         body: {
           ...data,
           // Omit c_password as it's not needed in the API

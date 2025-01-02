@@ -29,7 +29,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
-import { UserRoutes } from "@/types/user/userApi";
+import UserApi from "@/types/user/userApi";
 
 interface Props {
   organizationId: string;
@@ -52,7 +52,7 @@ export default function LinkFacilityUserSheet({
 
   const { data: preSelectedUser } = useQuery({
     queryKey: ["user", preSelectedUsername],
-    queryFn: query(UserRoutes.get, {
+    queryFn: query(UserApi.get, {
       pathParams: { username: preSelectedUsername || "" },
     }),
     enabled: !!preSelectedUsername,

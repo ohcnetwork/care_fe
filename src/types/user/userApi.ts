@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import { UserBase } from "./user";
 
-export const UserRoutes = {
+export default {
   list: {
     path: "/api/v1/users/",
     method: HttpMethod.GET,
