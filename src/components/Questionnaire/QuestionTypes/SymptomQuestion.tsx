@@ -147,7 +147,12 @@ const SymptomItem: React.FC<SymptomItemProps> = ({
     <div className="group hover:bg-gray-50">
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
-          <div className="font-medium truncate">{symptom.code.display}</div>
+          <div
+            className="font-medium text-sm truncate"
+            title={symptom.code.display}
+          >
+            {symptom.code.display}
+          </div>
           <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
