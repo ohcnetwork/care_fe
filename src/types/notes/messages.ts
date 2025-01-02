@@ -8,7 +8,3 @@ export interface Message {
   updated_by: UserBase;
 }
 
-export interface MessagesResponse {
-  count: number;
-  results: Message[];
-}
