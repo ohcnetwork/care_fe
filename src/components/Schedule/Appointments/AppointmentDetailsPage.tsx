@@ -11,7 +11,7 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isPast } from "date-fns";
+import { differenceInYears, format, isSameDay } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -338,7 +338,7 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const currentStatus = appointment.status;
-  const hasStarted = isPast(appointment.token_slot.start_datetime);
+  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
   if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
     return null;
@@ -369,7 +369,7 @@ const AppointmentActions = ({
     <div className="flex flex-col gap-2 w-64 mx-auto">
       {currentStatus === "booked" && (
         <Button
-          disabled={!hasStarted}
+          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("checked_in")}
           size="lg"
@@ -381,7 +381,7 @@ const AppointmentActions = ({
 
       {["booked", "checked_in"].includes(currentStatus) && (
         <Button
-          disabled={!hasStarted}
+          disabled={!isToday}
           variant={
             currentStatus === "checked_in" ? "outline_primary" : "outline"
           }
@@ -395,7 +395,7 @@ const AppointmentActions = ({
 
       {currentStatus === "in_consultation" && (
         <Button
-          disabled={!hasStarted}
+          disabled={!isToday}
           variant="outline_primary"
           onClick={() => onChange("fulfilled")}
           size="lg"
