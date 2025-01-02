@@ -71,7 +71,6 @@ export function useValueInjection<T = unknown>(options: {
   });
 
   useEffect(() => {
-    console.log("DOMVALUE", domValue);
     onChange(domValue);
   }, [domValue, targetElement, attribute]);
 

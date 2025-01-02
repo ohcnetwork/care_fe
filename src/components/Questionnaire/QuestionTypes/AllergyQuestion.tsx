@@ -104,18 +104,20 @@ export function AllergyQuestion({
       </Label>
       <ValueInjection
         value={allergies}
-        onChange={(value) =>
-          value &&
-          updateQuestionnaireResponseCB({
-            ...questionnaireResponse,
-            values: [
-              {
-                type: "allergy_intolerance",
-                value: value,
-              },
-            ],
-          })
+        onChange={
+          (value) => console.log(value)
+          // value &&
+          // updateQuestionnaireResponseCB({
+          //   ...questionnaireResponse,
+          //   values: [
+          //     {
+          //       type: "allergy_intolerance",
+          //       value: value,
+          //     },
+          //   ],
+          // })
         }
+        data-structured-input-id={question.id}
         data-structured-input="qn-allergies"
         className="rounded-lg border p-4"
       >
