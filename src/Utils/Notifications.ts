@@ -19,6 +19,16 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
+const toastNotification = (
+  message: string,
+  type: "success" | "error" | "warning",
+) => {
+  const toastId = toast[type](message, {
+    closeButton: true,
+  });
+  return toastId;
+};
+
 const notifyError = (error: any) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
@@ -40,7 +50,7 @@ const notifyError = (error: any) => {
       errorMsg += "\n";
     }
   }
-  toast.error(errorMsg);
+  toastNotification(errorMsg, "error");
 };
 
 /**
@@ -48,7 +58,7 @@ const notifyError = (error: any) => {
  * @deprecated Use `toast.success` instead
  */
 export const Success = ({ msg }: { msg: string }) => {
-  toast.success(msg);
+  toastNotification(msg, "success");
 };
 
 /**
@@ -64,7 +74,7 @@ export const Error = ({ msg }: { msg: any }) => {
  * @deprecated Use `toast.warning` instead
  */
 export const Warn = ({ msg }: { msg: string }) => {
-  toast.warning(msg);
+  toastNotification(msg, "warning");
 };
 
 /**
