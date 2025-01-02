@@ -397,35 +397,52 @@ export const formatPatientAge = (
 ) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
 
-  const start = dayjs(
-    obj.date_of_birth
-      ? new Date(obj.date_of_birth)
-      : new Date(obj.year_of_birth!, 0, 1),
-  );
-
-  const end = dayjs(
-    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
-  );
-
-  const years = end.diff(start, "years");
-  if (years) {
-    return `${years} ${suffixes.year}`;
+  // Check if age as an integer is provided
+  if (obj.age !== undefined && typeof obj.age === "number") {
+    if (obj.age >= 1) {
+      return `${obj.age} ${suffixes.year}`;
+    }
+    const months = Math.floor(obj.age * 12);
+    if (months > 0) {
+      return `${months} ${suffixes.month}`;
+    }
+    const days = Math.floor(obj.age * 365); // Approximation for fractional age
+    return `${days} ${suffixes.day}`;
   }
 
-  // Skip representing as no. of months/days if we don't know the date of birth
-  // since it would anyways be inaccurate.
-  if (!obj.date_of_birth) {
+  // Handle cases with date_of_birth
+  if (obj.date_of_birth) {
+    const start = dayjs(new Date(obj.date_of_birth));
+    const end = dayjs(
+      obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
+    );
+
+    const years = end.diff(start, "years");
+    if (years > 0) {
+      return `${years} ${suffixes.year}`;
+    }
+
+    const months = end.diff(start, "months");
+    if (months > 0) {
+      const remainingDays = end.diff(start.add(months, "months"), "days");
+      return `${months}${suffixes.month}${
+        remainingDays > 0 ? ` ${remainingDays}${suffixes.day}` : ""
+      }`;
+    }
+
+    const days = end.diff(start, "days");
+    return `${days}${suffixes.day}`;
+  }
+
+  // Handle cases with only year_of_birth
+  if (obj.year_of_birth) {
     return abbreviated
       ? `Born ${obj.year_of_birth}`
-      : `Born on ${obj.year_of_birth}`;
+      : `Born in ${obj.year_of_birth}`;
   }
 
-  const month = end.diff(start, "month");
-  const day = end.diff(start.add(month, "month"), "day");
-  if (month) {
-    return `${month}${suffixes.month} ${day}${suffixes.day}`;
-  }
-  return `${day}${suffixes.day}`;
+  // Fallback if no age information is available
+  return "";
 };
 
 export const compareBy = <T extends object>(key: keyof T) => {
