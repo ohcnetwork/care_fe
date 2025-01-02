@@ -3,7 +3,7 @@ import {
   QuestionMarkCircledIcon,
   TextAlignLeftIcon,
 } from "@radix-ui/react-icons";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -23,7 +23,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatement,
@@ -61,11 +60,8 @@ export function MedicationStatementQuestion({
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
 
-  const [medications, setMedications] = useState<MedicationStatement[]>(() => {
-    return (
-      (questionnaireResponse.values?.[0]?.value as MedicationStatement[]) || []
-    );
-  });
+  const medications =
+    (questionnaireResponse.values?.[0]?.value as MedicationStatement[]) || [];
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: Omit<
@@ -119,22 +115,8 @@ export function MedicationStatementQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ValueInjection
-        value={medications}
-        onChange={(value) => {
-          if (value) {
-            setMedications(value);
-            updateQuestionnaireResponseCB({
-              ...questionnaireResponse,
-              values: [
-                {
-                  type: "medication_statement",
-                  value: value,
-                },
-              ],
-            });
-          }
-        }}
+      <div
+        data-structured-input-id={question.id}
         data-structured-input="qn-medication-statement"
         className="rounded-lg border p-4"
       >
@@ -157,7 +139,7 @@ export function MedicationStatementQuestion({
             </ul>
           </div>
         )}
-      </ValueInjection>
+      </div>
 
       <ValueSetSelect
         system="system-medication"
