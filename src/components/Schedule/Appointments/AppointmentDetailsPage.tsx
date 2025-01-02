@@ -12,6 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
+import { PrinterIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -36,7 +37,10 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FacilityModel } from "@/components/Facility/models";
 import { AppointmentTokenCard } from "@/components/Schedule/Appointments/AppointmentTokenCard";
-import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
+import {
+  formatAppointmentSlotTime,
+  printAppointment,
+} from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { Appointment, AppointmentStatuses } from "@/components/Schedule/types";
 
@@ -128,8 +132,14 @@ export default function AppointmentDetailsPage(props: Props) {
                 facility={facilityQuery.data}
               />
             </div>
-            <div className="flex justify-end px-6">
-              {/* TODO: use navigator.share */}
+            <div className="flex gap-2 justify-end px-6">
+              <Button
+                variant="outline"
+                onClick={() => printAppointment({ t, facility, appointment })}
+              >
+                <PrinterIcon className="size-4 mr-2" />
+                <span>{t("print")}</span>
+              </Button>
               <Button
                 variant="default"
                 onClick={async () => {
