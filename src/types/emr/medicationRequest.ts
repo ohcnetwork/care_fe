@@ -124,7 +124,7 @@ export interface MedicationRequest {
   patient?: string; // UUID
   encounter?: string; // UUID
   authored_on: string;
-  dosage_instruction: MedicationRequestDosageInstruction;
+  dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
 
   created_by?: UserBareMinimum;

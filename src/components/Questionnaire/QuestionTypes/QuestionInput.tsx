@@ -2,6 +2,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { FollowUpAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpAppointmentQuestion";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
@@ -161,6 +163,8 @@ export function QuestionInput({
             return <SymptomQuestion {...commonProps} />;
           case "diagnosis":
             return <DiagnosisQuestion {...commonProps} />;
+          case "follow_up_appointment":
+            return <FollowUpAppointmentQuestion {...commonProps} />;
           case "encounter":
             if (encounterId) {
               return (

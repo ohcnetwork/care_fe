@@ -1,4 +1,9 @@
 import {
+  AppointmentCreate,
+  FollowUpAppointmentRequest,
+} from "@/components/Schedule/types";
+
+import {
   AllergyIntolerance,
   AllergyIntoleranceRequest,
 } from "@/types/emr/allergyIntolerance";
@@ -17,6 +22,7 @@ export interface StructuredDataMap {
   symptom: Symptom;
   diagnosis: Diagnosis;
   encounter: Encounter;
+  follow_up_appointment: FollowUpAppointmentRequest;
 }
 
 // Map structured types to their request types
@@ -27,6 +33,7 @@ export interface StructuredRequestMap {
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
   encounter: EncounterEditRequest;
+  follow_up_appointment: AppointmentCreate;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

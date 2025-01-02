@@ -21,6 +21,7 @@ import ScribeStructuredInput from "@/Utils/scribe";
 import {
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
+  MedicationRequestDosageInstruction,
   MedicationRequestIntent,
 } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
@@ -42,7 +43,7 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   do_not_perform: false,
   medication: undefined,
   authored_on: new Date().toISOString(),
-  dosage_instruction: {},
+  dosage_instruction: [],
 };
 
 export function MedicationRequestQuestion({
@@ -60,7 +61,11 @@ export function MedicationRequestQuestion({
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
       ...medications,
-      { ...MEDICATION_REQUEST_INITIAL_VALUE, medication },
+      {
+        ...MEDICATION_REQUEST_INITIAL_VALUE,
+        medication,
+        dosage_instruction: [],
+      },
     ];
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
@@ -304,12 +309,12 @@ export const MedicationRequestItem: React.FC<{
   onRemove?: () => void;
   index?: number;
 }> = ({ medication, disabled, onUpdate, onRemove, index = 0 }) => {
-  const dosageInstruction = medication.dosage_instruction;
+  const dosageInstruction = medication.dosage_instruction[0];
   const handleUpdateDosageInstruction = (
-    updates: Partial<MedicationRequest["dosage_instruction"]>,
+    updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
     onUpdate?.({
-      dosage_instruction: { ...dosageInstruction, ...updates },
+      dosage_instruction: [{ ...dosageInstruction, ...updates }],
     });
   };
 
@@ -364,7 +369,7 @@ export const MedicationRequestItem: React.FC<{
             <QuantityInput
               units={DOSAGE_UNITS}
               quantity={
-                medication.dosage_instruction?.dose_and_rate?.dose_quantity
+                medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
               }
               onChange={(value) =>
                 handleUpdateDosageInstruction({
@@ -378,7 +383,7 @@ export const MedicationRequestItem: React.FC<{
             <Label className="mb-1 block text-sm font-medium">Route</Label>
             <ValueSetSelect
               system="system-route"
-              value={medication.dosage_instruction?.route}
+              value={medication.dosage_instruction[0]?.route}
               onSelect={(route) => handleUpdateDosageInstruction({ route })}
               placeholder="Select route"
               disabled={disabled}
@@ -390,7 +395,7 @@ export const MedicationRequestItem: React.FC<{
             </Label>
             <ValueSetSelect
               system="system-administration-method"
-              value={medication.dosage_instruction?.method}
+              value={medication.dosage_instruction[0]?.method}
               onSelect={(method) => handleUpdateDosageInstruction({ method })}
               placeholder="Select method"
               disabled={disabled}
@@ -404,7 +409,7 @@ export const MedicationRequestItem: React.FC<{
             <Label className="mb-1 block text-sm font-medium pr-4">Site</Label>
             <ValueSetSelect
               system="system-body-site"
-              value={medication.dosage_instruction?.site}
+              value={medication.dosage_instruction[0]?.site}
               onSelect={(site) => handleUpdateDosageInstruction({ site })}
               placeholder="Select site"
               disabled={disabled}
@@ -415,12 +420,14 @@ export const MedicationRequestItem: React.FC<{
         <div className="flex items-center gap-2 mt-2">
           <Checkbox
             id={`prn-checkbox-${medication.medication?.code}`}
-            checked={medication.dosage_instruction?.as_needed_boolean ?? false}
+            checked={
+              medication.dosage_instruction[0]?.as_needed_boolean ?? false
+            }
             onCheckedChange={(checked) =>
               handleUpdateDosageInstruction({
                 as_needed_boolean: !!checked,
                 as_needed_for: checked
-                  ? medication.dosage_instruction?.as_needed_for
+                  ? medication.dosage_instruction[0]?.as_needed_for
                   : undefined,
               })
             }
@@ -431,12 +438,12 @@ export const MedicationRequestItem: React.FC<{
           </Label>
         </div>
 
-        {medication.dosage_instruction?.as_needed_boolean ? (
+        {medication.dosage_instruction[0]?.as_needed_boolean ? (
           <div className="flex gap-2">
             <div className="flex-1">
               <ValueSetSelect
                 system="system-as-needed-reason"
-                value={medication.dosage_instruction?.as_needed_for}
+                value={medication.dosage_instruction[0]?.as_needed_for}
                 onSelect={(reason) =>
                   handleUpdateDosageInstruction({ as_needed_for: reason })
                 }
@@ -486,13 +493,17 @@ export const MedicationRequestItem: React.FC<{
             </Label>
             <ValueSetSelect
               system="system-additional-instruction"
-              value={medication.dosage_instruction?.additional_instruction?.[0]}
+              value={
+                medication.dosage_instruction[0]?.additional_instruction?.[0]
+              }
               onSelect={(additionalInstruction) =>
                 onUpdate?.({
-                  dosage_instruction: {
-                    ...medication.dosage_instruction,
-                    additional_instruction: [additionalInstruction],
-                  },
+                  dosage_instruction: [
+                    {
+                      ...medication.dosage_instruction[0],
+                      additional_instruction: [additionalInstruction],
+                    },
+                  ],
                 })
               }
               disabled={disabled}
@@ -509,7 +520,7 @@ export const MedicationRequestItem: React.FC<{
 };
 
 const reverseFrequencyOption = (
-  option: MedicationRequest["dosage_instruction"]["timing"],
+  option: MedicationRequest["dosage_instruction"][0]["timing"],
 ) => {
   return Object.entries(FREQUENCY_OPTIONS).find(
     ([, value]) =>
@@ -561,6 +572,6 @@ const FREQUENCY_OPTIONS = {
   string,
   {
     display: string;
-    timing: MedicationRequest["dosage_instruction"]["timing"];
+    timing: MedicationRequest["dosage_instruction"][0]["timing"];
   }
 >;

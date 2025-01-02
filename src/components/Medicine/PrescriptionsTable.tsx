@@ -91,19 +91,19 @@ export default function PrescriptionsTable({
                   ...obj,
                   medicine: displayCode(obj.medication),
                   route__pretty:
-                    obj.dosage_instruction.route &&
-                    displayCode(obj.dosage_instruction.route),
+                    obj.dosage_instruction[0].route &&
+                    displayCode(obj.dosage_instruction[0].route),
                   frequency__pretty:
-                    obj.dosage_instruction.timing &&
-                    displayTiming(obj.dosage_instruction.timing),
+                    obj.dosage_instruction[0].timing &&
+                    displayTiming(obj.dosage_instruction[0].timing),
                   max_dose_per_period__pretty:
-                    obj.dosage_instruction.max_dose_per_period &&
+                    obj.dosage_instruction[0].max_dose_per_period &&
                     displayDoseRange(
-                      obj.dosage_instruction.max_dose_per_period,
+                      obj.dosage_instruction[0].max_dose_per_period,
                     ),
                   indicator:
-                    obj.dosage_instruction.as_needed_for &&
-                    displayCode(obj.dosage_instruction.as_needed_for),
+                    obj.dosage_instruction[0].as_needed_for &&
+                    displayCode(obj.dosage_instruction[0].as_needed_for),
                 })) || []
               }
               objectKeys={Object.values(tkeys)}
