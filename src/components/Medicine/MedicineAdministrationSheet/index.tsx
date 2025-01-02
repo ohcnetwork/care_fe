@@ -1,232 +1,341 @@
-import { useMemo, useState } from "react";
+import { Link } from "raviger";
+import { useState } from "react";
 
 import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import ScrollOverlay from "@/CAREUI/interactive/ScrollOverlay";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import Loading from "@/components/Common/Loading";
 import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
-import MedicineAdministrationTable from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTable";
-import { computeActivityBounds } from "@/components/Medicine/MedicineAdministrationSheet/utils";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
-import useRangePagination from "@/hooks/useRangePagination";
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 interface Props {
   readonly?: boolean;
-  isPrn: boolean;
+  facilityId: string;
 }
 
-const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
+const FREQUENCY_DISPLAY: Record<string, { code: string; meaning: string }> = {
+  "1-1-d": { code: "OD", meaning: "Once daily" },
+  "2-1-d": { code: "BD", meaning: "Twice daily" },
+  "1-1-wk": { code: "QWK", meaning: "Once a week" },
+  "4-1-h": { code: "Q4H", meaning: "Every 4 hours" },
+  "6-1-h": { code: "QID", meaning: "Four times a day" },
+  "8-1-h": { code: "TID", meaning: "Three times a day" },
+  "1-1-s": { code: "STAT", meaning: "Immediately" },
+  "1-1-d-night": { code: "HS", meaning: "At bedtime" },
+  "2-1-d-alt": { code: "QOD", meaning: "Every other day" },
+};
 
-const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
+function getFrequencyDisplay(
+  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+) {
+  if (!timing?.repeat) return undefined;
+  const key = `${timing.repeat.frequency}-${timing.repeat.period}-${timing.repeat.period_unit}`;
+  return FREQUENCY_DISPLAY[key];
+}
+
+const MedicineAdministrationSheet = ({ facilityId }: Props) => {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [showDiscontinued, setShowDiscontinued] = useState(false);
-
-  const filters = {
-    encounter: encounterId,
-    is_prn: isPrn,
-    limit: 100,
-  };
-
-  const activeMedicationRequests = useTanStackQueryInstead(
+  const { data: medications, loading } = useTanStackQueryInstead(
     routes.medicationRequest.list,
     {
       pathParams: { patientId: patient!.id },
       query: {
-        ...filters,
-        status: ["active", "on_hold"],
+        encounter: encounterId,
+        limit: 100,
       },
     },
   );
 
-  const discontinuedMedicationRequests = useTanStackQueryInstead(
-    routes.medicationRequest.list,
-    {
-      pathParams: { patientId: patient!.id },
-      query: {
-        ...filters,
-        status: ["completed", "ended", "stopped", "cancelled"],
-      },
-      prefetch: !showDiscontinued,
+  const filteredMedications = medications?.results?.filter(
+    (med: MedicationRequest) => {
+      if (!searchQuery.trim()) return true;
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const medicationName = med.medication?.display?.toLowerCase() || "";
+      return medicationName.includes(searchTerm);
     },
   );
 
-  const discontinuedCount = discontinuedMedicationRequests.data?.count;
+  const activeMedications = filteredMedications?.filter(
+    (med: MedicationRequest) =>
+      ["active", "on_hold"].includes(med.status || ""),
+  );
+  const discontinuedMedications = filteredMedications?.filter(
+    (med: MedicationRequest) =>
+      !["active", "on_hold"].includes(med.status || ""),
+  );
 
-  const { activityTimelineBounds, prescriptions } = useMemo(() => {
-    const prescriptionList = [
-      ...(activeMedicationRequests.data?.results.map((request) => ({
-        ...request,
-        discontinued: false,
-      })) ?? []),
-    ];
-
-    if (showDiscontinued) {
-      prescriptionList.push(
-        ...(discontinuedMedicationRequests.data?.results.map((request) => ({
-          ...request,
-          discontinued: true,
-        })) ?? []),
-      );
-    }
-
-    return {
-      prescriptions: prescriptionList.sort(
-        (a, b) => +a.discontinued - +b.discontinued,
-      ),
-      activityTimelineBounds: prescriptionList
-        ? computeActivityBounds(prescriptionList)
-        : undefined,
-    };
-  }, [
-    activeMedicationRequests.data,
-    discontinuedMedicationRequests.data,
-    showDiscontinued,
-  ]);
-
-  const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });
-  const pagination = useRangePagination({
-    bounds: activityTimelineBounds ?? DEFAULT_BOUNDS,
-    perPage: daysPerPage * 24 * 60 * 60 * 1000,
-    slots: (daysPerPage * 24) / 4, // Grouped by 4 hours
-    defaultEnd: true,
-  });
+  const EmptyState = ({ searching }: { searching?: boolean }) => (
+    <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
+      <div className="rounded-full bg-secondary/10 p-3">
+        <CareIcon icon="l-tablets" className="text-3xl text-muted-foreground" />
+      </div>
+      <div className="max-w-[200px] space-y-1">
+        <h3 className="font-medium">
+          {searching ? "No matches found" : "No Prescriptions"}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {searching
+            ? `No medications match "${searchQuery}"`
+            : "No medications have been prescribed yet"}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
-    <div>
+    <div className="space-y-2">
       <SubHeading
-        title={isPrn ? "PRN Prescriptions" : "Prescriptions"}
-        // lastModified={
-        //   prescriptions?.[0]?.last_administration?.created_date ??
-        //   prescriptions?.[0]?.modified_date
-        // }
-        /**
-         *  TODO: Wire this later
-         *    - edit medication request
-         *    - print prescription
-         *    - bulk administer
-         */
-        // options={
-        //   !readonly &&
-        //   !!activeMedicationRequests.data?.results && (
-        //     <>
-        //       <AuthorizedForConsultationRelatedActions>
-        //         <ButtonV2
-        //           id="edit-prescription"
-        //           variant="secondary"
-        //           border
-        //           href="prescriptions"
-        //           className="w-full"
-        //         >
-        //           <CareIcon icon="l-pen" className="text-lg" />
-        //           <span className="hidden lg:block">
-        //             {t("edit_prescriptions")}
-        //           </span>
-        //           <span className="block lg:hidden">{t("edit")}</span>
-        //         </ButtonV2>
-        //         <BulkAdminister
-        //           prescriptions={activeMedicationRequests.data.results}
-        //           onDone={() => activeMedicationRequests.refetch()}
-        //         />
-        //       </AuthorizedForConsultationRelatedActions>
-        //       <ButtonV2
-        //         href="prescriptions/print"
-        //         ghost
-        //         border
-        //         disabled={!activeMedicationRequests.data.results.length}
-        //         className="w-full"
-        //       >
-        //         <CareIcon icon="l-print" className="text-lg" />
-        //         Print
-        //       </ButtonV2>
-        //     </>
-        //   )
-        // }
+        title="Prescriptions"
+        options={
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+              >
+                <CareIcon icon="l-print" className="mr-2" />
+                Print
+              </Link>
+            </Button>
+          </div>
+        }
       />
-      <div className="rounded-lg border shadow">
-        <ScrollOverlay
-          overlay={
-            <div className="flex items-center gap-2 pb-2">
-              <span className="text-sm">Scroll to view more prescriptions</span>
-              <CareIcon
-                icon="l-arrow-down"
-                className="animate-bounce text-2xl"
-              />
-            </div>
-          }
-          disableOverlay={
-            activeMedicationRequests.loading ||
-            !prescriptions?.length ||
-            !(prescriptions?.length > 1)
-          }
-        >
-          {activeMedicationRequests.loading ? (
-            <div className="min-h-screen">
-              <Loading />
-            </div>
-          ) : (
-            <>
-              {prescriptions?.length === 0 && <NoPrescriptions prn={isPrn} />}
-              {!!prescriptions?.length && (
-                <MedicineAdministrationTable
-                  prescriptions={prescriptions}
-                  pagination={pagination}
-                  onRefetch={() => {
-                    activeMedicationRequests.refetch();
-                    discontinuedMedicationRequests.refetch();
-                  }}
-                  readonly={readonly || false}
-                />
-              )}
-            </>
+
+      <div className="rounded-lg border">
+        <div className="flex items-center gap-2 border-b p-2">
+          <CareIcon icon="l-search" className="text-lg text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search medications..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+            >
+              <CareIcon icon="l-times" className="text-lg" />
+            </Button>
           )}
-        </ScrollOverlay>
-        {!!discontinuedCount && (
-          <ButtonV2
-            id="discontinued-medicine"
-            variant="secondary"
-            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-secondary-100"
-            disabled={
-              activeMedicationRequests.loading ||
-              discontinuedMedicationRequests.loading
-            }
-            onClick={() => setShowDiscontinued(!showDiscontinued)}
-          >
-            <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
-              <CareIcon
-                icon={showDiscontinued ? "l-eye-slash" : "l-eye"}
-                className="text-lg"
-              />
-              <span>
-                {showDiscontinued ? "Hide" : "Show"}{" "}
-                <strong>{discontinuedCount}</strong> discontinued
-                prescription(s)
-              </span>
-            </span>
-          </ButtonV2>
+        </div>
+
+        {loading ? (
+          <div className="min-h-[200px] flex items-center justify-center">
+            <Loading />
+          </div>
+        ) : !medications?.results?.length ? (
+          <EmptyState />
+        ) : !filteredMedications?.length ? (
+          <EmptyState searching />
+        ) : (
+          <ScrollArea className="h-[calc(100vh-16rem)]">
+            <Tabs defaultValue="active" className="w-full">
+              <div className="border-b px-2">
+                <TabsList className="h-9">
+                  <TabsTrigger value="active" className="text-xs">
+                    Active{" "}
+                    <Badge variant="secondary" className="ml-2">
+                      {activeMedications?.length || 0}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="discontinued" className="text-xs">
+                    Discontinued{" "}
+                    <Badge variant="secondary" className="ml-2">
+                      {discontinuedMedications?.length || 0}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="active" className="p-0">
+                <div className="divide-y">
+                  {activeMedications?.map((med) => (
+                    <PrescriptionEntry key={med.id} medication={med} />
+                  ))}
+                </div>
+              </TabsContent>
+              <TabsContent value="discontinued" className="p-0">
+                <div className="divide-y">
+                  {discontinuedMedications?.map((med) => (
+                    <PrescriptionEntry key={med.id} medication={med} />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </ScrollArea>
         )}
       </div>
     </div>
   );
 };
 
-const NoPrescriptions = ({ prn }: { prn: boolean }) => {
+const PrescriptionEntry = ({
+  medication,
+}: {
+  medication: MedicationRequest;
+}) => {
+  const instruction = medication.dosage_instruction[0];
+  if (!instruction) return null;
+
+  const frequency = getFrequencyDisplay(instruction.timing);
+  const additionalInstructions = instruction.additional_instruction;
+  const isPrn = instruction.as_needed_boolean;
+
+  // Get status variant
+  const getStatusVariant = (
+    status: string = "",
+  ): "default" | "destructive" | "secondary" | "outline" | "primary" => {
+    switch (status) {
+      case "active":
+        return "default";
+      case "on-hold":
+        return "secondary";
+      case "cancelled":
+        return "destructive";
+      case "completed":
+        return "primary";
+      default:
+        return "secondary";
+    }
+  };
+
+  // Get priority variant
+  const getPriorityVariant = (
+    priority: string = "",
+  ): "default" | "destructive" | "secondary" | "outline" | "primary" => {
+    switch (priority) {
+      case "stat":
+        return "destructive";
+      case "urgent":
+      case "asap":
+        return "primary";
+      default:
+        return "outline";
+    }
+  };
+
   return (
-    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
-      <CareIcon icon="l-tablets" className="text-5xl" />
-      <h3 className="text-lg font-medium">
-        {prn
-          ? "No PRN Prescriptions Prescribed"
-          : "No Prescriptions Prescribed"}
-      </h3>
+    <div
+      className={classNames(
+        "p-2 text-sm transition-colors",
+        isPrn ? "bg-secondary/5 hover:bg-secondary/10" : "hover:bg-secondary/5",
+      )}
+    >
+      {/* Medicine Name and Status */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-2">
+              <span className="font-medium">
+                {medication.medication?.display}
+              </span>
+              {isPrn && (
+                <Badge
+                  variant="secondary"
+                  className="h-5 rounded px-1.5 text-[10px] font-medium uppercase tracking-wider"
+                >
+                  <span className="mr-1 text-[8px]">●</span>
+                  PRN
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              {medication.priority && (
+                <Badge
+                  variant={getPriorityVariant(medication.priority)}
+                  className="h-5 rounded px-1.5 text-[10px] font-medium uppercase tracking-wider"
+                >
+                  {medication.priority}
+                </Badge>
+              )}
+              <Badge
+                variant={getStatusVariant(medication.status)}
+                className="h-5 rounded px-1.5 text-[10px] font-medium uppercase tracking-wider"
+              >
+                {medication.status}
+              </Badge>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {medication.medication?.code}
+          </p>
+        </div>
+      </div>
+
+      {/* Dosage and Instructions */}
+      <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
+        {instruction.dose_and_rate && (
+          <span className="font-medium">
+            {instruction.dose_and_rate.type === "calculated" ? (
+              <span>
+                {instruction.dose_and_rate.dose_range?.low.value}{" "}
+                {instruction.dose_and_rate.dose_range?.low.unit} →{" "}
+                {instruction.dose_and_rate.dose_range?.high.value}{" "}
+                {instruction.dose_and_rate.dose_range?.high.unit}
+              </span>
+            ) : (
+              <span>
+                {instruction.dose_and_rate.dose_quantity?.value}{" "}
+                {instruction.dose_and_rate.dose_quantity?.unit}
+              </span>
+            )}
+          </span>
+        )}
+        {instruction.route && (
+          <span>
+            <span className="text-muted-foreground">Via:</span>{" "}
+            {instruction.route.display}
+          </span>
+        )}
+        {instruction.method && (
+          <span>
+            <span className="text-muted-foreground">Method:</span>{" "}
+            {instruction.method.display}
+          </span>
+        )}
+        {instruction.site && (
+          <span>
+            <span className="text-muted-foreground">Site:</span>{" "}
+            {instruction.site.display}
+          </span>
+        )}
+        {frequency && <span className="font-medium">{frequency.code}</span>}
+        {isPrn && instruction.as_needed_for && (
+          <span>
+            <span className="text-muted-foreground">When:</span>{" "}
+            {instruction.as_needed_for.display}
+          </span>
+        )}
+      </div>
+
+      {/* Additional Instructions */}
+      {additionalInstructions && additionalInstructions.length > 0 && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          {additionalInstructions.map((instr, idx) => (
+            <span key={idx}>
+              {idx > 0 && " • "}
+              {instr.display}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

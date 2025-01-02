@@ -145,9 +145,9 @@ export default function MedicineAdministrationTableRow({
                   </span>
                 )}
 
-                {prescription.dosage_instruction.route && (
+                {prescription.dosage_instruction[0].route && (
                   <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
-                    {displayCode(prescription.dosage_instruction.route)}
+                    {displayCode(prescription.dosage_instruction[0].route)}
                   </span>
                 )}
               </div>
@@ -217,7 +217,7 @@ type DosageFrequencyInfoProps = {
 export function DosageFrequencyInfo({
   prescription,
 }: DosageFrequencyInfoProps) {
-  const dosageInstruction = prescription.dosage_instruction;
+  const dosageInstruction = prescription.dosage_instruction[0];
 
   return (
     <div className="flex justify-center">

@@ -54,7 +54,7 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
 
-  const doseAndRate = prescription.dosage_instruction.dose_and_rate!;
+  const doseAndRate = prescription.dosage_instruction[0].dose_and_rate!;
   const requiresDosage = doseAndRate.type === "calculated";
 
   const formSchema = z
@@ -154,10 +154,10 @@ export default function AdministerMedicine({ prescription, onClose }: Props) {
       occurrence_period_end: time.toISOString(),
       note: values.note,
       dosage: {
-        text: prescription.dosage_instruction.text,
-        site: prescription.dosage_instruction.site,
-        route: prescription.dosage_instruction.route,
-        method: prescription.dosage_instruction.method,
+        text: prescription.dosage_instruction[0].text,
+        site: prescription.dosage_instruction[0].site,
+        route: prescription.dosage_instruction[0].route,
+        method: prescription.dosage_instruction[0].method,
         dose: {
           value: doseValue!,
           unit: doseUnit!,

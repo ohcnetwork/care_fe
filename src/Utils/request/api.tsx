@@ -49,10 +49,7 @@ import {
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
 import {
-  Organization,
-  OrganizationResponse,
   OrganizationUserRole,
-  OrganizationUserRoleResponse,
   RoleResponse,
 } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
@@ -62,7 +59,6 @@ import {
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import { Diagnosis } from "@/types/questionnaire/diagnosis";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { Symptom } from "@/types/questionnaire/symptom";
 import {
@@ -370,7 +366,7 @@ const routes = {
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserAssignedModel>(),
+    TRes: Type<UserBase>(),
   },
 
   getScheduleAbleFacilityUsers: {
@@ -607,66 +603,6 @@ const routes = {
     },
   },
 
-  // Questionnaire Routes
-  questionnaire: {
-    list: {
-      path: "/api/v1/questionnaire/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<QuestionnaireDetail>>(),
-    },
-
-    detail: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "GET",
-      TRes: Type<QuestionnaireDetail>(),
-    },
-
-    create: {
-      path: "/api/v1/questionnaire/",
-      method: "POST",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    update: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PUT",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<QuestionnaireDetail>(),
-    },
-
-    partialUpdate: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PATCH",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    delete: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-    },
-
-    submit: {
-      path: "/api/v1/questionnaire/{id}/submit/",
-      method: "POST",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<{
-        resource_id: string;
-        encounter?: string;
-        patient: string;
-        responses: Array<{
-          question_id: string;
-          value: string | number | boolean;
-          note?: string;
-          bodysite?: string;
-          method?: string;
-        }>;
-      }>(),
-    },
-  },
-
   batchRequest: {
     path: "/api/v1/batch_requests/",
     method: "POST",
@@ -745,57 +681,6 @@ const routes = {
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
 
-  // Organization Routes
-  organization: {
-    listMine: {
-      path: "/api/v1/organization/mine/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    list: {
-      path: "/api/v1/organization/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    get: {
-      path: "/api/v1/organization/{id}/",
-      method: "GET",
-      TRes: {} as Organization,
-    },
-    listUsers: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
-    },
-    assignUser: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "POST",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    updateUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "PUT",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    removeUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "DELETE",
-      TRes: {} as Record<string, never>,
-    },
-    listPatients: {
-      path: "/api/v1/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Patient>>(),
-    },
-    getPublicOrganizations: {
-      path: "/api/v1/govt/organization/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Organization>>(),
-    },
-  },
-
   facilityOrganization: {
     list: {
       path: "/api/v1/facility/{facilityId}/organizations/",
@@ -816,7 +701,7 @@ const routes = {
     listUsers: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
       method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
+      TRes: {} as PaginatedResponse<OrganizationUserRole>,
     },
     assignUser: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",

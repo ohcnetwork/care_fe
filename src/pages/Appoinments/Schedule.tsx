@@ -32,12 +32,12 @@ import { TokenData } from "@/types/auth/otpToken";
 
 interface AppointmentsProps {
   facilityId: string;
-  staffExternalId: string;
+  staffId: string;
 }
 
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
-  const { facilityId, staffExternalId } = props;
+  const { facilityId, staffId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<SlotAvailability>();
@@ -47,14 +47,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     localStorage.getItem(CarePatientTokenKey) || "{}",
   );
 
-  if (!staffExternalId) {
+  if (!staffId) {
     Notification.Error({ msg: "Staff username not found" });
     navigate(`/facility/${facilityId}/`);
   } else if (!tokenData) {
     Notification.Error({ msg: "Phone number not found" });
-    navigate(
-      `/facility/${facilityId}/appointments/${staffExternalId}/otp/send`,
-    );
+    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
   const { data: facilityResponse, error: facilityError } = useQuery<
@@ -73,12 +71,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   }
 
   const { data: userData, error: userError } = useQuery({
-    queryKey: ["user", staffExternalId],
-    queryFn: () =>
-      request(routes.getScheduleAbleFacilityUser, {
-        pathParams: { facilityId: facilityId, user_id: staffExternalId },
-      }),
-    enabled: !!staffExternalId,
+    queryKey: ["user", facilityId, staffId],
+    queryFn: query(routes.getScheduleAbleFacilityUser, {
+      pathParams: { facility_id: facilityId, user_id: staffId },
+    }),
+    enabled: !!facilityId && !!staffId,
   });
 
   if (userError) {
@@ -86,11 +83,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   }
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
-    queryKey: ["slots", facilityId, staffExternalId, selectedDate],
+    queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(routes.otp.getSlotsForDay, {
       body: {
         facility: facilityId,
-        resource: staffExternalId,
+        resource: staffId,
         day: dateQueryString(selectedDate),
       },
       headers: {
@@ -135,11 +132,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     );
   };
 
-  if (!userData?.data) {
+  if (!userData) {
     return <Loading />;
   }
-
-  const user = userData.data;
 
   return (
     <div className="flex flex-col">
@@ -162,24 +157,24 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               <div className="flex flex-col">
                 <div className="flex flex-col gap-4 py-4 justify-between h-full">
                   <Avatar
-                    imageUrl={user.read_profile_picture_url}
-                    name={`${user.first_name} ${user.last_name}`}
+                    imageUrl={userData.profile_picture_url}
+                    name={`${userData.first_name} ${userData.last_name}`}
                     className="h-96 w-96 self-center rounded-sm"
                   />
 
                   <div className="flex grow flex-col px-4">
                     <h3 className="truncate text-xl font-semibold">
-                      {user.user_type === "Doctor"
-                        ? `Dr. ${user.first_name} ${user.last_name}`
-                        : `${user.first_name} ${user.last_name}`}
+                      {userData.user_type === "doctor"
+                        ? `Dr. ${userData.first_name} ${userData.last_name}`
+                        : `${userData.first_name} ${userData.last_name}`}
                     </h3>
                     <p className="text-sm text-muted-foreground truncate">
-                      {user.user_type}
+                      {userData.user_type}
                     </p>
 
                     {/* <p className="text-xs mt-4">Education: </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {user.qualification}
+                      {userData.qualification}
                     </p> */}
                   </div>
                 </div>
@@ -198,9 +193,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             <div className="flex flex-col gap-6">
               <span className="text-base font-semibold">
                 {t("book_an_appointment_with")}{" "}
-                {user.user_type === "Doctor"
-                  ? `Dr. ${user.first_name} ${user.last_name}`
-                  : `${user.first_name} ${user.last_name}`}
+                {userData.user_type === "doctor"
+                  ? `Dr. ${userData.first_name} ${userData.last_name}`
+                  : `${userData.first_name} ${userData.last_name}`}
               </span>
               <div>
                 <Label className="mb-2">{t("reason_for_visit")}</Label>
@@ -299,7 +294,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 );
                 localStorage.setItem("reason", reason);
                 navigate(
-                  `/facility/${facilityId}/appointments/${staffExternalId}/patient-select`,
+                  `/facility/${facilityId}/appointments/${staffId}/patient-select`,
                 );
               }}
             >

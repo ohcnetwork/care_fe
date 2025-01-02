@@ -328,7 +328,7 @@ export default function AppointmentCreatePage(props: Props) {
                                     slot.allocated ===
                                     availability.tokens_per_slot
                                   }
-                                  className="flex flex-col items-center group"
+                                  className="flex flex-col items-center group gap-0"
                                 >
                                   <span className="font-semibold">
                                     {format(slot.start_datetime, "HH:mm")}

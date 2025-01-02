@@ -12,9 +12,9 @@ import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Patient } from "@/types/emr/newPatient";
+import organizationApi from "@/types/organization/organizationApi";
 
 import OrganizationLayout from "./components/OrganizationLayout";
 
@@ -29,7 +29,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
-    queryFn: query(routes.organization.listPatients, {
+    queryFn: query(organizationApi.listPatients, {
       pathParams: { id },
       queryParams: {
         geo_organization: id,

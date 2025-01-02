@@ -62,11 +62,11 @@ const initialForm: AppointmentPatientRegister & {
 
 type PatientRegistrationProps = {
   facilityId: string;
-  staffUsername: string;
+  staffId: string;
 };
 
 export function PatientRegistration(props: PatientRegistrationProps) {
-  const { staffUsername } = props;
+  const { staffId } = props;
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
   ) as SlotAvailability;
@@ -230,7 +230,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           type="button"
           onClick={() =>
             navigate(
-              `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
+              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
             )
           }
         >
@@ -436,7 +436,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 type="button"
                 onClick={() =>
                   navigate(
-                    `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
+                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
                   )
                 }
               >

@@ -5,8 +5,13 @@ import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
+import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 
 const consultationRoutes: AppRoutes = {
+  "/facility/:facilityId/encounter/:encounterId/prescriptions/print": ({
+    facilityId,
+    encounterId,
+  }) => <PrintPrescription facilityId={facilityId} encounterId={encounterId} />,
   "/facility/:facilityId/encounter/:encounterId/:tab": ({
     facilityId,
     encounterId,
