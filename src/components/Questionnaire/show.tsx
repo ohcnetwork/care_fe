@@ -14,6 +14,7 @@ import type { Question } from "@/types/questionnaire/question";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import Loading from "../Common/Loading";
+import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireShowProps {
@@ -106,6 +107,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           <p className="text-gray-600">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
+          <ManageQuestionnaireOrganizationsSheet questionnaireId={id} />
           <Button variant="outline" onClick={() => navigate("/questionnaire")}>
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Back to List

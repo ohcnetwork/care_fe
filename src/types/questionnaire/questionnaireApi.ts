@@ -70,6 +70,6 @@ export default {
     path: "/api/v1/questionnaire/{id}/set_organizations/",
     method: HttpMethod.POST,
     TRes: Type<PaginatedResponse<Organization>>(),
-    TBody: {} as { organization: string[] },
+    TBody: {} as { organizations: string[] },
   },
 };
