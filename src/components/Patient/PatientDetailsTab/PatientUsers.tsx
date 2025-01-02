@@ -233,7 +233,7 @@ export const PatientUsers = (props: PatientProps) => {
     },
   });
 
-  const ManangeUsers = () => {
+  const ManageUsers = () => {
     if (!users?.results?.length) {
       return (
         <div className="h-full text-center space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
@@ -314,7 +314,7 @@ export const PatientUsers = (props: PatientProps) => {
             </div>
             <AddUserSheet patientId={id} />
           </div>
-          <ManangeUsers />
+          <ManageUsers />
         </div>
       </div>
     </div>
