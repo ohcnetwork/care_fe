@@ -33,6 +33,7 @@ interface Props {
   onChange: (user: UserBase) => void;
   placeholder?: string;
   noOptionsMessage?: string;
+  popoverClassName?: string;
 }
 
 export default function UserSelector({
@@ -40,6 +41,7 @@ export default function UserSelector({
   onChange,
   placeholder,
   noOptionsMessage,
+  popoverClassName,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -56,7 +58,7 @@ export default function UserSelector({
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
-      <PopoverTrigger asChild className="w-full">
+      <PopoverTrigger asChild className={popoverClassName}>
         <Button
           variant="outline"
           role="combobox"

@@ -128,6 +128,7 @@ export default function LinkUserSheet({
             onChange={handleUserChange}
             placeholder="Search for a user"
             noOptionsMessage="No users found"
+            popoverClassName="w-full"
           />
           {selectedUser && (
             <div className="space-y-4">
