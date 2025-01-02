@@ -105,4 +105,7 @@ export interface AvailabilityHeatmap {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
-export interface FollowUpAppointmentQuestionRequest {}
+export interface FollowUpAppointmentQuestionRequest {
+  resource: UserBase["id"];
+  reason_for_visit: string;
+}

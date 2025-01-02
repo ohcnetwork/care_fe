@@ -13,6 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
 import { PrinterIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -159,6 +160,15 @@ export default function AppointmentDetailsPage(props: Props) {
               <AppointmentActions
                 appointment={appointment}
                 onChange={(status) => updateAppointment({ status })}
+                onViewPatient={() => {
+                  navigate(`/facility/${props.facilityId}/patients/verify`, {
+                    query: {
+                      phone_number: patient.phone_number,
+                      year_of_birth: patient.year_of_birth,
+                      partial_id: patient.id.slice(0, 5),
+                    },
+                  });
+                }}
               />
             </div>
           </div>
@@ -340,11 +350,13 @@ const AppointmentDetails = ({
 interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
+  onViewPatient: () => void;
 }
 
 const AppointmentActions = ({
   appointment,
   onChange,
+  onViewPatient,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const currentStatus = appointment.status;
@@ -378,15 +390,21 @@ const AppointmentActions = ({
   return (
     <div className="flex flex-col gap-2 w-64 mx-auto">
       {currentStatus === "booked" && (
-        <Button
-          disabled={!isToday}
-          variant="outline_primary"
-          onClick={() => onChange("checked_in")}
-          size="lg"
-        >
-          <EnterIcon className="size-4 mr-2" />
-          {t("check_in")}
-        </Button>
+        <>
+          <Button variant="outline" onClick={onViewPatient} size="lg">
+            <PersonIcon className="size-4 mr-2" />
+            {t("view_patient")}
+          </Button>
+          <Button
+            disabled={!isToday}
+            variant="outline_primary"
+            onClick={() => onChange("checked_in")}
+            size="lg"
+          >
+            <EnterIcon className="size-4 mr-2" />
+            {t("check_in")}
+          </Button>
+        </>
       )}
 
       {["booked", "checked_in"].includes(currentStatus) && (
