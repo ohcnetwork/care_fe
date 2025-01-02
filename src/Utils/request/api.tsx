@@ -59,7 +59,6 @@ import {
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import { Diagnosis } from "@/types/questionnaire/diagnosis";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { Symptom } from "@/types/questionnaire/symptom";
 import {
@@ -601,66 +600,6 @@ const routes = {
       method: "POST",
       TBody: Type<{ search: string; count: number }>(),
       TRes: Type<{ results: Code[] }>(),
-    },
-  },
-
-  // Questionnaire Routes
-  questionnaire: {
-    list: {
-      path: "/api/v1/questionnaire/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<QuestionnaireDetail>>(),
-    },
-
-    detail: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "GET",
-      TRes: Type<QuestionnaireDetail>(),
-    },
-
-    create: {
-      path: "/api/v1/questionnaire/",
-      method: "POST",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    update: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PUT",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<QuestionnaireDetail>(),
-    },
-
-    partialUpdate: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PATCH",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    delete: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-    },
-
-    submit: {
-      path: "/api/v1/questionnaire/{id}/submit/",
-      method: "POST",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<{
-        resource_id: string;
-        encounter?: string;
-        patient: string;
-        responses: Array<{
-          question_id: string;
-          value: string | number | boolean;
-          note?: string;
-          bodysite?: string;
-          method?: string;
-        }>;
-      }>(),
     },
   },
 

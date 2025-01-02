@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import type { Question } from "@/types/questionnaire/question";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import Loading from "../Common/Loading";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -66,7 +66,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
     data: questionnaire,
     loading,
     error,
-  } = useQuery(routes.questionnaire.detail, {
+  } = useQuery(questionnaireApi.detail, {
     pathParams: { id },
   });
 
