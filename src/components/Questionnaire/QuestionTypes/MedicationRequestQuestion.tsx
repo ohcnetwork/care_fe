@@ -1,5 +1,5 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
-import React, { useState } from "react";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,7 +17,6 @@ import { QuantityInput } from "@/components/Common/QuantityInput";
 import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import {
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
@@ -51,11 +50,8 @@ export function MedicationRequestQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: MedicationRequestQuestionProps) {
-  const [medications, setMedications] = useState<MedicationRequest[]>(() => {
-    return (
-      (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || []
-    );
-  });
+  const medications =
+    (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
@@ -106,22 +102,8 @@ export function MedicationRequestQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ValueInjection
-        value={medications}
-        onChange={(value) => {
-          if (value) {
-            setMedications(value);
-            updateQuestionnaireResponseCB({
-              ...questionnaireResponse,
-              values: [
-                {
-                  type: "medication_request",
-                  value,
-                },
-              ],
-            });
-          }
-        }}
+      <div
+        data-structured-input-id={question.id}
         data-structured-input="qn-medication-request"
         className="rounded-lg border p-4"
       >
@@ -150,7 +132,7 @@ export function MedicationRequestQuestion({
           onSelect={handleAddMedication}
           disabled={disabled}
         />
-      </ValueInjection>
+      </div>
     </div>
   );
 }

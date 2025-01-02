@@ -9,6 +9,7 @@ import { AppRoutes } from "./Routers/AppRouter";
 import { FormContextValue } from "./components/Form/FormContext";
 import { PatientMeta } from "./components/Patient/models";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
+import { pluginMap } from "./pluginMap";
 import { PatientModel } from "./types/emr/patient";
 
 export type PatientForm = PatientModel &
@@ -78,3 +79,5 @@ export type PluginManifest = {
   // navItems: INavItem[];
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
 };
+
+export { pluginMap };

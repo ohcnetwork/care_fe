@@ -25,7 +25,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import { Code } from "@/types/questionnaire/code";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -97,20 +96,8 @@ export function SymptomQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ValueInjection
-        value={symptoms}
-        onChange={(value) =>
-          value &&
-          updateQuestionnaireResponseCB({
-            ...questionnaireResponse,
-            values: [
-              {
-                type: "symptom",
-                value,
-              },
-            ],
-          })
-        }
+      <div
+        data-structured-input-id={question.id}
         data-structured-input="qn-symptoms"
         className="rounded-lg border p-4"
       >
@@ -142,7 +129,7 @@ export function SymptomQuestion({
           onSelect={handleAddSymptom}
           disabled={disabled}
         />
-      </ValueInjection>
+      </div>
     </div>
   );
 }

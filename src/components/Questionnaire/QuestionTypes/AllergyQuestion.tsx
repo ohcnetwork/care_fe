@@ -41,7 +41,6 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { ValueInjection } from "@/Utils/useValueInjectionObserver";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -125,21 +124,7 @@ export function AllergyQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <ValueInjection
-        value={allergies}
-        onChange={
-          (value) => console.log(value)
-          // value &&
-          // updateQuestionnaireResponseCB({
-          //   ...questionnaireResponse,
-          //   values: [
-          //     {
-          //       type: "allergy_intolerance",
-          //       value: value,
-          //     },
-          //   ],
-          // })
-        }
+      <div
         data-structured-input-id={question.id}
         data-structured-input="qn-allergies"
         className="rounded-lg border p-4"
@@ -192,7 +177,7 @@ export function AllergyQuestion({
           onSelect={handleAddAllergy}
           disabled={disabled}
         />
-      </ValueInjection>
+      </div>
     </div>
   );
 }
