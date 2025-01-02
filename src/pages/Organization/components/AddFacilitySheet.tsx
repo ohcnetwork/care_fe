@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function AddFacilitySheet({ organizationId }: Props) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,7 +41,10 @@ export default function AddFacilitySheet({ organizationId }: Props) {
         <div className="mt-6">
           <CreateFacilityForm
             organizationId={organizationId}
-            onSubmitSuccess={() => setOpen(false)}
+            onSubmitSuccess={() => {
+              setOpen(false);
+              queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+            }}
           />
         </div>
       </SheetContent>

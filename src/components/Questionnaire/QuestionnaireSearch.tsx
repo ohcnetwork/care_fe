@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { conditionalAttribute } from "@/Utils/utils";
 import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 interface QuestionnaireSearchProps {
@@ -36,9 +37,14 @@ export function QuestionnaireSearch({
 
   const { data: questionnaires, isLoading } =
     useQuery<QuestionnaireListResponse>({
-      queryKey: ["questionnaires", "list"],
+      queryKey: ["questionnaires", "list", search, subjectType],
       queryFn: query(routes.questionnaire.list, {
-        queryParams: subjectType ? { subject_type: subjectType } : undefined,
+        queryParams: {
+          title: search,
+          ...conditionalAttribute(!!subjectType, {
+            subject_type: subjectType,
+          }),
+        },
       }),
     });
 

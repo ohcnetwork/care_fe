@@ -1,11 +1,7 @@
-import DeathReport from "@/components/DeathReport/DeathReport";
-import InvestigationReports from "@/components/Facility/Investigations/Reports";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
-import { InsuranceDetails } from "@/components/Patient/InsuranceDetails";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
-import PatientNotes from "@/components/Patient/PatientNotes";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -22,12 +18,7 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
   ),
-  // "/patients/live": () => <PatientIndex tab={"live"} />,
-  // "/patients/discharged": () => <PatientIndex tab={"discharged"} />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
-  "/patient/:id/investigation_reports": ({ id }) => (
-    <InvestigationReports id={id} />
-  ),
   "/facility/:facilityId/patient/create": ({ facilityId }) => (
     <PatientRegistration facilityId={facilityId} />
   ),
@@ -41,16 +32,9 @@ const PatientRoutes: AppRoutes = {
     }) => <PatientHome facilityId={facilityId} id={id} page={tab.route} />;
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:id/insurance": ({ facilityId, id }) => (
-    <InsuranceDetails facilityId={facilityId} id={id} />
-  ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
     <PatientRegistration facilityId={facilityId} patientId={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes": ({
-    facilityId,
-    patientId,
-  }) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
@@ -61,7 +45,6 @@ const PatientRoutes: AppRoutes = {
       type="patient"
     />
   ),
-  "/death_report/:id": ({ id }) => <DeathReport id={id} />,
 };
 
 export default PatientRoutes;

@@ -9,8 +9,6 @@ import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
-import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
-import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
 import ScheduleRoutes from "@/components/Schedule/routes";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -57,8 +55,6 @@ const Routes: AppRoutes = {
   ...ScheduleRoutes,
   ...UserRoutes,
   ...OrganizationRoutes,
-  "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
-  "/notice_board": () => <NoticeBoard />,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,

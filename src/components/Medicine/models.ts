@@ -1,4 +1,3 @@
-import { PRESCRIPTION_ROUTES } from "@/components/Medicine/CreatePrescriptionForm";
 import { UserBareMinimum } from "@/components/Users/models";
 
 export const DOSAGE_UNITS = [
@@ -19,7 +18,7 @@ interface BasePrescription {
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
-  route?: (typeof PRESCRIPTION_ROUTES)[number];
+  route?: string;
   dosage_type?: "REGULAR" | "TITRATED" | "PRN";
   base_dosage?: DosageValue;
   target_dosage?: DosageValue;
