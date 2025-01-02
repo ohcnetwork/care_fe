@@ -1,8 +1,11 @@
+import { Link } from "raviger";
 import { useMemo, useState } from "react";
 
 import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ScrollOverlay from "@/CAREUI/interactive/ScrollOverlay";
+
+import { Button } from "@/components/ui/button";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
@@ -20,11 +23,16 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 interface Props {
   readonly?: boolean;
   isPrn: boolean;
+  facilityId: string;
 }
 
 const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 
-const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
+const MedicineAdministrationSheet = ({
+  readonly,
+  isPrn,
+  facilityId,
+}: Props) => {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
 
@@ -150,6 +158,20 @@ const MedicineAdministrationSheet = ({ readonly, isPrn }: Props) => {
         //     </>
         //   )
         // }
+
+        options={
+          !isPrn && (
+            <div className="flex items-center gap-2">
+              <Button asChild variant="primary">
+                <Link
+                  href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions`}
+                >
+                  Print Prescription
+                </Link>
+              </Button>
+            </div>
+          )
+        }
       />
       <div className="rounded-lg border shadow">
         <ScrollOverlay

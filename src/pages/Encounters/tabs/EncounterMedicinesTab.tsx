@@ -8,8 +8,16 @@ export const EncounterMedicinesTab = (props: EncounterTabProps) => {
   );
   return (
     <div className="flex flex-col gap-16">
-      <MedicineAdministrationSheet readonly={isDischarged} isPrn={false} />
-      <MedicineAdministrationSheet isPrn={true} readonly={isDischarged} />
+      <MedicineAdministrationSheet
+        readonly={isDischarged}
+        isPrn={false}
+        facilityId={props.facilityId}
+      />
+      <MedicineAdministrationSheet
+        isPrn={true}
+        readonly={isDischarged}
+        facilityId={props.facilityId}
+      />
       {/* <MedicinePrescriptionSummary consultation={props.encounter.id} /> */}
     </div>
   );
