@@ -758,7 +758,11 @@ export default function PatientRegistration(
             <br />
           </div> */}
           <div className="flex justify-end mt-20 gap-4">
-            <Button variant={"secondary"} onClick={() => goBack()}>
+            <Button
+              variant={"secondary"}
+              type="button"
+              onClick={() => goBack()}
+            >
               {t("cancel")}
             </Button>
             <Button
