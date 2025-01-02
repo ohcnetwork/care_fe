@@ -1,9 +1,3 @@
-import {
-  DistrictModel,
-  LocalBodyModel,
-  StateModel,
-} from "@/components/Facility/models";
-
 import { GENDER_TYPES, UserRole } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
@@ -55,9 +49,6 @@ export type UserModel = UserBareMinimum & {
   verified?: boolean;
   home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
-  local_body_object?: LocalBodyModel;
-  district_object?: DistrictModel;
-  state_object?: StateModel;
   qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;

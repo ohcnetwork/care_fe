@@ -25,28 +25,26 @@ export default function EncounterQuestionnaire({
       title="Questionnaire"
       backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
     >
-      <div className="container mx-auto p-4">
-        <Card>
-          <CardContent className="pt-6">
-            <QuestionnaireForm
-              facilityId={facilityId}
-              patientId={patientId}
-              subjectType={subjectType}
-              encounterId={encounterId}
-              questionnaireSlug={questionnaireSlug}
-              onSubmit={() => {
-                if (encounterId) {
-                  navigate(
-                    `/facility/${facilityId}/encounter/${encounterId}/updates`,
-                  );
-                } else {
-                  navigate(`/patient/${patientId}/updates`);
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="mt-2">
+        <CardContent className="lg:p-4 p-0">
+          <QuestionnaireForm
+            facilityId={facilityId}
+            patientId={patientId}
+            subjectType={subjectType}
+            encounterId={encounterId}
+            questionnaireSlug={questionnaireSlug}
+            onSubmit={() => {
+              if (encounterId) {
+                navigate(
+                  `/facility/${facilityId}/encounter/${encounterId}/updates`,
+                );
+              } else {
+                navigate(`/patient/${patientId}/updates`);
+              }
+            }}
+          />
+        </CardContent>
+      </Card>
     </Page>
   );
 }

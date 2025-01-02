@@ -29,13 +29,8 @@ const uploadFile = async (
         } catch {
           error = xhr.responseText;
         }
-        if (typeof error === "object" && !Array.isArray(error)) {
-          Object.values(error).forEach((msg) => {
-            Notification.Error({ msg: msg || "Something went wrong!" });
-          });
-        } else {
-          Notification.Error({ msg: error || "Something went wrong!" });
-        }
+        Notification.BadRequest({ errs: error.errors });
+        reject(new Error("Client error"));
         reject(new Error("Client error"));
       } else {
         resolve();

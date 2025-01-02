@@ -1,66 +1,15 @@
 import {
-  AssetBedBody,
-  AssetBedModel,
-  AssetData,
-  AssetLocationObject,
-  AssetService,
-  AssetServiceUpdate,
-  AssetTransaction,
-  AvailabilityRecord,
-  PatientAssetBed,
-} from "@/components/Assets/AssetTypes";
-import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
-import {
-  EventGeneric,
-  type Type,
-} from "@/components/Facility/ConsultationDetails/Events/types";
-import {
-  InvestigationGroup,
-  InvestigationType,
-} from "@/components/Facility/Investigations";
-import { Investigation } from "@/components/Facility/Investigations/Reports/types";
-import {
-  BedModel,
   CommentModel,
-  ConsultationModel,
-  CreateBedBody,
-  CurrentBed,
-  DailyRoundsBody,
-  DailyRoundsRes,
-  DistrictModel,
   FacilityModel,
   FacilityRequest,
-  FacilitySpokeModel,
-  FacilitySpokeRequest,
-  IFacilityNotificationRequest,
-  IFacilityNotificationResponse,
   IUserFacilityRequest,
-  InventoryItemsModel,
-  InventoryLogResponse,
-  InventorySummaryResponse,
-  LocalBodyModel,
-  LocationModel,
-  MinimumQuantityItemResponse,
   PatientConsentModel,
-  PatientNotesEditModel,
-  PatientNotesModel,
-  PatientTransferRequest,
-  PatientTransferResponse,
-  ShiftingModel,
-  StateModel,
-  WardModel,
 } from "@/components/Facility/models";
-import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
-import { HCXPolicyModel } from "@/components/HCX/models";
-import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
-import {
-  NotificationData,
-  PNconfigData,
-} from "@/components/Notifications/models";
+import { Prescription } from "@/components/Medicine/models";
+import { PNconfigData } from "@/components/Notifications/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
-  DailyRoundsModel,
   FileUploadModel,
 } from "@/components/Patient/models";
 import {
@@ -70,10 +19,8 @@ import {
 } from "@/components/Schedule/types";
 import {
   SkillModel,
-  SkillObjectModel,
   UpdatePasswordForm,
   UserAssignedModel,
-  UserBareMinimum,
   UserModel,
 } from "@/components/Users/models";
 
@@ -145,7 +92,13 @@ export interface LoginCredentials {
   password: string;
 }
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export enum HttpMethod {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
+}
 
 export const API = <TResponse = undefined, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
@@ -361,14 +314,6 @@ const routes = {
     TRes: Type<PNconfigData>(),
   },
 
-  // Skill Endpoints
-
-  getAllSkills: {
-    path: "/api/v1/skill/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<SkillObjectModel>>(),
-  },
-
   // Facility Endpoints
 
   getPermittedFacilities: {
@@ -414,44 +359,6 @@ const routes = {
     TBody: Type<Partial<FacilityModel>>(),
   },
 
-  getFacilityHubs: {
-    path: "/api/v1/facility/{id}/hubs",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
-  },
-
-  getFacilitySpokes: {
-    path: "/api/v1/facility/{id}/spokes/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
-  },
-
-  updateFacilitySpokes: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "PATCH",
-    TRes: Type<FacilitySpokeModel>(),
-    TBody: Type<FacilitySpokeRequest>(),
-  },
-
-  getFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "GET",
-    TRes: Type<FacilitySpokeModel>(),
-  },
-
-  createFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/",
-    method: "POST",
-    TRes: Type<FacilitySpokeModel>(),
-    TBody: Type<Partial<FacilitySpokeRequest>>(),
-  },
-
-  deleteFacilitySpoke: {
-    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
   deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
@@ -473,236 +380,11 @@ const routes = {
     TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
-  listFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<LocationModel>>(),
-  },
-  createFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/",
-    method: "POST",
-    TBody: Type<AssetLocationObject>(),
-    TRes: Type<AssetLocationObject>(),
-  },
-  getFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
-    method: "GET",
-    TRes: Type<AssetLocationObject>(),
-  },
-  updateFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
-    method: "PUT",
-    TBody: Type<AssetLocationObject>(),
-    TRes: Type<AssetLocationObject>(),
-  },
-  partialUpdateFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
-    method: "PATCH",
-  },
-  deleteFacilityAssetLocation: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-  listFacilityAssetLocationAvailability: {
-    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
-  },
-
-  // Asset bed
-  listAssetBeds: {
-    path: "/api/v1/assetbed/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetBedModel>>(),
-  },
-  createAssetBed: {
-    path: "/api/v1/assetbed/",
-    method: "POST",
-    TRes: Type<AssetData>(),
-    TBody: Type<AssetBedBody>(),
-  },
-  getAssetBed: {
-    path: "/api/v1/assetbed/{external_id}/",
-    method: "GET",
-  },
-  updateAssetBed: {
-    path: "/api/v1/assetbed/{external_id}/",
-    method: "PUT",
-  },
-  partialUpdateAssetBed: {
-    path: "/api/v1/assetbed/{external_id}/",
-    method: "PATCH",
-    TRes: Type<AssetBedModel>(),
-    TBody: Type<AssetBedBody>(),
-  },
-  deleteAssetBed: {
-    path: "/api/v1/assetbed/{external_id}/",
-    method: "DELETE",
-    TRes: Type<null | {
-      detail?: string;
-    }>(),
-  },
-  operateAsset: {
-    path: "/api/v1/asset/{external_id}/operate_assets/",
-    method: "POST",
-  },
-
-  // Patient Asset Beds (for CNS and Monitoring Hub)
-  listPatientAssetBeds: {
-    path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientAssetBed>>(),
-  },
-
-  // Facility Beds
-  listFacilityBeds: {
-    path: "/api/v1/bed/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<BedModel>>(),
-  },
-  createFacilityBed: {
-    path: "/api/v1/bed/",
-    method: "POST",
-    TBody: Type<BedModel>(),
-    TRes: Type<BedModel>(),
-  },
-  getFacilityBed: {
-    path: "/api/v1/bed/{external_id}/",
-    method: "GET",
-    TRes: Type<BedModel>(),
-  },
-  updateFacilityBed: {
-    path: "/api/v1/bed/{external_id}/",
-    method: "PUT",
-    TBody: Type<BedModel>(),
-    TRes: Type<BedModel>(),
-  },
-  deleteFacilityBed: {
-    path: "/api/v1/bed/{external_id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
-  // Consultation beds
-
-  listConsultationBeds: {
-    path: "/api/v1/consultationbed/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<CurrentBed>>(),
-  },
-  createConsultationBed: {
-    path: "/api/v1/consultationbed/",
-    method: "POST",
-    TBody: Type<CreateBedBody>(),
-    TRes: Type<PaginatedResponse<CurrentBed>>(),
-  },
-  getConsultationBed: {
-    path: "/api/v1/consultationbed/{external_id}/",
-    method: "GET",
-  },
-  updateConsultationBed: {
-    path: "/api/v1/consultationbed/{external_id}/",
-    method: "PUT",
-  },
-
   // Download Api
   deleteFacility: {
     path: "/api/v1/facility/{id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  downloadFacility: {
-    path: "/api/v1/facility/?csv",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  downloadPatients: {
-    path: "/api/v1/patient/?csv",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  getConsultationList: {
-    path: "/api/v1/consultation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<ConsultationModel>>(),
-  },
-  createConsultation: {
-    path: "/api/v1/consultation/",
-    method: "POST",
-    TBody: Type<ConsultationModel>(),
-    TRes: Type<ConsultationModel>(),
-  },
-  getConsultation: {
-    path: "/api/v1/consultation/{id}/",
-    method: "GET",
-    TRes: Type<ConsultationModel>(),
-  },
-  updateConsultation: {
-    path: "/api/v1/consultation/{id}/",
-    method: "PUT",
-    TBody: Type<ConsultationModel>(),
-    TRes: Type<ConsultationModel>(),
-  },
-  partialUpdateConsultation: {
-    path: "/api/v1/consultation/{id}/",
-    method: "PATCH",
-    TBody: Type<Partial<ConsultationModel>>(),
-    TRes: Type<ConsultationModel>(),
-  },
-  deleteConsultation: {
-    path: "/api/v1/consultation/{id}/",
-    method: "DELETE",
-  },
-  createDailyRounds: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
-    TBody: Type<DailyRoundsModel>(),
-    TRes: Type<DailyRoundsModel>(),
-    method: "POST",
-  },
-  updateDailyReport: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
-    TBody: Type<DailyRoundsModel>(),
-    TRes: Type<DailyRoundsModel>(),
-    method: "PUT",
-  },
-  updateDailyRound: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
-    method: "PATCH",
-    TBody: Type<Partial<DailyRoundsModel>>(),
-    TRes: Type<DailyRoundsModel>(),
-  },
-  getDailyReports: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
-  },
-
-  getEvents: {
-    path: "/api/v1/consultation/{consultationId}/events/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<EventGeneric>>(),
-  },
-
-  getDailyReport: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
-    method: "GET",
-    TRes: Type<DailyRoundsModel>(),
-  },
-  dailyRoundsAnalyse: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
-    method: "POST",
-    TBody: Type<DailyRoundsBody>(),
-    TRes: Type<DailyRoundsRes>(),
-  },
-
-  // Event Types
-
-  listEventTypes: {
-    path: "/api/v1/event_types/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Type>>(),
   },
 
   // Patient
@@ -739,188 +421,6 @@ const routes = {
     TBody: Type<Partial<PatientModel>>(),
     TRes: Type<PatientModel>(),
   },
-  transferPatient: {
-    path: "/api/v1/patient/{id}/transfer/",
-    method: "POST",
-    TBody: Type<PatientTransferRequest>(),
-    TRes: Type<PatientTransferResponse>(),
-  },
-  getPatientNotes: {
-    path: "/api/v1/patient/{patientId}/notes/",
-    method: "GET",
-    TBody: Type<PatientNotesModel[]>(),
-    TRes: Type<PaginatedResponse<PatientNotesModel>>(),
-  },
-  addPatientNote: {
-    path: "/api/v1/patient/{patientId}/notes/",
-    method: "POST",
-    TRes: Type<PatientNotesModel>(),
-    TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread"> & {
-        consultation?: string;
-        reply_to?: string;
-      }
-    >(),
-  },
-  updatePatientNote: {
-    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
-    method: "PUT",
-    TRes: Type<PatientNotesModel>(),
-  },
-  getPatientNoteEditHistory: {
-    path: "/api/v1/patient/{patientId}/notes/{noteId}/edits/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientNotesEditModel>>(),
-  },
-
-  // States
-  statesList: {
-    path: "/api/v1/state/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<StateModel>>(),
-  },
-
-  getState: {
-    path: "/api/v1/state/{id}/",
-    TRes: Type<StateModel>(),
-  },
-
-  // Districts
-
-  getDistrict: {
-    path: "/api/v1/district/{id}/",
-    method: "GET",
-    TRes: Type<DistrictModel>(),
-  },
-  getDistrictByState: {
-    path: "/api/v1/state/{id}/districts/",
-    method: "GET",
-    TRes: Type<DistrictModel[]>(),
-  },
-  getDistrictByName: {
-    path: "/api/v1/district/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<DistrictModel>>(),
-  },
-  getAllLocalBodyByDistrict: {
-    path: "/api/v1/district/{id}/get_all_local_body/",
-    method: "GET",
-    TRes: Type<LocalBodyModel[]>(),
-  },
-  getLocalbodyByDistrict: {
-    path: "/api/v1/district/{id}/local_bodies/",
-    method: "GET",
-    TRes: Type<LocalBodyModel[]>(),
-  },
-
-  // Local Body
-  getLocalBody: {
-    path: "/api/v1/local_body/{id}/",
-    TRes: Type<LocalBodyModel>(),
-  },
-  getAllLocalBody: {
-    path: "/api/v1/local_body/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<LocalBodyModel>>(),
-  },
-  getLocalbodyByName: {
-    path: "/api/v1/local_body/",
-  },
-
-  // ward
-  getWard: {
-    path: "/api/v1/ward/{id}/",
-  },
-  getWards: {
-    path: "/api/v1/ward/",
-  },
-  getWardByLocalBody: {
-    path: "/api/v1/ward/?local_body={id}",
-    method: "GET",
-    TRes: Type<PaginatedResponse<WardModel>>(),
-  },
-
-  //inventory
-  getItems: {
-    path: "/api/v1/items/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventoryItemsModel>>(),
-  },
-  createInventory: {
-    path: "/api/v1/facility/{facilityId}/inventory/",
-    method: "POST",
-    TRes: Type<InventoryLogResponse>(),
-  },
-  getInventoryLog: {
-    path: "/api/v1/facility/{facilityId}/inventory/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
-  },
-  setMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/",
-    method: "POST",
-    TRes: Type<MinimumQuantityItemResponse>(),
-  },
-  getMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
-  },
-  getMinQuantityItem: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
-    method: "GET",
-    TRes: Type<MinimumQuantityItemResponse>(),
-  },
-  updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
-    method: "PATCH",
-    TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
-  },
-  getInventorySummary: {
-    path: "/api/v1/facility/{facility_external_id}/inventorysummary/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
-  },
-  getItemName: {
-    path: "/api/v1/items/",
-    method: "GET",
-  },
-  flagInventoryItem: {
-    path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
-    method: "PUT",
-    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
-  },
-  deleteLastInventoryLog: {
-    path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-  dischargeSummaryGenerate: {
-    path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
-    method: "POST",
-    TRes: Type<never>(),
-  },
-  dischargeSummaryPreview: {
-    path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
-    method: "GET",
-    TRes: Type<{ read_signed_url: string }>(),
-  },
-  dischargeSummaryEmail: {
-    path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
-    method: "POST",
-    TRes: Type<never>(),
-  },
-  dischargePatient: {
-    path: "/api/v1/consultation/{id}/discharge_patient/",
-    method: "POST",
-    TBody: Type<object>(),
-    TRes: Type<object>(),
-  },
-  listFacilityDischargedPatients: {
-    path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientModel>>(),
-  },
 
   // Consents
   listConsents: {
@@ -947,104 +447,15 @@ const routes = {
   },
 
   //Profile
-  checkUsername: {
-    path: "/api/v1/users/{username}/check_availability/",
-    method: "GET",
-    TRes: Type<Record<string, never>>(),
-  },
 
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
     TRes: Type<UserBase>(),
   },
-  getUserBareMinimum: {
-    path: "/api/v1/facility/{facilityId}/get_users/{userExternalId}/",
-    method: "GET",
-    TRes: Type<UserBareMinimum>(),
-  },
   updateUserDetails: {
     path: "/api/v1/users/",
     method: "PUT",
-  },
-
-  //Shift
-  createShift: {
-    path: "/api/v1/shift/",
-    method: "POST",
-    TBody: Type<Partial<ShiftingModel>>(),
-    TRes: Type<PatientModel>(),
-  },
-  updateShift: {
-    path: "/api/v1/shift/{id}/",
-    method: "PUT",
-    TBody: Type<ShiftingModel>(),
-    TRes: Type<ShiftingModel>(),
-  },
-  listShiftRequests: {
-    path: "/api/v1/shift/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<ShiftingModel>>(),
-  },
-  getShiftDetails: {
-    path: "/api/v1/shift/{id}/",
-    method: "GET",
-    TRes: Type<ShiftingModel>(),
-  },
-  completeTransfer: {
-    path: "/api/v1/shift/{externalId}/transfer/",
-    method: "POST",
-    TBody: Type<ShiftingModel>(),
-    TRes: Type<Partial<PatientModel>>(),
-  },
-  downloadShiftRequests: {
-    path: "/api/v1/shift/",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  getShiftComments: {
-    path: "/api/v1/shift/{id}/comment/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<CommentModel>>(),
-  },
-  addShiftComments: {
-    path: "/api/v1/shift/{id}/comment/",
-    method: "POST",
-    TBody: Type<Partial<CommentModel>>(),
-    TRes: Type<CommentModel>(),
-  },
-
-  // Notifications
-  getNotifications: {
-    path: "/api/v1/notification/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<NotificationData>>(),
-  },
-  getNotificationData: {
-    path: "/api/v1/notification/{id}/",
-    method: "GET",
-    TRes: Type<NotificationData>(),
-  },
-  markNotificationAsRead: {
-    path: "/api/v1/notification/{id}/",
-    method: "PATCH",
-    TRes: Type<NotificationData>(),
-  },
-  markNotificationAsUnRead: {
-    path: "/api/v1/notification/{id}/",
-    method: "PATCH",
-    TRes: Type<NotificationData>(),
-  },
-  getPublicKey: {
-    path: "/api/v1/notification/public_key/",
-    method: "GET",
-    TRes: Type<NotificationData>(),
-  },
-  sendNotificationMessages: {
-    path: "/api/v1/notification/notify/",
-    method: "POST",
-    TRes: Type<IFacilityNotificationResponse>(),
-    TBody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUpload Create
@@ -1080,69 +491,6 @@ const routes = {
     method: "POST",
     TRes: Type<FileUploadModel>(),
     TBody: Type<{ archive_reason: string }>(),
-  },
-
-  // Investigation
-  listInvestigations: {
-    path: "/api/v1/investigation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InvestigationType>>(),
-  },
-  listInvestigationGroups: {
-    path: "/api/v1/investigation/group/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<InvestigationGroup>>(),
-  },
-  createInvestigation: {
-    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
-    method: "POST",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      investigations: {
-        investigation: string;
-        value: number;
-        notes: string;
-        session: string;
-      }[];
-    }>(),
-  },
-  getInvestigation: {
-    path: "/api/v1/consultation/{consultation_external_id}/investigation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Investigation>>(),
-  },
-  getPatientInvestigation: {
-    path: "/api/v1/patient/{patient_external_id}/investigation/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Investigation>>(),
-  },
-  editInvestigation: {
-    path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
-    method: "PUT",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      investigations: {
-        external_id: string;
-        value: number;
-        notes: string;
-      }[];
-    }>(),
-  },
-
-  // ICD11
-  listICD11Diagnosis: {
-    path: "/api/v1/icd/",
-    TRes: Type<ICD11DiagnosisModel[]>(),
-  },
-  getICD11Diagnosis: {
-    path: "/api/v1/icd/{id}/",
-    TRes: Type<ICD11DiagnosisModel>(),
-    enableExperimentalCache: true,
-  },
-  // Medibase
-  listMedibaseMedicines: {
-    path: "/api/v1/medibase/",
-    TRes: Type<MedibaseMedicine[]>(),
   },
 
   // Request
@@ -1183,90 +531,6 @@ const routes = {
     method: "POST",
     TRes: Type<CommentModel>(),
     TBody: Type<Partial<CommentModel>>(),
-  },
-
-  // Assets endpoints
-
-  listAssets: {
-    path: "/api/v1/asset/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetData>>(),
-  },
-  createAsset: {
-    path: "/api/v1/asset/",
-    method: "POST",
-    TBody: Type<AssetData>(),
-    TRes: Type<AssetData>(),
-  },
-  getAssetUserLocation: {
-    path: "/api/v1/asset/get_default_user_location/",
-    method: "GET",
-  },
-  createAssetUserLocation: {
-    path: "/api/v1/asset/set_default_user_location/",
-    method: "POST",
-  },
-  getAsset: {
-    path: "/api/v1/asset/{external_id}/",
-    method: "GET",
-    TRes: Type<AssetData>(),
-  },
-  deleteAsset: {
-    path: "/api/v1/asset/{external_id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-  updateAsset: {
-    path: "/api/v1/asset/{external_id}/",
-    method: "PUT",
-    TBody: Type<AssetData>(),
-    TRes: Type<AssetData>(),
-  },
-  partialUpdateAsset: {
-    path: "/api/v1/asset/{external_id}/",
-    method: "PATCH",
-    TRes: Type<AssetData>(),
-    TBody: Type<Partial<AssetData>>(),
-  },
-  listAssetAvailability: {
-    path: "/api/v1/asset/{external_id}/availability/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
-  },
-  listAssetQR: {
-    path: "/api/v1/public/asset_qr/{qr_code_id}/",
-    method: "GET",
-    TRes: Type<AssetData>(),
-  },
-
-  // Asset transaction endpoints
-
-  listAssetTransaction: {
-    path: "/api/v1/asset_transaction/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetTransaction>>(),
-  },
-  getAssetTransaction: {
-    path: "/api/v1/asset_transaction/{id}/",
-    method: "GET",
-  },
-
-  // Asset service endpoints
-
-  listAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetService>>(),
-  },
-  getAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
-    method: "GET",
-  },
-  updateAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
-    method: "PUT",
-    TRes: Type<AssetService>(),
-    TBody: Type<AssetServiceUpdate>(),
   },
 
   // Prescription endpoints
@@ -1312,58 +576,6 @@ const routes = {
     TRes: Type<Record<string, never>>(),
   },
 
-  // HCX Endpoints
-  hcx: {
-    policies: {
-      list: {
-        path: "/api/hcx/policy/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
-      },
-
-      create: {
-        path: "/api/hcx/policy/",
-        method: "POST",
-        TRes: Type<HCXPolicyModel>(),
-      },
-
-      get: {
-        path: "/api/hcx/policy/{external_id}/",
-        method: "GET",
-      },
-
-      update: {
-        path: "/api/hcx/policy/{external_id}/",
-        method: "PUT",
-        TRes: Type<HCXPolicyModel>(),
-      },
-
-      partialUpdate: {
-        path: "/api/hcx/policy/{external_id}/",
-        method: "PATCH",
-      },
-
-      delete: {
-        path: "/api/hcx/policy/{external_id}/",
-        method: "DELETE",
-        TRes: Type<Record<string, never>>(),
-      },
-
-      listPayors: {
-        path: "/api/hcx/payors/",
-        method: "GET",
-        TRes: Type<InsurerOptionModel[]>(),
-      },
-
-      checkEligibility: {
-        path: "/api/hcx/check_eligibility/",
-        method: "POST",
-        TBody: Type<{ policy: string }>(),
-        TRes: Type<HCXPolicyModel>(),
-      },
-    },
-  },
-
   facility: {
     getUsers: {
       path: "/api/v1/facility/{facility_id}/users/",
@@ -1389,11 +601,6 @@ const routes = {
   },
 
   valueset: {
-    // list: {
-    //   path: "/api/v1/valueset/",
-    //   method: "GET",
-    //   TRes: Type<PaginatedResponse<ValueSet>>(),
-    // },
     expand: {
       path: "/api/v1/valueset/{system}/expand/",
       method: "POST",
@@ -1580,7 +787,6 @@ const routes = {
       TRes: {} as Record<string, never>,
     },
     listPatients: {
-      // TODO: change this to the correct endpoint
       path: "/api/v1/patient/",
       method: "GET",
       TRes: Type<PaginatedResponse<Patient>>(),
@@ -1737,7 +943,7 @@ const routes = {
         TRes: Type<PaginatedResponse<UserBase>>(),
       },
       removeUser: {
-        method: "DELETE",
+        method: "POST",
         path: "/api/v1/patient/{patientId}/delete_user/",
         TRes: Type<{ user: string }>(),
       },
@@ -1751,26 +957,6 @@ const routes = {
         year_of_birth: string;
         partial_id: string;
       }>(),
-    },
-  },
-
-  // New user routes
-  user: {
-    list: {
-      path: "/api/v1/users/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-    create: {
-      path: "/api/v1/users/",
-      method: "POST",
-      TRes: Type<UserBase>(),
-      TBody: Type<UserBase>(),
-    },
-    get: {
-      path: "/api/v1/users/{username}/",
-      method: "GET",
-      TRes: Type<UserBase>(),
     },
   },
 

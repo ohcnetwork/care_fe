@@ -168,13 +168,7 @@ export function FacilityDetailsPage({ id }: Props) {
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">{facility.name}</h1>
               <p className="text-lg text-muted-foreground">
-                {[
-                  facility.address,
-                  facility.local_body_object?.name,
-                  facility.district_object?.name,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
+                {[facility.address].filter(Boolean).join(", ")}
               </p>
             </div>
 

@@ -7,6 +7,8 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import InputWithError from "@/components/ui/input-with-error";
 
+import useDebouncedState from "@/hooks/useDebouncedState";
+
 import { ORGANIZATION_LEVELS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
@@ -32,6 +34,7 @@ interface AutoCompleteOption {
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
 
   const headers = props.authToken
     ? {
@@ -42,11 +45,12 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     : {};
 
   const { data: getAllOrganizations } = useQuery<OrganizationResponse>({
-    queryKey: ["organizations-root"],
+    queryKey: ["organizations-root", searchQuery],
     queryFn: query(routes.organization.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
+        name: searchQuery || undefined,
       },
       ...headers,
     }),
@@ -58,11 +62,13 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     queryKey: [
       "organizations-current",
       selectedLevels[selectedLevels.length - 1]?.id,
+      searchQuery,
     ],
     queryFn: query(routes.organization.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
+        name: searchQuery || undefined,
       },
       ...headers,
     }),
@@ -153,6 +159,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
               onChange={(value: string) =>
                 handleLevelChange(value, selectedLevels.length)
               }
+              onSearch={setSearchQuery}
             />
           </InputWithError>
         </div>

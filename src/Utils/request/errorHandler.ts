@@ -1,4 +1,5 @@
 import { navigate } from "raviger";
+import { toast } from "sonner";
 
 import * as Notifications from "@/Utils/Notifications";
 import { HTTPError } from "@/Utils/request/types";
@@ -19,13 +20,18 @@ export function handleHttpError(error: Error) {
 
   const cause = error.cause;
 
+  if (isNotFound(error)) {
+    toast.error((cause?.detail as string) || "Not found");
+    return;
+  }
+
   if (isSessionExpired(cause)) {
     handleSessionExpired();
     return;
   }
 
   if (isBadRequest(error)) {
-    Notifications.BadRequest({ errs: cause });
+    Notifications.BadRequest({ errs: cause?.errors });
     return;
   }
 
@@ -51,4 +57,8 @@ function handleSessionExpired() {
 
 function isBadRequest(error: HTTPError) {
   return error.status === 400 || error.status === 406;
+}
+
+function isNotFound(error: HTTPError) {
+  return error.status === 404;
 }

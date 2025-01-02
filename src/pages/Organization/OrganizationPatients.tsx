@@ -32,6 +32,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     queryFn: query(routes.organization.listPatients, {
       pathParams: { id },
       queryParams: {
+        geo_organization: id,
         page: qParams.page,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,

@@ -504,6 +504,7 @@ const Login = (props: { forgot?: boolean }) => {
                             id="username"
                             name="username"
                             type="text"
+                            data-cy="username"
                             value={form.username}
                             onChange={handleChange}
                             className={cn(
@@ -523,6 +524,7 @@ const Login = (props: { forgot?: boolean }) => {
                             id="password"
                             name="password"
                             type="password"
+                            data-cy="password"
                             value={form.password}
                             onChange={handleChange}
                             className={cn(
@@ -559,6 +561,7 @@ const Login = (props: { forgot?: boolean }) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
+                          data-cy="submit"
                           disabled={isLoading}
                         >
                           {isLoading ? (

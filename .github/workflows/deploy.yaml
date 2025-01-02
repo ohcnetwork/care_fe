@@ -54,10 +54,6 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
-      - name: Run tests
-        run: |
-          echo "running tests..."
-
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
