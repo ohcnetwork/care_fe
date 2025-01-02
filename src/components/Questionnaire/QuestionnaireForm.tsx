@@ -297,140 +297,139 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto max-w-3xl pb-8">
-        <div className="p-4 space-y-6">
-          {/* Questionnaire Forms */}
-          {questionnaireForms.map((form, index) => (
-            <div
-              key={`${form.questionnaire.id}-${index}`}
-              className="border rounded-lg p-6 space-y-6"
-            >
-              <div className="flex justify-between items-center flex-wrap">
-                <div className="space-y-1">
-                  <h2 className="text-xl font-semibold">
-                    {form.questionnaire.title}
-                  </h2>
-                  {form.questionnaire.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {form.questionnaire.description}
-                    </p>
-                  )}
-                </div>
-
-                {form.questionnaire.id !== questionnaireData?.id && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="self-end"
-                    onClick={() => {
-                      setQuestionnaireForms((prev) =>
-                        prev.filter(
-                          (f) => f.questionnaire.id !== form.questionnaire.id,
-                        ),
-                      );
-                    }}
-                    disabled={isProcessing}
-                  >
-                    <CareIcon icon="l-times-circle" />
-                    <span>Remove</span>
-                  </Button>
+      <div className="flex-1 overflow-y-auto max-w-3xl pb-8 space-y-2">
+        {/* Questionnaire Forms */}
+        {questionnaireForms.map((form, index) => (
+          <div
+            key={`${form.questionnaire.id}-${index}`}
+            className="border rounded-lg p-6 space-y-6"
+          >
+            <div className="flex justify-between items-center flex-wrap">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold">
+                  {form.questionnaire.title}
+                </h2>
+                {form.questionnaire.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {form.questionnaire.description}
+                  </p>
                 )}
               </div>
 
-              <QuestionRenderer
-                facilityId={facilityId}
-                encounterId={encounterId}
-                questions={form.questionnaire.questions}
-                responses={form.responses}
-                onResponseChange={(responses) => {
-                  setQuestionnaireForms((existingForms) =>
-                    existingForms.map((formItem) =>
-                      formItem.questionnaire.id === form.questionnaire.id
-                        ? { ...formItem, responses }
-                        : formItem,
-                    ),
-                  );
-                }}
-                disabled={isProcessing}
-                activeGroupId={activeGroupId}
-                errors={form.errors}
-                clearError={(questionId: string) => {
-                  setQuestionnaireForms((prev) =>
-                    prev.map((f) =>
-                      f.questionnaire.id === form.questionnaire.id
-                        ? {
-                            ...f,
-                            errors: f.errors.filter(
-                              (e) => e.question_id !== questionId,
-                            ),
-                          }
-                        : f,
-                    ),
-                  );
-                }}
-              />
+              {form.questionnaire.id !== questionnaireData?.id && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="self-end"
+                  onClick={() => {
+                    setQuestionnaireForms((prev) =>
+                      prev.filter(
+                        (f) => f.questionnaire.id !== form.questionnaire.id,
+                      ),
+                    );
+                  }}
+                  disabled={isProcessing}
+                >
+                  <CareIcon icon="l-times-circle" />
+                  <span>Remove</span>
+                </Button>
+              )}
             </div>
-          ))}
 
-          {/* Search and Add Questionnaire */}
-
-          <div className="flex gap-4 items-center">
-            <QuestionnaireSearch
-              subjectType={subjectType}
-              onSelect={(selected) => {
-                if (
-                  questionnaireForms.some(
-                    (form) => form.questionnaire.id === selected.id,
-                  )
-                ) {
-                  return;
-                }
-
-                setQuestionnaireForms((prev) => [
-                  ...prev,
-                  {
-                    questionnaire: selected,
-                    responses: initializeResponses(selected.questions),
-                    errors: [],
-                  },
-                ]);
+            <QuestionRenderer
+              facilityId={facilityId}
+              encounterId={encounterId}
+              questions={form.questionnaire.questions}
+              responses={form.responses}
+              onResponseChange={(responses) => {
+                setQuestionnaireForms((existingForms) =>
+                  existingForms.map((formItem) =>
+                    formItem.questionnaire.id === form.questionnaire.id
+                      ? { ...formItem, responses }
+                      : formItem,
+                  ),
+                );
               }}
               disabled={isProcessing}
+              activeGroupId={activeGroupId}
+              errors={form.errors}
+              clearError={(questionId: string) => {
+                setQuestionnaireForms((prev) =>
+                  prev.map((f) =>
+                    f.questionnaire.id === form.questionnaire.id
+                      ? {
+                          ...f,
+                          errors: f.errors.filter(
+                            (e) => e.question_id !== questionId,
+                          ),
+                        }
+                      : f,
+                  ),
+                );
+              }}
             />
           </div>
+        ))}
 
-          {/* Submit and Cancel Buttons */}
-          {questionnaireForms.length > 0 && (
-            <div className="flex justify-end gap-4 mt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isProcessing || hasErrors}
-                className="relative"
-              >
-                {isProcessing ? (
-                  <>
-                    <span className="opacity-0">Submit</span>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
-                    </div>
-                  </>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div>
-          )}
+        {/* Search and Add Questionnaire */}
+
+        <div className="flex gap-4 items-center">
+          <QuestionnaireSearch
+            subjectType={subjectType}
+            onSelect={(selected) => {
+              if (
+                questionnaireForms.some(
+                  (form) => form.questionnaire.id === selected.id,
+                )
+              ) {
+                return;
+              }
+
+              setQuestionnaireForms((prev) => [
+                ...prev,
+                {
+                  questionnaire: selected,
+                  responses: initializeResponses(selected.questions),
+                  errors: [],
+                },
+              ]);
+            }}
+            disabled={isProcessing}
+          />
         </div>
+
+        {/* Submit and Cancel Buttons */}
+        {questionnaireForms.length > 0 && (
+          <div className="flex justify-end gap-4 mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isProcessing || hasErrors}
+              className="relative"
+            >
+              {isProcessing ? (
+                <>
+                  <span className="opacity-0">Submit</span>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                  </div>
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Add a Preview of the QuestionnaireForm */}
         {import.meta.env.DEV && (
           <div className="p-4 space-y-6">
