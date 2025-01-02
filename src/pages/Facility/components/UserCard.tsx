@@ -36,10 +36,10 @@ export function UserCard({ user, className, facilityId }: Props) {
       Object.keys(tokenData).length > 0 &&
       dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {
-      return `/facility/${facilityId}/appointments/${user.external_id}/book-appointment`;
+      return `/facility/${facilityId}/appointments/${user.id}/book-appointment`;
     }
-    return `/facility/${facilityId}/appointments/${user.external_id}/otp/send`;
-  }, [tokenData, facilityId, user.external_id]);
+    return `/facility/${facilityId}/appointments/${user.id}/otp/send`;
+  }, [tokenData, facilityId, user.id]);
 
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>

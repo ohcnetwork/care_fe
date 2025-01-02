@@ -47,11 +47,11 @@ const FormSchema = z.object({
 
 export default function PatientLogin({
   facilityId,
-  staffUsername,
+  staffId,
   page,
 }: {
   facilityId: string;
-  staffUsername: string;
+  staffId: string;
   page: string;
 }) {
   const { goBack } = useAppHistory();
@@ -74,7 +74,7 @@ export default function PatientLogin({
     dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
   ) {
     navigate(
-      `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+      `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
   const validate = (phoneNumber: string) => {
@@ -110,11 +110,11 @@ export default function PatientLogin({
         ) {
           Notification.Success({ msg: t("valid_otp_found") });
           navigate(
-            `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+            `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
           );
         } else {
           navigate(
-            `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
+            `/facility/${facilityId}/appointments/${staffId}/otp/verify`,
           );
         }
       }
@@ -162,7 +162,7 @@ export default function PatientLogin({
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
         navigate(
-          `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+          `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
       }
     },
@@ -289,7 +289,7 @@ export default function PatientLogin({
           page === "send"
             ? goBack()
             : navigate(
-                `/facility/${facilityId}/appointments/${staffUsername}/otp/send`,
+                `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )
         }
       >

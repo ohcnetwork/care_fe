@@ -118,7 +118,7 @@ export default function LinkFacilityUserSheet({
           Link User
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto p-8">
         <SheetHeader>
           <SheetTitle>Link User to Facility</SheetTitle>
           <SheetDescription>
@@ -131,6 +131,7 @@ export default function LinkFacilityUserSheet({
             onChange={handleUserChange}
             placeholder="Search for a user"
             noOptionsMessage="No users found"
+            popoverClassName="w-full"
           />
           {selectedUser && (
             <div className="space-y-4">
@@ -173,7 +174,13 @@ export default function LinkFacilityUserSheet({
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent
+                    position="popper"
+                    className="max-h-[calc(100vh-60vh)] w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-content-available-width)] overflow-y-auto"
+                    sideOffset={4}
+                    side="bottom"
+                    avoidCollisions={true}
+                  >
                     {roles?.results?.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         <div className="flex flex-col text-left">

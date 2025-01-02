@@ -21,6 +21,7 @@ import {
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
@@ -70,7 +71,7 @@ export function QuestionnaireForm({
     data: questionnaireData,
     loading: isQuestionnaireLoading,
     error: questionnaireError,
-  } = useQuery(routes.questionnaire.detail, {
+  } = useQuery(questionnaireApi.detail, {
     pathParams: { id: questionnaireSlug ?? "" },
     prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
