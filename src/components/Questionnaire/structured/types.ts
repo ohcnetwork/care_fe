@@ -1,6 +1,6 @@
 import {
   AppointmentCreate,
-  FollowUpAppointmentQuestionRequest,
+  FollowUpAppointmentRequest,
 } from "@/components/Schedule/types";
 
 import {
@@ -22,7 +22,7 @@ export interface StructuredDataMap {
   symptom: Symptom;
   diagnosis: Diagnosis;
   encounter: Encounter;
-  follow_up_appointment: FollowUpAppointmentQuestionRequest;
+  follow_up_appointment: FollowUpAppointmentRequest;
 }
 
 // Map structured types to their request types

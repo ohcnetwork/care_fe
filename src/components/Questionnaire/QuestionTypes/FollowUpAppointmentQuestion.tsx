@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
-import { FollowUpAppointmentQuestionRequest } from "@/components/Schedule/types";
+import { FollowUpAppointmentRequest } from "@/components/Schedule/types";
 
 import useSlug from "@/hooks/useSlug";
 
@@ -49,13 +49,11 @@ export function FollowUpAppointmentQuestion({
 
   const values =
     (questionnaireResponse.values?.[0]
-      ?.value as unknown as FollowUpAppointmentQuestionRequest[]) || [];
+      ?.value as unknown as FollowUpAppointmentRequest[]) || [];
 
   const value = values[0] ?? {};
 
-  const handleUpdate = (
-    updates: Partial<FollowUpAppointmentQuestionRequest>,
-  ) => {
+  const handleUpdate = (updates: Partial<FollowUpAppointmentRequest>) => {
     const followUpAppointment = { ...value, ...updates };
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
