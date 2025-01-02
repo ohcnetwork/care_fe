@@ -98,6 +98,20 @@ export function QuestionnaireForm({
     }
   }, [questionnaireData, isInitialized, questionnaireSlug]);
 
+  useEffect(() => {
+    if (questionnaireForms.length > 0) {
+      setTimeout(() => {
+        const lastElement = document.getElementById(
+          `${questionnaireForms[questionnaireForms.length - 1].questionnaire.id}-${questionnaireForms.length - 1}`,
+        );
+
+        if (lastElement) {
+          lastElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 200);
+    }
+  }, [questionnaireForms]);
+
   if (isQuestionnaireLoading) {
     return <Loading />;
   }
@@ -302,6 +316,7 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
+            id={`${form.questionnaire.id}-${index}`}
             className="border rounded-lg p-6 space-y-6"
           >
             <div className="flex justify-between items-center flex-wrap">
