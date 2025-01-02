@@ -135,15 +135,15 @@ export function DiagnosisQuestion({
           }
         }}
         name="Diagnoses"
-        prompt={`An array of objects of the following type: {
-          code?: {"code" : string, "display" : string, "system" : "http://snomed.info/sct"},
-          clinical_status?: "active" | "recurrence" | "relapse" | "inactive" | "remission" | "resolved",
-          verification_status?: "unconfirmed" | "provisional" | "differential" | "confirmed" | "refuted" | "entered-in-error",
-          onset?: {
+        prompt={`An array of objects of the following type, based on the SNOMED CT Code for the applicable diagnoses: {
+          code: {"code" : string, "display" : string, "system" : "http://snomed.info/sct"},
+          clinical_status: "active" | "recurrence" | "relapse" | "inactive" | "remission" | "resolved",
+          verification_status: "unconfirmed" | "provisional" | "differential" | "confirmed" | "refuted" | "entered-in-error",
+          onset: {
             onset_datetime: YYYY-MM-DD string
           },
           note?: string
-        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()}`}
+        }. Update existing data, delete existing data or append to the existing list as per the will of the user. Current date is ${new Date().toLocaleDateString()} Default onset_datetime to today unless otherwise specified`}
         example={[
           {
             code: {
