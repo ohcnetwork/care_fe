@@ -3,7 +3,3 @@ export interface Thread {
   title: string;
 }
 
-export interface ThreadsResponse {
-  count: number;
-  results: Thread[];
-}
