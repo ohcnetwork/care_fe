@@ -31,9 +31,12 @@ export function LandingPage() {
 
   const { data: districtsResponse } = useQuery<PaginatedResponse<Organization>>(
     {
-      queryKey: ["districts", STATE_GEO_ID],
+      queryKey: ["districts", STATE_GEO_ID, searchQuery],
       queryFn: query(organizationApi.getPublicOrganizations, {
-        queryParams: { parent: STATE_GEO_ID },
+        queryParams: {
+          parent: STATE_GEO_ID,
+          name: searchQuery,
+        },
       }),
     },
   );
