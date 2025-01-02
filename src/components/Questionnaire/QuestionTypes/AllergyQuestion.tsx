@@ -129,7 +129,6 @@ export function AllergyQuestion({
         value={allergies}
         onChange={(value) => {
           if (value) {
-            setAllergies(value);
             updateQuestionnaireResponseCB({
               ...questionnaireResponse,
               values: [
