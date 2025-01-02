@@ -11,8 +11,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import useActiveLink from "@/hooks/useActiveLink";
-
 export function NavMain({
   links,
 }: {
@@ -22,8 +20,6 @@ export function NavMain({
     icon?: string;
   }[];
 }) {
-  const activeLink = useActiveLink();
-
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -32,15 +28,14 @@ export function NavMain({
             <SidebarMenuButton
               asChild
               tooltip={link.name}
-              className="text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+              className={
+                "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+              }
             >
               <ActiveLink
                 href={link.url}
-                className={
-                  link.url.endsWith(activeLink!)
-                    ? "bg-white text-green-700 shadow"
-                    : ""
-                }
+                activeClass="bg-white text-green-700 shadow"
+                exactActiveClass="bg-white text-green-700 shadow"
               >
                 {link.icon && <CareIcon icon={link.icon as IconName} />}
                 <span className="group-data-[collapsible=icon]:hidden">

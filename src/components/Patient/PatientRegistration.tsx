@@ -309,7 +309,15 @@ export default function PatientRegistration(
       <hr className="mt-4" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
-        <form className="md:w-[500px]" onSubmit={handleFormSubmit}>
+        <form
+          className="md:w-[500px]"
+          onSubmit={handleFormSubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleFormSubmit(e);
+            }
+          }}
+        >
           <div id={"general-info"}>
             <h2 className="text-lg font-semibold">
               {t("patient__general-info")}

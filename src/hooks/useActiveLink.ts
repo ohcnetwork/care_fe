@@ -21,8 +21,6 @@ const activeLinkPriority = {
   "/users": "/users",
   "/notice_board": "/notice_board",
   "/appointments": "/appointments",
-  "/encounters": "/encounters",
-  "/organization": "/organization",
   "/facility": "/facility",
 };
 
@@ -32,6 +30,5 @@ const activeLinkPriority = {
 export default function useActiveLink() {
   const path = usePath() || "";
   const key = keysOf(activeLinkPriority).find((key) => path.includes(key));
-  console.log(path, key);
   return key && activeLinkPriority[key];
 }
