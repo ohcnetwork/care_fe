@@ -385,7 +385,7 @@ function AppointmentColumn(props: {
         </div>
       ) : (
         <ScrollArea>
-          <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-22rem)]">
+          <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-18rem)]">
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link
