@@ -649,3 +649,10 @@ export const copyToClipboard = async (content: string) => {
     Notification.Error({ msg: "Copying is not allowed" });
   }
 };
+
+export const conditionalAttribute = <T>(
+  condition: boolean,
+  attributes: Record<string, T>,
+) => {
+  return condition ? attributes : {};
+};

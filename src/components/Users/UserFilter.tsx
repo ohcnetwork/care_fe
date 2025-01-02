@@ -1,11 +1,5 @@
-import { useTranslation } from "react-i18next";
-
 import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 
-import DistrictAutocompleteFormField from "@/components/Common/DistrictAutocompleteFormField";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
-import { FacilityModel } from "@/components/Facility/models";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
@@ -31,7 +25,6 @@ const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
 };
 
 export default function UserFilter(props: any) {
-  const { t } = useTranslation();
   const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
@@ -90,13 +83,6 @@ export default function UserFilter(props: any) {
     else setFilterState({ ...filterState, [name]: value });
   };
 
-  const field = (name: string) => ({
-    name,
-    label: t(name),
-    value: filterState[name],
-    onChange: handleChange,
-  });
-
   return (
     <FiltersSlideover
       advancedFilter={props}
@@ -137,28 +123,6 @@ export default function UserFilter(props: any) {
       </div>
 
       <div className="w-full flex-none">
-        <FieldLabel>Home Facility</FieldLabel>
-        <FacilitySelect
-          allowNone
-          name="home_facility"
-          setSelected={(selected) =>
-            setFilterState({
-              ...filterState,
-              home_facility: (selected as FacilityModel)?.id || "",
-              home_facility_ref: selected,
-            })
-          }
-          selected={
-            filterState.home_facility === "NONE"
-              ? { name: t("no_home_facility"), id: "NONE" }
-              : filterState.home_facility_ref
-          }
-          errors=""
-          multiple={false}
-        />
-      </div>
-
-      <div className="w-full flex-none">
         <FieldLabel>Active in last...</FieldLabel>
         <SelectMenuV2
           id="last_active_days"
@@ -173,12 +137,6 @@ export default function UserFilter(props: any) {
         />
       </div>
 
-      <StateAutocompleteFormField {...field("state")} errorClassName="hidden" />
-      <DistrictAutocompleteFormField
-        errorClassName="hidden"
-        {...field("district")}
-        state={filterState.state}
-      />
       <div className="-mb-4">
         <PhoneNumberFormField
           label="Phone Number"

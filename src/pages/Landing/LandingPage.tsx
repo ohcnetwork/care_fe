@@ -13,10 +13,10 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 const { customLogo, stateLogo, mainLogo, keralaGeoId } = careConfig;
 
@@ -31,9 +31,12 @@ export function LandingPage() {
 
   const { data: districtsResponse } = useQuery<PaginatedResponse<Organization>>(
     {
-      queryKey: ["districts", STATE_GEO_ID],
-      queryFn: query(routes.organization.getPublicOrganizations, {
-        queryParams: { parent: STATE_GEO_ID },
+      queryKey: ["districts", STATE_GEO_ID, searchQuery],
+      queryFn: query(organizationApi.getPublicOrganizations, {
+        queryParams: {
+          parent: STATE_GEO_ID,
+          name: searchQuery,
+        },
       }),
     },
   );

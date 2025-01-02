@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import dayjs from "dayjs";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -36,9 +37,11 @@ export function DateTimeQuestion({
   clearError,
   classes,
 }: DateTimeQuestionProps) {
-  const currentValue = questionnaireResponse.values[0]?.value
-    ? new Date(questionnaireResponse.values[0].value as string)
-    : undefined;
+  const [currentValue, setCurrentValue] = useState(() => {
+    return questionnaireResponse.values[0]?.value
+      ? new Date(questionnaireResponse.values[0].value as string)
+      : undefined;
+  });
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) {
@@ -94,8 +97,14 @@ export function DateTimeQuestion({
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
       <ValueInjection
-        value={currentValue?.toISOString()}
-        onChange={(value) => value && handleUpdate(dayjs(value).toDate())}
+        value={{ date: currentValue?.toISOString() || "" }}
+        onChange={(value) => {
+          if (value?.date) {
+            const date = dayjs(value.date).toDate();
+            setCurrentValue(date);
+            handleUpdate(date);
+          }
+        }}
         data-cui-datetime-input
         className="flex gap-2"
       >

@@ -23,16 +23,17 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useDebouncedState from "@/hooks/useDebouncedState";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
+import UserApi from "@/types/user/userApi";
 
 interface Props {
   selected?: UserBase;
   onChange: (user: UserBase) => void;
   placeholder?: string;
   noOptionsMessage?: string;
+  popoverClassName?: string;
 }
 
 export default function UserSelector({
@@ -40,6 +41,7 @@ export default function UserSelector({
   onChange,
   placeholder,
   noOptionsMessage,
+  popoverClassName,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -47,7 +49,7 @@ export default function UserSelector({
 
   const { data, isFetching } = useQuery({
     queryKey: ["users", search],
-    queryFn: query(routes.user.list, {
+    queryFn: query(UserApi.list, {
       queryParams: { search_text: search },
     }),
   });
@@ -55,8 +57,8 @@ export default function UserSelector({
   const users = data?.results || [];
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      <PopoverTrigger asChild className={popoverClassName}>
         <Button
           variant="outline"
           role="combobox"
@@ -77,7 +79,11 @@ export default function UserSelector({
           <CaretDownIcon className="ml-auto" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start">
+      <PopoverContent
+        className="p-0 w-[var(--radix-popover-trigger-width)] max-w-[--radix-popover-content-available-width]"
+        align="start"
+        sideOffset={4}
+      >
         <Command filter={() => 1}>
           <CommandInput
             placeholder={t("search")}

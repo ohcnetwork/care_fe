@@ -7,15 +7,13 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import InputWithError from "@/components/ui/input-with-error";
 
+import useDebouncedState from "@/hooks/useDebouncedState";
+
 import { ORGANIZATION_LEVELS } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import {
-  Organization,
-  OrganizationResponse,
-  getOrgLevel,
-} from "@/types/organization/organization";
+import { Organization, getOrgLevel } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationSelectorProps {
   value?: string;
@@ -32,6 +30,7 @@ interface AutoCompleteOption {
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
 
   const headers = props.authToken
     ? {
@@ -41,12 +40,13 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       }
     : {};
 
-  const { data: getAllOrganizations } = useQuery<OrganizationResponse>({
-    queryKey: ["organizations-root"],
-    queryFn: query(routes.organization.list, {
+  const { data: getAllOrganizations } = useQuery({
+    queryKey: ["organizations-root", searchQuery],
+    queryFn: query(organizationApi.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
+        name: searchQuery || undefined,
       },
       ...headers,
     }),
@@ -58,11 +58,13 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     queryKey: [
       "organizations-current",
       selectedLevels[selectedLevels.length - 1]?.id,
+      searchQuery,
     ],
-    queryFn: query(routes.organization.list, {
+    queryFn: query(organizationApi.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
+        name: searchQuery || undefined,
       },
       ...headers,
     }),
@@ -75,7 +77,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         ? getAllOrganizations?.results
         : currentLevelOrganizations?.results;
 
-    const selectedOrg = orgList?.find((org) => org.id === value);
+    const selectedOrg = orgList?.find((org: Organization) => org.id === value);
     if (!selectedOrg) return;
 
     const newLevels = selectedLevels.slice(0, level);
@@ -153,6 +155,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
               onChange={(value: string) =>
                 handleLevelChange(value, selectedLevels.length)
               }
+              onSearch={setSearchQuery}
             />
           </InputWithError>
         </div>

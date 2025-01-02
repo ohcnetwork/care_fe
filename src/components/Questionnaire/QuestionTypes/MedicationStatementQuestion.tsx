@@ -3,7 +3,7 @@ import {
   QuestionMarkCircledIcon,
   TextAlignLeftIcon,
 } from "@radix-ui/react-icons";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -61,8 +61,11 @@ export function MedicationStatementQuestion({
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
 
-  const medications =
-    (questionnaireResponse.values?.[0]?.value as MedicationStatement[]) || [];
+  const [medications, setMedications] = useState<MedicationStatement[]>(() => {
+    return (
+      (questionnaireResponse.values?.[0]?.value as MedicationStatement[]) || []
+    );
+  });
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: Omit<
@@ -120,6 +123,7 @@ export function MedicationStatementQuestion({
         value={medications}
         onChange={(value) => {
           if (value) {
+            setMedications(value);
             updateQuestionnaireResponseCB({
               ...questionnaireResponse,
               values: [

@@ -26,10 +26,10 @@ import {
 import { GENDER_TYPES } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
+import UserApi from "@/types/user/userApi";
 
 const userFormSchema = z
   .object({
@@ -122,7 +122,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         res,
         data: user,
         error,
-      } = await request(routes.user.create, {
+      } = await request(UserApi.create, {
         body: {
           ...data,
           // Omit c_password as it's not needed in the API
@@ -274,7 +274,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="+91XXXXXXXXXX" {...field} />
+                  <Input type="tel" placeholder="+91XXXXXXXXXX" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -290,6 +290,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 <FormControl>
                   <Input
                     placeholder="+91XXXXXXXXXX"
+                    type="tel"
                     {...field}
                     disabled={isWhatsApp}
                   />

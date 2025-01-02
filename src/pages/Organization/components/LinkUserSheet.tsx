@@ -27,7 +27,9 @@ import UserSelector from "@/components/Common/UserSelector";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import organizationApi from "@/types/organization/organizationApi";
 import { UserBase } from "@/types/user/user";
+import UserApi from "@/types/user/userApi";
 
 interface Props {
   organizationId: string;
@@ -48,7 +50,7 @@ export default function LinkUserSheet({
 
   const { data: preSelectedUser } = useQuery({
     queryKey: ["user", preSelectedUsername],
-    queryFn: query(routes.user.get, {
+    queryFn: query(UserApi.get, {
       pathParams: { username: preSelectedUsername || "" },
     }),
     enabled: !!preSelectedUsername,
@@ -68,7 +70,7 @@ export default function LinkUserSheet({
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.organization.assignUser, {
+      mutate(organizationApi.assignUser, {
         pathParams: { id: organizationId },
         body,
       })(body),
@@ -128,6 +130,7 @@ export default function LinkUserSheet({
             onChange={handleUserChange}
             placeholder="Search for a user"
             noOptionsMessage="No users found"
+            popoverClassName="w-full"
           />
           {selectedUser && (
             <div className="space-y-4">
