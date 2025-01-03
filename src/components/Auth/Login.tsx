@@ -167,19 +167,24 @@ const Login = (props: { forgot?: boolean }) => {
         }, 200);
       }
     },
+
+    //Invalid OTP error handling
     onError: (error: HTTPError) => {
-      const errorData = error.cause as { errors: Array<{ otp: string }> };
-      const errors = errorData?.errors;
-      if (Array.isArray(errors) && errors.length > 0) {
-        // BE returns a different format for invalid OTP
-        // TODO: fix this
-        //const firstError = errors[0] as OtpError;
-        //setOtpError(firstError.msg);
-        const firstError = errors[0];
-        setOtpValidationError(firstError.otp);
-      } else {
-        setOtpValidationError(t("invalid_otp"));
+      let errorMessage = t("invalid_otp");
+      if (
+        error.cause &&
+        Array.isArray(error.cause.errors) &&
+        error.cause.errors.length > 0
+      ) {
+        const otpError = error.cause.errors.find((e) => e.otp);
+        if (otpError && otpError.otp) {
+          errorMessage = otpError.otp;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
       }
+      setOtpValidationError(errorMessage);
+      Notification.Error({ msg: errorMessage });
     },
   });
 

@@ -3,14 +3,14 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import HttpApi from "i18next-http-backend";
 import { initReactI18next } from "react-i18next";
 
-export const LANGUAGES: { [key: string]: any } = {
+export const LANGUAGES = {
   en: "English",
   ta: "தமிழ்",
   ml: "മലയാളം",
   mr: "मराठी",
   kn: "ಕನ್ನಡ",
   hi: "हिन्दी",
-};
+} as const;
 
 i18n
   .use(HttpApi)

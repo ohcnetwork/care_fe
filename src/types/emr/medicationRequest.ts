@@ -1,7 +1,17 @@
-import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { Code } from "@/types/questionnaire/code";
+
+export const DOSAGE_UNITS = [
+  "mg",
+  "g",
+  "ml",
+  "drop(s)",
+  "ampule(s)",
+  "tsp",
+  "mcg",
+  "unit(s)",
+] as const;
 
 export const MEDICATION_REQUEST_STATUS = [
   "active",

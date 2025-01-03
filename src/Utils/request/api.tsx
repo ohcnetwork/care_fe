@@ -5,8 +5,6 @@ import {
   IUserFacilityRequest,
   PatientConsentModel,
 } from "@/components/Facility/models";
-import { Prescription } from "@/components/Medicine/models";
-import { PNconfigData } from "@/components/Notifications/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -296,18 +294,6 @@ const routes = {
     path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
   },
 
-  getUserPnconfig: {
-    path: "/api/v1/users/{username}/pnconfig/",
-    method: "GET",
-    TRes: Type<PNconfigData>(),
-  },
-
-  updateUserPnconfig: {
-    path: "/api/v1/users/{username}/pnconfig/",
-    method: "PATCH",
-    TRes: Type<PNconfigData>(),
-  },
-
   // Facility Endpoints
 
   getPermittedFacilities: {
@@ -525,49 +511,6 @@ const routes = {
     method: "POST",
     TRes: Type<CommentModel>(),
     TBody: Type<Partial<CommentModel>>(),
-  },
-
-  // Prescription endpoints
-
-  listPrescriptions: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "GET",
-  },
-
-  createPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "POST",
-    TBody: Type<Prescription>(),
-    TRes: Type<Prescription>(),
-  },
-
-  listAdministrations: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
-    method: "GET",
-  },
-
-  getAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
-    method: "GET",
-  },
-
-  getPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "GET",
-  },
-
-  administerPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
-    method: "POST",
-  },
-
-  discontinuePrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
-    method: "POST",
-    TBody: Type<{
-      discontinued_reason: string;
-    }>(),
-    TRes: Type<Record<string, never>>(),
   },
 
   facility: {

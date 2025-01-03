@@ -53,8 +53,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   });
 
   const handleCreatePatient = useCallback(() => {
-    navigate(`/facility/${facilityId}/patient/create`);
-  }, [facilityId]);
+    const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
+
+    navigate(`/facility/${facilityId}/patient/create`, {
+      query: queryParams,
+    });
+  }, [facilityId, phoneNumber]);
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
