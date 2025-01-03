@@ -52,4 +52,9 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Organization>>(),
   },
+  getPublicOrganization: {
+    path: "/api/v1/govt/organization/{id}/",
+    method: HttpMethod.GET,
+    TRes: Type<Organization>(),
+  },
 };
