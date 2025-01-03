@@ -39,6 +39,7 @@ const consultationRoutes: AppRoutes = {
         facilityId={facilityId}
         encounterId={encounterId}
         questionnaireSlug="encounter"
+        subjectType="encounter"
         patientId={patientId}
       />
     ),

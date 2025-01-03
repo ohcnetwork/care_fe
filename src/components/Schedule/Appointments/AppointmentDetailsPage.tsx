@@ -363,7 +363,14 @@ const AppointmentActions = ({
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
   if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
-    return null;
+    return (
+      <div className="flex flex-col gap-2 w-64 mx-auto">
+        <Button variant="outline" onClick={onViewPatient} size="lg">
+          <PersonIcon className="size-4 mr-2" />
+          {t("view_patient")}
+        </Button>
+      </div>
+    );
   }
 
   if (!["booked", "checked_in", "in_consultation"].includes(currentStatus)) {

@@ -1,5 +1,5 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
-import React, { useState } from "react";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,7 +34,6 @@ interface MedicationRequestQuestionProps {
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
 }
-
 const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   status: "active",
   intent: "order",
@@ -45,19 +44,14 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   authored_on: new Date().toISOString(),
   dosage_instruction: [],
 };
-
 export function MedicationRequestQuestion({
   question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
 }: MedicationRequestQuestionProps) {
-  const [medications, setMedications] = useState<MedicationRequest[]>(() => {
-    return (
-      (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || []
-    );
-  });
-
+  const medications =
+    (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
       ...medications,
@@ -77,7 +71,6 @@ export function MedicationRequestQuestion({
       ],
     });
   };
-
   const handleRemoveMedication = (index: number) => {
     const newMedications = medications.filter((_, i) => i !== index);
     updateQuestionnaireResponseCB({
@@ -85,7 +78,6 @@ export function MedicationRequestQuestion({
       values: [{ type: "medication_request", value: newMedications }],
     });
   };
-
   const handleUpdateMedication = (
     index: number,
     updates: Partial<MedicationRequest>,
@@ -93,7 +85,6 @@ export function MedicationRequestQuestion({
     const newMedications = medications.map((medication, i) =>
       i === index ? { ...medication, ...updates } : medication,
     );
-
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
       values: [
@@ -104,18 +95,12 @@ export function MedicationRequestQuestion({
       ],
     });
   };
-
   return (
     <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
       <ScribeStructuredInput
         value={medications}
         onChange={(value) => {
           if (value) {
-            setMedications(value);
             updateQuestionnaireResponseCB({
               ...questionnaireResponse,
               values: [
@@ -128,7 +113,7 @@ export function MedicationRequestQuestion({
           }
         }}
         name="Medication Request"
-        prompt={`An array of objects of the following type: {
+        prompt={`An array of objects of the following type, based on a SNOWMED Medication Product like "Paracetamol containing product": {
           status?: "active" | "on-hold" | "ended" | "stopped" | "completed" | "cancelled" | "entered-in-error" | "draft" | "unknown",
           intent?: "proposal" | "plan" | "order" | "original_order" | "reflex_order" | "filler_order" | "instance_order",
           category?:  "inpatient" | "outpatient" | "community" | "discharge",
@@ -272,6 +257,10 @@ export function MedicationRequestQuestion({
         ]}
         className="rounded-lg border p-4"
       >
+        <Label className="text-base font-medium">
+          {question.text}
+          {question.required && <span className="ml-1 text-red-500">*</span>}
+        </Label>
         {medications.length > 0 && (
           <div className="rounded-lg border space-y-4">
             <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
@@ -301,7 +290,6 @@ export function MedicationRequestQuestion({
     </div>
   );
 }
-
 export const MedicationRequestItem: React.FC<{
   medication: MedicationRequest;
   disabled?: boolean;
@@ -317,7 +305,6 @@ export const MedicationRequestItem: React.FC<{
       dosage_instruction: [{ ...dosageInstruction, ...updates }],
     });
   };
-
   return (
     <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
       <div className="flex items-center justify-between">
@@ -403,7 +390,6 @@ export const MedicationRequestItem: React.FC<{
             />
           </div>
         </div>
-
         <div className="flex gap-2">
           <div className="flex-1">
             <Label className="mb-1 block text-sm font-medium pr-4">Site</Label>
@@ -416,7 +402,6 @@ export const MedicationRequestItem: React.FC<{
             />
           </div>
         </div>
-
         <div className="flex items-center gap-2 mt-2">
           <Checkbox
             id={`prn-checkbox-${medication.medication?.code}`}
@@ -437,7 +422,6 @@ export const MedicationRequestItem: React.FC<{
             As Needed / PRN
           </Label>
         </div>
-
         {medication.dosage_instruction[0]?.as_needed_boolean ? (
           <div className="flex gap-2">
             <div className="flex-1">
@@ -485,7 +469,6 @@ export const MedicationRequestItem: React.FC<{
             </div>
           </div>
         )}
-
         <div className="flex gap-2">
           <div className="flex-1">
             <Label className="mb-1 block text-sm font-medium">
@@ -511,14 +494,12 @@ export const MedicationRequestItem: React.FC<{
           </div>
         </div>
       </div>
-
       {/* <div className="font-mono text-xs whitespace-pre-wrap mt-8">
         {JSON.stringify(medication, null, 2)}
       </div> */}
     </div>
   );
 };
-
 const reverseFrequencyOption = (
   option: MedicationRequest["dosage_instruction"][0]["timing"],
 ) => {
@@ -529,7 +510,6 @@ const reverseFrequencyOption = (
       value.timing.repeat.period === option?.repeat?.period,
   )?.[0] as keyof typeof FREQUENCY_OPTIONS;
 };
-
 // TODO: verify period_unit is correct
 const FREQUENCY_OPTIONS = {
   BD: {
