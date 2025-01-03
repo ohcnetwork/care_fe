@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -22,7 +23,7 @@ import { UpdatePasswordForm } from "@/components/Users/models";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import { UserBase } from "@/types/user/user";
 
 const PasswordSchema = z
@@ -55,7 +56,6 @@ export default function UserResetPassword({
   userData: UserBase;
 }) {
   const { t } = useTranslation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
@@ -67,29 +67,37 @@ export default function UserResetPassword({
       new_password_2: "",
     },
   });
+  const { mutate: resetUserPasswordMutate } = useMutation({
+    mutationFn: async (formData: UpdatePasswordForm) => {
+      const response = await mutate(routes.updatePassword, { silent: true })(
+        formData,
+      );
+      if ("errors" in response) {
+        throw response;
+      }
+      return response;
+    },
+    onSuccess: (data: any) => {
+      Notification.Success({ msg: data?.message as string });
+      resetPasswordForm.reset();
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message || t("password_update_error");
+      Notification.Error({ msg: errorMessage });
+      resetPasswordForm.reset();
+    },
+  });
+
   const handleSubmitPassword = async (
     formData: z.infer<typeof PasswordSchema>,
   ) => {
-    setIsSubmitting(true);
-
     const form: UpdatePasswordForm = {
       old_password: formData.current_password,
       username: userData.username,
       new_password: formData.new_password_1,
     };
-
-    const { res, data, error } = await request(routes.updatePassword, {
-      body: form,
-    });
-
-    if (res?.ok) {
-      Notification.Success({ msg: data?.message as string });
-    } else {
-      Notification.Error({
-        msg: error?.message ?? t("password_update_error"),
-      });
-    }
-    setIsSubmitting(false);
+    resetUserPasswordMutate(form);
   };
 
   const renderPasswordForm = () => (
@@ -105,6 +113,7 @@ export default function UserResetPassword({
                 <FormControl>
                   <TextFormField
                     {...field}
+                    type="password"
                     onChange={(value) => {
                       field.onChange(value.value);
                     }}
@@ -125,6 +134,7 @@ export default function UserResetPassword({
                 <FormControl>
                   <TextFormField
                     {...field}
+                    type="password"
                     onChange={(value) => {
                       field.onChange(value.value);
                     }}
@@ -172,6 +182,7 @@ export default function UserResetPassword({
                 <FormControl>
                   <TextFormField
                     {...field}
+                    type="password"
                     onChange={(value) => {
                       field.onChange(value.value);
                     }}
@@ -186,15 +197,16 @@ export default function UserResetPassword({
 
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={!resetPasswordForm.formState.isDirty}
           variant="primary"
           className="mt-6 w-full"
         >
-          {isSubmitting ? t("submitting") : t("submit")}
+          {resetPasswordForm.formState.isDirty ? t("submitting") : t("submit")}
         </Button>
       </form>
     </Form>
   );
+
   const editButton = () => (
     <div className="mb-4 flex justify-start">
       <Button
