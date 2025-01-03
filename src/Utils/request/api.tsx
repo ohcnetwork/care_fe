@@ -22,14 +22,15 @@ import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
-import { Observation } from "@/types/emr/observation";
-import { ObservationAnalyzeResponse } from "@/types/emr/observation";
+import {
+  Observation,
+  ObservationAnalyzeResponse,
+} from "@/types/emr/observation";
 import { PatientModel } from "@/types/emr/patient";
 import {
   BaseFacility,
@@ -51,9 +52,7 @@ import {
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
-import { Diagnosis } from "@/types/questionnaire/diagnosis";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { Symptom } from "@/types/questionnaire/symptom";
 import {
   CreateResourceRequest,
   ResourceRequest,
@@ -599,42 +598,6 @@ const routes = {
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
   },
-
-  // Diagnosis Routes
-  getDiagnosis: {
-    path: "/api/v1/patient/{patientId}/diagnosis/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Diagnosis>>(),
-  },
-  getDiagnosisById: {
-    path: "/api/v1/patient/{patientId}/diagnosis/{diagnosisId}/",
-    method: "GET",
-    TRes: Type<Diagnosis>(),
-  },
-
-  // Get Symptom
-  getSymptom: {
-    path: "/api/v1/patient/{patientId}/symptom/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Symptom>>(),
-  },
-  getSymptomById: {
-    path: "/api/v1/patient/{patientId}/symptom/{symptomId}/",
-    method: "GET",
-    TRes: Type<Symptom>(),
-  },
-
-  getAllergy: {
-    path: "/api/v1/patient/{patientId}/allergy_intolerance/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
-  },
-  getAllergyById: {
-    path: "/api/v1/patient/{patientId}/allergy_intolerance/{allergyId}/",
-    method: "GET",
-    TRes: Type<AllergyIntolerance>(),
-  },
-
   facilityOrganization: {
     list: {
       path: "/api/v1/facility/{facilityId}/organizations/",

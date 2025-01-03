@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
 
@@ -16,7 +16,7 @@ interface SymptomsListProps {
 export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
-    queryFn: query(routes.getSymptom, {
+    queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),

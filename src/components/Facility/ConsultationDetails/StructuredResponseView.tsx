@@ -4,11 +4,13 @@ import { AllergyTable } from "@/components/Patient/allergy/AllergyTable";
 import { DiagnosisTable } from "@/components/Patient/diagnosis/DiagnosisTable";
 import { SymptomTable } from "@/components/Patient/symptoms/SymptomTable";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
-import { Diagnosis } from "@/types/questionnaire/diagnosis";
-import { Symptom } from "@/types/questionnaire/symptom";
+import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import allergyApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
+import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { Symptom } from "@/types/emr/symptom/symptom";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface Props {
   type: string;
@@ -22,17 +24,17 @@ export function StructuredResponseView({ type, id, patientId }: Props) {
     switch (type) {
       case "symptom":
         return {
-          route: routes.getSymptomById,
+          route: symptomApi.retrieveSymptom,
           pathParams: { ...params, symptomId: id },
         };
       case "diagnosis":
         return {
-          route: routes.getDiagnosisById,
+          route: diagnosisApi.retrieveDiagnosis,
           pathParams: { ...params, diagnosisId: id },
         };
       case "allergy_intolerance":
         return {
-          route: routes.getAllergyById,
+          route: allergyApi.retrieveAllergy,
           pathParams: { ...params, allergyId: id },
         };
       default:

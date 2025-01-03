@@ -17,7 +17,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 
 type AllergyCategory = "food" | "medication" | "environment" | "biologic";
 

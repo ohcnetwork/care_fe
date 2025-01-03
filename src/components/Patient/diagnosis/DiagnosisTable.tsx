@@ -10,7 +10,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { Diagnosis } from "@/types/questionnaire/diagnosis";
+import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export const getStatusBadgeStyle = (status: string) => {
   switch (status?.toLowerCase()) {
