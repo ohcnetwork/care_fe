@@ -385,7 +385,7 @@ function AppointmentColumn(props: {
         </span>
       </div>
       {appointments.length === 0 ? (
-        <div className="flex justify-center items-center h-[calc(100vh-22rem)]">
+        <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
           <p className="text-gray-500">{t("no_appointments")}</p>
         </div>
       ) : (
