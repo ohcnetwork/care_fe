@@ -25,12 +25,12 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { Code } from "@/types/questionnaire/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
-} from "@/types/questionnaire/diagnosis";
+} from "@/types/emr/diagnosis/diagnosis";
+import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
