@@ -75,6 +75,17 @@ function PatientIndex() {
 
   const appointments = appointmentsData?.results
     .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
+    .map((appointment) => ({
+      ...appointment,
+      token_slot: {
+        ...appointment.token_slot,
+        // TODO: remove this once BE is updated
+        start_datetime: dayjs(appointment.token_slot.start_datetime)
+          .add(-5, "hours")
+          .add(-30, "minutes")
+          .toISOString(),
+      },
+    }))
     .sort(
       (a, b) =>
         new Date(a.token_slot.start_datetime).getTime() -
