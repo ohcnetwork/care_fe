@@ -184,7 +184,7 @@ export const EncounterShow = (props: Props) => {
     >
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
-          title="Encounter"
+          title={t("encounter")}
           crumbsReplacements={{
             [encounterId]: { name: encounterData.patient.name },
             consultation: {
@@ -236,7 +236,7 @@ export const EncounterShow = (props: Props) => {
             className="btn btn-primary m-1 w-full hover:text-white"
             id="patient-details"
           >
-            Patient Details
+            {t("patient_details")}
           </Link>
           <a
             id="patient_discussion_notes"
@@ -249,7 +249,7 @@ export const EncounterShow = (props: Props) => {
             }
             className="btn btn-primary m-1 w-full hover:text-white"
           >
-            Discussion Notes
+            {t("discussion_notes")}
           </a>
         </div>
       </nav>
@@ -297,21 +297,23 @@ export const EncounterShow = (props: Props) => {
               )}
             </div> */}
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
+              {/* <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
                 <div className="flex items-center">
-                  <span className="text-secondary-900">Created: </span>&nbsp;
-                  {formatDateTime(encounterData.period.start)}
-                  {/* <RelativeDateUserMention
+                  <span className="text-secondary-900">{t("created")}: </span>
+                  &nbsp;
+                  <RelativeDateUserMention
                     actionDate={encounterData.created_date}
                     user={encounterData.created_by}
                     tooltipPosition="right"
                     withoutSuffix={true}
-                  /> */}
+                  />
                 </div>
-              </div>
+              </div> */}
               <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
                 <div className="flex items-center">
-                  <span className="text-secondary-900">Last Modified: </span>
+                  <span className="text-secondary-900">
+                    {t("last_modified")}:{" "}
+                  </span>
                   &nbsp;
                   {formatDateTime(encounterData.modified_date)}
                   {/* <RelativeDateUserMention
