@@ -249,7 +249,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 className="flex flex-col items-center group py-6 gap-1"
                               >
                                 <span className="font-semibold">
-                                  {/* To do: remove this once BE is updated */}
+                                  {/* TODO: remove this once BE is updated */}
                                   {dayjs(slot.start_datetime)
                                     .add(-5, "hours")
                                     .add(-30, "minutes")
