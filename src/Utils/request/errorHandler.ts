@@ -40,7 +40,7 @@ export function handleHttpError(error: Error) {
       const firstKey = Object.keys(cause)[0];
       const firstError = firstKey ? cause[firstKey] : null;
       if (firstError && Array.isArray(firstError)) {
-        Notifications.Error({ msg: firstError[0] });
+        toast.error(firstError[0]);
         return;
       }
     }
