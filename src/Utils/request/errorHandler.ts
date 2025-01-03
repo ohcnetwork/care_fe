@@ -32,7 +32,7 @@ export function handleHttpError(error: Error) {
 
   if (isBadRequest(error)) {
     const errs = cause?.errors;
-    if (errs && isPydanticError(errs)) {
+    if (isPydanticError(errs)) {
       handlePydanticErrors(errs);
       return;
     }
