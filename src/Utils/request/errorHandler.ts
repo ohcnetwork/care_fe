@@ -102,7 +102,7 @@ function handleBadRequest(cause: any) {
   }
 
   if (cause && typeof cause === "object" && !Array.isArray(cause)) {
-    Object.entries(cause).forEach(([key, value]) => {
+    Object.values(cause).forEach((value) => {
       if (Array.isArray(value)) {
         value.forEach((err) => {
           toast.error(`${err}`);
