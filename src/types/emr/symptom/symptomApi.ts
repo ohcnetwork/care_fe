@@ -1,19 +1,17 @@
-import { Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Symptom } from "./symptom";
 
-const symptomApi = {
+export default {
   listSymptoms: {
     path: "/api/v1/patient/{patientId}/symptom/",
-    method: "GET",
+    method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Symptom>>(),
   },
   retrieveSymptom: {
     path: "/api/v1/patient/{patientId}/symptom/{symptomId}/",
-    method: "GET",
+    method: HttpMethod.GET,
     TRes: Type<Symptom>(),
   },
-} as const;
-
-export default symptomApi;
+};

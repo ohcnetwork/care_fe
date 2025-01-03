@@ -1,19 +1,17 @@
-import { Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { AllergyIntolerance } from "./allergyIntolerance";
 
-const allergyIntoleranceApi = {
+export default {
   getAllergy: {
     path: "/api/v1/patient/{patientId}/allergy_intolerance/",
-    method: "GET",
+    method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
   },
   retrieveAllergy: {
     path: "/api/v1/patient/{patientId}/allergy_intolerance/{allergyId}/",
-    method: "GET",
+    method: HttpMethod.GET,
     TRes: Type<AllergyIntolerance>(),
   },
-} as const;
-
-export default allergyIntoleranceApi;
+};
