@@ -83,7 +83,7 @@ export default function UserResetPassword({
     },
     onError: (error: any) => {
       const errorMessage =
-        error?.response?.data?.message || t("password_update_error");
+        error.cause.old_password[0] || t("password_update_error");
       Notification.Error({ msg: errorMessage });
     },
   });
