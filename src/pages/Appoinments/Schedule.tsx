@@ -28,8 +28,8 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
-import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -85,7 +85,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
-    queryFn: query(PublicAppointmentAPIs.getSlotsForDay, {
+    queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {
         facility: facilityId,
         user: staffId,

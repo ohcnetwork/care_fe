@@ -6,7 +6,7 @@ import {
 
 import { Type } from "@/Utils/request/api";
 
-export const PublicAppointmentAPIs = {
+export default {
   getSlotsForDay: {
     path: "/api/v1/otp/slots/get_slots_for_day/",
     method: "POST",

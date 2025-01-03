@@ -22,9 +22,9 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 export default function PatientSelect({
   facilityId,
@@ -73,7 +73,7 @@ export default function PatientSelect({
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
-      mutate(PublicAppointmentAPIs.createAppointment, {
+      mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
         headers: {

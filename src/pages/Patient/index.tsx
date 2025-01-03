@@ -25,7 +25,7 @@ import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 function PatientIndex() {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ function PatientIndex() {
 
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(PublicAppointmentAPIs.getAppointments, {
+    queryFn: query(PublicAppointmentApi.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },

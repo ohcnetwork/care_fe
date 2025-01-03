@@ -38,12 +38,12 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
-import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
 import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
@@ -141,7 +141,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
-      mutate(PublicAppointmentAPIs.createAppointment, {
+      mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
         headers: {
