@@ -11,11 +11,6 @@ import {
   FileUploadModel,
 } from "@/components/Patient/models";
 import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
-import {
   SkillModel,
   UpdatePasswordForm,
   UserAssignedModel,
@@ -611,17 +606,33 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<Diagnosis>>(),
   },
+  getDiagnosisById: {
+    path: "/api/v1/patient/{patientId}/diagnosis/{diagnosisId}/",
+    method: "GET",
+    TRes: Type<Diagnosis>(),
+  },
+
   // Get Symptom
   getSymptom: {
     path: "/api/v1/patient/{patientId}/symptom/",
     method: "GET",
     TRes: Type<PaginatedResponse<Symptom>>(),
   },
+  getSymptomById: {
+    path: "/api/v1/patient/{patientId}/symptom/{symptomId}/",
+    method: "GET",
+    TRes: Type<Symptom>(),
+  },
 
   getAllergy: {
     path: "/api/v1/patient/{patientId}/allergy_intolerance/",
     method: "GET",
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
+  },
+  getAllergyById: {
+    path: "/api/v1/patient/{patientId}/allergy_intolerance/{allergyId}/",
+    method: "GET",
+    TRes: Type<AllergyIntolerance>(),
   },
 
   facilityOrganization: {
@@ -798,23 +809,6 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
-    },
-    getSlotsForDay: {
-      path: "/api/v1/otp/slots/get_slots_for_day/",
-      method: "POST",
-      TRes: Type<{ results: SlotAvailability[] }>(),
-      TBody: Type<{ facility: string; resource: string; day: string }>(),
-    },
-    getAppointments: {
-      path: "/api/v1/otp/slots/get_appointments/",
-      method: "GET",
-      TRes: Type<{ results: Appointment[] }>(),
-    },
-    createAppointment: {
-      path: "/api/v1/otp/slots/{id}/create_appointment/",
-      method: "POST",
-      TRes: Type<Appointment>(),
-      TBody: Type<AppointmentCreate>(),
     },
   },
 

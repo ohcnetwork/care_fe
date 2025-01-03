@@ -114,14 +114,6 @@ export default function useFileManager(
     const signedUrl = data.read_signed_url as string;
     const extension = getExtension(signedUrl);
 
-    const downloadFileUrl = (url: string) => {
-      fetch(url)
-        .then((res) => res.blob())
-        .then((blob) => {
-          setDownloadURL(URL.createObjectURL(blob));
-        });
-    };
-
     setFileState({
       ...file_state,
       open: true,
@@ -131,7 +123,7 @@ export default function useFileManager(
         extension as (typeof FILE_EXTENSIONS.IMAGE)[number],
       ),
     });
-    downloadFileUrl(signedUrl);
+    setDownloadURL(signedUrl);
     setFileUrl(signedUrl);
   };
 

@@ -22,6 +22,7 @@ import {
 import query from "@/Utils/request/query";
 import {
   dateQueryString,
+  formatDisplayName,
   formatPatientAge,
   getMonthStartAndEnd,
 } from "@/Utils/utils";
@@ -78,7 +79,7 @@ export const useAvailabilityHeatmap = ({
   let queryFn = query(ScheduleAPIs.slots.availabilityHeatmap, {
     pathParams: { facility_id: facilityId },
     body: {
-      resource: userId,
+      user: userId,
       from_date: fromDate,
       to_date: toDate,
     },
@@ -346,7 +347,7 @@ style="
               margin: 0.25rem 0 0 0;
             "
           >
-            ${appointment.resource.first_name} ${appointment.resource.last_name}
+            ${formatDisplayName(appointment.user)}
           </p>
         </div>
         <div>
