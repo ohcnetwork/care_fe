@@ -762,6 +762,7 @@
   "emergency_contact_volunteer": "Emergency Contact (Volunteer)",
   "emergency_phone_number": "Emergency Phone Number",
   "empty_date_time": "--:-- --; --/--/----",
+  "encounter": "Encounter",
   "encounter_admit_sources__born": "Born in hospital",
   "encounter_admit_sources__emd": "From accident/emergency department",
   "encounter_admit_sources__gp": "General Practitioner referral",
