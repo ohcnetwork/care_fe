@@ -1,3 +1,6 @@
+import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Tooltip } from "@radix-ui/react-tooltip";
 import {
   Dispatch,
   ReactNode,
@@ -101,6 +104,13 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
   };
 
+  const fileName = file_state?.name
+    ? file_state.name + "." + file_state.extension
+    : "";
+
+  const fileNameTooltip =
+    fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+
   const handleNext = (newIndex: number) => {
     if (
       !uploadedFiles?.length ||
@@ -171,9 +181,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
         <>
           <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
             <div>
-              <p className="text-2xl font-bold text-gray-800">
-                {file_state.name}.{file_state.extension}
-              </p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <p className="text-2xl font-bold text-gray-800 truncate">
+                      {fileNameTooltip}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm text-white truncate bg-black rounded-md p-2">
+                      {fileName}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               {uploadedFiles &&
                 uploadedFiles[index] &&
                 uploadedFiles[index].created_date && (

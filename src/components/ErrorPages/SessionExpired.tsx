@@ -1,16 +1,15 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
-
-import * as Notification from "@/Utils/Notifications";
 
 export default function SessionExpired() {
   const { signOut } = useAuthContext();
   const { t } = useTranslation();
 
   useEffect(() => {
-    Notification.closeAllNotifications();
+    toast.dismiss();
   }, []);
 
   return (

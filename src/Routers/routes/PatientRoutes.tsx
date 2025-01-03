@@ -1,23 +1,26 @@
-import DeathReport from "@/components/DeathReport/DeathReport";
-import InvestigationReports from "@/components/Facility/Investigations/Reports";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
-import { InsuranceDetails } from "@/components/Patient/InsuranceDetails";
-import { PatientManager } from "@/components/Patient/ManagePatients";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
-import PatientNotes from "@/components/Patient/PatientNotes";
-import { PatientRegister } from "@/components/Patient/PatientRegister";
+import PatientIndex from "@/components/Patient/PatientIndex";
+import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { EncounterList } from "@/pages/Encounters/EncounterList";
+import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const PatientRoutes: AppRoutes = {
-  "/patients": () => <PatientManager />,
-  "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
-  "/patient/:id/investigation_reports": ({ id }) => (
-    <InvestigationReports id={id} />
+  "/facility/:facilityId/patients": ({ facilityId }) => (
+    <PatientIndex facilityId={facilityId} />
   ),
-  "/facility/:facilityId/patient": ({ facilityId }) => (
-    <PatientRegister facilityId={facilityId} />
+  "/facility/:facilityId/encounters": ({ facilityId }) => (
+    <EncounterList facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/patients/verify": ({ facilityId }) => (
+    <VerifyPatient facilityId={facilityId} />
+  ),
+  "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
+  "/facility/:facilityId/patient/create": ({ facilityId }) => (
+    <PatientRegistration facilityId={facilityId} />
   ),
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientHome facilityId={facilityId} id={id} page="demography" />
@@ -29,16 +32,9 @@ const PatientRoutes: AppRoutes = {
     }) => <PatientHome facilityId={facilityId} id={id} page={tab.route} />;
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:id/insurance": ({ facilityId, id }) => (
-    <InsuranceDetails facilityId={facilityId} id={id} />
-  ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
-    <PatientRegister facilityId={facilityId} id={id} />
+    <PatientRegistration facilityId={facilityId} patientId={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/notes": ({
-    facilityId,
-    patientId,
-  }) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
@@ -46,10 +42,9 @@ const PatientRoutes: AppRoutes = {
     <FileUploadPage
       facilityId={facilityId}
       patientId={patientId}
-      type="PATIENT"
+      type="patient"
     />
   ),
-  "/death_report/:id": ({ id }) => <DeathReport id={id} />,
 };
 
 export default PatientRoutes;

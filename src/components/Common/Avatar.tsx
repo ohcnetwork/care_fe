@@ -45,9 +45,10 @@ const initials = (name: string): string => {
 
 interface AvatarProps {
   colors?: [string, string];
-  name: string;
+  name?: string;
   imageUrl?: string;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 const Avatar: React.FC<AvatarProps> = ({
@@ -55,10 +56,12 @@ const Avatar: React.FC<AvatarProps> = ({
   name,
   imageUrl,
   className,
+  icon,
 }) => {
-  const [bgColor] = propColors || toColor(name);
+  const [bgColor] = propColors || (name ? toColor(name) : toColor(""));
   return (
     <div
+      title={name}
       className={cn(
         `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
         className,
@@ -74,7 +77,12 @@ const Avatar: React.FC<AvatarProps> = ({
           alt={name}
           className="aspect-square h-full w-full object-cover"
         />
+      ) : icon ? (
+        <div className="flex items-center justify-center w-full h-full">
+          {icon}
+        </div>
       ) : (
+        // Render initials SVG
         <svg
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
@@ -92,7 +100,7 @@ const Avatar: React.FC<AvatarProps> = ({
             dominantBaseline="middle"
             alignmentBaseline="middle"
           >
-            {initials(name)}
+            {name ? initials(name) : null}
           </text>
         </svg>
       )}

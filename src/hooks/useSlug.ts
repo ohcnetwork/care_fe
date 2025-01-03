@@ -2,11 +2,13 @@ import { usePath } from "raviger";
 
 /**
  * Returns the slug from the current path.
+ *
+ * @deprecated use `usePathParams` instead
  * @param prefix The prefix of the slug.
  * @returns The slug.
  * @example
  * // Current path: /consultation/94b9a
- * const consultation = useSlug("consultation"); // consultation = "94b9a"
+ * const encounterId = useSlug("encounter"); // consultation = "94b9a"
  */
 export default function useSlug(prefix: string, fallback?: string) {
   const path = usePath() ?? "";
@@ -15,6 +17,7 @@ export default function useSlug(prefix: string, fallback?: string) {
 
 /**
  * Returns the slugs from the current path.
+ * * @deprecated use `usePathParams` instead
  * @param prefix The prefixes of the slug.
  * @returns The slugs
  * @example

@@ -9,9 +9,13 @@ RUN apt-get update && apt-get install -y git
 
 COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm install --ignore-scripts
 
 COPY . .
+
+RUN npm run postinstall
+
+RUN npm run setup
 
 RUN npm run build
 

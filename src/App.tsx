@@ -7,6 +7,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 
 import Loading from "@/components/Common/Loading";
@@ -26,7 +27,6 @@ const queryClient = new QueryClient({
     queries: {
       retry: 2,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
   queryCache: new QueryCache({
@@ -44,7 +44,10 @@ const App = () => {
         <PubSubProvider>
           <PluginEngine>
             <HistoryAPIProvider>
-              <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+              <AuthUserProvider
+                unauthorized={<Routers.SessionRouter />}
+                otpAuthorized={<Routers.PatientRouter />}
+              >
                 <FeatureFlagsProvider>
                   <Routers.AppRouter />
                 </FeatureFlagsProvider>
@@ -54,6 +57,15 @@ const App = () => {
               <Integrations.Sentry disabled={!import.meta.env.PROD} />
               <Integrations.Plausible />
             </HistoryAPIProvider>
+            <Sonner
+              position="top-right"
+              theme="light"
+              richColors
+              expand
+              // For `richColors` to work, pass at-least an empty object.
+              // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+              toastOptions={{ closeButton: true }}
+            />
             <Toaster />
           </PluginEngine>
         </PubSubProvider>

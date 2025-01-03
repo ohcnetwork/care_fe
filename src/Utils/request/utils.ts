@@ -30,9 +30,14 @@ const makeQueryParams = (query: QueryParams) => {
   const qParams = new URLSearchParams();
 
   Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined) {
-      qParams.set(key, `${value}`);
+    if (value === undefined) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((v) => qParams.append(key, `${v}`));
+      return;
     }
+
+    qParams.set(key, `${value}`);
   });
 
   return qParams.toString();

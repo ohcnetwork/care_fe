@@ -66,7 +66,7 @@ export default function PageTitle({
 
       <div
         className={classNames(
-          "mt-2 flex items-center",
+          "mt-1 flex items-center",
           !!componentRight &&
             "flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0",
         )}

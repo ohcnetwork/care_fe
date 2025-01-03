@@ -1,10 +1,17 @@
-import { PatientModel } from "@/components/Patient/models";
+import { differenceInMinutes, format } from "date-fns";
+import html2canvas from "html2canvas";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
+import { Time } from "@/Utils/types";
+import { DoseRange, Timing } from "@/types/emr/medicationRequest";
+import { Patient } from "@/types/emr/newPatient";
+import { PatientModel } from "@/types/emr/patient";
+import { Code } from "@/types/questionnaire/code";
+import { Quantity } from "@/types/questionnaire/quantity";
 
 interface ApacheParams {
   age: number;
@@ -94,6 +101,10 @@ export const formatDateTime = (date: DateLike, format?: string) => {
 
 export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
+
+export const formatTimeShort = (time: Time) => {
+  return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
+};
 
 export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
   formatDateTime(date, format);
@@ -234,6 +245,7 @@ export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   if (phoneNumber === "+91") return "";
   const phoneCodes: Record<string, CountryData> = phoneCodesJson;
   let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
+  if (parsedNumber.length < 12) return "";
   if (countryCode && phoneCodes[countryCode]) {
     parsedNumber = phoneCodes[countryCode].code + parsedNumber;
   } else if (!phoneNumber.startsWith("+")) {
@@ -361,7 +373,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",
     month: abbreviated ? "mo" : "months",
-    year: abbreviated ? "yr" : "years",
+    year: abbreviated ? "Y" : "years",
   };
 };
 
@@ -379,9 +391,12 @@ export const patientAgeInYears = (obj: PatientModel) => {
   return end.diff(start, "years");
 };
 
-export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
+export const formatPatientAge = (
+  obj: PatientModel | Patient,
+  abbreviated = false,
+) => {
+  if (obj.age != null) return `${obj.age} Y`;
   const suffixes = getRelativeDateSuffix(abbreviated);
-
   const start = dayjs(
     obj.date_of_birth
       ? new Date(obj.date_of_birth)
@@ -394,7 +409,7 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
 
   const years = end.diff(start, "years");
   if (years) {
-    return `${years}${suffixes.year}`;
+    return `${years} ${suffixes.year}`;
   }
 
   // Skip representing as no. of months/days if we don't know the date of birth
@@ -411,11 +426,6 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
     return `${month}${suffixes.month} ${day}${suffixes.day}`;
   }
   return `${day}${suffixes.day}`;
-};
-
-export const scrollTo = (id: string | boolean) => {
-  const element = document.querySelector(`#${id}`);
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const compareBy = <T extends object>(key: keyof T) => {
@@ -460,14 +470,6 @@ export const properRoundOf = (value: number) => {
     return value.toFixed();
   }
   return value.toFixed(2);
-};
-
-export const isPostPartum = (data_of_delivery?: string) => {
-  return dayjs().diff(data_of_delivery, "week") <= 6;
-};
-
-export const isAntenatal = (menstruation_start_date?: string) => {
-  return dayjs().diff(menstruation_start_date, "month") <= 9;
 };
 
 /**
@@ -563,6 +565,82 @@ export function omitBy<T extends Record<string, unknown>>(
   ) as Partial<T>;
 }
 
+export const properCase = (str: string) => {
+  return str
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
+export const getMonthStartAndEnd = (date: Date) => {
+  return {
+    start: new Date(date.getFullYear(), date.getMonth(), 1),
+    end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
+  };
+};
+
+export const displayCode = (code?: Code) => {
+  if (!code) return "N/A";
+
+  return code.display ?? code.code;
+};
+
+export const displayQuantity = (quantity?: Quantity) => {
+  if (!quantity) return "N/A";
+
+  return [quantity.value ?? "N/A", quantity.unit].join(" ");
+};
+
+// TODO: make it generic
+export const displayDoseRange = (range?: DoseRange) => {
+  if (!range) return "N/A";
+
+  return ([range.low, range.high] as Quantity[])
+    .map(displayQuantity)
+    .join(" - ");
+};
+
+export const displayTiming = (timing?: Timing) => {
+  if (!timing || !timing.repeat) return "N/A";
+
+  return `${timing.repeat.frequency} every ${timing.repeat.period} ${timing.repeat.period_unit}`;
+};
+
+/**
+ * Returns hours and minutes between two dates.
+ *
+ * Eg.
+ * 1 hour and 30 minutes
+ * 2 hours
+ * 30 minutes
+ */
+export const getReadableDuration = (
+  start: string | Date,
+  end: string | Date,
+) => {
+  const duration = differenceInMinutes(end, start);
+  const hours = Math.floor(duration / 60);
+  const minutes = duration % 60;
+  if (hours === 0 && minutes === 0) return "0 minutes";
+  if (hours === 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+  if (minutes === 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+  return `${hours} hour${hours > 1 ? "s" : ""} and ${minutes} minute${
+    minutes > 1 ? "s" : ""
+  }`;
+};
+
+export const saveElementAsImage = async (id: string, filename: string) => {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  const canvas = await html2canvas(element);
+
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = canvas.toDataURL("image/png", 1);
+  link.click();
+};
+
 export const copyToClipboard = async (content: string) => {
   try {
     await navigator.clipboard.writeText(content);
@@ -570,4 +648,11 @@ export const copyToClipboard = async (content: string) => {
   } catch (err) {
     Notification.Error({ msg: "Copying is not allowed" });
   }
+};
+
+export const conditionalAttribute = <T>(
+  condition: boolean,
+  attributes: Record<string, T>,
+) => {
+  return condition ? attributes : {};
 };

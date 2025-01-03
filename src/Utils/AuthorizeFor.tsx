@@ -1,6 +1,6 @@
 import React from "react";
 
-import Error404 from "@/components/ErrorPages/404";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -47,6 +47,6 @@ export const AuthorizeUserRoute: React.FC<AuthorizeUserRouteProps> = ({
   if (userTypes.includes(authUser.user_type)) {
     return <>{children}</>;
   } else {
-    return <Error404 />;
+    return <ErrorPage />;
   }
 };

@@ -85,7 +85,7 @@ export default function UserAvatar({
       <AvatarEditModal
         title={t("edit_avatar")}
         open={editAvatar}
-        imageUrl={userData?.read_profile_picture_url}
+        imageUrl={userData?.profile_picture_url}
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
@@ -94,7 +94,7 @@ export default function UserAvatar({
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
-              imageUrl={userData?.read_profile_picture_url}
+              imageUrl={userData?.profile_picture_url}
               name={formatDisplayName(userData)}
               className="h-20 w-20"
             />

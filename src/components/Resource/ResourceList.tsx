@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
-import { ResourceModel } from "@/components/Facility/models";
+import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Form/SearchInput";
 import BadgesList from "@/components/Resource/ResourceBadges";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
@@ -22,6 +21,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 export default function ListView() {
   const {
@@ -52,7 +52,7 @@ export default function ListView() {
     },
   );
 
-  const showResourceCardList = (data: ResourceModel[]) => {
+  const showResourceCardList = (data: ResourceRequest[]) => {
     if (data && !data.length) {
       return (
         <div className="w-full mt-64 flex flex-1 justify-center text-secondary-600">
@@ -61,7 +61,7 @@ export default function ListView() {
       );
     }
 
-    return data.map((resource: ResourceModel, i) => (
+    return data.map((resource: ResourceRequest, i) => (
       <div
         key={i}
         className="w-full border border-b-2 border-gray-200  col-span-6"
@@ -82,11 +82,6 @@ export default function ListView() {
                   {resource.category || ""}
                 </dd>
               </dt>
-            </div>
-            <div className="address mt-1">
-              <dd className="text-xs font-medium leading-5">
-                {resource.sub_category || "--"}
-              </dd>
             </div>
           </div>
 
@@ -155,7 +150,7 @@ export default function ListView() {
             >
               <CareIcon icon="l-plane-departure" className="mr-2" />
               <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.origin_facility_object?.name}
+                {resource.origin_facility?.name}
               </dd>
             </dt>
 
@@ -165,7 +160,7 @@ export default function ListView() {
             >
               <CareIcon icon="l-user-check" className="mr-2" />
               <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.approving_facility_object?.name}
+                {resource.approving_facility?.name}
               </dd>
             </dt>
 
@@ -175,8 +170,7 @@ export default function ListView() {
             >
               <CareIcon icon="l-plane-arrival" className="mr-2" />
               <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.assigned_facility_object?.name ||
-                  t("yet_to_be_decided")}
+                {resource.assigned_facility?.name || t("yet_to_be_decided")}
               </dd>
             </dt>
           </div>
@@ -194,55 +188,47 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex-col px-2 pb-2">
-      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-        <div className="w-1/3 lg:w-1/4">
-          <PageTitle
-            title={t("resource")}
-            hideBack
-            className="mx-3 md:mx-5"
-            componentRight={
-              <ExportButton
-                action={async () => {
-                  const { data } = await request(
-                    routes.downloadResourceRequests,
-                    {
-                      query: { ...appliedFilters, csv: true },
-                    },
-                  );
-                  return data ?? null;
-                }}
-                filenamePrefix="resource_requests"
-              />
-            }
-            breadcrumbs={false}
-          />
-        </div>
+    <Page
+      title={t("resource")}
+      hideBack
+      componentRight={
+        <ExportButton
+          variant="secondary"
+          className="ml-4 bg-transparent shadow-none text-black rounded-full"
+          action={async () => {
+            const { data } = await request(routes.downloadResourceRequests, {
+              query: { ...appliedFilters, csv: true },
+            });
+            return data ?? null;
+          }}
+          filenamePrefix="resource_requests"
+        />
+      }
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="md:px-4"></div>
+          <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
+            <SearchInput
+              name="title"
+              value={qParams.title}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_resource")}
+            />
+          </div>
 
-        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-          <SearchInput
-            name="title"
-            value={qParams.title}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("search_resource")}
-            className="w-full md:w-60"
-          />
-
-          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <Button
-              variant={"primary"}
-              onClick={onBoardViewBtnClick}
-              className="h-10.8 px-4 py-2"
-            >
-              <CareIcon icon="l-list-ul" className="mr-2" />
+          <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+            <Button variant={"primary"} onClick={onBoardViewBtnClick}>
+              <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
               {t("board_view")}
             </Button>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
           </div>
-        </div>
-      </div>
+        </>
+      }
+    >
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
@@ -292,6 +278,6 @@ export default function ListView() {
         showResourceStatus={true}
         key={window.location.search}
       />
-    </div>
+    </Page>
   );
 }

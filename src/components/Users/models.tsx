@@ -1,12 +1,8 @@
-import {
-  DistrictModel,
-  LocalBodyModel,
-  StateModel,
-} from "@/components/Facility/models";
-
 import { GENDER_TYPES, UserRole } from "@/common/constants";
 
 import { FeatureFlag } from "@/Utils/featureFlags";
+import { Organization } from "@/types/organization/organization";
+import { Permission } from "@/types/permission/permission";
 
 interface HomeFacilityObjectModel {
   id?: string;
@@ -28,11 +24,18 @@ export type UserBareMinimum = {
   user_type: UserRole;
   last_login: string | undefined;
   read_profile_picture_url?: string;
+  external_id: string;
 };
 
 export type GenderType = "Male" | "Female" | "Transgender";
 
+export type UserFacilityModel = {
+  id: string;
+  name: string;
+};
+
 export type UserModel = UserBareMinimum & {
+  external_id: string;
   local_body?: number;
   district?: number;
   state?: number;
@@ -46,14 +49,14 @@ export type UserModel = UserBareMinimum & {
   verified?: boolean;
   home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
-  local_body_object?: LocalBodyModel;
-  district_object?: DistrictModel;
-  state_object?: StateModel;
   qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
   user_flags?: FeatureFlag[];
+  facilities?: UserFacilityModel[];
+  organizations?: Organization[];
+  permissions: Permission[];
 };
 
 export type UserBaseModel = {

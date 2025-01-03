@@ -1,4 +1,3 @@
-import { TFunction } from "i18next";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -8,12 +7,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Avatar } from "@/components/Common/Avatar";
 import Tabs from "@/components/Common/Tabs";
 import SearchInput from "@/components/Form/SearchInput";
-import { UserAssignedModel, UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useSlug from "@/hooks/useSlug";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
 
-import { USER_TYPES, USER_TYPE_OPTIONS } from "@/common/constants";
+import { USER_TYPE_OPTIONS } from "@/common/constants";
 
 import {
   classNames,
@@ -21,13 +20,11 @@ import {
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
+import { UserBase } from "@/types/user/user";
 
-export const GetUserTypes = (editForm = false) => {
+export const GetUserTypes = () => {
   const authUser = useAuthUser();
-
-  const userIndex = USER_TYPES.indexOf(authUser.user_type);
-  const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
-  const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
+  const defaultAllowedUserTypes = USER_TYPE_OPTIONS;
 
   // Superuser gets all options
   if (authUser.is_superuser) {
@@ -35,34 +32,31 @@ export const GetUserTypes = (editForm = false) => {
   }
 
   switch (authUser.user_type) {
-    case "StaffReadOnly":
-      return readOnlyUsers.slice(0, 1);
-    case "DistrictReadOnlyAdmin":
-      return readOnlyUsers.slice(0, 2);
-    case "StateReadOnlyAdmin":
-      return readOnlyUsers.slice(0, 3);
-    case "Pharmacist":
-      return USER_TYPE_OPTIONS.slice(0, 1);
-    case "Nurse":
-    case "Staff":
-      if (editForm) return [...defaultAllowedUserTypes];
-      // Temporarily allows creation of users with elevated permissions due to introduction of new roles.
-      return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
+    // case "StaffReadOnly":
+    //   return readOnlyUsers.slice(0, 1);
+    // case "DistrictReadOnlyAdmin":
+    //   return readOnlyUsers.slice(0, 2);
+    // case "StateReadOnlyAdmin":
+    //   return readOnlyUsers.slice(0, 3);
+    // case "Pharmacist":
+    //   return USER_TYPE_OPTIONS.slice(0, 1);
+    // case "Nurse":
+    // case "Staff":
+    //   if (editForm) return [...defaultAllowedUserTypes];
+    //   // Temporarily allows creation of users with elevated permissions due to introduction of new roles.
+    //   return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
     default:
-      return defaultAllowedUserTypes;
   }
-};
-export const CanUserAccess = (user: UserModel | UserAssignedModel) => {
-  const allowedTypes = GetUserTypes(true).map((type) => type.id);
-  return allowedTypes.includes(user.user_type);
+  return defaultAllowedUserTypes;
 };
 const GetDetailsButton = (username: string) => {
   const { t } = useTranslation();
+  const facilityId = useSlug("facility");
   return (
     <div className="grow">
       <button
         id={`more-details-${username}`}
-        onClick={() => navigate(`/users/${username}`)}
+        onClick={() => navigate(`/facility/${facilityId}/users/${username}`)}
         className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs hover:bg-gray-200"
       >
         <CareIcon icon="l-arrow-up-right" className="text-lg" />
@@ -72,7 +66,7 @@ const GetDetailsButton = (username: string) => {
   );
 };
 const getNameAndStatusCard = (
-  user: UserModel | UserAssignedModel,
+  user: UserBase,
   cur_online: boolean,
   showDetailsButton = false,
 ) => {
@@ -106,36 +100,17 @@ const getNameAndStatusCard = (
   );
 };
 
-const getDistrict = (user: UserModel | UserAssignedModel, t: TFunction) => {
-  const district =
-    "district_object" in user && user.district_object
-      ? user.district_object?.name
-      : "district" in user && user.district
-        ? user.district
-        : undefined;
-
-  if (!district) return <></>;
-  return (
-    <div className="text-sm">
-      <div className="text-gray-500">{t("district")}</div>
-      <div id="district" className="font-medium">
-        {district}
-      </div>
-    </div>
-  );
-};
-
 export const UserStatusIndicator = ({
   user,
   className,
   addPadding = false,
 }: {
-  user: UserModel | UserAssignedModel;
+  user: UserBase;
   className?: string;
   addPadding?: boolean;
 }) => {
   const authUser = useAuthUser();
-  const isAuthUser = user.id === authUser.id;
+  const isAuthUser = user.id === authUser.external_id;
   const isOnline = isUserOnline(user) || isAuthUser;
   const { t } = useTranslation();
 
@@ -169,7 +144,7 @@ export const UserStatusIndicator = ({
     </div>
   );
 };
-const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
+const UserCard = ({ user }: { user: UserBase }) => {
   const userOnline = isUserOnline(user);
   const { width } = useWindowDimensions();
   const mediumScreenBreakpoint = 640;
@@ -188,8 +163,10 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
           <div className="flex flex-col gap-4 sm:flex-row w-full">
             <div className="flex flex-col items-center gap-4 min-[400px]:flex-row sm:items-start">
               <Avatar
-                imageUrl={user.read_profile_picture_url}
-                name={user.username ?? ""}
+                imageUrl={
+                  "profile_picture_url" in user ? user.profile_picture_url : ""
+                }
+                name={formatName(user)}
                 className="h-16 w-16 self-center text-2xl sm:self-auto"
               />
               {isMediumScreen && getNameAndStatusCard(user, userOnline)}
@@ -204,21 +181,6 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
                     {user.user_type}
                   </div>
                 </div>
-                <div className="text-sm">
-                  <div className="text-gray-500">{t("home_facility")}</div>
-                  <div id="home-facility" className="font-medium">
-                    {user.home_facility_object?.name || t("no_home_facility")}
-                  </div>
-                </div>
-                {getDistrict(user, t)}
-                <div className="text-sm">
-                  <div className="text-gray-500">
-                    {t("average_weekly_working_hours")}
-                  </div>
-                  <div className="font-medium">
-                    {user.weekly_working_hours ?? "-"}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -230,11 +192,7 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
     </Card>
   );
 };
-export const UserGrid = ({
-  users,
-}: {
-  users?: UserModel[] | UserAssignedModel[];
-}) => (
+export const UserGrid = ({ users }: { users?: UserBase[] }) => (
   <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
     {users?.map((user) => <UserCard key={user.id} user={user} />)}
   </div>
@@ -264,14 +222,7 @@ const UserListHeader = ({
   );
 };
 
-const UserListRow = ({
-  user,
-  showDistrictColumn,
-}: {
-  user: UserModel | UserAssignedModel;
-  showDistrictColumn: boolean;
-}) => {
-  const { t } = useTranslation();
+const UserListRow = ({ user }: { user: UserBase }) => {
   return (
     <tr
       key={`usr_${user.id}`}
@@ -281,7 +232,10 @@ const UserListRow = ({
       <td className="sticky left-0 z-10 bg-white px-4 py-4">
         <div className="flex items-center gap-3">
           <Avatar
-            imageUrl={user.read_profile_picture_url}
+            // TO do: adjust for facility users
+            imageUrl={
+              "profile_picture_url" in user ? user.profile_picture_url : ""
+            }
             name={user.username ?? ""}
             className="h-10 w-10 text-lg"
           />
@@ -304,27 +258,11 @@ const UserListRow = ({
       <td id="role" className="px-4 py-4 text-sm">
         {user.user_type}
       </td>
-      <td id="home-facility" className="px-4 py-4 text-sm">
-        {user.home_facility_object?.name || t("no_home_facility")}
-      </td>
-      {showDistrictColumn && (
-        <td id="district" className="px-4 py-4 text-sm">
-          {"district_object" in user && user.district_object
-            ? user.district_object?.name
-            : "district" in user && user.district
-              ? user.district
-              : ""}
-        </td>
-      )}
       <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>
   );
 };
-export const UserList = ({
-  users,
-}: {
-  users?: UserModel[] | UserAssignedModel[];
-}) => {
+export const UserList = ({ users }: { users?: UserBase[] }) => {
   const showDistrictColumn = users?.some(
     (user) => "district_object" in user || "district" in user,
   );
@@ -333,20 +271,14 @@ export const UserList = ({
       <table className="relative min-w-full divide-y divide-gray-200">
         <UserListHeader showDistrictColumn={showDistrictColumn ?? false} />
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users?.map((user) => (
-            <UserListRow
-              key={user.id}
-              user={user}
-              showDistrictColumn={showDistrictColumn ?? false}
-            />
-          ))}
+          {users?.map((user) => <UserListRow key={user.id} user={user} />)}
         </tbody>
       </table>
     </div>
   );
 };
 interface UserListViewProps {
-  users: UserModel[] | UserAssignedModel[];
+  users: UserBase[];
   onSearch: (username: string) => void;
   searchValue: string;
   activeTab: number;

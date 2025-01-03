@@ -13,16 +13,13 @@ import {
   useFormFieldPropsResolver,
 } from "@/components/Form/FormFields/Utils";
 
-import { classNames, compareBy } from "@/Utils/utils";
-
-import { Threshold } from "./RangeAutocompleteFormField";
+import { classNames } from "@/Utils/utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> &
   Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange"
   > & {
-    thresholds?: Threshold[];
     inputClassName?: string | undefined;
     removeDefaultClasses?: true | undefined;
     leading?: React.ReactNode | undefined;
@@ -62,23 +59,8 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       ? `Value can not be greater than ${props.max}`
       : undefined;
 
-  const sortedThresholds = props.thresholds?.sort(compareBy("value")) || [];
-
-  const getThreshold = (value: number) => {
-    const reversedThresholds = [...sortedThresholds].reverse();
-    const threshold = reversedThresholds.find(
-      (threshold) => value >= threshold.value,
-    );
-    return threshold;
-  };
-
-  const threshold = getThreshold(Number(field.value));
-
   const labelSuffixWithThreshold = (
     <div className="flex items-center gap-2">
-      {field.value && props.thresholds && threshold && (
-        <span className={threshold.className}>{threshold.label}</span>
-      )}
       <span>{field.labelSuffix}</span>
     </div>
   );
