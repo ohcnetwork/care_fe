@@ -28,7 +28,7 @@ import { UserBase } from "@/types/user/user";
 
 const PasswordSchema = z
   .object({
-    current_password: z
+    old_password: z
       .string()
       .min(1, { message: "Please enter current password" }),
     new_password_1: z
@@ -62,7 +62,7 @@ export default function UserResetPassword({
   const resetPasswordForm = useForm({
     resolver: zodResolver(PasswordSchema),
     defaultValues: {
-      current_password: "",
+      old_password: "",
       new_password_1: "",
       new_password_2: "",
     },
@@ -93,7 +93,7 @@ export default function UserResetPassword({
     formData: z.infer<typeof PasswordSchema>,
   ) => {
     const form: UpdatePasswordForm = {
-      old_password: formData.current_password,
+      old_password: formData.old_password,
       username: userData.username,
       new_password: formData.new_password_1,
     };
@@ -106,10 +106,10 @@ export default function UserResetPassword({
         <div className="space-y-4">
           <FormField
             control={resetPasswordForm.control}
-            name="current_password"
+            name="old_password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("current_password")}</FormLabel>
+                <FormLabel>{t("old_password")}</FormLabel>
                 <FormControl>
                   <TextFormField
                     {...field}
