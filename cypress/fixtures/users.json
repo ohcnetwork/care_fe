@@ -2,5 +2,9 @@
   "admin": {
     "username": "admin",
     "password": "admin"
+  },
+  "nurse": {
+    "username": "nihal-nurse",
+    "password": "Test@123"
   }
 }
