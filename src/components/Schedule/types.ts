@@ -5,7 +5,7 @@ import { UserBase } from "@/types/user/user";
 
 export interface ScheduleTemplate {
   readonly id: string;
-  resource: string;
+  user: string;
   name: string;
   valid_from: string;
   valid_to: string;
@@ -33,7 +33,7 @@ export type ScheduleAvailability = ScheduleTemplate["availabilities"][number];
 
 export interface ScheduleException {
   readonly id: string;
-  resource: string; // UUID of the resource
+  user: string; // UUID of user
   reason: string;
   valid_from: string; // date in YYYY-MM-DD format
   valid_to: string; // date in YYYY-MM-DD format
@@ -98,7 +98,7 @@ export interface Appointment {
   readonly booked_by: UserBase | null;
   status: (typeof AppointmentStatuses)[number];
   readonly reason_for_visit: string;
-  readonly resource: UserBase;
+  readonly user: UserBase;
 }
 
 export interface AvailabilityHeatmap {

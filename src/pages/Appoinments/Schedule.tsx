@@ -28,6 +28,7 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
+import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface AppointmentsProps {
@@ -84,10 +85,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
-    queryFn: query(routes.otp.getSlotsForDay, {
+    queryFn: query(PublicAppointmentAPIs.getSlotsForDay, {
       body: {
         facility: facilityId,
-        resource: staffId,
+        user: staffId,
         day: dateQueryString(selectedDate),
       },
       headers: {

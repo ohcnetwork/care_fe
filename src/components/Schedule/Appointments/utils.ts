@@ -22,6 +22,7 @@ import {
 import query from "@/Utils/request/query";
 import {
   dateQueryString,
+  formatDisplayName,
   formatPatientAge,
   getMonthStartAndEnd,
 } from "@/Utils/utils";
@@ -346,7 +347,7 @@ style="
               margin: 0.25rem 0 0 0;
             "
           >
-            ${appointment.resource.first_name} ${appointment.resource.last_name}
+            ${formatDisplayName(appointment.user)}
           </p>
         </div>
         <div>

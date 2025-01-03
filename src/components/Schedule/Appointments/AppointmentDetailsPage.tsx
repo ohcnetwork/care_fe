@@ -194,7 +194,7 @@ const AppointmentDetails = ({
   appointment: Appointment;
   facility: FacilityModel;
 }) => {
-  const { patient, resource } = appointment;
+  const { patient, user } = appointment;
   const { t } = useTranslation();
 
   return (
@@ -335,8 +335,8 @@ const AppointmentDetails = ({
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <div className="text-sm">
-              <p className="font-medium">{formatName(resource)}</p>
-              <p className="text-gray-600">{resource.email}</p>
+              <p className="font-medium">{formatName(user)}</p>
+              <p className="text-gray-600">{user.email}</p>
             </div>
             <Separator />
             <div className="text-sm">

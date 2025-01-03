@@ -10,9 +10,9 @@ import { UserModel } from "@/components/Users/models";
 import { CarePatientTokenKey } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { PublicAppointmentAPIs } from "@/pages/Appoinments/apis";
 import { TokenData } from "@/types/auth/otpToken";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
@@ -25,7 +25,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["appointment", tokenData.phoneNumber],
-    queryFn: query(routes.otp.getAppointments, {
+    queryFn: query(PublicAppointmentAPIs.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
       },
