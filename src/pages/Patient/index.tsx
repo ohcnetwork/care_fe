@@ -79,7 +79,7 @@ function PatientIndex() {
       ...appointment,
       token_slot: {
         ...appointment.token_slot,
-        // To do: remove this once BE is updated
+        // TODO: remove this once BE is updated
         start_datetime: dayjs(appointment.token_slot.start_datetime)
           .add(-5, "hours")
           .add(-30, "minutes")
