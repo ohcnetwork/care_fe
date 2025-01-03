@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -59,6 +59,7 @@ interface PatientRegistrationPageProps {
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
+  const [{ phone_number }] = useQueryParams();
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -69,7 +70,7 @@ export default function PatientRegistration(
   const [_showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [form, setForm] = useState<Partial<PatientModel>>({
     nationality: "India",
-    phone_number: "+91",
+    phone_number: phone_number || "+91",
     emergency_phone_number: "+91",
   });
   const [feErrors, setFeErrors] = useState<
