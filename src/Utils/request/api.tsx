@@ -611,17 +611,33 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<Diagnosis>>(),
   },
+  getDiagnosisById: {
+    path: "/api/v1/patient/{patientId}/diagnosis/{diagnosisId}/",
+    method: "GET",
+    TRes: Type<Diagnosis>(),
+  },
+
   // Get Symptom
   getSymptom: {
     path: "/api/v1/patient/{patientId}/symptom/",
     method: "GET",
     TRes: Type<PaginatedResponse<Symptom>>(),
   },
+  getSymptomById: {
+    path: "/api/v1/patient/{patientId}/symptom/{symptomId}/",
+    method: "GET",
+    TRes: Type<Symptom>(),
+  },
 
   getAllergy: {
     path: "/api/v1/patient/{patientId}/allergy_intolerance/",
     method: "GET",
     TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
+  },
+  getAllergyById: {
+    path: "/api/v1/patient/{patientId}/allergy_intolerance/{allergyId}/",
+    method: "GET",
+    TRes: Type<AllergyIntolerance>(),
   },
 
   facilityOrganization: {
