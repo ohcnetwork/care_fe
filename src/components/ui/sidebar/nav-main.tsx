@@ -11,6 +11,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+import useActiveLink from "@/hooks/useActiveLink";
+
 export function NavMain({
   links,
 }: {
@@ -20,6 +22,8 @@ export function NavMain({
     icon?: string;
   }[];
 }) {
+  const activePath = useActiveLink();
+
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -34,8 +38,12 @@ export function NavMain({
             >
               <ActiveLink
                 href={link.url}
-                activeClass="bg-white text-green-700 shadow"
-                exactActiveClass="bg-white text-green-700 shadow"
+                className={
+                  link.url.endsWith(activePath!) ||
+                  link.name.toLowerCase() === activePath!.split("/")[1]
+                    ? "bg-white text-green-700 shadow"
+                    : ""
+                }
               >
                 {link.icon && <CareIcon icon={link.icon as IconName} />}
                 <span className="group-data-[collapsible=icon]:hidden">
