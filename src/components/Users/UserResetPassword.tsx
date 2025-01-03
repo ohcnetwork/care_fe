@@ -83,10 +83,10 @@ export default function UserResetPassword({
     });
 
     if (res?.ok) {
-      Notification.Success({ msg: "Password Updated Successfully" });
+      Notification.Success({ msg: data?.message as string });
     } else {
       Notification.Error({
-        msg: t("password_update_error"),
+        msg: error?.message ?? t("password_update_error"),
       });
     }
     setIsSubmitting(false);
