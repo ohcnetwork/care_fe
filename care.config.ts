@@ -107,7 +107,7 @@ const careConfig = {
     // Kill switch in-case the heatmap API doesn't scale as expected
     useAvailabilityStatsAPI: boolean(
       "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
-      false,
+      true,
     ),
   },
 
