@@ -32,68 +32,73 @@ export function handleHttpError(error: Error) {
 
   if (isBadRequest(error)) {
     const errs = cause?.errors;
-    if (isPydanticError(errs)) {
+    if (errs && isPydanticError(errs)) {
       handlePydanticErrors(errs);
       return;
     }
-    Notifications.BadRequest({ errs });
+    if (cause && typeof cause === "object" && !Array.isArray(cause)) {
+      const firstKey = Object.keys(cause)[0];
+      const firstError = firstKey ? cause[firstKey] : null;
+      if (firstError && Array.isArray(firstError)) {
+        Notifications.Error({ msg: firstError[0] });
+        return;
+      }
+    }
+    Notifications.BadRequest({ errs: cause });
     return;
   }
 
-  Notifications.Error({
-    msg: cause?.detail || "Something went wrong...!",
-  });
-}
-
-function isSessionExpired(error: HTTPError["cause"]) {
-  return (
-    // If Authorization header is not valid
-    error?.code === "token_not_valid" ||
-    // If Authorization header is not provided
-    error?.detail === "Authentication credentials were not provided."
-  );
-}
-
-function handleSessionExpired() {
-  if (!location.pathname.startsWith("/session-expired")) {
-    navigate(`/session-expired?redirect=${window.location.href}`);
+  function isSessionExpired(error: HTTPError["cause"]) {
+    return (
+      // If Authorization header is not valid
+      error?.code === "token_not_valid" ||
+      // If Authorization header is not provided
+      error?.detail === "Authentication credentials were not provided."
+    );
   }
-}
 
-function isBadRequest(error: HTTPError) {
-  return error.status === 400 || error.status === 406;
-}
+  function handleSessionExpired() {
+    if (!location.pathname.startsWith("/session-expired")) {
+      navigate(`/session-expired?redirect=${window.location.href}`);
+    }
+  }
 
-function isNotFound(error: HTTPError) {
-  return error.status === 404;
-}
+  function isBadRequest(error: HTTPError) {
+    return error.status === 400 || error.status === 406;
+  }
 
-type PydanticError = {
-  type: string;
-  loc: string[];
-  msg: string;
-  input: unknown;
-  url: string;
-};
+  function isNotFound(error: HTTPError) {
+    return error.status === 404;
+  }
 
-function isPydanticError(errors: unknown): errors is PydanticError[] {
-  return (
-    Array.isArray(errors) &&
-    errors.every(
-      (error) => typeof error === "object" && error !== null && "type" in error,
-    )
-  );
-}
+  type PydanticError = {
+    type: string;
+    loc: string[];
+    msg: string;
+    input: unknown;
+    url: string;
+  };
 
-function handlePydanticErrors(errors: PydanticError[]) {
-  errors.map(({ type, loc, msg }) => {
-    const title = type
-      .replace("_", " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+  function isPydanticError(errors: unknown): errors is PydanticError[] {
+    return (
+      Array.isArray(errors) &&
+      errors.every(
+        (error) =>
+          typeof error === "object" && error !== null && "type" in error,
+      )
+    );
+  }
 
-    toast.error(`${title}: '${loc.join(".")}'`, {
-      description: msg,
-      duration: 8000,
+  function handlePydanticErrors(errors: PydanticError[]) {
+    errors.map(({ type, loc, msg }) => {
+      const title = type
+        .replace("_", " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+
+      toast.error(`${title}: '${loc.join(".")}'`, {
+        description: msg,
+        duration: 8000,
+      });
     });
-  });
+  }
 }

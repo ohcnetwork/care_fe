@@ -73,15 +73,10 @@ export default function UserResetPassword({
     },
   });
   const { mutate: resetUserPasswordMutate, isPending } = useMutation({
-    mutationFn: mutate(routes.updatePassword, { silent: true }),
+    mutationFn: mutate(routes.updatePassword),
     onSuccess: (data: any) => {
       toast.success(data?.message as string);
       resetPasswordForm.reset();
-    },
-    onError: (error: any) => {
-      const errorMessage =
-        error.cause?.old_password?.[0] ?? t("password_update_error");
-      toast.error(errorMessage);
     },
   });
 
