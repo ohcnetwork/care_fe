@@ -14,7 +14,7 @@ import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { keysOf } from "@/Utils/utils";
+import { formatDateTime, keysOf } from "@/Utils/utils";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
@@ -300,6 +300,7 @@ export const EncounterShow = (props: Props) => {
               <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
                 <div className="flex items-center">
                   <span className="text-secondary-900">Created: </span>&nbsp;
+                  {formatDateTime(encounterData.period.start)}
                   {/* <RelativeDateUserMention
                     actionDate={encounterData.created_date}
                     user={encounterData.created_by}
@@ -312,6 +313,7 @@ export const EncounterShow = (props: Props) => {
                 <div className="flex items-center">
                   <span className="text-secondary-900">Last Modified: </span>
                   &nbsp;
+                  {formatDateTime(encounterData.modified_date)}
                   {/* <RelativeDateUserMention
                     actionDate={consultationData.modified_date}
                     user={consultationData.last_edited_by}
