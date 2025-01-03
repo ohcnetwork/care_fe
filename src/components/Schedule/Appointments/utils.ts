@@ -79,7 +79,7 @@ export const useAvailabilityHeatmap = ({
   let queryFn = query(ScheduleAPIs.slots.availabilityHeatmap, {
     pathParams: { facility_id: facilityId },
     body: {
-      resource: userId,
+      user: userId,
       from_date: fromDate,
       to_date: toDate,
     },

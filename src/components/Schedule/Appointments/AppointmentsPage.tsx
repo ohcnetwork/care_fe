@@ -96,7 +96,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const resourcesQuery = useQuery({
     queryKey: ["appointments-resources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
+    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -109,7 +109,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        resource: qParams.practitioner ?? "",
+        user: qParams.practitioner ?? "",
         day: date,
       },
     }),

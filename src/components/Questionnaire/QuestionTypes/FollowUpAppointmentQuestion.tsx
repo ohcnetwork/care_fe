@@ -70,7 +70,7 @@ export function FollowUpAppointmentQuestion({
 
   const resourcesQuery = useQuery({
     queryKey: ["availableResources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
+    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -85,7 +85,7 @@ export function FollowUpAppointmentQuestion({
     queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        resource: resource?.id,
+        user: resource?.id,
         day: dateQueryString(selectedDate),
       },
     }),
