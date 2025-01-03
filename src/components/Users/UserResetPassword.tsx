@@ -67,7 +67,7 @@ export default function UserResetPassword({
       new_password_2: "",
     },
   });
-  const { mutate: resetUserPasswordMutate } = useMutation({
+  const { mutate: resetUserPasswordMutate, isPending } = useMutation({
     mutationFn: async (formData: UpdatePasswordForm) => {
       const response = await mutate(routes.updatePassword, { silent: true })(
         formData,
@@ -85,7 +85,6 @@ export default function UserResetPassword({
       const errorMessage =
         error?.response?.data?.message || t("password_update_error");
       Notification.Error({ msg: errorMessage });
-      resetPasswordForm.reset();
     },
   });
 
@@ -201,7 +200,7 @@ export default function UserResetPassword({
           variant="primary"
           className="mt-6 w-full"
         >
-          {resetPasswordForm.formState.isDirty ? t("submitting") : t("submit")}
+          {isPending ? t("submitting") : t("submit")}
         </Button>
       </form>
     </Form>
