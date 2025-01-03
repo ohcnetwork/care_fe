@@ -44,7 +44,7 @@ export function handleHttpError(error: Error) {
         return;
       }
     }
-    Notifications.BadRequest({ errs: cause });
+    Notifications.BadRequest({ errs: errs });
     return;
   }
 
