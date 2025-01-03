@@ -214,7 +214,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   return (
     <Page
-      title={facilityId ? "Update Facility" : "Create Facility"}
+      title={facilityId ? t("update_facility") : t("create_facility")}
       crumbsReplacements={{
         [facilityId || "????"]: { name: form.watch("name") },
       }}
@@ -329,6 +329,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="col-span-2 grid grid-cols-2 gap-5">
                 <OrganizationSelector
                   required={true}
+                  value={facilityData?.geo_organization}
                   onChange={(value) => form.setValue("geo_organization", value)}
                 />
               </div>
@@ -411,7 +412,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                         >
                           <CareIcon icon="l-map-marker" className="text-xl" />
                           <span className="tooltip-text tooltip-bottom">
-                            Select location from map
+                            {t("select_location_from")}
                           </span>
                         </Button>
                       </PopoverButton>

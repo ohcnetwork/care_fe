@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -28,9 +28,31 @@ interface AutoCompleteOption {
 }
 
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
-  const { onChange, required } = props;
+  const { value, onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
+
+  useEffect(() => {
+    if (value) {
+      try {
+        const parsedValue =
+          typeof value === "string" ? JSON.parse(value) : value;
+        if (parsedValue) {
+          const levels: Organization[] = [];
+          let current = parsedValue;
+
+          while (current.parent) {
+            levels.unshift(current);
+            current = current.parent;
+          }
+
+          setSelectedLevels(levels);
+        }
+      } catch (e) {
+        console.error("Invalid value for geo_organization:", e);
+      }
+    }
+  }, [value]);
 
   const headers = props.authToken
     ? {
@@ -146,7 +168,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
             required={selectedLevels.length === 0 && required}
           >
             <Autocomplete
-              value=""
+              value={selectedLevels[selectedLevels.length - 1]?.id || ""}
               options={getOrganizationOptions(
                 selectedLevels.length === 0
                   ? getAllOrganizations?.results
