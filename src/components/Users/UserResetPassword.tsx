@@ -1,9 +1,21 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import Form from "@/components/Form/Form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
@@ -13,14 +25,29 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { UserBase } from "@/types/user/user";
 
-import ButtonV2 from "../Common/ButtonV2";
-
-interface PasswordForm {
-  username: string;
-  old_password: string;
-  new_password_1: string;
-  new_password_2: string;
-}
+const PasswordSchema = z
+  .object({
+    current_password: z
+      .string()
+      .min(1, { message: "Please enter current password" }),
+    new_password_1: z
+      .string()
+      .min(8, { message: "New password must be at least 8 characters long" })
+      .regex(/\d/, { message: "Password must contain at least one number" })
+      .regex(/[a-z]/, {
+        message: "Password must contain at least one lowercase letter",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password must contain at least one uppercase letter",
+      }),
+    new_password_2: z
+      .string()
+      .min(1, { message: "Please confirm your new password" }),
+  })
+  .refine((values) => values.new_password_1 === values.new_password_2, {
+    message: "New password and confirm password must be the same.",
+    path: ["new_password_2"],
+  });
 
 export default function UserResetPassword({
   userData,
@@ -28,58 +55,25 @@ export default function UserResetPassword({
   userData: UserBase;
 }) {
   const { t } = useTranslation();
-  const [isSubmitting, setisSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
-  const initForm: PasswordForm = {
-    username: userData.username,
-    old_password: "",
-    new_password_1: "",
-    new_password_2: "",
-  };
+  const resetPasswordForm = useForm({
+    resolver: zodResolver(PasswordSchema),
+    defaultValues: {
+      current_password: "",
+      new_password_1: "",
+      new_password_2: "",
+    },
+  });
+  const handleSubmitPassword = async (
+    formData: z.infer<typeof PasswordSchema>,
+  ) => {
+    setIsSubmitting(true);
 
-  const validateNewPassword = (password: string) => {
-    if (
-      password.length < 8 ||
-      !/\d/.test(password) ||
-      password === password.toUpperCase() ||
-      password === password.toLowerCase()
-    ) {
-      return false;
-    }
-    return true;
-  };
-
-  const validateForm = (formData: PasswordForm) => {
-    const errors: Partial<Record<keyof PasswordForm, string>> = {};
-
-    if (!formData.old_password) {
-      errors.old_password = t("please_enter_current_password");
-    }
-
-    if (!formData.new_password_1) {
-      errors.new_password_1 = t("please_enter_new_password");
-    } else if (!validateNewPassword(formData.new_password_1)) {
-      errors.new_password_1 = t("new_password_validation");
-    }
-
-    if (!formData.new_password_2) {
-      errors.new_password_2 = t("please_confirm_password");
-    } else if (formData.new_password_1 !== formData.new_password_2) {
-      errors.new_password_2 = t("password_mismatch");
-    }
-
-    if (formData.new_password_1 === formData.old_password) {
-      errors.new_password_1 = t("new_password_same_as_old");
-    }
-
-    return errors;
-  };
-
-  const handleSubmit = async (formData: PasswordForm) => {
-    setisSubmitting(true);
     const form: UpdatePasswordForm = {
-      old_password: formData.old_password,
+      old_password: formData.current_password,
       username: userData.username,
       new_password: formData.new_password_1,
     };
@@ -89,119 +83,129 @@ export default function UserResetPassword({
     });
 
     if (res?.ok) {
-      Notification.Success({ msg: data?.message as string });
+      Notification.Success({ msg: "Password Updated Successfully" });
     } else {
       Notification.Error({
-        msg: error?.message ?? t("password_update_error"),
+        msg: t("password_update_error"),
       });
     }
-    setisSubmitting(false);
+    setIsSubmitting(false);
   };
 
-  const renderPasswordForm = () => {
-    return (
-      <Form<PasswordForm>
-        defaults={initForm}
-        validate={validateForm}
-        onSubmit={handleSubmit}
-        resetFormValsOnCancel
-        resetFormValsOnSubmit
-        hideRestoreDraft
-        noPadding
-        disabled={isSubmitting}
-        hideCancelButton
-      >
-        {(field) => (
-          <div className="grid grid-cols-6 gap-4">
-            <TextFormField
-              {...field("old_password")}
-              name="old_password"
-              label={t("current_password")}
-              className="col-span-6 sm:col-span-3"
-              type="password"
-              required
-              aria-label={t("current_password")}
-            />
-            <div className="col-span-6 sm:col-span-3">
-              <TextFormField
-                {...field("new_password_1")}
-                name="new_password_1"
-                label={t("new_password")}
-                type="password"
-                className="peer col-span-6 sm:col-span-3"
-                required
-                aria-label={t("new_password")}
-              />
-              <div
-                className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block"
-                aria-live="polite"
-              >
-                {validateRule(
-                  field("new_password_1").value?.length >= 8,
-                  t("password_length_validation"),
-                  !field("new_password_1").value,
-                )}
-                {validateRule(
-                  field("new_password_1").value !==
-                    field("new_password_1").value?.toUpperCase(),
-                  t("password_lowercase_validation"),
-                  !field("new_password_1").value,
-                )}
-                {validateRule(
-                  field("new_password_1").value !==
-                    field("new_password_1").value?.toLowerCase(),
-                  t("password_uppercase_validation"),
-                  !field("new_password_1").value,
-                )}
-                {validateRule(
-                  /\d/.test(field("new_password_1").value ?? ""),
-                  t("password_number_validation"),
-                  !field("new_password_1").value,
-                )}
-              </div>
-            </div>
-            <div className="col-span-6 sm:col-span-3">
-              <TextFormField
-                {...field("new_password_2")}
-                name="new_password_2"
-                label={t("new_password_confirmation")}
-                className="peer col-span-6 sm:col-span-3"
-                type="password"
-                required
-                aria-label={t("new_password_confirmation")}
-              />
-              {field("new_password_2").value?.length > 0 && (
-                <div
-                  className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block"
-                  aria-live="polite"
-                >
-                  {validateRule(
-                    field("new_password_1").value ===
-                      field("new_password_2").value,
-                    t("password_mismatch"),
-                    !field("new_password_2").value,
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </Form>
-    );
-  };
+  const renderPasswordForm = () => (
+    <Form {...resetPasswordForm}>
+      <form onSubmit={resetPasswordForm.handleSubmit(handleSubmitPassword)}>
+        <div className="space-y-4">
+          <FormField
+            control={resetPasswordForm.control}
+            name="current_password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("current_password")}</FormLabel>
+                <FormControl>
+                  <TextFormField
+                    {...field}
+                    onChange={(value) => {
+                      field.onChange(value.value);
+                    }}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={resetPasswordForm.control}
+            name="new_password_1"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("new_password")}</FormLabel>
+                <FormControl>
+                  <TextFormField
+                    {...field}
+                    onChange={(value) => {
+                      field.onChange(value.value);
+                    }}
+                    onFocus={() => setIsPasswordFieldFocused(true)}
+                    onBlur={() => setIsPasswordFieldFocused(false)}
+                  />
+                </FormControl>
+                {isPasswordFieldFocused && (
+                  <div
+                    className="text-small mt-2 pl-2 text-secondary-500"
+                    aria-live="polite"
+                  >
+                    {validateRule(
+                      field.value.length >= 8,
+                      t("password_length_validation"),
+                      !field.value,
+                    )}
+                    {validateRule(
+                      /[a-z]/.test(field.value),
+                      t("password_lowercase_validation"),
+                      !field.value,
+                    )}
+                    {validateRule(
+                      /[A-Z]/.test(field.value),
+                      t("password_uppercase_validation"),
+                      !field.value,
+                    )}
+                    {validateRule(
+                      /\d/.test(field.value),
+                      t("password_number_validation"),
+                      !field.value,
+                    )}
+                  </div>
+                )}
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={resetPasswordForm.control}
+            name="new_password_2"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("new_password_confirmation")}</FormLabel>
+                <FormControl>
+                  <TextFormField
+                    {...field}
+                    onChange={(value) => {
+                      field.onChange(value.value);
+                    }}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          variant="primary"
+          className="mt-6 w-full"
+        >
+          {isSubmitting ? t("submitting") : t("submit")}
+        </Button>
+      </form>
+    </Form>
+  );
   const editButton = () => (
     <div className="mb-4 flex justify-start">
-      <ButtonV2
+      <Button
         onClick={() => setIsEditing(!isEditing)}
         type="button"
         id="change-edit-password-button"
         className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
-        shadow={false}
       >
         <CareIcon icon={isEditing ? "l-times" : "l-edit"} className="h-4 w-4" />
         {isEditing ? t("cancel") : t("change_password")}
-      </ButtonV2>
+      </Button>
     </div>
   );
 
