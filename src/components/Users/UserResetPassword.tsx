@@ -68,15 +68,7 @@ export default function UserResetPassword({
     },
   });
   const { mutate: resetUserPasswordMutate, isPending } = useMutation({
-    mutationFn: async (formData: UpdatePasswordForm) => {
-      const response = await mutate(routes.updatePassword, { silent: true })(
-        formData,
-      );
-      if ("errors" in response) {
-        throw response;
-      }
-      return response;
-    },
+    mutationFn: mutate(routes.updatePassword, { silent: true }),
     onSuccess: (data: any) => {
       Notification.Success({ msg: data?.message as string });
       resetPasswordForm.reset();
