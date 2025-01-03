@@ -272,8 +272,9 @@ export const PatientUsers = (props: PatientProps) => {
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {t("remove_patient_user")} {formatDisplayName(user)}{" "}
-                      {t("from_patient")}
+                      {t("are_you_sure_want_to_remove", {
+                        name: formatDisplayName(user),
+                      })}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
