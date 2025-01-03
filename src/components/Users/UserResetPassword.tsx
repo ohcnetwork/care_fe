@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -21,7 +23,6 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { UserBase } from "@/types/user/user";
@@ -30,24 +31,28 @@ const PasswordSchema = z
   .object({
     old_password: z
       .string()
-      .min(1, { message: "Please enter current password" }),
+      .min(1, { message: t("please_enter_current_password") }),
     new_password_1: z
       .string()
-      .min(8, { message: "New password must be at least 8 characters long" })
-      .regex(/\d/, { message: "Password must contain at least one number" })
+      .min(8, { message: t("password_length_validation") })
+      .regex(/\d/, { message: t("password_number_validation") })
       .regex(/[a-z]/, {
-        message: "Password must contain at least one lowercase letter",
+        message: t("password_lowercase_validation"),
       })
       .regex(/[A-Z]/, {
-        message: "Password must contain at least one uppercase letter",
+        message: t("password_uppercase_validation"),
       }),
     new_password_2: z
       .string()
-      .min(1, { message: "Please confirm your new password" }),
+      .min(1, { message: t("please_enter_confirm_password") }),
   })
   .refine((values) => values.new_password_1 === values.new_password_2, {
-    message: "New password and confirm password must be the same.",
+    message: t("password_mismatch"),
     path: ["new_password_2"],
+  })
+  .refine((values) => values.new_password_1 !== values.old_password, {
+    message: t("new_password_same_as_old"),
+    path: ["new_password_1"],
   });
 
 export default function UserResetPassword({
@@ -70,13 +75,13 @@ export default function UserResetPassword({
   const { mutate: resetUserPasswordMutate, isPending } = useMutation({
     mutationFn: mutate(routes.updatePassword, { silent: true }),
     onSuccess: (data: any) => {
-      Notification.Success({ msg: data?.message as string });
+      toast.success(data?.message as string);
       resetPasswordForm.reset();
     },
     onError: (error: any) => {
       const errorMessage =
         error.cause?.old_password?.[0] ?? t("password_update_error");
-      Notification.Error({ msg: errorMessage });
+      toast.error(errorMessage);
     },
   });
 
@@ -108,7 +113,6 @@ export default function UserResetPassword({
                     onChange={(value) => {
                       field.onChange(value.value);
                     }}
-                    required
                   />
                 </FormControl>
                 <FormMessage />
@@ -133,6 +137,11 @@ export default function UserResetPassword({
                     onBlur={() => setIsPasswordFieldFocused(false)}
                   />
                 </FormControl>
+
+                {resetPasswordForm.formState.errors?.new_password_1?.message &&
+                  resetPasswordForm.formState.errors?.new_password_1?.message.includes(
+                    t("new_password_same_as_old"),
+                  ) && <FormMessage />}
                 {isPasswordFieldFocused && (
                   <div
                     className="text-small mt-2 pl-2 text-secondary-500"
@@ -177,7 +186,6 @@ export default function UserResetPassword({
                     onChange={(value) => {
                       field.onChange(value.value);
                     }}
-                    required
                   />
                 </FormControl>
                 <FormMessage />
