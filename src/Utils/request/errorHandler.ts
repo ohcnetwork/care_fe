@@ -31,20 +31,7 @@ export function handleHttpError(error: Error) {
   }
 
   if (isBadRequest(error)) {
-    const errs = cause?.errors;
-    if (isPydanticError(errs)) {
-      handlePydanticErrors(errs);
-      return;
-    }
-    if (cause && typeof cause === "object" && !Array.isArray(cause)) {
-      const firstKey = Object.keys(cause)[0];
-      const firstError = firstKey ? cause[firstKey] : null;
-      if (firstError && Array.isArray(firstError)) {
-        toast.error(firstError[0]);
-        return;
-      }
-    }
-    Notifications.BadRequest({ errs: errs });
+    handleBadRequest(cause);
     return;
   }
 
@@ -104,4 +91,26 @@ function handlePydanticErrors(errors: PydanticError[]) {
       duration: 8000,
     });
   });
+}
+
+function handleBadRequest(cause: any) {
+  const errs = cause?.errors;
+
+  if (isPydanticError(errs)) {
+    handlePydanticErrors(errs);
+    return;
+  }
+
+  if (cause && typeof cause === "object" && !Array.isArray(cause)) {
+    Object.entries(cause).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((err) => {
+          toast.error(`${err}`);
+        });
+      }
+    });
+    return;
+  }
+
+  Notifications.BadRequest({ errs: cause });
 }
