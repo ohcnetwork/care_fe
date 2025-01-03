@@ -105,12 +105,12 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
       <SheetTrigger asChild>
         <Button>
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("add_user")}
+          {t("assign_user")}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("add_user_to_patient")}</SheetTitle>
+          <SheetTitle>{t("assign_user_to_patient")}</SheetTitle>
           <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
@@ -192,7 +192,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 onClick={handleAddUser}
                 disabled={!selectedRole}
               >
-                {t("add_to_patient")}
+                {t("assign_to_patient")}
               </Button>
             </div>
           )}
