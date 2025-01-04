@@ -80,7 +80,7 @@ export function LandingPage() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedDistrict) {
-      params.append("district", selectedDistrict.id.toString());
+      params.append("geo_organization", selectedDistrict.id.toString());
     }
     navigate(`/facilities?${params.toString()}`);
   };

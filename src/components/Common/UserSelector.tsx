@@ -80,7 +80,7 @@ export default function UserSelector({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 w-[var(--radix-popover-trigger-width)] max-w-[--radix-popover-content-available-width]"
+        className="p-0 w-[var(--radix-popover-trigger-width)]"
         align="start"
         sideOffset={4}
       >

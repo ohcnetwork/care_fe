@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,17 +15,21 @@ import {
 import useDebouncedState from "@/hooks/useDebouncedState";
 import { FilterState } from "@/hooks/useFilters";
 
-import { FACILITY_TYPES, OptionsType } from "@/common/constants";
+import {
+  FACILITY_TYPES,
+  ORGANIZATION_LEVELS,
+  OptionsType,
+} from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationFilterProps {
-  value?: string;
-  onChange: (Filter: FilterState) => void;
+  selected: string[];
+  onChange: (Filter: FilterState, index?: number) => void;
+  skipLevels?: number[];
   required?: boolean;
-  authToken?: string;
   className?: string;
 }
 
@@ -36,64 +40,45 @@ interface AutoCompleteOption {
 
 export default function OrganizationFilter(props: OrganizationFilterProps) {
   const { t } = useTranslation();
-  const { onChange, value } = props;
+  const { onChange, selected, skipLevels } = props;
+
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<
     OptionsType | undefined
-  >();
-  const [selectedDistrict, setSelectedDistrict] = useState<Organization>();
-  const [selectedLocalBody, setSelectedLocalBody] = useState<Organization>();
-  const [searchDistrictQuery, setSearchDistrictQuery] = useDebouncedState(
-    "",
-    500,
-  );
-  const [searchLocalBodyQuery, setSearchLocalBodyQuery] = useDebouncedState(
-    "",
-    500,
-  );
+  >(undefined);
 
-  const { data: stateOrganization } = useQuery<Organization>({
-    queryKey: ["organization", value],
-    queryFn: query(organizationApi.getPublicOrganization, {
-      pathParams: {
-        id: value ?? "",
-      },
-    }),
-    enabled: !!value,
+  const orgDetailQuery = (id: string) =>
+    query(organizationApi.getPublicOrganization, {
+      pathParams: { id },
+    });
+
+  const orgDetailQueries = useQueries({
+    queries: selected.map((id) => ({
+      queryKey: ["organization-detail", id],
+      queryFn: orgDetailQuery(id),
+      enabled: selected.length > 0,
+    })),
   });
 
-  const { data: districtOrganizations } = useQuery<{
-    results: Organization[];
-  }>({
-    queryKey: ["organizations-district", value, searchDistrictQuery],
-    queryFn: query(organizationApi.getPublicOrganizations, {
-      queryParams: {
-        parent: stateOrganization?.id ?? "",
-      },
-    }),
-    enabled: !!stateOrganization?.id,
-  });
-
-  const { data: localBodyOrganizations } = useQuery<{
-    results: Organization[];
-  }>({
-    queryKey: [
-      "organizations-localbody",
-      selectedDistrict?.id,
-      searchLocalBodyQuery,
-    ],
-    queryFn: query(organizationApi.getPublicOrganizations, {
-      queryParams: {
-        parent: selectedDistrict?.id,
-      },
-    }),
-    enabled: !!selectedDistrict?.id,
-  });
+  const isQueriesLoading = orgDetailQueries.some((query) => query.isLoading);
 
   useEffect(() => {
-    if (selectedDistrict && !selectedLocalBody) {
-      onChange({ geo_organization: selectedDistrict.id });
+    if (!isQueriesLoading) {
+      const validOrgs = orgDetailQueries
+        .map((query) => query.data)
+        .filter((org): org is Organization => org !== undefined);
+
+      if (validOrgs.length > 0) {
+        setSelectedLevels(validOrgs);
+      }
     }
-  }, [selectedLocalBody]);
+  }, [isQueriesLoading, selected]);
+
+  // Get parent ID for the current level
+  const getParentId = (index: number) => {
+    if (index === 0) return "0";
+    return selectedLevels[index - 1]?.id;
+  };
 
   const getOrganizationOptions = (
     orgs?: Organization[],
@@ -105,18 +90,68 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     }));
   };
 
-  const districtOptions = getOrganizationOptions(
-    districtOrganizations?.results,
-  );
+  const clearSelections = () => {
+    setSelectedFacilityType(undefined);
+    const firstLevel = selectedLevels[0];
+    setSelectedLevels((prev) => {
+      const newLevels = prev.slice(0, 1);
+      onChange(
+        { geo_organization: firstLevel.id, facility_type: undefined },
+        0,
+      );
+      return newLevels;
+    });
+  };
 
-  const localBodyOptions = getOrganizationOptions(
-    localBodyOrganizations?.results,
-  );
+  const RenderOrganizationLevel = (
+    level: Organization | undefined,
+    index: number,
+  ) => {
+    const skip = skipLevels?.includes(index) || false;
+    const [levelSearch, setLevelSearch] = useDebouncedState("", 500);
+    const { data: availableOrgs } = useQuery<{ results: Organization[] }>({
+      queryKey: ["organizations-available", getParentId(index), levelSearch],
+      queryFn: query(organizationApi.getPublicOrganizations, {
+        queryParams: {
+          parent: getParentId(index),
+          name: levelSearch || undefined,
+        },
+      }),
+      enabled:
+        !skip &&
+        index <= selectedLevels.length &&
+        selectedLevels[index - 1] !== undefined,
+    });
+    if (skip) return null;
+    const options = getOrganizationOptions(availableOrgs?.results || []);
 
-  console.log(selectedFacilityType);
+    return (
+      <Autocomplete
+        popoverClassName="sm:min-w-56 sm:max-w-60 w-[calc(100vw-2rem)]"
+        value={selectedLevels[index]?.id || ""}
+        options={options}
+        onChange={(value: string) => {
+          const selectedOrg = availableOrgs?.results.find(
+            (org) => org.id === value,
+          );
+
+          if (selectedOrg) {
+            onChange({ geo_organization: selectedOrg.id }, index);
+            setLevelSearch("");
+          }
+        }}
+        onSearch={(value) => setLevelSearch(value)}
+        placeholder={t(
+          `select_${ORGANIZATION_LEVELS.govt[index].toLowerCase()}`,
+        )}
+        disabled={index > selectedLevels.length}
+        align="start"
+      />
+    );
+  };
 
   return (
-    <div className="gap-3 flex flex-row">
+    <div className="gap-3 flex flex-col sm:flex-row">
       <Select
         value={selectedFacilityType?.text || ""}
         onValueChange={(value) => {
@@ -129,7 +164,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           });
         }}
       >
-        <SelectTrigger className="overflow-hidden min-w-56">
+        <SelectTrigger className="overflow-hidden sm:min-w-56 sm:max-w-60 w-[calc(100vw-1rem)]">
           <SelectValue placeholder={t("select_facility_type")} />
         </SelectTrigger>
         <SelectContent>
@@ -140,42 +175,10 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      <Autocomplete
-        value={selectedDistrict?.id ?? ""}
-        options={districtOptions}
-        onChange={(value: string) => {
-          setSelectedDistrict(
-            districtOrganizations?.results?.find((org) => org.id === value),
-          );
-          onChange({ geo_organization: value });
-        }}
-        onSearch={setSearchDistrictQuery}
-        placeholder={t("facility_district_name")}
-        align="start"
-      />
-      <Autocomplete
-        disabled={!selectedDistrict?.id}
-        value={selectedLocalBody?.id ?? ""}
-        options={localBodyOptions}
-        onChange={(value: string) => {
-          setSelectedLocalBody(
-            localBodyOrganizations?.results?.find((org) => org.id === value),
-          );
-          onChange({ geo_organization: value });
-        }}
-        onSearch={setSearchLocalBodyQuery}
-        placeholder={t("select_local_body")}
-        align="start"
-      />
-      <Button
-        variant="outline"
-        onClick={() => {
-          setSelectedDistrict(undefined);
-          setSelectedLocalBody(undefined);
-          setSelectedFacilityType(undefined);
-          onChange({ geo_organization: undefined, facility_type: undefined });
-        }}
-      >
+      {ORGANIZATION_LEVELS.govt.map((_, index) =>
+        RenderOrganizationLevel(selectedLevels[index] || undefined, index),
+      )}
+      <Button onClick={clearSelections} variant="white">
         {t("clear")}
       </Button>
     </div>

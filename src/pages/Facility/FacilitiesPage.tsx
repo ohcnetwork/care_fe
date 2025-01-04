@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
@@ -35,10 +35,23 @@ export function FacilitiesPage() {
     });
 
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
 
   const { t } = useTranslation();
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
+    // Initialize with STATE_GEO_ID if no district selected
+    return qParams.geo_organization
+      ? [STATE_GEO_ID, qParams.geo_organization]
+      : [STATE_GEO_ID];
+  });
+
+  useEffect(() => {
+    if (selectedOrgs.length > 0) {
+      const lastSelected = selectedOrgs[selectedOrgs.length - 1];
+      updateQuery({ geo_organization: lastSelected });
+    }
+  }, [selectedOrgs]);
 
   const { data: facilitiesResponse, isLoading } = useQuery<
     PaginatedResponse<FacilityModel>
@@ -47,7 +60,7 @@ export function FacilitiesPage() {
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
         name: qParams.search,
-        geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        geo_organization: qParams.geo_organization,
         facility_type: qParams.facility_type,
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
@@ -55,16 +68,8 @@ export function FacilitiesPage() {
         ...advancedFilter.filter,
       },
     }),
-    enabled: !!qParams.geo_organization || !!STATE_GEO_ID,
+    enabled: !!qParams.geo_organization,
   });
-
-  useEffect(() => {
-    if (qParams.district) {
-      updateQuery({ geo_organization: qParams.district });
-    } else {
-      updateQuery({ geo_organization: STATE_GEO_ID });
-    }
-  }, [qParams.district, STATE_GEO_ID]);
 
   const GetLoginHeader = () => {
     if (
@@ -110,10 +115,23 @@ export function FacilitiesPage() {
         </Link>
         <GetLoginHeader />
       </div>
-      <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
+      <div className="flex flex-col justify-between sm:flex-row items-center gap-5 mb-6">
         <OrganizationFilter
-          value={STATE_GEO_ID}
-          onChange={updateQuery}
+          skipLevels={[0, 3]}
+          selected={selectedOrgs}
+          onChange={(filter, level) => {
+            if (filter.geo_organization) {
+              setSelectedOrgs((prev) => {
+                const newOrgId = filter.geo_organization as string;
+                const newOrgs = prev.slice(0, level);
+                newOrgs.push(newOrgId);
+                return newOrgs;
+              });
+            }
+            if ("facility_type" in filter) {
+              updateQuery({ facility_type: filter.facility_type });
+            }
+          }}
           className="flex flex-row w-full"
         />
         <SearchByMultipleFields
@@ -127,32 +145,12 @@ export function FacilitiesPage() {
               shortcutKey: "f",
             },
           ]}
-          className="w-full sm:w-1/2"
+          className="w-[calc(100vw-1rem)] sm:w-3/12"
           onSearch={(key, value) => updateQuery({ search: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
       </div>
-      {/* <FilterBadges
-        badges={({ badge, value }) => [
-          badge("Facility/District/Pincode", "search"),
-          value(
-            "District",
-            "district",
-            qParams.district && districtResponse?.data
-              ? districtResponse?.data.name
-              : "",
-          ),
-          value(
-            "Local Body",
-            "local_body",
-            qParams.local_body && localBodyResponse?.data
-              ? localBodyResponse?.data.name
-              : "",
-          ),
-          value("Pin Code", "pin_code", qParams.pin_code || ""),
-        ]}
-      /> */}
 
       <div className="mt-4 flex w-full flex-col gap-4">
         {isLoading ? (
