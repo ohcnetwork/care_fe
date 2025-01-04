@@ -455,12 +455,13 @@ export default function PatientRegistration(
                         maxLength={2}
                         max={31}
                         min={1}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
                           setForm((f) => ({
                             ...f,
-                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
-                          }))
-                        }
+                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${value ? Math.min(Math.max(Number(value), 1), 31) : ""}`,
+                          }));
+                        }}
                       />
                     </InputWithError>
                   </div>
@@ -473,12 +474,13 @@ export default function PatientRegistration(
                         maxLength={2}
                         max={12}
                         min={1}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
                           setForm((f) => ({
                             ...f,
-                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
-                          }))
-                        }
+                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${value ? Math.min(Math.max(Number(value), 1), 12) : ""}-${form.date_of_birth?.split("-")[2] || ""}`,
+                          }));
+                        }}
                       />
                     </InputWithError>
                   </div>
@@ -491,12 +493,15 @@ export default function PatientRegistration(
                         maxLength={4}
                         max={new Date().getFullYear()}
                         min={1900}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                          }))
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (!value || value.length <= 4) {
+                            setForm((f) => ({
+                              ...f,
+                              date_of_birth: `${value || ""}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
+                            }));
+                          }
+                        }}
                       />
                     </InputWithError>
                   </div>
