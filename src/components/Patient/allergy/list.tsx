@@ -14,9 +14,9 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 
 interface AllergyListProps {
   patientId: string;
@@ -25,7 +25,7 @@ interface AllergyListProps {
 export function AllergyList({ patientId }: AllergyListProps) {
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId],
-    queryFn: query(routes.getAllergy, {
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
     }),
   });

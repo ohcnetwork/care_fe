@@ -23,9 +23,9 @@ import { Appointment } from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 function PatientIndex() {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ function PatientIndex() {
 
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(routes.otp.getAppointments, {
+    queryFn: query(PublicAppointmentApi.getAppointments, {
       headers: {
         Authorization: `Bearer ${tokenData?.token}`,
       },
@@ -75,6 +75,17 @@ function PatientIndex() {
 
   const appointments = appointmentsData?.results
     .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
+    .map((appointment) => ({
+      ...appointment,
+      token_slot: {
+        ...appointment.token_slot,
+        // TODO: remove this once BE is updated
+        start_datetime: dayjs(appointment.token_slot.start_datetime)
+          .add(-5, "hours")
+          .add(-30, "minutes")
+          .toISOString(),
+      },
+    }))
     .sort(
       (a, b) =>
         new Date(a.token_slot.start_datetime).getTime() -
@@ -107,7 +118,7 @@ function PatientIndex() {
               <div className="space-y-1">
                 <Label className="text-xs">{t("practitioner")}</Label>
                 <p className="text-base font-semibold">
-                  {formatName(appointment.resource)}
+                  {formatName(appointment.user)}
                 </p>
                 <p className="text-sm font-semibold text-gray-600">
                   {formatAppointmentSlotTime(appointment)}
@@ -154,8 +165,8 @@ function PatientIndex() {
             <div className="flex flex-col">
               <span className="text-xs font-medium">{t("practitioner")}: </span>
               <span className="text-sm">
-                {appointment?.resource
-                  ? formatName(appointment.resource)
+                {appointment?.user
+                  ? formatName(appointment.user)
                   : "Resource from BE"}
               </span>
             </div>

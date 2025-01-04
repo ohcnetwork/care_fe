@@ -51,7 +51,7 @@ export default function AppointmentCreatePage(props: Props) {
 
   const resourcesQuery = useQuery({
     queryKey: ["availableResources", props.facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
+    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
       pathParams: {
         facility_id: props.facilityId,
       },
@@ -75,7 +75,7 @@ export default function AppointmentCreatePage(props: Props) {
     queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: props.facilityId },
       body: {
-        resource: resourceId,
+        user: resourceId,
         day: dateQueryString(selectedDate),
       },
     }),
@@ -328,7 +328,7 @@ export default function AppointmentCreatePage(props: Props) {
                                     slot.allocated ===
                                     availability.tokens_per_slot
                                   }
-                                  className="flex flex-col items-center group"
+                                  className="flex flex-col items-center group gap-0"
                                 >
                                   <span className="font-semibold">
                                     {format(slot.start_datetime, "HH:mm")}

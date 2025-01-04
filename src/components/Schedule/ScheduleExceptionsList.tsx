@@ -18,14 +18,12 @@ import useSlug from "@/hooks/useSlug";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
 
 interface Props {
-  user: UserBase;
   items?: ScheduleException[];
 }
 
-export default function ScheduleExceptionsList({ user, items }: Props) {
+export default function ScheduleExceptionsList({ items }: Props) {
   const { t } = useTranslation();
 
   if (items == null) {
@@ -45,16 +43,14 @@ export default function ScheduleExceptionsList({ user, items }: Props) {
     <ul className="flex flex-col gap-4">
       {items.map((exception) => (
         <li key={exception.id}>
-          <ScheduleExceptionItem {...exception} user={user} />
+          <ScheduleExceptionItem {...exception} />
         </li>
       ))}
     </ul>
   );
 }
 
-const ScheduleExceptionItem = (
-  props: ScheduleException & { user: UserBase },
-) => {
+const ScheduleExceptionItem = (props: ScheduleException) => {
   const { t } = useTranslation();
   const facilityId = useSlug("facility");
   const queryClient = useQueryClient();
@@ -69,7 +65,7 @@ const ScheduleExceptionItem = (
     onSuccess: () => {
       toast.success(t("exception_deleted"));
       queryClient.invalidateQueries({
-        queryKey: ["user-availability-exceptions", props.user.username],
+        queryKey: ["user-availability-exceptions", props.user],
       });
     },
   });
