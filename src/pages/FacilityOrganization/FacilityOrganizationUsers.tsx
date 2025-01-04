@@ -3,11 +3,11 @@ import { useQueryParams } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -121,15 +121,10 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                             <span className="text-sm text-gray-500 truncate">
                               {userRole.user.username}
                             </span>
-                            <Badge
-                              variant="secondary"
-                              className="bg-green-100 whitespace-nowrap"
-                            >
-                              <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
-                              <span className="text-xs text-green-700">
-                                online
-                              </span>
-                            </Badge>
+                            <UserStatusIndicator
+                              user={userRole.user}
+                              addPadding
+                            />
                           </div>
                         </div>
                       </div>
