@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { classNames } from "@/Utils/utils";
+import { classNames, keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelectorLogin = () => {
@@ -19,7 +19,7 @@ export const LanguageSelectorLogin = () => {
     }
   };
 
-  const availableLocales = Object.keys(LANGUAGES).filter((l) =>
+  const availableLocales = keysOf(LANGUAGES).filter((l) =>
     careConfig.availableLocales?.includes(l),
   );
 
@@ -28,7 +28,7 @@ export const LanguageSelectorLogin = () => {
       {t("available_in")}
       <br />
       <div className="inline-flex flex-wrap items-center justify-center gap-3">
-        {availableLocales.map((e: string) => (
+        {availableLocales.map((e) => (
           <button
             key={e}
             onClick={() => handleLanguage(e)}

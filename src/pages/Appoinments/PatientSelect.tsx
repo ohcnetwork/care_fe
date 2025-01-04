@@ -24,6 +24,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 export default function PatientSelect({
   facilityId,
@@ -72,7 +73,7 @@ export default function PatientSelect({
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
-      mutate(routes.otp.createAppointment, {
+      mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
         headers: {

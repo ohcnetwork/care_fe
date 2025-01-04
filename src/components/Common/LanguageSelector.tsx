@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { classNames } from "@/Utils/utils";
+import { classNames, keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelector = (props: any) => {
@@ -20,7 +20,7 @@ export const LanguageSelector = (props: any) => {
     }
   };
 
-  const availableLocales = Object.keys(LANGUAGES).filter((l) =>
+  const availableLocales = keysOf(LANGUAGES).filter((l) =>
     careConfig.availableLocales?.includes(l),
   );
 
@@ -36,7 +36,7 @@ export const LanguageSelector = (props: any) => {
         value={i18n.language}
         onChange={(e: any) => handleLanguage(e.target.value)}
       >
-        {availableLocales.map((e: string) => (
+        {availableLocales.map((e) => (
           <option key={e} value={e}>
             {LANGUAGES[e]}
           </option>

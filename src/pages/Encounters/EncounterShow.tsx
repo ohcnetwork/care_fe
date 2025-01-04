@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
@@ -14,7 +13,7 @@ import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { keysOf } from "@/Utils/utils";
+import { formatDateTime, keysOf } from "@/Utils/utils";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
@@ -77,7 +76,6 @@ export const EncounterShow = (props: Props) => {
   //     return "None";
   //   }
   // };
-  const [showPatientNotesPopup, setShowPatientNotesPopup] = useState(false);
 
   // const authUser = useAuthUser();
 
@@ -184,7 +182,7 @@ export const EncounterShow = (props: Props) => {
     >
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
-          title="Encounter"
+          title={t("encounter")}
           crumbsReplacements={{
             [encounterId]: { name: encounterData.patient.name },
             consultation: {
@@ -236,21 +234,8 @@ export const EncounterShow = (props: Props) => {
             className="btn btn-primary m-1 w-full hover:text-white"
             id="patient-details"
           >
-            Patient Details
+            {t("patient_details")}
           </Link>
-          <a
-            id="patient_discussion_notes"
-            onClick={() =>
-              showPatientNotesPopup
-                ? navigate(
-                    `/facility/${facilityId}/patient/${encounterData.patient.id}/notes`,
-                  )
-                : setShowPatientNotesPopup(true)
-            }
-            className="btn btn-primary m-1 w-full hover:text-white"
-          >
-            Discussion Notes
-          </a>
         </div>
       </nav>
       <div className="mt-4 w-full border-b-2 border-secondary-200">
@@ -297,21 +282,13 @@ export const EncounterShow = (props: Props) => {
               )}
             </div> */}
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
-                <div className="flex items-center">
-                  <span className="text-secondary-900">Created: </span>&nbsp;
-                  {/* <RelativeDateUserMention
-                    actionDate={encounterData.created_date}
-                    user={encounterData.created_by}
-                    tooltipPosition="right"
-                    withoutSuffix={true}
-                  /> */}
-                </div>
-              </div>
               <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
                 <div className="flex items-center">
-                  <span className="text-secondary-900">Last Modified: </span>
+                  <span className="text-secondary-900">
+                    {t("last_modified")}:{" "}
+                  </span>
                   &nbsp;
+                  {formatDateTime(encounterData.modified_date)}
                   {/* <RelativeDateUserMention
                     actionDate={consultationData.modified_date}
                     user={consultationData.last_edited_by}

@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/select";
 
 import { QuantityInput } from "@/components/Common/QuantityInput";
-import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import {
+  DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
   MedicationRequestDosageInstruction,
