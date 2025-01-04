@@ -20,6 +20,7 @@ interface OrganizationSelectorProps {
   onChange: (value: string) => void;
   required?: boolean;
   authToken?: string;
+  parentSelectedLevels?: Organization[];
 }
 
 interface AutoCompleteOption {
@@ -28,31 +29,28 @@ interface AutoCompleteOption {
 }
 
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
-  const { value, onChange, required } = props;
+  const { value, onChange, required, parentSelectedLevels } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
 
   useEffect(() => {
-    if (value) {
-      try {
-        const parsedValue =
-          typeof value === "string" ? JSON.parse(value) : value;
-        if (parsedValue) {
-          const levels: Organization[] = [];
-          let current = parsedValue;
+    if (value && parentSelectedLevels?.length == 0) {
+      const parsedValue = typeof value === "string" ? JSON.parse(value) : value;
+      if (parsedValue) {
+        const levels: Organization[] = [];
+        let current = parsedValue;
 
-          while (current.parent) {
-            levels.unshift(current);
-            current = current.parent;
-          }
-
-          setSelectedLevels(levels);
+        while (current.parent) {
+          levels.unshift(current);
+          current = current.parent;
         }
-      } catch (e) {
-        console.error("Invalid value for geo_organization:", e);
+
+        setSelectedLevels(levels);
       }
+    } else if (parentSelectedLevels) {
+      setSelectedLevels(parentSelectedLevels);
     }
-  }, [value]);
+  }, [value, parentSelectedLevels]);
 
   const headers = props.authToken
     ? {

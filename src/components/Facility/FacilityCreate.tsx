@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import {
   Popover,
   PopoverButton,
@@ -10,6 +11,7 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import Card from "@/CAREUI/display/Card";
@@ -58,8 +60,9 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { parsePhoneNumber } from "@/Utils/utils";
+import { getPincodeDetails, parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   facilityId?: string;
@@ -68,6 +71,8 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<any[]>([]);
+
   const { goBack } = useAppHistory();
 
   const facilityFormSchema = z.object({
@@ -212,6 +217,59 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
+  const handlePincodeChange = async (pincode: string) => {
+    try {
+      if (!validatePincode(pincode)) {
+        return;
+      }
+      const pincodeData = await getPincodeDetails(
+        pincode,
+        careConfig.govDataApiKey,
+      );
+
+      if (pincodeData) {
+        const { statename: stateName, districtname: districtName } =
+          pincodeData;
+
+        const stateOrg = await fetchOrganizationByName(stateName);
+        if (!stateOrg) {
+          setSelectedLevels([]);
+          return;
+        }
+
+        console.log("stateOrg", stateOrg);
+
+        const districtOrg = await fetchOrganizationByName(
+          districtName,
+          stateOrg.id,
+        );
+
+        setSelectedLevels([stateOrg, districtOrg]);
+      } else {
+        throw new Error("Invalid pincode or no data found.");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  async function fetchOrganizationByName(name: string, parentId?: string) {
+    try {
+      const data = await query(organizationApi.list, {
+        queryParams: {
+          org_type: "govt",
+          parent: parentId || "",
+          name,
+        },
+      })({ signal: new AbortController().signal });
+      return data.results?.[0];
+    } catch (error) {
+      console.error("Error fetching org:", error);
+      toast.error("Error fetching organization");
+      return undefined;
+    }
+  }
+
   return (
     <Page
       title={facilityId ? t("update_facility") : t("create_facility")}
@@ -318,6 +376,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           required
                           onChange={(value) => {
                             field.onChange(value.value);
+                            handlePincodeChange(value.value);
                           }}
                           error={form.formState.errors.pincode?.message}
                         />
@@ -330,7 +389,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <OrganizationSelector
                   required={true}
                   value={facilityData?.geo_organization}
-                  onChange={(value) => form.setValue("geo_organization", value)}
+                  parentSelectedLevels={selectedLevels}
+                  onChange={(value) => {
+                    // Update geo_organization value in form
+                    form.setValue("geo_organization", value);
+                  }}
                 />
               </div>
 
