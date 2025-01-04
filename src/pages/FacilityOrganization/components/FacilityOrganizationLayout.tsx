@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
+import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
@@ -61,7 +62,7 @@ export default function FacilityOrganizationLayout({
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   // add loading state
   if (!org) {

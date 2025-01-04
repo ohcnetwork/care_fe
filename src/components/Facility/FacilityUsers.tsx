@@ -13,6 +13,8 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
+import Loading from "../Common/Loading";
+
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -41,7 +43,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
   });
 
   if (userListLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   if (!userListData) {
     return <div>No users found</div>;
