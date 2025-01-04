@@ -21,14 +21,6 @@ export default function FacilityUsers(props: { facilityId: number }) {
   const [activeTab, setActiveTab] = useState(0);
   const { facilityId } = props;
 
-  const { data: facilityData } = useQuery({
-    queryKey: ["getFacility", facilityId],
-    queryFn: query(routes.facility.show, {
-      pathParams: { id: facilityId },
-    }),
-    enabled: !!facilityId,
-  });
-
   const { data: userListData, isLoading: userListLoading } = useQuery({
     queryKey: ["facilityUsers", facilityId],
     queryFn: query(routes.facility.getUsers, {
@@ -45,11 +37,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
   }
 
   return (
-    <Page
-      title={`${t("users")} - ${facilityData?.name}`}
-      hideBack={true}
-      breadcrumbs={false}
-    >
+    <Page title={`${t("users")}`} hideBack={true} breadcrumbs={false}>
       <CountBlock
         text={t("total_users")}
         count={userListData.count}
