@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import AuthorizedButton from "@/components/Common/AuthorizedButton";
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
@@ -172,17 +172,17 @@ export default function UserSummaryTab({
               </div>
             </div>
             <div className="w-3/4">
-              <ButtonV2
+              <AuthorizedButton
                 authorizeFor={() => deletePermitted}
                 onClick={() => setshowDeleteDialog(true)}
-                variant="danger"
+                variant="destructive"
                 data-testid="user-delete-button"
                 className="my-1 inline-flex"
                 disabled={isDeleting}
               >
                 <CareIcon icon="l-trash" className="h-4" />
                 <span className="">{t("delete_account_btn")}</span>
-              </ButtonV2>
+              </AuthorizedButton>
             </div>
           </div>
         )}

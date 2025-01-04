@@ -3,7 +3,7 @@ import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { ButtonSize, ButtonVariant } from "@/components/Common/ButtonV2";
+import { ButtonSize, ButtonVariant } from "@/components/ui/button";
 
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
@@ -41,7 +41,7 @@ export default function DropdownMenu({
           <div
             className={classNames(
               "flex items-center gap-2 whitespace-nowrap",
-              size === "small" ? "h-5" : "h-6",
+              size === "xs" ? "h-5" : "h-6",
             )}
           >
             {props.icon}
@@ -49,7 +49,7 @@ export default function DropdownMenu({
           </div>
           <CareIcon
             icon="l-angle-down"
-            className={size === "small" ? "text-base" : "text-lg"}
+            className={size === "xs" ? "text-base" : "text-lg"}
           />
         </MenuButton>
 
@@ -101,17 +101,25 @@ export function DropdownItem({
           className={classNames(
             "text-lg",
             {
-              primary: "text-primary-500",
-              secondary: "text-secondary-500",
-              success: "text-success-500",
-              warning: "text-warning-500",
-              danger: "text-danger-500",
-              alert: "text-alert-500",
+              primary: "text-primary-700",
+              secondary: "text-gray-900",
+              success: "text-green-500",
+              warning: "text-warning-900",
+              danger: "text-red-500",
+              alert: "text-alert-900",
+              destructive: "text-red-500",
+              ghost: "text-gray-500",
+              link: "text-blue-500",
+              outline: "text-gray-900",
+              outline_primary: "text-primary-700",
+              primary_gradient: "text-white",
+              white: "text-gray-900",
             }[variant],
           )}
         >
           {icon}
         </i>
+
         {children}
       </div>
     </MenuItem>

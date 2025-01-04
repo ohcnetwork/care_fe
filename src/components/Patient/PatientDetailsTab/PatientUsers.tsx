@@ -101,7 +101,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button variant="outline_primary">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           Add User
         </Button>

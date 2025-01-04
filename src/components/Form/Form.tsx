@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { FieldValidator } from "@/components/Form/FieldValidators";
 import {
   FormContextValue,
@@ -142,19 +143,20 @@ const Form = <T extends FormDetails>({
           {(!hideCancelButton || !hideSubmitButton) && (
             <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
               {!hideCancelButton && (
-                <Cancel
-                  onClick={handleCancel}
-                  label={props.cancelLabel ?? "Cancel"}
-                />
+                <Button type="button" variant="outline" onClick={handleCancel}>
+                  {props.cancelLabel ?? "Cancel"}
+                </Button>
               )}
               {!hideSubmitButton && (
-                <Submit
+                <Button
+                  variant="primary"
                   data-testid="submit-button"
                   type="submit"
                   disabled={disabled}
-                  label={props.submitLabel ?? "Submit"}
                   className={props?.submitButtonClassName}
-                />
+                >
+                  {props.submitLabel ?? "Submit"}
+                </Button>
               )}
             </div>
           )}

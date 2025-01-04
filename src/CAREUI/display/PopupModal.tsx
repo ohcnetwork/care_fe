@@ -1,7 +1,8 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -41,9 +42,13 @@ export default function PopupModal(props: Props) {
       <div className="space-y-6">
         {props.children}
         <div className="cui-form-button-group px-4">
-          <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+          <Button variant="outline" onClick={props.onHide}>
+            <span>{t("close")}</span>
+          </Button>
           {props.onSubmit && (
-            <Submit onClick={props.onSubmit} label={t("save")} shadow={false} />
+            <Button variant="primary" onClick={props.onSubmit}>
+              <span>{t("save")}</span>
+            </Button>
           )}
         </div>
       </div>
@@ -141,9 +146,13 @@ const DesktopView = (props: Props) => {
     >
       {children}
       <div className="flex w-full items-center justify-end gap-2 rounded-b-lg border-t border-t-secondary-300 bg-secondary-100 p-2">
-        <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+        <Button variant="outline" onClick={props.onHide}>
+          <span>{t("close")}</span>
+        </Button>
         {props.onSubmit && (
-          <Submit onClick={props.onSubmit} label={t("save")} shadow={false} />
+          <Button variant="primary" onClick={props.onSubmit}>
+            <span>{t("save")}</span>
+          </Button>
         )}
       </div>
     </div>

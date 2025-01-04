@@ -24,7 +24,10 @@ export const Updates = (props: PatientProps) => {
         <Link
           href={`/facility/${facilityId}/patient/${patientId}/questionnaire`}
         >
-          <Button>Add Patient Updates</Button>
+          <Button variant="outline_primary">
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("add_patient_updates")}
+          </Button>
         </Link>
       </div>
 
