@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
 
+import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -12,8 +13,6 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import Loading from "../Common/Loading";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
