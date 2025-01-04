@@ -64,7 +64,12 @@ import useAuthUser from "@/hooks/useAuthUser";
 import FiltersCache from "@/Utils/FiltersCache";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  dateQueryString,
+  formatDisplayName,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 
 interface QueryParams {
   practitioner?: string;
@@ -91,7 +96,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const resourcesQuery = useQuery({
     queryKey: ["appointments-resources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
+    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -104,7 +109,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        resource: qParams.practitioner ?? "",
+        user: qParams.practitioner ?? "",
         day: date,
       },
     }),
@@ -350,7 +355,7 @@ function AppointmentColumn(props: {
         status: props.status,
         limit: 100,
         slot: props.slot,
-        resource: props.practitioner,
+        user: props.practitioner,
         date: props.date,
       },
     }),
@@ -380,7 +385,7 @@ function AppointmentColumn(props: {
         </span>
       </div>
       {appointments.length === 0 ? (
-        <div className="flex justify-center items-center h-[calc(100vh-22rem)]">
+        <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
           <p className="text-gray-500">{t("no_appointments")}</p>
         </div>
       ) : (
@@ -456,7 +461,7 @@ function AppointmentRow(props: {
         status: status,
         limit: 100,
         slot: props.slot,
-        resource: props.practitioner,
+        user: props.practitioner,
         date: props.date,
       },
     }),
@@ -574,7 +579,7 @@ function AppointmentRowItem({
         <p>{"Need Room Information"}</p>
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatName(appointment.resource)}
+        {formatDisplayName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <p>{"Need Labels"}</p>

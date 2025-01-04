@@ -56,13 +56,13 @@ export const ScheduleAPIs = {
       path: "/api/v1/facility/{facility_id}/slots/availability_stats/",
       method: "POST",
       TRes: Type<AvailabilityHeatmap>(),
-      TBody: Type<{ from_date: string; to_date: string; resource: string }>(),
+      TBody: Type<{ from_date: string; to_date: string; user: string }>(),
     },
     getSlotsForDay: {
       path: "/api/v1/facility/{facility_id}/slots/get_slots_for_day/",
       method: "POST",
       TRes: Type<{ results: SlotAvailability[] }>(),
-      TBody: Type<{ resource: string; day: string }>(),
+      TBody: Type<{ user: string; day: string }>(),
     },
     createAppointment: {
       path: "/api/v1/facility/{facility_id}/slots/{slot_id}/create_appointment/",
@@ -73,9 +73,8 @@ export const ScheduleAPIs = {
   },
 
   appointments: {
-    // TODO: rename this to available_resources (or something more accurate)
-    availableDoctors: {
-      path: "/api/v1/facility/{facility_id}/appointments/available_doctors/",
+    availableUsers: {
+      path: "/api/v1/facility/{facility_id}/appointments/available_users/",
       method: "GET",
       TRes: Type<{ users: UserBase[] }>(),
     },
