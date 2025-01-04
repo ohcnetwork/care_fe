@@ -82,20 +82,22 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
     };
   });
 
-  return parentDetails
+  const filteredDetails = parentDetails
     .reverse()
     .concat({
       label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
       value: geoOrg.name,
     })
-    .map((org, index) => (
-      <span key={org.value}>
-        <span className="text-muted-foreground">{org.value}</span>
-        {index < parentDetails.length - 1 && (
-          <span className="mx-2 text-muted-foreground/50">→</span>
-        )}
-      </span>
-    ));
+    .slice(-2);
+
+  return filteredDetails.map((org, index) => (
+    <span key={org.value} className="flex items-center flex-wrap">
+      <span className="text-muted-foreground">{org.value}</span>
+      {index < filteredDetails.length - 1 && (
+        <span className="mx-2">&nbsp;</span>
+      )}
+    </span>
+  ));
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
@@ -286,7 +288,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <CardContent>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
                     <div className="flex items-start gap-3">
-                      <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                      <MapPin className="mt-3 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>
                         {facilityData?.geo_organization && (
                           <div className="mt-2 text-sm">
