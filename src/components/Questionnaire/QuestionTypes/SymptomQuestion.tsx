@@ -27,15 +27,15 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
 import {
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
   Symptom,
   SymptomRequest,
-} from "@/types/questionnaire/symptom";
+} from "@/types/emr/symptom/symptom";
+import { Code } from "@/types/questionnaire/code";
+import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 
 interface SymptomQuestionProps {
   question: Question;

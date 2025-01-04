@@ -179,7 +179,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 className="w-full"
               />
 
-              <div className="min-h-[200px]">
+              <div className="min-h-[200px]" id="patient-search-results">
                 {!!phoneNumber && (
                   <>
                     {isPending ? (
