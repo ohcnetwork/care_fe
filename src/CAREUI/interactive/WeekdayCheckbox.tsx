@@ -36,17 +36,17 @@ export default function WeekdayCheckbox({ value = [], onChange }: Props) {
   };
 
   return (
-    <ul className="flex justify-between">
+    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
       {Object.values(DAYS_OF_WEEK).map((day) => {
         const isChecked = value.includes(day);
 
         return (
-          <li key={day}>
+          <li key={day} className="w-full">
             <div
               className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-lg border px-8 py-6 transition-all duration-200 ease-in-out",
+                "flex flex-col items-center justify-center gap-2 rounded-lg border px-6 py-4 transition-all duration-200 ease-in-out",
                 isChecked
-                  ? "border-primary-500 bg-white shadow"
+                  ? "border-primary-500 bg-white shadow-md"
                   : "border-gray-300",
               )}
             >
@@ -57,7 +57,7 @@ export default function WeekdayCheckbox({ value = [], onChange }: Props) {
               />
               <label
                 htmlFor={`day_of_week_checkbox_${day}`}
-                className="cursor-pointer text-xs font-semibold uppercase"
+                className="cursor-pointer text-xs font-semibold uppercase text-center"
                 onClick={(e) => e.stopPropagation()}
               >
                 {t(`DAYS_OF_WEEK_SHORT__${day}`)}
