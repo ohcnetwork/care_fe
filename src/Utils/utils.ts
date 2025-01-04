@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { differenceInMinutes, format } from "date-fns";
 import html2canvas from "html2canvas";
 
@@ -6,10 +7,12 @@ import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
+import query from "@/Utils/request/query";
 import { Time } from "@/Utils/types";
 import { DoseRange, Timing } from "@/types/emr/medicationRequest";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
+import organizationApi from "@/types/organization/organizationApi";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
 
@@ -189,8 +192,30 @@ export const getPincodeDetails = async (pincode: string, apiKey: string) => {
     `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
   );
   const data = await response.json();
+  if (!data.records || data.records.length === 0) {
+    Notification.Error({ msg: "Invalid pincode" });
+    return null;
+  }
   return data.records[0];
 };
+
+export function useFetchOrganizationByName(name: string, parentId?: string) {
+  return useQuery({
+    queryKey: ["organization", name, parentId],
+    queryFn: async () => {
+      const data = await query(organizationApi.list, {
+        queryParams: {
+          org_type: "govt",
+          parent: parentId || "",
+          name: name || "",
+        },
+      })({ signal: new AbortController().signal });
+
+      return data.results?.[0];
+    },
+    enabled: !!name,
+  });
+}
 
 export const includesIgnoreCase = (str1: string, str2: string) => {
   if (!str1 || !str2) return false;
