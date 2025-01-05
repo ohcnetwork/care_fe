@@ -40,7 +40,8 @@ export default function OrganizationLayout({
   children,
 }: Props) {
   const path = usePath() || "";
-
+  console.log("navOrganizationId", navOrganizationId);
+  console.log("id", id);
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
     : `/organization`;
@@ -72,6 +73,7 @@ export default function OrganizationLayout({
     queryFn: query(organizationApi.get, {
       pathParams: { id },
     }),
+    enabled: !!id,
   });
 
   if (isLoading) {
