@@ -187,13 +187,11 @@ export function QuestionnaireForm({
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              console.log("structuredData", structuredData);
               const structuredRequests = getStructuredRequests(
                 response.structured_type,
                 structuredData,
                 context,
               );
-              console.log("structuredRequests", structuredRequests);
               requests.push(...structuredRequests);
             }
           }
