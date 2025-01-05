@@ -72,6 +72,7 @@ export default function OrganizationLayout({
     queryFn: query(organizationApi.get, {
       pathParams: { id },
     }),
+    enabled: !!id,
   });
 
   if (isLoading) {
