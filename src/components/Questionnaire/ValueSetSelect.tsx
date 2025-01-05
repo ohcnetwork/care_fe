@@ -32,6 +32,7 @@ interface Props {
   placeholder?: string;
   disabled?: boolean;
   count?: number;
+  searchPostFix?: string;
 }
 
 export default function ValueSetSelect({
@@ -41,6 +42,7 @@ export default function ValueSetSelect({
   placeholder = "Search...",
   disabled,
   count = 10,
+  searchPostFix = "",
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -50,7 +52,7 @@ export default function ValueSetSelect({
     queryKey: ["valueset", system, "expand", count, search],
     queryFn: query(routes.valueset.expand, {
       pathParams: { system },
-      body: { count, search },
+      body: { count, search: search + searchPostFix },
     }),
   });
 
