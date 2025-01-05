@@ -10,7 +10,8 @@ import Webcam from "react-webcam";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
@@ -253,49 +254,56 @@ const AvatarEditModal = ({
 
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <div>
-                  <label
-                    id="upload-cover-image"
-                    className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500"
-                  >
-                    <CareIcon icon="l-cloud-upload" className="text-lg" />
-                    {t("upload_an_image")}
-                    <input
-                      title="changeFile"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={onSelectFile}
-                    />
-                  </label>
+                  <Button id="upload-cover-image" variant="primary" asChild>
+                    <label className="cursor-pointer">
+                      <CareIcon
+                        icon="l-cloud-upload"
+                        className="text-lg mr-1"
+                      />
+                      {t("upload_an_image")}
+                      <input
+                        title="changeFile"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={onSelectFile}
+                      />
+                    </label>
+                  </Button>
                 </div>
-                <ButtonV2
+                <Button
+                  variant="primary"
                   onClick={() => {
                     setConstraint(() => VideoConstraints.user);
                     setIsCameraOpen(true);
                   }}
                 >
                   {`${t("open")} ${t("camera")}`}
-                </ButtonV2>
+                </Button>
                 <div className="sm:flex-1" />
-                <Cancel
+                <Button
+                  variant="outline"
                   onClick={(e) => {
                     e.stopPropagation();
                     closeModal();
                     dragProps.setFileDropError("");
                   }}
                   disabled={isProcessing}
-                />
+                >
+                  {t("cancel")}
+                </Button>
                 {imageUrl && (
-                  <ButtonV2
-                    variant="danger"
+                  <Button
+                    variant="destructive"
                     onClick={deleteAvatar}
                     disabled={isProcessing}
                   >
                     {t("delete")}
-                  </ButtonV2>
+                  </Button>
                 )}
-                <ButtonV2
+                <Button
                   id="save-cover-image"
+                  variant="outline"
                   onClick={uploadAvatar}
                   disabled={isProcessing || !selectedFile}
                 >
@@ -310,7 +318,7 @@ const AvatarEditModal = ({
                   <span>
                     {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
                   </span>
-                </ButtonV2>
+                </Button>
               </div>
             </>
           ) : (
@@ -346,29 +354,35 @@ const AvatarEditModal = ({
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 {!previewImage ? (
                   <>
-                    <ButtonV2 onClick={handleSwitchCamera}>
+                    <Button variant="primary" onClick={handleSwitchCamera}>
                       <CareIcon icon="l-camera-change" className="text-lg" />
                       {`${t("switch")} ${t("camera")}`}
-                    </ButtonV2>
-                    <ButtonV2
+                    </Button>
+                    <Button
+                      variant="primary"
                       onClick={() => {
                         captureImage();
                       }}
                     >
                       <CareIcon icon="l-capture" className="text-lg" />
                       {t("capture")}
-                    </ButtonV2>
+                    </Button>
                   </>
                 ) : (
                   <>
-                    <ButtonV2
+                    <Button
+                      variant="primary"
                       onClick={() => {
                         setPreviewImage(null);
                       }}
                     >
                       {t("retake")}
-                    </ButtonV2>
-                    <Submit disabled={isProcessing} onClick={uploadAvatar}>
+                    </Button>
+                    <Button
+                      variant="primary"
+                      disabled={isProcessing}
+                      onClick={uploadAvatar}
+                    >
                       {isCaptureImgBeingUploaded ? (
                         <>
                           <CareIcon
@@ -380,19 +394,22 @@ const AvatarEditModal = ({
                       ) : (
                         <> {t("submit")}</>
                       )}
-                    </Submit>
+                    </Button>
                   </>
                 )}
                 <div className="sm:flex-1"></div>
-                <Cancel
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  label={t("close")}
                   disabled={isProcessing}
-                />
+                >
+                  {t("close")}
+                </Button>
               </div>
             </>
           )}

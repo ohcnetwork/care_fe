@@ -190,7 +190,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
           </span>
         }
         action="Delete"
-        variant="danger"
+        variant="destructive"
         show={openDeleteDialog}
         onClose={handleDeleteClose}
         onConfirm={handleDeleteSubmit}

@@ -2,9 +2,11 @@ import careConfig from "@careConfig";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
+import { TooltipComponent } from "@/components/ui/tooltip";
+
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -99,21 +101,32 @@ export default function UserAvatar({
               className="h-20 w-20"
             />
             <div className="my-4 ml-4 flex flex-col gap-2">
-              <ButtonV2
-                onClick={(_) => setEditAvatar(!editAvatar)}
-                type="button"
-                id="change-avatar"
-                className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
-                shadow={false}
-                disabled={!showAvatarEdit(authUser, userData)}
-                tooltip={
-                  !showAvatarEdit(authUser, userData)
-                    ? t("edit_avatar_permission_error")
-                    : undefined
-                }
-              >
-                {t("change_avatar")}
-              </ButtonV2>
+              {!showAvatarEdit(authUser, userData) ? (
+                <TooltipComponent
+                  content={t("edit_avatar_permission_error")}
+                  className="w-full"
+                >
+                  <Button
+                    variant="white"
+                    onClick={() => setEditAvatar(!editAvatar)}
+                    type="button"
+                    id="change-avatar"
+                    disabled
+                  >
+                    {t("change_avatar")}
+                  </Button>
+                </TooltipComponent>
+              ) : (
+                <Button
+                  variant="white"
+                  onClick={() => setEditAvatar(!editAvatar)}
+                  type="button"
+                  id="change-avatar"
+                >
+                  {t("change_avatar")}
+                </Button>
+              )}
+
               <p className="text-xs leading-5 text-gray-500">
                 {t("change_avatar_note")}
               </p>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -18,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   Organization,
   OrganizationParent,
@@ -29,47 +31,29 @@ interface Props {
   navOrganizationId?: string;
   id: string;
   children: React.ReactNode;
+  setOrganization?: (org: Organization) => void;
 }
 
 interface NavItem {
   path: string;
   title: string;
   icon: IconName;
+  visibility: boolean;
 }
 
 export default function OrganizationLayout({
   id,
   navOrganizationId,
   children,
+  setOrganization,
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
     : `/organization`;
-  const navItems: NavItem[] = [
-    {
-      path: `${baseUrl}/${id}`,
-      title: "Organizations",
-      icon: "d-hospital",
-    },
-    {
-      path: `${baseUrl}/${id}/users`,
-      title: "Users",
-      icon: "d-people",
-    },
-    {
-      path: `${baseUrl}/${id}/patients`,
-      title: "Patients",
-      icon: "d-patient",
-    },
-    {
-      path: `${baseUrl}/${id}/facilities`,
-      title: "Facilities",
-      icon: "d-hospital",
-    },
-  ];
 
   const { data: org, isLoading } = useQuery<Organization>({
     queryKey: ["organization", id],
@@ -78,6 +62,47 @@ export default function OrganizationLayout({
     }),
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (org) {
+      setOrganization?.(org);
+    }
+  }, [org, setOrganization]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  // add loading state
+  if (!org) {
+    return <div>Not found</div>;
+  }
+
+  const navItems: NavItem[] = [
+    {
+      path: `${baseUrl}/${id}`,
+      title: "Organizations",
+      icon: "d-hospital",
+      visibility: hasPermission("can_view_organization", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/users`,
+      title: "Users",
+      icon: "d-people",
+      visibility: hasPermission("can_list_organization_users", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/patients`,
+      title: "Patients",
+      icon: "d-patient",
+      visibility: hasPermission("can_list_patients", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/facilities`,
+      title: "Facilities",
+      icon: "d-hospital",
+      visibility: hasPermission("can_read_facility", org.permissions),
+    },
+  ];
 
   if (isLoading) {
     return (

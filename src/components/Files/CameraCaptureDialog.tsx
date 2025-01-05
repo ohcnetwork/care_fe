@@ -4,7 +4,8 @@ import Webcam from "react-webcam";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -134,9 +135,13 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       <div className="m-4 flex justify-evenly sm:hidden">
         <div>
           {!previewImage ? (
-            <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+            <Button
+              variant="primary"
+              onClick={handleSwitchCamera}
+              className="m-2"
+            >
               {t("switch")}
-            </ButtonV2>
+            </Button>
           ) : (
             <></>
           )}
@@ -145,20 +150,22 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
           {!previewImage ? (
             <>
               <div>
-                <ButtonV2
+                <Button
+                  variant="primary"
                   onClick={() => {
                     captureImage();
                   }}
                   className="m-2"
                 >
                   {t("capture")}
-                </ButtonV2>
+                </Button>
               </div>
             </>
           ) : (
             <>
               <div className="flex space-x-2">
-                <ButtonV2
+                <Button
+                  variant="primary"
                   onClick={() => {
                     setPreviewImage(null);
                     onResetCapture();
@@ -166,8 +173,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   className="m-2"
                 >
                   {t("retake")}
-                </ButtonV2>
-                <Submit
+                </Button>
+                <Button
+                  variant="primary"
                   onClick={() => {
                     setPreviewImage(null);
                     onHide();
@@ -175,14 +183,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   className="m-2"
                 >
                   {t("submit")}
-                </Submit>
+                </Button>
               </div>
             </>
           )}
         </div>
         <div className="sm:flex-1">
-          <ButtonV2
-            variant="secondary"
+          <Button
+            variant="outline"
             onClick={() => {
               setPreviewImage(null);
               onResetCapture();
@@ -191,16 +199,16 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             className="m-2"
           >
             {t("close")}
-          </ButtonV2>
+          </Button>
         </div>
       </div>
       {/* buttons for laptop screens */}
       <div className={`${isLaptopScreen ? " " : "hidden"}`}>
         <div className="m-4 flex lg:hidden">
-          <ButtonV2 onClick={handleSwitchCamera}>
+          <Button variant="primary" onClick={handleSwitchCamera}>
             <CareIcon icon="l-camera-change" className="text-lg" />
             {`${t("switch")} ${t("camera")}`}
-          </ButtonV2>
+          </Button>
         </div>
 
         <div className="flex justify-end gap-2 p-4">
@@ -208,42 +216,45 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             {!previewImage ? (
               <>
                 <div>
-                  <ButtonV2
+                  <Button
+                    variant="primary"
                     onClick={() => {
                       captureImage();
                     }}
                   >
                     <CareIcon icon="l-capture" className="text-lg" />
                     {t("capture")}
-                  </ButtonV2>
+                  </Button>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex space-x-2">
-                  <ButtonV2
+                  <Button
+                    variant="primary"
                     onClick={() => {
                       setPreviewImage(null);
                       onResetCapture();
                     }}
                   >
                     {t("retake")}
-                  </ButtonV2>
-                  <Submit
+                  </Button>
+                  <Button
+                    variant="primary"
                     onClick={() => {
                       onHide();
                       setPreviewImage(null);
                     }}
                   >
                     {t("submit")}
-                  </Submit>
+                  </Button>
                 </div>
               </>
             )}
           </div>
           <div className="sm:flex-1" />
-          <ButtonV2
-            variant="secondary"
+          <Button
+            variant="outline"
             onClick={() => {
               setPreviewImage(null);
               onResetCapture();
@@ -251,7 +262,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             }}
           >
             {`${t("close")} ${t("camera")}`}
-          </ButtonV2>
+          </Button>
         </div>
       </div>
     </DialogModal>
