@@ -258,20 +258,23 @@ const AvatarEditModal = ({
                     id="upload-cover-image"
                     variant="primary"
                     type="button"
+                    asChild
                     onClick={() =>
                       document.getElementById("file-input")?.click()
                     }
                   >
-                    <CareIcon icon="l-cloud-upload" className="text-lg" />
-                    {t("upload_an_image")}
-                    <input
-                      id="file-input"
-                      title="changeFile"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={onSelectFile}
-                    />
+                    <div className="cursor-pointer">
+                      <CareIcon icon="l-cloud-upload" className="text-lg" />
+                      {t("upload_an_image")}
+                      <input
+                        id="file-input"
+                        title="changeFile"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={onSelectFile}
+                      />
+                    </div>
                   </Button>
                 </div>
                 <Button

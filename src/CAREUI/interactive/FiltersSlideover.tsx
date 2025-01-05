@@ -33,11 +33,15 @@ export default function FiltersSlideover({
         <div className="flex items-center justify-between">
           <span className="text-lg font-bold">{t("filters")}</span>
           <div className="mr-2 flex items-center justify-end gap-1">
-            <Button variant="warning" onClick={onClear} id="clear-filter">
+            <Button variant="ghost" onClick={onClear} id="clear-filter">
               <CareIcon icon="l-filter-slash" className="text-lg" />
               <span>{t("clear")}</span>
             </Button>
-            <Button variant="alert" onClick={onApply} id="apply-filter">
+            <Button
+              variant="outline_primary"
+              onClick={onApply}
+              id="apply-filter"
+            >
               {t("apply")}
             </Button>
           </div>
