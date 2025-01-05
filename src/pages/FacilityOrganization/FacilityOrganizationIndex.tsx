@@ -71,7 +71,7 @@ export default function FacilityOrganizationIndex({
               {t("organization_not_found")}
             </CardTitle>
             <CardDescription className="text-center">
-              {t("organization_access")}
+              {t("organization_forbidden")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -79,7 +79,7 @@ export default function FacilityOrganizationIndex({
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
-              {t("organization_manage")}
+              {t("organization_access_help")}
             </p>
           </CardContent>
         </Card>
@@ -88,7 +88,7 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title={t("organization_facility")} hideBack={true}>
+    <Page title={t("facility_organizations")} hideBack={true}>
       <div className="flex justify-center md:justify-end mt-2 mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
