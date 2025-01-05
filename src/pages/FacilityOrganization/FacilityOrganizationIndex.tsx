@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
@@ -36,24 +37,19 @@ export default function FacilityOrganizationIndex({
 
   if (isLoading) {
     return (
-      <div className="px-6 py-6">
-        <div className="flex justify-between items-center mt-6">
-          <div className="h-8 w-48 bg-gray-300 rounded animate-pulse" />
-        </div>
-        <div className="flex justify-between items-center mb-6">
-          <div />
-          <div className="h-8 w-48 bg-gray-300 rounded animate-pulse" />
-        </div>
+      <div className="px-6 py-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-8 w-48 self-end" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse" />
-                  <div className="h-4 w-1/4 bg-gray-300 rounded animate-pulse" />
-                </div>
-                <div className="flex justify-between items-center h-7 w-full bg-gray-300 rounded animate-pulse" />
-              </CardContent>
+            <Card key={i} className="relative space-y-4">
+              <CardHeader>
+                <Skeleton className="h-6 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
+              </CardHeader>
+              <CardFooter>
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
             </Card>
           ))}
         </div>
