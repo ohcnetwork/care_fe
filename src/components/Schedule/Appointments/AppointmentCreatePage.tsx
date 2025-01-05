@@ -30,6 +30,8 @@ import {
 } from "@/components/Schedule/Appointments/utils";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
@@ -41,6 +43,7 @@ interface Props {
 
 export default function AppointmentCreatePage(props: Props) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const [resourceId, setResourceId] = useState<string>();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -363,7 +366,9 @@ export default function AppointmentCreatePage(props: Props) {
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline">{t("cancel")}</Button>
+            <Button variant="outline" type="button" onClick={() => goBack()}>
+              {t("cancel")}
+            </Button>
             <Button
               variant="primary"
               type="submit"
