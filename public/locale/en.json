@@ -908,7 +908,7 @@
   "facility_organizations": "Facility Organizations",
   "facility_preference": "Facility preference",
   "facility_search_placeholder": "Search by Facility / District Name",
-  "facility_search_placeholder_pincode": "Search by Facility / District / Pincode",
+  "facility_search_placeholder_text": "Search by Facility name",
   "facility_type": "Facility Type",
   "failed_to_create_appointment": "Failed to create an appointment",
   "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later.",
