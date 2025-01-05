@@ -40,8 +40,7 @@ export default function OrganizationLayout({
   children,
 }: Props) {
   const path = usePath() || "";
-  console.log("navOrganizationId", navOrganizationId);
-  console.log("id", id);
+
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
     : `/organization`;
