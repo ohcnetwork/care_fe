@@ -2,7 +2,7 @@ import { navigate } from "raviger";
 import { toast } from "sonner";
 
 import * as Notifications from "@/Utils/Notifications";
-import { HTTPError, HTTPErrorCause } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
 
 export function handleHttpError(error: Error) {
   if (error.name === "AbortError") {
@@ -82,19 +82,19 @@ type PydanticError = {
   url: string;
 };
 
-function isStructuredError(cause: HTTPErrorCause): boolean {
-  return (
-    cause !== undefined && typeof cause === "object" && !Array.isArray(cause)
-  );
+function isStructuredError(cause: HTTPError["cause"]): boolean {
+  return typeof cause === "object" && !Array.isArray(cause);
 }
 
-function handleStructuredErrors(cause: HTTPErrorCause) {
+function handleStructuredErrors(cause: HTTPError["cause"]) {
   if (cause && typeof cause === "object" && !Array.isArray(cause)) {
     Object.values(cause).forEach((value) => {
       if (Array.isArray(value)) {
         value.forEach((err) => {
           toast.error(`${err}`);
         });
+      } else if (typeof value === "string") {
+        toast.error(value);
       }
     });
   }

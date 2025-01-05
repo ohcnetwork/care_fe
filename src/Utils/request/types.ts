@@ -51,7 +51,7 @@ export interface APICallOptions<TBody = unknown> {
   headers?: HeadersInit;
 }
 
-export type HTTPErrorCause = Record<string, unknown> | undefined;
+type HTTPErrorCause = Record<string, unknown> | undefined;
 
 export class HTTPError extends Error {
   status: number;
