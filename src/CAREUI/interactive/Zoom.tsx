@@ -2,7 +2,7 @@ import { ReactNode, createContext, useContext, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 
 type ProviderValue = {
   scale: number;
@@ -69,31 +69,25 @@ export const ZoomControls = (props: { disabled?: boolean }) => {
 
   return (
     <div className="absolute bottom-8 right-8 flex flex-col items-center justify-center gap-1 rounded-full border border-secondary-400 bg-white p-0.5 shadow-lg md:flex-row-reverse md:gap-2">
-      <ButtonV2
+      <Button
         disabled={props.disabled}
-        circle
-        variant="secondary"
-        size="small"
-        shadow={false}
-        className="p-2.5"
+        variant="ghost"
+        className="p-2.5 rounded-full"
         onClick={ctx.zoomIn}
       >
         <CareIcon icon="l-search-plus" className="text-lg" />
-      </ButtonV2>
+      </Button>
       <span className="text-sm font-semibold text-secondary-800">
         {Math.round(ctx.scale * 100)}%
       </span>
-      <ButtonV2
+      <Button
         disabled={props.disabled}
-        circle
-        variant="secondary"
-        size="small"
-        shadow={false}
-        className="p-2.5"
+        variant="ghost"
+        className="p-2.5 rounded-full"
         onClick={ctx.zoomOut}
       >
         <CareIcon icon="l-search-minus" className="text-lg" />
-      </ButtonV2>
+      </Button>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -7,6 +8,7 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -62,6 +64,7 @@ const facilityFormSchema = z.object({
     .string()
     .optional()
     .refine((val) => !val || validateLongitude(val), "Invalid longitude"),
+  is_public: z.boolean().default(false),
 });
 
 type FacilityFormValues = z.infer<typeof facilityFormSchema>;
@@ -77,6 +80,7 @@ export default function CreateFacilityForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilityFormSchema),
@@ -90,6 +94,7 @@ export default function CreateFacilityForm({
       phone_number: "+91",
       latitude: "",
       longitude: "",
+      is_public: false,
     },
   });
 
@@ -132,16 +137,23 @@ export default function CreateFacilityForm({
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
+      setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           form.setValue("latitude", position.coords.latitude.toString());
           form.setValue("longitude", position.coords.longitude.toString());
+          setIsGettingLocation(false);
+          Notification.Success({
+            msg: "Location updated successfully",
+          });
         },
         (error) => {
+          setIsGettingLocation(false);
           Notification.Error({
             msg: "Unable to get location: " + error.message,
           });
         },
+        { timeout: 10000 }, // 10 second timeout
       );
     } else {
       Notification.Error({
@@ -152,150 +164,45 @@ export default function CreateFacilityForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="facility_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Facility Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select facility type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {FACILITY_TYPES.map((type) => (
-                      <SelectItem key={type.text} value={type.text}>
-                        {type.text}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Facility Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Markdown supported" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="features"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Features</FormLabel>
-              <FormControl>
-                <MultiSelectFormField
-                  name={field.name}
-                  value={field.value}
-                  placeholder={t("features")}
-                  options={FACILITY_FEATURE_TYPES}
-                  optionLabel={(o) => o.name}
-                  optionValue={(o) => o.id}
-                  onChange={handleFeatureChange}
-                  error={form.formState.errors.features?.message}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="+91XXXXXXXXXX" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="pincode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pincode</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Address</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex gap-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Basic Information */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h3 className="text-lg font-medium">Basic Information</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
-              name="latitude"
+              name="facility_type"
               render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Latitude</FormLabel>
-                  <div className="flex gap-2">
+                <FormItem>
+                  <FormLabel>Facility Type</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <Input {...field} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select facility type" />
+                      </SelectTrigger>
                     </FormControl>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleGetCurrentLocation}
-                    >
-                      <CareIcon icon="l-location-point" className="h-4 w-4" />
-                    </Button>
-                  </div>
+                    <SelectContent>
+                      {FACILITY_TYPES.map((type) => (
+                        <SelectItem key={type.text} value={type.text}>
+                          {type.text}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facility Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter facility name" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -304,12 +211,39 @@ export default function CreateFacilityForm({
 
           <FormField
             control={form.control}
-            name="longitude"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Longitude</FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Textarea
+                    {...field}
+                    placeholder="Describe your facility (Markdown supported)"
+                    className="h-24"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="features"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Features</FormLabel>
+                <FormControl>
+                  <MultiSelectFormField
+                    name={field.name}
+                    value={field.value}
+                    placeholder="Select facility features"
+                    options={FACILITY_FEATURE_TYPES}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                    onChange={handleFeatureChange}
+                    error={form.formState.errors.features?.message}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -317,27 +251,185 @@ export default function CreateFacilityForm({
           />
         </div>
 
-        {!organizationId && (
+        {/* Contact Information */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h3 className="text-lg font-medium">Contact Information</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+91XXXXXXXXXX" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="pincode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pincode</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter pincode" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
-            name="geo_organization"
+            control={form.control}
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization</FormLabel>
+                <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <OrganizationSelector
-                    value={field.value}
-                    onChange={field.onChange}
-                    required
+                  <Textarea
+                    {...field}
+                    placeholder="Enter complete address"
+                    className="h-20"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
+        </div>
+
+        {/* Location Information */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Location Details</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGetCurrentLocation}
+              disabled={isGettingLocation}
+              className="flex items-center gap-2"
+            >
+              {isGettingLocation ? (
+                <>
+                  <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
+                  Getting Location...
+                </>
+              ) : (
+                <>
+                  <CareIcon icon="l-location-point" className="h-4 w-4" />
+                  Get Current Location
+                </>
+              )}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Latitude</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter latitude"
+                      disabled={isGettingLocation}
+                      className={isGettingLocation ? "animate-pulse" : ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="longitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Longitude</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter longitude"
+                      disabled={isGettingLocation}
+                      className={isGettingLocation ? "animate-pulse" : ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Visibility Settings */}
+        <div className="space-y-4 rounded-lg border p-4">
+          <h3 className="text-lg font-medium">Visibility Settings</h3>
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/5">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-base">
+                    Make this facility public
+                  </FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, this facility will be visible to the public
+                    and can be discovered by anyone using the platform
+                  </p>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {!organizationId && (
+            <FormField
+              name="geo_organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization</FormLabel>
+                  <FormControl>
+                    <OrganizationSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Facility"}
+          {isPending ? (
+            <>
+              <CareIcon
+                icon="l-spinner"
+                className="mr-2 h-4 w-4 animate-spin"
+              />
+              Creating Facility...
+            </>
+          ) : (
+            "Create Facility"
+          )}
         </Button>
       </form>
     </Form>

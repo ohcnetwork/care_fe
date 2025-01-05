@@ -1,8 +1,10 @@
+import { t } from "i18next";
 import { ReactNode, useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 import Pagination from "@/components/Common/Pagination";
 
@@ -76,16 +78,16 @@ const ExcelViewer = ({
           </p>
           <div className="flex gap-4">
             {downloadURL && downloadURL.length > 0 && (
-              <ButtonV2>
+              <Button>
                 <a
                   href={downloadURL}
                   className="text-white"
                   download={selectedFile.name}
                 >
                   <CareIcon icon="l-file-download" className="h-4 w-4" />
-                  <span>Download</span>
+                  <span>{t("download")}</span>
                 </a>
-              </ButtonV2>
+              </Button>
             )}
           </div>
         </div>
@@ -261,8 +263,12 @@ const ExcelViewer = ({
         </div>
       </>
       <div className="flex flex-wrap-reverse justify-end gap-5">
-        <Cancel onClick={onClose} label="Close" />
-        <Submit
+        <Button variant="outline" type="button" onClick={onClose}>
+          {t("close")}
+        </Button>
+        <Button
+          variant="primary"
+          type="submit"
           onClick={() => {
             handleSubmit(selectedRowsData);
             handleClose();
@@ -272,7 +278,7 @@ const ExcelViewer = ({
         >
           <CareIcon icon="l-file-import" className="text-lg" />
           <span>Import {selectedRows.length} selected fields</span>
-        </Submit>
+        </Button>
       </div>
     </DialogModal>
   );
