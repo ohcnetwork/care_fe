@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
@@ -203,7 +202,6 @@ export default function UserResetPassword({
                 )}
               />
             </div>
-
             <Button
               type="submit"
               disabled={!form.formState.isDirty}
