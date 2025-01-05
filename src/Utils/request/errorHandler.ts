@@ -82,21 +82,21 @@ type PydanticError = {
   url: string;
 };
 
-function isStructuredError(cause: HTTPError["cause"]): boolean {
+function isStructuredError(
+  cause: HTTPError["cause"],
+): cause is Record<string, string | string[]> {
   return typeof cause === "object" && !Array.isArray(cause);
 }
-
-function handleStructuredErrors(cause: HTTPError["cause"]) {
-  if (cause && typeof cause === "object" && !Array.isArray(cause)) {
-    Object.values(cause).forEach((value) => {
-      if (Array.isArray(value)) {
-        value.forEach((err) => {
-          toast.error(`${err}`);
-        });
-      } else if (typeof value === "string") {
-        toast.error(value);
-      }
-    });
+function handleStructuredErrors(cause: Record<string, string | string[]>) {
+  for (const value of Object.values(cause)) {
+    if (Array.isArray(value)) {
+      value.forEach((err) => toast.error(err));
+      return;
+    }
+    if (typeof value === "string") {
+      toast.error(value);
+      return;
+    }
   }
 }
 
