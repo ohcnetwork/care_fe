@@ -1,79 +1,96 @@
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import beBomData from "@/components/Licenses/be-sbom.json";
-import feBomData from "@/components/Licenses/fe-sbom.json";
 import licenseUrls from "@/components/Licenses/licenseUrls.json";
 
 const getLicenseUrl = (licenseId: string | undefined): string | null => {
   if (!licenseId) return null;
   return licenseUrls[licenseId as keyof typeof licenseUrls] || null;
 };
-interface CycloneDXExternalRef {
-  url?: string;
-  type?: string;
-  comment?: string;
+
+interface GitHubPackage {
+  name: string;
+  SPDXID: string;
+  versionInfo?: string;
+  downloadLocation?: string;
+  filesAnalyzed?: boolean;
+  licenseConcluded?: string;
+  copyrightText?: string;
+  externalRefs?: {
+    referenceCategory?: string;
+    referenceType?: string;
+    referenceLocator?: string;
+  }[];
 }
 
-interface CycloneDXLicense {
-  license?: {
-    id?: string;
+interface GitHubSBOM {
+  sbom?: {
+    spdxVersion?: string;
+    dataLicense?: string;
+    SPDXID?: string;
+    name?: string;
+    documentNamespace?: string;
+    creationInfo?: {
+      creators?: string[];
+      created?: string;
+    };
+    packages?: GitHubPackage[];
   };
-}
-
-interface CycloneDXProperties {
-  name?: string;
-  value?: string;
-}
-
-interface CycloneDXComponent {
-  type?: string;
-  name?: string;
-  group?: string;
-  version?: string;
-  bomRef?: string;
-  author?: string;
-  description?: string;
-  licenses?: CycloneDXLicense[];
-  externalReferences?: CycloneDXExternalRef[];
-  properties?: CycloneDXProperties[];
-}
-
-interface CycloneDXTool {
-  name?: string;
-  version?: string;
-  vendor?: string;
-  externalReferences?: CycloneDXExternalRef[];
-}
-
-interface CycloneDXBOM {
-  bomFormat?: string;
-  specVersion?: string;
-  version?: number;
-  serialNumber?: string;
-  metadata?: {
-    timestamp?: string;
-    tools?: CycloneDXTool[];
-    component?: CycloneDXComponent;
-  };
-  components?: CycloneDXComponent[];
 }
 
 const BOMDisplay: React.FC = () => {
   const [copyStatus, setCopyStatus] = useState(false);
   const [showExternalRefs, setShowExternalRefs] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("bom");
+  const [feBomData, setFeBomData] = useState<GitHubSBOM | null>(null);
+  const [beBomData, setBeBomData] = useState<GitHubSBOM | null>(null);
+
+  useEffect(() => {
+    const fetchSBOMData = async (url: string): Promise<GitHubSBOM | null> => {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+        });
+        return response.ok ? await response.json() : null;
+      } catch (error) {
+        console.error("Error fetching SBOM data:", error);
+        return null;
+      }
+    };
+
+    const fetchData = async () => {
+      const feUrl =
+        "https://api.github.com/repos/ohcnetwork/care_fe/dependency-graph/sbom";
+      const beUrl =
+        "https://api.github.com/repos/ohcnetwork/care/dependency-graph/sbom";
+
+      const [frontendData, backendData] = await Promise.all([
+        fetchSBOMData(feUrl),
+        fetchSBOMData(beUrl),
+      ]);
+
+      setFeBomData(frontendData);
+      setBeBomData(backendData);
+    };
+
+    fetchData();
+  }, []);
+
+  const bomData = activeTab === "bom" ? feBomData : beBomData;
 
   const handleCopy = () => {
     setCopyStatus(true);
     setTimeout(() => setCopyStatus(false), 2000);
   };
 
-  const bomData = (activeTab === "bom" ? feBomData : beBomData) as CycloneDXBOM;
+  const packages = bomData?.sbom?.packages || [];
 
   return (
     <div className="p-4">
@@ -98,57 +115,45 @@ const BOMDisplay: React.FC = () => {
       <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
         <div className="mb-4">
           <h2 className="mb-2 text-xl font-semibold text-primary md:text-2xl">
-            {bomData.bomFormat || "N/A"} BOM (Version:{" "}
-            {bomData.version || "N/A"})
+            SPDX SBOM (Version: {bomData?.sbom?.spdxVersion || "N/A"})
           </h2>
           <p className="text-sm text-gray-500">
             Created on:{" "}
-            {bomData.metadata?.timestamp
-              ? dayjs(bomData.metadata.timestamp).format("MMMM D, YYYY")
+            {bomData?.sbom?.creationInfo?.created
+              ? dayjs(bomData.sbom.creationInfo.created).format("MMMM D, YYYY")
               : "N/A"}
           </p>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <h3 className="col-span-full text-lg font-semibold text-primary">
-            Components:
+            Packages:
           </h3>
-          {bomData.components?.map((component, index) => (
+          {packages.map((pkg, index) => (
             <div
               key={index}
               className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg"
             >
               <a
-                href={
-                  component.externalReferences?.[1]?.url ||
-                  component.externalReferences?.[0]?.url ||
-                  "#"
-                }
+                // href={pkg.externalRefs?.[0]?.referenceLocator || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary-dark block text-primary"
               >
                 <strong className="text-lg">
-                  {component.name || "N/A"} v{component.version || "N/A"}
+                  {pkg.name || "N/A"} v{pkg.versionInfo || "N/A"}
                 </strong>
               </a>
-              {component.licenses && component.licenses[0]?.license?.id && (
+              {pkg.licenseConcluded && (
                 <p className="text-base">
                   License:{" "}
                   <a
-                    href={
-                      getLicenseUrl(component.licenses[0].license.id) || "#"
-                    }
+                    href={getLicenseUrl(pkg.licenseConcluded) || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-primary-dark text-primary"
                   >
-                    {component.licenses[0].license.id || "N/A"}
+                    {pkg.licenseConcluded || "N/A"}
                   </a>
-                </p>
-              )}
-              {component.description && (
-                <p className="text-base">
-                  Description: {component.description}
                 </p>
               )}
               <div>
@@ -164,15 +169,17 @@ const BOMDisplay: React.FC = () => {
                 </h4>
                 {showExternalRefs === index && (
                   <ul className="list-inside list-disc pl-4 text-xs">
-                    {component.externalReferences?.map((ref, idx) => (
+                    {pkg.externalRefs?.map((ref, idx) => (
                       <li key={idx}>
                         <a
-                          href={ref.url || "#"}
+                          href={ref.referenceLocator || "#"}
                           className="hover:text-primary-dark block break-words text-primary"
                         >
-                          {ref.url || "N/A"}
+                          {ref.referenceLocator || "N/A"}
                         </a>
-                        {ref.comment && <p>Comment: {ref.comment}</p>}
+                        {ref.referenceCategory && (
+                          <p>Category: {ref.referenceCategory}</p>
+                        )}
                       </li>
                     ))}
                   </ul>
