@@ -105,36 +105,6 @@
 .dropdown-item-warning { @apply accent-warning-500 hover:bg-warning-100 text-warning-500 }
 .dropdown-item-alert { @apply accent-alert-600 hover:bg-alert-100 text-alert-600 }
 
-a.button-primary-default { @apply hover:bg-primary-400 }
-a.button-primary-ghost { @apply hover:bg-primary-100 }
-
-a.button-secondary-default { @apply hover:bg-secondary-200 }
-a.button-secondary-ghost { @apply hover:bg-secondary-100 }
-
-a.button-danger-default { @apply hover:bg-danger-400 }
-a.button-danger-ghost { @apply hover:bg-danger-100 }
-
-a.button-warning-default { @apply hover:bg-warning-400 }
-a.button-warning-ghost { @apply hover:bg-warning-100 }
-
-a.button-alert-default { @apply hover:bg-alert-500 }
-a.button-alert-ghost { @apply hover:bg-alert-100 }
-
-button.button-primary-default { @apply enabled:hover:bg-primary-400 }
-button.button-primary-ghost { @apply enabled:hover:bg-primary-100 }
-
-button.button-secondary-default { @apply enabled:hover:bg-secondary-200 }
-button.button-secondary-ghost { @apply enabled:hover:bg-secondary-100 }
-
-button.button-danger-default { @apply enabled:hover:bg-danger-400 }
-button.button-danger-ghost { @apply enabled:hover:bg-danger-100 }
-
-button.button-warning-default { @apply enabled:hover:bg-warning-400 }
-button.button-warning-ghost { @apply enabled:hover:bg-warning-100 }
-
-button.button-alert-default { @apply enabled:hover:bg-alert-500 }
-button.button-alert-ghost { @apply enabled:hover:bg-alert-100 }
-
 .cui-form-button-group {
     @apply flex flex-col-reverse md:flex-row md:justify-end gap-2 w-full md:w-auto
 }
