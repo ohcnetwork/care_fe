@@ -48,6 +48,19 @@ const buttonVariants = cva(
   },
 );
 
+export type ButtonVariant =
+  | "primary"
+  | "outline"
+  | "secondary"
+  | "destructive"
+  | "primary_gradient"
+  | "ghost"
+  | "link"
+  | "white"
+  | "alert"
+  | "warning"
+  | "outline_primary";
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {

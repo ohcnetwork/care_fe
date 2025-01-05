@@ -254,20 +254,25 @@ const AvatarEditModal = ({
 
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <div>
-                  <label
+                  <Button
                     id="upload-cover-image"
-                    className="button-size-default rounded-md bg-primary-700 text-white  hover:bg-primary-700/90 dark:bg-primary-100 dark:text-primary-900 dark:hover:bg-primary-100/90 inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500"
+                    variant="primary"
+                    type="button"
+                    onClick={() =>
+                      document.getElementById("file-input")?.click()
+                    }
                   >
                     <CareIcon icon="l-cloud-upload" className="text-lg" />
                     {t("upload_an_image")}
                     <input
+                      id="file-input"
                       title="changeFile"
                       type="file"
                       accept="image/*"
                       className="hidden"
                       onChange={onSelectFile}
                     />
-                  </label>
+                  </Button>
                 </div>
                 <Button
                   variant="primary"

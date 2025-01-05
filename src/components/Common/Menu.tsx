@@ -3,19 +3,16 @@ import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { buttonVariants } from "@/components/ui/button";
+
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
 import { Anyone, AuthorizedElementProps } from "@/Utils/AuthorizeFor";
 import { classNames } from "@/Utils/utils";
 
-type ButtonVariant = "primary" | "secondary" | "danger" | "warning";
-type ButtonSize = "small" | "default" | "large";
-
 interface DropdownMenuProps {
   id?: string;
   title: string;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
   icon?: JSX.Element | undefined;
   children: ReactNode | ReactNode[];
   disabled?: boolean | undefined;
@@ -24,11 +21,11 @@ interface DropdownMenuProps {
   containerClassName?: string | undefined;
 }
 
-export default function DropdownMenu({
-  variant = "primary",
-  size = "default",
-  ...props
-}: DropdownMenuProps) {
+/**
+ * @deprecated This component will be replaced with ShadCN's dropdown.
+ */
+
+export default function DropdownMenu({ ...props }: DropdownMenuProps) {
   return (
     <div
       id={props.id}
@@ -37,21 +34,13 @@ export default function DropdownMenu({
       <Menu as="div" className="relative inline-block w-full text-left">
         <MenuButton
           disabled={props.disabled}
-          className={`button-size-${size} button-${variant}-default button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 lg:justify-between ${props.className}`}
+          className={`inline-flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 lg:justify-between ${props.className} ${buttonVariants({ variant: "primary", size: "default" })}`}
         >
-          <div
-            className={classNames(
-              "flex items-center gap-2 whitespace-nowrap",
-              size === "small" ? "h-5" : "h-6",
-            )}
-          >
+          <div className="flex items-center gap-2 whitespace-nowrap h-6">
             {props.icon}
             {props.title || "Dropdown"}
           </div>
-          <CareIcon
-            icon="l-angle-down"
-            className={size === "small" ? "text-base" : "text-lg"}
-          />
+          <CareIcon icon="l-angle-down" className="text-lg" />
         </MenuButton>
 
         <MenuItems
@@ -72,14 +61,12 @@ type RawDivProps = DetailedHTMLProps<
 
 export type DropdownItemProps = RawDivProps &
   AuthorizedElementProps & {
-    variant?: ButtonVariant;
     icon?: ReactNode | undefined;
     disabled?: boolean | undefined;
   };
 
 export function DropdownItem({
   authorizeFor = Anyone,
-  variant = "primary",
   className,
   icon,
   children,
@@ -93,26 +80,12 @@ export function DropdownItem({
         {...props}
         className={classNames(
           "m-2 flex items-center justify-start gap-3 rounded border-0 px-4 py-2 text-sm font-normal transition-all duration-200 ease-in-out",
-          `dropdown-item-${variant}`,
+          `dropdown-item-primary`,
           isAuthorized ? "pointer-events-auto cursor-pointer" : "!hidden",
           className,
         )}
       >
-        <i
-          className={classNames(
-            "text-lg",
-            {
-              primary: "text-primary-500",
-              secondary: "text-secondary-500",
-              success: "text-success-500",
-              warning: "text-warning-500",
-              danger: "text-danger-500",
-              alert: "text-alert-500",
-            }[variant],
-          )}
-        >
-          {icon}
-        </i>
+        <i className="text-lg text-primary-500">{icon}</i>
         {children}
       </div>
     </MenuItem>

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components//ui/button";
+import { Button, buttonVariants } from "@/components//ui/button";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Page from "@/components/Common/Page";
 import Tabs from "@/components/Common/Tabs";
@@ -221,9 +221,7 @@ export default function PatientConsentRecords(props: {
             ) : (
               <>
                 <label
-                  className={
-                    "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out"
-                  }
+                  className={`${buttonVariants({ variant: "primary", size: "default" })} inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out`}
                 >
                   <CareIcon icon={"l-file-upload-alt"} className="text-lg" />
                   {t("choose_file")}

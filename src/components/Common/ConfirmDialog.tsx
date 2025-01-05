@@ -1,20 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { Button, ButtonVariant } from "@/components/ui/button";
 
 import DialogModal from "@/components/Common/Dialog";
-
-type ButtonVariant =
-  | "default"
-  | "destructive"
-  | "outline"
-  | "primary"
-  | "secondary"
-  | "ghost"
-  | "link"
-  | "outline_primary"
-  | "primary_gradient"
-  | "white"
-  | "warning"
-  | "alert";
 
 type ConfirmDialogProps = {
   className?: string;

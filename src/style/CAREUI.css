@@ -99,33 +99,6 @@
     @apply h-full md:h-[300px] w-full
 }
 
-.button-primary-default { @apply accent-primary-500 bg-primary-500 hover:bg-primary-400 text-white !important }
-.button-primary-ghost { @apply accent-primary-500 hover:bg-primary-100 text-primary-500 !important }
-.button-primary-border { @apply border border-primary-500 }
-
-.button-secondary-default { @apply accent-secondary-200 bg-white hover:bg-secondary-200 text-secondary-800 !important }
-.button-secondary-ghost { @apply accent-secondary-300 hover:bg-secondary-400 text-secondary-700 !important }
-.button-secondary-border { @apply border border-secondary-300 }
-
-.button-danger-default { @apply accent-danger-500 bg-danger-500 hover:bg-danger-400 text-white !important }
-.button-danger-ghost { @apply accent-danger-500 hover:bg-danger-100 text-danger-500 !important }
-.button-danger-border { @apply border border-danger-500 }
-
-.button-warning-default { @apply accent-warning-500 bg-warning-500 hover:bg-warning-400 text-white !important }
-.button-warning-ghost { @apply accent-warning-500 hover:bg-warning-100 text-warning-500 !important }
-.button-warning-border { @apply border border-warning-500 }
-
-.button-alert-default { @apply accent-alert-600 bg-alert-600 hover:bg-alert-500 text-white !important }
-.button-alert-ghost { @apply accent-alert-600 hover:bg-alert-100 text-alert-600 !important }
-.button-alert-border { @apply border border-alert-600 }
-
-.button-shape-square { @apply rounded }
-.button-shape-circle { @apply rounded-full }
-
-.button-size-small { @apply px-2 py-1 text-xs }
-.button-size-default { @apply py-2 px-4 text-sm }
-.button-size-large { @apply py-3 px-5 text-base }
-
 .dropdown-item-primary { @apply accent-primary-500 hover:bg-primary-100 text-black hover:text-primary-500 }
 .dropdown-item-secondary { @apply accent-secondary-200 hover:bg-secondary-200 text-secondary-700 }
 .dropdown-item-danger { @apply accent-danger-500 hover:bg-danger-100 text-danger-500 }
