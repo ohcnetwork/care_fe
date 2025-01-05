@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,10 +10,8 @@ import InputWithError from "@/components/ui/input-with-error";
 
 import useDebouncedState from "@/hooks/useDebouncedState";
 
-import { ORGANIZATION_LEVELS } from "@/common/constants";
-
 import query from "@/Utils/request/query";
-import { Organization, getOrgLevel } from "@/types/organization/organization";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationSelectorProps {
@@ -27,6 +26,7 @@ interface AutoCompleteOption {
   value: string;
 }
 
+// TODO: Rename to GovtOrganizationSelector
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
@@ -64,6 +64,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
+        limit: 200,
         name: searchQuery || undefined,
       },
       ...headers,
@@ -99,14 +100,11 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     }));
   };
 
-  const getLevelLabel = (org: Organization) => {
-    const orgLevel = getOrgLevel(org.org_type, org.level_cache);
-    return typeof orgLevel === "string" ? orgLevel : orgLevel[0];
-  };
-
   const handleEdit = (level: number) => {
     setSelectedLevels((prev) => prev.slice(0, level));
   };
+
+  const lastLevel = selectedLevels[selectedLevels.length - 1];
 
   return (
     <>
@@ -115,9 +113,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         <div>
           <InputWithError
             key={level.id}
-            label={
-              index === 0 ? ORGANIZATION_LEVELS.govt[0] : getLevelLabel(level)
-            }
+            label={t(`SYSTEM__govt_org_type__${level.metadata?.govt_org_type}`)}
             required={required}
           >
             <div className="flex">
@@ -144,8 +140,11 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         selectedLevels[selectedLevels.length - 1]?.has_children) && (
         <div>
           <InputWithError
-            label={ORGANIZATION_LEVELS.govt[selectedLevels.length]}
-            required={selectedLevels.length === 0 && required}
+            label={t(
+              lastLevel
+                ? `SYSTEM__govt_org_type__${lastLevel.metadata?.govt_org_children_type || "default"}`
+                : "SYSTEM__govt_org_type__default",
+            )}
           >
             <Autocomplete
               value=""

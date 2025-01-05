@@ -1,7 +1,6 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
-import * as React from "react";
 
 import {
   DropdownMenu,
@@ -9,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -65,7 +63,7 @@ export function FacilitySwitcher({
             <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
               <DropdownMenuItem
-                key={facility.name}
+                key={index}
                 onClick={() => navigate(`/facility/${facility.id}`)}
                 className="gap-2 p-2"
               >
@@ -73,7 +71,6 @@ export function FacilitySwitcher({
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

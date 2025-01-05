@@ -25,8 +25,6 @@ import { TokenData } from "@/types/auth/otpToken";
 import OrganizationFilter from "../Organization/components/OrganizationFilter";
 import { FacilityCard } from "./components/FacilityCard";
 
-const STATE_GEO_ID = careConfig.keralaGeoId;
-
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
   const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
@@ -40,16 +38,13 @@ export function FacilitiesPage() {
 
   const { t } = useTranslation();
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
-    // Initialize with STATE_GEO_ID if no district selected
-    return qParams.geo_organization
-      ? [STATE_GEO_ID, qParams.geo_organization]
-      : [STATE_GEO_ID];
+    return qParams.organization ? [qParams.organization] : [];
   });
 
   useEffect(() => {
     if (selectedOrgs.length > 0) {
       const lastSelected = selectedOrgs[selectedOrgs.length - 1];
-      updateQuery({ geo_organization: lastSelected });
+      updateQuery({ organization: lastSelected });
     }
   }, [selectedOrgs]);
 
@@ -60,15 +55,17 @@ export function FacilitiesPage() {
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
         name: qParams.search,
-        geo_organization: qParams.geo_organization,
         facility_type: qParams.facility_type,
+        ...(qParams.organization && {
+          organization: qParams.organization,
+        }),
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
         ...advancedFilter.filter,
       },
     }),
-    enabled: !!qParams.geo_organization,
+    enabled: !!qParams.organization,
   });
 
   const GetLoginHeader = () => {
@@ -84,7 +81,7 @@ export function FacilitiesPage() {
               className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
               onClick={() => navigate("/patient/home")}
             >
-              Patient Dashboard
+              {t("patient_dashboard")}
             </Button>
           </div>
         </header>
@@ -98,7 +95,7 @@ export function FacilitiesPage() {
             className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
             onClick={() => navigate("/login")}
           >
-            Sign in
+            {t("sign_in")}
           </Button>
         </div>
       </header>
@@ -117,12 +114,12 @@ export function FacilitiesPage() {
       </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-5 mb-6">
         <OrganizationFilter
-          skipLevels={[0, 3]}
+          skipLevels={[3]}
           selected={selectedOrgs}
           onChange={(filter, level) => {
-            if (filter.geo_organization) {
+            if (filter.organization) {
               setSelectedOrgs((prev) => {
-                const newOrgId = filter.geo_organization as string;
+                const newOrgId = filter.organization as string;
                 const newOrgs = prev.slice(0, level);
                 newOrgs.push(newOrgId);
                 return newOrgs;
@@ -138,9 +135,9 @@ export function FacilitiesPage() {
           id="facility-search"
           options={[
             {
-              key: "facility_search_placeholder",
+              key: "facility_search_text",
               type: "text" as const,
-              placeholder: t("facility_search_placeholder"),
+              placeholder: t("facility_search_placeholder_text"),
               value: qParams.search || "",
               shortcutKey: "f",
             },

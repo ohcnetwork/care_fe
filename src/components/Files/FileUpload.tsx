@@ -1,10 +1,12 @@
+import { Loader2 } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import Pagination from "@/components/Common/Pagination";
 import Tabs from "@/components/Common/Tabs";
 import FileBlock from "@/components/Files/FileBlock";
@@ -291,25 +293,30 @@ export const FileUpload = (props: FileUploadProps) => {
                       error={fileUpload.error || undefined}
                     />
                     <div className="flex items-center gap-2">
-                      <ButtonV2
+                      <Button
+                        variant="outline_primary"
                         onClick={() =>
                           fileUpload.handleFileUpload(associatedId)
                         }
-                        loading={fileUpload.uploading}
-                        className="w-full"
+                        disabled={fileUpload.uploading} // Disable the button when loading
+                        className={`w-full ${fileUpload.uploading ? "opacity-50" : ""}`}
                         id="upload_file_button"
                       >
-                        <CareIcon icon="l-check" className="" />
+                        {fileUpload.uploading ? (
+                          <Loader2 className="animate-spin mr-2" size={16} />
+                        ) : (
+                          <CareIcon icon="l-check" className="" />
+                        )}
                         {t("upload")}
-                      </ButtonV2>
-                      <ButtonV2
-                        variant="danger"
+                      </Button>
+                      <Button
+                        variant="destructive"
                         onClick={fileUpload.clearFiles}
                         disabled={fileUpload.uploading}
                       >
                         <CareIcon icon="l-trash-alt" className="" />
                         {t("discard")}
-                      </ButtonV2>
+                      </Button>
                     </div>
                     {!!fileUpload.progress && (
                       <LinearProgressWithLabel value={fileUpload.progress} />

@@ -156,7 +156,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
-        <div className="flex justify-end">
+        <div className="flex justify-center md:justify-end">
           <AddPatientButton />
         </div>
         <div className="space-y-6 mt-6">

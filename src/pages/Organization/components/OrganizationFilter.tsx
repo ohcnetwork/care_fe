@@ -15,15 +15,14 @@ import {
 import useDebouncedState from "@/hooks/useDebouncedState";
 import { FilterState } from "@/hooks/useFilters";
 
-import {
-  FACILITY_TYPES,
-  ORGANIZATION_LEVELS,
-  OptionsType,
-} from "@/common/constants";
+import { FACILITY_TYPES, OptionsType } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+
+// TODO: fetch from the backend instead
+const govtOrgLevels = ["District", "LocalBody", "Ward"];
 
 interface OrganizationFilterProps {
   selected: string[];
@@ -95,10 +94,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     const firstLevel = selectedLevels[0];
     setSelectedLevels((prev) => {
       const newLevels = prev.slice(0, 1);
-      onChange(
-        { geo_organization: firstLevel.id, facility_type: undefined },
-        0,
-      );
+      onChange({ organization: firstLevel.id, facility_type: undefined }, 0);
       return newLevels;
     });
   };
@@ -113,14 +109,15 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       queryKey: ["organizations-available", getParentId(index), levelSearch],
       queryFn: query(organizationApi.getPublicOrganizations, {
         queryParams: {
-          parent: getParentId(index),
+          ...(index > 0 && { parent: getParentId(index) }),
+          ...(index === 0 && { level_cache: 1 }),
           name: levelSearch || undefined,
         },
       }),
       enabled:
         !skip &&
         index <= selectedLevels.length &&
-        selectedLevels[index - 1] !== undefined,
+        (index === 0 || selectedLevels[index - 1] !== undefined),
     });
     if (skip) return null;
     const options = getOrganizationOptions(availableOrgs?.results || []);
@@ -136,14 +133,12 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           );
 
           if (selectedOrg) {
-            onChange({ geo_organization: selectedOrg.id }, index);
+            onChange({ organization: selectedOrg.id }, index);
             setLevelSearch("");
           }
         }}
         onSearch={(value) => setLevelSearch(value)}
-        placeholder={t(
-          `select_${ORGANIZATION_LEVELS.govt[index].toLowerCase()}`,
-        )}
+        placeholder={t(`select_${govtOrgLevels[index].toLowerCase()}`)}
         disabled={index > selectedLevels.length}
         align="start"
       />
@@ -175,7 +170,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      {ORGANIZATION_LEVELS.govt.map((_, index) =>
+      {govtOrgLevels.map((_, index) =>
         RenderOrganizationLevel(selectedLevels[index] || undefined, index),
       )}
       <Button onClick={clearSelections} variant="white">
