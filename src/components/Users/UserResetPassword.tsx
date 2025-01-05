@@ -197,9 +197,11 @@ export default function UserResetPassword({
         onClick={() => setIsEditing(!isEditing)}
         type="button"
         id="change-edit-password-button"
-        className="flex items-center gap-2 px-3 py-1.5  shadow-sm "
       >
-        <CareIcon icon={isEditing ? "l-times" : "l-edit"} className="h-4 w-4" />
+        <CareIcon
+          icon={isEditing ? "l-times" : "l-edit"}
+          className="h-4 w-4 ml-2"
+        />
         {isEditing ? t("cancel") : t("change_password")}
       </Button>
     </div>

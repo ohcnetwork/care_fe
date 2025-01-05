@@ -19,12 +19,12 @@ export type AuthorizedElementProps = {
    *
    * **Example:**
    * ```jsx
-   * <AuthorizedButton authorizedFor={(role) => !role.includes('ReadOnly')}>
+   * <ButtonV2 authorizedFor={(role) => !role.includes('ReadOnly')}>
    *   Delete Facility
-   * </AuthorizedButton>
-   * <AuthorizedButton authorizedFor={AuthorizeFor.Admins}>
+   * </ButtonV2>
+   * <ButtonV2 authorizedFor={AuthorizeFor.Admins}>
    *   Delete Facility
-   * </AuthorizedButton>
+   * </ButtonV2>
    * ```
    */
   authorizeFor?: AuthorizedForCB | undefined;

@@ -2,10 +2,8 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
-import { ButtonVariant } from "@/components/ui/button";
-
 interface CalloutProps {
-  variant?: ButtonVariant;
+  variant?: "primary" | "secondary" | "warning" | "alert" | "danger";
   className?: string;
   badge: string;
   children: React.ReactNode;
@@ -15,48 +13,30 @@ export default function Callout({
   variant = "primary",
   ...props
 }: CalloutProps) {
-  const variantClasses: Record<ButtonVariant, string> = {
-    primary: "bg-primary-100 text-primary-900 shadow-sm",
-    outline: "border border-gray-200 bg-white text-gray-900 shadow-sm",
-    secondary: "bg-gray-100 text-gray-900 shadow-sm",
-    destructive: "bg-red-100 text-red-900 shadow-sm",
-    primary_gradient:
-      "bg-gradient-to-b from-primary-700 to-primary-800 text-white shadow-lg",
-    ghost: "hover:bg-gray-100 text-gray-900 shadow-sm",
-    link: "text-gray-900 underline-offset-4 hover:underline",
-    white: "bg-white text-gray-900 shadow-sm",
-    alert: "bg-alert-100 text-alert-900 shadow-sm",
-    warning: "bg-warning-100 text-warning-900 shadow-sm",
-    outline_primary:
-      "border border-primary-700 bg-white text-primary-700 shadow-sm",
-  };
-
-  const badgeVariantClasses: Record<ButtonVariant, string> = {
-    primary: "border-primary-300",
-    outline: "border-gray-200",
-    secondary: "border-gray-300",
-    destructive: "border-red-300",
-    primary_gradient: "border-primary-700",
-    ghost: "border-gray-100",
-    link: "border-transparent",
-    white: "border-gray-200",
-    alert: "border-alert-300",
-    warning: "border-warning-300",
-    outline_primary: "border-primary-700",
-  };
-
   return (
     <div
       className={cn(
         "flex h-min gap-2 rounded-md px-2 py-1.5 text-sm/tight",
-        variantClasses[variant],
+        {
+          primary: "bg-primary-100/50 text-primary-800",
+          secondary: "bg-gray-50 text-gray-700",
+          warning: "bg-warning-50 text-warning-700",
+          alert: "bg-purple-50 text-purple-500",
+          danger: "bg-danger-50 text-danger-600",
+        }[variant],
         props.className,
       )}
     >
       <div
         className={cn(
           "h-min rounded-full border bg-white px-2 py-0.5",
-          badgeVariantClasses[variant],
+          {
+            primary: "border-primary-200",
+            secondary: "border-secondary-300",
+            warning: "border-warning-300",
+            alert: "border-purple-300",
+            danger: "border-danger-300",
+          }[variant],
         )}
       >
         <span className="font-medium">{props.badge}</span>

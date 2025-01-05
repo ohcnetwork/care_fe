@@ -108,7 +108,7 @@ export default function UserAvatar({
                 >
                   <Button
                     variant="white"
-                    onClick={(_) => setEditAvatar(!editAvatar)}
+                    onClick={() => setEditAvatar(!editAvatar)}
                     type="button"
                     id="change-avatar"
                     disabled
@@ -119,7 +119,7 @@ export default function UserAvatar({
               ) : (
                 <Button
                   variant="white"
-                  onClick={(_) => setEditAvatar(!editAvatar)}
+                  onClick={() => setEditAvatar(!editAvatar)}
                   type="button"
                   id="change-avatar"
                 >

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button, CommonButtonProps } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 
 import Pagination from "@/components/Common/Pagination";
 
@@ -118,6 +118,10 @@ const WhenLoading = <TItem extends object>(props: WhenEmptyProps) => {
 };
 
 PaginatedList.WhenLoading = WhenLoading;
+
+interface CommonButtonProps extends ButtonProps {
+  label?: string;
+}
 
 const Refresh = ({ label = "Refresh", ...props }: CommonButtonProps) => {
   const { loading, refetch } = useContextualized<object>();
