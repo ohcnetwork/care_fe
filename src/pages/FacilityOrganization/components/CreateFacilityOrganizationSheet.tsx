@@ -93,7 +93,7 @@ export default function CreateFacilityOrganizationSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button variant="primary_gradient">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           Create Organization
         </Button>

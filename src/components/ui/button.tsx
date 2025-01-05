@@ -28,6 +28,10 @@ const buttonVariants = cva(
           "text-white border border-primary-900 rounded-lg font-medium relative overflow-hidden bg-gradient-to-b from-primary-700 to-primary-800 hover:from-primary-800 hover:to-primary-900 shadow-lg",
         white:
           "bg-white border border-secondary-400 text-gray-900 shadow-sm hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80",
+        warning:
+          "bg-warning-100 text-warning-900 border border-warning-300 shadow-sm hover:bg-warning-100/80 dark:bg-warning-900 dark:text-warning-50 dark:hover:bg-warning-900/80",
+        alert:
+          "bg-alert-100 text-alert-900 border border-alert-300 shadow-sm hover:bg-alert-100/80 dark:bg-alert-900 dark:text-alert-50 dark:hover:bg-alert-900/80",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -43,6 +47,19 @@ const buttonVariants = cva(
     },
   },
 );
+
+export type ButtonVariant =
+  | "primary"
+  | "outline"
+  | "secondary"
+  | "destructive"
+  | "primary_gradient"
+  | "ghost"
+  | "link"
+  | "white"
+  | "alert"
+  | "warning"
+  | "outline_primary";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,

@@ -14,12 +14,12 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import CircularProgress from "@/components/Common/CircularProgress";
 import DialogModal from "@/components/Common/Dialog";
 import { StateInterface } from "@/components/Files/FileUpload";
-
-import { FileUploadModel } from "../Patient/models";
+import { FileUploadModel } from "@/components/Patient/models";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 
@@ -211,24 +211,27 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
             <div className="flex gap-4 mt-2 md:mt-0">
               {downloadURL && downloadURL.length > 0 && (
-                <ButtonV2>
+                <Button variant="primary">
                   <a
                     href={downloadURL}
                     className="text-white"
                     download={`${file_state.name}.${file_state.extension}`}
                   >
                     <CareIcon icon="l-file-download" className="h-4 w-4" />
-                    <span>Download</span>
+                    <span>{t("download")}</span>
                   </a>
-                </ButtonV2>
+                </Button>
               )}
-              <Cancel onClick={onClose} label="Close" />
+              <Button variant="outline" type="button" onClick={onClose}>
+                {t("close")}
+              </Button>
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
             {uploadedFiles && uploadedFiles.length > 1 && (
-              <ButtonV2
-                className="cursor-pointer bg-primary-500 rounded-md mr-4"
+              <Button
+                variant="primary"
+                className="mr-4"
                 onClick={() => handleNext(index - 1)}
                 disabled={index <= 0}
                 aria-label="Previous file"
@@ -237,7 +240,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 }
               >
                 <CareIcon icon="l-arrow-left" className="h-4 w-4" />
-              </ButtonV2>
+              </Button>
             )}
             <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
@@ -279,8 +282,9 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
 
             {uploadedFiles && uploadedFiles.length > 1 && (
-              <ButtonV2
-                className="cursor-pointer bg-primary-500 rounded-md ml-4"
+              <Button
+                variant="primary"
+                className="ml-4"
                 onClick={() => handleNext(index + 1)}
                 disabled={index >= uploadedFiles.length - 1}
                 aria-label="Next file"
@@ -289,7 +293,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 }
               >
                 <CareIcon icon="l-arrow-right" className="h-4 w-4" />
-              </ButtonV2>
+              </Button>
             )}
           </div>
           <div className="flex items-center justify-between">
@@ -330,9 +334,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       false,
                     ],
                   ].map((button, index) => (
-                    <ButtonV2
-                      border
-                      ghost
+                    <Button
+                      variant="ghost"
                       key={index}
                       onClick={button[2] as () => void}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
@@ -345,7 +348,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         />
                       )}
                       {button[0] as string}
-                    </ButtonV2>
+                    </Button>
                   ))}
                 </>
               )}
@@ -366,9 +369,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       page === numPages,
                     ],
                   ].map((button, index) => (
-                    <ButtonV2
-                      border
-                      ghost
+                    <Button
+                      variant="ghost"
                       key={index}
                       onClick={button[2] as () => void}
                       className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
@@ -381,7 +383,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         />
                       )}
                       {button[0] as string}
-                    </ButtonV2>
+                    </Button>
                   ))}
                 </>
               )}

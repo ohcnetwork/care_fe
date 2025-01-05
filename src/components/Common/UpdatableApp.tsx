@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 
 import { classNames } from "@/Utils/utils";
 
@@ -136,14 +136,9 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
               A new version of CARE is available
             </p>
           </span>
-          <ButtonV2
-            disabled={isUpdating}
-            onClick={updateApp}
-            variant="alert"
-            className="bg-alert-500 enabled:hover:bg-alert-400"
-          >
+          <Button disabled={isUpdating} onClick={updateApp} variant="alert">
             {isUpdating ? "Updating..." : "Update"}
-          </ButtonV2>
+          </Button>
         </div>
       </Popover>
     </AlertTransition>

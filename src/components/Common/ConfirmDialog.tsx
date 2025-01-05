@@ -1,4 +1,5 @@
-import { ButtonVariant, Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button, ButtonVariant } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 
 type ConfirmDialogProps = {
@@ -30,15 +31,18 @@ const ConfirmDialog = ({
     <DialogModal {...props}>
       {children}
       <div className="mt-6 flex w-full flex-col justify-end gap-2 md:flex-row">
-        <Cancel onClick={props.onClose} label={cancelLabel} />
-        <Submit
+        <Button variant="outline" type="button" onClick={props.onClose}>
+          {cancelLabel}
+        </Button>
+        <Button
+          type="submit"
+          variant={variant}
           name={name ?? "submit"}
           onClick={onConfirm}
-          variant={variant}
           disabled={disabled}
         >
           {action}
-        </Submit>
+        </Button>
       </div>
     </DialogModal>
   );

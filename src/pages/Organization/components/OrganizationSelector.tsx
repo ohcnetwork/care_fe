@@ -84,6 +84,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
+        limit: 200,
         name: searchQuery || undefined,
       },
       ...headers,

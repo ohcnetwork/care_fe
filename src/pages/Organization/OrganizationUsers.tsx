@@ -67,7 +67,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   }
 
   return (
-    <OrganizationLayout id={id}>
+    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Users</h2>
