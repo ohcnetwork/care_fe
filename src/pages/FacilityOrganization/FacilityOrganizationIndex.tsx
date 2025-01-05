@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,6 +28,7 @@ export default function FacilityOrganizationIndex({
 }: {
   facilityId: string;
 }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
@@ -59,17 +61,17 @@ export default function FacilityOrganizationIndex({
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organizations">
+      <Page title={t("organizations")}>
         <div className="flex justify-end mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
-              No Organizations Found
+              {t("organization_not_found")}
             </CardTitle>
             <CardDescription className="text-center">
-              You don't have access to any organizations yet.
+              {t("organization_access")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -77,8 +79,7 @@ export default function FacilityOrganizationIndex({
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
-              Organizations help you manage facilities, users, and resources
-              efficiently. Contact your administrator to get access.
+              {t("organization_manage")}
             </p>
           </CardContent>
         </Card>
@@ -87,7 +88,7 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title="Facility Organizations" hideBack={true}>
+    <Page title={t("organization_facility")} hideBack={true}>
       <div className="flex justify-end mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
@@ -109,7 +110,7 @@ export default function FacilityOrganizationIndex({
                   href={`/facility/${facilityId}/organization/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
-                  View Details
+                  {t("view_details")}
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Link>
               </Button>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
@@ -42,6 +43,7 @@ export default function OrganizationLayout({
   children,
 }: Props) {
   const path = usePath() || "";
+  const { t } = useTranslation();
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -114,7 +116,7 @@ export default function OrganizationLayout({
   }
   // add loading state
   if (!org) {
-    return <div>Not found</div>;
+    return <div>{t("organization_not_found")}</div>;
   }
 
   const orgParents: OrganizationParent[] = [];
