@@ -31,6 +31,7 @@ export interface FacilityModel {
   facility_flags?: FeatureFlag[];
   latitude?: string;
   longitude?: string;
+  is_public?: boolean;
 }
 
 export interface OptionsType {
