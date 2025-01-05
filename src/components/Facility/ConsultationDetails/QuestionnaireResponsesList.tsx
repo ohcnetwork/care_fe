@@ -258,7 +258,6 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                         // New structured response rendering
                         Object.entries(item.structured_responses).map(
                           ([type, response]) => {
-                            console.log("LOGGG", type, response);
                             return (
                               <StructuredResponseView
                                 key={response.id}

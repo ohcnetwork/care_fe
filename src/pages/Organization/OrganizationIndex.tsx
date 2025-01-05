@@ -17,8 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
-import type { Organization } from "@/types/organization/organization";
-import { getOrgLevel } from "@/types/organization/organization";
+import {
+  type Organization,
+  getOrgLabel,
+} from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 export default function OrganizationIndex() {
@@ -88,7 +90,7 @@ export default function OrganizationIndex() {
                   {org.name}
                 </CardTitle>
                 <CardDescription>
-                  {getOrgLevel(org.org_type, org.level_cache)}
+                  {getOrgLabel(org.org_type, org.metadata)}
                 </CardDescription>
               </div>
             </CardHeader>
