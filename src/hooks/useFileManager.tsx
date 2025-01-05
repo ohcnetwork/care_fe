@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import DialogModal from "@/components/Common/Dialog";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
 import { StateInterface } from "@/components/Files/FileUpload";
@@ -306,8 +308,16 @@ export default function useFileManager(
             />
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Cancel onClick={() => setArchiveDialogueOpen(null)} />
-            <Submit disabled={archiving} label="Proceed" />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setArchiveDialogueOpen(null)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button type="submit" variant="primary" disabled={archiving}>
+              {t("proceed")}
+            </Button>
           </div>
         </form>
       </DialogModal>
@@ -384,7 +394,13 @@ export default function useFileManager(
           ))}
         </div>
         <div className="mt-10 flex justify-end">
-          <Cancel onClick={(_) => setArchiveDialogueOpen(null)} />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setArchiveDialogueOpen(null)}
+          >
+            {t("cancel")}
+          </Button>
         </div>
       </DialogModal>
       <DialogModal
@@ -425,15 +441,24 @@ export default function useFileManager(
             />
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Cancel onClick={() => setEditDialogueOpen(null)} />
-            <Submit
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditDialogueOpen(null)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
               disabled={
                 editing === true ||
                 editDialogueOpen?.name === "" ||
                 editDialogueOpen?.name?.length === 0
               }
-              label="Proceed"
-            />
+            >
+              {t("proceed")}
+            </Button>
           </div>
         </form>
       </DialogModal>

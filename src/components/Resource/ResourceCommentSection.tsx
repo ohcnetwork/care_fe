@@ -2,7 +2,8 @@ import { useState } from "react";
 
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import CircularProgress from "@/components/Common/CircularProgress";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 
@@ -51,14 +52,15 @@ const CommentSection = (props: { id: string }) => {
           />
 
           <div className="flex w-full justify-end">
-            <ButtonV2
+            <Button
+              variant="primary"
               onClick={async () => {
                 await onSubmitComment();
                 query.refetch();
               }}
             >
               Post Your Comment
-            </ButtonV2>
+            </Button>
           </div>
           <div className="w-full">
             <div>

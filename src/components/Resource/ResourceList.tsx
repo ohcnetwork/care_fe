@@ -1,10 +1,10 @@
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { ExportButton } from "@/components/Common/Export";
@@ -90,34 +90,38 @@ export default function ListView() {
               {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
                 <dt
                   title={t("resource_status")}
-                  className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center  overflow-hidden whitespace-nowrap text-ellipsis truncate"
+                  className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center overflow-hidden whitespace-nowrap text-ellipsis truncate"
                 >
-                  <Chip
-                    size="small"
+                  <Badge
                     variant="secondary"
-                    startIcon="l-truck"
-                    text={t(`${resource.status}`)}
                     className="text-lg font-bold text-sky-600 truncate bg-gray-300 rounded-full uppercase text-center"
-                  />
+                  >
+                    <span className="mr-1">
+                      <CareIcon icon="l-truck" />
+                    </span>
+                    {t(`${resource.status}`)}
+                  </Badge>
                 </dt>
               ) : (
                 <dt
                   title={t("resource_status")}
-                  className="w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full  leading-4"
+                  className="w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full leading-4"
                 >
-                  <Chip
-                    size="small"
+                  <Badge
                     variant={
                       resource.status === "APPROVED" ? "primary" : "secondary"
                     }
-                    startIcon="l-truck"
-                    text={t(`${resource.status}`)}
                     className={`text-lg font-bold rounded-full uppercase ${
                       resource.status === "APPROVED"
                         ? "bg-sky-200"
-                        : "bg-yellow-200 "
+                        : "bg-yellow-200"
                     }`}
-                  />
+                  >
+                    <span className="mr-1">
+                      <CareIcon icon="l-truck" />
+                    </span>
+                    {t(`${resource.status}`)}
+                  </Badge>
                 </dt>
               )}
 
