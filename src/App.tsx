@@ -55,7 +55,6 @@ const App = () => {
 
               {/* Integrations */}
               <Integrations.Sentry disabled={!import.meta.env.PROD} />
-              <Integrations.Plausible />
             </HistoryAPIProvider>
             <Sonner
               position="top-right"
