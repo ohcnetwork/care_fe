@@ -162,7 +162,7 @@ export const PatientHome = (props: {
                         (!patientData?.last_consultation ||
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
-                            <ButtonV2
+                            <Button
                               id="create-consultation"
                               className="w-full"
                               size="default"
@@ -179,7 +179,7 @@ export const PatientHome = (props: {
                                 />
                                 {t("add_consultation")}
                               </span>
-                            </ButtonV2>
+                            </Button>
                           </div>
                         )} */}
                     </div>
@@ -257,7 +257,7 @@ export const PatientHome = (props: {
 
                     {/* {NonReadOnlyUsers && (
                       <div>
-                        <ButtonV2
+                        <Button
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
@@ -271,7 +271,7 @@ export const PatientHome = (props: {
                               ? t("update_volunteer")
                               : t("assign_to_volunteer")}
                           </span>
-                        </ButtonV2>
+                        </Button>
                       </div>
                     )} */}
                   </div>

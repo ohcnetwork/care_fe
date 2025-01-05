@@ -4,7 +4,8 @@ import * as XLSX from "xlsx";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import ExcelViewer from "@/components/Common/ExcelViewer";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
@@ -248,7 +249,9 @@ export default function ExcelFileDragAndDrop({
           Upload a file
         </label>
         <div className="sm:flex-1" />
-        <Cancel
+        <Button
+          type="button"
+          variant="outline"
           onClick={() => {
             closeModal();
             setErrors([]);
@@ -257,8 +260,12 @@ export default function ExcelFileDragAndDrop({
             dragProps.setFileDropError("");
           }}
           disabled={loading}
-        />
-        <Submit
+        >
+          {t("close")}
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
           data-testid="import-btn"
           onClick={() => handleSubmit(validData)}
           disabled={loading || !selectedFile || validData.length === 0}
@@ -273,7 +280,7 @@ export default function ExcelFileDragAndDrop({
               ? "Importing..."
               : `Import ${validData.length} valid fields`}
           </span>
-        </Submit>
+        </Button>
       </div>
     </div>
   );

@@ -21,11 +21,14 @@ export const Updates = (props: PatientProps) => {
     <div className="mt-4 px-3 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold leading-tight">{t("updates")}</h2>
-        <Link
-          href={`/facility/${facilityId}/patient/${patientId}/questionnaire`}
-        >
-          <Button>Add Patient Updates</Button>
-        </Link>
+        <Button asChild variant="outline_primary">
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/questionnaire`}
+          >
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("add_patient_updates")}
+          </Link>
+        </Button>
       </div>
 
       <PaginatedList
