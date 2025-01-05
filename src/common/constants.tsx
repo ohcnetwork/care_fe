@@ -1762,12 +1762,3 @@ export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
  * @deprecated use `LocalStorageKeys.patientTokenKey` instead
  */
 export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
-
-// organization_levels map based of type. for govt
-// thought: This might be better placed in the organization types files
-export const ORGANIZATION_LEVELS = {
-  govt: ["State", "District", "LocalBody", "Ward"],
-  team: ["Team"],
-  role: ["Role"],
-  other: ["Other"],
-};
