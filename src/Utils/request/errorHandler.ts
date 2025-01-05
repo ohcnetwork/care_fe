@@ -2,7 +2,7 @@ import { navigate } from "raviger";
 import { toast } from "sonner";
 
 import * as Notifications from "@/Utils/Notifications";
-import { HTTPError } from "@/Utils/request/types";
+import { HTTPError, HTTPErrorCause } from "@/Utils/request/types";
 
 export function handleHttpError(error: Error) {
   if (error.name === "AbortError") {
@@ -31,7 +31,18 @@ export function handleHttpError(error: Error) {
   }
 
   if (isBadRequest(error)) {
-    handleBadRequest(cause);
+    const errs = cause?.errors;
+    if (isPydanticError(errs)) {
+      handlePydanticErrors(errs);
+      return;
+    }
+
+    if (isStructuredError(cause)) {
+      handleStructuredErrors(cause);
+      return;
+    }
+
+    Notifications.BadRequest({ errs });
     return;
   }
 
@@ -71,6 +82,24 @@ type PydanticError = {
   url: string;
 };
 
+function isStructuredError(cause: HTTPErrorCause): boolean {
+  return (
+    cause !== undefined && typeof cause === "object" && !Array.isArray(cause)
+  );
+}
+
+function handleStructuredErrors(cause: HTTPErrorCause) {
+  if (cause && typeof cause === "object" && !Array.isArray(cause)) {
+    Object.values(cause).forEach((value) => {
+      if (Array.isArray(value)) {
+        value.forEach((err) => {
+          toast.error(`${err}`);
+        });
+      }
+    });
+  }
+}
+
 function isPydanticError(errors: unknown): errors is PydanticError[] {
   return (
     Array.isArray(errors) &&
@@ -91,26 +120,4 @@ function handlePydanticErrors(errors: PydanticError[]) {
       duration: 8000,
     });
   });
-}
-
-function handleBadRequest(cause: any) {
-  const errs = cause?.errors;
-
-  if (isPydanticError(errs)) {
-    handlePydanticErrors(errs);
-    return;
-  }
-
-  if (cause && typeof cause === "object" && !Array.isArray(cause)) {
-    Object.values(cause).forEach((value) => {
-      if (Array.isArray(value)) {
-        value.forEach((err) => {
-          toast.error(`${err}`);
-        });
-      }
-    });
-    return;
-  }
-
-  Notifications.BadRequest({ errs: cause });
 }
