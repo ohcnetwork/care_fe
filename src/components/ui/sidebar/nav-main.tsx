@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function NavMain({
@@ -20,6 +21,13 @@ export function NavMain({
     icon?: string;
   }[];
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -31,10 +39,10 @@ export function NavMain({
               className={
                 "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
               }
+              onClick={handleLinkClick}
             >
               <ActiveLink
                 href={link.url}
-                activeClass="bg-white text-green-700 shadow"
                 exactActiveClass="bg-white text-green-700 shadow"
               >
                 {link.icon && <CareIcon icon={link.icon as IconName} />}

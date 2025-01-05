@@ -62,7 +62,7 @@ function generateFacilityLinks(
     { name: t("encounters"), url: `${baseUrl}/encounters`, icon: "d-patient" },
     // { name: t("assets"), url: `${baseUrl}/assets`, icon: "d-folder" },
     // { name: t("shifting"), url: "/shifting", icon: "d-ambulance" },
-    { name: t("resource"), url: "/resource", icon: "d-book-open" },
+    { name: t("resource"), url: "/resource/board", icon: "d-book-open" },
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
     // { name: t("All users"), url: "/users", icon: "d-people" },
     {
