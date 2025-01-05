@@ -174,23 +174,25 @@ export default function OrganizationLayout({
       {/* Navigation */}
       <div className="mt-4">
         <Menubar>
-          {navItems.map((item) => (
-            <MenubarMenu key={item.path}>
-              <MenubarTrigger
-                className={`${
-                  path === item.path
-                    ? "font-medium text-primary-700 bg-gray-100"
-                    : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                }`}
-                asChild
-              >
-                <Link href={item.path} className="cursor-pointer">
-                  <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-          ))}
+          {navItems
+            .filter((item) => item.visibility)
+            .map((item) => (
+              <MenubarMenu key={item.path}>
+                <MenubarTrigger
+                  className={`${
+                    path === item.path
+                      ? "font-medium text-primary-700 bg-gray-100"
+                      : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
+                  }`}
+                  asChild
+                >
+                  <Link href={item.path} className="cursor-pointer">
+                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Link>
+                </MenubarTrigger>
+              </MenubarMenu>
+            ))}
         </Menubar>
       </div>
       {/* Page Content */}
