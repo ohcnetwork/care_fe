@@ -41,7 +41,7 @@ import {
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";

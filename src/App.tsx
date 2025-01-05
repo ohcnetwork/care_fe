@@ -62,9 +62,9 @@ const App = () => {
               theme="light"
               richColors
               expand
-              // Voluntarily passing empty object as a workaround for `richColors`
-              // to work. Refer: https://github.com/shadcn-ui/ui/issues/2234.
-              toastOptions={{}}
+              // For `richColors` to work, pass at-least an empty object.
+              // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+              toastOptions={{ closeButton: true }}
             />
             <Toaster />
           </PluginEngine>

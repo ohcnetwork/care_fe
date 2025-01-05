@@ -9,7 +9,7 @@ import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/ut
 import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 import { Appointment } from "@/components/Schedule/types";
 
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 interface Props {
   id?: string;
@@ -76,8 +76,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
             <div>
               <Label>{t("practitioner")}:</Label>
               <p className="text-sm font-semibold">
-                {appointment.resource.first_name}{" "}
-                {appointment.resource.last_name}
+                {formatName(appointment.user)}
               </p>
             </div>
             <div>

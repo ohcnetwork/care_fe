@@ -11,7 +11,6 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
@@ -21,16 +20,6 @@ export default function FacilityUsers(props: { facilityId: number }) {
   });
   const [activeTab, setActiveTab] = useState(0);
   const { facilityId } = props;
-
-  const { data: facilityData } = useTanStackQueryInstead(
-    routes.getAnyFacility,
-    {
-      pathParams: {
-        id: facilityId,
-      },
-      prefetch: facilityId !== undefined,
-    },
-  );
 
   const { data: userListData, isLoading: userListLoading } = useQuery({
     queryKey: ["facilityUsers", facilityId],
@@ -44,15 +33,11 @@ export default function FacilityUsers(props: { facilityId: number }) {
     return <div>Loading...</div>;
   }
   if (!userListData) {
-    return <div>No users found</div>;
+    return <div>{t("no_users_found")}</div>;
   }
 
   return (
-    <Page
-      title={`${t("users")} - ${facilityData?.name}`}
-      hideBack={true}
-      breadcrumbs={false}
-    >
+    <Page title={`${t("users")}`} hideBack={true} breadcrumbs={false}>
       <CountBlock
         text={t("total_users")}
         count={userListData.count}
