@@ -18,7 +18,6 @@ import query from "@/Utils/request/query";
 import {
   Organization,
   OrganizationParent,
-  getOrgLevel,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -73,6 +72,7 @@ export default function OrganizationLayout({
     queryFn: query(organizationApi.get, {
       pathParams: { id },
     }),
+    enabled: !!id,
   });
 
   if (isLoading) {
@@ -93,10 +93,7 @@ export default function OrganizationLayout({
   }
 
   return (
-    <Page
-      title={`${org.name} ${getOrgLevel(org.org_type, org.level_cache)}`}
-      breadcrumbs={false}
-    >
+    <Page title={`${org.name}`} breadcrumbs={false}>
       {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
       <Breadcrumb className="mt-1">
         <BreadcrumbList>

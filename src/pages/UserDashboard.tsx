@@ -8,7 +8,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
-import { getOrgLevel } from "@/types/organization/organization";
+import { getOrgLabel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
   const user = useAuthUser();
@@ -118,8 +118,7 @@ export default function UserDashboard() {
                         {org.name}
                       </h3>
                       <p className="text-xs md:text-sm text-muted-foreground truncate">
-                        {org.org_type} ·{" "}
-                        {getOrgLevel(org.org_type, org.level_cache)}
+                        {getOrgLabel(org.org_type, org.metadata)}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
