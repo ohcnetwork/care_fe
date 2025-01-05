@@ -105,7 +105,6 @@ export function QuestionnaireForm({
   }
 
   if (questionnaireError) {
-    console.log(questionnaireError);
     return (
       <Alert variant="destructive" className="m-4">
         <AlertTitle>{t("questionnaire_error_loading")}</AlertTitle>
