@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
 
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -13,6 +12,8 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+
+import { Card, CardContent } from "../ui/card";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
@@ -42,7 +43,49 @@ export default function FacilityUsers(props: { facilityId: number }) {
   });
 
   if (userListLoading) {
-    return <Loading />;
+    return (
+      <div className="px-6">
+        <div className="h-8 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+        <div className="flex items-center mb-4">
+          <div className="h-16 w-16 bg-gray-200 flex h-16 w-16 items-center justify-center rounded-lg animate-pulse mr-3"></div>
+          <div>
+            <div className="h-4 w-14 bg-gray-200 rounded animate-pulse mb-1"></div>
+            <div className="h-12 w-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-10 w-72 bg-gray-200 rounded animate-pulse"></div>
+          <div className="flex space-x-2">
+            <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-start">
+                  <div className="h-16 w-16 bg-gray-200 rounded-lg animate-pulse mr-4"></div>{" "}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="h-6 w-24 bg-gray-200 rounded animate-pulse mb-1"></div>{" "}
+                        <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>{" "}
+                      </div>
+                      <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>{" "}
+                    </div>
+                    <div className="mt-2">
+                      <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-1"></div>
+                      <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
   if (!userListData) {
     return <div>No users found</div>;
