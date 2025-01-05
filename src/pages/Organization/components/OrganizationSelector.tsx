@@ -27,6 +27,31 @@ interface AutoCompleteOption {
   value: string;
 }
 
+const formatName = (name: string) => {
+  return name
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (l: string) => l.toUpperCase());
+};
+
+const formatOrgName = (org: Organization) => {
+  let name = org.name;
+  const orgType: string | undefined = org.metadata?.govt_org_type;
+  if (
+    orgType === "block_panchayat" ||
+    orgType === "municipality" ||
+    orgType === "corporation"
+  ) {
+    name = `${org.name} ${formatName(orgType)}`;
+  } else if (orgType === "ward") {
+    const orgId = org.metadata?.govt_org_id;
+    if (orgId) {
+      name = `${orgId}: ${org.name}`;
+    }
+  }
+
+  return name;
+};
+
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
@@ -94,7 +119,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
   ): AutoCompleteOption[] => {
     if (!orgs) return [];
     return orgs.map((org) => ({
-      label: org.name,
+      label: formatOrgName(org),
       value: org.id,
     }));
   };
@@ -116,14 +141,18 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
           <InputWithError
             key={level.id}
             label={
-              index === 0 ? ORGANIZATION_LEVELS.govt[0] : getLevelLabel(level)
+              !level.metadata?.govt_org_type
+                ? index === 0
+                  ? ORGANIZATION_LEVELS.govt[0]
+                  : getLevelLabel(level)
+                : formatName(level.metadata.govt_org_type)
             }
             required={required}
           >
             <div className="flex">
               <div className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300">
                 <div className="w-full text-nowrap overflow-x-auto">
-                  {level.name}
+                  {formatOrgName(level)}
                 </div>
               </div>
               <Button
@@ -144,7 +173,16 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         selectedLevels[selectedLevels.length - 1]?.has_children) && (
         <div>
           <InputWithError
-            label={ORGANIZATION_LEVELS.govt[selectedLevels.length]}
+            key={"next-level"}
+            label={
+              selectedLevels[selectedLevels.length - 1]?.metadata
+                ?.govt_org_children_type
+                ? formatName(
+                    selectedLevels[selectedLevels.length - 1]?.metadata
+                      ?.govt_org_children_type,
+                  )
+                : ORGANIZATION_LEVELS.govt[selectedLevels.length]
+            }
             required={selectedLevels.length === 0 && required}
           >
             <Autocomplete
