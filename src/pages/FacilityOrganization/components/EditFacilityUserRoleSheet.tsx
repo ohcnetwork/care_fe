@@ -151,7 +151,7 @@ export default function EditUserRoleSheet({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+            <div className="sm:grid grid-cols-2 gap-4 pt-2 border-t">
               <div>
                 <span className="text-sm text-gray-500">Username</span>
                 <p className="text-sm font-medium">{userRole.user.username}</p>
