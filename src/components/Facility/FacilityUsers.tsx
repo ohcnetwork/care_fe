@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import Page from "@/components/Common/Page";
 import UserListView from "@/components/Users/UserListAndCard";
 
@@ -11,9 +14,6 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-
-import { Card, CardContent } from "../ui/card";
-import { Skeleton } from "../ui/skeleton";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
