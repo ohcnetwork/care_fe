@@ -2,10 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,8 +23,6 @@ import { TokenData } from "@/types/auth/otpToken";
 
 import { FacilityCard } from "./components/FacilityCard";
 
-const STATE_GEO_ID = careConfig.keralaGeoId;
-
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
   const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
@@ -47,30 +42,19 @@ export function FacilitiesPage() {
     queryKey: ["facilities", qParams],
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
-        geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        ...(qParams.organization && {
+          organization: qParams.organization,
+        }),
+
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
         ...advancedFilter.filter,
       },
     }),
-    enabled: !!qParams.geo_organization || !!STATE_GEO_ID,
+    enabled: !!qParams.organization,
   });
 
-  useEffect(() => {
-    if (qParams.district) {
-      updateQuery({ geo_organization: qParams.district });
-    } else {
-      updateQuery({ geo_organization: STATE_GEO_ID });
-    }
-  }, [qParams.district, STATE_GEO_ID]);
-
-  /*   useEffect(() => {
-    if (!qParams.district && qParams.local_body) {
-      advancedFilter.removeFilters(["local_body"]);
-    }
-  }, [advancedFilter, qParams]);
- */
   const GetLoginHeader = () => {
     if (
       tokenData &&
@@ -120,47 +104,19 @@ export function FacilitiesPage() {
           id="facility-search"
           options={[
             {
-              key: "facility_district_pincode",
+              key: "facility_search_text",
               type: "text" as const,
-              placeholder: t("facility_search_placeholder_pincode"),
-              value: qParams.search || "",
+              placeholder: t("facility_search_placeholder_text"),
+              value: qParams.name || "",
               shortcutKey: "f",
             },
           ]}
           className="w-full sm:w-1/2"
-          onSearch={(key, value) => updateQuery({ search: value })}
+          onSearch={(key, value) => updateQuery({ name: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
-        <Button
-          variant="white"
-          onClick={() => advancedFilter.setShow(true)}
-          className="flex items-center gap-2 p-5"
-        >
-          <CareIcon icon="l-filter" className="h-4 w-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-400">Filter</span>
-        </Button>
       </div>
-      {/* <FilterBadges
-        badges={({ badge, value }) => [
-          badge("Facility/District/Pincode", "search"),
-          value(
-            "District",
-            "district",
-            qParams.district && districtResponse?.data
-              ? districtResponse?.data.name
-              : "",
-          ),
-          value(
-            "Local Body",
-            "local_body",
-            qParams.local_body && localBodyResponse?.data
-              ? localBodyResponse?.data.name
-              : "",
-          ),
-          value("Pin Code", "pin_code", qParams.pin_code || ""),
-        ]}
-      /> */}
 
       <div className="mt-4 flex w-full flex-col gap-4">
         {isLoading ? (
