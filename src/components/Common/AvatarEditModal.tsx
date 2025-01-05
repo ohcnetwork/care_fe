@@ -254,27 +254,21 @@ const AvatarEditModal = ({
 
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <div>
-                  <Button
-                    id="upload-cover-image"
-                    variant="primary"
-                    type="button"
-                    asChild
-                    onClick={() =>
-                      document.getElementById("file-input")?.click()
-                    }
-                  >
-                    <div className="cursor-pointer">
-                      <CareIcon icon="l-cloud-upload" className="text-lg" />
+                  <Button id="upload-cover-image" variant="primary" asChild>
+                    <label className="cursor-pointer">
+                      <CareIcon
+                        icon="l-cloud-upload"
+                        className="text-lg mr-1"
+                      />
                       {t("upload_an_image")}
                       <input
-                        id="file-input"
                         title="changeFile"
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={onSelectFile}
                       />
-                    </div>
+                    </label>
                   </Button>
                 </div>
                 <Button
