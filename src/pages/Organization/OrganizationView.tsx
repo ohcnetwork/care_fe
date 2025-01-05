@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import Pagination from "@/components/Common/Pagination";
 
 import query from "@/Utils/request/query";
-import { Organization, getOrgLevel } from "@/types/organization/organization";
+import { Organization, getOrgLabel } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import OrganizationLayout from "./components/OrganizationLayout";
@@ -95,12 +95,14 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                               <Badge variant="outline">
                                 {orgChild.org_type}
                               </Badge>
-                              <Badge variant="outline">
-                                {getOrgLevel(
-                                  orgChild.org_type,
-                                  orgChild.level_cache,
-                                )}
-                              </Badge>
+                              {orgChild.metadata?.govt_org_type && (
+                                <Badge variant="outline">
+                                  {getOrgLabel(
+                                    orgChild.org_type,
+                                    orgChild.metadata,
+                                  )}
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <Button variant="link" asChild>
