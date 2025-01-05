@@ -18,8 +18,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
@@ -118,11 +118,11 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("old_password")}</FormLabel>
                     <FormControl>
-                      <TextFormField
+                      <Input
                         {...field}
                         type="password"
-                        onChange={(value) => {
-                          field.onChange(value.value);
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
                         }}
                       />
                     </FormControl>
@@ -138,11 +138,11 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("new_password")}</FormLabel>
                     <FormControl>
-                      <TextFormField
+                      <Input
                         {...field}
                         type="password"
-                        onChange={(value) => {
-                          field.onChange(value.value);
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
                         }}
                         onFocus={() => setIsPasswordFieldFocused(true)}
                         onBlur={() => setIsPasswordFieldFocused(false)}
@@ -190,11 +190,11 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("new_password_confirmation")}</FormLabel>
                     <FormControl>
-                      <TextFormField
+                      <Input
                         {...field}
                         type="password"
-                        onChange={(value) => {
-                          field.onChange(value.value);
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
                         }}
                       />
                     </FormControl>
