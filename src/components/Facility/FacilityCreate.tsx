@@ -59,13 +59,10 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import {
-  getPincodeDetails,
-  parsePhoneNumber,
-  useFetchOrganizationByName,
-} from "@/Utils/utils";
+import { getPincodeDetails, parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { Organization } from "@/types/organization/organization";
+import { useFetchOrganizationByName } from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   facilityId?: string;
@@ -376,7 +373,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                   value={facilityData?.geo_organization}
                   parentSelectedLevels={selectedLevels}
                   onChange={(value) => {
-                    // Update geo_organization value in form
                     form.setValue("geo_organization", value);
                   }}
                 />
