@@ -230,7 +230,7 @@
   "SYSTEM__govt_org_type__district": "District",
   "SYSTEM__govt_org_type__grama_panchayat": "Grama Panchayat",
   "SYSTEM__govt_org_type__local_body": "Local Body",
-  "SYSTEM__govt_org_type__muncipality": "Muncipality",
+  "SYSTEM__govt_org_type__municipality": "Municipality",
   "SYSTEM__govt_org_type__state": "State",
   "SYSTEM__govt_org_type__ward": "Ward",
   "SYSTEM__org_type__default": "Organization",

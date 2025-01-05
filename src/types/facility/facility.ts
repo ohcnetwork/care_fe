@@ -11,6 +11,7 @@ export interface BaseFacility {
   cover_image_url?: string;
   features: number[];
   geo_organization?: string;
+  is_public: boolean;
 }
 
 export type CreateFacility = Omit<BaseFacility, "id">;
@@ -26,4 +27,5 @@ export interface FacilityData {
   features: number[];
   geo_organization: Organization;
   pincode?: string;
+  is_public: boolean;
 }
