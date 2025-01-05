@@ -70,41 +70,6 @@ export default function OrganizationLayout({
   }, [org, setOrganization]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  // add loading state
-  if (!org) {
-    return <div>Not found</div>;
-  }
-
-  const navItems: NavItem[] = [
-    {
-      path: `${baseUrl}/${id}`,
-      title: "Organizations",
-      icon: "d-hospital",
-      visibility: hasPermission("can_view_organization", org.permissions),
-    },
-    {
-      path: `${baseUrl}/${id}/users`,
-      title: "Users",
-      icon: "d-people",
-      visibility: hasPermission("can_list_organization_users", org.permissions),
-    },
-    {
-      path: `${baseUrl}/${id}/patients`,
-      title: "Patients",
-      icon: "d-patient",
-      visibility: hasPermission("can_list_patients", org.permissions),
-    },
-    {
-      path: `${baseUrl}/${id}/facilities`,
-      title: "Facilities",
-      icon: "d-hospital",
-      visibility: hasPermission("can_read_facility", org.permissions),
-    },
-  ];
-
-  if (isLoading) {
     return (
       <div className="p-4">
         <Skeleton className="h-8 w-48 mb-4" />
@@ -143,6 +108,33 @@ export default function OrganizationLayout({
   if (!org) {
     return <div>{t("organization_not_found")}</div>;
   }
+
+  const navItems: NavItem[] = [
+    {
+      path: `${baseUrl}/${id}`,
+      title: "Organizations",
+      icon: "d-hospital",
+      visibility: hasPermission("can_view_organization", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/users`,
+      title: "Users",
+      icon: "d-people",
+      visibility: hasPermission("can_list_organization_users", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/patients`,
+      title: "Patients",
+      icon: "d-patient",
+      visibility: hasPermission("can_list_patients", org.permissions),
+    },
+    {
+      path: `${baseUrl}/${id}/facilities`,
+      title: "Facilities",
+      icon: "d-hospital",
+      visibility: hasPermission("can_read_facility", org.permissions),
+    },
+  ];
 
   const orgParents: OrganizationParent[] = [];
   let currentParent = org.parent;
