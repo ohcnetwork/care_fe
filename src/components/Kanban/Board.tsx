@@ -8,8 +8,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { ReactNode, RefObject, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { callApi } from "@/Utils/request/query";
 import { QueryRoute } from "@/Utils/request/types";
 import { QueryOptions } from "@/Utils/request/useQuery";
@@ -37,25 +35,9 @@ export default function KanbanBoard<T extends { id: string }>(
   const board = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="h-[calc(100vh-114px)] md:h-[calc(100vh-50px)]">
-      <div className="flex flex-col items-end justify-between md:flex-row">
+    <div>
+      <div className="flex flex-col justify-between md:flex-row">
         <div>{props.title}</div>
-        <div className="flex items-center gap-2 py-2">
-          {[0, 1].map((button, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                board.current?.scrollBy({
-                  left: button ? 250 : -250,
-                  behavior: "smooth",
-                });
-              }}
-              className="inline-flex aspect-square h-8 items-center justify-center rounded-full border border-secondary-400 bg-secondary-200 text-2xl hover:bg-secondary-300"
-            >
-              <CareIcon icon={`l-${button ? "arrow-right" : "arrow-left"}`} />
-            </button>
-          ))}
-        </div>
       </div>
       <DragDropContext onDragEnd={props.onDragEnd}>
         <div className="h-full overflow-x-auto scrollbar-hide" ref={board}>
@@ -152,7 +134,7 @@ export function KanbanSection<T extends { id: string }>(
           </div>
           <div
             ref={sectionRef}
-            className="h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden"
+            className="h-[calc(100vh-340px)] overflow-y-auto overflow-x-hidden"
             onScroll={(e) => {
               const target = e.target as HTMLDivElement;
               if (
@@ -184,6 +166,7 @@ export function KanbanSection<T extends { id: string }>(
                 )}
               </Draggable>
             ))}
+
             {provided.placeholder}
             {isFetchingNextPage && (
               <div className="mt-2 h-[300px] w-[284px] animate-pulse rounded-lg bg-secondary-300" />
