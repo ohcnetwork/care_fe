@@ -33,6 +33,7 @@ export interface Organization {
   created_at: string;
   updated_at: string;
   metadata: Metadata | null;
+  permissions: string[];
 }
 
 export interface OrganizationUserRole {

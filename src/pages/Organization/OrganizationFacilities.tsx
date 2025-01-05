@@ -37,7 +37,7 @@ export default function OrganizationFacilities({
         page: qParams.page,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,
-        geo_organization: id,
+        organization: id,
         name: qParams.name,
         ...advancedFilter.filter,
       },
