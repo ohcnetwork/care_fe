@@ -64,7 +64,7 @@ export default function UserResetPassword({
   const [isEditing, setIsEditing] = useState(false);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
-  const resetPasswordForm = useForm({
+  const form = useForm({
     resolver: zodResolver(PasswordSchema),
     defaultValues: {
       old_password: "",
@@ -72,11 +72,11 @@ export default function UserResetPassword({
       new_password_2: "",
     },
   });
-  const { mutate: resetUserPasswordMutate, isPending } = useMutation({
+  const { mutate: resetPassword, isPending } = useMutation({
     mutationFn: mutate(routes.updatePassword),
-    onSuccess: (data: any) => {
+    onSuccess: (data: Record<string, string | string[]>) => {
       toast.success(data?.message as string);
-      resetPasswordForm.reset();
+      form.reset();
     },
   });
 
@@ -88,137 +88,133 @@ export default function UserResetPassword({
       username: userData.username,
       new_password: formData.new_password_1,
     };
-    resetUserPasswordMutate(form);
+    resetPassword(form);
   };
-
-  const renderPasswordForm = () => (
-    <Form {...resetPasswordForm}>
-      <form onSubmit={resetPasswordForm.handleSubmit(handleSubmitPassword)}>
-        <div className="space-y-4">
-          <FormField
-            control={resetPasswordForm.control}
-            name="old_password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("old_password")}</FormLabel>
-                <FormControl>
-                  <TextFormField
-                    {...field}
-                    type="password"
-                    onChange={(value) => {
-                      field.onChange(value.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={resetPasswordForm.control}
-            name="new_password_1"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("new_password")}</FormLabel>
-                <FormControl>
-                  <TextFormField
-                    {...field}
-                    type="password"
-                    onChange={(value) => {
-                      field.onChange(value.value);
-                    }}
-                    onFocus={() => setIsPasswordFieldFocused(true)}
-                    onBlur={() => setIsPasswordFieldFocused(false)}
-                  />
-                </FormControl>
-
-                {resetPasswordForm.formState.errors?.new_password_1?.message &&
-                  resetPasswordForm.formState.errors?.new_password_1?.message.includes(
-                    t("new_password_same_as_old"),
-                  ) && <FormMessage />}
-                {isPasswordFieldFocused && (
-                  <div
-                    className="text-small mt-2 pl-2 text-secondary-500"
-                    aria-live="polite"
-                  >
-                    {validateRule(
-                      field.value.length >= 8,
-                      t("password_length_validation"),
-                      !field.value,
-                    )}
-                    {validateRule(
-                      /[a-z]/.test(field.value),
-                      t("password_lowercase_validation"),
-                      !field.value,
-                    )}
-                    {validateRule(
-                      /[A-Z]/.test(field.value),
-                      t("password_uppercase_validation"),
-                      !field.value,
-                    )}
-                    {validateRule(
-                      /\d/.test(field.value),
-                      t("password_number_validation"),
-                      !field.value,
-                    )}
-                  </div>
-                )}
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={resetPasswordForm.control}
-            name="new_password_2"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("new_password_confirmation")}</FormLabel>
-                <FormControl>
-                  <TextFormField
-                    {...field}
-                    type="password"
-                    onChange={(value) => {
-                      field.onChange(value.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <Button
-          type="submit"
-          disabled={!resetPasswordForm.formState.isDirty}
-          variant="primary"
-          className="mt-6 w-full"
-        >
-          {isPending ? t("submitting") : t("submit")}
-        </Button>
-      </form>
-    </Form>
-  );
-
-  const editButton = () => (
-    <div className="mb-4 flex justify-start">
-      <Button
-        onClick={() => setIsEditing(!isEditing)}
-        type="button"
-        id="change-edit-password-button"
-        className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
-      >
-        <CareIcon icon={isEditing ? "l-times" : "l-edit"} className="h-4 w-4" />
-        {isEditing ? t("cancel") : t("change_password")}
-      </Button>
-    </div>
-  );
 
   return (
     <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
-      {editButton()}
-      {isEditing && renderPasswordForm()}
+      <div className="mb-4 flex justify-start">
+        <Button
+          onClick={() => setIsEditing(!isEditing)}
+          type="button"
+          id="change-edit-password-button"
+          className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
+        >
+          <CareIcon
+            icon={isEditing ? "l-times" : "l-edit"}
+            className="h-4 w-4"
+          />
+          {isEditing ? t("cancel") : t("change_password")}
+        </Button>
+      </div>
+      {isEditing && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmitPassword)}>
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="old_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("old_password")}</FormLabel>
+                    <FormControl>
+                      <TextFormField
+                        {...field}
+                        type="password"
+                        onChange={(value) => {
+                          field.onChange(value.value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="new_password_1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("new_password")}</FormLabel>
+                    <FormControl>
+                      <TextFormField
+                        {...field}
+                        type="password"
+                        onChange={(value) => {
+                          field.onChange(value.value);
+                        }}
+                        onFocus={() => setIsPasswordFieldFocused(true)}
+                        onBlur={() => setIsPasswordFieldFocused(false)}
+                      />
+                    </FormControl>
+                    {form.formState.errors?.new_password_1?.message &&
+                      form.formState.errors?.new_password_1?.message.includes(
+                        t("new_password_same_as_old"),
+                      ) && <FormMessage />}
+                    {isPasswordFieldFocused && (
+                      <div
+                        className="text-small mt-2 pl-2 text-secondary-500"
+                        aria-live="polite"
+                      >
+                        {validateRule(
+                          field.value.length >= 8,
+                          t("password_length_validation"),
+                          !field.value,
+                        )}
+                        {validateRule(
+                          /[a-z]/.test(field.value),
+                          t("password_lowercase_validation"),
+                          !field.value,
+                        )}
+                        {validateRule(
+                          /[A-Z]/.test(field.value),
+                          t("password_uppercase_validation"),
+                          !field.value,
+                        )}
+                        {validateRule(
+                          /\d/.test(field.value),
+                          t("password_number_validation"),
+                          !field.value,
+                        )}
+                      </div>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="new_password_2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("new_password_confirmation")}</FormLabel>
+                    <FormControl>
+                      <TextFormField
+                        {...field}
+                        type="password"
+                        onChange={(value) => {
+                          field.onChange(value.value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={!form.formState.isDirty}
+              variant="primary"
+              className="mt-6 w-full"
+            >
+              {isPending ? t("submitting") : t("submit")}
+            </Button>
+          </form>
+        </Form>
+      )}
     </div>
   );
 }
