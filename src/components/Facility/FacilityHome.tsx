@@ -38,7 +38,7 @@ import type {
   Organization,
   OrganizationParent,
 } from "@/types/organization/organization";
-import { getOrgLevelLabel } from "@/types/organization/organization";
+import { getOrgLabel } from "@/types/organization/organization";
 
 import type { UserModel } from "../Users/models";
 
@@ -77,7 +77,7 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 
   const parentDetails = orgParents.map((org) => {
     return {
-      label: getOrgLevelLabel(org.org_type, org.level_cache),
+      label: getOrgLabel(org.org_type, org.metadata),
       value: org.name,
     };
   });
@@ -85,14 +85,14 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
   return parentDetails
     .reverse()
     .concat({
-      label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
+      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
       value: geoOrg.name,
     })
     .map((org, index) => (
       <span key={org.value}>
-        <span className="text-muted-foreground">{org.value}</span>
+        <span className="text-gray-500">{org.value}</span>
         {index < parentDetails.length - 1 && (
-          <span className="mx-2 text-muted-foreground/50">→</span>
+          <span className="mx-2 text-gray-500">→</span>
         )}
       </span>
     ));
