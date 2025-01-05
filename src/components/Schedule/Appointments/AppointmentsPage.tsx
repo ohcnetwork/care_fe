@@ -256,7 +256,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
         <div className="flex gap-4 items-center">
           <Input
-            className="w-[300px]"
+            className="w-full"
             placeholder={t("search")}
             value={qParams.search}
             onChange={(e) => setQParams({ search: e.target.value })}
@@ -478,6 +478,7 @@ function AppointmentRow(props: {
     <>
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
+          className="w-full overflow-scroll"
           value={status}
           onValueChange={(value) => setStatus(value as Appointment["status"])}
         >
