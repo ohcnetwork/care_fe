@@ -69,6 +69,8 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
       if (validOrgs.length > 0) {
         setSelectedLevels(validOrgs);
+      } else {
+        setSelectedLevels([]);
       }
     }
   }, [isQueriesLoading, selected]);
@@ -91,12 +93,10 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
-    const firstLevel = selectedLevels[0];
-    setSelectedLevels((prev) => {
-      const newLevels = prev.slice(0, 1);
-      onChange({ organization: firstLevel.id, facility_type: undefined }, 0);
-      return newLevels;
-    });
+    setSelectedLevels([]);
+    setTimeout(() => {
+      onChange({ organization: undefined, facility_type: undefined }, 0);
+    }, 0);
   };
 
   const RenderOrganizationLevel = (
@@ -124,6 +124,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
     return (
       <Autocomplete
+        key={`dropdown-${index}`}
         popoverClassName="sm:min-w-56 sm:max-w-60 w-[calc(100vw-2rem)]"
         value={selectedLevels[index]?.id || ""}
         options={options}
@@ -173,7 +174,13 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       {govtOrgLevels.map((_, index) =>
         RenderOrganizationLevel(selectedLevels[index] || undefined, index),
       )}
-      <Button onClick={clearSelections} variant="white">
+      <Button
+        onClick={clearSelections}
+        variant="white"
+        disabled={
+          selectedLevels.length === 0 && selectedFacilityType === undefined
+        }
+      >
         {t("clear")}
       </Button>
     </div>

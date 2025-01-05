@@ -45,6 +45,8 @@ export function FacilitiesPage() {
     if (selectedOrgs.length > 0) {
       const lastSelected = selectedOrgs[selectedOrgs.length - 1];
       updateQuery({ organization: lastSelected });
+    } else {
+      updateQuery({ organization: undefined });
     }
   }, [selectedOrgs]);
 
@@ -55,7 +57,7 @@ export function FacilitiesPage() {
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
         name: qParams.search,
-        facility_type: qParams.facility_type,
+        ...(qParams.facility_type && { facility_type: qParams.facility_type }),
         ...(qParams.organization && {
           organization: qParams.organization,
         }),
@@ -114,16 +116,20 @@ export function FacilitiesPage() {
       </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-5 mb-6">
         <OrganizationFilter
-          skipLevels={[3]}
+          skipLevels={[]}
           selected={selectedOrgs}
           onChange={(filter, level) => {
-            if (filter.organization) {
-              setSelectedOrgs((prev) => {
-                const newOrgId = filter.organization as string;
-                const newOrgs = prev.slice(0, level);
-                newOrgs.push(newOrgId);
-                return newOrgs;
-              });
+            if ("organization" in filter) {
+              if (filter.organization) {
+                setSelectedOrgs((prev) => {
+                  const newOrgId = filter.organization as string;
+                  const newOrgs = prev.slice(0, level);
+                  newOrgs.push(newOrgId);
+                  return newOrgs;
+                });
+              } else {
+                setSelectedOrgs([]);
+              }
             }
             if ("facility_type" in filter) {
               updateQuery({ facility_type: filter.facility_type });
