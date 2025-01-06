@@ -5,15 +5,12 @@ import { DiagnosisTable } from "@/components/Patient/diagnosis/DiagnosisTable";
 import { SymptomTable } from "@/components/Patient/symptoms/SymptomTable";
 
 import query from "@/Utils/request/query";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface Props {
-  type: string;
+  type: "symptom" | "diagnosis" | "allergy_intolerance";
   id: string;
   patientId: string;
   encounterId: string;
@@ -25,73 +22,57 @@ export function StructuredResponseView({
   patientId,
   encounterId,
 }: Props) {
-  const getRouteAndParams = () => {
-    const params: Record<string, string> = { patientId };
-    switch (type) {
-      case "symptom":
-        return {
-          route: symptomApi.retrieveSymptom,
-          pathParams: { ...params, symptomId: id },
-          queryParams: { encounter: encounterId },
-        };
-      case "diagnosis":
-        return {
-          route: diagnosisApi.retrieveDiagnosis,
-          pathParams: { ...params, diagnosisId: id },
-          queryParams: { encounter: encounterId },
-        };
-      case "allergy_intolerance":
-        return {
-          route: allergyApi.retrieveAllergy,
-          pathParams: { ...params, allergyId: id },
-          queryParams: { encounter: encounterId },
-        };
-    }
-  };
+  const basePathParams = { patientId };
+  const queryParams = { encounter: encounterId };
 
-  const routeConfig = getRouteAndParams();
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: [type, id],
-    queryFn: query(routeConfig?.route as any, {
-      pathParams: routeConfig?.pathParams,
-      queryParams: routeConfig?.queryParams,
-    }),
-    enabled: !!id && !!routeConfig,
+  const getParams = (idKey: string) => ({
+    pathParams: { ...basePathParams, [idKey]: id },
+    queryParams,
   });
 
-  if (!routeConfig) return null;
+  const symptomQuery = useQuery({
+    queryKey: ["symptom"],
+    queryFn: query(symptomApi.retrieveSymptom, getParams("symptomId")),
+    enabled: type === "symptom" && !!id,
+  });
 
-  if (isLoading) {
-    return <div className="animate-pulse h-20 bg-muted rounded-md" />;
-  }
+  const diagnosisQuery = useQuery({
+    queryKey: ["diagnosis"],
+    queryFn: query(diagnosisApi.retrieveDiagnosis, getParams("diagnosisId")),
+    enabled: type === "diagnosis" && !!id,
+  });
 
-  if (error) {
-    console.error(`Error loading ${type}:`, error);
+  const allergyQuery = useQuery({
+    queryKey: ["allergy_intolerance"],
+    queryFn: query(allergyApi.retrieveAllergy, getParams("allergyId")),
+    enabled: type === "allergy_intolerance" && !!id,
+  });
+
+  const currentQuery = {
+    symptom: symptomQuery,
+    diagnosis: diagnosisQuery,
+    allergy_intolerance: allergyQuery,
+  }[type];
+
+  if (currentQuery.error) {
+    console.error(`Error loading ${type}:`, currentQuery.error);
     return <div>Error loading {type}</div>;
   }
 
   switch (type) {
     case "symptom":
       return (
-        <SymptomTable
-          symptoms={[data as unknown as Symptom]}
-          showHeader={true}
-        />
+        symptomQuery.data && <SymptomTable symptoms={[symptomQuery.data]} />
       );
     case "diagnosis":
       return (
-        <DiagnosisTable
-          diagnoses={[data as unknown as Diagnosis]}
-          showHeader={true}
-        />
+        diagnosisQuery.data && (
+          <DiagnosisTable diagnoses={[diagnosisQuery.data]} />
+        )
       );
     case "allergy_intolerance":
       return (
-        <AllergyTable
-          allergies={[data as unknown as AllergyIntolerance]}
-          showHeader={true}
-        />
+        allergyQuery.data && <AllergyTable allergies={[allergyQuery.data]} />
       );
     default:
       return null;
