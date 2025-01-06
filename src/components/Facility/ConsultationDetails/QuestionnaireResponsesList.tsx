@@ -10,7 +10,10 @@ import { Card } from "@/components/ui/card";
 import routes from "@/Utils/request/api";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
-import { Question } from "@/types/questionnaire/question";
+import {
+  Question,
+  StructuredQuestionType,
+} from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 import { StructuredResponseView } from "./StructuredResponseView";
@@ -263,7 +266,7 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                             return (
                               <StructuredResponseView
                                 key={response.id}
-                                type={type}
+                                type={type as StructuredQuestionType}
                                 id={response.id}
                                 patientId={encounter.patient.id}
                                 encounterId={encounter.id}

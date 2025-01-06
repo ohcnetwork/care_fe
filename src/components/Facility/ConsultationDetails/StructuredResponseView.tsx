@@ -8,13 +8,15 @@ import query from "@/Utils/request/query";
 import allergyApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import { StructuredQuestionType } from "@/types/questionnaire/question";
 
-interface Props {
-  type: "symptom" | "diagnosis" | "allergy_intolerance";
+type SupportedType = "symptom" | "diagnosis" | "allergy_intolerance";
+type Props = {
+  type: StructuredQuestionType;
   id: string;
   patientId: string;
   encounterId: string;
-}
+};
 
 export function StructuredResponseView({
   type,
@@ -22,6 +24,10 @@ export function StructuredResponseView({
   patientId,
   encounterId,
 }: Props) {
+  const isSupportedType = (t: StructuredQuestionType): t is SupportedType => {
+    return ["symptom", "diagnosis", "allergy_intolerance"].includes(t);
+  };
+
   const basePathParams = { patientId };
   const queryParams = { encounter: encounterId };
 
@@ -47,6 +53,8 @@ export function StructuredResponseView({
     queryFn: query(allergyApi.retrieveAllergy, getParams("allergyId")),
     enabled: type === "allergy_intolerance" && !!id,
   });
+
+  if (!isSupportedType(type)) return null;
 
   const currentQuery = {
     symptom: symptomQuery,
