@@ -43,6 +43,7 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
@@ -62,11 +63,11 @@ const initialForm: AppointmentPatientRegister & {
 
 type PatientRegistrationProps = {
   facilityId: string;
-  staffUsername: string;
+  staffId: string;
 };
 
 export function PatientRegistration(props: PatientRegistrationProps) {
-  const { staffUsername } = props;
+  const { staffId } = props;
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
   ) as SlotAvailability;
@@ -140,7 +141,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
-      mutate(routes.otp.createAppointment, {
+      mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
         headers: {
@@ -230,7 +231,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           type="button"
           onClick={() =>
             navigate(
-              `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
+              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
             )
           }
         >
@@ -436,7 +437,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 type="button"
                 onClick={() =>
                   navigate(
-                    `/facility/${props.facilityId}/appointments/${staffUsername}/patient-select`,
+                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
                   )
                 }
               >

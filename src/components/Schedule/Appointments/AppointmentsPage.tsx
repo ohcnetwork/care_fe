@@ -64,7 +64,12 @@ import useAuthUser from "@/hooks/useAuthUser";
 import FiltersCache from "@/Utils/FiltersCache";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  dateQueryString,
+  formatDisplayName,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 
 interface QueryParams {
   practitioner?: string;
@@ -91,7 +96,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const resourcesQuery = useQuery({
     queryKey: ["appointments-resources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableDoctors, {
+    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -104,7 +109,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        resource: qParams.practitioner ?? "",
+        user: qParams.practitioner ?? "",
         day: date,
       },
     }),
@@ -350,7 +355,7 @@ function AppointmentColumn(props: {
         status: props.status,
         limit: 100,
         slot: props.slot,
-        resource: props.practitioner,
+        user: props.practitioner,
         date: props.date,
       },
     }),
@@ -380,12 +385,12 @@ function AppointmentColumn(props: {
         </span>
       </div>
       {appointments.length === 0 ? (
-        <div className="flex justify-center items-center h-[calc(100vh-22rem)]">
+        <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
           <p className="text-gray-500">{t("no_appointments")}</p>
         </div>
       ) : (
         <ScrollArea>
-          <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-22rem)]">
+          <ul className="space-y-3 px-3 pb-4 pt-1 h-[calc(100vh-18rem)]">
             {appointments.map((appointment) => (
               <li key={appointment.id}>
                 <Link
@@ -456,7 +461,7 @@ function AppointmentRow(props: {
         status: status,
         limit: 100,
         slot: props.slot,
-        resource: props.practitioner,
+        user: props.practitioner,
         date: props.date,
       },
     }),
@@ -574,7 +579,7 @@ function AppointmentRowItem({
         <p>{"Need Room Information"}</p>
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatName(appointment.resource)}
+        {formatDisplayName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <p>{"Need Labels"}</p>
@@ -678,26 +683,40 @@ const AppointmentStatusDropdown = ({
 
 interface SlotFilterProps {
   slots: SlotAvailability[];
+  disableInline?: boolean;
+  disabled?: boolean;
   selectedSlot: string | undefined;
   onSelect: (slot: string) => void;
 }
 
-function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
+export const SlotFilter = ({
+  selectedSlot,
+  onSelect,
+  ...props
+}: SlotFilterProps) => {
   const { t } = useTranslation();
   const slots = props.slots.filter((slot) => slot.allocated > 0);
 
   const resolvedSlot =
     selectedSlot && slots.find((slot) => slot.id === selectedSlot);
 
-  if (slots.length <= 3) {
+  if (slots.length <= 3 && !props.disableInline) {
     return (
       <Tabs value={selectedSlot ?? "all"} onValueChange={onSelect}>
         <TabsList>
-          <TabsTrigger value="all" className="uppercase">
+          <TabsTrigger
+            value="all"
+            className="uppercase"
+            disabled={props.disabled}
+          >
             {t("all")}
           </TabsTrigger>
           {slots.map((slot) => (
-            <TabsTrigger key={slot.id} value={slot.id}>
+            <TabsTrigger
+              key={slot.id}
+              value={slot.id}
+              disabled={props.disabled}
+            >
               {format(slot.start_datetime, "h:mm a").replace(":00", "")}
               {" - "}
               {format(slot.end_datetime, "h:mm a").replace(":00", "")}
@@ -717,6 +736,7 @@ function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
           variant="outline"
           role="combobox"
           className="min-w-60 justify-start"
+          disabled={props.disabled}
         >
           {resolvedSlot ? (
             <div className="flex items-center gap-2">
@@ -797,4 +817,4 @@ function SlotFilter({ selectedSlot, onSelect, ...props }: SlotFilterProps) {
       </SelectContent>
     </Select>
   );
-}
+};

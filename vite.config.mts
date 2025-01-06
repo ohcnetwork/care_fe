@@ -204,13 +204,6 @@ export default defineConfig(({ mode }) => {
           REACT_SENTRY_DSN: z.string().url().optional(),
           REACT_SENTRY_ENVIRONMENT: z.string().optional(),
 
-          REACT_PLAUSIBLE_SITE_DOMAIN: z
-            .string()
-            .regex(/^[a-zA-Z0-9][a-zA-Z0-9-_.]*\.[a-zA-Z]{2,}$/)
-            .optional()
-            .describe("Domain name without protocol (e.g., sub.domain.com)"),
-
-          REACT_PLAUSIBLE_SERVER_URL: z.string().url().optional(),
           REACT_CDN_URLS: z
             .string()
             .optional()
@@ -302,9 +295,7 @@ export default defineConfig(({ mode }) => {
     preview: {
       headers: {
         "Content-Security-Policy-Report-Only": `default-src 'self';\
-          script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
           style-src 'self' 'unsafe-inline';\
-          connect-src 'self' https://plausible.10bedicu.in;\
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },

@@ -53,8 +53,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   });
 
   const handleCreatePatient = useCallback(() => {
-    navigate(`/facility/${facilityId}/patient/create`);
-  }, [facilityId]);
+    const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
+
+    navigate(`/facility/${facilityId}/patient/create`, {
+      query: queryParams,
+    });
+  }, [facilityId, phoneNumber]);
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
@@ -152,7 +156,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   return (
     <div>
       <div className="container max-w-5xl mx-auto py-6">
-        <div className="flex justify-end">
+        <div className="flex justify-center md:justify-end">
           <AddPatientButton />
         </div>
         <div className="space-y-6 mt-6">
@@ -175,7 +179,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 className="w-full"
               />
 
-              <div className="min-h-[200px]">
+              <div className="min-h-[200px]" id="patient-search-results">
                 {!!phoneNumber && (
                   <>
                     {isPending ? (

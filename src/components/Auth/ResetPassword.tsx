@@ -2,7 +2,8 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 
@@ -173,8 +174,20 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 )}
             </div>
             <div className="grid p-4 sm:flex sm:justify-between">
-              <Cancel onClick={() => navigate("/login")} />
-              <Submit onClick={(e) => handleSubmit(e)} label="reset" />
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => navigate("/login")}
+              >
+                <span>{t("cancel")}</span>
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                onClick={(e) => handleSubmit(e)}
+              >
+                <span>{t("reset")}</span>
+              </Button>
             </div>
           </form>
         </div>

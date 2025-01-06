@@ -111,7 +111,7 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      resource: user.id,
+      user: user.id,
     });
   }
 

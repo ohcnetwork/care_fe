@@ -184,13 +184,23 @@ export function EncounterList({
       queryParams: {
         ...buildQueryParams(status, facilityId, encounterClass, priority),
         name,
-        encounter_id,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
-    enabled: !propEncounters,
+    enabled: !propEncounters && !encounter_id,
+  });
+
+  const { data: queryEncounter } = useQuery<Encounter>({
+    queryKey: ["encounter", encounter_id],
+    queryFn: query(routes.encounter.get, {
+      pathParams: { id: encounter_id },
+      queryParams: {
+        facility: facilityId,
+      },
+    }),
+    enabled: !!encounter_id,
   });
 
   const searchOptions = [
@@ -220,7 +230,10 @@ export function EncounterList({
     },
   ];
 
-  const encounters = propEncounters || queryEncounters?.results || [];
+  const encounters =
+    propEncounters ||
+    queryEncounters?.results ||
+    (queryEncounter ? [queryEncounter] : []);
 
   const { t } = useTranslation();
 

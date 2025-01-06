@@ -32,7 +32,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
       onClose={handleCancel}
       onConfirm={handleSubmit}
       disabled={disable}
-      variant="danger"
+      variant="destructive"
     >
       <div className="flex leading-relaxed text-secondary-800">
         <div>

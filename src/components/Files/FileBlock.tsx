@@ -3,7 +3,8 @@ import { t } from "i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { FileUploadModel } from "@/components/Patient/models";
 
 import { FileManagerResult } from "@/hooks/useFileManager";
@@ -90,35 +91,37 @@ export default function FileBlock(props: FileBlockProps) {
         )}
         {!file.is_archived &&
           (fileManager.isPreviewable(file) ? (
-            <ButtonV2
+            <Button
+              variant={"secondary"}
               onClick={() => fileManager.viewFile(file, associating_id)}
               className="w-full md:w-auto"
             >
               <CareIcon icon="l-eye" />
               {t("view")}
-            </ButtonV2>
+            </Button>
           ) : (
-            <ButtonV2
+            <Button
+              variant={"secondary"}
               onClick={() => fileManager.downloadFile(file, associating_id)}
               className="w-full md:w-auto"
             >
               <CareIcon icon="l-arrow-circle-down" />
               {t("download")}
-            </ButtonV2>
+            </Button>
           ))}
         <div className="inline-flex w-full gap-2 md:w-auto">
           {!file.is_archived && editable && (
-            <ButtonV2
+            <Button
               variant={"secondary"}
               onClick={() => fileManager.editFile(file, associating_id)}
               className="flex-1 md:flex-auto"
             >
               <CareIcon icon={"l-pen"} />
               {t("rename")}
-            </ButtonV2>
+            </Button>
           )}
           {(file.is_archived || editable) && archivable && (
-            <ButtonV2
+            <Button
               variant={file.is_archived ? "primary" : "secondary"}
               onClick={() => fileManager.archiveFile(file, associating_id)}
               className="flex-1 md:flex-auto"
@@ -127,7 +130,7 @@ export default function FileBlock(props: FileBlockProps) {
                 icon={file.is_archived ? "l-info-circle" : "l-archive"}
               />
               {file.is_archived ? t("more_info") : t("archive")}
-            </ButtonV2>
+            </Button>
           )}
         </div>
       </div>

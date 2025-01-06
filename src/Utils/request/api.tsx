@@ -5,18 +5,11 @@ import {
   IUserFacilityRequest,
   PatientConsentModel,
 } from "@/components/Facility/models";
-import { Prescription } from "@/components/Medicine/models";
-import { PNconfigData } from "@/components/Notifications/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 import {
   SkillModel,
   UpdatePasswordForm,
@@ -29,14 +22,15 @@ import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
-import { Observation } from "@/types/emr/observation";
-import { ObservationAnalyzeResponse } from "@/types/emr/observation";
+import {
+  Observation,
+  ObservationAnalyzeResponse,
+} from "@/types/emr/observation";
 import { PatientModel } from "@/types/emr/patient";
 import {
   BaseFacility,
@@ -48,11 +42,10 @@ import {
   FacilityOrganizationCreate,
   FacilityOrganizationResponse,
 } from "@/types/facilityOrganization/facilityOrganization";
+import { Message } from "@/types/notes/messages";
+import { Thread } from "@/types/notes/threads";
 import {
-  Organization,
-  OrganizationResponse,
   OrganizationUserRole,
-  OrganizationUserRoleResponse,
   RoleResponse,
 } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
@@ -61,10 +54,7 @@ import {
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
-import { Diagnosis } from "@/types/questionnaire/diagnosis";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { Symptom } from "@/types/questionnaire/symptom";
 import {
   CreateResourceRequest,
   ResourceRequest,
@@ -300,18 +290,6 @@ const routes = {
     path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
   },
 
-  getUserPnconfig: {
-    path: "/api/v1/users/{username}/pnconfig/",
-    method: "GET",
-    TRes: Type<PNconfigData>(),
-  },
-
-  updateUserPnconfig: {
-    path: "/api/v1/users/{username}/pnconfig/",
-    method: "PATCH",
-    TRes: Type<PNconfigData>(),
-  },
-
   // Facility Endpoints
 
   getPermittedFacilities: {
@@ -370,7 +348,7 @@ const routes = {
 
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserAssignedModel>(),
+    TRes: Type<UserBase>(),
   },
 
   getScheduleAbleFacilityUsers: {
@@ -531,49 +509,6 @@ const routes = {
     TBody: Type<Partial<CommentModel>>(),
   },
 
-  // Prescription endpoints
-
-  listPrescriptions: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "GET",
-  },
-
-  createPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "POST",
-    TBody: Type<Prescription>(),
-    TRes: Type<Prescription>(),
-  },
-
-  listAdministrations: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
-    method: "GET",
-  },
-
-  getAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
-    method: "GET",
-  },
-
-  getPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "GET",
-  },
-
-  administerPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
-    method: "POST",
-  },
-
-  discontinuePrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
-    method: "POST",
-    TBody: Type<{
-      discontinued_reason: string;
-    }>(),
-    TRes: Type<Record<string, never>>(),
-  },
-
   facility: {
     getUsers: {
       path: "/api/v1/facility/{facility_id}/users/",
@@ -604,66 +539,6 @@ const routes = {
       method: "POST",
       TBody: Type<{ search: string; count: number }>(),
       TRes: Type<{ results: Code[] }>(),
-    },
-  },
-
-  // Questionnaire Routes
-  questionnaire: {
-    list: {
-      path: "/api/v1/questionnaire/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<QuestionnaireDetail>>(),
-    },
-
-    detail: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "GET",
-      TRes: Type<QuestionnaireDetail>(),
-    },
-
-    create: {
-      path: "/api/v1/questionnaire/",
-      method: "POST",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    update: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PUT",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<QuestionnaireDetail>(),
-    },
-
-    partialUpdate: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "PATCH",
-      TRes: Type<QuestionnaireDetail>(),
-      TBody: Type<Partial<QuestionnaireDetail>>(),
-    },
-
-    delete: {
-      path: "/api/v1/questionnaire/{id}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-    },
-
-    submit: {
-      path: "/api/v1/questionnaire/{id}/submit/",
-      method: "POST",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<{
-        resource_id: string;
-        encounter?: string;
-        patient: string;
-        responses: Array<{
-          question_id: string;
-          value: string | number | boolean;
-          note?: string;
-          bodysite?: string;
-          method?: string;
-        }>;
-      }>(),
     },
   },
 
@@ -725,77 +600,6 @@ const routes = {
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
   },
-
-  // Diagnosis Routes
-  getDiagnosis: {
-    path: "/api/v1/patient/{patientId}/diagnosis/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Diagnosis>>(),
-  },
-  // Get Symptom
-  getSymptom: {
-    path: "/api/v1/patient/{patientId}/symptom/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<Symptom>>(),
-  },
-
-  getAllergy: {
-    path: "/api/v1/patient/{patientId}/allergy_intolerance/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
-  },
-
-  // Organization Routes
-  organization: {
-    listMine: {
-      path: "/api/v1/organization/mine/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    list: {
-      path: "/api/v1/organization/",
-      method: "GET",
-      TRes: {} as OrganizationResponse,
-    },
-    get: {
-      path: "/api/v1/organization/{id}/",
-      method: "GET",
-      TRes: {} as Organization,
-    },
-    listUsers: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
-    },
-    assignUser: {
-      path: "/api/v1/organization/{id}/users/",
-      method: "POST",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    updateUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "PUT",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    removeUserRole: {
-      path: "/api/v1/organization/{id}/users/{userRoleId}/",
-      method: "DELETE",
-      TRes: {} as Record<string, never>,
-    },
-    listPatients: {
-      path: "/api/v1/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Patient>>(),
-    },
-    getPublicOrganizations: {
-      path: "/api/v1/govt/organization/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<Organization>>(),
-    },
-  },
-
   facilityOrganization: {
     list: {
       path: "/api/v1/facility/{facilityId}/organizations/",
@@ -816,7 +620,7 @@ const routes = {
     listUsers: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
       method: "GET",
-      TRes: {} as OrganizationUserRoleResponse,
+      TRes: {} as PaginatedResponse<OrganizationUserRole>,
     },
     assignUser: {
       path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
@@ -843,6 +647,35 @@ const routes = {
       path: "/api/v1/role/",
       method: "GET",
       TRes: {} as RoleResponse,
+    },
+  },
+
+  // Notes Routes
+  notes: {
+    patient: {
+      listThreads: {
+        path: "/api/v1/patient/{patientId}/thread/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<Thread>>(),
+        TQuery: Type<{ encounter: string }>(),
+      },
+      createThread: {
+        path: "/api/v1/patient/{patientId}/thread/",
+        method: "POST",
+        TRes: Type<Thread>(),
+        TBody: Type<{ title: string; encounter: string }>(),
+      },
+      getMessages: {
+        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<Message>>(),
+      },
+      postMessage: {
+        path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
+        method: "POST",
+        TRes: Type<Message>(),
+        TBody: Type<{ message: string }>(),
+      },
     },
   },
 
@@ -970,23 +803,6 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
-    },
-    getSlotsForDay: {
-      path: "/api/v1/otp/slots/get_slots_for_day/",
-      method: "POST",
-      TRes: Type<{ results: SlotAvailability[] }>(),
-      TBody: Type<{ facility: string; resource: string; day: string }>(),
-    },
-    getAppointments: {
-      path: "/api/v1/otp/slots/get_appointments/",
-      method: "GET",
-      TRes: Type<{ results: Appointment[] }>(),
-    },
-    createAppointment: {
-      path: "/api/v1/otp/slots/{id}/create_appointment/",
-      method: "POST",
-      TRes: Type<Appointment>(),
-      TBody: Type<AppointmentCreate>(),
     },
   },
 
