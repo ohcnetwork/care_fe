@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 import {
   Select,
   SelectContent,
@@ -226,7 +227,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Password" {...field} />
+                  <PasswordInput placeholder="Password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -240,11 +241,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Confirm password"
-                    {...field}
-                  />
+                  <PasswordInput placeholder="Confirm password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

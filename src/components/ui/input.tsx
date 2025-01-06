@@ -17,7 +17,11 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           if (type === "date" || type === "time") {
             e.target.showPicker();
           }
+          if (props.onFocus) {
+            props.onFocus(e);
+          }
         }}
+        onBlur={props.onBlur}
       />
     );
   },
