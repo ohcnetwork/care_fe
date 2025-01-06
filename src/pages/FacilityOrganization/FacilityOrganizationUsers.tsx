@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -28,6 +29,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
     sheet: string;
     username: string;
   }>();
+  const { t } = useTranslation();
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
@@ -70,7 +72,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Users</h2>
+          <h2 className="text-lg font-semibold">{t("users")}</h2>
           <div className="flex gap-2">
             <AddUserSheet
               open={openAddUserSheet}
@@ -97,7 +99,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
           {users?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No users found.
+                {t("no_users_found")}
               </CardContent>
             </Card>
           ) : (
@@ -132,13 +134,13 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <div className="text-gray-500">Role</div>
+                        <div className="text-gray-500">{t("role")}</div>
                         <div className="font-medium truncate">
                           {userRole.role.name}
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Phone Number</div>
+                        <div className="text-gray-500">{t("phone_number")}</div>
                         <div className="font-medium truncate">
                           {userRole.user.phone_number}
                         </div>
@@ -160,7 +162,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                               icon="l-arrow-up-right"
                               className="h-4 w-4"
                             />
-                            <span>More details</span>
+                            <span>{t("more_details")}</span>
                           </Button>
                         }
                       />
