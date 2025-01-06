@@ -140,21 +140,25 @@ const ResetPassword = (props: ResetPasswordProps) => {
                   form.password?.length >= 8,
                   t("password_length_validation"),
                   !form.password,
+                  t("password_length_met"),
                 )}
                 {validateRule(
                   form.password !== form.password.toUpperCase(),
                   t("password_lowercase_validation"),
                   !form.password,
+                  t("password_lowercase_met"),
                 )}
                 {validateRule(
                   form.password !== form.password.toLowerCase(),
                   t("password_uppercase_validation"),
                   !form.password,
+                  t("password_uppercase_met"),
                 )}
                 {validateRule(
                   /\d/.test(form.password),
                   t("password_number_validation"),
                   !form.password,
+                  t("password_number_met"),
                 )}
               </div>
             )}
@@ -180,6 +184,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 form.confirm === form.password,
                 t("password_mismatch"),
                 !form.password && form.password.length > 0,
+                t("password_match"),
               )}
           </div>
         </div>
