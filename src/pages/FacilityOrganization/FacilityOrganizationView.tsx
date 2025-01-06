@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Link } from "raviger";
 import { useState } from "react";
 
@@ -52,7 +53,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-lg font-semibold">Organizations</h2>
+          <h2 className="text-lg font-semibold">{t("organizations")}</h2>
           <div className="lg:flex items-center gap-4 w-full sm:w-auto flex-row ">
             <div className="w-full sm:w-72 mb-2 lg:mb-0">
               <Input
@@ -110,7 +111,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                             <Link
                               href={`/facility/${facilityId}/organization/${org.id}`}
                             >
-                              View Details
+                              {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
                                 className="h-4 w-4"
@@ -131,8 +132,8 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {searchQuery
-                      ? `No organizations found matching "${searchQuery}"`
-                      : "No sub-organizations found."}
+                      ? t("noOrganizationsFound", { searchQuery })
+                      : t("no_suborganizations_found")}
                   </CardContent>
                 </Card>
               )}
