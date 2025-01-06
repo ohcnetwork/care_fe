@@ -2,6 +2,7 @@ import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   DropdownMenu,
@@ -9,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -29,6 +29,7 @@ export function FacilitySwitcher({
   selectedFacility: UserFacilityModel | null;
 }) {
   const { isMobile } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <SidebarMenu>
@@ -44,7 +45,7 @@ export function FacilitySwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {selectedFacility?.name || "Select Facility"}
+                  {selectedFacility?.name || t("select_facility")}
                 </span>
               </div>
               <CaretSortIcon className="ml-auto" />
@@ -58,12 +59,12 @@ export function FacilitySwitcher({
           >
             <DropdownMenuItem onClick={() => navigate("/")}>
               <DashboardIcon className="size-4" />
-              View Dashboard
+              {t("view_dashboard")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Facilities</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {facilities.map((facility, index) => (
+            {facilities.map((facility) => (
               <DropdownMenuItem
                 key={facility.name}
                 onClick={() => navigate(`/facility/${facility.id}`)}
@@ -73,7 +74,6 @@ export function FacilitySwitcher({
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
