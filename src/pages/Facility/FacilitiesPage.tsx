@@ -73,6 +73,7 @@ export function FacilitiesPage() {
   const GetLoginHeader = () => {
     if (
       tokenData &&
+      tokenData.createdAt &&
       dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {
       return (
@@ -141,7 +142,7 @@ export function FacilitiesPage() {
           id="facility-search"
           options={[
             {
-              key: "facility_search_text",
+              key: "facility_search_placeholder_text",
               type: "text" as const,
               placeholder: t("facility_search_placeholder_text"),
               value: qParams.search || "",
