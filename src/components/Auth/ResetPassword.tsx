@@ -123,7 +123,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
         <div className="space-y-6">
           <div>
             <PasswordInput
-              type="password"
               name="password"
               placeholder={t("new_password")}
               onChange={handleChange}
