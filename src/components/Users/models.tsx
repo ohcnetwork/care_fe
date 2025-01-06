@@ -55,7 +55,13 @@ export type UserModel = UserBareMinimum & {
   user_flags?: FeatureFlag[];
   facilities?: UserFacilityModel[];
   organizations?: Organization[];
-  permissions: string[];
+  permissions: UserPermissions[];
+};
+
+export type UserPermissions = {
+  name: string;
+  slug: string;
+  context: string;
 };
 
 export type UserBaseModel = {

@@ -89,7 +89,7 @@ export default function AppRouter() {
   return (
     <SidebarProvider>
       <PermissionProvider
-        userPermissions={user?.permissions || []}
+        userPermissions={user?.permissions.map((item) => item.slug) || []}
         isSuperAdmin={user?.is_superuser || false}
       >
         {shouldShowSidebar && <AppSidebar user={user} />}

@@ -50,6 +50,7 @@ import { FILE_EXTENSIONS } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { classNames } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
@@ -68,6 +69,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
+  const { hasPermission } = usePermissions();
 
   const associatingId =
     {
@@ -244,14 +246,20 @@ export const FilesTab = (props: FilesTabProps) => {
                   <span>{t("archive")}</span>
                 </button>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-primary-900">
-                <button
-                  onClick={() => fileManager.editFile(file, associatingId)}
-                >
-                  <CareIcon icon="l-pen" className="mr-1" />
-                  <span>{t("rename")}</span>
-                </button>
-              </DropdownMenuItem>
+              {hasPermission(
+                type === "encounter"
+                  ? "can_write_encounter"
+                  : "can_write_patient",
+              ) && (
+                <DropdownMenuItem className="text-primary-900">
+                  <button
+                    onClick={() => fileManager.editFile(file, associatingId)}
+                  >
+                    <CareIcon icon="l-pen" className="mr-1" />
+                    <span>{t("rename")}</span>
+                  </button>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         }
@@ -314,6 +322,12 @@ export const FilesTab = (props: FilesTabProps) => {
   };
 
   const FileUploadButtons = (): JSX.Element => {
+    if (
+      !hasPermission(
+        type === "encounter" ? "can_write_encounter" : "can_write_patient",
+      )
+    )
+      return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -367,8 +381,6 @@ export const FilesTab = (props: FilesTabProps) => {
       </DropdownMenu>
     );
   };
-
-  console.log("render");
 
   const RenderTable = () => {
     return (

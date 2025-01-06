@@ -75,7 +75,9 @@ const userFormSchema = z
       .optional(),
     phone_number_is_whatsapp: z.boolean().default(true),
     date_of_birth: z.string().min(1, "Date of birth is required"),
-    gender: z.enum(["male", "female", "other"]),
+    gender: z.enum(
+      GENDER_TYPES.map((gender) => gender.id) as [string, ...string[]],
+    ),
     qualification: z.string().optional(),
     doctor_experience_commenced_on: z.string().optional(),
     doctor_medical_council_registration: z.string().optional(),
@@ -155,11 +157,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           name="user_type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>User Type</FormLabel>
+              <FormLabel>{t("user_type")}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user type" />
+                    <SelectValue placeholder={t("select_user_type")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -180,9 +182,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel>{t("first_name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="First name" {...field} />
+                  <Input placeholder={t("first_name")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -194,9 +196,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="last_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel>{t("last_name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Last name" {...field} />
+                  <Input placeholder={t("last_name")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -209,9 +211,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>{t("username")}</FormLabel>
               <FormControl>
-                <Input placeholder="Username" {...field} />
+                <Input placeholder={t("username")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -224,9 +226,13 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t("password")}</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Password" {...field} />
+                  <Input
+                    type="password"
+                    placeholder={t("password")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -238,11 +244,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="c_password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>{t("confirm_password")}</FormLabel>
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="Confirm password"
+                    placeholder={t("confirm_password")}
                     {...field}
                   />
                 </FormControl>
@@ -257,7 +263,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("email")}</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="Email" {...field} />
               </FormControl>
@@ -272,7 +278,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <Input type="tel" placeholder="+91XXXXXXXXXX" {...field} />
                 </FormControl>
@@ -286,7 +292,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="alt_phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Alternative Phone Number</FormLabel>
+                <FormLabel>{t("alternative_phone_number")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="+91XXXXXXXXXX"
@@ -313,7 +319,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>WhatsApp number is same as phone number</FormLabel>
+                <FormLabel>
+                  {t("whatsapp_number_is_same_as_phone_number")}
+                </FormLabel>
               </div>
             </FormItem>
           )}
@@ -325,7 +333,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="date_of_birth"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date of Birth</FormLabel>
+                <FormLabel>{t("date_of_birth")}</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -339,14 +347,14 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
+                <FormLabel>{t("gender")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -369,9 +377,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="qualification"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Qualification</FormLabel>
+                <FormLabel>{t("qualification")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Qualification" {...field} />
+                  <Input placeholder={t("qualification")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -387,11 +395,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 name="doctor_experience_commenced_on"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Years of Experience</FormLabel>
+                    <FormLabel>{t("years_of_experience")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="Years of experience"
+                        placeholder={t("years_of_experience")}
                         {...field}
                       />
                     </FormControl>
@@ -405,10 +413,10 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 name="doctor_medical_council_registration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Medical Council Registration</FormLabel>
+                    <FormLabel>{t("medical_council_registration")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Medical council registration"
+                        placeholder={t("medical_council_registration")}
                         {...field}
                       />
                     </FormControl>
@@ -438,7 +446,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         />
 
         <Button type="submit" className="w-full">
-          Create User
+          {t("create_user")}
         </Button>
       </form>
     </Form>
