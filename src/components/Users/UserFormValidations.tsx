@@ -60,7 +60,7 @@ export const validateRule = (
   return (
     <div>
       {isInitialRender ? (
-        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
+        <CareIcon icon="l-circle" className="text-sm text-gray-500" />
       ) : isConditionMet ? (
         <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
       ) : (
