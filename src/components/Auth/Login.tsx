@@ -103,6 +103,7 @@ const Login = (props: LoginProps) => {
     },
     onSuccess: ({ res }) => {
       setCaptcha(res?.status === 429);
+      window.location.href = "/";
     },
   });
 
@@ -160,10 +161,7 @@ const Login = (props: LoginProps) => {
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        Notification.Success({ msg: t("verify_otp_success_login") });
-        setTimeout(() => {
-          window.location.href = "/patient/home";
-        }, 200);
+        window.location.href = "/patient/home";
       }
     },
 
