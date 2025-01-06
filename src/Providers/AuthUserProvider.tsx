@@ -27,14 +27,19 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
+  const [accessToken, setAccessToken] = useState(
+    localStorage.getItem(LocalStorageKeys.accessToken),
+  );
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
+    enabled: !!accessToken,
   });
 
   const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
+  console.log("isOTPAuthorized", isOTPAuthorized);
 
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
@@ -62,6 +67,17 @@ export default function AuthUserProvider({
     );
   }, [user]);
 
+  useEffect(() => {
+    // Listen for localStorage changes
+    const listener = (event: StorageEvent) => {
+      if (event.key === LocalStorageKeys.accessToken) {
+        setAccessToken(event.newValue);
+      }
+    };
+    addEventListener("storage", listener);
+    return () => removeEventListener("storage", listener);
+  }, []);
+
   const signIn = useCallback(
     async (creds: { username: string; password: string }) => {
       const query = await request(routes.login, { body: creds });
@@ -70,7 +86,7 @@ export default function AuthUserProvider({
         localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
-        await queryClient.resetQueries({ queryKey: ["currentUser"] });
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
         if (location.pathname === "/" || location.pathname === "/login") {
           navigate(getRedirectOr("/"));
@@ -120,9 +136,19 @@ export default function AuthUserProvider({
     return <Loading />;
   }
 
+  const SelectedRouter = () => {
+    if (user) {
+      return children;
+    } else if (isOTPAuthorized) {
+      return otpAuthorized;
+    } else {
+      return unauthorized;
+    }
+  };
+
   return (
     <AuthUserContext.Provider value={{ signIn, signOut, user }}>
-      {!user ? (isOTPAuthorized ? otpAuthorized : unauthorized) : children}
+      <SelectedRouter />
     </AuthUserContext.Provider>
   );
 }

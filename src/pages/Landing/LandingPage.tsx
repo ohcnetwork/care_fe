@@ -13,6 +13,8 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
+import { LoginHeader } from "@/components/Common/LoginHeader";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
@@ -96,17 +98,9 @@ export function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="w-full p-4">
-        <div className="flex justify-end items-center">
-          <Button
-            variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-            onClick={() => navigate("/login")}
-          >
-            Sign in
-          </Button>
-        </div>
-      </header>
+      <div className="w-full p-4">
+        <LoginHeader />
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center pt-24">
