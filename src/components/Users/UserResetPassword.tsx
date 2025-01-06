@@ -18,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
@@ -118,9 +118,8 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("old_password")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         {...field}
-                        type="password"
                         onChange={(e) => {
                           field.onChange(e.target.value);
                         }}
@@ -138,7 +137,7 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("new_password")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         {...field}
                         type="password"
                         onChange={(e) => {
@@ -191,7 +190,7 @@ export default function UserResetPassword({
                   <FormItem>
                     <FormLabel>{t("new_password_confirmation")}</FormLabel>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         {...field}
                         type="password"
                         onChange={(e) => {
