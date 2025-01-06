@@ -149,7 +149,9 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
       route={routes.getQuestionnaireResponses}
       pathParams={{
         patientId: encounter.patient.id,
-        encounterId: encounter.id,
+      }}
+      query={{
+        encounter: encounter.id,
       }}
     >
       {() => (
@@ -264,6 +266,7 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
                                 type={type}
                                 id={response.id}
                                 patientId={encounter.patient.id}
+                                encounterId={encounter.id}
                               />
                             );
                           },
