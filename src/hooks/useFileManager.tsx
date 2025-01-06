@@ -91,7 +91,7 @@ export default function useFileManager(
     associating_id: string,
   ) => {
     return queryClient.fetchQuery({
-      queryKey: [`${fileType}-files`, associating_id, file.id],
+      queryKey: [`${fileType}-file`, associating_id, file.id],
       queryFn: () =>
         query(routes.retrieveUpload, {
           queryParams: {

@@ -105,6 +105,7 @@ export function FacilityDetailsPage({ id }: Props) {
   const GetLoginHeader = () => {
     if (
       tokenData &&
+      tokenData.createdAt &&
       dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {
       return (
