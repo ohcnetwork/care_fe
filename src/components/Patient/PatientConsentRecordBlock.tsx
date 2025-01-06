@@ -1,6 +1,8 @@
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { PatientConsentModel } from "@/components/Facility/models";
 import FileBlock from "@/components/Files/FileBlock";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
@@ -86,15 +88,16 @@ export default function PatientConsentRecordBlockGroup(props: {
             required
             error="Please select a patient code status type"
           />
-          <ButtonV2
+          <Button
+            variant="primary"
             onClick={() => {
               handlePCSUpdate(patientCodeStatus);
             }}
             disabled={patientCodeStatus === consentRecord.patient_code_status}
             className="h-[46px]"
           >
-            Update
-          </ButtonV2>
+            {t("update")}
+          </Button>
         </div>
       )}
       {files?.map((file: FileUploadModel, i: number) => (

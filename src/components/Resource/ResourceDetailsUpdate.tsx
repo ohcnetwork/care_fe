@@ -1,9 +1,11 @@
+import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 
 import Card from "@/CAREUI/display/Card";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
@@ -280,8 +282,12 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             </div>
 
             <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
-              <Cancel variant="secondary" onClick={() => goBack()} />
-              <Submit onClick={handleSubmit} />
+              <Button type="button" variant="outline" onClick={() => goBack()}>
+                {t("cancel")}
+              </Button>
+              <Button type="submit" variant="primary" onClick={handleSubmit}>
+                {t("submit")}
+              </Button>
             </div>
           </div>
         </Card>

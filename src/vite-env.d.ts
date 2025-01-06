@@ -31,8 +31,6 @@ interface ImportMetaEnv {
   readonly REACT_ENABLED_APPS?: string;
 
   // Plugins related envs...
-  readonly REACT_PLAUSIBLE_SERVER_URL?: string;
-  readonly REACT_PLAUSIBLE_SITE_DOMAIN?: string;
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;
   readonly REACT_ENABLE_HCX?: string;

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -38,6 +39,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDisplayName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -101,21 +103,19 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button variant="outline_primary">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Add User
+          {t("assign_user")}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Add User to Patient</SheetTitle>
-          <SheetDescription>
-            Search for a user and assign a role to add them to the patient.
-          </SheetDescription>
+          <SheetTitle>{t("assign_user_to_patient")}</SheetTitle>
+          <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Search User</h3>
+            <h3 className="text-sm font-medium">{t("search_user")}</h3>
             <UserSelector
               selected={selectedUser}
               onChange={handleUserChange}
@@ -128,13 +128,13 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               <div className="rounded-lg border p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
-                    name={`${selectedUser.first_name} ${selectedUser.last_name}`}
+                    name={formatDisplayName(selectedUser)}
                     imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
                   <div className="flex flex-col flex-1">
                     <span className="font-medium text-lg">
-                      {selectedUser.first_name} {selectedUser.last_name}
+                      {formatDisplayName(selectedUser)}
                     </span>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
@@ -144,13 +144,17 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                   <div>
-                    <span className="text-sm text-gray-500">Username</span>
+                    <span className="text-sm text-gray-500">
+                      {t("username")}
+                    </span>
                     <p className="text-sm font-medium">
                       {selectedUser.username}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">User Type</span>
+                    <span className="text-sm text-gray-500">
+                      {t("user_type")}
+                    </span>
                     <p className="text-sm font-medium">
                       {selectedUser.user_type}
                     </p>
@@ -159,7 +163,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Select Role</label>
+                <label className="text-sm font-medium">
+                  {t("select_role")}
+                </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
@@ -186,7 +192,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 onClick={handleAddUser}
                 disabled={!selectedRole}
               >
-                Add to Patient
+                {t("assign_to_patient")}
               </Button>
             </div>
           )}
@@ -227,76 +233,89 @@ export const PatientUsers = (props: PatientProps) => {
     },
   });
 
+  const ManageUsers = () => {
+    if (!users?.results?.length) {
+      return (
+        <div className="h-full text-center space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
+          {t("no_user_assigned")}
+        </div>
+      );
+    }
+    return (
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users?.results.map((user) => (
+          <div
+            key={user.id}
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-4">
+                <Avatar
+                  name={formatDisplayName(user)}
+                  className="h-10 w-10"
+                  imageUrl={user.profile_picture_url}
+                />
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {formatDisplayName(user)}
+                  </h3>
+                  <p className="text-sm text-gray-500">{user.username}</p>
+                </div>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <CareIcon icon="l-trash" className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("are_you_sure_want_to_remove", {
+                        name: formatDisplayName(user),
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => removeUser(user.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t("remove")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+              <div className="text-sm">
+                <div className="text-gray-500">{t("phone_number")}</div>
+                <div className="font-medium">{user.phone_number}</div>
+              </div>
+              <div className="text-sm">
+                <div className="text-gray-500">{t("user_type")}</div>
+                <div className="font-medium">{user.user_type}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="mt-4 px-4 md:px-0" data-test-id="patient-users">
       <div className="group my-2 w-full">
         <div className="h-full space-y-2">
           <div className="flex flex-row items-center justify-between">
             <div className="mr-4 text-xl font-bold text-secondary-900">
-              Users
+              {t("users")}
             </div>
             <AddUserSheet patientId={id} />
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {users?.results?.map((user: UserBase) => (
-              <div
-                key={user.id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
-                    <Avatar
-                      name={`${user.first_name} ${user.last_name}`}
-                      className="h-10 w-10"
-                      imageUrl={user.profile_picture_url}
-                    />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        {user.first_name} {user.last_name}
-                      </h3>
-                      <p className="text-sm text-gray-500">{user.username}</p>
-                    </div>
-                  </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <CareIcon icon="l-trash" className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Remove User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to remove {user.first_name}{" "}
-                          {user.last_name} from this patient? This action cannot
-                          be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => removeUser(user.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Remove
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                  <div className="text-sm">
-                    <div className="text-gray-500">Phone Number</div>
-                    <div className="font-medium">{user.phone_number}</div>
-                  </div>
-                  <div className="text-sm">
-                    <div className="text-gray-500">User Type</div>
-                    <div className="font-medium">{user.user_type}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ManageUsers />
         </div>
       </div>
     </div>

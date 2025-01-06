@@ -1,9 +1,10 @@
 import { t } from "i18next";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button, buttonVariants } from "@/components//ui/button";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Page from "@/components/Common/Page";
 import Tabs from "@/components/Common/Tabs";
@@ -126,7 +127,7 @@ export default function PatientConsentRecords(props: {
           setShowPCSChangeModal(null);
         }}
         action="Change Patient Code Status"
-        variant="danger"
+        variant="destructive"
         description={`Consent records exist with the "${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => consentRecords?.find((c) => c.type === 2 && !c.archived)?.patient_code_status === c.id)?.text}" patient code status. Adding a new record for a different type will archive the existing records. Are you sure you want to proceed?`}
         title="Archive Previous Records"
         className="w-auto"
@@ -177,7 +178,8 @@ export default function PatientConsentRecords(props: {
           <div className="flex gap-2">
             {fileUpload.files[0] ? (
               <>
-                <ButtonV2
+                <Button
+                  variant="primary"
                   onClick={() => {
                     const diffPCS = consentRecords?.find(
                       (record) =>
@@ -193,31 +195,33 @@ export default function PatientConsentRecords(props: {
                       handleUpload();
                     }
                   }}
-                  loading={fileUpload.uploading}
                   disabled={
-                    newConsent.type === 2 &&
-                    newConsent.patient_code_status === 0
+                    fileUpload.uploading ||
+                    (newConsent.type === 2 &&
+                      newConsent.patient_code_status === 0)
                   }
-                  className="flex-1"
+                  className={`flex-1 ${fileUpload.uploading ? "opacity-50" : ""}`}
                 >
-                  <CareIcon icon="l-check" className="mr-2" />
-                  Upload
-                </ButtonV2>
-                <ButtonV2
-                  variant="danger"
+                  {fileUpload.uploading ? (
+                    <Loader2 className="animate-spin mr-2" size={16} />
+                  ) : (
+                    <CareIcon icon="l-check" className="mr-2" />
+                  )}
+                  {t("upload")}
+                </Button>
+                <Button
+                  variant="destructive"
                   onClick={fileUpload.clearFiles}
                   disabled={fileUpload.uploading}
                 >
                   <CareIcon icon="l-trash" className="text-lg" />
                   <span>{t("delete")}</span>
-                </ButtonV2>
+                </Button>
               </>
             ) : (
               <>
                 <label
-                  className={
-                    "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out"
-                  }
+                  className={`${buttonVariants({ variant: "primary", size: "default" })} inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out`}
                 >
                   <CareIcon icon={"l-file-upload-alt"} className="text-lg" />
                   {t("choose_file")}

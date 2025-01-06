@@ -131,6 +131,7 @@ export function MedicationRequestQuestion({
         placeholder="Search for medications to add"
         onSelect={handleAddMedication}
         disabled={disabled}
+        searchPostFix=" clinical drug"
       />
     </div>
   );

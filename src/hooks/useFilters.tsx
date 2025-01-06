@@ -6,7 +6,6 @@ import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
-import { triggerGoal } from "@/Integrations/Plausible";
 import FiltersCache from "@/Utils/FiltersCache";
 import { classNames, humanizeStrings } from "@/Utils/utils";
 
@@ -49,17 +48,6 @@ export default function useFilters({
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
-
-    // For each of the newly applied filters (additional filters compared to
-    // previously applied ones), trigger a plausible goal "Advanced filter
-    // applied" with the applied filter's query key and current location as tags.
-    Object.keys(query).forEach((filter) =>
-      triggerGoal("Advanced filter applied", {
-        filter,
-        location: location.pathname,
-      }),
-    );
-
     updateCache(query);
   };
 

@@ -16,7 +16,7 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
         </span>
       }
       action="Delete"
-      variant="danger"
+      variant="destructive"
       show
       onConfirm={props.handleOk}
       onClose={props.handleCancel}
