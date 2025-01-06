@@ -20,52 +20,36 @@ export const routes = {
   "/": () => <LandingPage />,
   "/facilities": () => <FacilitiesPage />,
   "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
-  "/facility/:facilityId/appointments/:staffUsername/otp/:page": ({
+  "/facility/:facilityId/appointments/:staffId/otp/:page": ({
     facilityId,
-    staffUsername,
+    staffId,
     page,
   }: {
     facilityId: string;
-    staffUsername: string;
+    staffId: string;
     page: string;
-  }) => (
-    <PatientLogin
-      facilityId={facilityId}
-      staffUsername={staffUsername}
-      page={page}
-    />
-  ),
-  "/facility/:facilityId/appointments/:staffExternalId/book-appointment": ({
+  }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
+  "/facility/:facilityId/appointments/:staffId/book-appointment": ({
     facilityId,
-    staffExternalId,
+    staffId,
   }: {
     facilityId: string;
-    staffExternalId: string;
-  }) => (
-    <ScheduleAppointment
-      facilityId={facilityId}
-      staffExternalId={staffExternalId}
-    />
-  ),
-  "/facility/:facilityId/appointments/:staffUsername/patient-select": ({
+    staffId: string;
+  }) => <ScheduleAppointment facilityId={facilityId} staffId={staffId} />,
+  "/facility/:facilityId/appointments/:staffId/patient-select": ({
     facilityId,
-    staffUsername,
+    staffId,
   }: {
     facilityId: string;
-    staffUsername: string;
-  }) => <PatientSelect facilityId={facilityId} staffUsername={staffUsername} />,
-  "/facility/:facilityId/appointments/:staffUsername/patient-registration": ({
+    staffId: string;
+  }) => <PatientSelect facilityId={facilityId} staffId={staffId} />,
+  "/facility/:facilityId/appointments/:staffId/patient-registration": ({
     facilityId,
-    staffUsername,
+    staffId,
   }: {
     facilityId: string;
-    staffUsername: string;
-  }) => (
-    <PatientRegistration
-      facilityId={facilityId}
-      staffUsername={staffUsername}
-    />
-  ),
+    staffId: string;
+  }) => <PatientRegistration facilityId={facilityId} staffId={staffId} />,
   "/login": () => <Login />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (

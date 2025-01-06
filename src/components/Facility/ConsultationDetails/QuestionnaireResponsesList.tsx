@@ -13,6 +13,8 @@ import { Encounter } from "@/types/emr/encounter";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
+import { StructuredResponseView } from "./StructuredResponseView";
+
 interface Props {
   encounter: Encounter;
 }
@@ -145,7 +147,10 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
   return (
     <PaginatedList
       route={routes.getQuestionnaireResponses}
-      pathParams={{ patientId: encounter.patient.id }}
+      pathParams={{
+        patientId: encounter.patient.id,
+        encounterId: encounter.id,
+      }}
     >
       {() => (
         <div className="mt-4 flex w-full flex-col gap-4">
@@ -182,29 +187,25 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
               {(item) => (
                 <Card
                   key={item.id}
-                  className="flex flex-col p-4 transition-colors hover:bg-muted/50"
+                  className="flex flex-col py-2 px-3 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-4">
-                      <CareIcon
-                        icon="l-file-alt"
-                        className="mt-1 h-4 w-4 text-muted-foreground"
-                      />
                       <div>
-                        <h3 className="text-base font-medium">
+                        <h3 className="text-sm font-medium">
                           {item.questionnaire?.title ||
                             Object.keys(item.structured_responses || {}).map(
                               (key) => properCase(key),
                             )}
                         </h3>
                         <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                          <CareIcon icon="l-calender" className="h-3 w-3" />
+                          <CareIcon icon="l-clock" className="h-3 w-3" />
                           <span>{formatDateTime(item.created_date)}</span>
-                        </div>
-                        <div className="mt-0.5 text-xs text-muted-foreground">
-                          by {item.created_by?.first_name || ""}{" "}
-                          {item.created_by?.last_name || ""}
-                          {` (${item.created_by?.user_type})`}
+                          <span className="mt-0.5 text-xs text-muted-foreground">
+                            by {item.created_by?.first_name || ""}{" "}
+                            {item.created_by?.last_name || ""}
+                            {` (${item.created_by?.user_type})`}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -219,38 +220,55 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
 
                   {expandedResponseIds.has(item.id) && (
                     <div className="mt-3 border-t pt-3">
-                      <div className="space-y-4">
-                        {item.questionnaire?.questions.map(
-                          (question: Question) => {
-                            // Skip structured questions for now as they need special handling
-                            if (question.type === "structured") return null;
+                      {item.questionnaire ? (
+                        // Existing questionnaire response rendering
+                        <div className="space-y-4">
+                          {item.questionnaire?.questions.map(
+                            (question: Question) => {
+                              // Skip structured questions for now as they need special handling
+                              if (question.type === "structured") return null;
 
-                            const response = item.responses.find(
-                              (r) => r.question_id === question.id,
-                            );
+                              const response = item.responses.find(
+                                (r) => r.question_id === question.id,
+                              );
 
-                            if (question.type === "group") {
+                              if (question.type === "group") {
+                                return (
+                                  <QuestionGroup
+                                    key={question.id}
+                                    group={question}
+                                    responses={item.responses}
+                                  />
+                                );
+                              }
+
+                              if (!response) return null;
+
                               return (
-                                <QuestionGroup
+                                <QuestionResponseValue
                                   key={question.id}
-                                  group={question}
-                                  responses={item.responses}
+                                  question={question}
+                                  response={response}
                                 />
                               );
-                            }
-
-                            if (!response) return null;
-
+                            },
+                          )}
+                        </div>
+                      ) : item.structured_responses ? (
+                        // New structured response rendering
+                        Object.entries(item.structured_responses).map(
+                          ([type, response]) => {
                             return (
-                              <QuestionResponseValue
-                                key={question.id}
-                                question={question}
-                                response={response}
+                              <StructuredResponseView
+                                key={response.id}
+                                type={type}
+                                id={response.id}
+                                patientId={encounter.patient.id}
                               />
                             );
                           },
-                        )}
-                      </div>
+                        )
+                      ) : null}
                     </div>
                   )}
                 </Card>

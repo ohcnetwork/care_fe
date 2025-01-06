@@ -8,7 +8,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
-import { getOrgLevel } from "@/types/organization/organization";
+import { getOrgLabel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
   const user = useAuthUser();
@@ -71,7 +71,10 @@ export default function UserDashboard() {
       {facilities.length > 0 && (
         <section className="space-y-3 md:space-y-4">
           <h2 className="text-lg font-semibold px-1">Your Facilities</h2>
-          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            data-cy="facility-list"
+          >
             {facilities.map((facility) => (
               <Link key={facility.id} href={`/facility/${facility.id}`}>
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
@@ -115,8 +118,7 @@ export default function UserDashboard() {
                         {org.name}
                       </h3>
                       <p className="text-xs md:text-sm text-muted-foreground truncate">
-                        {org.org_type} ·{" "}
-                        {getOrgLevel(org.org_type, org.level_cache)}
+                        {getOrgLabel(org.org_type, org.metadata)}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />

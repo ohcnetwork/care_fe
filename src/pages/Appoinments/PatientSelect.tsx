@@ -24,13 +24,14 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 export default function PatientSelect({
   facilityId,
-  staffUsername,
+  staffId,
 }: {
   facilityId: string;
-  staffUsername: string;
+  staffId: string;
 }) {
   const { t } = useTranslation();
   const selectedSlot = JSON.parse(
@@ -44,16 +45,16 @@ export default function PatientSelect({
 
   const queryClient = useQueryClient();
 
-  if (!staffUsername) {
-    Notification.Error({ msg: "Staff Username Not Found" });
+  if (!staffId) {
+    Notification.Error({ msg: "Staff Not Found" });
     navigate(`/facility/${facilityId}/`);
   } else if (!tokenData) {
     Notification.Error({ msg: "Phone Number Not Found" });
-    navigate(`/facility/${facilityId}/appointments/${staffUsername}/otp/send`);
+    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   } else if (!selectedSlot) {
     Notification.Error({ msg: "Selected Slot Not Found" });
     navigate(
-      `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+      `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
 
@@ -72,7 +73,7 @@ export default function PatientSelect({
 
   const { mutate: createAppointment } = useMutation({
     mutationFn: (body: AppointmentCreate) =>
-      mutate(routes.otp.createAppointment, {
+      mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
         headers: {
@@ -205,7 +206,7 @@ export default function PatientSelect({
           className="border border-secondary-400"
           onClick={() =>
             navigate(
-              `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
+              `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
             )
           }
         >
@@ -229,7 +230,7 @@ export default function PatientSelect({
           className="w-1/2 self-center"
           onClick={() =>
             navigate(
-              `/facility/${facilityId}/appointments/${staffUsername}/patient-registration`,
+              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
             )
           }
         >

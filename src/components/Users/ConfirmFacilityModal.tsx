@@ -69,7 +69,7 @@ const ConfirmFacilityModal = ({
       action={action}
       onClose={handleCancel}
       onConfirm={handleOk}
-      variant="danger"
+      variant="destructive"
     >
       <div className="flex leading-relaxed text-secondary-800">{body}</div>
     </ConfirmDialog>

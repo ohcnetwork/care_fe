@@ -1,13 +1,18 @@
 import {
+  AppointmentCreate,
+  FollowUpAppointmentRequest,
+} from "@/components/Schedule/types";
+
+import {
   AllergyIntolerance,
   AllergyIntoleranceRequest,
-} from "@/types/emr/allergyIntolerance";
+} from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import { Diagnosis, DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
-import { Diagnosis, DiagnosisRequest } from "@/types/questionnaire/diagnosis";
+import { Symptom, SymptomRequest } from "@/types/emr/symptom/symptom";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
-import { Symptom, SymptomRequest } from "@/types/questionnaire/symptom";
 
 // Map structured types to their data types
 export interface StructuredDataMap {
@@ -17,6 +22,7 @@ export interface StructuredDataMap {
   symptom: Symptom;
   diagnosis: Diagnosis;
   encounter: Encounter;
+  follow_up_appointment: FollowUpAppointmentRequest;
 }
 
 // Map structured types to their request types
@@ -27,6 +33,7 @@ export interface StructuredRequestMap {
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
   encounter: EncounterEditRequest;
+  follow_up_appointment: AppointmentCreate;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

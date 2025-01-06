@@ -16,7 +16,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import {
   Organization,
   OrganizationParent,
-  getOrgLevelLabel,
+  getOrgLabel,
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
@@ -24,34 +24,6 @@ export const Demography = (props: PatientProps) => {
   const { t } = useTranslation();
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   setAssignedVolunteerObject(patientData.assigned_to_object);
-
-  //   const observedSections: Element[] = [];
-  //   const sections = document.querySelectorAll("div[id]");
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       entries.forEach((entry) => {
-  //         if (entry.isIntersecting) {
-  //           setActiveSection(entry.target.id);
-  //         }
-  //       });
-  //     },
-  //     {
-  //       threshold: 0.6,
-  //     },
-  //   );
-
-  //   sections.forEach((section) => {
-  //     observer.observe(section);
-  //     observedSections.push(section);
-  //   });
-
-  //   return () => {
-  //     observedSections.forEach((section) => observer.unobserve(section));
-  //   };
-  // }, [patientData.assigned_to_object]);
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,
@@ -137,15 +109,6 @@ export const Demography = (props: PatientProps) => {
     details: (React.ReactNode | { label: string; value: React.ReactNode })[];
   };
 
-  // const orgParents: OrganizationParent[] = [];
-  // let currentParent = org.parent;
-  // while (currentParent) {
-  //   if (currentParent.id) {
-  //     orgParents.push(currentParent);
-  //   }
-  //   currentParent = currentParent.parent;
-  // }
-
   const getGeoOrgDetails = (geoOrg: Organization) => {
     const orgParents: OrganizationParent[] = [];
     let currentParent = geoOrg.parent;
@@ -158,13 +121,13 @@ export const Demography = (props: PatientProps) => {
 
     const parentDetails = orgParents.map((org) => {
       return {
-        label: getOrgLevelLabel(org.org_type, org.level_cache),
+        label: getOrgLabel(org.org_type, org.metadata),
         value: org.name,
       };
     });
 
     return parentDetails.reverse().concat({
-      label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
+      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
       value: geoOrg.name,
     });
   };

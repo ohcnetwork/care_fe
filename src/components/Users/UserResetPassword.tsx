@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
@@ -12,8 +14,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { UserBase } from "@/types/user/user";
-
-import ButtonV2 from "../Common/ButtonV2";
 
 interface PasswordForm {
   username: string;
@@ -192,16 +192,18 @@ export default function UserResetPassword({
 
   const editButton = () => (
     <div className="mb-4 flex justify-start">
-      <ButtonV2
+      <Button
+        variant="outline_primary"
         onClick={() => setIsEditing(!isEditing)}
         type="button"
         id="change-edit-password-button"
-        className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
-        shadow={false}
       >
-        <CareIcon icon={isEditing ? "l-times" : "l-edit"} className="h-4 w-4" />
+        <CareIcon
+          icon={isEditing ? "l-times" : "l-edit"}
+          className="h-4 w-4 ml-2"
+        />
         {isEditing ? t("cancel") : t("change_password")}
-      </ButtonV2>
+      </Button>
     </div>
   );
 

@@ -35,8 +35,9 @@
 #### Install the required dependencies
 
 ```sh
-npm run install-all
+npm install
 ```
+
 #### First-time setup
 
 For first-time setup, run the following command to generate the pluginMap and install plugin configurations:
@@ -58,9 +59,9 @@ Once the development server has started, open [localhost:4000](http://localhost:
 Authenticate to staging API with any of the following credentials
 
 ```yaml
-- username: dev-districtadmin
+- username: devdistrictadmin
   password: Coronasafe@123
-  role: District Admin
+  role: Administrator
 
 - username: staffdev
   password: Coronasafe@123

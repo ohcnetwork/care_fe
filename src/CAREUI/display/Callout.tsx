@@ -2,10 +2,8 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
-import { ButtonVariant } from "@/components/Common/ButtonV2";
-
 interface CalloutProps {
-  variant?: ButtonVariant;
+  variant?: "primary" | "secondary" | "warning" | "alert" | "danger";
   className?: string;
   badge: string;
   children: React.ReactNode;

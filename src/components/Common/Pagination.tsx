@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 
 import { statusType, useAbortableEffect } from "@/common/utils";
 
@@ -171,18 +171,17 @@ interface NavButtonProps {
 
 const NavButton = (props: NavButtonProps) => {
   return (
-    <ButtonV2
+    <Button
       id={props.id}
       disabled={props.disabled}
       onClick={props.onClick}
-      ghost={!props.selected}
-      variant={props.selected === undefined ? "secondary" : "primary"}
+      variant={props.selected ? "primary" : "secondary"}
       className="tooltip rounded-none text-sm font-bold"
     >
       {props.children}
       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
         {props.tooltip}
       </span>
-    </ButtonV2>
+    </Button>
   );
 };

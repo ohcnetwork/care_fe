@@ -107,7 +107,7 @@ export interface Encounter {
   created_by: UserBase;
   updated_by: UserBase;
   created_date: string;
-  updated_date: string;
+  modified_date: string;
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
