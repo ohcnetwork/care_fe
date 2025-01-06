@@ -14,7 +14,6 @@
 // import useOperateCamera, {
 //   PTZPayload,
 // } from "@/components/CameraFeed/useOperateCamera";
-// import ButtonV2 from "@/components/Common/ButtonV2";
 // import ConfirmDialog from "@/components/Common/ConfirmDialog";
 // import Loading from "@/components/Common/Loading";
 // import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
@@ -22,7 +21,6 @@
 // import useAuthUser from "@/hooks/useAuthUser";
 // import useBreakpoints from "@/hooks/useBreakpoints";
 
-// import { triggerGoal } from "@/Integrations/Plausible";
 // import { Warn } from "@/Utils/Notifications";
 // import request from "@/Utils/request/request";
 // import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -226,7 +224,7 @@
 //                     className="animate-spin text-base text-zinc-300 md:mx-2"
 //                   />
 //                 ) : (
-//                   <ButtonV2
+//                   <Button
 //                     size="small"
 //                     variant="secondary"
 //                     disabled={cannotSaveToPreset}
@@ -243,7 +241,7 @@
 //                     onClick={() => setShowPresetSaveConfirmation(true)}
 //                   >
 //                     <CareIcon icon="l-save" className="text-lg" />
-//                   </ButtonV2>
+//                   </Button>
 //                 )}
 //               </>
 //             ) : (

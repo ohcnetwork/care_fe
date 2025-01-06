@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2, { CommonButtonProps } from "@/components/Common/ButtonV2";
+import { Button, ButtonProps } from "@/components/ui/button";
+
 import Pagination from "@/components/Common/Pagination";
 
 import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
@@ -118,13 +119,16 @@ const WhenLoading = <TItem extends object>(props: WhenEmptyProps) => {
 
 PaginatedList.WhenLoading = WhenLoading;
 
+interface CommonButtonProps extends ButtonProps {
+  label?: string;
+}
+
 const Refresh = ({ label = "Refresh", ...props }: CommonButtonProps) => {
   const { loading, refetch } = useContextualized<object>();
 
   return (
-    <ButtonV2
+    <Button
       variant="secondary"
-      border
       {...props}
       onClick={() => refetch()}
       disabled={loading}
@@ -134,7 +138,7 @@ const Refresh = ({ label = "Refresh", ...props }: CommonButtonProps) => {
         className={classNames("text-lg", loading && "animate-spin")}
       />
       <span>{label}</span>
-    </ButtonV2>
+    </Button>
   );
 };
 

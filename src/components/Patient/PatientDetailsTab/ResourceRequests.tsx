@@ -60,6 +60,7 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         <Button
+          variant="outline_primary"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,
