@@ -31,7 +31,7 @@ import { AppointmentPatient } from "@/pages/Patient/Utils";
 export function FacilityNavUser() {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile, open } = useSidebar();
+  const { isMobile, open, setOpenMobile } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -94,7 +94,12 @@ export function FacilityNavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => navigate(`/users/${user.username}`)}
+                onClick={() => {
+                  navigate(`/users/${user.username}`);
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
               >
                 <BadgeCheck />
                 {t("profile")}
