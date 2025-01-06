@@ -119,15 +119,12 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                           <h1 className="text-base font-bold break-words pr-2">
                             {userRole.user.first_name} {userRole.user.last_name}
                           </h1>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm text-gray-500 truncate">
+                          <span className="text-sm text-gray-500">
+                            <span className="mx-2">
                               {userRole.user.username}
                             </span>
-                            <UserStatusIndicator
-                              user={userRole.user}
-                              addPadding
-                            />
-                          </div>
+                            <UserStatusIndicator user={userRole.user} />
+                          </span>
                         </div>
                       </div>
                     </div>
