@@ -27,19 +27,15 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
-  const [accessToken, setAccessToken] = useState(
-    localStorage.getItem(LocalStorageKeys.accessToken),
-  );
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
-    enabled: !!accessToken,
+    enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
   const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
-  console.log("isOTPAuthorized", isOTPAuthorized);
 
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
@@ -66,17 +62,6 @@ export default function AuthUserProvider({
       careConfig.auth.tokenRefreshInterval,
     );
   }, [user]);
-
-  useEffect(() => {
-    // Listen for localStorage changes
-    const listener = (event: StorageEvent) => {
-      if (event.key === LocalStorageKeys.accessToken) {
-        setAccessToken(event.newValue);
-      }
-    };
-    addEventListener("storage", listener);
-    return () => removeEventListener("storage", listener);
-  }, []);
 
   const signIn = useCallback(
     async (creds: { username: string; password: string }) => {
