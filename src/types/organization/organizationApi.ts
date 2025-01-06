@@ -70,13 +70,13 @@ export function useFetchOrganizationByName(name: string, parentId?: string) {
         queryParams: {
           org_type: "govt",
           parent: parentId || "",
-          name: name || "",
+          name: name,
         },
       })({ signal: new AbortController().signal });
 
-      return data.results?.[0];
+      return data.results?.[0] || null;
     },
-    enabled: !!name,
+    enabled: name != undefined,
   });
 }
 

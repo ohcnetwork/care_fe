@@ -11,6 +11,7 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import Card from "@/CAREUI/display/Card";
@@ -225,11 +226,11 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { data: pincodeData, isError: isPincodeError } = useQuery({
     queryKey: ["pincodeDetails", pincode],
     queryFn: () => getPincodeDetails(pincode, careConfig.govDataApiKey),
-    enabled: validatePincode(pincode),
+    enabled: validatePincode(pincode) && pincode != facilityData?.pincode,
   });
 
   if (isPincodeError) {
-    Notification.Error({ msg: "Invalid pincode" });
+    toast.error("Invalid pincode");
   }
 
   const stateName = pincodeData?.statename;
@@ -250,10 +251,9 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   }, [stateOrg, districtOrg]);
 
-  console.log("selectedLevels", selectedLevels);
-
   const handlePincodeChange = (value: string) => {
     setPincode(value);
+    setSelectedLevels([]);
   };
 
   return (
@@ -512,7 +512,9 @@ export const FacilityCreate = (props: FacilityProps) => {
 
               {/* Visibility Settings */}
               <div className="space-y-4 rounded-lg border p-4">
-                <h3 className="text-lg font-medium">Visibility Settings</h3>
+                <h3 className="text-lg font-medium">
+                  {t("visibility_settings")}
+                </h3>
                 <FormField
                   control={form.control}
                   name="is_public"
