@@ -37,19 +37,19 @@ export function StructuredResponseView({
   });
 
   const symptomQuery = useQuery({
-    queryKey: ["symptom"],
+    queryKey: ["symptom", id],
     queryFn: query(symptomApi.retrieveSymptom, getParams("symptomId")),
     enabled: type === "symptom" && !!id,
   });
 
   const diagnosisQuery = useQuery({
-    queryKey: ["diagnosis"],
+    queryKey: ["diagnosis", id],
     queryFn: query(diagnosisApi.retrieveDiagnosis, getParams("diagnosisId")),
     enabled: type === "diagnosis" && !!id,
   });
 
   const allergyQuery = useQuery({
-    queryKey: ["allergy_intolerance"],
+    queryKey: ["allergy_intolerance", id],
     queryFn: query(allergyApi.retrieveAllergy, getParams("allergyId")),
     enabled: type === "allergy_intolerance" && !!id,
   });
