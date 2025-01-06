@@ -1,6 +1,10 @@
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -14,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Loading from "@/components/Common/Loading";
+import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
@@ -24,11 +29,20 @@ import {
 } from "@/components/Schedule/types";
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
+import mutate from "@/Utils/request/mutate";
+
 interface Props {
   items?: ScheduleTemplate[];
+  facilityId: string;
+  userId: string;
 }
 
-export default function ScheduleTemplatesList({ items }: Props) {
+export default function ScheduleTemplatesList({
+  items,
+  facilityId,
+  userId,
+}: Props) {
+  const { t } = useTranslation();
   if (items == null) {
     return <Loading />;
   }
@@ -37,7 +51,7 @@ export default function ScheduleTemplatesList({ items }: Props) {
     return (
       <div className="flex flex-col items-center text-center text-gray-500 py-64">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>No schedule templates found for this month.</p>
+        <p>{t("no_schedule_templates_found")}</p>
       </div>
     );
   }
@@ -46,17 +60,48 @@ export default function ScheduleTemplatesList({ items }: Props) {
     <ul className="flex flex-col gap-4">
       {items.map((template) => (
         <li key={template.id}>
-          <ScheduleTemplateItem {...template} />
+          <ScheduleTemplateItem
+            {...template}
+            facilityId={facilityId}
+            userId={userId}
+          />
         </li>
       ))}
     </ul>
   );
 }
 
-const ScheduleTemplateItem = (props: ScheduleTemplate) => {
+const ScheduleTemplateItem = (
+  props: ScheduleTemplate & { facilityId: string; userId: string },
+) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteTemplate, isPending } = useMutation({
+    mutationFn: mutate(ScheduleAPIs.templates.delete, {
+      pathParams: {
+        facility_id: props.facilityId,
+        id: props.id,
+      },
+    }),
+    onSuccess: () => {
+      toast.success(t("template_deleted"));
+      queryClient.invalidateQueries({
+        queryKey: [
+          "user-schedule-templates",
+          { facilityId: props.facilityId, userId: props.userId },
+        ],
+      });
+    },
+  });
+
   return (
-    <div className="rounded-lg bg-white py-2 shadow">
+    <div
+      className={cn(
+        "rounded-lg bg-white py-2 shadow",
+        isPending && "opacity-50 pointer-events-none",
+      )}
+    >
       <div className="flex items-center justify-between py-2 pr-4">
         <div className="flex">
           <ColoredIndicator
@@ -82,7 +127,9 @@ const ScheduleTemplateItem = (props: ScheduleTemplate) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => deleteTemplate()}>
+              {t("delete")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

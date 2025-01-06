@@ -12,14 +12,12 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { PrinterIcon } from "lucide-react";
+import { BanIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -175,6 +173,7 @@ export default function AppointmentDetailsPage(props: Props) {
             <Separator className="my-4" />
             <div className="mx-6 mt-10">
               <AppointmentActions
+                facilityId={props.facilityId}
                 appointment={appointment}
                 onChange={(status) => updateAppointment({ status })}
                 onViewPatient={redirectToPatientPage}
@@ -357,19 +356,37 @@ const AppointmentDetails = ({
 };
 
 interface AppointmentActionsProps {
+  facilityId: string;
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
 }
 
 const AppointmentActions = ({
+  facilityId,
   appointment,
   onChange,
   onViewPatient,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+
+  const { mutate: cancelAppointment } = useMutation({
+    mutationFn: mutate(ScheduleAPIs.appointments.cancel, {
+      pathParams: {
+        facility_id: facilityId,
+        id: appointment.id,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", appointment.id],
+      });
+    },
+  });
 
   if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
     return null;
@@ -449,9 +466,21 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      <Button variant="outline" onClick={() => onChange("cancelled")} size="lg">
-        <CareIcon icon="l-ban" className="text-lg mr-2" />
+      <Button
+        variant="outline"
+        onClick={() => cancelAppointment({ reason: "cancelled" })}
+        size="lg"
+      >
+        <BanIcon className="size-4 mr-2" />
         {t("cancel_appointment")}
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+        size="lg"
+      >
+        <BanIcon className="size-4 mr-2" />
+        {t("mark_as_entered_in_error")}
       </Button>
     </div>
   );

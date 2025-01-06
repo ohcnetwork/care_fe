@@ -23,6 +23,7 @@ export const ScheduleAPIs = {
     delete: {
       path: "/api/v1/facility/{facility_id}/schedule/{id}/",
       method: "DELETE",
+      TBody: Type<void>(),
       TRes: Type<void>(),
     },
     list: {
@@ -92,6 +93,12 @@ export const ScheduleAPIs = {
       path: "/api/v1/facility/{facility_id}/appointments/{id}/",
       method: "PUT",
       TBody: Type<Partial<WritableOnly<Appointment>>>(),
+      TRes: Type<Appointment>(),
+    },
+    cancel: {
+      path: "/api/v1/facility/{facility_id}/appointments/{id}/cancel/",
+      method: "POST",
+      TBody: Type<{ reason: "cancelled" | "entered_in_error" }>(),
       TRes: Type<Appointment>(),
     },
   },

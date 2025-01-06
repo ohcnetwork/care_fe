@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -30,12 +31,9 @@ import {
 
 import { ScheduleAPIs } from "@/components/Schedule/api";
 
-import useSlug from "@/hooks/useSlug";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
 
 const formSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
@@ -53,13 +51,15 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
-  onRefresh?: () => void;
-  user: UserBase;
+  facilityId: string;
+  userId: string;
 }
 
-export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
+export default function ScheduleExceptionForm({ facilityId, userId }: Props) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
-  const facilityId = useSlug("facility");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -73,14 +73,18 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
     },
   });
 
-  const {
-    mutate: createException,
-    isPending,
-    isSuccess,
-  } = useMutation({
+  const { mutate: createException, isPending } = useMutation({
     mutationFn: mutate(ScheduleAPIs.exceptions.create, {
       pathParams: { facility_id: facilityId },
     }),
+    onSuccess: () => {
+      toast.success(t("exception_created"));
+      setOpen(false);
+      form.reset();
+      queryClient.invalidateQueries({
+        queryKey: ["user-schedule-exceptions", { facilityId, userId }],
+      });
+    },
   });
 
   const unavailableAllDay = form.watch("unavailable_all_day");
@@ -95,23 +99,14 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
     }
   }, [unavailableAllDay]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Exception created successfully");
-      setOpen(false);
-      form.reset();
-      onRefresh?.();
-    }
-  }, [isSuccess]);
-
-  async function onSubmit(data: FormValues) {
+  function onSubmit(data: FormValues) {
     createException({
       reason: data.reason,
       valid_from: dateQueryString(data.valid_from),
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      user: user.id,
+      user: userId,
     });
   }
 

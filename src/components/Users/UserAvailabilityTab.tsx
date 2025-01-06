@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -44,15 +43,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
 
   const facilityId = useSlug("facility");
 
-  // TODO: remove this once we have a way to get the facilityId
-  useEffect(() => {
-    if (!facilityId) {
-      toast.error("User needs to be linked to a home facility");
-    }
-  }, [facilityId]);
-
   const templatesQuery = useQuery({
-    queryKey: ["user-availability-templates", user.username],
+    queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
     queryFn: query(ScheduleAPIs.templates.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
@@ -61,7 +53,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: ["user-availability-exceptions", user.username],
+    queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
     queryFn: query(ScheduleAPIs.exceptions.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
@@ -73,9 +65,9 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 py-4 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-8 py-4 lg:grid-cols-2">
       <Calendar
-        className="md:order-last"
+        className="lg:order-last"
         month={month}
         onMonthChange={setMonth}
         renderDay={(date: Date) => {
@@ -149,7 +141,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               <PopoverContent
                 className="w-[24rem] p-6"
                 align="center"
-                side="bottom"
+                side="left"
                 sideOffset={5}
               >
                 <div className="flex items-center justify-between">
@@ -242,16 +234,10 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             </Button>
           </div>
           {view === "schedule" && (
-            <ScheduleTemplateForm
-              onRefresh={templatesQuery.refetch}
-              user={user}
-            />
+            <ScheduleTemplateForm facilityId={facilityId} userId={user.id} />
           )}
           {view === "exceptions" && (
-            <ScheduleExceptionForm
-              onRefresh={exceptionsQuery.refetch}
-              user={user}
-            />
+            <ScheduleExceptionForm facilityId={facilityId} userId={user.id} />
           )}
         </div>
 
@@ -259,6 +245,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           <ScrollArea className="h-[calc(100vh-24rem)] -mr-3 pr-3 pb-4">
             {view === "schedule" && (
               <ScheduleTemplatesList
+                facilityId={facilityId}
+                userId={user.id}
                 items={
                   templatesQuery.isLoading
                     ? undefined
@@ -274,6 +262,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                     ? undefined
                     : exceptionsQuery.data?.results
                 }
+                facilityId={facilityId}
+                userId={user.id}
               />
             )}
 

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -41,12 +41,9 @@ import {
 } from "@/components/Schedule/helpers";
 import { ScheduleSlotTypes } from "@/components/Schedule/types";
 
-import useSlug from "@/hooks/useSlug";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -79,13 +76,14 @@ const formSchema = z.object({
 });
 
 interface Props {
-  onRefresh?: () => void;
-  user: UserBase;
+  facilityId: string;
+  userId: string;
 }
 
-export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
-  const facilityId = useSlug("facility");
+export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -109,31 +107,26 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
     },
   });
 
-  const {
-    mutate: createTemplate,
-    isPending,
-    isSuccess,
-  } = useMutation({
+  const { mutate: createTemplate, isPending } = useMutation({
     mutationFn: mutate(ScheduleAPIs.templates.create, {
       pathParams: { facility_id: facilityId },
     }),
-  });
-
-  useEffect(() => {
-    if (isSuccess) {
+    onSuccess: () => {
       toast.success("Schedule template created successfully");
       setOpen(false);
       form.reset();
-      onRefresh?.();
-    }
-  }, [isSuccess]);
+      queryClient.invalidateQueries({
+        queryKey: ["user-schedule-templates", { facilityId, userId }],
+      });
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     createTemplate({
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       name: values.name,
-      user: user.id as unknown as string,
+      user: userId,
       availabilities: values.availabilities.map((availability) => ({
         name: availability.name,
         slot_type: availability.slot_type,
@@ -179,9 +172,6 @@ export default function ScheduleTemplateForm({ user, onRefresh }: Props) {
       </Callout>
     );
   };
-
-  console.log(form.formState.errors);
-  console.log(form.formState);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

@@ -1,6 +1,15 @@
-import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
+import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatDate, isPast } from "date-fns";
+import {
+  format,
+  formatDate,
+  isPast,
+  isToday,
+  isTomorrow,
+  isYesterday,
+} from "date-fns";
+import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +19,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Command,
   CommandEmpty,
@@ -19,7 +29,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -182,48 +191,51 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         : t("no_results")}
                     </CommandEmpty>
                     <CommandGroup>
-                      <CommandItem
-                        value="all"
-                        onSelect={() =>
-                          setQParams({
-                            practitioner: undefined,
-                            slot: undefined,
-                          })
-                        }
-                        className="cursor-pointer"
-                      >
-                        <span>{t("show_all")}</span>
-                        {qParams.practitioner === undefined && (
-                          <CheckIcon className="ml-auto" />
-                        )}
-                      </CommandItem>
-                      {resourcesQuery.data?.users.map((user) => (
+                      <PopoverClose className="w-full">
                         <CommandItem
-                          key={user.id}
-                          value={formatName(user)}
+                          value="all"
                           onSelect={() =>
                             setQParams({
-                              practitioner: user.id,
+                              practitioner: undefined,
                               slot: undefined,
                             })
                           }
                           className="cursor-pointer"
                         >
-                          <div className="flex items-center gap-2">
-                            <Avatar
-                              imageUrl={user.profile_picture_url}
-                              name={formatName(user)}
-                              className="size-6 rounded-full"
-                            />
-                            <span>{formatName(user)}</span>
-                            <span className="text-xs text-gray-500 font-medium">
-                              {user.user_type}
-                            </span>
-                          </div>
-                          {qParams.practitioner === user.id && (
+                          <span>{t("show_all")}</span>
+                          {qParams.practitioner === undefined && (
                             <CheckIcon className="ml-auto" />
                           )}
                         </CommandItem>
+                      </PopoverClose>
+                      {resourcesQuery.data?.users.map((user) => (
+                        <PopoverClose className="w-full" key={user.id}>
+                          <CommandItem
+                            value={formatName(user)}
+                            onSelect={() =>
+                              setQParams({
+                                practitioner: user.id,
+                                slot: undefined,
+                              })
+                            }
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Avatar
+                                imageUrl={user.profile_picture_url}
+                                name={formatName(user)}
+                                className="size-6 rounded-full"
+                              />
+                              <span>{formatName(user)}</span>
+                              <span className="text-xs text-gray-500 font-medium">
+                                {user.user_type}
+                              </span>
+                            </div>
+                            {qParams.practitioner === user.id && (
+                              <CheckIcon className="ml-auto" />
+                            )}
+                          </CommandItem>
+                        </PopoverClose>
                       ))}
                     </CommandGroup>
                   </CommandList>
@@ -233,12 +245,51 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           </div>
 
           <div>
-            <Label className="mb-2">
-              <span className="text-black">{t("today")}</span>
-              <span className="pl-1 text-gray-500">
-                ({formatDate(new Date(), "dd MMM yyyy")})
-              </span>
-            </Label>
+            <div className="flex items-center gap-1 -mt-2">
+              <Label>
+                {(() => {
+                  const relative =
+                    (isYesterday(date) && t("yesterday")) ||
+                    (isToday(date) && t("today")) ||
+                    (isTomorrow(date) && t("tomorrow"));
+                  if (relative) {
+                    return (
+                      <>
+                        <span className="text-black">{relative}</span>
+                        <span className="pl-1 text-gray-500">
+                          ({formatDate(date, "dd MMM yyyy")})
+                        </span>
+                      </>
+                    );
+                  }
+                  return (
+                    <span className="text-black">
+                      {formatDate(date, "dd MMM yyyy")}
+                    </span>
+                  );
+                })()}
+              </Label>
+              <Popover modal>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Edit3Icon />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(date)}
+                    onSelect={(date) => {
+                      setQParams({
+                        date: dateQueryString(date),
+                        slot: undefined,
+                      });
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
 
             <SlotFilter
               slots={slots ?? []}
@@ -261,7 +312,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             value={qParams.search}
             onChange={(e) => setQParams({ search: e.target.value })}
           />
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button variant="secondary">
                 <CareIcon icon="l-filter" className="mr-2" />
@@ -288,7 +339,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 </Button>
               </div>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
       </div>
 

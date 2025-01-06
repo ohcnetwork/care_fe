@@ -14,16 +14,20 @@ import Loading from "@/components/Common/Loading";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { ScheduleException } from "@/components/Schedule/types";
 
-import useSlug from "@/hooks/useSlug";
-
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
 
 interface Props {
   items?: ScheduleException[];
+  facilityId: string;
+  userId: string;
 }
 
-export default function ScheduleExceptionsList({ items }: Props) {
+export default function ScheduleExceptionsList({
+  items,
+  facilityId,
+  userId,
+}: Props) {
   const { t } = useTranslation();
 
   if (items == null) {
@@ -43,29 +47,37 @@ export default function ScheduleExceptionsList({ items }: Props) {
     <ul className="flex flex-col gap-4">
       {items.map((exception) => (
         <li key={exception.id}>
-          <ScheduleExceptionItem {...exception} />
+          <ScheduleExceptionItem
+            {...exception}
+            facilityId={facilityId}
+            userId={userId}
+          />
         </li>
       ))}
     </ul>
   );
 }
 
-const ScheduleExceptionItem = (props: ScheduleException) => {
+const ScheduleExceptionItem = (
+  props: ScheduleException & { facilityId: string; userId: string },
+) => {
   const { t } = useTranslation();
-  const facilityId = useSlug("facility");
   const queryClient = useQueryClient();
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(ScheduleAPIs.exceptions.delete, {
       pathParams: {
         id: props.id,
-        facility_id: facilityId,
+        facility_id: props.facilityId,
       },
     }),
     onSuccess: () => {
       toast.success(t("exception_deleted"));
       queryClient.invalidateQueries({
-        queryKey: ["user-availability-exceptions", props.user],
+        queryKey: [
+          "user-schedule-exceptions",
+          { facilityId: props.facilityId, userId: props.userId },
+        ],
       });
     },
   });
