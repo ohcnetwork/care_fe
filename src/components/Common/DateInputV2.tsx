@@ -279,7 +279,13 @@ const DateInputV2: React.FC<Props> = ({
         datePickerHeaderDate.getDate(),
       );
       if (min && year === min.getFullYear() && newDate < min) {
-        setDatePickerHeaderDate(new Date(min.getFullYear(), min.getMonth(), 1));
+        setDatePickerHeaderDate(
+          new Date(min.getFullYear(), min.getMonth(), min.getDate()),
+        );
+      } else if (max && year === max.getFullYear() && newDate > max) {
+        setDatePickerHeaderDate(
+          new Date(max.getFullYear(), max.getMonth(), max.getDate()),
+        );
       } else {
         setDatePickerHeaderDate(newDate);
       }
