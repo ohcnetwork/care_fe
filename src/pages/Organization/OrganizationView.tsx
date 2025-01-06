@@ -38,7 +38,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     debounceQuery(searchQuery);
   }, [searchQuery]);
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", id, "children", page, limit],
+    queryKey: ["organization", id, "children", page, limit, debouncedQuery],
     queryFn: query(organizationApi.list, {
       queryParams: {
         parent: id,
