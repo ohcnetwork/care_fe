@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import useDebounce from "@/hooks/useDebounce";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
@@ -30,15 +32,25 @@ export default function OrganizationFacilities({
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 14, cacheBlacklist: ["facility"] });
 
+  const [debouncedParams, setDebouncedParams] = useState(qParams);
+
+  const debounceParams = useDebounce((newParams) => {
+    setDebouncedParams(newParams);
+  }, 500);
+
+  useEffect(() => {
+    debounceParams(qParams);
+  }, [JSON.stringify(qParams)]);
+
   const { data: facilities, isLoading } = useQuery({
-    queryKey: ["organizationFacilities", id, qParams],
+    queryKey: ["organizationFacilities", id, debouncedParams],
     queryFn: query(routes.facility.list, {
       queryParams: {
-        page: qParams.page,
+        page: debouncedParams.page,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: (debouncedParams.page - 1) * resultsPerPage,
         organization: id,
-        name: qParams.name,
+        name: debouncedParams.name,
         ...advancedFilter.filter,
       },
     }),

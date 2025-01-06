@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
+
+import useDebounce from "@/hooks/useDebounce";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -25,16 +27,24 @@ interface Props {
 export default function OrganizationView({ id, navOrganizationId }: Props) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
 
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  const limit = 12; // 3x4 grid
+  const debounceQuery = useDebounce((newParams) => {
+    setDebouncedQuery(newParams);
+  }, 500);
+  useEffect(() => {
+    debounceQuery(searchQuery);
+  }, [searchQuery]);
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, searchQuery],
+    queryKey: ["organization", id, "children", page, limit],
     queryFn: query(organizationApi.list, {
       queryParams: {
         parent: id,
         offset: (page - 1) * limit,
         limit,
-        name: searchQuery || undefined,
+        name: debouncedQuery || undefined,
       },
     }),
   });

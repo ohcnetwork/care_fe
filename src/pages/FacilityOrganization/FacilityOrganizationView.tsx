@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
+
+import useDebounce from "@/hooks/useDebounce";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -25,8 +27,15 @@ interface Props {
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const limit = 12; // 3x4 grid
+  const debounceQuery = useDebounce((newParams) => {
+    setDebouncedQuery(newParams);
+  }, 500);
 
+  useEffect(() => {
+    debounceQuery(searchQuery);
+  }, [searchQuery]);
   const { data: children, isLoading } = useQuery({
     queryKey: [
       "facilityOrganization",
@@ -35,7 +44,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       id,
       page,
       limit,
-      searchQuery,
+      debouncedQuery,
     ],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId, organizationId: id },
@@ -43,7 +52,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
         parent: id,
         offset: (page - 1) * limit,
         limit,
-        name: searchQuery || undefined,
+        name: debouncedQuery || undefined,
       },
     }),
   });
