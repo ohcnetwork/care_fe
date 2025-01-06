@@ -54,8 +54,8 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-lg font-semibold">{t("organizations")}</h2>
-          <div className="flex items-center gap-4 w-full sm:w-auto ">
-            <div className="w-1/2 md:w-fit sm:w-72">
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center w-full sm:justify-end ">
+            <div className="w-full mb-1 sm:mb-0 lg:w-1/3 md:w-fit">
               <Input
                 placeholder="Search by name..."
                 value={searchQuery}
@@ -66,10 +66,12 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 className="w-full"
               />
             </div>
-            <CreateFacilityOrganizationSheet
-              facilityId={facilityId}
-              parentId={id}
-            />
+            <div className="w-auto">
+              <CreateFacilityOrganizationSheet
+                facilityId={facilityId}
+                parentId={id}
+              />
+            </div>
           </div>
         </div>
 
