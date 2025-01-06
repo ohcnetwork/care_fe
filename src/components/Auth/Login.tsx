@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
@@ -46,6 +46,10 @@ interface LoginFormData {
 
 type LoginMode = "staff" | "patient";
 
+interface LoginProps {
+  forgot?: boolean;
+}
+
 interface OtpError {
   type: string;
   loc: string[];
@@ -63,7 +67,7 @@ interface OtpLoginData {
   otp: string;
 }
 
-const Login = (props: { forgot?: boolean }) => {
+const Login = (props: LoginProps) => {
   const { signIn } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
@@ -73,6 +77,8 @@ const Login = (props: { forgot?: boolean }) => {
     password: "",
   };
   const { forgot } = props;
+  const [params] = useQueryParams();
+  const { mode } = params;
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -81,7 +87,9 @@ const Login = (props: { forgot?: boolean }) => {
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(forgot);
-  const [loginMode, setLoginMode] = useState<LoginMode>("staff");
+  const [loginMode, setLoginMode] = useState<LoginMode>(
+    mode === "patient" ? "patient" : "staff",
+  );
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -96,6 +104,7 @@ const Login = (props: { forgot?: boolean }) => {
     },
     onSuccess: ({ res }) => {
       setCaptcha(res?.status === 429);
+      window.location.href = "/";
     },
   });
 
@@ -153,10 +162,7 @@ const Login = (props: { forgot?: boolean }) => {
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        Notification.Success({ msg: t("verify_otp_success_login") });
-        setTimeout(() => {
-          window.location.href = "/patient/home";
-        }, 200);
+        window.location.href = "/patient/home";
       }
     },
 
