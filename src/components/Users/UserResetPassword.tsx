@@ -139,7 +139,6 @@ export default function UserResetPassword({
                     <FormControl>
                       <PasswordInput
                         {...field}
-                        type="password"
                         onChange={(e) => {
                           field.onChange(e.target.value);
                         }}
@@ -192,7 +191,6 @@ export default function UserResetPassword({
                     <FormControl>
                       <PasswordInput
                         {...field}
-                        type="password"
                         onChange={(e) => {
                           field.onChange(e.target.value);
                         }}
