@@ -13,7 +13,7 @@ import { AppointmentSuccess } from "@/pages/Appoinments/Success";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import PatientIndex from "@/pages/Patient/index";
 
-import SessionRouter from "./SessionRouter";
+import PublicRouter from "./PublicRouter";
 
 const PatientRoutes = {
   "/nearby_facilities": () => <FacilitiesPage />,
@@ -39,7 +39,7 @@ export default function PatientRouter() {
   const pages = useRoutes(PatientRoutes);
 
   if (!pages) {
-    return <SessionRouter />;
+    return <PublicRouter />;
   }
 
   return (
