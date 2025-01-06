@@ -55,6 +55,7 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
           <TabsContent key={tab.id} value={tab.id}>
             <ObservationVisualizer
               patientId={props.patient.id}
+              encounterId={props.encounter.id}
               codeGroups={tab.groups}
               gridCols={2}
             />

@@ -28,6 +28,7 @@ interface PaginatedResponse<T> {
 
 interface ObservationHistoryTableProps {
   patientId: string;
+  encounterId: string;
   codes: Code[];
 }
 
@@ -45,6 +46,7 @@ const formatDate = (dateString: string) => {
 
 export const ObservationHistoryTable = ({
   patientId,
+  encounterId,
   codes,
 }: ObservationHistoryTableProps) => {
   const { ref, inView } = useInView();
@@ -57,6 +59,7 @@ export const ObservationHistoryTable = ({
       const response = await query(routes.listObservations, {
         pathParams: { patientId },
         queryParams: {
+          encounter: encounterId,
           limit: String(LIMIT),
           codes: codes.map((c) => c.code).join(","),
           offset: String(pageParam),
