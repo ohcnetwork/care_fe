@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
 
-import useDebounce from "@/hooks/useDebounce";
+import useDebouncedState from "@/hooks/useDebouncedState";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -27,15 +27,16 @@ interface Props {
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const limit = 12; // 3x4 grid
-  const debounceQuery = useDebounce((newParams) => {
-    setDebouncedQuery(newParams);
-  }, 500);
+  const [debouncedParams, setDebouncedParams] = useDebouncedState(
+    searchQuery,
+    500,
+  );
 
   useEffect(() => {
-    debounceQuery(searchQuery);
+    setDebouncedParams(searchQuery);
   }, [searchQuery]);
+
   const { data: children, isLoading } = useQuery({
     queryKey: [
       "facilityOrganization",
@@ -44,7 +45,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       id,
       page,
       limit,
-      debouncedQuery,
+      debouncedParams,
     ],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId, organizationId: id },
@@ -52,7 +53,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
         parent: id,
         offset: (page - 1) * limit,
         limit,
-        name: debouncedQuery || undefined,
+        name: debouncedParams || undefined,
       },
     }),
   });

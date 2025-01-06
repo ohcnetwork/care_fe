@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
 
-import useDebounce from "@/hooks/useDebounce";
+import useDebouncedState from "@/hooks/useDebouncedState";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -28,23 +28,25 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [debouncedParams, setDebouncedParams] = useDebouncedState(
+    searchQuery,
+    500,
+  );
+
+  useEffect(() => {
+    setDebouncedParams(searchQuery);
+  }, [searchQuery]);
 
   const limit = 12; // 3x4 grid
-  const debounceQuery = useDebounce((newParams) => {
-    setDebouncedQuery(newParams);
-  }, 500);
-  useEffect(() => {
-    debounceQuery(searchQuery);
-  }, [searchQuery]);
+
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, debouncedQuery],
+    queryKey: ["organization", id, "children", page, limit, debouncedParams],
     queryFn: query(organizationApi.list, {
       queryParams: {
         parent: id,
         offset: (page - 1) * limit,
         limit,
-        name: debouncedQuery || undefined,
+        name: debouncedParams || undefined,
       },
     }),
   });
