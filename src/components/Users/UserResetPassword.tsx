@@ -148,10 +148,6 @@ export default function UserResetPassword({
                         onBlur={() => setIsPasswordFieldFocused(false)}
                       />
                     </FormControl>
-                    {form.formState.errors?.new_password_1?.message &&
-                      form.formState.errors?.new_password_1?.message.includes(
-                        t("new_password_same_as_old"),
-                      ) && <FormMessage />}
                     {isPasswordFieldFocused && (
                       <div
                         className="text-small mt-2 pl-2 text-secondary-500"
@@ -175,6 +171,11 @@ export default function UserResetPassword({
                         {validateRule(
                           /\d/.test(field.value),
                           t("password_number_validation"),
+                          !field.value,
+                        )}
+                        {validateRule(
+                          field.value !== form.watch("old_password"),
+                          t("new_password_same_as_old"),
                           !field.value,
                         )}
                       </div>

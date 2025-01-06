@@ -1200,7 +1200,7 @@
   "never": "never",
   "new_password": "New Password",
   "new_password_confirmation": "Confirm New Password",
-  "new_password_same_as_old": "New password is same as old password, please enter a different new password.",
+  "new_password_same_as_old": "Password must be different from current password",
   "new_password_validation": "New password is not valid.",
   "next_sessions": "Next Sessions",
   "no": "No",
