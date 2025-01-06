@@ -80,6 +80,9 @@ export default function PatientRegistration(
     useState(!!patientId);
   const [debouncedNumber, setDebouncedNumber] = useState<string>();
 
+  const MIN_YEAR = 1900;
+  const MAX_YEAR = new Date().getFullYear();
+
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
     // { label: t("social_profile"), id: "social-profile" },
@@ -274,6 +277,93 @@ export default function PatientRegistration(
     }
   };
 
+  const isLeapYear = (year: number): boolean => {
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  };
+
+  const isValidDate = (day: number, month: number, year: number): boolean => {
+    const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if (month === 2) {
+      return day <= (isLeapYear(year) ? 29 : 28);
+    }
+    return day <= monthDays[month - 1];
+  };
+
+  const handleDateOfBirth = (
+    part: "day" | "month" | "year",
+    value: string,
+    min: number,
+    max: number,
+    maxLength: number,
+  ) => {
+    if (value.length > maxLength) {
+      value = value.slice(0, maxLength);
+    }
+    const numericValue = Number(value.slice(0, maxLength));
+
+    setForm((prevState) => {
+      const [currentYear, currentMonth, currentDay] =
+        prevState.date_of_birth?.split("-") || ["", "", ""];
+
+      let formattedValue = value;
+      let errorMessage = "";
+
+      if (part === "day") {
+        if (numericValue < min || numericValue > max) {
+          formattedValue = "";
+          errorMessage = t("INVALID_DAY");
+        }
+      } else if (part === "month") {
+        if (numericValue < min || numericValue > max) {
+          formattedValue = "";
+          errorMessage = t("INVALID_MONTH");
+        }
+      } else if (part === "year") {
+        if (formattedValue.length === 4) {
+          const yearValue = Number(formattedValue);
+
+          if (yearValue < min || yearValue > max) {
+            formattedValue = "";
+            errorMessage = t("INVALID_YEAR", { min: MIN_YEAR, max: MAX_YEAR });
+          }
+        }
+      }
+
+      const updatedDay = part === "day" ? formattedValue : currentDay;
+      const updatedMonth = part === "month" ? formattedValue : currentMonth;
+      const updatedYear = part === "year" ? formattedValue : currentYear;
+
+      if (updatedDay && updatedMonth && updatedYear) {
+        const day = Number(updatedDay);
+        const month = Number(updatedMonth);
+        const year = Number(updatedYear);
+
+        if (!isValidDate(day, month, year)) {
+          errorMessage = t("INVALID_DATE");
+        } else {
+          const today = new Date();
+          const selectedDate = new Date(year, month - 1, day);
+
+          if (selectedDate > today) {
+            errorMessage = t("DATE_NOT_ALLOWED");
+          }
+        }
+      }
+
+      setFeErrors((errors) => ({
+        ...errors,
+        date_of_birth: errorMessage ? [errorMessage] : [],
+      }));
+
+      const updatedDate = `${updatedYear}-${updatedMonth}-${updatedDay}`;
+
+      return {
+        ...prevState,
+        date_of_birth: updatedDate,
+      };
+    });
+  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       if (!patientId || patientQuery.data?.phone_number !== form.phone_number) {
@@ -446,65 +536,51 @@ export default function PatientRegistration(
               </TabsList>
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <InputWithError label={t("day")} required>
-                      <Input
-                        placeholder="DD"
-                        type="number"
-                        value={form.date_of_birth?.split("-")[2] || ""}
-                        maxLength={2}
-                        max={31}
-                        min={1}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setForm((f) => ({
-                            ...f,
-                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${value ? Math.min(Math.max(Number(value), 1), 31) : ""}`,
-                          }));
-                        }}
-                      />
-                    </InputWithError>
-                  </div>
-                  <div className="flex-1">
-                    <InputWithError label={t("month")} required>
-                      <Input
-                        placeholder="MM"
-                        type="number"
-                        value={form.date_of_birth?.split("-")[1] || ""}
-                        maxLength={2}
-                        max={12}
-                        min={1}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setForm((f) => ({
-                            ...f,
-                            date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${value ? Math.min(Math.max(Number(value), 1), 12) : ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                          }));
-                        }}
-                      />
-                    </InputWithError>
-                  </div>
-                  <div className="flex-1">
-                    <InputWithError label={t("year")} required>
-                      <Input
-                        type="number"
-                        placeholder="YYYY"
-                        value={form.date_of_birth?.split("-")[0] || ""}
-                        maxLength={4}
-                        max={new Date().getFullYear()}
-                        min={1900}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (!value || value.length <= 4) {
-                            setForm((f) => ({
-                              ...f,
-                              date_of_birth: `${value || ""}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                            }));
-                          }
-                        }}
-                      />
-                    </InputWithError>
-                  </div>
+                  {["day", "month", "year"].map((part) => {
+                    const key = part as "day" | "month" | "year";
+                    const placeholders = {
+                      day: "DD",
+                      month: "MM",
+                      year: "YYYY",
+                    };
+                    const maxLengths = { day: 2, month: 2, year: 4 };
+                    const limits = {
+                      day: { min: 1, max: 31 },
+                      month: { min: 1, max: 12 },
+                      year: { min: MIN_YEAR, max: MAX_YEAR },
+                    };
+
+                    return (
+                      <div className="flex-1" key={key}>
+                        <InputWithError label={t(key)} required>
+                          <Input
+                            type="number"
+                            placeholder={placeholders[key]}
+                            value={
+                              form.date_of_birth?.split("-")[
+                                ["year", "month", "day"].indexOf(key)
+                              ] || ""
+                            }
+                            maxLength={maxLengths[key]}
+                            max={limits[key].max}
+                            min={limits[key].min}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (key !== "year" || value.length <= 4) {
+                                handleDateOfBirth(
+                                  key,
+                                  value,
+                                  limits[key].min,
+                                  limits[key].max,
+                                  maxLengths[key],
+                                );
+                              }
+                            }}
+                          />
+                        </InputWithError>
+                      </div>
+                    );
+                  })}
                 </div>
                 {errors["date_of_birth"] && (
                   <InputErrors errors={errors["date_of_birth"]} />
