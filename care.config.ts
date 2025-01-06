@@ -82,12 +82,6 @@ const careConfig = {
   minEncounterDate: new Date(env.REACT_MIN_ENCOUNTER_DATE || "2020-01-01"),
 
   // Plugins related configs...
-
-  plausible: {
-    server: env.REACT_PLAUSIBLE_SERVER_URL || "https://plausible.ohc.network",
-    domain: env.REACT_PLAUSIBLE_SITE_DOMAIN || "care.ohc.network",
-  },
-
   sentry: {
     dsn:
       env.REACT_SENTRY_DSN ||
@@ -120,7 +114,6 @@ const careConfig = {
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
-  keralaGeoId: env.REACT_KERALA_GEO_ID || "",
 } as const;
 
 export default careConfig;
