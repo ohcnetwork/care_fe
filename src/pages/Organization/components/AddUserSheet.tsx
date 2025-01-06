@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -29,15 +31,15 @@ export default function AddUserSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Add User
+          <CareIcon icon="l-user-plus" className="mr-2 h-5 w-5" />
+          {t("add_user")}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Add New User</SheetTitle>
+          <SheetTitle>{t("add_new_user")}</SheetTitle>
           <SheetDescription>
-            Create a new user and add them to the organization.
+            {t("create_new_user_description")}
           </SheetDescription>
         </SheetHeader>
         <div className="mt-6">

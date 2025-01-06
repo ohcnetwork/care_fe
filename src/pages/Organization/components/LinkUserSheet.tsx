@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -113,16 +114,13 @@ export default function LinkUserSheet({
       <SheetTrigger asChild>
         <Button>
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Link User
+          {t("link_user")}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Link User to Organization</SheetTitle>
-          <SheetDescription>
-            Search for an existing user and assign a role to link them to the
-            organization.
-          </SheetDescription>
+          <SheetTitle>{t("link_user_to_organization")}</SheetTitle>
+          <SheetDescription>{t("link_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
           <UserSelector
@@ -153,13 +151,17 @@ export default function LinkUserSheet({
 
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                   <div>
-                    <span className="text-sm text-gray-500">Username</span>
+                    <span className="text-sm text-gray-500">
+                      {t("username")}
+                    </span>
                     <p className="text-sm font-medium">
                       {selectedUser.username}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">User Type</span>
+                    <span className="text-sm text-gray-500">
+                      {t("user_type")}
+                    </span>
                     <p className="text-sm font-medium">
                       {selectedUser.user_type}
                     </p>
@@ -168,7 +170,9 @@ export default function LinkUserSheet({
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Select Role</label>
+                <label className="text-sm font-medium">
+                  {t("select_role")}
+                </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select a role" />
@@ -195,7 +199,7 @@ export default function LinkUserSheet({
                 onClick={handleAddUser}
                 disabled={!selectedRole}
               >
-                Link to Organization
+                {t("link_to_organization")}
               </Button>
             </div>
           )}
