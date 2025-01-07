@@ -48,6 +48,8 @@ const careConfig = {
     .split(",")
     .map((l) => l.trim()),
 
+  defaultEncounterType: env.REACT_DEFAULT_ENCOUNTER_TYPE || "hh",
+
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 
