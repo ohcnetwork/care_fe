@@ -356,6 +356,7 @@ export function QuestionnaireForm({
               disabled={isProcessing}
               activeGroupId={activeGroupId}
               errors={form.errors}
+              patientId={patientId}
               clearError={(questionId: string) => {
                 setQuestionnaireForms((prev) =>
                   prev.map((f) =>

@@ -21,7 +21,7 @@ import Loading from "@/components/Common/Loading";
 import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
 import { Appointment } from "@/components/Schedule/types";
 
-import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
