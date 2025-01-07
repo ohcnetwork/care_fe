@@ -32,10 +32,8 @@ import {
 } from "@/types/emr/diagnosis/diagnosis";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
 
 interface DiagnosisQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -49,7 +47,6 @@ const DIAGNOSIS_INITIAL_VALUE: Partial<Diagnosis> = {
 };
 
 export function DiagnosisQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -90,42 +87,36 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
-      <div className="rounded-lg border p-4">
-        {diagnoses.length > 0 && (
-          <div className="rounded-lg border">
-            <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-              <div className="col-span-5">Diagnosis</div>
-              <div className="col-span-2 text-center">Onset Date</div>
-              <div className="col-span-2 text-center">Status</div>
-              <div className="col-span-2 text-center">Verification</div>
-              <div className="col-span-1 text-center">Action</div>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {diagnoses.map((diagnosis, index) => (
-                <DiagnosisItem
-                  key={index}
-                  diagnosis={diagnosis}
-                  disabled={disabled}
-                  onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
-                  onRemove={() => handleRemoveDiagnosis(index)}
-                />
-              ))}
-            </div>
+    <>
+      {diagnoses.length > 0 && (
+        <div className="rounded-lg border">
+          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
+            <div className="col-span-5">Diagnosis</div>
+            <div className="col-span-2 text-center">Onset Date</div>
+            <div className="col-span-2 text-center">Status</div>
+            <div className="col-span-2 text-center">Verification</div>
+            <div className="col-span-1 text-center">Action</div>
           </div>
-        )}
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder="Search for diagnoses to add"
-          onSelect={handleAddDiagnosis}
-          disabled={disabled}
-        />
-      </div>
-    </div>
+          <div className="divide-y divide-gray-200">
+            {diagnoses.map((diagnosis, index) => (
+              <DiagnosisItem
+                key={index}
+                diagnosis={diagnosis}
+                disabled={disabled}
+                onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
+                onRemove={() => handleRemoveDiagnosis(index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      <ValueSetSelect
+        system="system-condition-code"
+        placeholder="Search for diagnoses to add"
+        onSelect={handleAddDiagnosis}
+        disabled={disabled}
+      />
+    </>
   );
 }
 

@@ -35,10 +35,8 @@ import {
 } from "@/types/emr/symptom/symptom";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
 
 interface SymptomQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -53,7 +51,6 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
 };
 
 export function SymptomQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -91,42 +88,36 @@ export function SymptomQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
-      <div className="rounded-lg border p-4">
-        {symptoms.length > 0 && (
-          <div className="rounded-lg border">
-            <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-              <div className="col-span-5">Symptom</div>
-              <div className="col-span-2 text-center">Date</div>
-              <div className="col-span-2 text-center">Status</div>
-              <div className="col-span-2 text-center">Severity</div>
-              <div className="col-span-1 text-center">Action</div>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {symptoms.map((symptom, index) => (
-                <SymptomItem
-                  key={index}
-                  symptom={symptom}
-                  disabled={disabled}
-                  onUpdate={(updates) => handleUpdateSymptom(index, updates)}
-                  onRemove={() => handleRemoveSymptom(index)}
-                />
-              ))}
-            </div>
+    <>
+      {symptoms.length > 0 && (
+        <div className="rounded-lg border">
+          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
+            <div className="col-span-5">Symptom</div>
+            <div className="col-span-2 text-center">Date</div>
+            <div className="col-span-2 text-center">Status</div>
+            <div className="col-span-2 text-center">Severity</div>
+            <div className="col-span-1 text-center">Action</div>
           </div>
-        )}
-        <ValueSetSelect
-          system="system-condition-code"
-          placeholder="Search for symptoms to add"
-          onSelect={handleAddSymptom}
-          disabled={disabled}
-        />
-      </div>
-    </div>
+          <div className="divide-y divide-gray-200">
+            {symptoms.map((symptom, index) => (
+              <SymptomItem
+                key={index}
+                symptom={symptom}
+                disabled={disabled}
+                onUpdate={(updates) => handleUpdateSymptom(index, updates)}
+                onRemove={() => handleRemoveSymptom(index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      <ValueSetSelect
+        system="system-condition-code"
+        placeholder="Search for symptoms to add"
+        onSelect={handleAddSymptom}
+        disabled={disabled}
+      />
+    </>
   );
 }
 
