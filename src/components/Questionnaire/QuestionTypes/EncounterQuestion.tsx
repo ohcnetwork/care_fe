@@ -14,6 +14,7 @@ import {
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
+  Encounter,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -62,64 +63,59 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
 
-  const [encounter, setEncounter] = useState<EncounterEditRequest>(() => {
-    if (!encounterData) {
-      return {
-        status: "unknown" as EncounterStatus,
-        encounter_class: "amb" as EncounterClass,
-        period: {
-          start: new Date().toISOString(),
-          end: undefined,
-        },
-        priority: "routine" as EncounterPriority,
-        external_identifier: "",
-        hospitalization: {
-          re_admission: false,
-          admit_source: "other" as EncounterAdmitSources,
-          discharge_disposition: "home" as EncounterDischargeDisposition,
-          diet_preference: "none" as EncounterDietPreference,
-        },
-        facility: "",
-        patient: "",
-        organizations: [],
-      };
-    }
-    return {
-      status: encounterData.status,
-      encounter_class: encounterData.encounter_class,
-      period: encounterData.period,
-      priority: encounterData.priority,
-      external_identifier: encounterData.external_identifier || "",
-      hospitalization: encounterData.hospitalization,
-      facility: encounterData.facility.id,
-      patient: encounterData.patient.id,
-      organizations: [],
-    };
+  const [encounter, setEncounter] = useState<EncounterEditRequest>({
+    status: "unknown" as EncounterStatus,
+    encounter_class: "amb" as EncounterClass,
+    period: {
+      start: new Date().toISOString(),
+      end: undefined,
+    },
+    priority: "routine" as EncounterPriority,
+    external_identifier: "",
+    hospitalization: {
+      re_admission: false,
+      admit_source: "other" as EncounterAdmitSources,
+      discharge_disposition: "home" as EncounterDischargeDisposition,
+      diet_preference: "none" as EncounterDietPreference,
+    },
+    facility: "",
+    patient: "",
+    organizations: [],
   });
+
+  const refreshEncounterState = (data: Encounter) => {
+    setEncounter(() => ({
+      status: data.status,
+      encounter_class: data.encounter_class,
+      period: data.period,
+      priority: data.priority,
+      external_identifier: data.external_identifier || "",
+      hospitalization: data.hospitalization,
+      facility: data.facility?.id,
+      patient: data.patient?.id,
+      organizations: [],
+    }));
+  };
 
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      setEncounter({
-        status: encounterData.status,
-        encounter_class: encounterData.encounter_class,
-        period: encounterData.period,
-        priority: encounterData.priority,
-        external_identifier: encounterData.external_identifier || "",
-        hospitalization: encounterData.hospitalization,
-        facility: encounterData.facility.id,
-        patient: encounterData.patient.id,
-        organizations: [],
-      });
+      handleUpdateEncounter(encounterData as any);
     }
   }, [encounterData]);
+
+  useEffect(() => {
+    const formStateValue = (questionnaireResponse.values[0]?.value as any)?.[0];
+    if (formStateValue) {
+      refreshEncounterState(formStateValue as Encounter);
+    }
+  }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (
     updates: Partial<Omit<EncounterEditRequest, "organizations" | "patient">>,
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
-    setEncounter(newEncounter);
 
     // Create the full encounter request object
     const encounterRequest: EncounterEditRequest = {
