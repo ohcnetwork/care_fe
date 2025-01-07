@@ -112,7 +112,7 @@ export const UserStatusIndicator = ({
         <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
-            {t("last_seen")} {relativeTime(user.last_login)}
+            {relativeTime(user.last_login)}
           </span>
         </Badge>
       ) : (
