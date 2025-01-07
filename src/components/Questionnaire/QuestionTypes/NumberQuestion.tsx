@@ -38,9 +38,10 @@ export function NumberQuestion({
 
   return (
     <div className={cn(classes)}>
-      <Label className="text-base font-medium">
+      <Label className="text-base font-medium flex justify-between">
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
+        <span className="text-sm text-gray-500">{question.unit?.code}</span>
       </Label>
       <Input
         type="number"
