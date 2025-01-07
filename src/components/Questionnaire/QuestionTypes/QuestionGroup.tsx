@@ -118,7 +118,7 @@ export const QuestionGroup = memo(function QuestionGroup({
     >
       {question.text && (
         <div className="space-y-1">
-          <Label className="text-lg font-semibold text-green-600">
+          <Label className="text-lg font-semibold text-gray-900">
             {question.text}
           </Label>
           {question.description && (
