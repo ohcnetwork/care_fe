@@ -1,5 +1,6 @@
 import ObservationsList from "@/components/Facility/ConsultationDetails/ObservationsList";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
@@ -15,6 +16,11 @@ export const EncounterUpdatesTab = ({
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4">
+          {/* Allergies Section */}
+          <div>
+            <AllergyList patientId={patient.id} encounterId={encounter.id} />
+          </div>
+
           {/* Symptoms Section */}
           <div>
             <SymptomsList patientId={patient.id} encounterId={encounter.id} />
