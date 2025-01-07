@@ -106,7 +106,7 @@ export default function FacilityOrganizationSelector(
   };
 
   return (
-    <InputWithError label="Organization" required={required}>
+    <InputWithError label="Select Department" required={required}>
       <div className="space-y-4">
         {/* Selected Organization Display */}
         {selectedOrganization && (
@@ -116,12 +116,12 @@ export default function FacilityOrganizationSelector(
                 <p className="font-medium">{selectedOrganization.name}</p>
                 {selectedOrganization.has_children && (
                   <p className="text-sm text-gray-500">
-                    You can select a sub-organization or keep this selection
+                    You can select a sub-department or keep this selection
                   </p>
                 )}
               </div>
               {selectedOrganization.has_children && (
-                <Badge variant="outline">Has Sub-organizations</Badge>
+                <Badge variant="outline">Has Sub-departments</Badge>
               )}
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function FacilityOrganizationSelector(
                   handleLevelChange(value, selectedLevels.length)
                 }
                 placeholder={`Select ${
-                  selectedLevels.length ? "sub-organization" : "organization"
+                  selectedLevels.length ? "sub-department" : "Department"
                 }...`}
               />
             </div>
