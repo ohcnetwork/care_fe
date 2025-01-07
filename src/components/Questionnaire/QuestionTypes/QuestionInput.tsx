@@ -2,6 +2,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FollowUpAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpAppointmentQuestion";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -74,14 +75,14 @@ export function QuestionInput({
     });
   };
 
-  const renderSingleInput = (index: number = 0, withLabel: boolean = true) => {
+  const renderSingleInput = (index: number = 0) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
       disabled,
-      withLabel,
+      withLabel: false,
       clearError,
       index,
       patientId,
@@ -147,7 +148,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="space-y-2">
+      <div className="">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -164,8 +165,9 @@ export function QuestionInput({
 
           return (
             <div key={index} className="mt-2 gap-2 flex items-end">
-              <div className="flex-1">
-                {renderSingleInput(index, index === 0)}
+              <div className="flex-1 space-y-1">
+                {index === 0 && <QuestionLabel question={question} />}
+                {renderSingleInput(index)}
               </div>
               {removeButton}
             </div>
