@@ -353,10 +353,6 @@ const DateInputV2: React.FC<Props> = ({
     <div>
       <div
         className={`${containerClassName ?? "container mx-auto text-black"}`}
-        data-cui-dateinput
-        data-cui-dateinput-value={JSON.stringify(
-          dayjs(value).format("YYYY-MM-DDTHH:mm"),
-        )}
       >
         <Popover className="relative">
           {({ open, close }) => {

@@ -162,10 +162,7 @@ export function QuestionInput({
 
           return (
             <div key={index} className="mt-2 gap-2 flex items-end">
-              <div
-                className="flex-1 space-y-1"
-                data-structured-input-id={question.id}
-              >
+              <div className="flex-1 space-y-1" data-question-id={question.id}>
                 {index === 0 && <QuestionLabel question={question} />}
                 {renderSingleInput(index)}
               </div>
