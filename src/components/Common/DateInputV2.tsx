@@ -1,12 +1,12 @@
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { t } from "i18next";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import DateTextInput from "@/components/Common/DateTextInput";
 
-import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 import { classNames } from "@/Utils/utils";
@@ -149,9 +149,7 @@ const DateInputV2: React.FC<Props> = ({
             setIsOpen?.(false);
           }
         })()
-      : Notification.Error({
-          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
-        });
+      : toast.error("Cannot select date out of range");
   };
 
   const handleTimeChange = (options: {
@@ -265,9 +263,9 @@ const DateInputV2: React.FC<Props> = ({
       );
       setType("date");
     } else {
-      Notification.Error({
-        msg: outOfLimitsErrorMessage ?? "Cannot select month out of range",
-      });
+      toast.error(
+        outOfLimitsErrorMessage ?? "Cannot select month out of range",
+      );
     }
   };
   //min and max setting for year
@@ -291,9 +289,7 @@ const DateInputV2: React.FC<Props> = ({
       }
       setType("date");
     } else {
-      Notification.Error({
-        msg: outOfLimitsErrorMessage ?? "Cannot select year out of range",
-      });
+      toast.error("Cannot select year out of range");
     }
   };
 

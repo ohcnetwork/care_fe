@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,6 @@ import {
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
@@ -131,19 +131,13 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       });
 
       if (res?.ok) {
-        Notification.Success({
-          msg: t("user_added_successfully"),
-        });
+        toast.success(t("user_added_successfully"));
         onSubmitSuccess?.(user!);
       } else {
-        Notification.Error({
-          msg: error?.message ?? t("user_add_error"),
-        });
+        toast.error(String(error?.message || t("password_update_error")));
       }
     } catch (error) {
-      Notification.Error({
-        msg: t("user_add_error"),
-      });
+      toast.error(t("user_add_error"));
     }
   };
 

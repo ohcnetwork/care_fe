@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,7 +19,6 @@ import {
   PREVIEWABLE_FILE_EXTENSIONS,
 } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -146,7 +146,7 @@ export default function useFileManager(
         pathParams: { id: body.id },
       })({} as any),
     onSuccess: () => {
-      Notification.Success({ msg: "File archived successfully" });
+      toast.success("File archived successfully");
       queryClient.invalidateQueries({
         queryKey: [`${fileType}-files`, archiveDialogueOpen?.associating_id],
       });
@@ -215,7 +215,7 @@ export default function useFileManager(
         pathParams: { id: body.id },
       })(body),
     onSuccess: (_, { associating_id }) => {
-      Notification.Success({ msg: "File name changed successfully" });
+      toast.success("File name changed successfully");
       setEditDialogueOpen(null);
       onEdit && onEdit();
       queryClient.invalidateQueries({
@@ -489,7 +489,7 @@ export default function useFileManager(
   ) => {
     try {
       if (!file.id) return;
-      Notification.Success({ msg: "Downloading file..." });
+      toast.success("Downloading file...");
       const fileData = await retrieveUpload(file, associating_id);
       const response = await fetch(fileData?.read_signed_url || "");
       if (!response.ok) throw new Error("Network response was not ok.");
@@ -507,7 +507,7 @@ export default function useFileManager(
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
     } catch (err) {
-      Notification.Error({ msg: "Failed to download file" });
+      toast.error("Failed to download file");
     }
   };
 

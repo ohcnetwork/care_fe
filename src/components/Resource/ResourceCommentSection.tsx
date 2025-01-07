@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import CircularProgress from "@/components/Common/CircularProgress";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { formatName } from "@/Utils/utils";
@@ -23,9 +23,7 @@ const CommentSection = (props: { id: string }) => {
       comment: commentBox,
     };
     if (!/\S+/.test(commentBox)) {
-      Notification.Error({
-        msg: "Comment Should Contain At Least 1 Character",
-      });
+      toast.error("Comment Should Contain At Least 1 Character");
       return;
     }
     const { res } = await request(routes.addResourceComments, {
@@ -33,7 +31,7 @@ const CommentSection = (props: { id: string }) => {
       body: payload,
     });
     if (res?.ok) {
-      Notification.Success({ msg: "Comment added successfully" });
+      toast.success("Comment added successfully");
     }
     setCommentBox("");
   };

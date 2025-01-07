@@ -44,27 +44,11 @@ const notifyError = (error: any) => {
 };
 
 /**
- * Success message handler
- * @deprecated Use `toast.success` instead
- */
-export const Success = ({ msg }: { msg: string }) => {
-  toast.success(msg);
-};
-
-/**
  * Error message handler
  * @deprecated Use `toast.error` instead
  */
 export const Error = ({ msg }: { msg: any }) => {
   notifyError(msg);
-};
-
-/**
- * Warning message handler
- * @deprecated Use `toast.warning` instead
- */
-export const Warn = ({ msg }: { msg: string }) => {
-  toast.warning(msg);
 };
 
 /**

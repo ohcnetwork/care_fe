@@ -5,6 +5,7 @@ import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -31,7 +32,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
@@ -108,7 +108,7 @@ export default function PatientLogin({
           tokenData.phoneNumber === phoneNumber &&
           dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
         ) {
-          Notification.Success({ msg: t("valid_otp_found") });
+          toast.success(t("valid_otp_found"));
           navigate(
             `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
           );
@@ -120,9 +120,7 @@ export default function PatientLogin({
       }
     },
     onError: () => {
-      Notification.Error({
-        msg: t("error_sending_otp"),
-      });
+      toast.error(t("error_sending_otp"));
     },
   });
 
@@ -170,9 +168,7 @@ export default function PatientLogin({
       const errorData = error.cause as { errors: Array<{ otp: string }> };
       const errorMessage =
         errorData?.errors?.[0]?.otp || t("error_verifying_otp");
-      Notification.Error({
-        msg: errorMessage,
-      });
+      toast.error(errorMessage);
     },
   });
 

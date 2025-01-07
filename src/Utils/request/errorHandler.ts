@@ -10,7 +10,7 @@ export function handleHttpError(error: Error) {
   }
 
   if (!(error instanceof HTTPError)) {
-    Notifications.Error({ msg: error.message || "Something went wrong!" });
+    toast.error(error.message || "Something went wrong!");
     return;
   }
 

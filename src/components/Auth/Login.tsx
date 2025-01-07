@@ -31,7 +31,6 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 import { CarePatientTokenKey } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
@@ -118,7 +117,7 @@ const Login = (props: { forgot?: boolean }) => {
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
-      Notification.Success({ msg: t("send_otp_success") });
+      toast.success(t("send_otp_success"));
     },
     onError: (error: any) => {
       const errors = error?.data || [];
@@ -152,7 +151,7 @@ const Login = (props: { forgot?: boolean }) => {
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        Notification.Success({ msg: t("verify_otp_success_login") });
+        toast.success(t("verify_otp_success_login"));
         setTimeout(() => {
           window.location.href = "/patient/home";
         }, 200);
@@ -175,7 +174,7 @@ const Login = (props: { forgot?: boolean }) => {
         errorMessage = error.message;
       }
       setOtpValidationError(errorMessage);
-      Notification.Error({ msg: errorMessage });
+      toast.error(errorMessage);
     },
   });
 

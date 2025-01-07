@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 import * as Notification from "@/Utils/Notifications";
 import { handleUploadPercentage } from "@/Utils/request/utils";
@@ -44,9 +45,7 @@ const uploadFile = async (
     }
 
     xhr.onerror = () => {
-      Notification.Error({
-        msg: "Network Failure. Please check your internet connectivity.",
-      });
+      toast.error("Network Failure. Please check your internet connectivity.");
       onError();
       reject(new Error("Network error"));
     };

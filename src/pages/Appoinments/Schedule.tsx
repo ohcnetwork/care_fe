@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,6 @@ import { SlotAvailability } from "@/components/Schedule/types";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -49,10 +49,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   );
 
   if (!staffId) {
-    Notification.Error({ msg: "Staff username not found" });
+    toast.error("Staff username not found");
     navigate(`/facility/${facilityId}/`);
   } else if (!tokenData) {
-    Notification.Error({ msg: "Phone number not found" });
+    toast.error("Phone number not found");
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
@@ -68,7 +68,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   });
 
   if (facilityError) {
-    Notification.Error({ msg: "Error while fetching facility data" });
+    toast.error("Error while fetching facility data");
   }
 
   const { data: userData, error: userError } = useQuery({
@@ -80,7 +80,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   });
 
   if (userError) {
-    Notification.Error({ msg: "Error while fetching user data" });
+    toast.error("Error while fetching user data");
   }
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
@@ -105,11 +105,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       Array.isArray(slotsQuery.error.cause.errors) &&
       slotsQuery.error.cause.errors[0][0] === "Resource is not schedulable"
     ) {
-      Notification.Error({
-        msg: t("user_not_available_for_appointments"),
-      });
+      toast.error(t("user_not_available_for_appointments"));
     } else {
-      Notification.Error({ msg: t("error_fetching_slots_data") });
+      toast.error(t("error_fetching_slots_data"));
     }
   }
 

@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
@@ -12,7 +14,6 @@ import {
   USER_TYPE_OPTIONS,
 } from "@/common/constants";
 
-import * as Notify from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
@@ -69,9 +70,7 @@ export default function UserFilter(props: any) {
       last_active_days: last_active_days || "",
     };
     if (state && !district) {
-      Notify.Warn({
-        msg: "District is required when state is selected",
-      });
+      toast.warning("District is required when state is selected");
       return;
     }
     onChange(data);

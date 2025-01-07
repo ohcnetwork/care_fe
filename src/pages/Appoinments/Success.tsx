@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -9,7 +10,6 @@ import { UserModel } from "@/components/Users/models";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
@@ -34,7 +34,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   });
 
   if (error) {
-    Notification.Error({ msg: t("appointment_not_found") });
+    toast.error(t("appointment_not_found"));
   }
 
   const appointmentData = data?.results.find(

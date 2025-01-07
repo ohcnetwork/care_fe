@@ -1143,6 +1143,7 @@
   "location": "Location",
   "location_beds_empty": "No beds available in this location",
   "location_management": "Location Management",
+  "location_updated_successfully": "Location updated successfully",
   "log_lab_results": "Log Lab Results",
   "log_report": "Log Report",
   "log_update": "Log Update",

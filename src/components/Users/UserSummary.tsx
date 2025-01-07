@@ -1,6 +1,7 @@
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
@@ -18,7 +19,6 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import * as Notification from "@/Utils/Notifications";
 import {
   editUserPermissions,
   showAvatarEdit,
@@ -54,15 +54,11 @@ export default function UserSummaryTab({
     });
     setIsDeleting(false);
     if (res?.status === 204) {
-      Notification.Success({
-        msg: t("user_deleted_successfully"),
-      });
+      toast.success(t("user_deleted_successfully"));
       setshowDeleteDialog(!showDeleteDialog);
       navigate("/users");
     } else {
-      Notification.Error({
-        msg: t("user_delete_error") + ": " + (error || ""),
-      });
+      toast.error(t("user_delete_error") + ": " + (error || ""));
       setshowDeleteDialog(!showDeleteDialog);
     }
   };

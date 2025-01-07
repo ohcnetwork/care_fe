@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,7 +19,6 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
@@ -57,7 +57,7 @@ export function FacilityDetailsPage({ id }: Props) {
         silent: true,
       });
       if (response.res?.status !== 200) {
-        Notification.Error({ msg: "Error while fetching users data" });
+        toast.error("Error while fetching users data");
       }
       return response;
     },

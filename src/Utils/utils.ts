@@ -1,10 +1,10 @@
 import { differenceInMinutes, format } from "date-fns";
 import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
-import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { DoseRange, Timing } from "@/types/emr/medicationRequest";
@@ -644,9 +644,9 @@ export const saveElementAsImage = async (id: string, filename: string) => {
 export const copyToClipboard = async (content: string) => {
   try {
     await navigator.clipboard.writeText(content);
-    Notification.Success({ msg: "Copied to clipboard" });
+    toast.success("Copied to clipboard");
   } catch (err) {
-    Notification.Error({ msg: "Copying is not allowed" });
+    toast.error("Copying is not allowed");
   }
 };
 
