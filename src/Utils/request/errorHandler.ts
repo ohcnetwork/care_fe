@@ -31,7 +31,12 @@ export function handleHttpError(error: Error) {
   }
 
   if (isBadRequest(error)) {
-    Notifications.BadRequest({ errs: cause?.errors });
+    const errs = cause?.errors;
+    if (isPydanticError(errs)) {
+      handlePydanticErrors(errs);
+      return;
+    }
+    Notifications.BadRequest({ errs });
     return;
   }
 
@@ -61,4 +66,34 @@ function isBadRequest(error: HTTPError) {
 
 function isNotFound(error: HTTPError) {
   return error.status === 404;
+}
+
+type PydanticError = {
+  type: string;
+  loc: string[];
+  msg: string;
+  input: unknown;
+  url: string;
+};
+
+function isPydanticError(errors: unknown): errors is PydanticError[] {
+  return (
+    Array.isArray(errors) &&
+    errors.every(
+      (error) => typeof error === "object" && error !== null && "type" in error,
+    )
+  );
+}
+
+function handlePydanticErrors(errors: PydanticError[]) {
+  errors.map(({ type, loc, msg }) => {
+    const title = type
+      .replace("_", " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    toast.error(`${title}: '${loc.join(".")}'`, {
+      description: msg,
+      duration: 8000,
+    });
+  });
 }

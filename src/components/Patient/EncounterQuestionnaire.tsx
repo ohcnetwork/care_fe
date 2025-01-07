@@ -1,9 +1,12 @@
+import { t } from "i18next";
 import { navigate } from "raviger";
 
 import { Card, CardContent } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 
@@ -22,15 +25,16 @@ export default function EncounterQuestionnaire({
   questionnaireSlug,
   subjectType,
 }: Props) {
+  const { goBack } = useAppHistory();
   return (
     <>
       <PLUGIN_Component __name="Scribe" />
       <Page
-        title="Questionnaire"
+        title={t("questionnaire")}
         backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
       >
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="mt-2">
+          <CardContent className="lg:p-4 p-0">
             <QuestionnaireForm
               facilityId={facilityId}
               patientId={patientId}
@@ -46,6 +50,7 @@ export default function EncounterQuestionnaire({
                   navigate(`/patient/${patientId}/updates`);
                 }
               }}
+              onCancel={() => goBack()}
             />
           </CardContent>
         </Card>

@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -104,13 +105,10 @@ export function QuestionnaireForm({
   }
 
   if (questionnaireError) {
-    console.log(questionnaireError);
     return (
       <Alert variant="destructive" className="m-4">
-        <AlertTitle>Error loading questionnaire</AlertTitle>
-        <AlertDescription>
-          The questionnaire you tried to access does not exist.
-        </AlertDescription>
+        <AlertTitle>{t("questionnaire_error_loading")}</AlertTitle>
+        <AlertDescription>{t("questionnaire_not_exist")}</AlertDescription>
       </Alert>
     );
   }
@@ -187,13 +185,11 @@ export function QuestionnaireForm({
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
-              console.log("structuredData", structuredData);
               const structuredRequests = getStructuredRequests(
                 response.structured_type,
                 structuredData,
                 context,
               );
-              console.log("structuredRequests", structuredRequests);
               requests.push(...structuredRequests);
             }
           }
@@ -408,7 +404,7 @@ export function QuestionnaireForm({
               onClick={onCancel}
               disabled={isProcessing}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="button"
@@ -418,13 +414,13 @@ export function QuestionnaireForm({
             >
               {isProcessing ? (
                 <>
-                  <span className="opacity-0">Submit</span>
+                  <span className="opacity-0">{t("submit")}</span>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
                   </div>
                 </>
               ) : (
-                "Submit"
+                t("submit")
               )}
             </Button>
           </div>

@@ -1,7 +1,6 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Globe } from "lucide-react";
 import { navigate } from "raviger";
-import * as React from "react";
 
 import {
   DropdownMenu,
@@ -29,7 +28,7 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
     <DropdownMenu>
@@ -46,7 +45,7 @@ export function OrganizationSwitcher({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
                   {selectedOrganization
-                    ? "Organizations"
+                    ? "My Organizations"
                     : "Select Organization"}
                 </span>
               </div>
@@ -70,7 +69,12 @@ export function OrganizationSwitcher({
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => navigate(`/organization/${org.id}`)}
+            onClick={() => {
+              navigate(`/organization/${org.id}`);
+              if (isMobile) {
+                setOpenMobile(false);
+              }
+            }}
           >
             {org.name}
           </DropdownMenuItem>

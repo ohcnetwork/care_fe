@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/select";
 
 import { QuantityInput } from "@/components/Common/QuantityInput";
-import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import ScribeStructuredInput from "@/Utils/scribe";
 import {
+  DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
   MedicationRequestDosageInstruction,
@@ -97,6 +97,10 @@ export function MedicationRequestQuestion({
   };
   return (
     <div className="space-y-4">
+      <Label className="text-base font-medium">
+        {question.text}
+        {question.required && <span className="ml-1 text-red-500">*</span>}
+      </Label>
       <ScribeStructuredInput
         value={medications}
         onChange={(value) => {
@@ -255,38 +259,33 @@ export function MedicationRequestQuestion({
             ],
           },
         ]}
-        className="rounded-lg border p-4"
+        className="rounded-lg border space-y-4"
       >
-        <Label className="text-base font-medium">
-          {question.text}
-          {question.required && <span className="ml-1 text-red-500">*</span>}
-        </Label>
         {medications.length > 0 && (
-          <div className="rounded-lg border space-y-4">
-            <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
-              {medications.map((medication, index) => (
-                <li key={index}>
-                  <MedicationRequestItem
-                    medication={medication}
-                    disabled={disabled}
-                    onUpdate={(medication) =>
-                      handleUpdateMedication(index, medication)
-                    }
-                    onRemove={() => handleRemoveMedication(index)}
-                    index={index}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
+            {medications.map((medication, index) => (
+              <li key={index}>
+                <MedicationRequestItem
+                  medication={medication}
+                  disabled={disabled}
+                  onUpdate={(medication) =>
+                    handleUpdateMedication(index, medication)
+                  }
+                  onRemove={() => handleRemoveMedication(index)}
+                  index={index}
+                />
+              </li>
+            ))}
+          </ul>
         )}
-        <ValueSetSelect
-          system="system-medication"
-          placeholder="Search for medications to add"
-          onSelect={handleAddMedication}
-          disabled={disabled}
-        />
       </ScribeStructuredInput>
+      <ValueSetSelect
+        system="system-medication"
+        placeholder="Search for medications to add"
+        onSelect={handleAddMedication}
+        disabled={disabled}
+        searchPostFix=" clinical drug"
+      />
     </div>
   );
 }

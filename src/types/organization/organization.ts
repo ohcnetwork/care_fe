@@ -1,4 +1,4 @@
-import { ORGANIZATION_LEVELS } from "@/common/constants";
+import { t } from "i18next";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 
@@ -6,10 +6,16 @@ import { UserBase } from "../user/user";
 
 type org_type = "team" | "govt" | "role" | "other";
 
+export type Metadata = {
+  govt_org_children_type?: string;
+  govt_org_type?: string;
+};
+
 export interface OrganizationParent {
   id: string;
   name: string;
   description?: string;
+  metadata: Metadata | null;
   org_type: org_type;
   level_cache: number;
   parent?: OrganizationParent;
@@ -26,6 +32,8 @@ export interface Organization {
   parent?: OrganizationParent;
   created_at: string;
   updated_at: string;
+  metadata: Metadata | null;
+  permissions: string[];
 }
 
 export interface OrganizationUserRole {
@@ -49,15 +57,11 @@ export type OrganizationUserRoleResponse =
   PaginatedResponse<OrganizationUserRole>;
 export type RoleResponse = PaginatedResponse<Role>;
 
-export const getOrgLevel = (org_type: org_type, level_cache: number) => {
+export const getOrgLabel = (org_type: org_type, metadata: Metadata | null) => {
   if (org_type === "govt") {
-    return ORGANIZATION_LEVELS.govt[level_cache];
-  } else {
-    return ORGANIZATION_LEVELS[org_type];
+    return metadata?.govt_org_type
+      ? t(`SYSTEM__govt_org_type__${metadata?.govt_org_type}`)
+      : t(`SYSTEM__org_type__${org_type}`);
   }
-};
-
-export const getOrgLevelLabel = (org_type: org_type, level_cache: number) => {
-  const orgLevel = getOrgLevel(org_type, level_cache);
-  return typeof orgLevel === "string" ? orgLevel : orgLevel[0];
+  return org_type;
 };

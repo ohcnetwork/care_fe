@@ -1,9 +1,10 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,10 @@ interface LoginFormData {
 
 type LoginMode = "staff" | "patient";
 
+interface LoginProps {
+  forgot?: boolean;
+}
+
 interface OtpError {
   type: string;
   loc: string[];
@@ -61,7 +66,7 @@ interface OtpLoginData {
   otp: string;
 }
 
-const Login = (props: { forgot?: boolean }) => {
+const Login = (props: LoginProps) => {
   const { signIn } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
@@ -71,6 +76,8 @@ const Login = (props: { forgot?: boolean }) => {
     password: "",
   };
   const { forgot } = props;
+  const [params] = useQueryParams();
+  const { mode } = params;
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -79,7 +86,9 @@ const Login = (props: { forgot?: boolean }) => {
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(forgot);
-  const [loginMode, setLoginMode] = useState<LoginMode>("staff");
+  const [loginMode, setLoginMode] = useState<LoginMode>(
+    mode === "patient" ? "patient" : "staff",
+  );
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -94,24 +103,15 @@ const Login = (props: { forgot?: boolean }) => {
     },
     onSuccess: ({ res }) => {
       setCaptcha(res?.status === 429);
+      window.location.href = "/";
     },
   });
 
   // Forgot Password Mutation
-  const forgotPasswordMutation = useMutation({
-    mutationFn: async (data: { username: string }) => {
-      const response = await request(routes.forgotPassword, {
-        body: data,
-      });
-      return response;
-    },
+  const { mutate: submitForgetPassword } = useMutation({
+    mutationFn: mutate(routes.forgotPassword),
     onSuccess: () => {
-      Notification.Success({
-        msg: t("password_sent"),
-      });
-    },
-    onError: (error: any) => {
-      setErrors(error);
+      toast.success(t("password_sent"));
     },
   });
 
@@ -161,25 +161,27 @@ const Login = (props: { forgot?: boolean }) => {
           createdAt: new Date().toISOString(),
         };
         localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        Notification.Success({ msg: t("verify_otp_success_login") });
-        setTimeout(() => {
-          window.location.href = "/patient/home";
-        }, 200);
+        window.location.href = "/patient/home";
       }
     },
+
+    //Invalid OTP error handling
     onError: (error: HTTPError) => {
-      const errorData = error.cause as { errors: Array<{ otp: string }> };
-      const errors = errorData?.errors;
-      if (Array.isArray(errors) && errors.length > 0) {
-        // BE returns a different format for invalid OTP
-        // TODO: fix this
-        //const firstError = errors[0] as OtpError;
-        //setOtpError(firstError.msg);
-        const firstError = errors[0];
-        setOtpValidationError(firstError.otp);
-      } else {
-        setOtpValidationError(t("invalid_otp"));
+      let errorMessage = t("invalid_otp");
+      if (
+        error.cause &&
+        Array.isArray(error.cause.errors) &&
+        error.cause.errors.length > 0
+      ) {
+        const otpError = error.cause.errors.find((e) => e.otp);
+        if (otpError && otpError.otp) {
+          errorMessage = otpError.otp;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
       }
+      setOtpValidationError(errorMessage);
+      Notification.Error({ msg: errorMessage });
     },
   });
 
@@ -287,7 +289,7 @@ const Login = (props: { forgot?: boolean }) => {
     const valid = validateForgetData();
     if (!valid) return;
 
-    forgotPasswordMutation.mutate(valid);
+    submitForgetPassword(valid);
   };
 
   const onCaptchaChange = (value: any) => {
@@ -317,10 +319,7 @@ const Login = (props: { forgot?: boolean }) => {
 
   // Loading state derived from mutations
   const isLoading =
-    staffLoginMutation.isPending ||
-    forgotPasswordMutation.isPending ||
-    sendOtpPending ||
-    verifyOtpPending;
+    staffLoginMutation.isPending || sendOtpPending || verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
