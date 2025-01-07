@@ -115,28 +115,25 @@ export function MedicationStatementQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div className="rounded-lg border p-4">
-        {medications.length > 0 && (
-          <div className="rounded-lg border space-y-4">
-            <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
-              {medications.map((medication, index) => (
-                <li key={index}>
-                  <MedicationStatementItem
-                    medication={medication}
-                    disabled={disabled}
-                    onUpdate={(medication) =>
-                      handleUpdateMedication(index, medication)
-                    }
-                    onRemove={() => handleRemoveMedication(index)}
-                    index={index}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
+      {medications.length > 0 && (
+        <div className="rounded-lg border space-y-4">
+          <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
+            {medications.map((medication, index) => (
+              <li key={index}>
+                <MedicationStatementItem
+                  medication={medication}
+                  disabled={disabled}
+                  onUpdate={(medication) =>
+                    handleUpdateMedication(index, medication)
+                  }
+                  onRemove={() => handleRemoveMedication(index)}
+                  index={index}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <ValueSetSelect
         system="system-medication"
         placeholder={t("search_medication")}

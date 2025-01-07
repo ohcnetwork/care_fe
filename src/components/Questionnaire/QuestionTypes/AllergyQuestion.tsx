@@ -125,46 +125,42 @@ export function AllergyQuestion({
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
       {allergies.length > 0 && (
-        <div className="rounded-lg border p-4">
-          <div className="rounded-lg border">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]"></TableHead>
-                    <TableHead className="w-[220px]">Substance</TableHead>
-                    <TableHead className="w-[85px] text-center whitespace-normal px-0.5">
-                      Clinical
-                      <br />
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[65px] text-center px-0.5">
-                      Critical
-                    </TableHead>
-                    <TableHead className="w-[85px] text-center px-0.5">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[125px] text-center px-0.5">
-                      Occurrence
-                    </TableHead>
-                    <TableHead className="w-[35px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allergies.map((allergy, index) => (
-                    <AllergyTableRow
-                      key={index}
-                      allergy={allergy}
-                      disabled={disabled}
-                      onUpdate={(updates) =>
-                        handleUpdateAllergy(index, updates)
-                      }
-                      onRemove={() => handleRemoveAllergy(index)}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+        <div className="rounded-lg border">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40px]"></TableHead>
+                  <TableHead className="w-[220px]">Substance</TableHead>
+                  <TableHead className="w-[85px] text-center whitespace-normal px-0.5">
+                    Clinical
+                    <br />
+                    Status
+                  </TableHead>
+                  <TableHead className="w-[65px] text-center px-0.5">
+                    Critical
+                  </TableHead>
+                  <TableHead className="w-[85px] text-center px-0.5">
+                    Status
+                  </TableHead>
+                  <TableHead className="w-[125px] text-center px-0.5">
+                    Occurrence
+                  </TableHead>
+                  <TableHead className="w-[35px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allergies.map((allergy, index) => (
+                  <AllergyTableRow
+                    key={index}
+                    allergy={allergy}
+                    disabled={disabled}
+                    onUpdate={(updates) => handleUpdateAllergy(index, updates)}
+                    onRemove={() => handleRemoveAllergy(index)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
