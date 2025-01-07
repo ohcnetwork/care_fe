@@ -72,13 +72,14 @@ export function QuestionInput({
     });
   };
 
-  const renderSingleInput = (index: number = 0) => {
+  const renderSingleInput = (index: number = 0, withLabel: boolean = true) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
       disabled,
+      withLabel,
       clearError,
       index,
     };
@@ -159,8 +160,10 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2">
-              <div>{renderSingleInput(index)}</div>
+            <div key={index} className="mt-2 gap-2 flex items-end">
+              <div className="flex-1">
+                {renderSingleInput(index, index === 0)}
+              </div>
               {removeButton}
             </div>
           );
