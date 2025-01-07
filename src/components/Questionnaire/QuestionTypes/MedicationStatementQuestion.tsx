@@ -243,7 +243,7 @@ const MedicationStatementItem: React.FC<{
           </div>
           <div className="flex-[2]">
             <Label className="mb-1 block text-sm font-medium">
-              {t("dosage")}
+              {t("dosage_instructions")}
             </Label>
             <Input
               value={medication.dosage_text}

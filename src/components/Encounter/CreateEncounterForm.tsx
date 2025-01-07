@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -139,7 +140,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
-      encounter_class: encounterClass || "amb",
+      encounter_class: encounterClass || careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
     },
