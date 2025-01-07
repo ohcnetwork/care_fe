@@ -20,6 +20,7 @@ interface ChoiceQuestionProps {
     questionnaireResponse: QuestionnaireResponse,
   ) => void;
   disabled?: boolean;
+  withLabel?: boolean;
   clearError: () => void;
   index?: number;
 }
@@ -29,6 +30,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled = false,
+  withLabel = true,
   clearError,
   index = 0,
 }: ChoiceQuestionProps) {
@@ -51,10 +53,12 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 
   return (
     <div className="space-y-2">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+      {withLabel && (
+        <Label className="text-base font-medium">
+          {question.text}
+          {question.required && <span className="ml-1 text-red-500">*</span>}
+        </Label>
+      )}
       <Select
         value={currentValue}
         onValueChange={handleValueChange}
