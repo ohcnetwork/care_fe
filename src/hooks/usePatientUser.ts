@@ -11,3 +11,11 @@ export function usePatientContext() {
   }
   return ctx;
 }
+
+export function useNullablePatientContext() {
+  const ctx = useContext(PatientUserContext);
+  if (!ctx) {
+    return null;
+  }
+  return ctx;
+}
