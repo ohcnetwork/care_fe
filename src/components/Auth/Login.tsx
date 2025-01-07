@@ -28,8 +28,6 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { LocalStorageKeys } from "@/common/constants";
-
 import FiltersCache from "@/Utils/FiltersCache";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -152,11 +150,7 @@ const Login = (props: LoginProps) => {
           phoneNumber: `+91${phone}`,
           createdAt: new Date().toISOString(),
         };
-        localStorage.setItem(
-          LocalStorageKeys.patientTokenKey,
-          JSON.stringify(tokenData),
-        );
-        patientLogin();
+        patientLogin(tokenData, `/patient/home`);
       }
     },
     onError: (error: any) => {
