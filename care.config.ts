@@ -1,3 +1,5 @@
+import { EncounterClass } from "@/types/emr/encounter";
+
 const env = import.meta.env;
 
 interface ILogo {
@@ -48,7 +50,8 @@ const careConfig = {
     .split(",")
     .map((l) => l.trim()),
 
-  defaultEncounterType: env.REACT_DEFAULT_ENCOUNTER_TYPE || "hh",
+  defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
+    "hh") as EncounterClass,
 
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",

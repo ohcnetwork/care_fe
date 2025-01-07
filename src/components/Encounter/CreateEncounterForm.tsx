@@ -140,8 +140,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
-      encounter_class:
-        encounterClass || (careConfig.defaultEncounterType as EncounterClass),
+      encounter_class: encounterClass || careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
     },
