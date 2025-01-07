@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       query: queryParams,
     });
   }, [facilityId, phoneNumber]);
+
+  useKeyboardShortcut(["shift", "p"], handleCreatePatient);
 
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
@@ -140,18 +143,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       listPatients();
     }
   }, [phoneNumber, listPatients]);
-
-  useEffect(() => {
-    function handleKeyPress(event: KeyboardEvent) {
-      if (event.shiftKey && (event.key === "p" || event.key === "P")) {
-        event.preventDefault();
-        handleCreatePatient();
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [handleCreatePatient]);
 
   return (
     <div>
