@@ -274,12 +274,14 @@ export function AllergyQuestion({
                       <DropdownMenuItem
                         onClick={() =>
                           handleUpdateAllergy(index, {
-                            note: allergy.note ? "" : " ",
+                            note: allergy.note !== undefined ? undefined : "",
                           })
                         }
                       >
                         <Pencil2Icon className="h-4 w-4 mr-2" />
-                        {allergy.note ? "Hide Notes" : "Add Notes"}
+                        {allergy.note !== undefined
+                          ? "Hide Notes"
+                          : "Add Notes"}
                       </DropdownMenuItem>
                       {allergy.clinical_status !== "active" && (
                         <DropdownMenuItem
@@ -390,13 +392,13 @@ export function AllergyQuestion({
                   </div>
                 </div>
 
-                {allergy.note && (
+                {allergy.note !== undefined && (
                   <div>
                     <Label className="text-xs text-gray-500">Notes</Label>
                     <Input
                       type="text"
                       placeholder="Add notes about the allergy..."
-                      value={allergy.note}
+                      value={allergy.note ?? ""}
                       onChange={(e) =>
                         handleUpdateAllergy(index, { note: e.target.value })
                       }
@@ -431,7 +433,7 @@ const AllergyTableRow = ({
   onUpdate,
   onRemove,
 }: AllergyItemProps) => {
-  const [showNotes, setShowNotes] = useState(false);
+  const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
   const rowClassName = `group ${
     allergy.clinical_status === "inactive"
@@ -440,6 +442,16 @@ const AllergyTableRow = ({
         ? "line-through"
         : ""
   }`;
+
+  const handleNotesToggle = () => {
+    if (showNotes) {
+      setShowNotes(false);
+      onUpdate?.({ note: undefined });
+    } else {
+      setShowNotes(true);
+      onUpdate?.({ note: "" });
+    }
+  };
 
   return (
     <>
@@ -535,7 +547,7 @@ const AllergyTableRow = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
+              <DropdownMenuItem onClick={handleNotesToggle}>
                 <Pencil2Icon className="h-4 w-4 mr-2" />
                 {showNotes ? "Hide Notes" : "Add Notes"}
               </DropdownMenuItem>
@@ -582,7 +594,7 @@ const AllergyTableRow = ({
             <Input
               type="text"
               placeholder="Add notes about the allergy..."
-              value={allergy.note || ""}
+              value={allergy.note ?? ""}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
               disabled={disabled}
               className="mt-0.5"
