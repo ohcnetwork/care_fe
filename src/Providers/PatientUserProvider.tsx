@@ -4,7 +4,7 @@ import { createContext, useEffect, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -12,7 +12,7 @@ import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
 
 const tokenData: TokenData = JSON.parse(
-  localStorage.getItem(CarePatientTokenKey) || "{}",
+  localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
 );
 
 export type PatientUserContextType = {

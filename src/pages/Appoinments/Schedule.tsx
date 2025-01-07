@@ -20,7 +20,7 @@ import { FacilityModel } from "@/components/Facility/models";
 import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 import { SlotAvailability } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -45,7 +45,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const [reason, setReason] = useState("");
 
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
 
   if (!staffId) {
