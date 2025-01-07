@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 
@@ -27,19 +27,23 @@ export default function AuthUserProvider({
   otpAuthorized,
 }: Props) {
   const queryClient = useQueryClient();
+  const [accessToken, setAccessToken] = useState(
+    localStorage.getItem(LocalStorageKeys.accessToken),
+  );
+  const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
 
   const { data: user, isLoading } = useQuery({
-    queryKey: ["currentUser"],
+    queryKey: ["currentUser", accessToken],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
-  const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
+  const tokenData: TokenData = useMemo(() => {
+    return JSON.parse(
+      localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
+    );
+  }, [isOTPAuthorized]);
 
   useEffect(() => {
     if (
@@ -68,6 +72,7 @@ export default function AuthUserProvider({
       const query = await request(routes.login, { body: creds });
 
       if (query.res?.ok && query.data) {
+        setAccessToken(query.data.access);
         localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
@@ -87,6 +92,7 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    setIsOTPAuthorized(false);
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
 
@@ -132,7 +138,14 @@ export default function AuthUserProvider({
   };
 
   return (
-    <AuthUserContext.Provider value={{ signIn, signOut, user }}>
+    <AuthUserContext.Provider
+      value={{
+        signIn,
+        signOut,
+        user,
+        isOTPAuthorized,
+      }}
+    >
       <SelectedRouter />
     </AuthUserContext.Provider>
   );
