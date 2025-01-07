@@ -15,7 +15,7 @@ import {
   SlotAvailability,
 } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -39,7 +39,7 @@ export default function PatientSelect({
   ) as SlotAvailability;
   const reason = localStorage.getItem("reason");
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
