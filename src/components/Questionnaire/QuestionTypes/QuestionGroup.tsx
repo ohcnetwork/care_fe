@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Label } from "@/components/ui/label";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -111,16 +111,14 @@ export const QuestionGroup = memo(function QuestionGroup({
     <div
       title="group_styling"
       className={cn(
-        "space-y-4 rounded-lg border p-4",
+        "space-y-4 rounded-lg",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
         <div className="space-y-1">
-          <Label className="text-lg font-semibold text-gray-900">
-            {question.text}
-          </Label>
+          <QuestionLabel question={question} groupLabel />
           {question.description && (
             <p className="text-sm text-muted-foreground">
               {question.description}
