@@ -21,7 +21,6 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
             props.onFocus(e);
           }
         }}
-        onBlur={props.onBlur}
       />
     );
   },

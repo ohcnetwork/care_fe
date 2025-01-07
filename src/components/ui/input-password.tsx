@@ -18,8 +18,6 @@ const PasswordInput = React.forwardRef<
         className={cn("pr-10", className)}
         ref={ref}
         {...props}
-        onFocus={props.onFocus}
-        onBlur={props.onBlur}
       />
       <button
         type="button"
