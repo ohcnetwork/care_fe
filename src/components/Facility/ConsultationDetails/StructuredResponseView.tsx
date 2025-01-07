@@ -16,9 +16,15 @@ interface Props {
   type: string;
   id: string;
   patientId: string;
+  encounterId: string;
 }
 
-export function StructuredResponseView({ type, id, patientId }: Props) {
+export function StructuredResponseView({
+  type,
+  id,
+  patientId,
+  encounterId,
+}: Props) {
   const getRouteAndParams = () => {
     const params: Record<string, string> = { patientId };
     switch (type) {
@@ -26,19 +32,20 @@ export function StructuredResponseView({ type, id, patientId }: Props) {
         return {
           route: symptomApi.retrieveSymptom,
           pathParams: { ...params, symptomId: id },
+          queryParams: { encounter: encounterId },
         };
       case "diagnosis":
         return {
           route: diagnosisApi.retrieveDiagnosis,
           pathParams: { ...params, diagnosisId: id },
+          queryParams: { encounter: encounterId },
         };
       case "allergy_intolerance":
         return {
           route: allergyApi.retrieveAllergy,
           pathParams: { ...params, allergyId: id },
+          queryParams: { encounter: encounterId },
         };
-      default:
-        return null;
     }
   };
 
@@ -47,7 +54,8 @@ export function StructuredResponseView({ type, id, patientId }: Props) {
   const { data, isLoading, error } = useQuery({
     queryKey: [type, id],
     queryFn: query(routeConfig?.route as any, {
-      pathParams: routeConfig?.pathParams || { patientId },
+      pathParams: routeConfig?.pathParams,
+      queryParams: routeConfig?.queryParams,
     }),
     enabled: !!id && !!routeConfig,
   });

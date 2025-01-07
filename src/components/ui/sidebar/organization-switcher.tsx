@@ -28,7 +28,7 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
     <DropdownMenu>
@@ -69,7 +69,12 @@ export function OrganizationSwitcher({
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => navigate(`/organization/${org.id}`)}
+            onClick={() => {
+              navigate(`/organization/${org.id}`);
+              if (isMobile) {
+                setOpenMobile(false);
+              }
+            }}
           >
             {org.name}
           </DropdownMenuItem>
