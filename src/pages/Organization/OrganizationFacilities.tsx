@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -34,10 +33,6 @@ export default function OrganizationFacilities({
 
   const [debouncedParams, setDebouncedParams] = useDebouncedState(qParams, 500);
 
-  useEffect(() => {
-    setDebouncedParams(qParams);
-  }, [qParams]);
-
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, debouncedParams],
     queryFn: query(routes.facility.list, {
@@ -56,7 +51,7 @@ export default function OrganizationFacilities({
   if (!id) {
     return null;
   }
-
+  console.log("ddd", debouncedParams);
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
@@ -70,12 +65,13 @@ export default function OrganizationFacilities({
             type="text"
             placeholder="Search facilities..."
             value={qParams.name || ""}
-            onChange={(e) =>
+            onChange={(e) => {
               updateQuery({
                 name: e.target.value,
                 page: 1,
-              })
-            }
+              });
+              setDebouncedParams({ ...qParams, name: e.target.value, page: 1 });
+            }}
             className="max-w-sm"
           />
         </div>

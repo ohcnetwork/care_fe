@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -33,10 +33,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     500,
   );
 
-  useEffect(() => {
-    setDebouncedParams(searchQuery);
-  }, [searchQuery]);
-
   const limit = 12; // 3x4 grid
 
   const { data: children, isLoading } = useQuery({
@@ -68,6 +64,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setPage(1); // Reset to first page on search
+                setDebouncedParams(e.target.value);
               }}
               className="w-full"
             />

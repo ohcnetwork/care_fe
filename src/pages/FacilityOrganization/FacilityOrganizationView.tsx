@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -32,10 +32,6 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     searchQuery,
     500,
   );
-
-  useEffect(() => {
-    setDebouncedParams(searchQuery);
-  }, [searchQuery]);
 
   const { data: children, isLoading } = useQuery({
     queryKey: [
@@ -71,6 +67,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setPage(1); // Reset to first page on search
+                  setDebouncedParams(e.target.value);
                 }}
                 className="w-full"
               />
