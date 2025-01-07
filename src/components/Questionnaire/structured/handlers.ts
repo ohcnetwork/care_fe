@@ -27,27 +27,21 @@ const handlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
-    getRequests: (allergies, { patientId, encounterId }) =>
-      allergies.map((allergy) => {
-        // Ensure all required fields have default values
-        const body: RequestTypeFor<"allergy_intolerance"> = {
-          clinical_status: allergy.clinical_status ?? "active",
-          verification_status: allergy.verification_status ?? "unconfirmed",
-          category: allergy.category ?? "medication",
-          criticality: allergy.criticality ?? "low",
-          code: allergy.code,
-          last_occurrence: allergy.last_occurrence,
-          note: allergy.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/allergy_intolerance/`,
+    getRequests: (allergies, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: allergies.map((allergy) => ({
+              ...allergy,
+              encounter: encounterId,
+            })),
+          },
           reference_id: "allergy_intolerance",
-        };
-      }),
+        },
+      ];
+    },
   },
   medication_request: {
     getRequests: (medications, { patientId, encounterId }) => {

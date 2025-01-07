@@ -1,7 +1,4 @@
-import {
-  AllergyIntolerance,
-  AllergyIntoleranceRequest,
-} from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis, DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
@@ -15,7 +12,7 @@ import {
 
 // Map structured types to their data types
 export interface StructuredDataMap {
-  allergy_intolerance: AllergyIntolerance;
+  allergy_intolerance: AllergyIntoleranceRequest;
   medication_request: MedicationRequest;
   medication_statement: MedicationStatement;
   symptom: Symptom;
@@ -26,7 +23,7 @@ export interface StructuredDataMap {
 
 // Map structured types to their request types
 export interface StructuredRequestMap {
-  allergy_intolerance: AllergyIntoleranceRequest;
+  allergy_intolerance: { datapoints: AllergyIntoleranceRequest[] };
   medication_request: { datapoints: MedicationRequest[] };
   medication_statement: { datapoints: MedicationStatement[] };
   symptom: SymptomRequest;
