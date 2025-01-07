@@ -114,42 +114,31 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   };
 
   return (
-    <div className="gap-3 flex flex-col sm:flex-col">
-      <div className="flex flex-row gap-3">
-        <Select
-          value={selectedFacilityType?.text || ""}
-          onValueChange={(value) => {
-            setSelectedFacilityType(
-              FACILITY_TYPES.find((type) => type.text === value),
-            );
-            onChange({
-              facility_type: FACILITY_TYPES.find((type) => type.text === value)
-                ?.id,
-            });
-          }}
-        >
-          <SelectTrigger className="overflow-hidden sm:min-w-48 sm:max-w-56 w-[calc(100vw-1rem)]">
-            <SelectValue placeholder={t("select_facility_type")} />
-          </SelectTrigger>
-          <SelectContent>
-            {FACILITY_TYPES.map((type) => (
-              <SelectItem key={type.id} value={type.text}>
-                {type.text}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          onClick={clearSelections}
-          variant="white"
-          disabled={
-            selectedLevels.length === 0 && selectedFacilityType === undefined
-          }
-        >
-          {t("clear")}
-        </Button>
-      </div>
-      <div className="flex flex-row gap-3">
+    <div className="flex flex-wrap gap-3">
+      <Select
+        value={selectedFacilityType?.text || ""}
+        onValueChange={(value) => {
+          setSelectedFacilityType(
+            FACILITY_TYPES.find((type) => type.text === value),
+          );
+          onChange({
+            facility_type: FACILITY_TYPES.find((type) => type.text === value)
+              ?.id,
+          });
+        }}
+      >
+        <SelectTrigger className="max-w-min">
+          <SelectValue placeholder={t("select_facility_type")} />
+        </SelectTrigger>
+        <SelectContent>
+          {FACILITY_TYPES.map((type) => (
+            <SelectItem key={type.id} value={type.text}>
+              {type.text}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="flex gap-3">
         {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
           (_, index) => (
             <OrganizationLevel
@@ -166,6 +155,15 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ),
         )}
       </div>
+      <Button
+        onClick={clearSelections}
+        variant="ghost"
+        disabled={
+          selectedLevels.length === 0 && selectedFacilityType === undefined
+        }
+      >
+        {t("clear")}
+      </Button>
     </div>
   );
 }
@@ -239,7 +237,7 @@ function OrganizationLevel({
   return (
     <Autocomplete
       key={`dropdown-${index}`}
-      popoverClassName="sm:min-w-64 sm:max-w-72 w-[calc(100vw-2rem)]"
+      popoverClassName="sm:min-w-40"
       value={selectedLevels[index]?.id || ""}
       options={options}
       onChange={(value: string) => {

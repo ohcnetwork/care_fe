@@ -78,10 +78,10 @@ export function FacilitiesPage() {
     ) {
       return (
         <header className="w-full p-4">
-          <div className="flex justify-end items-center">
+          <div className="flex items-center justify-end">
             <Button
               variant="ghost"
-              className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+              className="px-6 text-sm font-medium rounded-full hover:bg-gray-100"
               onClick={() => navigate("/patient/home")}
             >
               {t("patient_dashboard")}
@@ -92,10 +92,10 @@ export function FacilitiesPage() {
     }
     return (
       <header className="w-full p-4">
-        <div className="flex justify-end items-center">
+        <div className="flex items-center justify-end">
           <Button
             variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+            className="px-6 text-sm font-medium rounded-full hover:bg-gray-100"
             onClick={() => navigate("/login")}
           >
             {t("sign_in")}
@@ -106,16 +106,14 @@ export function FacilitiesPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between w-full">
-        <Link href="/" className="mb-6">
-          <div className="mb-8">
-            <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
-          </div>
+    <div className="container px-4 py-8 mx-auto">
+      <div className="flex items-start justify-between w-full">
+        <Link href="/" className="">
+          <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
         </Link>
         <GetLoginHeader />
       </div>
-      <div className="flex flex-col justify-between sm:flex-row items-center gap-5 mb-6">
+      <div className="flex flex-col items-start justify-between gap-5 mt-4 sm:flex-row">
         <OrganizationFilter
           skipLevels={[]}
           selected={selectedOrgs}
@@ -149,14 +147,14 @@ export function FacilitiesPage() {
               shortcutKey: "f",
             },
           ]}
-          className="w-[calc(100vw-1rem)] sm:w-3/12"
+          className="max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ search: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
       </div>
 
-      <div className="mt-4 flex w-full flex-col gap-4">
+      <div className="flex flex-col w-full gap-4 mt-4">
         {isLoading ? (
           <Loading />
         ) : !facilitiesResponse?.results.length ? (
@@ -167,13 +165,13 @@ export function FacilitiesPage() {
           </Card>
         ) : (
           <>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 3xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 3xl:grid-cols-3">
               {facilitiesResponse.results.map((facility) => (
                 <FacilityCard key={facility.id} facility={facility} />
               ))}
             </div>
 
-            <div className="flex w-full items-center justify-center">
+            <div className="flex items-center justify-center w-full">
               <Pagination totalCount={facilitiesResponse.count} />
             </div>
           </>
