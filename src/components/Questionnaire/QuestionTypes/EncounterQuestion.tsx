@@ -392,9 +392,9 @@ export function EncounterQuestion({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="diary_free">Dairy Free</SelectItem>
-                  <SelectItem value="nut_free">Nut Free</SelectItem>
-                  <SelectItem value="gluten_free">Gluten Free</SelectItem>
+                  <SelectItem value="diary-free">Dairy Free</SelectItem>
+                  <SelectItem value="nut-free">Nut Free</SelectItem>
+                  <SelectItem value="gluten-free">Gluten Free</SelectItem>
                   <SelectItem value="vegan">Vegan</SelectItem>
                   <SelectItem value="halal">Halal</SelectItem>
                   <SelectItem value="kosher">Kosher</SelectItem>

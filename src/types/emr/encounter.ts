@@ -43,9 +43,9 @@ export type EncounterDischargeDisposition =
 
 export type EncounterDietPreference =
   | "vegetarian"
-  | "diary_free"
-  | "nut_free"
-  | "gluten_free"
+  | "diary-free"
+  | "nut-free"
+  | "gluten-free"
   | "vegan"
   | "halal"
   | "kosher"
