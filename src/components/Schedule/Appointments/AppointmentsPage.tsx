@@ -60,13 +60,7 @@ import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
 } from "@/components/Schedule/Appointments/utils";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import { getFakeTokenNumber } from "@/components/Schedule/helpers";
-import {
-  Appointment,
-  AppointmentStatuses,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -79,6 +73,12 @@ import {
   formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import {
+  Appointment,
+  AppointmentStatuses,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface QueryParams {
   practitioner?: string;
@@ -105,7 +105,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const resourcesQuery = useQuery({
     queryKey: ["appointments-resources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
+    queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -115,7 +115,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, qParams.practitioner, date],
-    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
+    queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
         user: qParams.practitioner ?? "",
@@ -400,7 +400,7 @@ function AppointmentColumn(props: {
       props.slot,
       props.date,
     ],
-    queryFn: query(ScheduleAPIs.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
         status: props.status,
@@ -506,7 +506,7 @@ function AppointmentRow(props: {
       props.slot,
       props.date,
     ],
-    queryFn: query(ScheduleAPIs.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
         status: status,
@@ -665,7 +665,7 @@ const AppointmentStatusDropdown = ({
   const hasStarted = isPast(appointment.token_slot.start_datetime);
 
   const { mutate: updateAppointment } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.appointments.update, {
+    mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: {
         facility_id: facilityId,
         id: appointment.id,
@@ -733,7 +733,7 @@ const AppointmentStatusDropdown = ({
 };
 
 interface SlotFilterProps {
-  slots: SlotAvailability[];
+  slots: TokenSlot[];
   disableInline?: boolean;
   disabled?: boolean;
   selectedSlot: string | undefined;

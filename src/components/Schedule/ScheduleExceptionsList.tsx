@@ -11,11 +11,11 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { ScheduleException } from "@/components/Schedule/types";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
+import { ScheduleException } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   items?: ScheduleException[];
@@ -65,7 +65,7 @@ const ScheduleExceptionItem = (
   const queryClient = useQueryClient();
 
   const { mutate: deleteException, isPending } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.exceptions.delete, {
+    mutationFn: mutate(scheduleApis.exceptions.delete, {
       pathParams: {
         id: props.id,
         facility_id: props.facilityId,

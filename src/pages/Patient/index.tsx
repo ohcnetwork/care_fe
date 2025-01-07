@@ -19,13 +19,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
-import { Appointment } from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { Appointment } from "@/types/scheduling/schedule";
 
 function PatientIndex() {
   const { t } = useTranslation();

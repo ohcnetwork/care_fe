@@ -23,11 +23,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import DateFormField from "@/components/Form/FormFields/DateFormField";
-import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import { CarePatientTokenKey, GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
@@ -44,6 +39,11 @@ import {
 } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
@@ -70,7 +70,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
-  ) as SlotAvailability;
+  ) as TokenSlot;
   const reason = localStorage.getItem("reason");
   const tokenData: TokenData = JSON.parse(
     localStorage.getItem(CarePatientTokenKey) || "{}",
@@ -140,7 +140,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreate) =>
+    mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,

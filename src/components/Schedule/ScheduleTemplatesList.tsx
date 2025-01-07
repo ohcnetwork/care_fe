@@ -18,18 +18,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Loading from "@/components/Common/Loading";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/components/Schedule/helpers";
-import {
-  ScheduleSlotTypes,
-  ScheduleTemplate,
-} from "@/components/Schedule/types";
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import mutate from "@/Utils/request/mutate";
+import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   items?: ScheduleTemplate[];
@@ -78,7 +75,7 @@ const ScheduleTemplateItem = (
   const queryClient = useQueryClient();
 
   const { mutate: deleteTemplate, isPending } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.templates.delete, {
+    mutationFn: mutate(scheduleApis.templates.delete, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.id,
@@ -145,7 +142,7 @@ const ScheduleTemplateItem = (
                       <span className="text-sm">
                         {/* TODO: Temp. hack since backend is giving slot_type as number in Response */}
                         {
-                          ScheduleSlotTypes[
+                          ["open", "appointment", "closed"][
                             (slot.slot_type as unknown as number) - 1
                           ]
                         }

@@ -29,11 +29,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { ScheduleAPIs } from "@/components/Schedule/api";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 const formSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
@@ -74,7 +73,7 @@ export default function ScheduleExceptionForm({ facilityId, userId }: Props) {
   });
 
   const { mutate: createException, isPending } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.exceptions.create, {
+    mutationFn: mutate(scheduleApis.exceptions.create, {
       pathParams: { facility_id: facilityId },
     }),
     onSuccess: () => {

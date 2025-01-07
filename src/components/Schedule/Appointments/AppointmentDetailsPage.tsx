@@ -40,8 +40,6 @@ import {
   formatAppointmentSlotTime,
   printAppointment,
 } from "@/components/Schedule/Appointments/utils";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { Appointment, AppointmentStatuses } from "@/components/Schedule/types";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -51,6 +49,12 @@ import {
   getReadableDuration,
   saveElementAsImage,
 } from "@/Utils/utils";
+import {
+  Appointment,
+  AppointmentStatuses,
+  AppointmentUpdateRequest,
+} from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   facilityId: string;
@@ -72,7 +76,7 @@ export default function AppointmentDetailsPage(props: Props) {
 
   const appointmentQuery = useQuery({
     queryKey: ["appointment", props.appointmentId],
-    queryFn: query(ScheduleAPIs.appointments.retrieve, {
+    queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
@@ -93,9 +97,9 @@ export default function AppointmentDetailsPage(props: Props) {
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
     unknown,
-    { status: Appointment["status"] }
+    AppointmentUpdateRequest
   >({
-    mutationFn: mutate(ScheduleAPIs.appointments.update, {
+    mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
@@ -215,7 +219,9 @@ const AppointmentDetails = ({
                     entered_in_error: "destructive",
                     cancelled: "destructive",
                     noshow: "destructive",
-                  } as Record<Appointment["status"], BadgeProps["variant"]>
+                  } as Partial<
+                    Record<Appointment["status"], BadgeProps["variant"]>
+                  >
                 )[appointment.status] ?? "outline"
               }
             >
@@ -375,7 +381,7 @@ const AppointmentActions = ({
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
   const { mutate: cancelAppointment } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.appointments.cancel, {
+    mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
         facility_id: facilityId,
         id: appointment.id,

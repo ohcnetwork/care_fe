@@ -34,16 +34,15 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/components/Schedule/helpers";
-import { ScheduleSlotTypes } from "@/components/Schedule/types";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -60,7 +59,7 @@ const formSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, "Session name is required"),
-        slot_type: z.enum(ScheduleSlotTypes),
+        slot_type: z.enum(["appointment", "open", "closed"]),
         reason: z.string(),
         start_time: z
           .string()
@@ -108,7 +107,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
   });
 
   const { mutate: createTemplate, isPending } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.templates.create, {
+    mutationFn: mutate(scheduleApis.templates.create, {
       pathParams: { facility_id: facilityId },
     }),
     onSuccess: () => {
@@ -323,23 +322,25 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                                 defaultValue={field.value}
                                 className="flex space-x-4"
                               >
-                                {ScheduleSlotTypes.map((type) => (
-                                  <div
-                                    key={type}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    <RadioGroupItem
-                                      value={type}
-                                      id={`slot-type-${type}-${index}`}
-                                    />
-                                    <label
-                                      htmlFor={`slot-type-${type}-${index}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                {["appointment", "open", "closed"].map(
+                                  (type) => (
+                                    <div
+                                      key={type}
+                                      className="flex items-center space-x-2"
                                     >
-                                      {t(`SCHEDULE_SLOT_TYPE__${type}`)}
-                                    </label>
-                                  </div>
-                                ))}
+                                      <RadioGroupItem
+                                        value={type}
+                                        id={`slot-type-${type}-${index}`}
+                                      />
+                                      <label
+                                        htmlFor={`slot-type-${type}-${index}`}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                      >
+                                        {t(`SCHEDULE_SLOT_TYPE__${type}`)}
+                                      </label>
+                                    </div>
+                                  ),
+                                )}
                               </RadioGroup>
                             </FormControl>
                             <FormMessage />
@@ -403,7 +404,9 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                           name={`availabilities.${index}.tokens_per_slot`}
                           render={({ field }) => (
                             <FormItem className="flex-1">
-                              <FormLabel required>Tokens per Slot</FormLabel>
+                              <FormLabel required>
+                                {t("patients_per_slot")}
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"

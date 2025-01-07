@@ -18,7 +18,6 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
 import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
-import { SlotAvailability } from "@/components/Schedule/types";
 
 import { CarePatientTokenKey } from "@/common/constants";
 
@@ -30,6 +29,7 @@ import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { TokenSlot } from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -41,7 +41,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { facilityId, staffId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<SlotAvailability>();
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
 
   const tokenData: TokenData = JSON.parse(
@@ -83,7 +83,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     Notification.Error({ msg: "Error while fetching user data" });
   }
 
-  const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
+  const slotsQuery = useQuery<{ results: TokenSlot[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {

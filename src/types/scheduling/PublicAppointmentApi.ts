@@ -1,16 +1,15 @@
+import { Type } from "@/Utils/request/api";
 import {
   Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
-
-import { Type } from "@/Utils/request/api";
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 export default {
   getSlotsForDay: {
     path: "/api/v1/otp/slots/get_slots_for_day/",
     method: "POST",
-    TRes: Type<{ results: SlotAvailability[] }>(),
+    TRes: Type<{ results: TokenSlot[] }>(),
     TBody: Type<{ facility: string; user: string; day: string }>(),
   },
   getAppointments: {
@@ -22,6 +21,6 @@ export default {
     path: "/api/v1/otp/slots/{id}/create_appointment/",
     method: "POST",
     TRes: Type<Appointment>(),
-    TBody: Type<AppointmentCreate>(),
+    TBody: Type<AppointmentCreateRequest>(),
   },
 } as const;

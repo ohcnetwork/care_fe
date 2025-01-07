@@ -19,18 +19,18 @@ import ScheduleExceptionForm from "@/components/Schedule/ScheduleExceptionForm";
 import ScheduleExceptionsList from "@/components/Schedule/ScheduleExceptionsList";
 import ScheduleTemplateForm from "@/components/Schedule/ScheduleTemplateForm";
 import ScheduleTemplatesList from "@/components/Schedule/ScheduleTemplatesList";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
   filterAvailabilitiesByDayOfWeek,
   getSlotsPerSession,
   isDateInRange,
 } from "@/components/Schedule/helpers";
-import { ScheduleAvailability } from "@/components/Schedule/types";
 
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { formatTimeShort } from "@/Utils/utils";
+import { AvailabilityDateTime } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 import { UserBase } from "@/types/user/user";
 
 type Props = {
@@ -45,7 +45,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
 
   const templatesQuery = useQuery({
     queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
-    queryFn: query(ScheduleAPIs.templates.list, {
+    queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
@@ -54,7 +54,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
 
   const exceptionsQuery = useQuery({
     queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
-    queryFn: query(ScheduleAPIs.exceptions.list, {
+    queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
@@ -287,7 +287,7 @@ const diagonalStripes = {
 
 // TODO: remove this in favour of supporting flexible day of week availability
 export const formatAvailabilityTime = (
-  availability: ScheduleAvailability["availability"],
+  availability: AvailabilityDateTime[],
 ) => {
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;

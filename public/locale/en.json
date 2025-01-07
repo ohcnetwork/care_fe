@@ -1398,6 +1398,7 @@
   "patient_update_error": "Could not update patient",
   "patient_update_success": "Patient Updated Sucessfully",
   "patients": "Patients",
+  "patients_per_slot": "Patients per Slot",
   "pending": "Pending",
   "permanent_address": "Permanent Address",
   "permission_denied": "You do not have permission to perform this action",
