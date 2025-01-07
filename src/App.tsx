@@ -45,7 +45,7 @@ const App = () => {
           <PluginEngine>
             <HistoryAPIProvider>
               <AuthUserProvider
-                unauthorized={<Routers.SessionRouter />}
+                unauthorized={<Routers.PublicRouter />}
                 otpAuthorized={<Routers.PatientRouter />}
               >
                 <FeatureFlagsProvider>
@@ -55,7 +55,6 @@ const App = () => {
 
               {/* Integrations */}
               <Integrations.Sentry disabled={!import.meta.env.PROD} />
-              <Integrations.Plausible />
             </HistoryAPIProvider>
             <Sonner
               position="top-right"

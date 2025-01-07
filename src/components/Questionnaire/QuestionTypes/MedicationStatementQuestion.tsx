@@ -53,7 +53,6 @@ const MEDICATION_STATEMENT_INITIAL_VALUE: Omit<
 };
 
 export function MedicationStatementQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -110,11 +109,7 @@ export function MedicationStatementQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+    <>
       {medications.length > 0 && (
         <div className="rounded-lg border space-y-4">
           <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
@@ -139,8 +134,9 @@ export function MedicationStatementQuestion({
         placeholder={t("search_medication")}
         onSelect={handleAddMedication}
         disabled={disabled}
+        searchPostFix=" clinical drug"
       />
-    </div>
+    </>
   );
 }
 
@@ -242,7 +238,7 @@ const MedicationStatementItem: React.FC<{
           </div>
           <div className="flex-[2]">
             <Label className="mb-1 block text-sm font-medium">
-              {t("dosage")}
+              {t("dosage_instructions")}
             </Label>
             <Input
               value={medication.dosage_text}

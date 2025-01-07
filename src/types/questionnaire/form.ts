@@ -1,6 +1,6 @@
 import { FollowUpAppointmentRequest } from "@/components/Schedule/types";
 
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
@@ -29,7 +29,7 @@ export type ResponseValue = {
     | number
     | boolean
     | Date
-    | AllergyIntolerance[]
+    | AllergyIntoleranceRequest[]
     | MedicationRequest[]
     | MedicationStatement[]
     | Symptom[]

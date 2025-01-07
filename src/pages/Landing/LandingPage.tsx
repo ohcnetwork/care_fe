@@ -13,35 +13,34 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
+import { LoginHeader } from "@/components/Common/LoginHeader";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-const { customLogo, stateLogo, mainLogo, keralaGeoId } = careConfig;
-
-const STATE_GEO_ID = keralaGeoId || "";
+const { customLogo, stateLogo, mainLogo } = careConfig;
 
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedDistrict, setSelectedDistrict] = useState<Organization | null>(
-    null,
-  );
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(null);
 
-  const { data: districtsResponse } = useQuery<PaginatedResponse<Organization>>(
-    {
-      queryKey: ["districts", STATE_GEO_ID],
-      queryFn: query(organizationApi.getPublicOrganizations, {
-        queryParams: { parent: STATE_GEO_ID },
-      }),
-    },
-  );
+  const { data: organizationsResponse } = useQuery<
+    PaginatedResponse<Organization>
+  >({
+    queryKey: ["organizations", "level", "1"],
+    queryFn: query(organizationApi.getPublicOrganizations, {
+      queryParams: { level_cache: 1 },
+    }),
+  });
 
-  const districts = districtsResponse?.results || [];
+  const organizations = organizationsResponse?.results || [];
 
-  const filteredDistricts = districts.filter((district) =>
-    district.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredOrganizations = organizations.filter((organization) =>
+    organization.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,14 +48,14 @@ export function LandingPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    setSelectedDistrict(null);
+    setSelectedOrganization(null);
     setIsOpen(true);
   };
 
   const handleInputClick = () => {
     setIsOpen(true);
-    if (selectedDistrict) {
-      setSearchQuery(selectedDistrict.name);
+    if (selectedOrganization) {
+      setSearchQuery(selectedOrganization.name);
     }
   };
 
@@ -79,18 +78,18 @@ export function LandingPage() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (selectedDistrict) {
-      params.append("district", selectedDistrict.id.toString());
+    if (selectedOrganization) {
+      params.append("organization", selectedOrganization.id.toString());
     }
     navigate(`/facilities?${params.toString()}`);
   };
 
-  const handleDistrictSelect = (value: string) => {
-    const district = districts.find(
-      (d) => d.name.toLowerCase() === value.toLowerCase(),
+  const handleOrganizationSelect = (value: string) => {
+    const organization = organizations.find(
+      (o) => o.name.toLowerCase() === value.toLowerCase(),
     );
-    if (district) {
-      setSelectedDistrict(district);
+    if (organization) {
+      setSelectedOrganization(organization);
       setSearchQuery("");
       setIsOpen(false);
     }
@@ -99,17 +98,9 @@ export function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="w-full p-4">
-        <div className="flex justify-end items-center">
-          <Button
-            variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-            onClick={() => navigate("/login")}
-          >
-            Sign in
-          </Button>
-        </div>
-      </header>
+      <div className="w-full p-4">
+        <LoginHeader />
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center pt-24">
@@ -141,18 +132,22 @@ export function LandingPage() {
                 <input
                   ref={inputRef}
                   type="text"
-                  value={selectedDistrict ? selectedDistrict.name : searchQuery}
+                  value={
+                    selectedOrganization
+                      ? selectedOrganization.name
+                      : searchQuery
+                  }
                   onChange={handleSearchChange}
                   onClick={handleInputClick}
-                  placeholder="Search districts..."
+                  placeholder="Search..."
                   className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-500 cursor-pointer shadow-none ring-0"
                 />
-                {(searchQuery || selectedDistrict) && (
+                {(searchQuery || selectedOrganization) && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setSearchQuery("");
-                      setSelectedDistrict(null);
+                      setSelectedOrganization(null);
                     }}
                     className="p-1 hover:bg-gray-100 rounded-full"
                   >
@@ -169,19 +164,21 @@ export function LandingPage() {
               <div className="absolute top-full left-0 right-0 mt-1 rounded-md border bg-white shadow-lg z-10">
                 <Command>
                   <CommandGroup className="overflow-y-auto max-h-80">
-                    {filteredDistricts.length === 0 ? (
-                      <CommandEmpty>No district found.</CommandEmpty>
+                    {filteredOrganizations.length === 0 ? (
+                      <CommandEmpty>
+                        Unable to find anything based on your search.
+                      </CommandEmpty>
                     ) : (
-                      filteredDistricts.map((district) => (
+                      filteredOrganizations.map((organization) => (
                         <CommandItem
-                          key={district.id}
-                          value={district.name.toLowerCase()}
+                          key={organization.id}
+                          value={organization.name.toLowerCase()}
                           onSelect={() => {
-                            handleDistrictSelect(district.name);
+                            handleOrganizationSelect(organization.name);
                           }}
                           className="cursor-pointer"
                         >
-                          {district.name}
+                          {organization.name}
                         </CommandItem>
                       ))
                     )}
@@ -197,7 +194,7 @@ export function LandingPage() {
               variant="primary"
               className="px-6 h-10"
               onClick={handleSearch}
-              disabled={!selectedDistrict}
+              disabled={!selectedOrganization}
             >
               Search Facilities
             </Button>

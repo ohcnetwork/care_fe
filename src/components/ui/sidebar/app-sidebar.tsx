@@ -100,25 +100,27 @@ function generatePatientLinks(
 ): NavigationLink[] {
   if (!selectedUser) return [];
 
-  const { state, district, ward, local_body } = selectedUser;
+  const { geo_organization } = selectedUser;
+  let parentOrganization = geo_organization?.parent;
+  while (parentOrganization?.parent) {
+    if (parentOrganization.level_cache === 1) {
+      break;
+    }
+    parentOrganization = parentOrganization.parent;
+  }
+
   const queryParams = new URLSearchParams();
 
-  if (state) queryParams.set("state", String(state));
-  if (district) queryParams.set("district", String(district));
-  if (ward) queryParams.set("ward", String(ward));
-  if (local_body) queryParams.set("local_body", String(local_body));
+  if (parentOrganization) {
+    queryParams.set("organization", String(parentOrganization?.id));
+  }
 
   return [
     { name: t("appointments"), url: "/patient/home", icon: "d-patient" },
     {
       name: t("nearby_facilities"),
-      url: `/facilities/?${queryParams.toString()}`,
+      url: `/nearby_facilities/?${queryParams.toString()}`,
       icon: "d-patient",
-    },
-    {
-      name: t("medical_records"),
-      url: `/patient/${selectedUser.id}`,
-      icon: "d-book-open",
     },
   ];
 }

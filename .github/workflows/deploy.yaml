@@ -61,7 +61,7 @@ jobs:
 
   build:
     needs: test
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging' || startsWith(github.event.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.event.ref, 'refs/tags/v')
     name: Build & Push to container registries
     runs-on: ubuntu-latest
     steps:
@@ -139,18 +139,3 @@ jobs:
         run: |
           echo "Release ${{ github.sha }} is ready to be deployed to production"
 
-  deploy-staging-gcp:
-    needs: build
-    if: github.ref == 'refs/heads/staging'
-    name: Deploy to staging GCP cluster
-    runs-on: ubuntu-latest
-    environment:
-      name: Staging-GCP
-      url: https://care-staging.ohc.network/
-    steps:
-      - name: Trigger deploy
-        run: |
-          COMMIT_SHA=${{ github.sha }}
-          JSON='{ "substitutions": { "care_be_tag":"", "care_fe_tag": "'"$COMMIT_SHA"'", "metabase_tag": "" } }'
-          curl --location "${{ secrets.STAGING_GCP_DEPLOY_URL }}" \
-            --header 'Content-Type: application/json' --data "$JSON"

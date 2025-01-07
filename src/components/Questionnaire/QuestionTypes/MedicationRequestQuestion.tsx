@@ -25,10 +25,8 @@ import {
 } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
 
 interface MedicationRequestQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -46,7 +44,6 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
 };
 
 export function MedicationRequestQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -102,11 +99,7 @@ export function MedicationRequestQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+    <>
       {medications.length > 0 && (
         <div className="rounded-lg border space-y-4">
           <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
@@ -131,8 +124,9 @@ export function MedicationRequestQuestion({
         placeholder="Search for medications to add"
         onSelect={handleAddMedication}
         disabled={disabled}
+        searchPostFix=" clinical drug"
       />
-    </div>
+    </>
   );
 }
 
