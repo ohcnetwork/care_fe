@@ -32,10 +32,8 @@ import {
 } from "@/types/emr/diagnosis/diagnosis";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
 
 interface DiagnosisQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -49,7 +47,6 @@ const DIAGNOSIS_INITIAL_VALUE: Partial<Diagnosis> = {
 };
 
 export function DiagnosisQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -90,11 +87,7 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+    <>
       {diagnoses.length > 0 && (
         <div className="rounded-lg border">
           <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
@@ -123,7 +116,7 @@ export function DiagnosisQuestion({
         onSelect={handleAddDiagnosis}
         disabled={disabled}
       />
-    </div>
+    </>
   );
 }
 
