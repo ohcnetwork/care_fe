@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import Loading from "@/components/Common/Loading";
 import { UserModel } from "@/components/Users/models";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
@@ -19,7 +19,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
   const { t } = useTranslation();
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
   const userData: UserModel = JSON.parse(localStorage.getItem("user") ?? "{}");
 

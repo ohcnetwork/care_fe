@@ -29,7 +29,7 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -66,7 +66,7 @@ export default function PatientLogin({
   });
 
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
 
   if (
@@ -101,7 +101,7 @@ export default function PatientLogin({
     onSuccess: () => {
       if (page === "send") {
         const tokenData: TokenData = JSON.parse(
-          localStorage.getItem(CarePatientTokenKey) || "{}",
+          localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
         );
         if (
           Object.keys(tokenData).length > 0 &&
@@ -160,7 +160,10 @@ export default function PatientLogin({
           phoneNumber: phoneNumber,
           createdAt: new Date().toISOString(),
         };
-        localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
+        localStorage.setItem(
+          LocalStorageKeys.patientTokenKey,
+          JSON.stringify(tokenData),
+        );
         navigate(
           `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
@@ -294,7 +297,7 @@ export default function PatientLogin({
         }
       >
         <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-        <span className="text-sm underline">Back</span>
+        <span className="text-sm underline">{t("back")}</span>
       </Button>
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}
     </div>

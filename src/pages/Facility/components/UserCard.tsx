@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { useMemo } from "react";
 
@@ -10,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/Common/Avatar";
 import { UserAssignedModel } from "@/components/Users/models";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import { formatName } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
@@ -28,7 +29,7 @@ export function UserCard({ user, className, facilityId }: Props) {
   });
 
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
 
   const returnLink = useMemo(() => {
@@ -58,7 +59,7 @@ export function UserCard({ user, className, facilityId }: Props) {
 
               {user.qualification && (
                 <>
-                  <p className="text-xs mt-3">Education: </p>
+                  <p className="text-xs mt-3">{t("education")}: </p>
                   <p className="text-sm text-muted-foreground">
                     {user.qualification}
                   </p>
@@ -77,7 +78,7 @@ export function UserCard({ user, className, facilityId }: Props) {
                 navigate(returnLink);
               }}
             >
-              Book Appointment
+              {t("book_appointment")}
             </Button>
           </div>
         </div>
