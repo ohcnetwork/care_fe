@@ -11,7 +11,7 @@ interface AuthContextType {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
   signOut: () => Promise<void>;
-  isOTPAuthorized: boolean;
+  patientLogin: () => void;
 }
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);

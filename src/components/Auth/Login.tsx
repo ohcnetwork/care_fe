@@ -70,7 +70,7 @@ interface LoginProps {
 }
 
 const Login = (props: LoginProps) => {
-  const { signIn } = useAuthContext();
+  const { signIn, patientLogin } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
@@ -119,7 +119,7 @@ const Login = (props: LoginProps) => {
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
-      Notification.Success({ msg: t("send_otp_success") });
+      toast.success(t("send_otp_success"));
     },
     onError: (error: any) => {
       const errors = error?.data || [];
@@ -156,6 +156,7 @@ const Login = (props: LoginProps) => {
           LocalStorageKeys.patientTokenKey,
           JSON.stringify(tokenData),
         );
+        patientLogin();
       }
     },
     onError: (error: any) => {

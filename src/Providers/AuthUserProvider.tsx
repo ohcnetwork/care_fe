@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 
@@ -13,7 +13,6 @@ import { LocalStorageKeys } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
   children: React.ReactNode;
@@ -30,7 +29,9 @@ export default function AuthUserProvider({
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
-  const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
+  const [patientToken, setPatientToken] = useState(
+    JSON.parse(localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}"),
+  );
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["currentUser", accessToken],
@@ -39,21 +40,15 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
-  const tokenData: TokenData = useMemo(() => {
-    return JSON.parse(
-      localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-    );
-  }, [isOTPAuthorized]);
-
   useEffect(() => {
     if (
-      tokenData.token &&
-      Object.keys(tokenData).length > 0 &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+      patientToken.token &&
+      Object.keys(patientToken).length > 0 &&
+      dayjs(patientToken.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {
-      setIsOTPAuthorized(true);
+      navigate("/patient/home");
     }
-  }, [tokenData]);
+  }, [patientToken]);
 
   useEffect(() => {
     if (!user) {
@@ -88,11 +83,20 @@ export default function AuthUserProvider({
     [queryClient],
   );
 
+  const patientLogin = useCallback(() => {
+    setPatientToken(
+      JSON.parse(
+        localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
+      ),
+    );
+    navigate("/patient/home");
+  }, []);
+
   const signOut = useCallback(async () => {
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
-    setIsOTPAuthorized(false);
+    setPatientToken({});
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
 
@@ -130,7 +134,7 @@ export default function AuthUserProvider({
   const SelectedRouter = () => {
     if (user) {
       return children;
-    } else if (isOTPAuthorized) {
+    } else if (patientToken.token) {
       return otpAuthorized;
     } else {
       return unauthorized;
@@ -143,7 +147,7 @@ export default function AuthUserProvider({
         signIn,
         signOut,
         user,
-        isOTPAuthorized,
+        patientLogin,
       }}
     >
       <SelectedRouter />
