@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -316,8 +317,12 @@ export default function ResourceCreate(props: resourceProps) {
         />
 
         <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
-          <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} />
+          <Button type="button" variant="outline" onClick={() => goBack()}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" variant="primary" onClick={handleSubmit}>
+            {t("submit")}
+          </Button>
         </div>
       </Card>
     </Page>

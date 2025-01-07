@@ -1,32 +1,24 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
-import { useEffect } from "react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
+import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
-import { CarePatientTokenKey } from "@/common/constants";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
 
 import { FacilityCard } from "./components/FacilityCard";
-
-const STATE_GEO_ID = careConfig.keralaGeoId;
 
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
@@ -34,10 +26,6 @@ export function FacilitiesPage() {
     useFilters({
       limit: RESULTS_PER_PAGE_LIMIT,
     });
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
 
   const { t } = useTranslation();
 
@@ -47,63 +35,18 @@ export function FacilitiesPage() {
     queryKey: ["facilities", qParams],
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
-        geo_organization: qParams.geo_organization || STATE_GEO_ID,
+        ...(qParams.organization && {
+          organization: qParams.organization,
+        }),
+
         page: qParams.page,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
         ...advancedFilter.filter,
       },
     }),
-    enabled: !!qParams.geo_organization || !!STATE_GEO_ID,
+    enabled: !!qParams.organization,
   });
-
-  useEffect(() => {
-    if (qParams.district) {
-      updateQuery({ geo_organization: qParams.district });
-    } else {
-      updateQuery({ geo_organization: STATE_GEO_ID });
-    }
-  }, [qParams.district, STATE_GEO_ID]);
-
-  /*   useEffect(() => {
-    if (!qParams.district && qParams.local_body) {
-      advancedFilter.removeFilters(["local_body"]);
-    }
-  }, [advancedFilter, qParams]);
- */
-  const GetLoginHeader = () => {
-    if (
-      tokenData &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-    ) {
-      return (
-        <header className="w-full p-4">
-          <div className="flex justify-end items-center">
-            <Button
-              variant="ghost"
-              className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-              onClick={() => navigate("/patient/home")}
-            >
-              Patient Dashboard
-            </Button>
-          </div>
-        </header>
-      );
-    }
-    return (
-      <header className="w-full p-4">
-        <div className="flex justify-end items-center">
-          <Button
-            variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-            onClick={() => navigate("/login")}
-          >
-            Sign in
-          </Button>
-        </div>
-      </header>
-    );
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -113,54 +56,26 @@ export function FacilitiesPage() {
             <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
           </div>
         </Link>
-        <GetLoginHeader />
+        <LoginHeader />
       </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
         <SearchByMultipleFields
           id="facility-search"
           options={[
             {
-              key: "facility_district_pincode",
+              key: "facility_search_text",
               type: "text" as const,
-              placeholder: t("facility_search_placeholder_pincode"),
-              value: qParams.search || "",
+              placeholder: t("facility_search_placeholder_text"),
+              value: qParams.name || "",
               shortcutKey: "f",
             },
           ]}
           className="w-full sm:w-1/2"
-          onSearch={(key, value) => updateQuery({ search: value })}
+          onSearch={(key, value) => updateQuery({ name: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />
-        <Button
-          variant="white"
-          onClick={() => advancedFilter.setShow(true)}
-          className="flex items-center gap-2 p-5"
-        >
-          <CareIcon icon="l-filter" className="h-4 w-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-400">Filter</span>
-        </Button>
       </div>
-      {/* <FilterBadges
-        badges={({ badge, value }) => [
-          badge("Facility/District/Pincode", "search"),
-          value(
-            "District",
-            "district",
-            qParams.district && districtResponse?.data
-              ? districtResponse?.data.name
-              : "",
-          ),
-          value(
-            "Local Body",
-            "local_body",
-            qParams.local_body && localBodyResponse?.data
-              ? localBodyResponse?.data.name
-              : "",
-          ),
-          value("Pin Code", "pin_code", qParams.pin_code || ""),
-        ]}
-      /> */}
 
       <div className="mt-4 flex w-full flex-col gap-4">
         {isLoading ? (

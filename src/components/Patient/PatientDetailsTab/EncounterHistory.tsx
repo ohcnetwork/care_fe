@@ -24,7 +24,7 @@ const EncounterHistory = (props: PatientProps) => {
       query={{ patient: id }}
       perPage={5}
     >
-      {(_) => (
+      {() => (
         <div className="mt-8">
           <PaginatedList.WhenLoading>
             <CircularProgress />

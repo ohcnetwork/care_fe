@@ -1,7 +1,6 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
-import * as React from "react";
 
 import {
   DropdownMenu,
@@ -9,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,7 +26,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -65,15 +63,19 @@ export function FacilitySwitcher({
             <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
               <DropdownMenuItem
-                key={facility.name}
-                onClick={() => navigate(`/facility/${facility.id}`)}
+                key={index}
+                onClick={() => {
+                  navigate(`/facility/${facility.id}`);
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Hospital className="size-4 shrink-0" />
                 </div>
                 {facility.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

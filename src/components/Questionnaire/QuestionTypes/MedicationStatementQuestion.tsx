@@ -146,6 +146,7 @@ export function MedicationStatementQuestion({
         placeholder={t("search_medication")}
         onSelect={handleAddMedication}
         disabled={disabled}
+        searchPostFix=" clinical drug"
       />
     </div>
   );

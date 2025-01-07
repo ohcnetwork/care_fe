@@ -1,7 +1,7 @@
 import AppRouter from "@/Routers/AppRouter";
 import PatientRouter from "@/Routers/PatientRouter";
-import SessionRouter from "@/Routers/SessionRouter";
+import PublicRouter from "@/Routers/PublicRouter";
 
-const routers = { PatientRouter, SessionRouter, AppRouter };
+const routers = { PatientRouter, PublicRouter, AppRouter };
 
 export default routers;

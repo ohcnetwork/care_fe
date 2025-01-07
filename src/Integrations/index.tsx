@@ -1,6 +1,5 @@
-import Plausible from "@/Integrations/Plausible";
 import Sentry from "@/Integrations/Sentry";
 
-const Integrations = { Sentry, Plausible };
+const Integrations = { Sentry };
 
 export default Integrations;

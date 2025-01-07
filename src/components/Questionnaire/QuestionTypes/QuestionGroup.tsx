@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import { QuestionInput } from "./QuestionInput";
 
@@ -22,6 +22,57 @@ interface QuestionGroupProps {
   facilityId: string;
 }
 
+function isQuestionEnabled(
+  question: Question,
+  questionnaireResponses: QuestionnaireResponse[],
+) {
+  if (!question.enable_when?.length) return true;
+
+  const checkCondition = (enableWhen: EnableWhen) => {
+    const dependentValue = questionnaireResponses.find(
+      (v) => v.link_id === enableWhen.question,
+    )?.values[0];
+
+    // Early return if no dependent value exists
+    if (!dependentValue?.value) return false;
+
+    switch (enableWhen.operator) {
+      case "exists":
+        return dependentValue !== undefined && dependentValue !== null;
+      case "equals":
+        return dependentValue.value === enableWhen.answer;
+      case "not_equals":
+        return dependentValue.value !== enableWhen.answer;
+      case "greater":
+        return (
+          typeof dependentValue.value === "number" &&
+          dependentValue.value > enableWhen.answer
+        );
+      case "less":
+        return (
+          typeof dependentValue.value === "number" &&
+          dependentValue.value < enableWhen.answer
+        );
+      case "greater_or_equals":
+        return (
+          typeof dependentValue.value === "number" &&
+          dependentValue.value >= enableWhen.answer
+        );
+      case "less_or_equals":
+        return (
+          typeof dependentValue.value === "number" &&
+          dependentValue.value <= enableWhen.answer
+        );
+      default:
+        return true;
+    }
+  };
+
+  return question.enable_behavior === "any"
+    ? question.enable_when.some(checkCondition)
+    : question.enable_when.every(checkCondition);
+}
+
 export const QuestionGroup = memo(function QuestionGroup({
   question,
   encounterId,
@@ -33,6 +84,12 @@ export const QuestionGroup = memo(function QuestionGroup({
   activeGroupId,
   facilityId,
 }: QuestionGroupProps) {
+  const isEnabled = isQuestionEnabled(question, questionnaireResponses);
+
+  if (!isEnabled) {
+    return null;
+  }
+
   if (question.type !== "group") {
     return (
       <QuestionInput

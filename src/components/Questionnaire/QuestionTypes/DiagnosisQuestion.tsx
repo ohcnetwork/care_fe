@@ -23,16 +23,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Code } from "@/types/questionnaire/code";
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
-} from "@/types/questionnaire/diagnosis";
+} from "@/types/emr/diagnosis/diagnosis";
+import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
-
-import ValueSetSelect from "../ValueSetSelect";
 
 interface DiagnosisQuestionProps {
   question: Question;

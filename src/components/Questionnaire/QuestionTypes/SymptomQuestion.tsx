@@ -25,17 +25,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Code } from "@/types/questionnaire/code";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
 import {
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
   Symptom,
   SymptomRequest,
-} from "@/types/questionnaire/symptom";
-
-import ValueSetSelect from "../ValueSetSelect";
+} from "@/types/emr/symptom/symptom";
+import { Code } from "@/types/questionnaire/code";
+import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 
 interface SymptomQuestionProps {
   question: Question;

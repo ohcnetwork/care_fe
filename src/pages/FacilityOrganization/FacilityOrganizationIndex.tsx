@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,6 +28,7 @@ export default function FacilityOrganizationIndex({
 }: {
   facilityId: string;
 }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
@@ -37,41 +39,39 @@ export default function FacilityOrganizationIndex({
 
   if (isLoading) {
     return (
-      <Page title="Organizations">
+      <div className="px-6 py-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-8 w-48 self-end" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="relative">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="relative space-y-4">
               <CardHeader>
-                <Skeleton className="h-6 w-2/3" />
-                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-6 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-3/4" />
-              </CardContent>
               <CardFooter>
-                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-10 w-full" />
               </CardFooter>
             </Card>
           ))}
         </div>
-      </Page>
+      </div>
     );
   }
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organizations">
-        <div className="flex justify-end mb-4">
+      <Page title={t("organizations")}>
+        <div className="flex justify-center md:justify-end mt-2 mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
-              No Organizations Found
+              {t("organization_not_found")}
             </CardTitle>
             <CardDescription className="text-center">
-              You don't have access to any organizations yet.
+              {t("organization_forbidden")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -79,8 +79,7 @@ export default function FacilityOrganizationIndex({
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
             <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
-              Organizations help you manage facilities, users, and resources
-              efficiently. Contact your administrator to get access.
+              {t("organization_access_help")}
             </p>
           </CardContent>
         </Card>
@@ -89,8 +88,8 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title="Facility Organizations" hideBack={true}>
-      <div className="flex justify-end mb-4">
+    <Page title={t("facility_organizations")} hideBack={true}>
+      <div className="flex justify-center md:justify-end mt-2 mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
@@ -111,7 +110,7 @@ export default function FacilityOrganizationIndex({
                   href={`/facility/${facilityId}/organization/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
-                  View Details
+                  {t("view_details")}
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Link>
               </Button>

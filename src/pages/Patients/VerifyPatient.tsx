@@ -48,6 +48,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
         patient: patientData?.id,
         live: false,
       },
+      silent: true,
     }),
     enabled: !!patientData?.id,
   });

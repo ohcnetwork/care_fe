@@ -1,5 +1,6 @@
+import { DashboardIcon } from "@radix-ui/react-icons";
 import { TFunction } from "i18next";
-import { usePathParams } from "raviger";
+import { Link, usePathParams } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,6 +9,9 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility-switcher";
@@ -61,10 +65,8 @@ function generateFacilityLinks(
     },
     { name: t("encounters"), url: `${baseUrl}/encounters`, icon: "d-patient" },
     // { name: t("assets"), url: `${baseUrl}/assets`, icon: "d-folder" },
-    // { name: t("shifting"), url: "/shifting", icon: "d-ambulance" },
     { name: t("resource"), url: "/resource", icon: "d-book-open" },
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
-    // { name: t("All users"), url: "/users", icon: "d-people" },
     {
       name: t("organization"),
       url: `${baseUrl}/organization`,
@@ -98,25 +100,27 @@ function generatePatientLinks(
 ): NavigationLink[] {
   if (!selectedUser) return [];
 
-  const { state, district, ward, local_body } = selectedUser;
+  const { geo_organization } = selectedUser;
+  let parentOrganization = geo_organization?.parent;
+  while (parentOrganization?.parent) {
+    if (parentOrganization.level_cache === 1) {
+      break;
+    }
+    parentOrganization = parentOrganization.parent;
+  }
+
   const queryParams = new URLSearchParams();
 
-  if (state) queryParams.set("state", String(state));
-  if (district) queryParams.set("district", String(district));
-  if (ward) queryParams.set("ward", String(ward));
-  if (local_body) queryParams.set("local_body", String(local_body));
+  if (parentOrganization) {
+    queryParams.set("organization", String(parentOrganization?.id));
+  }
 
   return [
     { name: t("appointments"), url: "/patient/home", icon: "d-patient" },
     {
       name: t("nearby_facilities"),
-      url: `/facilities/?${queryParams.toString()}`,
+      url: `/nearby_facilities/?${queryParams.toString()}`,
       icon: "d-patient",
-    },
-    {
-      name: t("medical_records"),
-      url: `/patient/${selectedUser.id}`,
-      icon: "d-book-open",
     },
   ];
 }
@@ -165,19 +169,39 @@ export function AppSidebar({
       className="group-data-[side=left]:border-r-0"
     >
       <SidebarHeader>
-        {selectedOrganization && hasOrganizations && user?.organizations ? (
+        {selectedOrganization && hasOrganizations && (
           <OrganizationSwitcher
-            organizations={user.organizations}
+            organizations={user?.organizations || []}
             selectedOrganization={selectedOrganization}
           />
-        ) : (
-          hasFacilities &&
-          user?.facilities && (
-            <FacilitySwitcher
-              facilities={user.facilities}
-              selectedFacility={selectedFacility}
-            />
-          )
+        )}
+        {selectedFacility && hasFacilities && (
+          <FacilitySwitcher
+            facilities={user?.facilities || []}
+            selectedFacility={selectedFacility}
+          />
+        )}
+        {!selectedFacility && !selectedOrganization && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white mt-2"
+              >
+                <Link href="/">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
+                    <DashboardIcon className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight text-gray-900">
+                    <span className="truncate font-semibold">
+                      View Dashboard
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         )}
       </SidebarHeader>
 

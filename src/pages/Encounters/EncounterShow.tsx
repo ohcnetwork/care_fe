@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
@@ -14,13 +13,15 @@ import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { keysOf } from "@/Utils/utils";
+import { formatDateTime, keysOf } from "@/Utils/utils";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
+
+import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
   facilityId: string;
@@ -34,6 +35,7 @@ const defaultTabs = {
   plots: EncounterPlotsTab,
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
+  notes: EncounterNotesTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
@@ -77,7 +79,6 @@ export const EncounterShow = (props: Props) => {
   //     return "None";
   //   }
   // };
-  const [showPatientNotesPopup, setShowPatientNotesPopup] = useState(false);
 
   // const authUser = useAuthUser();
 
@@ -184,7 +185,7 @@ export const EncounterShow = (props: Props) => {
     >
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
-          title="Encounter"
+          title={t("encounter")}
           crumbsReplacements={{
             [encounterId]: { name: encounterData.patient.name },
             consultation: {
@@ -236,21 +237,8 @@ export const EncounterShow = (props: Props) => {
             className="btn btn-primary m-1 w-full hover:text-white"
             id="patient-details"
           >
-            Patient Details
+            {t("patient_details")}
           </Link>
-          <a
-            id="patient_discussion_notes"
-            onClick={() =>
-              showPatientNotesPopup
-                ? navigate(
-                    `/facility/${facilityId}/patient/${encounterData.patient.id}/notes`,
-                  )
-                : setShowPatientNotesPopup(true)
-            }
-            className="btn btn-primary m-1 w-full hover:text-white"
-          >
-            Discussion Notes
-          </a>
         </div>
       </nav>
       <div className="mt-4 w-full border-b-2 border-secondary-200">
@@ -259,65 +247,17 @@ export const EncounterShow = (props: Props) => {
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}
-              fetchPatientData={() => {
-                // consultationQuery.refetch();
-                // patientDataQuery.refetch();
-              }}
+              fetchPatientData={() => {}}
             />
 
-            {/* <div className="flex flex-col justify-between px-4 md:flex-row">
-              {consultationData.admitted_to && (
-                <div className="mt-2 rounded-lg border bg-secondary-100 p-2 md:mt-0">
-                  <div className="border-b-2 py-1">
-                    Patient
-                    {consultationData.discharge_date
-                      ? " Discharged from"
-                      : " Admitted to"}
-                    <span className="badge badge-pill badge-warning ml-2 font-bold">
-                      {consultationData.admitted_to}
-                    </span>
-                  </div>
-                  {(consultationData.discharge_date ??
-                    consultationData.encounter_date) && (
-                    <div className="text-3xl font-bold">
-                      {relativeTime(
-                        consultationData.discharge_date
-                          ? consultationData.discharge_date
-                          : consultationData.encounter_date,
-                      )}
-                    </div>
-                  )}
-                  <div className="-mt-2 text-xs">
-                    {consultationData.encounter_date &&
-                      formatDateTime(consultationData.encounter_date)}
-                    {consultationData.discharge_date &&
-                      ` - ${formatDateTime(consultationData.discharge_date)}`}
-                  </div>
-                </div>
-              )}
-            </div> */}
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
-                <div className="flex items-center">
-                  <span className="text-secondary-900">Created: </span>&nbsp;
-                  {/* <RelativeDateUserMention
-                    actionDate={encounterData.created_date}
-                    user={encounterData.created_by}
-                    tooltipPosition="right"
-                    withoutSuffix={true}
-                  /> */}
-                </div>
-              </div>
               <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
                 <div className="flex items-center">
-                  <span className="text-secondary-900">Last Modified: </span>
+                  <span className="text-secondary-900">
+                    {t("last_modified")}:{" "}
+                  </span>
                   &nbsp;
-                  {/* <RelativeDateUserMention
-                    actionDate={consultationData.modified_date}
-                    user={consultationData.last_edited_by}
-                    tooltipPosition="left"
-                    withoutSuffix={true}
-                  /> */}
+                  {formatDateTime(encounterData.modified_date)}
                 </div>
               </div>
             </div>
@@ -349,20 +289,5 @@ export const EncounterShow = (props: Props) => {
         </div>
       </div>
     </EncounterProvider>
-
-    // <DoctorVideoSlideover
-    //   facilityId={facilityId}
-    //   show={showDoctors}
-    //   setShow={setShowDoctors}
-    // />
-
-    // {showPatientNotesPopup && (
-    //   <PatientNotesSlideover
-    //     patientId={patientId}
-    //     facilityId={facilityId}
-    //     consultationId={consultationId}
-    //     setShowPatientNotesPopup={setShowPatientNotesPopup}
-    //   />
-    // )}
   );
 };

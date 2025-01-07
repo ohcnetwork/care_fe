@@ -1,3 +1,5 @@
+import { EncounterClass } from "@/types/emr/encounter";
+
 const env = import.meta.env;
 
 interface ILogo {
@@ -48,6 +50,9 @@ const careConfig = {
     .split(",")
     .map((l) => l.trim()),
 
+  defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
+    "hh") as EncounterClass,
+
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 
@@ -82,12 +87,6 @@ const careConfig = {
   minEncounterDate: new Date(env.REACT_MIN_ENCOUNTER_DATE || "2020-01-01"),
 
   // Plugins related configs...
-
-  plausible: {
-    server: env.REACT_PLAUSIBLE_SERVER_URL || "https://plausible.ohc.network",
-    domain: env.REACT_PLAUSIBLE_SITE_DOMAIN || "care.ohc.network",
-  },
-
   sentry: {
     dsn:
       env.REACT_SENTRY_DSN ||
@@ -120,7 +119,6 @@ const careConfig = {
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
-  keralaGeoId: env.REACT_KERALA_GEO_ID || "",
 } as const;
 
 export default careConfig;

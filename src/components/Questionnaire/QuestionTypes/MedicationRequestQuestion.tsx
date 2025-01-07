@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/select";
 
 import { QuantityInput } from "@/components/Common/QuantityInput";
-import { DOSAGE_UNITS } from "@/components/Medicine/models";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import {
+  DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
+  MedicationRequestDosageInstruction,
   MedicationRequestIntent,
 } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
@@ -32,7 +33,6 @@ interface MedicationRequestQuestionProps {
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
 }
-
 const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   status: "active",
   intent: "order",
@@ -41,9 +41,8 @@ const MEDICATION_REQUEST_INITIAL_VALUE: MedicationRequest = {
   do_not_perform: false,
   medication: undefined,
   authored_on: new Date().toISOString(),
-  dosage_instruction: {},
+  dosage_instruction: [],
 };
-
 export function MedicationRequestQuestion({
   question,
   questionnaireResponse,
@@ -52,11 +51,14 @@ export function MedicationRequestQuestion({
 }: MedicationRequestQuestionProps) {
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
-
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
       ...medications,
-      { ...MEDICATION_REQUEST_INITIAL_VALUE, medication },
+      {
+        ...MEDICATION_REQUEST_INITIAL_VALUE,
+        medication,
+        dosage_instruction: [],
+      },
     ];
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
@@ -68,7 +70,6 @@ export function MedicationRequestQuestion({
       ],
     });
   };
-
   const handleRemoveMedication = (index: number) => {
     const newMedications = medications.filter((_, i) => i !== index);
     updateQuestionnaireResponseCB({
@@ -76,7 +77,6 @@ export function MedicationRequestQuestion({
       values: [{ type: "medication_request", value: newMedications }],
     });
   };
-
   const handleUpdateMedication = (
     index: number,
     updates: Partial<MedicationRequest>,
@@ -84,7 +84,6 @@ export function MedicationRequestQuestion({
     const newMedications = medications.map((medication, i) =>
       i === index ? { ...medication, ...updates } : medication,
     );
-
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
       values: [
@@ -95,7 +94,6 @@ export function MedicationRequestQuestion({
       ],
     });
   };
-
   return (
     <div className="space-y-4">
       <Label className="text-base font-medium">
@@ -105,38 +103,36 @@ export function MedicationRequestQuestion({
       <div
         data-structured-input-id={question.id}
         data-structured-input="qn-medication-request"
-        className="rounded-lg border p-4"
+        className="rounded-lg border space-y-4"
       >
         {medications.length > 0 && (
-          <div className="rounded-lg border space-y-4">
-            <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
-              {medications.map((medication, index) => (
-                <li key={index}>
-                  <MedicationRequestItem
-                    medication={medication}
-                    disabled={disabled}
-                    onUpdate={(medication) =>
-                      handleUpdateMedication(index, medication)
-                    }
-                    onRemove={() => handleRemoveMedication(index)}
-                    index={index}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
+            {medications.map((medication, index) => (
+              <li key={index}>
+                <MedicationRequestItem
+                  medication={medication}
+                  disabled={disabled}
+                  onUpdate={(medication) =>
+                    handleUpdateMedication(index, medication)
+                  }
+                  onRemove={() => handleRemoveMedication(index)}
+                  index={index}
+                />
+              </li>
+            ))}
+          </ul>
         )}
-        <ValueSetSelect
-          system="system-medication"
-          placeholder="Search for medications to add"
-          onSelect={handleAddMedication}
-          disabled={disabled}
-        />
       </div>
+      <ValueSetSelect
+        system="system-medication"
+        placeholder="Search for medications to add"
+        onSelect={handleAddMedication}
+        disabled={disabled}
+        searchPostFix=" clinical drug"
+      />
     </div>
   );
 }
-
 export const MedicationRequestItem: React.FC<{
   medication: MedicationRequest;
   disabled?: boolean;
@@ -144,15 +140,14 @@ export const MedicationRequestItem: React.FC<{
   onRemove?: () => void;
   index?: number;
 }> = ({ medication, disabled, onUpdate, onRemove, index = 0 }) => {
-  const dosageInstruction = medication.dosage_instruction;
+  const dosageInstruction = medication.dosage_instruction[0];
   const handleUpdateDosageInstruction = (
-    updates: Partial<MedicationRequest["dosage_instruction"]>,
+    updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
     onUpdate?.({
-      dosage_instruction: { ...dosageInstruction, ...updates },
+      dosage_instruction: [{ ...dosageInstruction, ...updates }],
     });
   };
-
   return (
     <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
       <div className="flex items-center justify-between">
@@ -204,7 +199,7 @@ export const MedicationRequestItem: React.FC<{
             <QuantityInput
               units={DOSAGE_UNITS}
               quantity={
-                medication.dosage_instruction?.dose_and_rate?.dose_quantity
+                medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
               }
               onChange={(value) =>
                 handleUpdateDosageInstruction({
@@ -218,7 +213,7 @@ export const MedicationRequestItem: React.FC<{
             <Label className="mb-1 block text-sm font-medium">Route</Label>
             <ValueSetSelect
               system="system-route"
-              value={medication.dosage_instruction?.route}
+              value={medication.dosage_instruction[0]?.route}
               onSelect={(route) => handleUpdateDosageInstruction({ route })}
               placeholder="Select route"
               disabled={disabled}
@@ -230,7 +225,7 @@ export const MedicationRequestItem: React.FC<{
             </Label>
             <ValueSetSelect
               system="system-administration-method"
-              value={medication.dosage_instruction?.method}
+              value={medication.dosage_instruction[0]?.method}
               onSelect={(method) => handleUpdateDosageInstruction({ method })}
               placeholder="Select method"
               disabled={disabled}
@@ -238,29 +233,29 @@ export const MedicationRequestItem: React.FC<{
             />
           </div>
         </div>
-
         <div className="flex gap-2">
           <div className="flex-1">
             <Label className="mb-1 block text-sm font-medium pr-4">Site</Label>
             <ValueSetSelect
               system="system-body-site"
-              value={medication.dosage_instruction?.site}
+              value={medication.dosage_instruction[0]?.site}
               onSelect={(site) => handleUpdateDosageInstruction({ site })}
               placeholder="Select site"
               disabled={disabled}
             />
           </div>
         </div>
-
         <div className="flex items-center gap-2 mt-2">
           <Checkbox
             id={`prn-checkbox-${medication.medication?.code}`}
-            checked={medication.dosage_instruction?.as_needed_boolean ?? false}
+            checked={
+              medication.dosage_instruction[0]?.as_needed_boolean ?? false
+            }
             onCheckedChange={(checked) =>
               handleUpdateDosageInstruction({
                 as_needed_boolean: !!checked,
                 as_needed_for: checked
-                  ? medication.dosage_instruction?.as_needed_for
+                  ? medication.dosage_instruction[0]?.as_needed_for
                   : undefined,
               })
             }
@@ -270,13 +265,12 @@ export const MedicationRequestItem: React.FC<{
             As Needed / PRN
           </Label>
         </div>
-
-        {medication.dosage_instruction?.as_needed_boolean ? (
+        {medication.dosage_instruction[0]?.as_needed_boolean ? (
           <div className="flex gap-2">
             <div className="flex-1">
               <ValueSetSelect
                 system="system-as-needed-reason"
-                value={medication.dosage_instruction?.as_needed_for}
+                value={medication.dosage_instruction[0]?.as_needed_for}
                 onSelect={(reason) =>
                   handleUpdateDosageInstruction({ as_needed_for: reason })
                 }
@@ -318,7 +312,6 @@ export const MedicationRequestItem: React.FC<{
             </div>
           </div>
         )}
-
         <div className="flex gap-2">
           <div className="flex-1">
             <Label className="mb-1 block text-sm font-medium">
@@ -326,13 +319,17 @@ export const MedicationRequestItem: React.FC<{
             </Label>
             <ValueSetSelect
               system="system-additional-instruction"
-              value={medication.dosage_instruction?.additional_instruction?.[0]}
+              value={
+                medication.dosage_instruction[0]?.additional_instruction?.[0]
+              }
               onSelect={(additionalInstruction) =>
                 onUpdate?.({
-                  dosage_instruction: {
-                    ...medication.dosage_instruction,
-                    additional_instruction: [additionalInstruction],
-                  },
+                  dosage_instruction: [
+                    {
+                      ...medication.dosage_instruction[0],
+                      additional_instruction: [additionalInstruction],
+                    },
+                  ],
                 })
               }
               disabled={disabled}
@@ -340,16 +337,14 @@ export const MedicationRequestItem: React.FC<{
           </div>
         </div>
       </div>
-
       {/* <div className="font-mono text-xs whitespace-pre-wrap mt-8">
         {JSON.stringify(medication, null, 2)}
       </div> */}
     </div>
   );
 };
-
 const reverseFrequencyOption = (
-  option: MedicationRequest["dosage_instruction"]["timing"],
+  option: MedicationRequest["dosage_instruction"][0]["timing"],
 ) => {
   return Object.entries(FREQUENCY_OPTIONS).find(
     ([, value]) =>
@@ -358,7 +353,6 @@ const reverseFrequencyOption = (
       value.timing.repeat.period === option?.repeat?.period,
   )?.[0] as keyof typeof FREQUENCY_OPTIONS;
 };
-
 // TODO: verify period_unit is correct
 const FREQUENCY_OPTIONS = {
   BD: {
@@ -401,6 +395,6 @@ const FREQUENCY_OPTIONS = {
   string,
   {
     display: string;
-    timing: MedicationRequest["dosage_instruction"]["timing"];
+    timing: MedicationRequest["dosage_instruction"][0]["timing"];
   }
 >;

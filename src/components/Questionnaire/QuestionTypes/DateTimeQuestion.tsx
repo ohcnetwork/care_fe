@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import dayjs from "dayjs";
-import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -37,11 +36,9 @@ export function DateTimeQuestion({
   clearError,
   classes,
 }: DateTimeQuestionProps) {
-  const [currentValue, setCurrentValue] = useState(() => {
-    return questionnaireResponse.values[0]?.value
-      ? new Date(questionnaireResponse.values[0].value as string)
-      : undefined;
-  });
+  const currentValue = questionnaireResponse.values[0]?.value
+    ? new Date(questionnaireResponse.values[0].value as string)
+    : undefined;
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) {
@@ -101,7 +98,6 @@ export function DateTimeQuestion({
         onChange={(value) => {
           if (value?.date) {
             const date = dayjs(value.date).toDate();
-            setCurrentValue(date);
             handleUpdate(date);
           }
         }}

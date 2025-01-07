@@ -32,6 +32,7 @@ export default function AuthUserProvider({
     queryKey: ["currentUser"],
     queryFn: query(routes.currentUser, { silent: true }),
     retry: false,
+    enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
   const [isOTPAuthorized, setIsOTPAuthorized] = useState(false);
@@ -70,7 +71,7 @@ export default function AuthUserProvider({
         localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
-        await queryClient.resetQueries({ queryKey: ["currentUser"] });
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
         if (location.pathname === "/" || location.pathname === "/login") {
           navigate(getRedirectOr("/"));
@@ -120,9 +121,19 @@ export default function AuthUserProvider({
     return <Loading />;
   }
 
+  const SelectedRouter = () => {
+    if (user) {
+      return children;
+    } else if (isOTPAuthorized) {
+      return otpAuthorized;
+    } else {
+      return unauthorized;
+    }
+  };
+
   return (
     <AuthUserContext.Provider value={{ signIn, signOut, user }}>
-      {!user ? (isOTPAuthorized ? otpAuthorized : unauthorized) : children}
+      <SelectedRouter />
     </AuthUserContext.Provider>
   );
 }

@@ -38,7 +38,7 @@ import type {
   Organization,
   OrganizationParent,
 } from "@/types/organization/organization";
-import { getOrgLevelLabel } from "@/types/organization/organization";
+import { getOrgLabel } from "@/types/organization/organization";
 
 import type { UserModel } from "../Users/models";
 
@@ -77,24 +77,22 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 
   const parentDetails = orgParents.map((org) => {
     return {
-      label: getOrgLevelLabel(org.org_type, org.level_cache),
+      label: getOrgLabel(org.org_type, org.metadata),
       value: org.name,
     };
   });
 
-  return parentDetails
-    .reverse()
-    .concat({
-      label: getOrgLevelLabel(geoOrg.org_type, geoOrg.level_cache),
+  return [
+    {
+      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
       value: geoOrg.name,
-    })
+    },
+  ]
+    .concat(parentDetails)
     .map((org, index) => (
-      <span key={org.value}>
-        <span className="text-muted-foreground">{org.value}</span>
-        {index < parentDetails.length - 1 && (
-          <span className="mx-2 text-muted-foreground/50">→</span>
-        )}
-      </span>
+      <div key={index}>
+        <span className="text-gray-500">{org.value}</span>
+      </div>
     ));
 };
 
@@ -192,7 +190,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
           </span>
         }
         action="Delete"
-        variant="danger"
+        variant="destructive"
         show={openDeleteDialog}
         onClose={handleDeleteClose}
         onConfirm={handleDeleteSubmit}
@@ -284,7 +282,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="mt-2 space-y-2">
               <Card>
                 <CardContent>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
+                  <div className="flex flex-col gap-4 items-start mt-4">
                     <div className="flex items-start gap-3">
                       <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>
