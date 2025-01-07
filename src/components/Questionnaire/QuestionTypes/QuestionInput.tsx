@@ -35,6 +35,7 @@ interface QuestionInputProps {
   clearError: () => void;
   disabled?: boolean;
   facilityId: string;
+  patientId: string;
 }
 
 export function QuestionInput({
@@ -46,6 +47,7 @@ export function QuestionInput({
   clearError,
   disabled,
   facilityId,
+  patientId,
 }: QuestionInputProps) {
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
@@ -81,6 +83,7 @@ export function QuestionInput({
       disabled,
       clearError,
       index,
+      patientId,
     };
 
     switch (question.type) {

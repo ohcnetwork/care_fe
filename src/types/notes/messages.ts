@@ -7,4 +7,3 @@ export interface Message {
   created_by: UserBase;
   updated_by: UserBase;
 }
-
