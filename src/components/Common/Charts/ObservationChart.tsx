@@ -51,6 +51,7 @@ interface ObservationVisualizerProps {
   codeGroups: CodeGroup[];
   height?: number;
   gridCols?: number;
+  encounterId: string;
 }
 
 interface ChartData {
@@ -98,6 +99,7 @@ const formatChartDate = (
 export const ObservationVisualizer = ({
   patientId,
   codeGroups,
+  encounterId,
   height = 300,
   gridCols = 2,
 }: ObservationVisualizerProps) => {
@@ -108,10 +110,14 @@ export const ObservationVisualizer = ({
     queryKey: [
       "observations",
       patientId,
+      encounterId,
       allCodes.map((c) => c.code).join(","),
     ],
     queryFn: query(routes.observationsAnalyse, {
       pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+      },
       body: {
         codes: allCodes,
       },
@@ -380,6 +386,7 @@ export const ObservationVisualizer = ({
             <TabsContent value="history">
               <ObservationHistoryTable
                 patientId={patientId}
+                encounterId={encounterId}
                 codes={group.codes}
               />
             </TabsContent>
