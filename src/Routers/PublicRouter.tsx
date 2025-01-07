@@ -60,6 +60,6 @@ export const routes = {
   "/invalid-reset": () => <InvalidReset />,
 };
 
-export default function SessionRouter() {
+export default function PublicRouter() {
   return useRoutes(routes) || <Login />;
 }
