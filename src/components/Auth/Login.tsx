@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, useQueryParams } from "raviger";
+import { useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,13 +28,12 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
-import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
@@ -42,7 +41,10 @@ interface LoginFormData {
   password: string;
 }
 
-type LoginMode = "staff" | "patient";
+interface OtpLoginData {
+  phone_number: string;
+  otp: string;
+}
 
 interface OtpError {
   type: string;
@@ -55,14 +57,19 @@ interface OtpError {
   url: string;
 }
 
-// Update interface for OTP data
-interface OtpLoginData {
-  phone_number: string;
-  otp: string;
+interface OtpValidationError {
+  otp?: string;
+  [key: string]: string | undefined;
 }
 
-const Login = (props: { forgot?: boolean }) => {
-  const { signIn } = useAuthContext();
+type LoginMode = "staff" | "patient";
+
+interface LoginProps {
+  forgot?: boolean;
+}
+
+const Login = (props: LoginProps) => {
+  const { signIn, patientLogin } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
@@ -71,15 +78,17 @@ const Login = (props: { forgot?: boolean }) => {
     password: "",
   };
   const { forgot } = props;
+  const [params] = useQueryParams();
+  const { mode } = params;
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
-  // display spinner while login is under progress
-  const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(forgot);
-  const [loginMode, setLoginMode] = useState<LoginMode>("staff");
+  const [loginMode, setLoginMode] = useState<LoginMode>(
+    mode === "patient" ? "patient" : "staff",
+  );
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -94,14 +103,6 @@ const Login = (props: { forgot?: boolean }) => {
     },
     onSuccess: ({ res }) => {
       setCaptcha(res?.status === 429);
-    },
-  });
-
-  // Forgot Password Mutation
-  const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(routes.forgotPassword),
-    onSuccess: () => {
-      toast.success(t("password_sent"));
     },
   });
 
@@ -150,23 +151,23 @@ const Login = (props: { forgot?: boolean }) => {
           phoneNumber: `+91${phone}`,
           createdAt: new Date().toISOString(),
         };
-        localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
-        toast.success(t("verify_otp_success_login"));
-        setTimeout(() => {
-          window.location.href = "/patient/home";
-        }, 200);
+        localStorage.setItem(
+          LocalStorageKeys.patientTokenKey,
+          JSON.stringify(tokenData),
+        );
+        patientLogin();
       }
     },
-
-    //Invalid OTP error handling
-    onError: (error: HTTPError) => {
+    onError: (error: any) => {
       let errorMessage = t("invalid_otp");
       if (
         error.cause &&
         Array.isArray(error.cause.errors) &&
         error.cause.errors.length > 0
       ) {
-        const otpError = error.cause.errors.find((e) => e.otp);
+        const otpError = error.cause.errors.find(
+          (e: OtpValidationError) => e.otp,
+        );
         if (otpError && otpError.otp) {
           errorMessage = otpError.otp;
         }
@@ -178,14 +179,20 @@ const Login = (props: { forgot?: boolean }) => {
     },
   });
 
+  // Forgot Password Mutation
+  const { mutate: submitForgetPassword } = useMutation({
+    mutationFn: mutate(routes.forgotPassword),
+    onSuccess: () => {
+      toast.success(t("password_sent"));
+    },
+  });
+
   // Format phone number to include +91
   const formatPhoneNumber = (value: string) => {
     // Remove any non-digit characters
     const digits = value.replace(/\D/g, "");
-
     // Limit to 10 digits
     const truncated = digits.slice(0, 10);
-
     return truncated;
   };
 
@@ -197,7 +204,6 @@ const Login = (props: { forgot?: boolean }) => {
   };
 
   // Login form validation
-
   const handleChange = (e: any) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
@@ -236,16 +242,8 @@ const Login = (props: { forgot?: boolean }) => {
       setErrors(err);
       return false;
     }
-
     return form;
   };
-
-  // set loading to false when component is unmounted
-  useEffect(() => {
-    return () => {
-      setLoading(false);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,10 +295,19 @@ const Login = (props: { forgot?: boolean }) => {
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isOtpSent) {
-      sendOtp(phone);
-    } else {
-      verifyOtp({ phone_number: `+91${phone}`, otp });
+    try {
+      if (!isOtpSent) {
+        await sendOtp(phone);
+        setIsOtpSent(true);
+      } else {
+        await verifyOtp({ phone_number: `+91${phone}`, otp });
+      }
+    } catch (error: any) {
+      if (!isOtpSent) {
+        setOtpError(error.message);
+      } else {
+        setOtpValidationError(error.message);
+      }
     }
   };
 
@@ -308,6 +315,8 @@ const Login = (props: { forgot?: boolean }) => {
     setIsOtpSent(false);
     setPhone("");
     setOtp("");
+    setOtpError("");
+    setOtpValidationError("");
   };
 
   // Loading state derived from mutations
@@ -688,13 +697,13 @@ const Login = (props: { forgot?: boolean }) => {
                         className="w-full"
                         variant="primary"
                         disabled={
-                          loading ||
+                          isLoading ||
                           !phone ||
                           phone.length !== 10 ||
                           (isOtpSent && otp.length !== 5)
                         }
                       >
-                        {loading ? (
+                        {isLoading ? (
                           <CircularProgress className="text-white" />
                         ) : isOtpSent ? (
                           t("verify_otp")
