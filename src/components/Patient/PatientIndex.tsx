@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
@@ -52,6 +53,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     results: [],
     count: 0,
   });
+  const { t } = useTranslation();
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
@@ -71,7 +73,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         onClick={handleCreatePatient}
       >
         <CareIcon icon="l-plus" className="h-4 w-4" />
-        Add New Patient
+        {t("add_new_patient")}
         <kbd
           className={cn(
             "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
@@ -90,7 +92,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     {
       key: "phone_number",
       type: "phone" as const,
-      placeholder: "Search by phone number",
+      placeholder: t("search_by_phone_number"),
       value: phoneNumber,
       shortcutKey: "p",
     },
@@ -125,7 +127,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
-      toast.error("Please enter a valid year of birth (YYYY)");
+      toast.error(t("valid_year_of_birth"));
       return;
     }
 
@@ -153,11 +155,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         <div className="space-y-6 mt-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
-              Search Patients
+              {t("search_patients")}
             </h1>
             <p className="text-muted-foreground">
-              Search for existing patients using their phone number or create a
-              new patient record
+              {t("search_patient_page_text")}
             </p>
           </div>
 
@@ -181,11 +182,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
                           <h3 className="text-lg font-semibold">
-                            No Patient Records Found
+                            {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-muted-foreground mb-6">
-                            No existing records found with this phone number.
-                            Would you like to register a new patient?
+                            {t("no_patient_record_text")}
                           </p>
                           <AddPatientButton outline />
                         </div>
@@ -196,10 +196,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <TableHeader>
                             <TableRow>
                               <TableHead className="w-[300px]">
-                                Patient Name
+                                {t("patient_name")}
                               </TableHead>
-                              <TableHead>Phone Number</TableHead>
-                              <TableHead>Gender</TableHead>
+                              <TableHead>{t("phone_number")}</TableHead>
+                              <TableHead>{t("gender")}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -237,15 +237,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Verify Patient Identity</DialogTitle>
+            <DialogTitle>{t("verify_patient_identity")}</DialogTitle>
             <DialogDescription>
-              Please enter the patient's year of birth to verify their identity
+              {t("patient_birth_year_for_identity")}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Input
               type="text"
-              placeholder="Year of Birth (YYYY)"
+              placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
               onChange={(e) => {
                 const value = e.target.value;
@@ -260,9 +260,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               variant="outline"
               onClick={() => setVerificationOpen(false)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
-            <Button onClick={handleVerify}>Verify</Button>
+            <Button onClick={handleVerify}>{t("verify")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

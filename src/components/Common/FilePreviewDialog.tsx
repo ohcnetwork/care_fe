@@ -191,7 +191,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 uploadedFiles[index] &&
                 uploadedFiles[index].created_date && (
                   <p className="mt-1 text-sm text-gray-600">
-                    Created on{" "}
+                    {t("created_on")}{" "}
                     {new Date(
                       uploadedFiles[index].created_date!,
                     ).toLocaleString("en-US", {
