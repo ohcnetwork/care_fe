@@ -160,7 +160,9 @@ export function QuestionInput({
 
           return (
             <div key={index} className="mt-2 gap-2">
-              <div>{renderSingleInput(index)}</div>
+              <div data-structured-input-id={question.id}>
+                {renderSingleInput(index)}
+              </div>
               {removeButton}
             </div>
           );

@@ -30,7 +30,7 @@ import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
-interface QuestionnaireFormState {
+export interface QuestionnaireFormState {
   questionnaire: QuestionnaireDetail;
   responses: QuestionnaireResponse[];
   errors: QuestionValidationError[];

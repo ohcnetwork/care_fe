@@ -1,11 +1,16 @@
 import { memo } from "react";
 
-import { Label } from "@/components/ui/label";
-import Select from "@/components/ui/select-util";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { properCase } from "@/Utils/utils";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import type { AnswerOption, Question } from "@/types/questionnaire/question";
 
 interface ChoiceQuestionProps {
   question: Question;
@@ -14,6 +19,7 @@ interface ChoiceQuestionProps {
     questionnaireResponse: QuestionnaireResponse,
   ) => void;
   disabled?: boolean;
+  withLabel?: boolean;
   clearError: () => void;
   index?: number;
 }
@@ -44,20 +50,24 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   };
 
   return (
-    <div className="space-y-2">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
-      <Select
-        value={currentValue}
-        onChange={handleValueChange}
-        disabled={disabled}
-        options={options.map((option) => ({
-          label: properCase(option.display || option.value),
-          value: option.value.toString(),
-        }))}
-      />
-    </div>
+    <Select
+      value={currentValue}
+      onValueChange={handleValueChange}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select an option" />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option: AnswerOption) => (
+          <SelectItem
+            key={option.value.toString()}
+            value={option.value.toString()}
+          >
+            {properCase(option.display || option.value)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 });

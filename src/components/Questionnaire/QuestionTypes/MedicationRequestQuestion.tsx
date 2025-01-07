@@ -100,11 +100,7 @@ export function MedicationRequestQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div
-        data-structured-input-id={question.id}
-        data-structured-input="qn-medication-request"
-        className="rounded-lg border space-y-4"
-      >
+      <div className="rounded-lg border space-y-4">
         {medications.length > 0 && (
           <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
             {medications.map((medication, index) => (

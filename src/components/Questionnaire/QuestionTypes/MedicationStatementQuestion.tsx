@@ -115,11 +115,7 @@ export function MedicationStatementQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div
-        data-structured-input-id={question.id}
-        data-structured-input="qn-medication-statement"
-        className="rounded-lg border p-4"
-      >
+      <div className="rounded-lg border p-4">
         {medications.length > 0 && (
           <div className="rounded-lg border space-y-4">
             <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">

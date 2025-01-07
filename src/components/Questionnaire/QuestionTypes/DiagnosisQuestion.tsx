@@ -95,11 +95,7 @@ export function DiagnosisQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div
-        data-structured-input-id={question.id}
-        data-structured-input="qn-diagnoses"
-        className="rounded-lg border p-4"
-      >
+      <div className="rounded-lg border p-4">
         {diagnoses.length > 0 && (
           <div className="rounded-lg border">
             <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">

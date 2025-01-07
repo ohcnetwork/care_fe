@@ -124,12 +124,8 @@ export function AllergyQuestion({
         {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
-      <div
-        data-structured-input-id={question.id}
-        data-structured-input="qn-allergies"
-        className="rounded-lg border p-4"
-      >
-        {allergies.length > 0 && (
+      {allergies.length > 0 && (
+        <div className="rounded-lg border p-4">
           <div className="rounded-lg border">
             <div className="overflow-x-auto">
               <Table>
@@ -170,14 +166,14 @@ export function AllergyQuestion({
               </Table>
             </div>
           </div>
-        )}
-        <ValueSetSelect
-          system="system-allergy-code"
-          placeholder="Search for allergies to add"
-          onSelect={handleAddAllergy}
-          disabled={disabled}
-        />
-      </div>
+        </div>
+      )}
+      <ValueSetSelect
+        system="system-allergy-code"
+        placeholder="Search for allergies to add"
+        onSelect={handleAddAllergy}
+        disabled={disabled}
+      />
     </div>
   );
 }
