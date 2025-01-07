@@ -165,8 +165,8 @@ export const PatientHome = (props: {
                   <div className="text-xs font-normal text-gray-600">
                     {t("last_updated_by")}{" "}
                     <span className="font-semibold text-gray-900">
-                      {patientData.updated_by.first_name}{" "}
-                      {patientData.updated_by.last_name}
+                      {patientData.updated_by?.first_name}{" "}
+                      {patientData.updated_by?.last_name}
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
@@ -187,8 +187,8 @@ export const PatientHome = (props: {
                   <div className="text-xs font-normal leading-5 text-gray-600">
                     {t("patient_profile_created_by")}{" "}
                     <span className="font-semibold text-gray-900">
-                      {patientData.created_by.first_name}{" "}
-                      {patientData.created_by.last_name}
+                      {patientData.created_by?.first_name}{" "}
+                      {patientData.created_by?.last_name}
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
