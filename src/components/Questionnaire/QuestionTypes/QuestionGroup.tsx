@@ -20,6 +20,7 @@ interface QuestionGroupProps {
   disabled?: boolean;
   activeGroupId?: string;
   facilityId: string;
+  patientId: string;
 }
 
 function isQuestionEnabled(
@@ -83,6 +84,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   disabled,
   activeGroupId,
   facilityId,
+  patientId,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -101,6 +103,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         clearError={() => clearError(question.id)}
         disabled={disabled}
         facilityId={facilityId}
+        patientId={patientId}
       />
     );
   }
@@ -145,6 +148,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             clearError={clearError}
             disabled={disabled}
             activeGroupId={activeGroupId}
+            patientId={patientId}
           />
         ))}
       </div>
