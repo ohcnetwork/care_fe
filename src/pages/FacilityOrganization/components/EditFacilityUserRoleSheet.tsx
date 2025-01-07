@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -165,7 +166,7 @@ export default function EditUserRoleSheet({
                 </span>
                 <p className="text-sm font-medium">{userRole.role.name}</p>
               </div>
-              <div>
+              <div className="col-span-2">
                 <span className="text-sm text-gray-500">
                   {t("last_login")}{" "}
                 </span>
@@ -174,9 +175,9 @@ export default function EditUserRoleSheet({
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <Label className="text-sm font-medium">
               {t("select_new_role")}
-            </label>
+            </Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
               <SelectTrigger className="h-12">
                 <SelectValue placeholder={t("select_role")} />
@@ -219,8 +220,10 @@ export default function EditUserRoleSheet({
                     {t("remove_user_organization")}
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t("remove_user_warn_1")} {userRole.user.first_name}{" "}
-                    {userRole.user.last_name} {t("remove_user_warn_2")}
+                    {t("remove_user_warn", {
+                      firstName: userRole.user.first_name,
+                      lastName: userRole.user.last_name,
+                    })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

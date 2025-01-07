@@ -120,7 +120,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                             {userRole.user.first_name} {userRole.user.last_name}
                           </h1>
                           <span className="text-sm text-gray-500">
-                            <span className="mx-2">
+                            <span className="mr-2">
                               {userRole.user.username}
                             </span>
                             <UserStatusIndicator user={userRole.user} />

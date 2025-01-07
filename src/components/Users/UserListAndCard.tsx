@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +16,7 @@ import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import { USER_TYPE_OPTIONS } from "@/common/constants";
 
-import { formatName, isUserOnline } from "@/Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 export const GetUserTypes = () => {
@@ -113,20 +112,7 @@ export const UserStatusIndicator = ({
         <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
-            {t("last_seen")}{" "}
-            {(() => {
-              const diffInMinutes = dayjs().diff(user.last_login, "minutes");
-              const diffInHours = dayjs().diff(user.last_login, "hours");
-              const diffInDays = dayjs().diff(user.last_login, "days");
-
-              if (diffInMinutes < 60) {
-                return `${diffInMinutes} ${t("minutes_ago")}`;
-              } else if (diffInHours < 24) {
-                return `${diffInHours} ${t("hour")}${diffInHours > 1 ? "s" : ""} ${t("ago")}`;
-              } else {
-                return `${diffInDays} ${t("days") + t("ago")}`;
-              }
-            })()}
+            {t("last_seen")} {relativeTime(user.last_login)}
           </span>
         </Badge>
       ) : (
