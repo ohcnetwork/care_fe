@@ -17,7 +17,7 @@ describe("Patient Search", () => {
 
   it("search patient with phone number and verifies details", () => {
     patientSearch
-      .selectFacility("PHC Kakkanad -1")
+      .selectFacility("Arike")
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
       .verifySearchResults(PATIENT_DETAILS);
