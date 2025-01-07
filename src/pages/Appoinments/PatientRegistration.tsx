@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import DateFormField from "@/components/Form/FormFields/DateFormField";
 
-import { CarePatientTokenKey, GENDER_TYPES } from "@/common/constants";
+import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
@@ -73,7 +73,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   ) as TokenSlot;
   const reason = localStorage.getItem("reason");
   const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
+    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
   );
 
   const { t } = useTranslation();
