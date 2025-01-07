@@ -127,12 +127,6 @@ const routes = {
     TBody: Type<LoginCredentials>(),
   },
 
-  checkUsername: {
-    path: "/api/v1/users/{username}/check_availability/",
-    method: "GET",
-    TRes: Type<Record<string, never>>(),
-  },
-
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
