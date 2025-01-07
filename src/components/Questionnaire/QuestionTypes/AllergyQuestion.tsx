@@ -78,7 +78,6 @@ const CATEGORY_ICONS: Record<AllergyCategory, React.ReactNode> = {
 };
 
 export function AllergyQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -119,11 +118,7 @@ export function AllergyQuestion({
   };
 
   return (
-    <div className="space-y-4">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+    <>
       {allergies.length > 0 && (
         <div className="rounded-lg border">
           <div className="overflow-x-auto">
@@ -170,7 +165,7 @@ export function AllergyQuestion({
         onSelect={handleAddAllergy}
         disabled={disabled}
       />
-    </div>
+    </>
   );
 }
 interface AllergyItemProps {
