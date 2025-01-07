@@ -77,7 +77,7 @@ function isNotFound(error: HTTPError) {
 type PydanticError = {
   type: string;
   loc?: string[];
-  msg: string;
+  msg: string | Record<string, string>;
   input?: unknown;
   url?: string;
 };
@@ -110,14 +110,15 @@ function isPydanticError(errors: unknown): errors is PydanticError[] {
 
 function handlePydanticErrors(errors: PydanticError[]) {
   errors.map(({ type, loc, msg }) => {
+    const message = typeof msg === "string" ? msg : Object.values(msg)[0];
     if (!loc) {
-      toast.error(msg);
+      toast.error(message);
       return;
     }
     type = type
       .replace("_", " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
-    toast.error(msg, {
+    toast.error(message, {
       description: `${type}: '${loc.join(".")}'`,
       duration: 8000,
     });
