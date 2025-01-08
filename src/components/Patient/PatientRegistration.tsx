@@ -1,15 +1,25 @@
-import careConfig from "@careConfig";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -33,19 +43,14 @@ import {
   //RATION_CARD_CATEGORY, // SOCIOECONOMIC_STATUS_CHOICES ,
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
-import { validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  dateQueryString,
-  getPincodeDetails,
-  parsePhoneNumber,
-} from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
-import { PatientModel, validatePatient } from "@/types/emr/patient";
+import { PatientModel } from "@/types/emr/patient";
 
 import Autocomplete from "../ui/autocomplete";
 
@@ -53,6 +58,74 @@ interface PatientRegistrationPageProps {
   facilityId: string;
   patientId?: string;
 }
+
+export const GENDERS = GENDER_TYPES.map((gender) => gender.id) as [
+  (typeof GENDER_TYPES)[number]["id"],
+];
+
+export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
+  (typeof BLOOD_GROUP_CHOICES)[number]["id"],
+];
+
+const formSchema = z
+  .object({
+    name: z.string().nonempty("Name is required"),
+    phone_number: z
+      .string()
+      .regex(/^\+\d{12}$/, "Phone number must be a 10-digit mobile number"),
+    same_phone_number: z.boolean(),
+    emergency_phone_number: z
+      .string()
+      .regex(
+        /^\+\d{12}$/,
+        "Emergency phone number must be a 10-digit mobile number",
+      ),
+    gender: z.enum(GENDERS, { required_error: "Gender is required" }),
+    blood_group: z.enum(BLOOD_GROUPS, {
+      required_error: "Blood group is required",
+    }),
+    yob_or_dob: z.enum(["dob", "age"]),
+    date_of_birth: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        "Date of birth must be in YYYY-MM-DD format",
+      )
+      .optional(),
+    year_of_birth: z
+      .string()
+      .regex(/^\d{4}$/, "Year of birth must be in YYYY format")
+      .optional(),
+    address: z.string().nonempty("Address is required"),
+    same_address: z.boolean(),
+    permanent_address: z.string().nonempty("Emergency address is required"),
+    pincode: z
+      .number()
+      .int()
+      .positive()
+      .min(100000, "Pincode must be a 6-digit number")
+      .max(999999, "Pincode must be a 6-digit number"),
+    nationality: z.string().nonempty("Nationality is required"),
+    geo_organization: z
+      .string()
+      .uuid("Geo organization must be a valid UUID")
+      .optional(),
+  })
+  .refine((data) => (data.yob_or_dob === "dob" ? !!data.date_of_birth : true), {
+    message: "Date of birth must be present",
+    path: ["date_of_birth"],
+  })
+  .refine((data) => (data.yob_or_dob === "age" ? !!data.year_of_birth : true), {
+    message: "Year of birth must be present",
+    path: ["year_of_birth"],
+  })
+  .refine(
+    (data) => (data.nationality === "India" ? !!data.geo_organization : true),
+    {
+      message: "Geo organization is required when nationality is India",
+      path: ["geo_organization"],
+    },
+  );
 
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
@@ -62,63 +135,19 @@ export default function PatientRegistration(
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
-  const [samePhoneNumber, setSamePhoneNumber] = useState(false);
-  const [sameAddress, setSameAddress] = useState(true);
-  const [ageDob, setAgeDob] = useState<"dob" | "age">("dob");
-  const [_showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
-  const [form, setForm] = useState<Partial<PatientModel>>({
-    nationality: "India",
-    phone_number: phone_number || "+91",
-    emergency_phone_number: "+91",
-  });
-  const [feErrors, setFeErrors] = useState<
-    Partial<Record<keyof PatientModel, string[]>>
-  >({});
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [debouncedNumber, setDebouncedNumber] = useState<string>();
 
-  const sidebarItems = [
-    { label: t("patient__general-info"), id: "general-info" },
-    // { label: t("social_profile"), id: "social-profile" },
-    //{ label: t("volunteer_contact"), id: "volunteer-contact" },
-    //{ label: t("patient__insurance-details"), id: "insurance-details" },
-  ];
-
-  const mutationFields: (keyof PatientModel)[] = [
-    "name",
-    "phone_number",
-    "emergency_phone_number",
-    "geo_organization",
-    "gender",
-    "blood_group",
-    "date_of_birth",
-    "age",
-    "address",
-    "permanent_address",
-    "pincode",
-    "nationality",
-    "meta_info",
-    "ration_card_category",
-  ];
-
-  const mutationData: Partial<PatientModel> = {
-    ...Object.fromEntries(
-      Object.entries(form).filter(([key]) =>
-        mutationFields.includes(key as keyof PatientModel),
-      ),
-    ),
-    date_of_birth:
-      ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
-    age: ageDob === "age" ? form.age : undefined,
-    meta_info: {
-      ...(form.meta_info as any),
-      occupation:
-        form.meta_info?.occupation === ""
-          ? undefined
-          : form.meta_info?.occupation,
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nationality: "India",
+      phone_number: phone_number || "+91",
+      emergency_phone_number: "+91",
+      yob_or_dob: "dob",
     },
-  };
+  });
 
   const createPatientMutation = useMutation({
     mutationFn: mutate(routes.addPatient),
@@ -131,7 +160,7 @@ export default function PatientRegistration(
         query: {
           phone_number: resp.phone_number,
           year_of_birth:
-            ageDob === "dob"
+            form.getValues("yob_or_dob") === "dob"
               ? new Date(resp.date_of_birth!).getFullYear()
               : new Date().getFullYear() - Number(resp.age!),
           partial_id: resp?.id?.slice(0, 5),
@@ -162,128 +191,38 @@ export default function PatientRegistration(
     },
   });
 
-  const patientQuery = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(routes.getPatient, {
-      pathParams: { id: patientId || "" },
-    }),
-    enabled: !!patientId,
-  });
-
-  useEffect(() => {
-    if (patientQuery.data) {
-      setForm(patientQuery.data);
-      if (patientQuery.data.year_of_birth && !patientQuery.data.date_of_birth) {
-        setAgeDob("age");
-      }
-      if (
-        patientQuery.data.phone_number ===
-        patientQuery.data.emergency_phone_number
-      )
-        setSamePhoneNumber(true);
-      if (patientQuery.data.address === patientQuery.data.permanent_address)
-        setSameAddress(true);
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (patientId) {
+      updatePatientMutation.mutate({ ...values, ward_old: undefined });
+      return;
     }
-  }, [patientQuery.data]);
 
-  const handlePincodeChange = async (value: string) => {
-    if (!validatePincode(value)) return;
-    if (form.state && form.district) return;
+    createPatientMutation.mutate({
+      ...values,
+      facility: facilityId,
+      ward_old: undefined,
+    });
+  }
 
-    const pincodeDetails = await getPincodeDetails(
-      value,
-      careConfig.govDataApiKey,
-    );
-    if (!pincodeDetails) return;
-
-    const { statename: _stateName, districtname: _districtName } =
-      pincodeDetails;
-
-    setShowAutoFilledPincode(true);
-    setTimeout(() => {
-      setShowAutoFilledPincode(false);
-    }, 2000);
-  };
-
-  useEffect(() => {
-    const timeout = setTimeout(
-      () => handlePincodeChange(form.pincode?.toString() || ""),
-      1000,
-    );
-    return () => clearTimeout(timeout);
-  }, [form.pincode]);
+  const sidebarItems = [
+    { label: t("patient__general-info"), id: "general-info" },
+  ];
 
   const title = !patientId
     ? t("add_details_of_patient")
     : t("update_patient_details");
 
-  const errors = {
-    ...feErrors,
-    ...(createPatientMutation.error as unknown as string[]),
-  };
-
-  const fieldProps = (field: keyof typeof form) => ({
-    value: form[field] as string,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((f) => ({
-        ...f,
-        [field]: e.target.value === "" ? undefined : e.target.value,
-      })),
-  });
-
-  const selectProps = (field: keyof typeof form) => ({
-    value: (form[field] as string)?.toString(),
-    onValueChange: (value: string) =>
-      setForm((f) => ({ ...f, [field]: value })),
-  });
-
   const handleDialogClose = (action: string) => {
     if (action === "transfer") {
       navigate(`/facility/${facilityId}/patients`, {
         query: {
-          phone_number: form.phone_number,
+          phone_number: form.getValues("phone_number"),
         },
       });
     } else {
       setSuppressDuplicateWarning(true);
     }
   };
-
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const validate = validatePatient(form, ageDob === "dob");
-    if (typeof validate !== "object") {
-      patientId
-        ? updatePatientMutation.mutate({ ...mutationData, ward_old: undefined })
-        : createPatientMutation.mutate({
-            ...mutationData,
-            facility: facilityId,
-            ward_old: undefined,
-          });
-    } else {
-      const firstErrorField = document.querySelector("[data-input-error]");
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      Notification.Error({
-        msg: t("please_fix_errors"),
-      });
-      setFeErrors(validate);
-    }
-  };
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (!patientId || patientQuery.data?.phone_number !== form.phone_number) {
-        setSuppressDuplicateWarning(false);
-      }
-      setDebouncedNumber(form.phone_number);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [form.phone_number]);
 
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", debouncedNumber],
@@ -295,9 +234,46 @@ export default function PatientRegistration(
     enabled: !!parsePhoneNumber(debouncedNumber || ""),
   });
 
-  const duplicatePatients = patientPhoneSearch.data?.results.filter(
-    (p) => p.id !== patientId,
-  );
+  const duplicatePatients = useMemo(() => {
+    return patientPhoneSearch.data?.results.filter((p) => p.id !== patientId);
+  }, [patientPhoneSearch.data, patientId]);
+
+  const patientQuery = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    enabled: !!patientId,
+  });
+
+  useEffect(() => {
+    if (patientQuery.data) {
+      form.reset({
+        ...patientQuery.data,
+        same_phone_number:
+          patientQuery.data.phone_number ===
+          patientQuery.data.emergency_phone_number,
+        same_address:
+          patientQuery.data.address === patientQuery.data.permanent_address,
+        yob_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+      } as unknown as z.infer<typeof formSchema>);
+    }
+  }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const phoneNumber = form.getValues("phone_number");
+      if (!patientId || patientQuery.data?.phone_number !== phoneNumber) {
+        setSuppressDuplicateWarning(false);
+      }
+      setDebouncedNumber(phoneNumber);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [form.watch("phone_number")]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
   }
@@ -307,558 +283,470 @@ export default function PatientRegistration(
       <hr className="mt-4" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
-        <form className="md:w-[500px]" onSubmit={handleFormSubmit}>
-          <div id={"general-info"}>
-            <h2 className="text-lg font-semibold">
-              {t("patient__general-info")}
-            </h2>
-            <div className="text-sm">{t("general_info_detail")}</div>
-            <br />
-            <Label className="mb-2">
-              {t("name")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              {...fieldProps("name")}
-              placeholder={t("type_patient_name")}
-            />
-            <div className="mt-1" data-input-error>
-              {errors["name"] &&
-                errors["name"].map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
-            <br />
-            <Label className="mb-2">
-              {t("phone_number")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              {...fieldProps("phone_number")}
-              onChange={(e) => {
-                if (e.target.value.length > 13) return;
-                setForm((f) => ({
-                  ...f,
-                  phone_number: e.target.value,
-                  emergency_phone_number: samePhoneNumber
-                    ? e.target.value
-                    : f.emergency_phone_number,
-                }));
-              }}
-            />
-            <div className="mt-1" data-input-error>
-              {errors["phone_number"] &&
-                errors["phone_number"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
 
-            <div className="mt-1 flex gap-1 items-center">
-              <Checkbox
-                checked={samePhoneNumber}
-                onCheckedChange={() => {
-                  const newValue = !samePhoneNumber;
-                  setSamePhoneNumber(newValue);
-                  if (newValue) {
-                    setForm((f) => ({
-                      ...f,
-                      emergency_phone_number: f.phone_number,
-                    }));
-                  }
-                }}
-                id="same-phone-number"
-              />
-              <Label htmlFor="same-phone-number">
-                {t("use_phone_number_for_emergency")}
-              </Label>
-            </div>
-            <br />
+        <Form {...form}>
+          <form
+            className="md:w-[500px] space-y-10"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <div id="general-info" className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold">
+                  {t("patient__general-info")}
+                </h2>
+                <div className="text-sm">{t("general_info_detail")}</div>
+              </div>
 
-            <Label className="mb-2">
-              {t("emergency_phone_number")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              {...fieldProps("emergency_phone_number")}
-              onChange={(e) => {
-                if (e.target.value.length > 13) return;
-                setForm((f) => ({
-                  ...f,
-                  emergency_phone_number: e.target.value,
-                }));
-              }}
-              disabled={samePhoneNumber}
-            />
-            <div className="mt-1" data-input-error>
-              {errors["emergency_phone_number"] &&
-                errors["emergency_phone_number"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
-            {/* <br />
-            <Input
-              // This field does not exist in the backend, but is present in the design
-              required
-              label={t("emergency_contact_person_name_details")}
-              placeholder={t("emergency_contact_person_name")}
-            /> */}
-            <br />
-
-            <Label className="mb-2">
-              {t("sex")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <RadioGroup
-              value={form.gender?.toString()}
-              onValueChange={(value) =>
-                setForm((f) => ({ ...f, gender: value }))
-              }
-              className="flex items-center gap-4"
-            >
-              {GENDER_TYPES.map((g) => (
-                <Fragment key={g.id}>
-                  <RadioGroupItem
-                    value={g.id.toString()}
-                    id={"gender_" + g.id}
-                  />
-                  <Label htmlFor={"gender_" + g.id}>
-                    {t(`GENDER__${g.id}`)}
-                  </Label>
-                </Fragment>
-              ))}
-            </RadioGroup>
-            <div className="mt-1" data-input-error>
-              {errors["gender"] &&
-                errors["gender"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
-
-            <br />
-
-            <Label className="mb-2">
-              {t("blood_group")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Select {...selectProps("blood_group")}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BLOOD_GROUP_CHOICES.map((bg) => (
-                  <SelectItem key={bg.id} value={bg.id}>
-                    {bg.text}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="mt-1" data-input-error>
-              {errors["blood_group"] &&
-                errors["blood_group"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
-
-            <br />
-            <Tabs
-              value={ageDob}
-              onValueChange={(value: string) =>
-                setAgeDob(value as typeof ageDob)
-              }
-            >
-              <TabsList className="mb-4">
-                {[
-                  ["dob", t("date_of_birth")],
-                  ["age", t("age")],
-                ].map(([key, label]) => (
-                  <TabsTrigger value={key}>{label}</TabsTrigger>
-                ))}
-              </TabsList>
-              <TabsContent value="dob">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("day")}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("name")}
                       <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="DD"
-                      type="number"
-                      value={form.date_of_birth?.split("-")[2] || ""}
-                      maxLength={2}
-                      max={31}
-                      min={1}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("month")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="MM"
-                      type="number"
-                      value={form.date_of_birth?.split("-")[1] || ""}
-                      maxLength={2}
-                      max={12}
-                      min={1}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("year")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="YYYY"
-                      value={form.date_of_birth?.split("-")[0] || ""}
-                      maxLength={4}
-                      max={new Date().getFullYear()}
-                      min={1900}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-                {errors["date_of_birth"] && (
-                  <div className="mt-1" data-input-error>
-                    {errors["date_of_birth"].map((error, i) => (
-                      <div key={i} className="text-red-500 text-xs">
-                        {error}
-                      </div>
-                    ))}
-                  </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder={t("type_patient_name")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </TabsContent>
-              <TabsContent value="age">
-                <div className="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 text-sm text-yellow-800 mb-4">
-                  {t("age_input_warning")}
-                  <br />
-                  <b>{t("age_input_warning_bold")}</b>
-                </div>
-                <div className="relative">
-                  <Label className="mb-2">
-                    {t("age")}
-                    <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    value={form.age ? form.age : undefined}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        age: e.target.value,
-                        year_of_birth: e.target.value
-                          ? new Date().getFullYear() - Number(e.target.value)
-                          : undefined,
-                      }))
-                    }
-                    type="number"
-                  />
-                  <div className="mt-1" data-input-error>
-                    {errors["year_of_birth"] &&
-                      errors["year_of_birth"]?.map((error, i) => (
-                        <div key={i} className="text-red-500 text-xs">
-                          {error}
-                        </div>
-                      ))}
-                  </div>
-
-                  {form.year_of_birth && (
-                    <div className="text-xs absolute right-6 top-[22px] bottom-0 flex items-center justify-center p-2 pointer-events-none">
-                      {t("year_of_birth")} : {form.year_of_birth}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-            <br />
-
-            <Label className="mb-2">
-              {t("current_address")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              {...fieldProps("address")}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  address: e.target.value,
-                  permanent_address: sameAddress
-                    ? e.target.value
-                    : f.permanent_address,
-                }))
-              }
-            />
-            <div className="mt-1" data-input-error>
-              {errors["address"] &&
-                errors["address"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
-
-            <div className="mt-1 flex gap-1 items-center">
-              <Checkbox
-                checked={sameAddress}
-                onCheckedChange={() => {
-                  setSameAddress(!sameAddress);
-                  setForm((f) => ({
-                    ...f,
-                    permanent_address: !sameAddress
-                      ? f.address
-                      : f.permanent_address,
-                  }));
-                }}
-                id="same-address"
               />
-              <Label htmlFor="same-address">
-                {t("use_address_as_permanent")}
-              </Label>
-            </div>
-            <br />
 
-            <Label className="mb-2">
-              {t("permanent_address")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              {...fieldProps("permanent_address")}
-              value={form.permanent_address}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, permanent_address: e.target.value }))
-              }
-              disabled={sameAddress}
-            />
-            {/* <br />
-            <Input
-              // This field does not exist in the backend, but is present in the design
-              label={t("landmark")}
-            /> */}
-            <br />
-            <Label className="mb-2">
-              {t("pincode")}
-              <span className="text-red-500">*</span>
-            </Label>
-            <Input {...fieldProps("pincode")} type="number" />
-            <div className="mt-1" data-input-error>
-              {errors["pincode"] &&
-                errors["pincode"]?.map((error, i) => (
-                  <div key={i} className="text-red-500 text-xs">
-                    {error}
-                  </div>
-                ))}
-            </div>
+              <FormField
+                control={form.control}
+                name="phone_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("phone_number")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          form.setValue("phone_number", e.target.value);
+                          if (form.watch("same_phone_number")) {
+                            form.setValue(
+                              "emergency_phone_number",
+                              e.target.value,
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      <FormField
+                        control={form.control}
+                        name="same_phone_number"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={(v) => {
+                                  field.onChange(v);
+                                  if (v) {
+                                    form.setValue(
+                                      "emergency_phone_number",
+                                      form.watch("phone_number"),
+                                    );
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel>
+                              {t("use_phone_number_for_emergency")}
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* {showAutoFilledPincode && (
-              <div>
-                <CareIcon
-                  icon="l-check-circle"
-                  className="mr-2 text-sm text-green-500"
-                />
-                <span className="text-sm text-primary-500">
-                  {t("pincode_autofill")}
-                </span>
-              </div>
-            )} */}
-            <br />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2">
-                  {t("nationality")}
-                  <span className="text-red-500">*</span>
-                </Label>
-                <Autocomplete
-                  options={countryList.map((c) => ({ label: c, value: c }))}
-                  value={form.nationality || ""}
-                  onChange={(value) => {
-                    setForm((f) => ({
-                      ...f,
-                      nationality: value,
-                    }));
-                  }}
-                />
-                <div className="mt-1" data-input-error>
-                  {errors["nationality"] &&
-                    errors["nationality"]?.map((error, i) => (
-                      <div key={i} className="text-red-500 text-xs">
-                        {error}
-                      </div>
-                    ))}
-                </div>
-              </div>
-              {form.nationality === "India" && (
-                <>
-                  <OrganizationSelector
-                    required={true}
-                    onChange={(value) =>
-                      setForm((f) => ({
-                        ...f,
-                        geo_organization: value,
-                      }))
-                    }
+              <FormField
+                control={form.control}
+                name="emergency_phone_number"
+                disabled={form.watch("same_phone_number")}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("emergency_phone_number")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>
+                      {t("sex")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        {...field}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex gap-5 flex-wrap"
+                      >
+                        {GENDER_TYPES.map((g) => (
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value={g.id} />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {t(`GENDER__${g.id}`)}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="blood_group"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("blood_group")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <Select
+                      {...field}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={t("please_select_blood_group")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {BLOOD_GROUP_CHOICES.map((bg) => (
+                          <SelectItem value={bg.id}>{bg.text}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Tabs
+                value={form.watch("yob_or_dob")}
+                onValueChange={(v) =>
+                  form.setValue("yob_or_dob", v as "dob" | "age")
+                }
+              >
+                <TabsList className="mb-2" defaultValue="dob">
+                  <TabsTrigger value="dob">{t("date_of_birth")}</TabsTrigger>
+                  <TabsTrigger value="age">{t("age")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="dob">
+                  <FormField
+                    control={form.control}
+                    name="date_of_birth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center">
+                                <FormLabel>{t("day")}</FormLabel>
+                                <span className="text-red-500">*</span>
+                              </div>
+                              <Input
+                                type="number"
+                                placeholder="DD"
+                                {...field}
+                                value={
+                                  form.watch("date_of_birth")?.split("-")[2]
+                                }
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "date_of_birth",
+                                    `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center">
+                                <FormLabel>{t("month")}</FormLabel>
+                                <span className="text-red-500">*</span>
+                              </div>
+                              <Input
+                                type="number"
+                                placeholder="MM"
+                                {...field}
+                                value={
+                                  form.watch("date_of_birth")?.split("-")[1]
+                                }
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "date_of_birth",
+                                    `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center">
+                                <FormLabel>{t("year")}</FormLabel>
+                                <span className="text-red-500">*</span>
+                              </div>
+                              <Input
+                                type="number"
+                                placeholder="YYYY"
+                                {...field}
+                                value={
+                                  form.watch("date_of_birth")?.split("-")[0]
+                                }
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "date_of_birth",
+                                    `${e.target.value}-${form.watch("date_of_birth")?.split("-")[1]}-${form.watch("date_of_birth")?.split("-")[2]}`,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </>
-              )}
-            </div>
-          </div>
-          {/* <div id="social-profile" className="mt-10"> */}
-          {/* <h2 className="text-lg font-semibold">
-              {t("patient__social-profile")}
-            </h2>
-            <div className="text-sm">{t("social_profile_detail")}</div>
-            <br /> */}
-          {/* <div>
-              <InputWithError label={t("occupation")}>
-                <Autocomplete
-                  options={OCCUPATION_TYPES.map((occupation) => ({
-                    label: occupation.text,
-                    value: occupation.value,
-                  }))}
-                  value={form.meta_info?.occupation || ""}
-                  onChange={(value) =>
-                    setForm((f) => ({
-                      ...f,
-                      meta_info: { ...(f.meta_info as any), occupation: value },
-                    }))
-                  }
-                />
-              </InputWithError>
-            </div> */}
-          {/* <br /> */}
-          {/* <div>
-              <InputWithError
-                label={t("ration_card_category")}
-                errors={errors["ration_card_category"]}
-              >
-                <Select {...selectProps("ration_card_category")}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RATION_CARD_CATEGORY.map((rcg) => (
-                      <SelectItem key={rcg} value={rcg}>
-                        {t(`ration_card__${rcg}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </InputWithError>
-            </div> */}
-          {/* <br /> */}
-          {/* <InputWithError label={t("socioeconomic_status")}>
-              <RadioGroup
-                value={form.meta_info?.socioeconomic_status}
-                onValueChange={(value) =>
-                  setForm((f) => ({
-                    ...f,
-                    meta_info: {
-                      ...(f.meta_info as any),
-                      socioeconomic_status: value,
-                    },
-                  }))
-                }
-                className="flex items-center gap-4"
-              >
-                {SOCIOECONOMIC_STATUS_CHOICES.map((sec) => (
-                  <Fragment key={sec}>
-                    <RadioGroupItem value={sec} id={"sec_" + sec} />
-                    <Label htmlFor={"sec_" + sec}>
-                      {t(`SOCIOECONOMIC_STATUS__${sec}`)}
-                    </Label>
-                  </Fragment>
-                ))}
-              </RadioGroup>
-            </InputWithError> */}
-          {/* <br /> */}
-          {/* <InputWithError label={t("has_domestic_healthcare_support")}>
-              <RadioGroup
-                value={form.meta_info?.domestic_healthcare_support}
-                onValueChange={(value) =>
-                  setForm((f) => ({
-                    ...f,
-                    meta_info: {
-                      ...(f.meta_info as any),
-                      domestic_healthcare_support: value,
-                    },
-                  }))
-                }
-                className="flex items-center gap-4"
-              >
-                {DOMESTIC_HEALTHCARE_SUPPORT_CHOICES.map((dhs) => (
-                  <Fragment key={dhs}>
-                    <RadioGroupItem value={dhs} id={"dhs_" + dhs} />
-                    <Label htmlFor={"dhs_" + dhs}>
-                      {t(`DOMESTIC_HEALTHCARE_SUPPORT__${dhs}`)}
-                    </Label>
-                  </Fragment>
-                ))}
-              </RadioGroup>
-            </InputWithError> */}
-          {/* </div> */}
-          {/* <div id="volunteer-contact" className="mt-10">
-            <h2 className="text-lg font-semibold">
-              {t("patient__volunteer-contact")}
-            </h2>
-            <div className="text-sm">{t("volunteer_contact_detail")}</div>
-            <br />
+                </TabsContent>
+                <TabsContent value="age">
+                  <div className="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 text-sm text-yellow-800 mb-4">
+                    {t("age_input_warning")}
+                    <br />
+                    <b>{t("age_input_warning_bold")}</b>
+                  </div>
 
-          </div> */}
-          {/* <div id="insurance-details" className="mt-10">
-            <h2 className="text-lg font-semibold">
-              {t("patient__insurance-details")}
-            </h2>
-            <div className="text-sm">{t("insurance_details_detail")}</div>
-            <br />
-          </div> */}
-          <div className="flex justify-end mt-20 gap-4">
-            <Button
-              variant={"secondary"}
-              type="button"
-              onClick={() => goBack()}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant={"primary"}
-              disabled={
-                patientId
-                  ? updatePatientMutation.isPending
-                  : createPatientMutation.isPending
-              }
-            >
-              {patientId ? t("save") : t("save_and_continue")}
-            </Button>
-          </div>
-        </form>
+                  <FormField
+                    control={form.control}
+                    name="year_of_birth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("age")}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={t("age")}
+                            {...field}
+                            value={
+                              new Date().getFullYear() -
+                              Number(form.watch("year_of_birth"))
+                            }
+                            onChange={(e) =>
+                              form.setValue(
+                                "year_of_birth",
+                                String(
+                                  new Date().getFullYear() -
+                                    Number(e.target.value),
+                                ),
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("current_address")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        onChange={(e) => {
+                          form.setValue("address", e.target.value);
+                          if (form.watch("same_address")) {
+                            form.setValue("permanent_address", e.target.value);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      <FormField
+                        control={form.control}
+                        name="same_address"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={(v) => {
+                                  field.onChange(v);
+                                  if (v) {
+                                    form.setValue(
+                                      "permanent_address",
+                                      form.watch("address"),
+                                    );
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel>
+                              {t("use_address_as_permanent")}
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="permanent_address"
+                disabled={form.watch("same_address")}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("permanent_address")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pincode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("pincode")}
+                      <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) =>
+                          form.setValue("pincode", Number(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="nationality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t("nationality")}
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Autocomplete
+                          options={countryList.map((c) => ({
+                            label: c,
+                            value: c,
+                          }))}
+                          {...field}
+                          onChange={(value) =>
+                            form.setValue("nationality", value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("nationality") === "India" && (
+                  <FormField
+                    control={form.control}
+                    name="geo_organization"
+                    render={({ field }) => (
+                      <FormItem className="contents">
+                        <FormControl>
+                          <OrganizationSelector
+                            {...field}
+                            required={true}
+                            value={form.watch("geo_organization")}
+                            onChange={(value) =>
+                              form.setValue("geo_organization", value)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <Button
+                variant={"secondary"}
+                type="button"
+                onClick={() => goBack()}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={
+                  createPatientMutation.isPending ||
+                  updatePatientMutation.isPending
+                }
+              >
+                {patientId ? t("save") : t("save_and_continue")}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
       {!patientPhoneSearch.isLoading &&
         !!duplicatePatients?.length &&
