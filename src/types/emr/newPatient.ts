@@ -32,8 +32,8 @@ export interface Patient {
   created_date: string;
   modified_date: string;
   geo_organization: Organization;
-  created_by: UserBareMinimum;
-  modified_by: UserBareMinimum;
+  created_by: UserBareMinimum | null;
+  updated_by: UserBareMinimum | null;
 }
 
 export interface PartialPatientModel {

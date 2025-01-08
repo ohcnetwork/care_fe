@@ -1,25 +1,22 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
+import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
-import { CarePatientTokenKey } from "@/common/constants";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
 
 import { FacilityCard } from "./components/FacilityCard";
 
@@ -29,10 +26,6 @@ export function FacilitiesPage() {
     useFilters({
       limit: RESULTS_PER_PAGE_LIMIT,
     });
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
 
   const { t } = useTranslation();
 
@@ -55,40 +48,6 @@ export function FacilitiesPage() {
     enabled: !!qParams.organization,
   });
 
-  const GetLoginHeader = () => {
-    if (
-      tokenData &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-    ) {
-      return (
-        <header className="w-full p-4">
-          <div className="flex justify-end items-center">
-            <Button
-              variant="ghost"
-              className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-              onClick={() => navigate("/patient/home")}
-            >
-              Patient Dashboard
-            </Button>
-          </div>
-        </header>
-      );
-    }
-    return (
-      <header className="w-full p-4">
-        <div className="flex justify-end items-center">
-          <Button
-            variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-            onClick={() => navigate("/login")}
-          >
-            Sign in
-          </Button>
-        </div>
-      </header>
-    );
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between w-full">
@@ -97,7 +56,7 @@ export function FacilitiesPage() {
             <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
           </div>
         </Link>
-        <GetLoginHeader />
+        <LoginHeader />
       </div>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
         <SearchByMultipleFields

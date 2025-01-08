@@ -1,5 +1,4 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -34,11 +33,7 @@ export function TextQuestion({
   };
 
   return (
-    <div className="space-y-2">
-      <Label className="text-base font-medium">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
+    <>
       {question.type === "text" ? (
         <Textarea
           value={questionnaireResponse.values[0]?.value?.toString() || ""}
@@ -54,6 +49,6 @@ export function TextQuestion({
           disabled={disabled}
         />
       )}
-    </div>
+    </>
   );
 }
