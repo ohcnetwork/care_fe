@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
+import { usePreventNavigation } from "@/hooks/usePreventNavigation";
+
 import routes from "@/Utils/request/api";
 import useMutation from "@/Utils/request/useMutation";
 import useQuery from "@/Utils/request/useQuery";
@@ -61,6 +63,7 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
@@ -82,6 +85,8 @@ export function QuestionnaireForm({
     { silent: true },
   );
 
+  usePreventNavigation({ isDirty });
+
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
       const questionnaire =
@@ -99,6 +104,19 @@ export function QuestionnaireForm({
       }
     }
   }, [questionnaireData, isInitialized, questionnaireSlug]);
+
+  useEffect(() => {
+    const hasEdits = questionnaireForms.some((form) =>
+      form.responses.some(
+        (response) =>
+          response.values.length > 0 ||
+          response.note ||
+          response.body_site ||
+          response.method,
+      ),
+    );
+    setIsDirty(hasEdits);
+  }, [questionnaireForms]);
 
   if (isQuestionnaireLoading) {
     return <Loading />;
