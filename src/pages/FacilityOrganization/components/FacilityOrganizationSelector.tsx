@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import InputWithError from "@/components/ui/input-with-error";
+import { Label } from "@/components/ui/label";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -31,6 +32,7 @@ interface AutoCompleteOption {
 export default function FacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
+  const { t } = useTranslation();
   const { onChange, required, facilityId } = props;
   const [selectedLevels, setSelectedLevels] = useState<FacilityOrganization[]>(
     [],
@@ -106,7 +108,11 @@ export default function FacilityOrganizationSelector(
   };
 
   return (
-    <InputWithError label="Select Department" required={required}>
+    <>
+      <Label className="mb-2">
+        {t("select_department")}
+        {required && <span className="text-red-500">*</span>}
+      </Label>
       <div className="space-y-4">
         {/* Selected Organization Display */}
         {selectedOrganization && (
@@ -185,6 +191,6 @@ export default function FacilityOrganizationSelector(
           </div>
         )}
       </div>
-    </InputWithError>
+    </>
   );
 }
