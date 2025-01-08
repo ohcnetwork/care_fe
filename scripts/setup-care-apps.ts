@@ -20,9 +20,11 @@ interface Plugin {
 function readAppsConfig(): Plugin[] {
   const appsConfig = process.env.REACT_ENABLED_APPS
     ? process.env.REACT_ENABLED_APPS.split(",").map((app) => {
-        const [package_] = app.split("@");
-        const repo = package_.split("/").at(-1);
-        if (!repo) throw Error("Invalid Apps Configuration");
+        const package_ = app.includes("|")
+          ? app.split("|")[1].split("@")[0]
+          : app.split("@")[0];
+        console.log(package_);
+        const [, repo] = package_.split("/");
         return {
           repo,
           // Convert repo name to camelCase for import
