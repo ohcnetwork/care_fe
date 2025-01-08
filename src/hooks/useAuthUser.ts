@@ -4,6 +4,7 @@ import { UserModel } from "@/components/Users/models";
 
 import { JwtTokenObtainPair, LoginCredentials } from "@/Utils/request/api";
 import { RequestResult } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otpToken";
 
 type SignInReturnType = RequestResult<JwtTokenObtainPair>;
 
@@ -11,7 +12,8 @@ interface AuthContextType {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
   signOut: () => Promise<void>;
-  patientLogin: () => void;
+  patientLogin: (tokenData: TokenData, redirectUrl: string) => void;
+  patientToken: TokenData | null;
 }
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);
