@@ -1,19 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { createContext, useEffect, useState } from "react";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
-
-import { CarePatientTokenKey } from "@/common/constants";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { TokenData } from "@/types/auth/otpToken";
-
-const tokenData: TokenData = JSON.parse(
-  localStorage.getItem(CarePatientTokenKey) || "{}",
-);
 
 export type PatientUserContextType = {
   patients?: AppointmentPatient[];
@@ -22,12 +16,9 @@ export type PatientUserContextType = {
   tokenData: TokenData;
 };
 
-export const PatientUserContext = createContext<PatientUserContextType>({
-  patients: undefined,
-  selectedPatient: null,
-  setSelectedPatient: () => {},
-  tokenData: tokenData,
-});
+export const PatientUserContext = createContext<PatientUserContextType | null>(
+  null,
+);
 
 interface Props {
   children: React.ReactNode;
@@ -38,14 +29,16 @@ export default function PatientUserProvider({ children }: Props) {
   const [selectedPatient, setSelectedPatient] =
     useState<AppointmentPatient | null>(null);
 
+  const { patientToken: tokenData } = useAuthContext();
+
   const { data: userData } = useQuery({
-    queryKey: ["patients", tokenData.phoneNumber],
+    queryKey: ["patients", tokenData],
     queryFn: query(routes.otp.getPatient, {
       headers: {
-        Authorization: `Bearer ${tokenData.token}`,
+        Authorization: `Bearer ${tokenData?.token}`,
       },
     }),
-    enabled: !!tokenData.token,
+    enabled: !!tokenData?.token,
   });
 
   useEffect(() => {
@@ -62,22 +55,21 @@ export default function PatientUserProvider({ children }: Props) {
     }
   }, [userData]);
 
-  const patientUserContext: PatientUserContextType = {
-    patients,
-    selectedPatient,
-    setSelectedPatient,
-    tokenData,
-  };
+  if (!tokenData) {
+    navigate("/");
+    return null;
+  }
 
   return (
-    <PatientUserContext.Provider value={patientUserContext}>
-      <SidebarProvider>
-        <AppSidebar
-          patientUserContext={patientUserContext}
-          facilitySidebar={false}
-        />
-        {children}
-      </SidebarProvider>
+    <PatientUserContext.Provider
+      value={{
+        patients,
+        selectedPatient,
+        setSelectedPatient,
+        tokenData: tokenData,
+      }}
+    >
+      {children}
     </PatientUserContext.Provider>
   );
 }
