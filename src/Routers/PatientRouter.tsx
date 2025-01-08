@@ -2,14 +2,12 @@ import careConfig from "@careConfig";
 import { useRoutes } from "raviger";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
-
-import { usePatientContext } from "@/hooks/usePatientUser";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { PatientRegistration } from "@/pages/Appoinments/PatientRegistration";
@@ -70,8 +68,6 @@ export default function PatientRouter() {
 
   const appointmentPages = useRoutes(AppointmentRoutes);
 
-  const patientUserContext = usePatientContext();
-
   if (!pages) {
     if (appointmentPages) {
       return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
@@ -82,7 +78,7 @@ export default function PatientRouter() {
   return (
     <PatientUserProvider>
       <SidebarProvider>
-        <AppSidebar patientUserContext={patientUserContext} />
+        <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
           className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
