@@ -11,10 +11,9 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/Common/Avatar";
 import { UserAssignedModel } from "@/components/Users/models";
 
-import { LocalStorageKeys } from "@/common/constants";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
   user: UserAssignedModel;
@@ -28,12 +27,11 @@ export function UserCard({ user, className, facilityId }: Props) {
     last_name: user.last_name || "",
   });
 
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
+  const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
     if (
+      tokenData &&
       Object.keys(tokenData).length > 0 &&
       dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {

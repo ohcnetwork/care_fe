@@ -24,7 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import DateFormField from "@/components/Form/FormFields/DateFormField";
 
-import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
+import { usePatientContext } from "@/hooks/usePatientUser";
+
+import { GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
@@ -37,7 +39,6 @@ import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
-import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -72,15 +73,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     localStorage.getItem("selectedSlot") ?? "",
   ) as TokenSlot;
   const reason = localStorage.getItem("reason");
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
 
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
 
   const { publish } = usePubSub();
+
+  const patientUserContext = usePatientContext();
+  const tokenData = patientUserContext?.tokenData;
 
   const patientSchema = z
     .object({

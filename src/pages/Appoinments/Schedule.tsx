@@ -19,7 +19,7 @@ import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
 import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 
-import { LocalStorageKeys } from "@/common/constants";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -27,7 +27,6 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { TokenSlot } from "@/types/scheduling/schedule";
 
@@ -44,9 +43,8 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
 
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
+  const patientUserContext = usePatientContext();
+  const tokenData = patientUserContext?.tokenData;
 
   if (!staffId) {
     Notification.Error({ msg: "Staff username not found" });
