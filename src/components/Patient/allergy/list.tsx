@@ -20,13 +20,15 @@ import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoler
 
 interface AllergyListProps {
   patientId: string;
+  encounterId?: string;
 }
 
-export function AllergyList({ patientId }: AllergyListProps) {
+export function AllergyList({ patientId, encounterId }: AllergyListProps) {
   const { data: allergies, isLoading } = useQuery({
-    queryKey: ["allergies", patientId],
+    queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
+      queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
   });
 

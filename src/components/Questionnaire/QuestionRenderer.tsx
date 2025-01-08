@@ -16,6 +16,7 @@ interface QuestionRendererProps {
   activeGroupId?: string;
   encounterId?: string;
   facilityId: string;
+  patientId: string;
 }
 
 export function QuestionRenderer({
@@ -28,6 +29,7 @@ export function QuestionRenderer({
   activeGroupId,
   encounterId,
   facilityId,
+  patientId,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -70,6 +72,7 @@ export function QuestionRenderer({
             clearError={clearError}
             disabled={disabled}
             activeGroupId={activeGroupId}
+            patientId={patientId}
           />
         </div>
       ))}

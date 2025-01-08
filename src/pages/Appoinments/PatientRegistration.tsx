@@ -29,7 +29,9 @@ import {
   SlotAvailability,
 } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey, GENDER_TYPES } from "@/common/constants";
+import { usePatientContext } from "@/hooks/usePatientUser";
+
+import { GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
@@ -42,7 +44,6 @@ import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
-import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
@@ -72,15 +73,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     localStorage.getItem("selectedSlot") ?? "",
   ) as SlotAvailability;
   const reason = localStorage.getItem("reason");
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
 
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
 
   const { publish } = usePubSub();
+
+  const patientUserContext = usePatientContext();
+  const tokenData = patientUserContext?.tokenData;
 
   const patientSchema = z
     .object({
