@@ -11,7 +11,7 @@ export function handleHttpError(error: Error) {
   }
 
   if (!(error instanceof HTTPError)) {
-    toast.error(error.message || "Something went wrong!");
+    toast.error(error.message || t("something_went_wrong"));
     return;
   }
 
@@ -22,7 +22,7 @@ export function handleHttpError(error: Error) {
   const cause = error.cause;
 
   if (isNotFound(error)) {
-    toast.error((cause?.detail as string) || "Not found");
+    toast.error((cause?.detail as string) || t("not_found"));
     return;
   }
 

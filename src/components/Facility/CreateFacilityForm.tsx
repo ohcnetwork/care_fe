@@ -148,7 +148,7 @@ export default function CreateFacilityForm({
         { timeout: 10000 }, // 10 second timeout
       );
     } else {
-      toast.error("Geolocation is not supported by this browser");
+      toast.error(t("geolocation_is_not_supported_by_this_browser"));
     }
   };
 

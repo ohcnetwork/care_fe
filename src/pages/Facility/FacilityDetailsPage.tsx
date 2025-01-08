@@ -53,7 +53,7 @@ export function FacilityDetailsPage({ id }: Props) {
         silent: true,
       });
       if (response.res?.status !== 200) {
-        toast.error("Error while fetching users data");
+        toast.error(t("error_fetching_users_data"));
       }
       return response;
     },

@@ -53,7 +53,7 @@ export default function UserHome(props: UserHomeProps) {
           navigate("/users");
         } else if (error) {
           toast.error(
-            "Error while fetching user details: " + (error?.message || ""),
+            t("error_fetching_user_details") + (error?.message || ""),
           );
         }
       },

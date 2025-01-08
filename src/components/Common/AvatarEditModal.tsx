@@ -107,7 +107,7 @@ const AvatarEditModal = ({
       return;
     }
     if (!isImageFile(e.target.files[0])) {
-      toast.warning("Please upload an image file!");
+      toast.warning(t("please_upload_an_image_file"));
       return;
     }
     setSelectedFile(e.target.files[0]);

@@ -74,7 +74,7 @@ export default function UserAvatar({
       pathParams: { username },
     });
     if (res?.ok) {
-      toast.success("Profile picture deleted");
+      toast.success(t("profile_picture_deleted"));
       refetchUserData?.();
       setEditAvatar(false);
     } else {

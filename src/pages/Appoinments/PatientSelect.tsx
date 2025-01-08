@@ -45,13 +45,13 @@ export default function PatientSelect({
   const queryClient = useQueryClient();
 
   if (!staffId) {
-    toast.error("Staff Not Found");
+    toast.error(t("staff_not_found"));
     navigate(`/facility/${facilityId}/`);
   } else if (!tokenData) {
-    toast.error("Phone Number Not Found");
+    toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   } else if (!selectedSlot) {
-    toast.error("Selected Slot Not Found");
+    toast.error(t("selected_slot_not_found"));
     navigate(
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );

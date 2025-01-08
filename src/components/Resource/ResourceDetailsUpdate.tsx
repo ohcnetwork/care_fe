@@ -178,7 +178,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
       if (res && res.status == 200 && data) {
         dispatch({ type: "set_form", form: data });
-        toast.success("Request updated successfully");
+        toast.success(t("request_updated_successfully"));
         navigate(`/resource/${props.id}`);
       } else {
         setIsLoading(false);

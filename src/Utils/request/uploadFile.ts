@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
@@ -45,7 +46,7 @@ const uploadFile = async (
     }
 
     xhr.onerror = () => {
-      toast.error("Network Failure. Please check your internet connectivity.");
+      toast.error(t("network_failure"));
       onError();
       reject(new Error("Network error"));
     };

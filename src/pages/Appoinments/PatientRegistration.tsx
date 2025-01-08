@@ -178,7 +178,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         },
       })(body),
     onSuccess: (data: AppointmentPatient) => {
-      toast.success("Patient created successfully");
+      toast.success(t("patient_created_successfully"));
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,

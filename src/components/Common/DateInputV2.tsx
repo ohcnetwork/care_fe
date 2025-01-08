@@ -150,7 +150,7 @@ const DateInputV2: React.FC<Props> = ({
           }
         })()
       : toast.error(
-          outOfLimitsErrorMessage ?? "Cannot select date out of range",
+          outOfLimitsErrorMessage ?? t("cannot_select_date_out_of_range"),
         );
   };
 
@@ -266,7 +266,7 @@ const DateInputV2: React.FC<Props> = ({
       setType("date");
     } else {
       toast.error(
-        outOfLimitsErrorMessage ?? "Cannot select month out of range",
+        outOfLimitsErrorMessage ?? t("cannot_select_month_out_of_range"),
       );
     }
   };
@@ -291,7 +291,7 @@ const DateInputV2: React.FC<Props> = ({
       }
       setType("date");
     } else {
-      toast.error("Cannot select year out of range");
+      toast.error(t("cannot_select_year_out_of_range"));
     }
   };
 

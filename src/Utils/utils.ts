@@ -1,5 +1,6 @@
 import { differenceInMinutes, format } from "date-fns";
 import html2canvas from "html2canvas";
+import { t } from "i18next";
 import { toast } from "sonner";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
@@ -644,9 +645,9 @@ export const saveElementAsImage = async (id: string, filename: string) => {
 export const copyToClipboard = async (content: string) => {
   try {
     await navigator.clipboard.writeText(content);
-    toast.success("Copied to clipboard");
+    toast.success(t("copied_to_clipboard"));
   } catch (err) {
-    toast.error("Copying is not allowed");
+    toast.error(t("copying_is_not_allowed"));
   }
 };
 

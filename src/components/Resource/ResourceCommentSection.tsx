@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -23,7 +24,7 @@ const CommentSection = (props: { id: string }) => {
       comment: commentBox,
     };
     if (!/\S+/.test(commentBox)) {
-      toast.error("Comment Should Contain At Least 1 Character");
+      toast.error(t("comment_min_length"));
       return;
     }
     const { res } = await request(routes.addResourceComments, {
