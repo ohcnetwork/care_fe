@@ -1632,6 +1632,7 @@
   "select": "चुनना",
   "select_all": "Select All",
   "select_date": "तारीख़ चुनें",
+  "select_department": "Select Department",
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_facility_for_discharged_patients_warning": "छुट्टी दिए गए मरीजों को देखने के लिए सुविधा का चयन किया जाना आवश्यक है।",
   "select_for_administration": "प्रशासन के लिए चयन करें",
