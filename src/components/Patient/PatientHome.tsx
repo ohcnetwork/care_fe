@@ -11,6 +11,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
@@ -230,8 +231,8 @@ export const PatientHome = (props: {
                   {t("actions")}
                 </div>
                 <div className="mt-2 h-full space-y-2">
-                  <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
-                    <div>
+                  <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
+                    <div className="space-y-2">
                       <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
@@ -246,6 +247,12 @@ export const PatientHome = (props: {
                           {t("view_update_patient_files")}
                         </span>
                       </Button>
+
+                      <PLUGIN_Component
+                        __name="PatientHomeActions"
+                        patient={patientData}
+                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                      />
                     </div>
 
                     {/* {NonReadOnlyUsers && (
