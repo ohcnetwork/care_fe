@@ -1,4 +1,5 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
+import { t } from "i18next";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -106,34 +107,34 @@ export function MedicationRequestQuestion({
               {/* Header */}
               <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Medicine
+                  {t("medicine")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Dosage
+                  {t("dosage")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Frequency
+                  {t("frequency")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Days
+                  {t("days")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Instructions
+                  {t("instructions")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Additional Instructions
+                  {t("additional_instructions")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Route
+                  {t("route")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Site
+                  {t("site")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Method
+                  {t("method")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  Intent
+                  {t("intent")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3"></div>
               </div>
@@ -159,7 +160,7 @@ export function MedicationRequestQuestion({
       <div className="relative">
         <ValueSetSelect
           system="system-medication"
-          placeholder="Search for medications to add"
+          placeholder={t("search_medications")}
           onSelect={handleAddMedication}
           disabled={disabled}
           searchPostFix=" clinical drug"
@@ -208,7 +209,9 @@ const MedicationRequestGridRow: React.FC<{
       <div className="grid gap-4 p-4 lg:p-0 lg:contents">
         {/* Dosage */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Dosage</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("dosage")}
+          </Label>
           <QuantityInput
             units={DOSAGE_UNITS}
             quantity={
@@ -225,7 +228,9 @@ const MedicationRequestGridRow: React.FC<{
 
         {/* Frequency */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Frequency</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("frequency")}
+          </Label>
           <Select
             value={
               medication.dosage_instruction[0]?.as_needed_boolean
@@ -250,10 +255,10 @@ const MedicationRequestGridRow: React.FC<{
             disabled={disabled}
           >
             <SelectTrigger className="h-8 text-sm">
-              <SelectValue placeholder="Select frequency" />
+              <SelectValue placeholder={t("select_frequency")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="PRN">As Needed / PRN</SelectItem>
+              <SelectItem value="PRN">{t("as_needed_prn")}</SelectItem>
               {Object.entries(FREQUENCY_OPTIONS).map(([key, option]) => (
                 <SelectItem key={key} value={key}>
                   {option.display}
@@ -265,7 +270,7 @@ const MedicationRequestGridRow: React.FC<{
 
         {/* Days */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Days</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">{t("days")}</Label>
           <Input
             type="number"
             disabled={
@@ -300,14 +305,16 @@ const MedicationRequestGridRow: React.FC<{
 
         {/* Instructions */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Instructions</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("instructions")}
+          </Label>
           <ValueSetSelect
             system="system-as-needed-reason"
             value={medication.dosage_instruction[0]?.as_needed_for}
             onSelect={(reason) =>
               handleUpdateDosageInstruction({ as_needed_for: reason })
             }
-            placeholder="Select reason for PRN"
+            placeholder={t("select_prn_reason")}
             disabled={
               disabled || !medication.dosage_instruction[0]?.as_needed_boolean
             }
@@ -318,7 +325,7 @@ const MedicationRequestGridRow: React.FC<{
         {/* Additional Instructions */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
           <Label className="mb-1.5 block text-sm lg:hidden">
-            Additional Instructions
+            {t("additional_instructions")}
           </Label>
           <ValueSetSelect
             system="system-additional-instruction"
@@ -330,31 +337,31 @@ const MedicationRequestGridRow: React.FC<{
                 additional_instruction: [instruction],
               })
             }
-            placeholder="Select additional instructions"
+            placeholder={t("select_additional_instructions")}
             disabled={disabled}
           />
         </div>
 
         {/* Route */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Route</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
           <ValueSetSelect
             system="system-route"
             value={medication.dosage_instruction[0]?.route}
             onSelect={(route) => handleUpdateDosageInstruction({ route })}
-            placeholder="Select route"
+            placeholder={t("select_route")}
             disabled={disabled}
           />
         </div>
 
         {/* Site */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Site</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
           <ValueSetSelect
             system="system-body-site"
             value={medication.dosage_instruction[0]?.site}
             onSelect={(site) => handleUpdateDosageInstruction({ site })}
-            placeholder="Select site"
+            placeholder={t("select_site")}
             disabled={disabled}
             wrapTextForSmallScreen={true}
           />
@@ -362,12 +369,14 @@ const MedicationRequestGridRow: React.FC<{
 
         {/* Method */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Method</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("method")}
+          </Label>
           <ValueSetSelect
             system="system-administration-method"
             value={medication.dosage_instruction[0]?.method}
             onSelect={(method) => handleUpdateDosageInstruction({ method })}
-            placeholder="Select method"
+            placeholder={t("select_method")}
             disabled={disabled}
             count={20}
           />
@@ -375,7 +384,9 @@ const MedicationRequestGridRow: React.FC<{
 
         {/* Intent */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">Intent</Label>
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("intent")}
+          </Label>
           <Select
             value={medication.intent}
             onValueChange={(value: MedicationRequestIntent) =>
@@ -384,7 +395,10 @@ const MedicationRequestGridRow: React.FC<{
             disabled={disabled}
           >
             <SelectTrigger className="h-8 text-sm capitalize">
-              <SelectValue className="capitalize" placeholder="Select intent" />
+              <SelectValue
+                className="capitalize"
+                placeholder={t("select_intent")}
+              />
             </SelectTrigger>
             <SelectContent>
               {MEDICATION_REQUEST_INTENT.map((intent) => (

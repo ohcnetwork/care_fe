@@ -73,7 +73,7 @@ export function QuestionRenderer({
           className={cn(
             isMedicationRequest(question)
               ? " md:w-auto md:overflow-x-auto"
-              : "max-w-5xl",
+              : "max-w-4xl",
           )}
         >
           <QuestionGroup

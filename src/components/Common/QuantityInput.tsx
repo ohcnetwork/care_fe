@@ -51,7 +51,7 @@ const QuantityInput = <TUnit extends string>({
         onValueChange={(value) => handleChange({ unit: value as TUnit })}
         defaultValue={quantity?.unit}
       >
-        <SelectTrigger className="max-w-min rounded-l-none focus:ring-0 focus:ring-offset-0 border-l-0 focus:border-transparent bg-gray-50 px-2 py-0">
+        <SelectTrigger className="max-w-min rounded-l-none focus:ring-0 focus:ring-offset-0 border-l-0 focus:border-transparent bg-gray-50">
           <SelectValue placeholder="Unit" />
         </SelectTrigger>
         <SelectContent>
