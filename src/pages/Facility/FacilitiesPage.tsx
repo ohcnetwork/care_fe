@@ -49,7 +49,7 @@ export function FacilitiesPage() {
     queryKey: ["facilities", qParams],
     queryFn: query(routes.getAllFacilities, {
       queryParams: {
-        name: qParams.search,
+        name: qParams.name,
         ...(qParams.facility_type && { facility_type: qParams.facility_type }),
         ...(qParams.organization && {
           organization: qParams.organization,
@@ -101,12 +101,12 @@ export function FacilitiesPage() {
               key: "facility_search_placeholder_text",
               type: "text" as const,
               placeholder: t("facility_search_placeholder_text"),
-              value: qParams.search || "",
+              value: qParams.name || "",
               shortcutKey: "f",
             },
           ]}
           className="max-w-min sm:min-w-64"
-          onSearch={(key, value) => updateQuery({ search: value })}
+          onSearch={(key, value) => updateQuery({ name: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
         />

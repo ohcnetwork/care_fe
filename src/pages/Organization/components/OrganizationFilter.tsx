@@ -116,9 +116,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       return [prevTypes[0], prevTypes[1]];
     });
     setSelectedLevels([]);
-    setTimeout(() => {
-      onChange({ organization: undefined, facility_type: undefined }, 0);
-    }, 0);
+    onChange({ organization: undefined, facility_type: undefined }, 0);
   };
 
   return (
