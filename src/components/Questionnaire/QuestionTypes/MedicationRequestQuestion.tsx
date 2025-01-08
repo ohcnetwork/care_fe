@@ -2,7 +2,6 @@ import { MinusCircledIcon } from "@radix-ui/react-icons";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -99,44 +98,83 @@ export function MedicationRequestQuestion({
   };
 
   return (
-    <>
+    <div className="space-y-4">
       {medications.length > 0 && (
-        <div className="rounded-lg border space-y-4">
-          <ul className="space-y-2 divide-y-2 divide-gray-200 divide-dashed">
-            {medications.map((medication, index) => (
-              <li key={index}>
-                <MedicationRequestItem
-                  medication={medication}
-                  disabled={disabled}
-                  onUpdate={(medication) =>
-                    handleUpdateMedication(index, medication)
-                  }
-                  onRemove={() => handleRemoveMedication(index)}
-                  index={index}
-                />
-              </li>
-            ))}
-          </ul>
+        <div className="w-full border rounded-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <div className="min-w-fit w-full">
+              {/* Header */}
+              <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Medicine
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Dosage
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Frequency
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Days
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Instructions
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Additional Instructions
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Route
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Site
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Method
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  Intent
+                </div>
+                <div className="font-semibold text-gray-600 p-3"></div>
+              </div>
+
+              {/* Body */}
+              <div className="bg-white">
+                {medications.map((medication, index) => (
+                  <MedicationRequestGridRow
+                    key={index}
+                    medication={medication}
+                    disabled={disabled}
+                    onUpdate={(updates) =>
+                      handleUpdateMedication(index, updates)
+                    }
+                    onRemove={() => handleRemoveMedication(index)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
-      <ValueSetSelect
-        system="system-medication"
-        placeholder="Search for medications to add"
-        onSelect={handleAddMedication}
-        disabled={disabled}
-        searchPostFix=" clinical drug"
-      />
-    </>
+      <div className="relative">
+        <ValueSetSelect
+          system="system-medication"
+          placeholder="Search for medications to add"
+          onSelect={handleAddMedication}
+          disabled={disabled}
+          searchPostFix=" clinical drug"
+        />
+      </div>
+    </div>
   );
 }
 
-export const MedicationRequestItem: React.FC<{
+const MedicationRequestGridRow: React.FC<{
   medication: MedicationRequest;
   disabled?: boolean;
   onUpdate?: (medication: Partial<MedicationRequest>) => void;
   onRemove?: () => void;
-  index?: number;
-}> = ({ medication, disabled, onUpdate, onRemove, index = 0 }) => {
+}> = ({ medication, disabled, onUpdate, onRemove }) => {
   const dosageInstruction = medication.dosage_instruction[0];
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
@@ -147,202 +185,230 @@ export const MedicationRequestItem: React.FC<{
   };
 
   return (
-    <div className="p-3 justify-between group focus-within:ring-2 ring-gray-300 rounded-lg space-y-2">
-      <div className="flex items-center justify-between">
-        <h4 className="text-base font-semibold">
-          {index + 1}. {medication.medication?.display}
-        </h4>
-        <div className="flex items-center gap-2">
-          <div>
-            <Label className="sr-only">Intent</Label>
-            <Select
-              value={medication.intent}
-              onValueChange={(value: MedicationRequestIntent) =>
-                onUpdate?.({ intent: value })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="capitalize">
-                <SelectValue placeholder="Select intent" />
-              </SelectTrigger>
-              <SelectContent>
-                {MEDICATION_REQUEST_INTENT.map((intent) => (
-                  <SelectItem
-                    key={intent}
-                    value={intent}
-                    className="capitalize"
-                  >
-                    {intent.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {onRemove && (
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={onRemove}
-              disabled={disabled}
-            >
-              <MinusCircledIcon className="size-4" />
-            </Button>
-          )}
+    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+      {/* Medicine Name and Controls */}
+      <div className="p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
+        <span className="break-words line-clamp-2">
+          {medication.medication?.display}
+        </span>
+        <div className="flex items-center gap-2 lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            disabled={disabled}
+            className="h-8 w-8"
+          >
+            <MinusCircledIcon className="h-4 w-4 text-gray-400" />
+          </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Label className="mb-1 block text-sm font-medium">Dosage</Label>
-            <QuantityInput
-              units={DOSAGE_UNITS}
-              quantity={
-                medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
-              }
-              onChange={(value) =>
-                handleUpdateDosageInstruction({
-                  dose_and_rate: { type: "ordered", dose_quantity: value },
-                })
-              }
-              disabled={disabled}
-            />
-          </div>
-          <div className="flex-[2]">
-            <Label className="mb-1 block text-sm font-medium">Route</Label>
-            <ValueSetSelect
-              system="system-route"
-              value={medication.dosage_instruction[0]?.route}
-              onSelect={(route) => handleUpdateDosageInstruction({ route })}
-              placeholder="Select route"
-              disabled={disabled}
-            />
-          </div>
-          <div className="flex-1">
-            <Label className="mb-1 block text-sm font-medium pr-4">
-              Method
-            </Label>
-            <ValueSetSelect
-              system="system-administration-method"
-              value={medication.dosage_instruction[0]?.method}
-              onSelect={(method) => handleUpdateDosageInstruction({ method })}
-              placeholder="Select method"
-              disabled={disabled}
-              count={20}
-            />
-          </div>
-        </div>
 
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Label className="mb-1 block text-sm font-medium pr-4">Site</Label>
-            <ValueSetSelect
-              system="system-body-site"
-              value={medication.dosage_instruction[0]?.site}
-              onSelect={(site) => handleUpdateDosageInstruction({ site })}
-              placeholder="Select site"
-              disabled={disabled}
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 mt-2">
-          <Checkbox
-            id={`prn-checkbox-${medication.medication?.code}`}
-            checked={
-              medication.dosage_instruction[0]?.as_needed_boolean ?? false
+      {/* Main Fields */}
+      <div className="grid gap-4 p-4 lg:p-0 lg:contents">
+        {/* Dosage */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Dosage</Label>
+          <QuantityInput
+            units={DOSAGE_UNITS}
+            quantity={
+              medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
             }
-            onCheckedChange={(checked) =>
+            onChange={(value) =>
               handleUpdateDosageInstruction({
-                as_needed_boolean: !!checked,
-                as_needed_for: checked
-                  ? medication.dosage_instruction[0]?.as_needed_for
-                  : undefined,
+                dose_and_rate: { type: "ordered", dose_quantity: value },
               })
             }
             disabled={disabled}
           />
-          <Label htmlFor={`prn-checkbox-${medication.medication?.code}`}>
-            As Needed / PRN
-          </Label>
         </div>
 
-        {medication.dosage_instruction[0]?.as_needed_boolean ? (
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <ValueSetSelect
-                system="system-as-needed-reason"
-                value={medication.dosage_instruction[0]?.as_needed_for}
-                onSelect={(reason) =>
-                  handleUpdateDosageInstruction({ as_needed_for: reason })
-                }
-                placeholder="Select reason or indicator for PRN"
-                disabled={disabled}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label className="mb-1 block text-sm font-medium">
-                Frequency
-              </Label>
-              <Select
-                value={reverseFrequencyOption(dosageInstruction?.timing)}
-                onValueChange={(value: keyof typeof FREQUENCY_OPTIONS) =>
-                  handleUpdateDosageInstruction({
-                    timing: FREQUENCY_OPTIONS[value].timing,
-                  })
-                }
-                disabled={disabled}
-              >
-                <SelectTrigger className="capitalize">
-                  <SelectValue placeholder="Select frequency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(FREQUENCY_OPTIONS).map(([key, option]) => (
-                    <SelectItem key={key} value={key}>
-                      {option.display}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <Label className="mb-1 block text-sm font-medium">Days</Label>
-              <Input type="number" disabled={disabled} />
-            </div>
-          </div>
-        )}
+        {/* Frequency */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Frequency</Label>
+          <Select
+            value={
+              medication.dosage_instruction[0]?.as_needed_boolean
+                ? "PRN"
+                : reverseFrequencyOption(dosageInstruction?.timing)
+            }
+            onValueChange={(value) => {
+              if (value === "PRN") {
+                handleUpdateDosageInstruction({
+                  as_needed_boolean: true,
+                  timing: undefined,
+                });
+              } else {
+                handleUpdateDosageInstruction({
+                  as_needed_boolean: false,
+                  timing:
+                    FREQUENCY_OPTIONS[value as keyof typeof FREQUENCY_OPTIONS]
+                      .timing,
+                });
+              }
+            }}
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Select frequency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PRN">As Needed / PRN</SelectItem>
+              {Object.entries(FREQUENCY_OPTIONS).map(([key, option]) => (
+                <SelectItem key={key} value={key}>
+                  {option.display}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Label className="mb-1 block text-sm font-medium">
-              Additional Instructions
-            </Label>
-            <ValueSetSelect
-              system="system-additional-instruction"
-              value={
-                medication.dosage_instruction[0]?.additional_instruction?.[0]
-              }
-              onSelect={(additionalInstruction) =>
-                onUpdate?.({
-                  dosage_instruction: [
-                    {
-                      ...medication.dosage_instruction[0],
-                      additional_instruction: [additionalInstruction],
+        {/* Days */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Days</Label>
+          <Input
+            type="number"
+            disabled={
+              disabled || medication.dosage_instruction[0]?.as_needed_boolean
+            }
+            value={
+              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
+                ?.value ?? ""
+            }
+            onChange={(e) =>
+              handleUpdateDosageInstruction({
+                timing: {
+                  ...dosageInstruction?.timing,
+                  repeat: {
+                    frequency:
+                      dosageInstruction?.timing?.repeat?.frequency ?? 1,
+                    period: dosageInstruction?.timing?.repeat?.period ?? 1,
+                    period_unit:
+                      dosageInstruction?.timing?.repeat?.period_unit ?? "d",
+                    bounds_duration: {
+                      value: e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined,
+                      unit: "d",
                     },
-                  ],
-                })
-              }
-              disabled={disabled}
-            />
-          </div>
+                  },
+                },
+              })
+            }
+          />
+        </div>
+
+        {/* Instructions */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Instructions</Label>
+          <ValueSetSelect
+            system="system-as-needed-reason"
+            value={medication.dosage_instruction[0]?.as_needed_for}
+            onSelect={(reason) =>
+              handleUpdateDosageInstruction({ as_needed_for: reason })
+            }
+            placeholder="Select reason for PRN"
+            disabled={
+              disabled || !medication.dosage_instruction[0]?.as_needed_boolean
+            }
+            wrapTextForSmallScreen={true}
+          />
+        </div>
+
+        {/* Additional Instructions */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            Additional Instructions
+          </Label>
+          <ValueSetSelect
+            system="system-additional-instruction"
+            value={
+              medication.dosage_instruction[0]?.additional_instruction?.[0]
+            }
+            onSelect={(instruction) =>
+              handleUpdateDosageInstruction({
+                additional_instruction: [instruction],
+              })
+            }
+            placeholder="Select additional instructions"
+            disabled={disabled}
+          />
+        </div>
+
+        {/* Route */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Route</Label>
+          <ValueSetSelect
+            system="system-route"
+            value={medication.dosage_instruction[0]?.route}
+            onSelect={(route) => handleUpdateDosageInstruction({ route })}
+            placeholder="Select route"
+            disabled={disabled}
+          />
+        </div>
+
+        {/* Site */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Site</Label>
+          <ValueSetSelect
+            system="system-body-site"
+            value={medication.dosage_instruction[0]?.site}
+            onSelect={(site) => handleUpdateDosageInstruction({ site })}
+            placeholder="Select site"
+            disabled={disabled}
+            wrapTextForSmallScreen={true}
+          />
+        </div>
+
+        {/* Method */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Method</Label>
+          <ValueSetSelect
+            system="system-administration-method"
+            value={medication.dosage_instruction[0]?.method}
+            onSelect={(method) => handleUpdateDosageInstruction({ method })}
+            placeholder="Select method"
+            disabled={disabled}
+            count={20}
+          />
+        </div>
+
+        {/* Intent */}
+        <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+          <Label className="mb-1.5 block text-sm lg:hidden">Intent</Label>
+          <Select
+            value={medication.intent}
+            onValueChange={(value: MedicationRequestIntent) =>
+              onUpdate?.({ intent: value })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 text-sm capitalize">
+              <SelectValue className="capitalize" placeholder="Select intent" />
+            </SelectTrigger>
+            <SelectContent>
+              {MEDICATION_REQUEST_INTENT.map((intent) => (
+                <SelectItem key={intent} value={intent} className="capitalize">
+                  {intent.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Remove Button - Desktop */}
+        <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            disabled={disabled}
+            className="h-8 w-8"
+          >
+            <MinusCircledIcon className="h-4 w-4 text-gray-400" />
+          </Button>
         </div>
       </div>
-
-      {/* <div className="font-mono text-xs whitespace-pre-wrap mt-8">
-        {JSON.stringify(medication, null, 2)}
-      </div> */}
     </div>
   );
 };

@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -53,12 +55,24 @@ export function QuestionRenderer({
     onResponseChange(newResponses);
   };
 
+  const isMedicationRequest = (question: Question): boolean => {
+    return (
+      question.type === "structured" &&
+      question.structured_type === "medication_request"
+    );
+  };
+
   return (
     <div className="space-y-4">
       {questions.map((question) => (
         <div
           key={question.id}
           ref={(el) => (questionRefs.current[question.id] = el)}
+          className={cn(
+            isMedicationRequest(question)
+              ? " md:w-auto md:overflow-x-auto"
+              : "max-w-5xl",
+          )}
         >
           <QuestionGroup
             facilityId={facilityId}

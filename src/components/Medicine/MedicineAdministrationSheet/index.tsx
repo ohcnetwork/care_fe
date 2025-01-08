@@ -17,7 +17,10 @@ import useSlug from "@/hooks/useSlug";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
+import {
+  BOUNDS_DURATION_UNITS,
+  MedicationRequest,
+} from "@/types/emr/medicationRequest";
 
 interface Props {
   readonly?: boolean;
@@ -324,6 +327,16 @@ const PrescriptionEntry = ({
           </span>
         )}
       </div>
+      {instruction.timing?.repeat?.bounds_duration && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          <span className="text-muted-foreground">Duration:</span>{" "}
+          {instruction.timing.repeat.bounds_duration.value}{" "}
+          {instruction.timing.repeat.bounds_duration.unit &&
+            BOUNDS_DURATION_UNITS[
+              instruction.timing.repeat.bounds_duration.unit
+            ]?.label}
+        </div>
+      )}
 
       {/* Additional Instructions */}
       {additionalInstructions && additionalInstructions.length > 0 && (
