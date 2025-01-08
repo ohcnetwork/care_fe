@@ -291,7 +291,9 @@ const DateInputV2: React.FC<Props> = ({
       }
       setType("date");
     } else {
-      toast.error(t("cannot_select_year_out_of_range"));
+      toast.error(
+        outOfLimitsErrorMessage ?? t("cannot_select_year_out_of_range"),
+      );
     }
   };
 
