@@ -120,7 +120,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-col sm:flex-row gap-3">
       <Select
         value={selectedFacilityType?.text || ""}
         onValueChange={(value) => {
@@ -133,7 +133,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           });
         }}
       >
-        <SelectTrigger className="max-w-min">
+        <SelectTrigger className="sm:max-w-56 h-[38px]">
           <SelectValue placeholder={t("select_facility_type")} />
         </SelectTrigger>
         <SelectContent>
@@ -144,7 +144,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      <div className="flex rounded-md border border-1 border-secondary-400 overflow-clip">
+      <div className="flex flex-col gap-2 sm:flex-row sm:rounded-md sm:border sm:border-1 sm:border-secondary-500 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
         {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
           (_, index) => (
             <OrganizationLevel
