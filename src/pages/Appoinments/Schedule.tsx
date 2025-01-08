@@ -47,10 +47,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const tokenData = patientUserContext?.tokenData;
 
   if (!staffId) {
-    toast.error("Staff username not found");
+    toast.error(t("staff_username_not_found"));
     navigate(`/facility/${facilityId}/`);
   } else if (!tokenData) {
-    toast.error("Phone number not found");
+    toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
@@ -66,7 +66,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   });
 
   if (facilityError) {
-    toast.error("Error while fetching facility data");
+    toast.error(t("error_fetching_facility_data"));
   }
 
   const { data: userData, error: userError } = useQuery({
@@ -78,7 +78,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   });
 
   if (userError) {
-    toast.error("Error while fetching user data");
+    toast.error(t("error_fetching_user_data"));
   }
 
   const slotsQuery = useQuery<{ results: SlotAvailability[] }>({

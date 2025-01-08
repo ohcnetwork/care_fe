@@ -81,7 +81,8 @@ export default function UserResetPassword({
     setisSubmitting(true);
     const form: UpdatePasswordForm = {
       old_password: formData.old_password,
-      username: userData.username,
+      // username: userData.username,
+      username: "userData.username",
       new_password: formData.new_password_1,
     };
 
@@ -95,6 +96,7 @@ export default function UserResetPassword({
       Notification.notifyError({
         msg: error?.message ?? t("password_update_error"),
       });
+      // toast.error(error?.message ?? t("password_update_error"));
     }
     setisSubmitting(false);
   };

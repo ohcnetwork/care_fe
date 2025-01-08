@@ -203,8 +203,8 @@ export const FacilityCreate = (props: FacilityProps) => {
       if (res?.ok && responseData) {
         toast.success(
           facilityId
-            ? "Facility updated successfully"
-            : "Facility added successfully",
+            ? t("facility_updated_success")
+            : t("facility_added_successfully"),
         );
         navigate(`/facility/${responseData.id}`);
       }

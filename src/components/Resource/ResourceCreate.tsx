@@ -204,7 +204,7 @@ export default function ResourceCreate(props: resourceProps) {
 
       if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
-        toast.success("Request created successfully");
+        toast.success(t("resource_created_successfully"));
         navigate(`/resource/${data.id}`);
       }
     }

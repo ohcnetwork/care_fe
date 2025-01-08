@@ -146,7 +146,7 @@ export default function useFileManager(
         pathParams: { id: body.id },
       })({} as any),
     onSuccess: () => {
-      toast.success("File archived successfully");
+      toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
         queryKey: [`${fileType}-files`, archiveDialogueOpen?.associating_id],
       });
@@ -215,7 +215,7 @@ export default function useFileManager(
         pathParams: { id: body.id },
       })(body),
     onSuccess: (_, { associating_id }) => {
-      toast.success("File name changed successfully");
+      toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
       onEdit && onEdit();
       queryClient.invalidateQueries({
@@ -489,7 +489,7 @@ export default function useFileManager(
   ) => {
     try {
       if (!file.id) return;
-      toast.success("Downloading file...");
+      toast.success(t("file_download_started"));
       const fileData = await retrieveUpload(file, associating_id);
       const response = await fetch(fileData?.read_signed_url || "");
       if (!response.ok) throw new Error("Network response was not ok.");
@@ -506,8 +506,9 @@ export default function useFileManager(
       // Clean up
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
+      toast.success(t("file_download_completed"));
     } catch (err) {
-      toast.error("Failed to download file");
+      toast.error(t("file_download_failed"));
     }
   };
 
