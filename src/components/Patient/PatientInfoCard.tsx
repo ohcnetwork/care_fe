@@ -48,10 +48,6 @@ const QUESTIONNAIRE_OPTIONS = [
     title: "Community Nurse Form",
   },
   {
-    slug: "nursing_care_given",
-    title: "Nursing Care Given",
-  },
-  {
     slug: "recommend_discharge_v2",
     title: "Recommend Discharge",
   },
