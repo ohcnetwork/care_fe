@@ -82,12 +82,12 @@ export class FacilityCreation {
   }
 
   verifyValidationErrors() {
-    cy.verifyErrorMessage("Name is required");
-    cy.verifyErrorMessage("Facility type is required");
-    cy.verifyErrorMessage("Address is required");
-    cy.verifyErrorMessage(
+    cy.verifyErrorMessages([
+      "Name is required",
+      "Facility type is required",
+      "Address is required",
       "Phone number must start with +91 followed by 10 digits",
-    );
+    ]);
   }
 
   searchFacility(facilityName: string) {

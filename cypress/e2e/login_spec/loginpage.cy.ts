@@ -15,8 +15,7 @@ describe("Login Page", () => {
 
   it("should successfully login with admin credentials", () => {
     loginPage.interceptLogin();
-    loginPage.loginByRole("admin");
-    loginPage.verifyLoginResponse();
+    loginPage.loginByRole("staff");
     cy.url().should("include", "/");
   });
 

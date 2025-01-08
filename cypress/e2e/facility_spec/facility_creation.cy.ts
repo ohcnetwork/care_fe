@@ -13,6 +13,7 @@ describe("Facility Management", () => {
     cy.clearLocalStorage();
     cy.saveLocalStorage();
     cy.visit("/login");
+    loginPage.loginByRole("admin");
   });
 
   afterEach(() => {
@@ -20,8 +21,6 @@ describe("Facility Management", () => {
   });
 
   it("Create a new facility using the admin role", () => {
-    // Login
-    loginPage.loginByRole("admin");
     // Navigate to facility creation
     facilityPage.navigateToFacilities();
     facilityPage.clickAddFacility();
@@ -57,8 +56,6 @@ describe("Facility Management", () => {
   });
 
   it("Should show validation errors for required fields", () => {
-    loginPage.loginByRole("nurse");
-
     facilityPage.navigateToFacilities();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();

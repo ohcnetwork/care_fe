@@ -144,29 +144,44 @@ const locations = [
 ];
 
 function generateFacilityName(): string {
-  const useSpecialPrefix = Math.random() < 0.2; // 20% chance for special prefix
-  const location = locations[Math.floor(Math.random() * locations.length)];
+  // Use crypto.getRandomValues for secure random selection
+  const randomBytes = new Uint8Array(2);
+  crypto.getRandomValues(randomBytes);
+
+  const useSpecialPrefix = randomBytes[0] % 5 === 0; // 20% chance
+  const locationIndex = randomBytes[1] % locations.length;
+  const location = locations[locationIndex];
 
   if (useSpecialPrefix) {
-    const specialPrefix =
-      specialPrefixes[Math.floor(Math.random() * specialPrefixes.length)];
+    const specialPrefixIndex = randomBytes[0] % specialPrefixes.length;
+    const specialPrefix = specialPrefixes[specialPrefixIndex];
     return `${specialPrefix} GHC ${location.name}`;
   } else {
-    const prefix =
-      facilityPrefixes[Math.floor(Math.random() * facilityPrefixes.length)];
+    const prefixIndex = randomBytes[0] % facilityPrefixes.length;
+    const prefix = facilityPrefixes[prefixIndex];
     return `${prefix} ${location.name}`;
   }
 }
 
 export function generateFacilityData(): FacilityTestData {
-  const location = locations[Math.floor(Math.random() * locations.length)];
+  const randomBytes = new Uint8Array(2);
+  crypto.getRandomValues(randomBytes);
+
+  const locationIndex = randomBytes[0] % locations.length;
+  const location = locations[locationIndex];
   const name = generateFacilityName();
 
-  // Randomly select 2-4 features from the available options
-  const shuffledFeatures = [...FACILITY_FEATURES].sort(
-    () => Math.random() - 0.5,
-  );
-  const numberOfFeatures = Math.floor(Math.random() * 3) + 2; // Random number between 2 and 4
+  // Generate number of features (2-4)
+  const numberOfFeatures = (randomBytes[1] % 3) + 2;
+
+  // Securely shuffle features array
+  const shuffledFeatures = [...FACILITY_FEATURES]
+    .map((value) => ({
+      value,
+      sort: crypto.getRandomValues(new Uint8Array(1))[0],
+    }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
 
   return {
     name,
