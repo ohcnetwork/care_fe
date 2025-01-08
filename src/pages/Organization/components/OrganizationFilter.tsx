@@ -18,6 +18,7 @@ import { FilterState } from "@/hooks/useFilters";
 import { FACILITY_TYPES, OptionsType } from "@/common/constants";
 
 import query from "@/Utils/request/query";
+import { classNames } from "@/Utils/utils";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -59,6 +60,14 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     })),
   });
 
+  const { data: rootOrgs } = useQuery<{ results: Organization[] }>({
+    queryKey: ["root-organization", selected.length],
+    queryFn: query(organizationApi.getPublicOrganizations, {
+      queryParams: { level_cache: 1 },
+    }),
+    enabled: selected.length === 0,
+  });
+
   const isQueriesLoading = orgDetailQueries.some((query) => query.isLoading);
 
   useEffect(() => {
@@ -85,6 +94,22 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       }
     }
   }, [isQueriesLoading, selected]);
+
+  useEffect(() => {
+    if (rootOrgs) {
+      const validOrg = rootOrgs.results[0];
+      if (
+        validOrg &&
+        validOrg.metadata?.govt_org_type &&
+        validOrg.metadata?.govt_org_children_type
+      ) {
+        setOrgTypes([
+          validOrg.metadata.govt_org_type,
+          validOrg.metadata.govt_org_children_type,
+        ]);
+      }
+    }
+  }, [rootOrgs]);
 
   // Get parent ID for the current level
   const getParentId = (index: number) => {
@@ -138,7 +163,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      <div className="flex gap-3">
+      <div className="flex rounded-md border border-1 border-secondary-400 overflow-clip">
         {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
           (_, index) => (
             <OrganizationLevel
@@ -236,8 +261,11 @@ function OrganizationLevel({
 
   return (
     <Autocomplete
+      popoverClassName={classNames(
+        "border-0 shadow-none rounded-none",
+        index !== 0 && "border-l border-secondary-400",
+      )}
       key={`dropdown-${index}`}
-      popoverClassName="sm:min-w-40"
       value={selectedLevels[index]?.id || ""}
       options={options}
       onChange={(value: string) => {
