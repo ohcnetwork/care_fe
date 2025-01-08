@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -29,11 +31,13 @@ import { GENDER_TYPES } from "@/common/constants";
 import { validateUsername } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
+import userApi from "@/types/user/userApi";
 
 const userFormSchema = z
   .object({
@@ -140,25 +144,55 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
   );
   const [usernameInput, setUsernameInput] = useState("");
 
-  const checkUsername = async (username: string) => {
-    setUsernameExists(userExistsEnums.checking);
-    const { res: usernameCheck } = await request(UserApi.checkUsername, {
-      pathParams: { username },
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["checkUsername", usernameInput],
+    queryFn: query(userApi.checkUsername, {
+      pathParams: { username: usernameInput },
       silent: true,
-    });
-    if (usernameCheck === undefined || usernameCheck.status === 409) {
-      setUsernameExists(userExistsEnums.exists);
-    } else if (usernameCheck.status === 200) {
-      setUsernameExists(userExistsEnums.available);
-    } else {
-      Notification.Error({
-        msg: "Some error occurred while checking username availability. Please try again later.",
-      });
+    }),
+    enabled: validateUsername(usernameInput),
+  });
+
+  useEffect(() => {
+    if (!validateUsername(usernameInput)) {
+      setUsernameExists(userExistsEnums.idle);
+      return;
     }
-  };
+
+    if (isLoading) {
+      setUsernameExists(userExistsEnums.checking);
+    } else if (error) {
+      if (error instanceof Error && "status" in error) {
+        const status = (error as any).status;
+
+        if (status === 409) {
+          setUsernameExists(userExistsEnums.exists);
+        } else if (status === 404) {
+          toast.error(
+            "Some error occurred while checking username availability. Please try again later.",
+          );
+          setUsernameExists(userExistsEnums.idle);
+        }
+      } else {
+        toast.error(
+          "Some error occurred while checking username availability. Please try again later.",
+        );
+        setUsernameExists(userExistsEnums.idle);
+      }
+    } else {
+      setUsernameExists(userExistsEnums.available);
+    }
+  }, [data, error, isLoading, usernameInput]);
 
   const renderFeedback = () => {
     switch (usernameExists) {
+      case userExistsEnums.checking:
+        return (
+          <div className="flex items-center gap-1">
+            <CareIcon icon="l-spinner" className="text-xl animate-spin" />
+            <span className="text-md text-gray-500">Checking username...</span>
+          </div>
+        );
       case userExistsEnums.available:
         return (
           <div className="flex items-center gap-1">
@@ -185,15 +219,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     }
   };
 
-  useEffect(() => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsernameInput(value);
     setUsernameExists(userExistsEnums.idle);
-    const timeout = setTimeout(() => {
-      if (validateUsername(usernameInput)) {
-        checkUsername(usernameInput);
-      }
-    }, 500);
-    return () => clearTimeout(timeout);
-  }, [usernameInput]);
+  };
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -303,7 +333,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="username"
@@ -316,7 +345,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                     placeholder={t("username")}
                     {...field}
                     value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
+                    onChange={handleInputChange}
                   />
                 </div>
               </FormControl>
@@ -557,7 +586,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             </div>
           </>
         )}
-
         <FormField
           control={form.control}
           name="geo_organization"
