@@ -13,7 +13,7 @@ import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge, relativeDate } from "@/Utils/utils";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -22,17 +22,8 @@ export const PatientHome = (props: {
   page: (typeof patientTabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
-  // const [patientData, setPatientData] = useState<PatientModel>({});
 
   const { t } = useTranslation();
-
-  // const [assignedVolunteer, setAssignedVolunteer] = useState<
-  //   AssignedToObjectModel | undefined
-  // >(patientData.assigned_to_object);
-
-  // useEffect(() => {
-  //   setAssignedVolunteer(patientData.assigned_to_object);
-  // }, [patientData.assigned_to_object]);
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
@@ -44,66 +35,9 @@ export const PatientHome = (props: {
     enabled: !!id,
   });
 
-  // const handleAssignedVolunteer = async () => {
-  //   const previousVolunteerId = patientData?.assigned_to;
-
-  //   const { res, data } = await request(routes.patchPatient, {
-  //     pathParams: {
-  //       id: patientData.id as string,
-  //     },
-  //     body: {
-  //       assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
-  //     },
-  //   });
-
-  //   if (res?.ok && data) {
-  //     setPatientData(data);
-
-  //     if (!previousVolunteerId && assignedVolunteer) {
-  //       Notification.Success({
-  //         msg: t("volunteer_assigned"),
-  //       });
-  //     } else if (previousVolunteerId && assignedVolunteer) {
-  //       Notification.Success({
-  //         msg: t("volunteer_update"),
-  //       });
-  //     } else if (!assignedVolunteer) {
-  //       Notification.Success({
-  //         msg: t("volunteer_unassigned"),
-  //       });
-  //     }
-
-  //     refetch();
-  //   }
-
-  //   setOpenAssignVolunteerDialog(false);
-
-  //   if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  // };
-
   if (isLoading) {
     return <Loading />;
   }
-
-  // const handlePatientTransfer = async (value: boolean) => {
-  //   await request(routes.patchPatient, {
-  //     pathParams: {
-  //       id: patientData.id as string,
-  //     },
-  //     body: { allow_transfer: value },
-  //     onResponse: ({ res }) => {
-  //       if (res?.status === 200) {
-  //         setPatientData((prev) => ({
-  //           ...prev,
-  //           allow_transfer: value,
-  //         }));
-  //         Notification.Success({
-  //           msg: t("transfer_status_updated"),
-  //         });
-  //       }
-  //     },
-  //   });
-  // };
 
   const Tab = patientTabs.find((t) => t.route === page)?.component;
 
@@ -151,36 +85,6 @@ export const PatientHome = (props: {
                         {t(`GENDER__${patientData.gender}`)}, {"  "}
                         {patientData.blood_group?.replace("_", " ")}
                       </h3>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-full space-y-2">
-                  <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
-                    <div>
-                      {/* {patientData?.is_active &&
-                        (!patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date) && (
-                          <div>
-                            <Button
-                              id="create-consultation"
-                              className="w-full"
-                              size="default"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("add_consultation")}
-                              </span>
-                            </Button>
-                          </div>
-                        )} */}
                     </div>
                   </div>
                 </div>
@@ -247,26 +151,6 @@ export const PatientHome = (props: {
                         </span>
                       </Button>
                     </div>
-
-                    {/* {NonReadOnlyUsers && (
-                      <div>
-                        <Button
-                          id="assign-volunteer"
-                          onClick={() => setOpenAssignVolunteerDialog(true)}
-                          disabled={false}
-                          authorizeFor={NonReadOnlyUsers}
-                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                          size="large"
-                        >
-                          <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon icon="l-users-alt" className="text-lg" />{" "}
-                            {patientData.assigned_to
-                              ? t("update_volunteer")
-                              : t("assign_to_volunteer")}
-                          </span>
-                        </Button>
-                      </div>
-                    )} */}
                   </div>
                 </div>
               </div>
@@ -276,53 +160,50 @@ export const PatientHome = (props: {
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
             >
-              <div>
-                {/* <div className="my-1 rounded-sm p-2">
-                  <div>
-                    <div className="text-xs font-normal text-gray-600">
-                      {t("last_updated_by")}{" "}
-                      <span className="font-semibold text-gray-900">
-                        {patientData.last_edited?.first_name}{" "}
-                        {patientData.last_edited?.last_name}
-                      </span>
-                    </div>
-                    <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                      <div className="tooltip">
-                        <span className={`tooltip-text tooltip`}>
-                          {patientData.modified_date
-                            ? formatDateTime(patientData.modified_date)
-                            : "--:--"}
-                        </span>
+              <div className="my-1 rounded-sm p-2">
+                <div>
+                  <div className="text-xs font-normal text-gray-600">
+                    {t("last_updated_by")}{" "}
+                    <span className="font-semibold text-gray-900">
+                      {patientData.updated_by?.first_name}{" "}
+                      {patientData.updated_by?.last_name}
+                    </span>
+                  </div>
+                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
+                    <div className="tooltip">
+                      <span className={`tooltip-text tooltip`}>
                         {patientData.modified_date
-                          ? relativeDate(patientData.modified_date)
+                          ? formatDateTime(patientData.modified_date)
                           : "--:--"}
-                      </div>
-                    </div>
-                  </div> */}
-                {
-                  // TODO: Add this back when backend provides created_date
-                  /* <div className="mt-4">
-                    <div className="text-xs font-normal leading-5 text-gray-600">
-                      {t("patient_profile_created_by")}{" "}
-                      <span className="font-semibold text-gray-900">
-                        {patientData.created_by?.first_name}{" "}
-                        {patientData.created_by?.last_name}
                       </span>
+                      {patientData.modified_date
+                        ? relativeDate(patientData.modified_date)
+                        : "--:--"}
                     </div>
-                    <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                      <div className="tooltip">
-                        <span className={`tooltip-text tooltip`}>
-                          {patientData.created_date
-                            ? formatDateTime(patientData.created_date)
-                            : "--:--"}
-                        </span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="text-xs font-normal leading-5 text-gray-600">
+                    {t("patient_profile_created_by")}{" "}
+                    <span className="font-semibold text-gray-900">
+                      {patientData.created_by?.first_name}{" "}
+                      {patientData.created_by?.last_name}
+                    </span>
+                  </div>
+                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
+                    <div className="tooltip">
+                      <span className={`tooltip-text tooltip`}>
                         {patientData.created_date
-                          ? relativeDate(patientData.created_date)
+                          ? formatDateTime(patientData.created_date)
                           : "--:--"}
-                      </div>
+                      </span>
+                      {patientData.created_date
+                        ? relativeDate(patientData.created_date)
+                        : "--:--"}
                     </div>
-                  </div> */
-                }
+                  </div>
+                </div>
               </div>
             </div>
             <div className="py-2">

@@ -20,48 +20,42 @@ export function BooleanQuestion({
   clearError,
 }: BooleanQuestionProps) {
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-normal">
-        {question.text}
-        {question.required && <span className="ml-1 text-red-500">*</span>}
-      </Label>
-      <RadioGroup
-        value={questionnaireResponse.values[0]?.value?.toString()}
-        onValueChange={(value) => {
-          clearError();
-          updateQuestionnaireResponseCB({
-            ...questionnaireResponse,
-            values: [
-              {
-                type: "boolean",
-                value: value === "true",
-              },
-            ],
-          });
-        }}
-        disabled={disabled}
-      >
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="true" id={`${question.id}-true`} />
-            <Label
-              htmlFor={`${question.id}-true`}
-              className="text-sm font-normal"
-            >
-              True
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="false" id={`${question.id}-false`} />
-            <Label
-              htmlFor={`${question.id}-false`}
-              className="text-sm font-normal"
-            >
-              False
-            </Label>
-          </div>
+    <RadioGroup
+      value={questionnaireResponse.values[0]?.value?.toString()}
+      onValueChange={(value) => {
+        clearError();
+        updateQuestionnaireResponseCB({
+          ...questionnaireResponse,
+          values: [
+            {
+              type: "boolean",
+              value: value === "true",
+            },
+          ],
+        });
+      }}
+      disabled={disabled}
+    >
+      <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="true" id={`${question.id}-true`} />
+          <Label
+            htmlFor={`${question.id}-true`}
+            className="text-sm font-normal"
+          >
+            True
+          </Label>
         </div>
-      </RadioGroup>
-    </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="false" id={`${question.id}-false`} />
+          <Label
+            htmlFor={`${question.id}-false`}
+            className="text-sm font-normal"
+          >
+            False
+          </Label>
+        </div>
+      </div>
+    </RadioGroup>
   );
 }

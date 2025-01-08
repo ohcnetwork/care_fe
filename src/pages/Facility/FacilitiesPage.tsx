@@ -1,26 +1,23 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
+import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
-import { LocalStorageKeys } from "@/common/constants";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
 
 import OrganizationFilter from "../Organization/components/OrganizationFilter";
 import { FacilityCard } from "./components/FacilityCard";
@@ -31,10 +28,6 @@ export function FacilitiesPage() {
     useFilters({
       limit: RESULTS_PER_PAGE_LIMIT,
     });
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
 
   const { t } = useTranslation();
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
@@ -70,48 +63,13 @@ export function FacilitiesPage() {
     enabled: !!qParams.organization,
   });
 
-  const GetLoginHeader = () => {
-    if (
-      tokenData &&
-      tokenData.createdAt &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-    ) {
-      return (
-        <header className="w-full p-4">
-          <div className="flex items-center justify-end">
-            <Button
-              variant="ghost"
-              className="px-6 text-sm font-medium rounded-full hover:bg-gray-100"
-              onClick={() => navigate("/patient/home")}
-            >
-              {t("patient_dashboard")}
-            </Button>
-          </div>
-        </header>
-      );
-    }
-    return (
-      <header className="w-full p-4">
-        <div className="flex items-center justify-end">
-          <Button
-            variant="ghost"
-            className="px-6 text-sm font-medium rounded-full hover:bg-gray-100"
-            onClick={() => navigate("/login")}
-          >
-            {t("sign_in")}
-          </Button>
-        </div>
-      </header>
-    );
-  };
-
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="flex items-start justify-between w-full">
         <Link href="/" className="">
           <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
         </Link>
-        <GetLoginHeader />
+        <LoginHeader />
       </div>
       <div className="flex flex-col items-start justify-between gap-5 mt-4 sm:flex-row">
         <OrganizationFilter

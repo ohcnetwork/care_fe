@@ -2,7 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Organization } from "../organization/organization";
-import { QuestionnaireDetail } from "./questionnaire";
+import { QuestionnaireDetail, QuestionnaireUpdate } from "./questionnaire";
 
 export default {
   list: {
@@ -27,7 +27,7 @@ export default {
   update: {
     path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<QuestionnaireDetail>(),
+    TRes: Type<QuestionnaireUpdate>(),
     TBody: Type<QuestionnaireDetail>(),
   },
 

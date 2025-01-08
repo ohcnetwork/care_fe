@@ -25,13 +25,12 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
-
-import { AppointmentPatient } from "@/pages/Patient/Utils";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 export function FacilityNavUser() {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile, open } = useSidebar();
+  const { isMobile, open, setOpenMobile } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -94,7 +93,12 @@ export function FacilityNavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => navigate(`/users/${user.username}`)}
+                onClick={() => {
+                  navigate(`/users/${user.username}`);
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
               >
                 <BadgeCheck />
                 {t("profile")}
@@ -112,16 +116,14 @@ export function FacilityNavUser() {
   );
 }
 
-export function PatientNavUser({
-  patient,
-  phoneNumber,
-}: {
-  patient: AppointmentPatient | null;
-  phoneNumber: string;
-}) {
+export function PatientNavUser() {
   const { t } = useTranslation();
   const { isMobile, open } = useSidebar();
   const signOut = usePatientSignOut();
+  const patientUserContext = usePatientContext();
+
+  const patient = patientUserContext?.selectedPatient;
+  const phoneNumber = patientUserContext?.tokenData.phoneNumber;
 
   return (
     <SidebarMenu>

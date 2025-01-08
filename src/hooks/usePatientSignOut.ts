@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { useCallback } from "react";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 
 const getRedirectURL = () => {
   return new URLSearchParams(window.location.search).get("redirect");
@@ -9,7 +9,7 @@ const getRedirectURL = () => {
 
 export const usePatientSignOut = () => {
   const signOut = useCallback(async () => {
-    localStorage.removeItem(CarePatientTokenKey);
+    localStorage.removeItem(LocalStorageKeys.patientTokenKey);
     localStorage.removeItem("selectedPatient");
 
     const redirectURL = getRedirectURL();

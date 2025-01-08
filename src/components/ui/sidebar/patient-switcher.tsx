@@ -10,22 +10,25 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { PatientUserContextType } from "@/Providers/PatientUserProvider";
+import { usePatientContext } from "@/hooks/usePatientUser";
+
 import { classNames } from "@/Utils/utils";
 
 import { useSidebar } from "../sidebar";
 
 interface PatientSwitcherProps {
-  patientUserContext: PatientUserContextType;
   className?: string;
 }
 
-export function PatientSwitcher({
-  patientUserContext,
-  className,
-}: PatientSwitcherProps) {
+export function PatientSwitcher({ className }: PatientSwitcherProps) {
   const { t } = useTranslation();
   const { open } = useSidebar();
+
+  const patientUserContext = usePatientContext();
+
+  if (!patientUserContext) {
+    return null;
+  }
 
   return (
     <div
