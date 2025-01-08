@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 
@@ -40,9 +41,7 @@ export function handleHttpError(error: Error) {
     return;
   }
 
-  Notifications.notifyError({
-    msg: cause?.detail || "Something went wrong...!",
-  });
+  toast.error((cause?.detail as string) || t("something_went_wrong"));
 }
 
 function isSessionExpired(error: HTTPError["cause"]) {

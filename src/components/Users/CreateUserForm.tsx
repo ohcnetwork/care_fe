@@ -26,7 +26,6 @@ import {
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
@@ -136,9 +135,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         toast.success(t("user_added_successfully"));
         onSubmitSuccess?.(user!);
       } else {
-        Notification.notifyError({
-          msg: error?.message ?? t("user_add_error"),
-        });
+        toast.error((error?.message as string) ?? t("user_add_error"));
       }
     } catch (error) {
       toast.error(t("user_add_error"));

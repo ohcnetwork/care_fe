@@ -19,7 +19,7 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-export const notifyError = (error: any) => {
+const notifyError = (error: any) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
     console.log("string", error);
