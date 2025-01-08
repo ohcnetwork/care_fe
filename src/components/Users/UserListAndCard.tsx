@@ -89,6 +89,7 @@ const getNameAndStatusCard = (user: UserBase, showDetailsButton = false) => {
 export const UserStatusIndicator = ({
   user,
   addPadding = false,
+  className = "",
 }: {
   user: UserBase;
   className?: string;
@@ -101,7 +102,7 @@ export const UserStatusIndicator = ({
   return (
     <span
       title={`${new Date(user.last_login).toLocaleString()}`}
-      className={addPadding ? "px-3 py-1" : "py-px"}
+      className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
       {isUserOnline(user) || isAuthUser ? (
         <Badge variant="secondary" className="bg-green-100 whitespace-nowrap">
