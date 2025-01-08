@@ -1632,6 +1632,7 @@
   "select": "தேர்ந்தெடு",
   "select_all": "Select All",
   "select_date": "தேதியைத் தேர்ந்தெடுக்கவும்",
+  "select_department": "Select Department",
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_facility_for_discharged_patients_warning": "டிஸ்சார்ஜ் செய்யப்பட்ட நோயாளிகளைப் பார்க்க வசதியைத் தேர்ந்தெடுக்க வேண்டும்.",
   "select_for_administration": "நிர்வாகத்திற்கு தேர்ந்தெடுக்கவும்",
