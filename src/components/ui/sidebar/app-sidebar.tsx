@@ -24,8 +24,6 @@ import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switc
 
 import { UserFacilityModel, UserModel } from "@/components/Users/models";
 
-import { usePatientContext } from "@/hooks/usePatientUser";
-
 import { PatientUserContextType } from "@/Providers/PatientUserProvider";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { Organization } from "@/types/organization/organization";
@@ -129,6 +127,7 @@ function generatePatientLinks(
 
 export function AppSidebar({
   user,
+  patientUserContext,
   facilitySidebar = true,
   ...props
 }: AppSidebarProps) {
@@ -142,8 +141,6 @@ export function AppSidebar({
 
   const [selectedFacility, setSelectedFacility] =
     React.useState<UserFacilityModel | null>(null);
-
-  const patientUserContext = usePatientContext();
 
   const { t } = useTranslation();
 
