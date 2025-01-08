@@ -105,7 +105,7 @@ export function FacilitiesPage() {
               shortcutKey: "f",
             },
           ]}
-          className="max-w-min sm:min-w-64"
+          className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}

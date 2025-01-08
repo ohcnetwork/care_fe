@@ -43,8 +43,8 @@ export function OrganizationLevel({
   return (
     <Autocomplete
       popoverClassName={classNames(
-        "sm:border-0 sm:border-0 sm:shadow-none sm:rounded-none sm:max-w-56",
-        index !== 0 && "sm:border-l sm:border-secondary-500",
+        "lg:border-0 lg:border-0 lg:shadow-none lg:rounded-none lg:max-w-56",
+        index !== 0 && "lg:border-l lg:border-secondary-500",
       )}
       key={`dropdown-${index}`}
       value={selectedLevels[index]?.id || ""}

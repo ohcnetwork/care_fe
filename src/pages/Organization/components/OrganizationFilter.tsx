@@ -120,7 +120,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
+    <div className="flex flex-col flex-wrap sm:flex-row gap-3">
       <Select
         value={selectedFacilityType?.text || ""}
         onValueChange={(value) => {
@@ -144,7 +144,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ))}
         </SelectContent>
       </Select>
-      <div className="flex flex-col gap-2 sm:flex-row sm:rounded-md sm:border sm:border-1 sm:border-secondary-500 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
+      <div className="flex flex-col gap-2 lg:gap-0 lg:flex-row lg:rounded-md lg:border lg:border-1 lg:border-secondary-500 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
         {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
           (_, index) => (
             <OrganizationLevel
