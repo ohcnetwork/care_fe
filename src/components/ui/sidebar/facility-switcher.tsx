@@ -26,7 +26,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -64,7 +64,12 @@ export function FacilitySwitcher({
             {facilities.map((facility, index) => (
               <DropdownMenuItem
                 key={index}
-                onClick={() => navigate(`/facility/${facility.id}`)}
+                onClick={() => {
+                  navigate(`/facility/${facility.id}`);
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">

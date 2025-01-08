@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -7,20 +8,20 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import Loading from "@/components/Common/Loading";
 import { UserModel } from "@/components/Users/models";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
   const { t } = useTranslation();
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
+
+  const patientUserContext = usePatientContext();
+  const tokenData = patientUserContext?.tokenData;
+
   const userData: UserModel = JSON.parse(localStorage.getItem("user") ?? "{}");
 
   const { data, isLoading, error } = useQuery({
@@ -44,6 +45,13 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   if (isLoading) {
     return <Loading />;
   }
+
+  const appointmentTime = dayjs(appointmentData?.token_slot.start_datetime)
+    .add(-5, "hours")
+    .add(-30, "minutes")
+    .toISOString();
+  const appointmentDate = format(new Date(appointmentTime), "do MMMM");
+  const appointmentTimeSlot = format(new Date(appointmentTime), "hh:mm a");
 
   return (
     <div className="mx-auto p-2 max-w-3xl">
@@ -76,28 +84,14 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("date")}:
           </h2>
-          <p className="text-lg font-medium">
-            {appointmentData?.token_slot.start_datetime
-              ? format(
-                  new Date(appointmentData?.token_slot.start_datetime),
-                  "do MMMM",
-                )
-              : ""}
-          </p>
+          <p className="text-lg font-medium">{appointmentDate}</p>
         </div>
 
         <div>
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("time")}:
           </h2>
-          <p className="text-lg font-medium">
-            {appointmentData?.token_slot.start_datetime
-              ? format(
-                  new Date(appointmentData?.token_slot.start_datetime),
-                  "hh:mm a",
-                )
-              : ""}
-          </p>
+          <p className="text-lg font-medium">{appointmentTimeSlot}</p>
         </div>
       </div>
 
