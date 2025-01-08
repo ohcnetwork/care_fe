@@ -40,7 +40,7 @@ export function handleHttpError(error: Error) {
     return;
   }
 
-  Notifications.Error({
+  Notifications.notifyError({
     msg: cause?.detail || "Something went wrong...!",
   });
 }

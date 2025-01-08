@@ -15,7 +15,7 @@ export default function handleResponse(
 
   // 404 Not Found
   if (res.status === 404) {
-    notify?.Error({ msg: "Not Found" });
+    notify?.notifyError({ msg: "Not Found" });
     return;
   }
 
@@ -39,7 +39,7 @@ export default function handleResponse(
       return;
     }
 
-    notify?.Error({ msg: error?.detail || "Something went wrong...!" });
+    notify?.notifyError({ msg: error?.detail || "Something went wrong...!" });
     return;
   }
 }

@@ -26,6 +26,7 @@ import {
 
 import { GENDER_TYPES } from "@/common/constants";
 
+import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
@@ -125,6 +126,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       } = await request(UserApi.create, {
         body: {
           ...data,
+          email: "invalid-email-format",
           // Omit c_password as it's not needed in the API
           c_password: undefined,
         } as unknown as UserBase,
@@ -134,7 +136,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         toast.success(t("user_added_successfully"));
         onSubmitSuccess?.(user!);
       } else {
-        toast.error(String(error?.message || t("password_update_error")));
+        Notification.notifyError({
+          msg: error?.message ?? t("user_add_error"),
+        });
       }
     } catch (error) {
       toast.error(t("user_add_error"));

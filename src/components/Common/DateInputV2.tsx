@@ -149,7 +149,9 @@ const DateInputV2: React.FC<Props> = ({
             setIsOpen?.(false);
           }
         })()
-      : toast.error("Cannot select date out of range");
+      : toast.error(
+          outOfLimitsErrorMessage ?? "Cannot select date out of range",
+        );
   };
 
   const handleTimeChange = (options: {

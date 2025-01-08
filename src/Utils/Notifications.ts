@@ -19,7 +19,7 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-const notifyError = (error: any) => {
+export const notifyError = (error: any) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
     errorMsg =
@@ -41,14 +41,6 @@ const notifyError = (error: any) => {
     }
   }
   toast.error(errorMsg);
-};
-
-/**
- * Error message handler
- * @deprecated Use `toast.error` instead
- */
-export const Error = ({ msg }: { msg: any }) => {
-  notifyError(msg);
 };
 
 /**
