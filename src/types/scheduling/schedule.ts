@@ -61,6 +61,21 @@ export interface ScheduleAvailability {
   availability: AvailabilityDateTime[];
 }
 
+export interface ScheduleAvailabilityCreateRequest {
+  name: string;
+  slot_type: ScheduleSlotType;
+  slot_size_in_minutes: number;
+  tokens_per_slot: number;
+  reason: string;
+  availability: AvailabilityDateTime[];
+}
+
+export interface ScheduleAvailabilityUpdateRequest {
+  name: string;
+  tokens_per_slot: number;
+  reason: string;
+}
+
 export interface ScheduleException {
   id: string;
   reason: string;

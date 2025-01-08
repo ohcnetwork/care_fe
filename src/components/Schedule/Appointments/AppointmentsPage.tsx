@@ -94,6 +94,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const date = qParams.date ?? dateQueryString(new Date());
 
   const setQParams = (params: QueryParams) => {
+    // TODO: use null for deletion as per raviger's docs
     params = FiltersCache.utils.clean({ ...qParams, ...params });
     _setQParams(params, { replace: true });
   };
@@ -407,7 +408,9 @@ function AppointmentColumn(props: {
         limit: 100,
         slot: props.slot,
         user: props.practitioner,
-        date: props.date,
+        // TODO: update this
+        // date_after: props.date,
+        // date_before: props.date,
       },
     }),
   });

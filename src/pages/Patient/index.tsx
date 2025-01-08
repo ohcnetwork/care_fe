@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -22,6 +22,7 @@ import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/ut
 
 import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -29,6 +30,7 @@ import { Appointment } from "@/types/scheduling/schedule";
 
 function PatientIndex() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const [selectedAppointment, setSelectedAppointment] = useState<
     Appointment | undefined
@@ -51,6 +53,19 @@ function PatientIndex() {
       },
     }),
     enabled: !!tokenData?.token,
+  });
+
+  const { mutate: cancelAppointment, isPending } = useMutation({
+    mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+      headers: {
+        Authorization: `Bearer ${tokenData?.token}`,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", tokenData?.phoneNumber],
+      });
+    },
   });
 
   const getStatusChip = (status: string) => {
@@ -141,7 +156,16 @@ function PatientIndex() {
               {t(appointment.status)}
             </span>
             <span className="flex flex-row gap-2">
-              <Button variant="destructive">
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() =>
+                  cancelAppointment({
+                    appointment: appointment.id,
+                    patient: appointment.patient.id,
+                  })
+                }
+              >
                 <span>{t("cancel")}</span>
               </Button>
               <Button variant="secondary">

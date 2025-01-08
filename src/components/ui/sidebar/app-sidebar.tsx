@@ -76,7 +76,7 @@ function generateFacilityLinks(
 
   if (user) {
     links.push({
-      name: t("schedules"),
+      name: t("my_schedules"),
       url: `${baseUrl}/users/${user.username}/availability`,
       icon: "d-calendar",
     });

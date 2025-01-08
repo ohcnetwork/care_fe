@@ -6,6 +6,9 @@ import {
   AppointmentUpdateRequest,
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
+  ScheduleAvailability,
+  ScheduleAvailabilityCreateRequest,
+  ScheduleAvailabilityUpdateRequest,
   ScheduleException,
   ScheduleExceptionCreateRequest,
   ScheduleTemplate,
@@ -17,7 +20,7 @@ import { UserBase } from "@/types/user/user";
 
 export default {
   /**
-   * Schedule Template Related APIs
+   * Schedule Template related APIs
    */
   templates: {
     create: {
@@ -25,6 +28,11 @@ export default {
       method: HttpMethod.POST,
       TRes: Type<ScheduleTemplate>(),
       TBody: Type<ScheduleTemplateCreateRequest>(),
+    },
+    retrieve: {
+      path: "/api/v1/facility/{facility_id}/schedule/{id}/",
+      method: HttpMethod.GET,
+      TRes: Type<ScheduleTemplate>(),
     },
     list: {
       path: "/api/v1/facility/{facility_id}/schedule/",
@@ -43,10 +51,44 @@ export default {
       TBody: Type<void>(),
       TRes: Type<void>(),
     },
+
+    /**
+     * Schedule Template's Availability related APIs
+     */
+    availabilities: {
+      list: {
+        path: "/api/v1/facility/{facility_id}/schedule/{schedule_id}/availability/",
+        method: HttpMethod.GET,
+        TRes: Type<PaginatedResponse<ScheduleAvailability>>(),
+      },
+      retrieve: {
+        path: "/api/v1/facility/{facility_id}/schedule/{schedule_id}/availability/{id}/",
+        method: HttpMethod.GET,
+        TRes: Type<ScheduleAvailability>(),
+      },
+      create: {
+        path: "/api/v1/facility/{facility_id}/schedule/{schedule_id}/availability/",
+        method: HttpMethod.POST,
+        TBody: Type<ScheduleAvailabilityCreateRequest>(),
+        TRes: Type<ScheduleAvailability>(),
+      },
+      update: {
+        path: "/api/v1/facility/{facility_id}/schedule/{schedule_id}/availability/{id}/",
+        method: HttpMethod.PUT,
+        TBody: Type<ScheduleAvailabilityUpdateRequest>(),
+        TRes: Type<ScheduleAvailability>(),
+      },
+      delete: {
+        path: "/api/v1/facility/{facility_id}/schedule/{schedule_id}/availability/{id}/",
+        method: HttpMethod.DELETE,
+        TBody: Type<void>(),
+        TRes: Type<void>(),
+      },
+    },
   },
 
   /**
-   * Schedule Exception Related APIs
+   * Schedule Exception related APIs
    */
   exceptions: {
     create: {
@@ -69,7 +111,7 @@ export default {
   },
 
   /**
-   * Schedule Token Slot Related APIs
+   * Schedule Token Slot related APIs
    */
   slots: {
     getSlotsForDay: {
@@ -127,4 +169,4 @@ export default {
       TRes: Type<{ users: UserBase[] }>(),
     },
   },
-};
+} as const;

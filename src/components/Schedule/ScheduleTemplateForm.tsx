@@ -274,8 +274,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                           className="text-lg text-blue-600"
                         />
                         <span className="font-semibold">
-                          {form.watch(`availabilities.${index}.name`) ||
-                            "Untitled Session"}
+                          {form.watch(`availabilities.${index}.name`)}
                         </span>
                       </div>
                       <Button

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -37,8 +38,13 @@ type Props = {
   userData: UserBase;
 };
 
+type AvailabilityTabQueryParams = {
+  view?: "schedule" | "exceptions";
+};
+
 export default function UserAvailabilityTab({ userData: user }: Props) {
-  const [view, setView] = useState<"schedule" | "exceptions">("schedule");
+  const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
+  const view = qParams.view || "schedule";
   const [month, setMonth] = useState(new Date());
 
   const facilityId = useSlug("facility");
@@ -217,14 +223,14 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() => setView("schedule")}
+              onClick={() => setQParams({ view: "schedule" })}
               className={cn(view === "schedule" && "shadow", "hover:bg-white")}
             >
               Schedule
             </Button>
             <Button
               variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setView("exceptions")}
+              onClick={() => setQParams({ view: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow",
                 "hover:bg-white",
