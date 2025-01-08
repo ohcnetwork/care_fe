@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { format } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -248,11 +248,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 className="flex flex-col items-center group py-6 gap-1"
                               >
                                 <span className="font-semibold">
-                                  {/* TODO: remove this once BE is updated */}
-                                  {dayjs(slot.start_datetime)
-                                    .add(-5, "hours")
-                                    .add(-30, "minutes")
-                                    .format("HH:mm")}
+                                  {format(slot.start_datetime, "HH:mm")}
                                 </span>
                                 <span
                                   className={cn(
