@@ -42,6 +42,37 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/questionnaire": ({
+    facilityId,
+    patientId,
+  }) => (
+    <EncounterQuestionnaire
+      facilityId={facilityId}
+      patientId={patientId}
+      subjectType="patient"
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
+    ({ facilityId, encounterId, patientId }) => (
+      <EncounterQuestionnaire
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
+    ({ facilityId, encounterId, slug, patientId }) => (
+      <EncounterQuestionnaire
+        facilityId={facilityId}
+        encounterId={encounterId}
+        questionnaireSlug={slug}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
+    ({ patientId, id }) => (
+      <QuestionnaireResponseView responseId={id} patientId={patientId} />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
     ({ facilityId, patientId, id }) => (
       <PatientConsentRecords
@@ -62,37 +93,6 @@ const consultationRoutes: AppRoutes = {
       type="encounter"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/questionnaire": ({
-    facilityId,
-    patientId,
-  }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
-      subjectType="patient"
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
-    ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
-    ({ patientId, id }) => (
-      <QuestionnaireResponseView responseId={id} patientId={patientId} />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
-    ({ facilityId, encounterId, slug, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        questionnaireSlug={slug}
-        patientId={patientId}
-      />
-    ),
 };
 
 export default consultationRoutes;
