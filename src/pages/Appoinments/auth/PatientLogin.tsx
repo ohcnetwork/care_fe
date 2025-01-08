@@ -25,12 +25,12 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
+import CircularProgress from "@/components/Common/CircularProgress";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
-
-import { LocalStorageKeys } from "@/common/constants";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -64,12 +64,11 @@ export default function PatientLogin({
       pin: "",
     },
   });
-
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
+  const { patientLogin } = useAuthContext();
+  const { patientToken: tokenData } = useAuthContext();
 
   if (
+    tokenData &&
     Object.keys(tokenData).length > 0 &&
     dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
   ) {
@@ -90,7 +89,7 @@ export default function PatientLogin({
     return errors;
   };
 
-  const { mutate: sendOTP } = useMutation({
+  const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: (phoneNumber: string) =>
       request(routes.otp.sendOtp, {
         body: {
@@ -100,23 +99,7 @@ export default function PatientLogin({
       }),
     onSuccess: () => {
       if (page === "send") {
-        const tokenData: TokenData = JSON.parse(
-          localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-        );
-        if (
-          Object.keys(tokenData).length > 0 &&
-          tokenData.phoneNumber === phoneNumber &&
-          dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-        ) {
-          toast.success(t("valid_otp_found"));
-          navigate(
-            `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
-          );
-        } else {
-          navigate(
-            `/facility/${facilityId}/appointments/${staffId}/otp/verify`,
-          );
-        }
+        navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
     },
     onError: () => {
@@ -134,7 +117,7 @@ export default function PatientLogin({
     sendOTP(phoneNumber);
   };
 
-  const { mutate: verifyOTP } = useMutation({
+  const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
     mutationFn: async ({
       phone_number,
       otp,
@@ -158,11 +141,8 @@ export default function PatientLogin({
           phoneNumber: phoneNumber,
           createdAt: new Date().toISOString(),
         };
-        localStorage.setItem(
-          LocalStorageKeys.patientTokenKey,
-          JSON.stringify(tokenData),
-        );
-        navigate(
+        patientLogin(
+          tokenData,
           `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
       }
@@ -204,9 +184,14 @@ export default function PatientLogin({
             variant="primary"
             type="submit"
             className="w-full h-12 text-lg"
+            disabled={isSendOTPLoading}
           >
             <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-            {t("send_otp")}
+            {isSendOTPLoading ? (
+              <CircularProgress className="text-white" />
+            ) : (
+              t("send_otp")
+            )}
           </Button>
         </form>
       </div>
@@ -264,8 +249,13 @@ export default function PatientLogin({
               variant="primary_gradient"
               type="submit"
               className="w-full h-12 text-lg"
+              disabled={isVerifyOTPLoading}
             >
-              {t("verify_otp")}
+              {isVerifyOTPLoading ? (
+                <CircularProgress className="text-white" />
+              ) : (
+                t("verify_otp")
+              )}
             </Button>
             <a
               className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
