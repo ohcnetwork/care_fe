@@ -32,7 +32,7 @@ const CommentSection = (props: { id: string }) => {
       body: payload,
     });
     if (res?.ok) {
-      toast.success("Comment added successfully");
+      toast.success(t("comment_added_successfully"));
     }
     setCommentBox("");
   };

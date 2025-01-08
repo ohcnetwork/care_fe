@@ -143,7 +143,7 @@ export default function CreateFacilityForm({
         },
         (error) => {
           setIsGettingLocation(false);
-          toast.error("Unable to get location: " + error.message);
+          toast.error(t("unable_to_get_location") + error.message);
         },
         { timeout: 10000 }, // 10 second timeout
       );

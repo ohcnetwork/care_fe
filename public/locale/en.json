@@ -1814,6 +1814,7 @@
   "type_your_comment": "Type your comment",
   "type_your_reason_here": "Type your reason here",
   "unable_to_get_current_position": "Unable to get current position.",
+  "unable_to_get_location: ": "Unable to get location: ",
   "unassign": "Unassign",
   "unconfirmed": "Unconfirmed",
   "unique_id": "Unique Id",

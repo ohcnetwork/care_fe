@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { toast } from "sonner";
 
 import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
@@ -70,7 +71,7 @@ export default function UserFilter(props: any) {
       last_active_days: last_active_days || "",
     };
     if (state && !district) {
-      toast.warning("District is required when state is selected");
+      toast.warning(t("district_is_required_when_state_is_selected"));
       return;
     }
     onChange(data);

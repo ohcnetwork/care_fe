@@ -28,7 +28,7 @@ export default function UserSoftwareUpdate() {
         isUpdateAvailable: false,
         isChecking: false,
       });
-      toast.success(t("No update available"));
+      toast.success(t("no_update_available"));
     }
   };
 
