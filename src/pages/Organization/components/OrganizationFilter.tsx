@@ -1,8 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,13 +11,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
 import { FilterState } from "@/hooks/useFilters";
 
 import { FACILITY_TYPES, OptionsType } from "@/common/constants";
 
 import query from "@/Utils/request/query";
-import { classNames } from "@/Utils/utils";
+import { OrganizationLevel } from "@/pages/Organization/components/OrganizationLevel";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -28,11 +26,6 @@ interface OrganizationFilterProps {
   skipLevels?: number[];
   required?: boolean;
   className?: string;
-}
-
-interface AutoCompleteOption {
-  label: string;
-  value: string;
 }
 
 const DEFAULT_ORG_LEVELS = 3;
@@ -117,16 +110,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     return selectedLevels[index - 1]?.id;
   };
 
-  const getOrganizationOptions = (
-    orgs?: Organization[],
-  ): AutoCompleteOption[] => {
-    if (!orgs) return [];
-    return orgs.map((org) => ({
-      label: org.name,
-      value: org.id,
-    }));
-  };
-
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
     setOrgTypes((prevTypes) => {
@@ -175,7 +158,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               setOrgTypes={setOrgTypes}
               onChange={onChange}
               getParentId={getParentId}
-              getOrganizationOptions={getOrganizationOptions}
             />
           ),
         )}
@@ -190,104 +172,5 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         {t("clear")}
       </Button>
     </div>
-  );
-}
-
-interface OrganizationLevelProps {
-  index: number;
-  skip: boolean;
-  selectedLevels: Organization[];
-  orgTypes: string[];
-  setOrgTypes: React.Dispatch<React.SetStateAction<string[]>>;
-  onChange: (Filter: FilterState, index?: number) => void;
-  getParentId: (index: number) => string;
-  getOrganizationOptions: (orgs?: Organization[]) => AutoCompleteOption[];
-}
-
-function OrganizationLevel({
-  index,
-  skip,
-  selectedLevels,
-  orgTypes,
-  setOrgTypes,
-  onChange,
-  getParentId,
-  getOrganizationOptions,
-}: OrganizationLevelProps) {
-  const [levelSearch, setLevelSearch] = useDebouncedState("", 500);
-  const { t } = useTranslation();
-  const { data: availableOrgs } = useQuery<{ results: Organization[] }>({
-    queryKey: ["organizations-available", getParentId(index), levelSearch],
-    queryFn: query(organizationApi.getPublicOrganizations, {
-      queryParams: {
-        ...(index > 0 && { parent: getParentId(index) }),
-        ...(index === 0 && { level_cache: 1 }),
-        name: levelSearch || undefined,
-      },
-    }),
-    enabled:
-      !skip &&
-      index <= selectedLevels.length &&
-      (index === 0 || selectedLevels[index - 1] !== undefined),
-  });
-
-  // Update org types when we get new data for this level
-  useEffect(() => {
-    if (selectedLevels[index]) {
-      const currentOrg = selectedLevels[index];
-      if (currentOrg?.metadata?.govt_org_children_type) {
-        setOrgTypes((prevTypes) => {
-          const newTypes = [...prevTypes];
-          // Update next level type
-          if (currentOrg.metadata?.govt_org_children_type) {
-            if (index === newTypes.length) {
-              newTypes.push(currentOrg.metadata.govt_org_children_type);
-            } else {
-              newTypes[index + 1] = currentOrg.metadata.govt_org_children_type;
-            }
-          }
-          return newTypes;
-        });
-      }
-    }
-  }, [selectedLevels, setOrgTypes]);
-
-  const options = useMemo(() => {
-    return getOrganizationOptions(availableOrgs?.results || []);
-  }, [availableOrgs?.results, getOrganizationOptions]);
-
-  if (skip) return null;
-  const orgType = orgTypes[index];
-
-  return (
-    <Autocomplete
-      popoverClassName={classNames(
-        "border-0 shadow-none rounded-none",
-        index !== 0 && "border-l border-secondary-400",
-      )}
-      key={`dropdown-${index}`}
-      value={selectedLevels[index]?.id || ""}
-      options={options}
-      onChange={(value: string) => {
-        const selectedOrg = availableOrgs?.results.find(
-          (org) => org.id === value,
-        );
-
-        if (selectedOrg) {
-          onChange({ organization: selectedOrg.id }, index);
-          setLevelSearch("");
-        }
-      }}
-      onSearch={(value) => setLevelSearch(value)}
-      placeholder={
-        orgType
-          ? t("select") +
-            " " +
-            t(`SYSTEM__govt_org_type__${orgType?.toLowerCase()}`)
-          : t("select_previous")
-      }
-      disabled={index > selectedLevels.length}
-      align="start"
-    />
   );
 }
