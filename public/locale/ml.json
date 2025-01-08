@@ -1632,6 +1632,7 @@
   "select": "തിരഞ്ഞെടുക്കുക",
   "select_all": "Select All",
   "select_date": "തീയതി തിരഞ്ഞെടുക്കുക",
+  "select_department": "Select Department",
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_facility_for_discharged_patients_warning": "ഡിസ്ചാർജ് ചെയ്ത രോഗികളെ കാണാനുള്ള സൗകര്യം തിരഞ്ഞെടുക്കേണ്ടതുണ്ട്.",
   "select_for_administration": "അഡ്മിനിസ്ട്രേഷനായി തിരഞ്ഞെടുക്കുക",
