@@ -22,11 +22,9 @@ const formatKey = (key: string) => {
 const notifyError = (error: any) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
-    console.log("string", error);
     errorMsg =
       !error || error.length > 100 ? "Something went wrong...!" : error;
   } else if (error.detail) {
-    console.log("error.detail", error.detail);
     errorMsg = error.detail;
   } else {
     for (const [key, value] of Object.entries(error)) {
@@ -41,7 +39,6 @@ const notifyError = (error: any) => {
       }
       errorMsg += "\n";
     }
-    console.log("errorMsg---", errorMsg);
   }
   toast.error(errorMsg);
 };
