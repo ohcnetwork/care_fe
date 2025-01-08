@@ -14,7 +14,6 @@ import {
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
-  Encounter,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -83,31 +82,19 @@ export function EncounterQuestion({
     organizations: [],
   });
 
-  const refreshEncounterState = (data: Encounter) => {
-    setEncounter(() => ({
-      status: data.status,
-      encounter_class: data.encounter_class,
-      period: data.period,
-      priority: data.priority,
-      external_identifier: data.external_identifier || "",
-      hospitalization: data.hospitalization,
-      facility: data.facility?.id,
-      patient: data.patient?.id,
-      organizations: [],
-    }));
-  };
-
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      handleUpdateEncounter(encounterData as any);
+      handleUpdateEncounter(encounterData as unknown as EncounterEditRequest);
     }
   }, [encounterData]);
 
   useEffect(() => {
     const formStateValue = (questionnaireResponse.values[0]?.value as any)?.[0];
     if (formStateValue) {
-      refreshEncounterState(formStateValue as Encounter);
+      setEncounter(() => ({
+        ...formStateValue,
+      }));
     }
   }, [questionnaireResponse]);
 
