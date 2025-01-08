@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useRoutes } from "raviger";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
@@ -78,7 +78,7 @@ export default function PatientRouter() {
   return (
     <PatientUserProvider>
       <SidebarProvider>
-        <AppSidebar facilitySidebar={false} />
+        <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
           className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
