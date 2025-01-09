@@ -910,18 +910,77 @@ export const HEADER_CONTENT_TYPES = {
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
-/**
- * @deprecated use `LocalStorageKeys.patientTokenKey` instead
- */
-export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
+export const ENCOUNTER_DIET_PREFERENCE = {
+  encounter_diet_preference__vegetarian: "vegetarian",
+  encounter_diet_preference__diary_free: "diary_free",
+  encounter_diet_preference__nut_free: "nut_free",
+  encounter_diet_preference__gluten_free: "gluten_free",
+  encounter_diet_preference__vegan: "vegan",
+  encounter_diet_preference__halal: "halal",
+  encounter_diet_preference__kosher: "kosher",
+  encounter_diet_preference__none: "none",
+} as const;
 
-export const DIET_PREFERENCE_OPTIONS = [
-  { label: "Vegetarian", value: "vegetarian" },
-  { label: "Dairy Free", value: "diary_free" },
-  { label: "Nut Free", value: "nut_free" },
-  { label: "Gluten Free", value: "gluten_free" },
-  { label: "Vegan", value: "vegan" },
-  { label: "Halal", value: "halal" },
-  { label: "Kosher", value: "kosher" },
-  { label: "None", value: "none" },
-] as const;
+export const ENCOUNTER_STATUS = {
+  encounter_status__planned: "planned",
+  encounter_status__in_progress: "in_progress",
+  encounter_status__on_hold: "on_hold",
+  encounter_status__discharged: "discharged",
+  encounter_status__completed: "completed",
+  encounter_status__cancelled: "cancelled",
+  encounter_status__discontinued: "discontinued",
+  encounter_status__entered_in_error: "entered_in_error",
+  encounter_status__unknown: "unknown",
+} as const;
+
+export const ENCOUNTER_CLASS = {
+  encounter_class__imp: "imp",
+  encounter_class__amb: "amb",
+  encounter_class__obsenc: "obsenc",
+  encounter_class__emer: "emer",
+  encounter_class__vr: "vr",
+  encounter_class__hh: "hh",
+} as const;
+
+export const ENCOUNTER_PRIORITY = {
+  encounter_priority__asap: "ASAP",
+  encounter_priority__callback_results: "callback_results",
+  encounter_priority__callback_for_scheduling: "callback_for_scheduling",
+  encounter_priority__elective: "elective",
+  encounter_priority__emergency: "emergency",
+  encounter_priority__preop: "preop",
+  encounter_priority__as_needed: "as_needed",
+  encounter_priority__routine: "routine",
+  encounter_priority__rush_reporting: "rush_reporting",
+  encounter_priority__stat: "stat",
+  encounter_priority__timing_critical: "timing_critical",
+  encounter_priority__use_as_directed: "use_as_directed",
+  encounter_priority__urgent: "urgent",
+} as const;
+
+export const ENCOUNTER_ADMIT_SOURCE = {
+  encounter_admit_sources__hosp_trans: "hosp_trans",
+  encounter_admit_sources__emd: "emd",
+  encounter_admit_sources__outp: "outp",
+  encounter_admit_sources__born: "born",
+  encounter_admit_sources__gp: "gp",
+  encounter_admit_sources__mp: "mp",
+  encounter_admit_sources__nursing: "nursing",
+  encounter_admit_sources__psych: "psych",
+  encounter_admit_sources__rehab: "rehab",
+  encounter_admit_sources__other: "other",
+} as const;
+
+export const ENCOUNTER_DISCHARGE_DISPOSITION = {
+  encounter_discharge_disposition__home: "home",
+  encounter_discharge_disposition__alt_home: "alt_home",
+  encounter_discharge_disposition__other_hcf: "other_hcf",
+  encounter_discharge_disposition__hosp: "hosp",
+  encounter_discharge_disposition__long: "long",
+  encounter_discharge_disposition__aadvice: "aadvice",
+  encounter_discharge_disposition__exp: "exp",
+  encounter_discharge_disposition__psy: "psy",
+  encounter_discharge_disposition__rehab: "rehab",
+  encounter_discharge_disposition__snf: "snf",
+  encounter_discharge_disposition__oth: "oth",
+} as const;
