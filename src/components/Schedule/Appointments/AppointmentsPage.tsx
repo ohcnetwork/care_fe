@@ -2,13 +2,16 @@ import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addDays,
   format,
   formatDate,
   isPast,
   isToday,
   isTomorrow,
   isYesterday,
+  subDays,
 } from "date-fns";
+import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -292,27 +295,119 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                   );
                 })()}
               </Label>
-              {/* <Popover modal>
+              <Popover modal>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon">
-                    <Edit3Icon />
+                    <Edit3Icon className="size-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={new Date(date_from)}
-                    onSelect={(date) => {
-                      setQParams({
-                        ...qParams,
-                        date_from: dateQueryString(date),
-                        slot: null,
-                      });
-                    }}
-                    initialFocus
-                  />
+                <PopoverContent className="w-auto">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between">
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(subDays(today, 14)),
+                            date_to: dateQueryString(today),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("last_fortnight_short")}
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(subDays(today, 7)),
+                            date_to: dateQueryString(today),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("last_week_short")}
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(today),
+                            date_to: dateQueryString(today),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("today")}
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(today),
+                            date_to: dateQueryString(addDays(today, 7)),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("next_week_short")}
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => {
+                          const today = new Date();
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(today),
+                            date_to: dateQueryString(addDays(today, 14)),
+                            slot: null,
+                          });
+                        }}
+                      >
+                        {t("next_fortnight_short")}
+                      </Button>
+                    </div>
+
+                    <DateRangePicker
+                      date={{
+                        from: qParams.date_from
+                          ? new Date(qParams.date_from)
+                          : undefined,
+                        to: qParams.date_to
+                          ? new Date(qParams.date_to)
+                          : undefined,
+                      }}
+                      onChange={(date) =>
+                        setQParams({
+                          ...qParams,
+                          date_from: date?.from
+                            ? dateQueryString(date.from)
+                            : null,
+                          date_to: date?.to ? dateQueryString(date?.to) : null,
+                          slot: null,
+                        })
+                      }
+                    />
+                  </div>
                 </PopoverContent>
-              </Popover> */}
+              </Popover>
             </div>
 
             <SlotFilter
