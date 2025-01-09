@@ -20,6 +20,7 @@ import {
   DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
+  MedicationRequestBoundsDurationUnit,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
 } from "@/types/emr/medicationRequest";
@@ -247,9 +248,14 @@ const MedicationRequestGridRow: React.FC<{
               } else {
                 handleUpdateDosageInstruction({
                   as_needed_boolean: false,
-                  timing:
-                    FREQUENCY_OPTIONS[value as keyof typeof FREQUENCY_OPTIONS]
-                      .timing,
+                  timing: {
+                    repeat: {
+                      ...dosageInstruction?.timing?.repeat,
+                      ...FREQUENCY_OPTIONS[
+                        value as keyof typeof FREQUENCY_OPTIONS
+                      ].timing.repeat,
+                    },
+                  },
                 });
               }
             }}
@@ -276,9 +282,9 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <QuantityInput
             units={
-              Object.keys(BOUNDS_DURATION_UNITS) as Array<
-                keyof typeof BOUNDS_DURATION_UNITS
-              >
+              Object.keys(
+                BOUNDS_DURATION_UNITS,
+              ) as Array<MedicationRequestBoundsDurationUnit>
             }
             quantity={{
               value:
@@ -288,35 +294,22 @@ const MedicationRequestGridRow: React.FC<{
                 medication.dosage_instruction[0]?.timing?.repeat
                   ?.bounds_duration?.unit ?? "d",
             }}
-            onChange={(value) =>
+            onChange={(value) => {
               handleUpdateDosageInstruction({
                 timing: {
                   ...dosageInstruction?.timing,
                   repeat: {
-                    frequency:
-                      dosageInstruction?.timing?.repeat?.frequency ?? 1,
-                    period: dosageInstruction?.timing?.repeat?.period ?? 1,
-                    period_unit:
-                      dosageInstruction?.timing?.repeat?.period_unit ?? "d",
-                    bounds_duration: value?.value
-                      ? {
-                          value: value.value,
-                          unit: value.unit as keyof typeof BOUNDS_DURATION_UNITS,
-                        }
-                      : undefined,
+                    ...dosageInstruction?.timing?.repeat,
+                    bounds_duration: {
+                      value: value?.value,
+                      unit: value?.unit as MedicationRequestBoundsDurationUnit,
+                    },
                   },
                 },
-              })
-            }
+              });
+            }}
             disabled={
               disabled || medication.dosage_instruction[0]?.as_needed_boolean
-            }
-            unitLabels={
-              Object.fromEntries(
-                Object.entries(BOUNDS_DURATION_UNITS).map(
-                  ([key, { label }]) => [key, label],
-                ),
-              ) as Record<keyof typeof BOUNDS_DURATION_UNITS, string>
             }
           />
         </div>

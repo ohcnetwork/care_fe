@@ -78,9 +78,12 @@ export interface DosageQuantity {
   unit?: (typeof DOSAGE_UNITS)[number];
 }
 
+export type MedicationRequestBoundsDurationUnit =
+  keyof typeof BOUNDS_DURATION_UNITS;
+
 export interface BoundsDuration {
-  value: number;
-  unit: keyof typeof BOUNDS_DURATION_UNITS;
+  value?: number;
+  unit: MedicationRequestBoundsDurationUnit;
 }
 
 export interface DoseRange {
@@ -91,8 +94,8 @@ export interface DoseRange {
 export interface Timing {
   repeat?: {
     frequency?: number;
-    period: number;
-    period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
+    period?: number;
+    period_unit?: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
     bounds_duration?: BoundsDuration;
   };
   code?: Code;

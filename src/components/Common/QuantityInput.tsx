@@ -7,6 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  BOUNDS_DURATION_UNITS,
+  MedicationRequestBoundsDurationUnit,
+} from "@/types/emr/medicationRequest";
+
 interface QuantityValue<TUnit extends string> {
   value?: number;
   unit?: TUnit;
@@ -19,7 +24,6 @@ interface Props<TUnit extends string> {
   disabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
-  unitLabels?: Record<TUnit, string>;
 }
 
 const QuantityInput = <TUnit extends string>({
@@ -29,10 +33,18 @@ const QuantityInput = <TUnit extends string>({
   disabled,
   placeholder,
   autoFocus,
-  unitLabels,
 }: Props<TUnit>) => {
   const handleChange = (update: Partial<QuantityValue<TUnit>>) => {
     onChange({ ...quantity, ...update });
+  };
+
+  const getUnitLabel = (unit: TUnit) => {
+    const isDurationUnit = (
+      value: string,
+    ): value is MedicationRequestBoundsDurationUnit =>
+      Object.keys(BOUNDS_DURATION_UNITS).includes(value);
+
+    return isDurationUnit(unit) ? BOUNDS_DURATION_UNITS[unit].label : unit;
   };
 
   return (
@@ -62,7 +74,7 @@ const QuantityInput = <TUnit extends string>({
         <SelectContent>
           {units.map((unit) => (
             <SelectItem key={unit} value={unit}>
-              {unitLabels?.[unit] ?? unit}
+              {getUnitLabel(unit)}
             </SelectItem>
           ))}
         </SelectContent>

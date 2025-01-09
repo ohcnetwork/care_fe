@@ -65,12 +65,10 @@ export function QuestionRenderer({
     onResponseChange(newResponses);
   };
 
-  const shouldBeFullWidth = (question: Question): boolean => {
-    if (question.type !== "structured" || !question.structured_type) {
-      return false;
-    }
-    return FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
-  };
+  const shouldBeFullWidth = (question: Question): boolean =>
+    question.type === "structured" &&
+    !!question.structured_type &&
+    FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (
     <div className="space-y-4">
