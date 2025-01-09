@@ -21,8 +21,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
-
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
@@ -45,11 +43,11 @@ export default function UserSelector({
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useDebouncedState("", 500);
+  const [search, setSearch] = useState("");
 
   const { data, isFetching } = useQuery({
     queryKey: ["users", search],
-    queryFn: query(UserApi.list, {
+    queryFn: query.debounced(UserApi.list, {
       queryParams: { search_text: search },
     }),
   });

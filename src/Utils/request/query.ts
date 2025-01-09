@@ -3,6 +3,7 @@ import careConfig from "@careConfig";
 import { getResponseBody } from "@/Utils/request/request";
 import { APICallOptions, HTTPError, Route } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
+import { sleep } from "@/Utils/utils";
 
 export async function callApi<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
@@ -67,3 +68,28 @@ export default function query<TData, TBody>(
     return callApi(route, { ...options, signal });
   };
 }
+
+/**
+ * Creates a debounced TanStack Query compatible query function.
+ *
+ * Example:
+ * ```tsx
+ * const { data, isLoading } = useQuery({
+ *   queryKey: ["patient-search", facilityId, search],
+ *   queryFn: query.debounced(patientsApi.search, {
+ *     pathParams: { facilityId },
+ *     queryParams: { limit: 10, offset: 0, search },
+ *   }),
+ * });
+ * ```
+ */
+const debouncedQuery = <TData, TBody>(
+  route: Route<TData, TBody>,
+  options?: APICallOptions<TBody> & { debounceInterval?: number },
+) => {
+  return async ({ signal }: { signal: AbortSignal }) => {
+    await sleep(options?.debounceInterval ?? 500);
+    return query(route, { ...options })({ signal });
+  };
+};
+query.debounced = debouncedQuery;
