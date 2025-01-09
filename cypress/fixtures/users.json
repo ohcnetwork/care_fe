@@ -6,5 +6,9 @@
   "nurse": {
     "username": "nihal-nurse",
     "password": "Test@123"
+  },
+  "staff": {
+    "username": "nihal-staff",
+    "password": "Test@123"
   }
 }
