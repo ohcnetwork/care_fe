@@ -1,9 +1,14 @@
 export class FacilityCreation {
   // Navigation
-  navigateToFacilities() {
-    cy.get('[data-cy="organization-list"]').should("be.visible");
-    cy.verifyAndClickElement('[data-cy="organization-list"]', "Kerala");
-    cy.get('[data-testid="org-nav-facilities"]').should("be.visible").click();
+  navigateToOrganization(orgName: string) {
+    cy.verifyAndClickElement('[data-cy="organization-list"]', orgName);
+  }
+
+  navigateToFacilitiesList() {
+    cy.verifyAndClickElement(
+      '[data-testid="org-nav-facilities"]',
+      "Facilities",
+    );
   }
 
   clickAddFacility() {
@@ -15,11 +20,8 @@ export class FacilityCreation {
     cy.get('[data-cy="facility-name"]').type(name);
   }
 
-  selectFacilityType() {
-    cy.clickAndSelectOption(
-      '[data-cy="facility-type"]',
-      "Primary Health Centres",
-    );
+  selectFacilityType(facilityType: string) {
+    cy.clickAndSelectOption('[data-cy="facility-type"]', facilityType);
   }
 
   enterDescription(description: string) {
@@ -47,9 +49,9 @@ export class FacilityCreation {
   }
 
   // Combined methods using individual functions
-  fillBasicDetails(name: string, _facilityType: string, description: string) {
+  fillBasicDetails(name: string, facilityType: string, description: string) {
     this.enterFacilityName(name);
-    this.selectFacilityType();
+    this.selectFacilityType(facilityType);
     this.enterDescription(description);
   }
 

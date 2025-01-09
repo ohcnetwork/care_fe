@@ -6,6 +6,7 @@ import { generateFacilityData } from "../../utils/facilityData";
 describe("Facility Management", () => {
   const loginPage = new LoginPage();
   const facilityPage = new FacilityCreation();
+  const facilityType = "Primary Health Centre";
   const testFacility = generateFacilityData();
   const phoneNumber = generatePhoneNumber();
 
@@ -13,7 +14,7 @@ describe("Facility Management", () => {
     cy.clearLocalStorage();
     cy.saveLocalStorage();
     cy.visit("/login");
-    loginPage.loginByRole("admin");
+    loginPage.loginByRole("nurse");
   });
 
   afterEach(() => {
@@ -21,14 +22,14 @@ describe("Facility Management", () => {
   });
 
   it("Create a new facility using the admin role", () => {
-    // Navigate to facility creation
-    facilityPage.navigateToFacilities();
+    facilityPage.navigateToOrganization("Kerala");
+    facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
 
     // Fill form
     facilityPage.fillBasicDetails(
       testFacility.name,
-      testFacility.type,
+      facilityType,
       testFacility.description,
     );
 
