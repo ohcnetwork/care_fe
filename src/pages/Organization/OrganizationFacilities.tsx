@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,7 +19,6 @@ import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import OrganizationLayout from "./components/OrganizationLayout";
-import { useTranslation } from "react-i18next";
 
 interface Props {
   id: string;
@@ -150,7 +150,7 @@ export default function OrganizationFacilities({
                       href={`/facility/${facility.id}`}
                       className="text-sm text-primary hover:underline"
                     >
-                     {t("view_facility")}
+                      {t("view_facility")}
                       <Button
                         variant="ghost"
                         size="icon"

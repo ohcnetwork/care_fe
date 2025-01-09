@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     searchQuery,
     500,
   );
- const {t}=useTranslation();
+  const { t } = useTranslation();
   const { data: children, isLoading } = useQuery({
     queryKey: [
       "facilityOrganization",
