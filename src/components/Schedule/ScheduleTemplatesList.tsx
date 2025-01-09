@@ -166,12 +166,7 @@ const ScheduleTemplateItem = ({
                       <span>{slot.name}</span>
                       <p className="text-gray-600">
                         <span className="text-sm">
-                          {/* TODO: Temp. hack since backend is giving slot_type as number in Response */}
-                          {
-                            ["open", "appointment", "closed"][
-                              (slot.slot_type as unknown as number) - 1
-                            ]
-                          }
+                          {t(`SCHEDULE_AVAILABILITY_TYPE__${slot.slot_type}`)}
                         </span>
                         {slot.slot_type === "appointment" && (
                           <>
@@ -198,17 +193,22 @@ const ScheduleTemplateItem = ({
               </li>
             ))}
           </ul>
-          <Trans
-            i18nKey="schedule_valid_from_till_range"
-            values={{
-              from_date: format(
-                parseISO(template.valid_from),
-                "EEE, dd MMM yyyy",
-              ),
-              to_date: format(parseISO(template.valid_to), "EEE, dd MMM yyyy"),
-            }}
-            components={{ strong: <strong className="font-semibold" /> }}
-          />
+          <span className="text-sm text-gray-500">
+            <Trans
+              i18nKey="schedule_valid_from_till_range"
+              values={{
+                from_date: format(
+                  parseISO(template.valid_from),
+                  "EEE, dd MMM yyyy",
+                ),
+                to_date: format(
+                  parseISO(template.valid_to),
+                  "EEE, dd MMM yyyy",
+                ),
+              }}
+              components={{ strong: <strong className="font-semibold" /> }}
+            />
+          </span>
         </div>
       </div>
       <Sheet
@@ -217,7 +217,7 @@ const ScheduleTemplateItem = ({
           setQParams({ ...qParams, edit: open ? template.id : null })
         }
       >
-        <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
+        <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
           <SheetHeader>
             <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           </SheetHeader>

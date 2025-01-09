@@ -1,16 +1,8 @@
+import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
+
 import { Time } from "@/Utils/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import { UserBase } from "@/types/user/user";
-
-export enum DayOfWeek {
-  MONDAY = 0,
-  TUESDAY = 1,
-  WEDNESDAY = 2,
-  THURSDAY = 3,
-  FRIDAY = 4,
-  SATURDAY = 5,
-  SUNDAY = 6,
-}
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
 
@@ -66,12 +58,6 @@ export type ScheduleAvailability = ScheduleAvailabilityBase & {
 };
 
 export type ScheduleAvailabilityCreateRequest = ScheduleAvailabilityBase;
-
-export interface ScheduleAvailabilityUpdateRequest {
-  name: string;
-  tokens_per_slot: number | null;
-  reason: string;
-}
 
 export interface ScheduleException {
   id: string;

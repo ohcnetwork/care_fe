@@ -10,8 +10,9 @@ import * as z from "zod";
 
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import WeekdayCheckbox from "@/CAREUI/interactive/WeekdayCheckbox";
-import { DayOfWeekValue } from "@/CAREUI/interactive/WeekdayCheckbox";
+import WeekdayCheckbox, {
+  DayOfWeek,
+} from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -47,6 +48,8 @@ import {
   getTokenDuration,
 } from "@/components/Schedule/helpers";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
+
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
@@ -63,6 +66,10 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
+  const weekdayFormat = useBreakpoints({
+    default: "alphabet",
+    md: "short",
+  } as const);
 
   const formSchema = z.object({
     name: z.string().min(1, t("field_required")),
@@ -73,7 +80,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
       required_error: t("field_required"),
     }),
     weekdays: z
-      .array(z.number() as unknown as z.ZodType<DayOfWeekValue>)
+      .array(z.number() as unknown as z.ZodType<DayOfWeek>)
       .min(1, t("schedule_weekdays_min_error")),
     availabilities: z
       .array(
@@ -291,6 +298,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                           <WeekdayCheckbox
                             value={field.value}
                             onChange={field.onChange}
+                            format={weekdayFormat}
                           />
                         </FormControl>
                         <FormMessage />
