@@ -1,8 +1,10 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -39,9 +41,14 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { parsePhoneNumber } from "@/Utils/utils";
+import query from "@/Utils/request/query";
+import { getPincodeDetails, parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
+import { Organization } from "@/types/organization/organization";
+import { useFetchOrganizationByName } from "@/types/organization/organizationApi";
+
+import { FacilityModel } from "./models";
 
 const facilityFormSchema = z.object({
   facility_type: z.string().min(1, "Facility type is required"),
@@ -49,6 +56,7 @@ const facilityFormSchema = z.object({
   description: z.string().optional(),
   features: z.array(z.number()).default([]),
   pincode: z.string().refine(validatePincode, "Invalid pincode"),
+  geo_organization: z.string().min(1, { message: "required" }),
   address: z.string().min(1, "Address is required"),
   phone_number: z
     .string()
@@ -69,18 +77,19 @@ const facilityFormSchema = z.object({
 
 type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
-interface Props {
+interface FacilityProps {
   organizationId: string;
+  facilityId?: string;
   onSubmitSuccess?: () => void;
 }
 
-export default function CreateFacilityForm({
-  organizationId,
-  onSubmitSuccess,
-}: Props) {
+export default function CreateFacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const { organizationId, facilityId, onSubmitSuccess } = props;
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [pincode, setPincode] = useState("");
 
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilityFormSchema),
@@ -90,6 +99,7 @@ export default function CreateFacilityForm({
       description: "",
       features: [],
       pincode: "",
+      geo_organization: "",
       address: "",
       phone_number: "+91",
       latitude: "",
@@ -122,18 +132,82 @@ export default function CreateFacilityForm({
     },
   });
 
-  const onSubmit = (data: FacilityFormValues) => {
-    createFacility({
-      ...data,
-      phone_number: parsePhoneNumber(data.phone_number),
-      geo_organization: organizationId,
-    });
+  const { mutate: updateFacility, isPending: isUpdatePenidng } = useMutation({
+    mutationFn: mutate(routes.updateFacility, {
+      pathParams: { id: facilityId || "" },
+    }), // Use the update route
+    onSuccess: (_data: FacilityModel) => {
+      Notification.Success({
+        msg: t("facility_updated_successfully"),
+      });
+      queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
+      form.reset();
+      onSubmitSuccess?.();
+    },
+    onError: (error: Error) => {
+      const errorData = error.cause as { errors: { msg: string[] } };
+      if (errorData?.errors?.msg) {
+        errorData.errors.msg.forEach((msg) => {
+          Notification.Error({ msg });
+        });
+      } else {
+        Notification.Error({
+          msg: t("facility_update_error"),
+        });
+      }
+    },
+  });
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId || "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const onSubmit: (data: FacilityFormValues) => void = (
+    data: FacilityFormValues,
+  ) => {
+    if (facilityId) {
+      return updateFacility({
+        ...data,
+        phone_number: parsePhoneNumber(data.phone_number),
+        geo_organization: organizationId,
+      });
+    } else {
+      createFacility({
+        ...data,
+        phone_number: parsePhoneNumber(data.phone_number),
+        geo_organization: organizationId,
+      });
+    }
   };
 
   const handleFeatureChange = (value: any) => {
     const { value: features }: { value: Array<number> } = value;
     form.setValue("features", features);
   };
+
+  // Update form when facility data is loaded
+  useEffect(() => {
+    if (facilityData) {
+      console.log(facilityData);
+      form.reset({
+        facility_type: facilityData.facility_type,
+        name: facilityData.name,
+        description: facilityData.description || "",
+        features: facilityData.features || [],
+        pincode: facilityData.pincode?.toString() || "",
+        geo_organization: facilityData.geo_organization,
+        address: facilityData.address,
+        phone_number: facilityData.phone_number,
+        latitude: facilityData.latitude?.toString() || "",
+        longitude: facilityData.longitude?.toString() || "",
+        is_public: facilityData.is_public,
+      });
+    }
+  }, [facilityData, form]);
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -160,6 +234,39 @@ export default function CreateFacilityForm({
         msg: "Geolocation is not supported by this browser",
       });
     }
+  };
+
+  const { data: pincodeData, isError: isPincodeError } = useQuery({
+    queryKey: ["pincodeDetails", pincode],
+    queryFn: () => getPincodeDetails(pincode, careConfig.govDataApiKey),
+    enabled: validatePincode(pincode) && pincode != facilityData?.pincode,
+  });
+
+  if (isPincodeError) {
+    toast.error("Invalid pincode");
+  }
+
+  const stateName = pincodeData?.statename;
+
+  const districtName = pincodeData?.districtname;
+
+  const { data: stateOrg } = useFetchOrganizationByName(stateName);
+  const { data: districtOrg } = useFetchOrganizationByName(
+    districtName,
+    stateOrg?.id,
+  );
+
+  useEffect(() => {
+    if (stateOrg && districtOrg) {
+      setSelectedLevels([stateOrg, districtOrg]);
+    } else {
+      setSelectedLevels([]);
+    }
+  }, [stateOrg, districtOrg]);
+
+  const handlePincodeChange = (value: string) => {
+    setPincode(value);
+    setSelectedLevels([]);
   };
 
   return (
@@ -294,12 +401,26 @@ export default function CreateFacilityForm({
                       data-cy="facility-pincode"
                       placeholder="Enter pincode"
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handlePincodeChange(e.target.value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="col-span-2 grid grid-cols-2 gap-5">
+              <OrganizationSelector
+                required={true}
+                value={facilityData?.geo_organization}
+                parentSelectedLevels={selectedLevels}
+                onChange={(value) => {
+                  form.setValue("geo_organization", value);
+                }}
+              />
+            </div>
           </div>
 
           <FormField
@@ -441,24 +562,45 @@ export default function CreateFacilityForm({
           )}
         </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isPending}
-          data-cy="submit-facility"
-        >
-          {isPending ? (
-            <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 h-4 w-4 animate-spin"
-              />
-              Creating Facility...
-            </>
-          ) : (
-            "Create Facility"
-          )}
-        </Button>
+        {facilityId ? (
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isUpdatePenidng}
+            data-cy="update-facility"
+          >
+            {isUpdatePenidng ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 h-4 w-4 animate-spin"
+                />
+                Updating Facility...
+              </>
+            ) : (
+              "Update Facility"
+            )}
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isPending}
+            data-cy="submit-facility"
+          >
+            {isPending ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 h-4 w-4 animate-spin"
+                />
+                Creating Facility...
+              </>
+            ) : (
+              "Create Facility"
+            )}
+          </Button>
+        )}
       </form>
     </Form>
   );

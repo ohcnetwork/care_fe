@@ -111,62 +111,59 @@ export default function OrganizationFacilities({
             </Card>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
-              <Link
-                key={facility.id}
-                href={`/facility/${facility.id}`}
-                className="block"
-              >
-                <Card className="h-full hover:border-primary/50 transition-colors overflow-hidden">
-                  <div className="relative h-48 bg-gray-100">
-                    {facility.read_cover_image_url ? (
-                      <img
-                        src={facility.read_cover_image_url}
-                        alt={facility.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                        <Avatar name={facility.name} />
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-md font-medium text-gray-900">
-                            {facility.name}
-                          </h3>
-                          <div className="font-medium">
-                            {facility.facility_type}
-                          </div>
+              <Card className="h-full hover:border-primary/50 transition-colors overflow-hidden">
+                <div className="relative h-48 bg-gray-100">
+                  {facility.read_cover_image_url ? (
+                    <img
+                      src={facility.read_cover_image_url}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                      <Avatar name={facility.name} />
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-md font-medium text-gray-900">
+                          {facility.name}
+                        </h3>
+                        <div className="font-medium">
+                          {facility.facility_type}
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end">
-                    <Link
-                      href={`/facility/${facility.id}`}
-                      className="text-sm text-primary hover:underline"
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <div className="mt-2">
+                    <AddFacilitySheet
+                      organizationId={id}
+                      facilityId={facility.id}
+                    />
+                  </div>
+                  <Link
+                    href={`/facility/${facility.id}`}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    View Facility
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      asChild
                     >
-                      View Facility
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        asChild
-                      >
-                        <div>
-                          <CareIcon
-                            icon="l-arrow-up-right"
-                            className="h-4 w-4"
-                          />
-                        </div>
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              </Link>
+                      <div>
+                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                      </div>
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
             ))
           )}
         </div>
