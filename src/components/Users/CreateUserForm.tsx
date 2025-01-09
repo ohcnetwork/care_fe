@@ -137,11 +137,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
   });
 
   const renderUsernameFeedback = (usernameInput: string) => {
-    if (
-      form.formState.errors.username &&
-      form.formState.errors.username?.message
-    ) {
-      return validateRule(false, form.formState.errors.username.message);
+    const {
+      errors: { username },
+    } = form.formState;
+    if (username?.message) {
+      return validateRule(false, username.message);
     } else if (isLoading) {
       return (
         <div className="flex items-center gap-1">
@@ -155,9 +155,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         </div>
       );
     } else if (error) {
-      return validateRule(false, <>{t("username_not_available")}</>);
+      return validateRule(false, t("username_not_available"));
     } else if (usernameInput) {
-      return validateRule(true, <>{t("username_available")}</>);
+      return validateRule(true, t("username_available"));
     }
   };
 
