@@ -147,7 +147,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         <div className="flex items-center gap-1">
           <CareIcon
             icon="l-spinner"
-            className="text-xl text-gray-500 animate-spin"
+            className="text-sm text-gray-500 animate-spin"
           />
           <span className="text-gray-500 text-sm">
             {t("checking_availability")}

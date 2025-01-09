@@ -57,13 +57,13 @@ export const validateRule = (
   isInitialState: boolean = false,
 ) => {
   return (
-    <div>
+    <div className="text-sm">
       {isInitialState ? (
-        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
+        <CareIcon icon="l-circle" className="text-gray-500" />
       ) : condition ? (
-        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-green-500" />
       ) : (
-        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-red-500" />
       )}{" "}
       <span
         className={classNames(
