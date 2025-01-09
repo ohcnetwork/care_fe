@@ -148,7 +148,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         false,
         username.message,
         isInitialRender,
-        t("username_available"),
+        t("username_valid"),
       );
     } else if (isLoading) {
       return (

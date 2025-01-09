@@ -1897,6 +1897,7 @@
   "username_available": "Username is available",
   "username_not_available": "Username is not available",
   "username_userdetails_not_found": "Unable to fetch details as username or user details not found",
+  "username_valid": "Username is valid",
   "users": "Users",
   "vacant": "Vacant",
   "vaccinated": "Vaccinated",
