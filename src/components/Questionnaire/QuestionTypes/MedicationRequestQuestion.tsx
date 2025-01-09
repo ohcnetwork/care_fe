@@ -100,55 +100,59 @@ export function MedicationRequestQuestion({
 
   return (
     <div className="space-y-4">
-      <div className="md:overflow-x-auto w-auto ">
+      <div className="md:overflow-x-auto w-auto">
         {medications.length > 0 && (
-          <div className="min-w-fit w-full border rounded-md">
-            {/* Header */}
-            <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("medicine")}
+          <div className="min-w-fit">
+            <div className="max-w-[2084px] relative border rounded-md">
+              {/* Header */}
+              <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("medicine")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("dosage")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("frequency")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("days")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("instructions")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("additional_instructions")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("route")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("site")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("method")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("intent")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
               </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("dosage")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("frequency")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("days")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("instructions")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("additional_instructions")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("route")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("site")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("method")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 border-r">
-                {t("intent")}
-              </div>
-              <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)]" />
-            </div>
 
-            {/* Body */}
-            <div className="bg-white">
-              {medications.map((medication, index) => (
-                <MedicationRequestGridRow
-                  key={index}
-                  medication={medication}
-                  disabled={disabled}
-                  onUpdate={(updates) => handleUpdateMedication(index, updates)}
-                  onRemove={() => handleRemoveMedication(index)}
-                />
-              ))}
+              {/* Body */}
+              <div className="bg-white">
+                {medications.map((medication, index) => (
+                  <MedicationRequestGridRow
+                    key={index}
+                    medication={medication}
+                    disabled={disabled}
+                    onUpdate={(updates) =>
+                      handleUpdateMedication(index, updates)
+                    }
+                    onRemove={() => handleRemoveMedication(index)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -408,7 +412,7 @@ const MedicationRequestGridRow: React.FC<{
         </div>
 
         {/* Remove Button - Desktop */}
-        <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)]">
+        <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
           <Button
             variant="ghost"
             size="icon"
