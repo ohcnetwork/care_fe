@@ -1,4 +1,4 @@
-import { ChevronRight, LogOut, Settings } from "lucide-react";
+import { ChevronRight, ClipboardList, LogOut, Settings } from "lucide-react";
 import { Link } from "raviger";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,19 @@ export default function UserDashboard() {
               Edit Profile
             </Link>
           </Button>
+          {user.username === "admin" && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              asChild
+            >
+              <Link href="/questionnaire" className="gap-2 text-inherit">
+                <ClipboardList className="h-4 w-4" />
+                Questionnaires
+              </Link>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
