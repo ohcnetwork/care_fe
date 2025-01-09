@@ -143,7 +143,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                         {t("schedule_appointment")}
                       </span>
                       <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                        {t("book_new_appoitment")}
+                        {t("book_new_appointment")}
                       </span>
                     </div>
                     <CareIcon
