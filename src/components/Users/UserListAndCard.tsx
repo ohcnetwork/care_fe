@@ -17,6 +17,7 @@ import { USER_TYPE_OPTIONS } from "@/common/constants";
 import {
   classNames,
   formatName,
+  formatPhoneNumber,
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
@@ -210,13 +211,12 @@ const UserListHeader = ({
         <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left">
           {t("name")}
         </th>
-        <th className="w-32 px-4 py-3 text-left">{t("status")}</th>
-        <th className="px-4 py-3 text-left">{t("role")}</th>
-        <th className="px-4 py-3 text-left">{t("home_facility")}</th>
+        <th className="w-32 px-10 py-3 text-left">{t("status")}</th>
+        <th className="px-10 py-3 text-left">{t("role")}</th>
+        <th className="px-4 py-3 text-left">{t("contact_number")}</th>
         {showDistrictColumn && (
           <th className="px-4 py-3 text-left">{t("district")}</th>
         )}
-        <th className="px-4 py-3"></th>
       </tr>
     </thead>
   );
@@ -229,7 +229,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
       id={`usr_${user.id}`}
       className="hover:bg-gray-50"
     >
-      <td className="sticky left-0 z-10 bg-white px-4 py-4">
+      <td className="sticky left-0 z-10 bg-white px-4 py-4 lg:pr-20">
         <div className="flex items-center gap-3">
           <Avatar
             // TO do: adjust for facility users
@@ -252,11 +252,14 @@ const UserListRow = ({ user }: { user: UserBase }) => {
           </div>
         </div>
       </td>
-      <td className="flex-0 py-4">
+      <td className="flex-0 px-6 py-4">
         <UserStatusIndicator user={user} addPadding />
       </td>
-      <td id="role" className="px-4 py-4 text-sm">
+      <td id="role" className="px-10 py-4 text-sm">
         {user.user_type}
+      </td>
+      <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
+        {formatPhoneNumber(user.phone_number)}
       </td>
       <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>
@@ -312,7 +315,7 @@ export default function UserListView({
               text: (
                 <div className="flex items-center gap-2">
                   <CareIcon icon="l-credit-card" className="text-lg" />
-                  <span>Card</span>
+                  <span>{t("card")}</span>
                 </div>
               ),
               value: 0,
@@ -322,7 +325,7 @@ export default function UserListView({
               text: (
                 <div className="flex items-center gap-2">
                   <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>List</span>
+                  <span>{t("list")}</span>
                 </div>
               ),
               value: 1,
@@ -345,7 +348,7 @@ export default function UserListView({
       ) : (
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-            No Users Found
+            {t("no_users_found")}
           </div>
         </div>
       )}
