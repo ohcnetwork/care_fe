@@ -3,7 +3,6 @@ import { t } from "i18next";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,6 +16,7 @@ import { QuantityInput } from "@/components/Common/QuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import {
+  BOUNDS_DURATION_UNITS,
   DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
@@ -103,9 +103,9 @@ export function MedicationRequestQuestion({
       <div className="md:overflow-x-auto w-auto">
         {medications.length > 0 && (
           <div className="min-w-fit">
-            <div className="max-w-[2084px] relative border rounded-md">
+            <div className="max-w-[2144px] relative border rounded-md">
               {/* Header */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -116,7 +116,7 @@ export function MedicationRequestQuestion({
                   {t("frequency")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("days")}
+                  {t("duration")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("instructions")}
@@ -186,7 +186,7 @@ const MedicationRequestGridRow: React.FC<{
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name and Controls */}
       <div className="p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2">
@@ -269,19 +269,26 @@ const MedicationRequestGridRow: React.FC<{
           </Select>
         </div>
 
-        {/* Days */}
+        {/* Duration */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-          <Label className="mb-1.5 block text-sm lg:hidden">{t("days")}</Label>
-          <Input
-            type="number"
-            disabled={
-              disabled || medication.dosage_instruction[0]?.as_needed_boolean
+          <Label className="mb-1.5 block text-sm lg:hidden">
+            {t("duration")}
+          </Label>
+          <QuantityInput
+            units={
+              Object.keys(BOUNDS_DURATION_UNITS) as Array<
+                keyof typeof BOUNDS_DURATION_UNITS
+              >
             }
-            value={
-              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-                ?.value ?? ""
-            }
-            onChange={(e) =>
+            quantity={{
+              value:
+                medication.dosage_instruction[0]?.timing?.repeat
+                  ?.bounds_duration?.value,
+              unit:
+                medication.dosage_instruction[0]?.timing?.repeat
+                  ?.bounds_duration?.unit ?? "d",
+            }}
+            onChange={(value) =>
               handleUpdateDosageInstruction({
                 timing: {
                   ...dosageInstruction?.timing,
@@ -292,14 +299,22 @@ const MedicationRequestGridRow: React.FC<{
                     period_unit:
                       dosageInstruction?.timing?.repeat?.period_unit ?? "d",
                     bounds_duration: {
-                      value: e.target.value
-                        ? parseInt(e.target.value)
-                        : undefined,
-                      unit: "d",
+                      value: value?.value,
+                      unit: value?.unit as keyof typeof BOUNDS_DURATION_UNITS,
                     },
                   },
                 },
               })
+            }
+            disabled={
+              disabled || medication.dosage_instruction[0]?.as_needed_boolean
+            }
+            unitLabels={
+              Object.fromEntries(
+                Object.entries(BOUNDS_DURATION_UNITS).map(
+                  ([key, { label }]) => [key, label],
+                ),
+              ) as Record<keyof typeof BOUNDS_DURATION_UNITS, string>
             }
           />
         </div>
@@ -441,41 +456,73 @@ const reverseFrequencyOption = (
 
 // TODO: verify period_unit is correct
 const FREQUENCY_OPTIONS = {
-  BD: {
-    display: "Twice daily",
+  BID: {
+    display: "Two times a day",
     timing: { repeat: { frequency: 2, period: 1, period_unit: "d" } },
-  },
-  HS: {
-    display: "Night only",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  OD: {
-    display: "Once daily",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  Q4H: {
-    display: "4th hourly",
-    timing: { repeat: { frequency: 4, period: 1, period_unit: "h" } },
-  },
-  QID: {
-    display: "6th hourly",
-    timing: { repeat: { frequency: 6, period: 1, period_unit: "h" } },
-  },
-  QOD: {
-    display: "Alternate day",
-    timing: { repeat: { frequency: 2, period: 1, period_unit: "d" } },
-  },
-  QWK: {
-    display: "Once a week",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "wk" } },
-  },
-  STAT: {
-    display: "Imediately",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "s" } },
   },
   TID: {
-    display: "8th hourly",
-    timing: { repeat: { frequency: 8, period: 1, period_unit: "h" } },
+    display: "Three times a day",
+    timing: { repeat: { frequency: 3, period: 1, period_unit: "d" } },
+  },
+  QID: {
+    display: "Four times a day",
+    timing: { repeat: { frequency: 4, period: 1, period_unit: "d" } },
+  },
+  AM: {
+    display: "Every morning",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
+  },
+  PM: {
+    display: "Every afternoon",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
+  },
+  QD: {
+    display: "Every day",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
+  },
+  QOD: {
+    display: "Every other day",
+    timing: { repeat: { frequency: 1, period: 2, period_unit: "d" } },
+  },
+  Q1H: {
+    display: "Every hour",
+    timing: { repeat: { frequency: 24, period: 1, period_unit: "d" } },
+  },
+  Q2H: {
+    display: "Every 2 hours",
+    timing: { repeat: { frequency: 12, period: 1, period_unit: "d" } },
+  },
+  Q3H: {
+    display: "Every 3 hours",
+    timing: { repeat: { frequency: 8, period: 1, period_unit: "d" } },
+  },
+  Q4H: {
+    display: "Every 4 hours",
+    timing: { repeat: { frequency: 6, period: 1, period_unit: "d" } },
+  },
+  Q6H: {
+    display: "Every 6 hours",
+    timing: { repeat: { frequency: 4, period: 1, period_unit: "d" } },
+  },
+  Q8H: {
+    display: "Every 8 hours",
+    timing: { repeat: { frequency: 3, period: 1, period_unit: "d" } },
+  },
+  BED: {
+    display: "At bedtime",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
+  },
+  WK: {
+    display: "Weekly",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "wk" } },
+  },
+  MO: {
+    display: "Monthly",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "mo" } },
+  },
+  STAT: {
+    display: "Immediately",
+    timing: { repeat: { frequency: 1, period: 1, period_unit: "s" } }, // One-time
   },
 } as const satisfies Record<
   string,

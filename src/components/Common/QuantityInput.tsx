@@ -19,6 +19,7 @@ interface Props<TUnit extends string> {
   disabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
+  unitLabels?: Record<TUnit, string>;
 }
 
 const QuantityInput = <TUnit extends string>({
@@ -28,6 +29,7 @@ const QuantityInput = <TUnit extends string>({
   disabled,
   placeholder,
   autoFocus,
+  unitLabels,
 }: Props<TUnit>) => {
   const handleChange = (update: Partial<QuantityValue<TUnit>>) => {
     onChange({ ...quantity, ...update });
@@ -60,7 +62,7 @@ const QuantityInput = <TUnit extends string>({
         <SelectContent>
           {units.map((unit) => (
             <SelectItem key={unit} value={unit}>
-              {unit}
+              {unitLabels?.[unit] ?? unit}
             </SelectItem>
           ))}
         </SelectContent>

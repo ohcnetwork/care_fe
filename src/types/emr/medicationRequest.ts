@@ -14,9 +14,10 @@ export const DOSAGE_UNITS = [
 ] as const;
 
 export const BOUNDS_DURATION_UNITS = {
-  ms: { label: "Milliseconds" },
-  s: { label: "Seconds" },
-  min: { label: "Minutes" },
+  // TODO: Are these smaller units required?
+  // ms: { label: "Milliseconds" },
+  // s: { label: "Seconds" },
+  // min: { label: "Minutes" },
   h: { label: "Hours" },
   d: { label: "Days" },
   wk: { label: "Weeks" },
