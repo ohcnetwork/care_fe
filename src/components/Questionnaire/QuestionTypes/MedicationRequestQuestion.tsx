@@ -100,64 +100,60 @@ export function MedicationRequestQuestion({
 
   return (
     <div className="space-y-4">
-      {medications.length > 0 && (
-        <div className="w-full border rounded-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <div className="min-w-fit w-full">
-              {/* Header */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("medicine")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("dosage")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("frequency")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("days")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("instructions")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("additional_instructions")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("route")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("site")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("method")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("intent")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3"></div>
+      <div className="md:overflow-x-auto w-auto ">
+        {medications.length > 0 && (
+          <div className="min-w-fit w-full border rounded-md">
+            {/* Header */}
+            <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("medicine")}
               </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("dosage")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("frequency")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("days")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("instructions")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("additional_instructions")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("route")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("site")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("method")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3 border-r">
+                {t("intent")}
+              </div>
+              <div className="font-semibold text-gray-600 p-3"></div>
+            </div>
 
-              {/* Body */}
-              <div className="bg-white">
-                {medications.map((medication, index) => (
-                  <MedicationRequestGridRow
-                    key={index}
-                    medication={medication}
-                    disabled={disabled}
-                    onUpdate={(updates) =>
-                      handleUpdateMedication(index, updates)
-                    }
-                    onRemove={() => handleRemoveMedication(index)}
-                  />
-                ))}
-              </div>
+            {/* Body */}
+            <div className="bg-white">
+              {medications.map((medication, index) => (
+                <MedicationRequestGridRow
+                  key={index}
+                  medication={medication}
+                  disabled={disabled}
+                  onUpdate={(updates) => handleUpdateMedication(index, updates)}
+                  onRemove={() => handleRemoveMedication(index)}
+                />
+              ))}
             </div>
           </div>
-        </div>
-      )}
-      <div className="relative">
+        )}
+      </div>
+      <div className="max-w-4xl">
         <ValueSetSelect
           system="system-medication"
           placeholder={t("search_medications")}

@@ -71,9 +71,7 @@ export function QuestionRenderer({
           key={question.id}
           ref={(el) => (questionRefs.current[question.id] = el)}
           className={cn(
-            isMedicationRequest(question)
-              ? " md:w-auto md:overflow-x-auto"
-              : "max-w-4xl",
+            isMedicationRequest(question) ? "md:w-auto" : "max-w-4xl",
           )}
         >
           <QuestionGroup

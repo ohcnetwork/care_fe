@@ -164,8 +164,8 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2 flex items-end">
-              <div className="flex-1 space-y-1">
+            <div key={index} className="mt-2 gap-2">
+              <div className="space-y-1">
                 {index === 0 && <QuestionLabel question={question} />}
                 {renderSingleInput(index)}
               </div>
