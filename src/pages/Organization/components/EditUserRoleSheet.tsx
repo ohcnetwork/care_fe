@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import {
@@ -14,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -31,6 +33,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -52,6 +55,7 @@ export default function EditUserRoleSheet({
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
+  const { t } = useTranslation();
 
   const { data: roles } = useQuery({
     queryKey: ["roles"],
@@ -69,7 +73,7 @@ export default function EditUserRoleSheet({
       queryClient.invalidateQueries({
         queryKey: ["organizationUsers", organizationId],
       });
-      toast.success("User role updated successfully");
+      toast.success(t("user_role_update_success"));
       setOpen(false);
     },
     onError: (error) => {
@@ -89,7 +93,7 @@ export default function EditUserRoleSheet({
       queryClient.invalidateQueries({
         queryKey: ["organizationUsers", organizationId],
       });
-      toast.success("User removed from organization successfully");
+      toast.success(t("user_removed_success"));
       setOpen(false);
     },
     onError: (error) => {
@@ -102,7 +106,7 @@ export default function EditUserRoleSheet({
 
   const handleUpdateRole = () => {
     if (selectedRole === userRole.role.id) {
-      toast.error("Please select a different role");
+      toast.error(t("select_diff_role"));
       return;
     }
 
@@ -115,13 +119,13 @@ export default function EditUserRoleSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {trigger || <Button variant="outline">Edit Role</Button>}
+        {trigger || <Button variant="outline">{t("edit_role")}</Button>}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit User Role</SheetTitle>
+          <SheetTitle>{t("edit_user_role")}</SheetTitle>
           <SheetDescription>
-            Update the role for this user in the organization.
+            {t("update_user_role_organization")}
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
@@ -144,29 +148,31 @@ export default function EditUserRoleSheet({
 
             <div className="grid grid-cols-2 gap-4 pt-2 border-t">
               <div>
-                <span className="text-sm text-gray-500">Username</span>
+                <span className="text-sm text-gray-500">{t("username")}</span>
                 <p className="text-sm font-medium">{userRole.user.username}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-500">Current Role</span>
+                <span className="text-sm text-gray-500">
+                  {t("current_role")}
+                </span>
                 <p className="text-sm font-medium">{userRole.role.name}</p>
               </div>
-              <div>
-                <span className="text-sm text-gray-500">Last Login</span>
-                <p className="text-sm font-medium">
-                  {userRole.user.last_login
-                    ? new Date(userRole.user.last_login).toLocaleDateString()
-                    : "Never"}
-                </p>
+              <div className="col-span-2">
+                <span className="text-sm text-gray-500">
+                  {t("last_login")}{" "}
+                </span>
+                <UserStatusIndicator user={userRole.user} />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select New Role</label>
+            <Label className="text-sm font-medium">
+              {t("select_new_role")}
+            </Label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
               <SelectTrigger className="h-12">
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={t("select_role")} />
               </SelectTrigger>
               <SelectContent>
                 {roles?.results?.map((role) => (
@@ -191,33 +197,34 @@ export default function EditUserRoleSheet({
               onClick={handleUpdateRole}
               disabled={selectedRole === userRole.role.id}
             >
-              Update Role
+              {t("update_role")}
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="w-full">
-                  Remove User
+                  {t("remove_user")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    Remove User from Organization
+                    {t("remove_user_organization")}
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove {userRole.user.first_name}{" "}
-                    {userRole.user.last_name} from this organization? This
-                    action cannot be undone.
+                    {t("remove_user_warn", {
+                      firstName: userRole.user.first_name,
+                      lastName: userRole.user.last_name,
+                    })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => removeRole()}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Remove
+                    {t("remove")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

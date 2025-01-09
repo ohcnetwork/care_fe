@@ -1,6 +1,7 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ export function FacilitySwitcher({
   selectedFacility: UserFacilityModel | null;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <SidebarMenu>
@@ -42,7 +44,7 @@ export function FacilitySwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {selectedFacility?.name || "Select Facility"}
+                  {selectedFacility?.name || t("select_facility")}
                 </span>
               </div>
               <CaretSortIcon className="ml-auto" />
@@ -56,10 +58,10 @@ export function FacilitySwitcher({
           >
             <DropdownMenuItem onClick={() => navigate("/")}>
               <DashboardIcon className="size-4" />
-              View Dashboard
+              {t("view_dashboard")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Facilities</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
               <DropdownMenuItem
