@@ -1,4 +1,5 @@
 import { LazyExoticComponent } from "react";
+import { UseFormReturn } from "react-hook-form";
 
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
@@ -23,11 +24,17 @@ export type PatientHomeActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientRegistrationFormComponentType = React.FC<{
+  form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  patientId?: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
+  PatientRegistrationForm: PatientRegistrationFormComponentType;
 };
 
 // Create a type for lazy-loaded components

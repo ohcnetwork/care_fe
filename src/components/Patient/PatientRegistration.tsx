@@ -44,6 +44,7 @@ import {
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -51,6 +52,7 @@ import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
+import { Organization } from "@/types/organization/organization";
 
 import Autocomplete from "../ui/autocomplete";
 
@@ -256,6 +258,9 @@ export default function PatientRegistration(
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
         yob_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        geo_organization: (
+          patientQuery.data.geo_organization as unknown as Organization
+        )?.id,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -289,6 +294,12 @@ export default function PatientRegistration(
             className="md:w-[500px] space-y-10"
             onSubmit={form.handleSubmit(onSubmit)}
           >
+            <PLUGIN_Component
+              __name="PatientRegistrationForm"
+              form={form}
+              patientId={patientId}
+            />
+
             <div id="general-info" className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold">
@@ -400,7 +411,7 @@ export default function PatientRegistration(
                       <RadioGroup
                         {...field}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
