@@ -104,7 +104,7 @@ export function MedicationRequestQuestion({
         {medications.length > 0 && (
           <div className="min-w-fit w-full border rounded-md">
             {/* Header */}
-            <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+            <div className="hidden lg:grid grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
               <div className="font-semibold text-gray-600 p-3 border-r">
                 {t("medicine")}
               </div>
@@ -135,7 +135,7 @@ export function MedicationRequestQuestion({
               <div className="font-semibold text-gray-600 p-3 border-r">
                 {t("intent")}
               </div>
-              <div className="font-semibold text-gray-600 p-3"></div>
+              <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)]" />
             </div>
 
             {/* Body */}
@@ -182,7 +182,7 @@ const MedicationRequestGridRow: React.FC<{
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,100px,300px,220px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,100px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name and Controls */}
       <div className="p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2">
@@ -408,7 +408,7 @@ const MedicationRequestGridRow: React.FC<{
         </div>
 
         {/* Remove Button - Desktop */}
-        <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center">
+        <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)]">
           <Button
             variant="ghost"
             size="icon"
