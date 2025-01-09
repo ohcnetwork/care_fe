@@ -79,8 +79,8 @@ export interface DosageQuantity {
 }
 
 export interface BoundsDuration {
-  value?: number;
-  unit?: keyof typeof BOUNDS_DURATION_UNITS;
+  value: number;
+  unit: keyof typeof BOUNDS_DURATION_UNITS;
 }
 
 export interface DoseRange {
