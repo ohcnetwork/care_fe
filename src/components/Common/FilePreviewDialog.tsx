@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
@@ -152,20 +153,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       : `rotate-${normalizedRotation}`;
   }
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!show) return;
-      if (e.key === "ArrowLeft" && index > 0) {
-        handleNext(index - 1);
-      }
-      if (e.key === "ArrowRight" && index < (uploadedFiles?.length || 0) - 1) {
-        handleNext(index + 1);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [show, index, uploadedFiles]);
+  useKeyboardShortcut(["ArrowLeft"], () => index > 0 && handleNext(index - 1));
+  useKeyboardShortcut(
+    ["ArrowRight"],
+    () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
+  );
 
   return (
     <DialogModal
@@ -199,7 +191,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 uploadedFiles[index] &&
                 uploadedFiles[index].created_date && (
                   <p className="mt-1 text-sm text-gray-600">
-                    Created on{" "}
+                    {t("created_on")}{" "}
                     {new Date(
                       uploadedFiles[index].created_date!,
                     ).toLocaleString("en-US", {
@@ -235,9 +227,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onClick={() => handleNext(index - 1)}
                 disabled={index <= 0}
                 aria-label="Previous file"
-                onKeyDown={(e) =>
-                  e.key === "ArrowLeft" && handleNext(index - 1)
-                }
               >
                 <CareIcon icon="l-arrow-left" className="h-4 w-4" />
               </Button>
@@ -288,9 +277,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 onClick={() => handleNext(index + 1)}
                 disabled={index >= uploadedFiles.length - 1}
                 aria-label="Next file"
-                onKeyDown={(e) =>
-                  e.key === "ArrowRight" && handleNext(index + 1)
-                }
               >
                 <CareIcon icon="l-arrow-right" className="h-4 w-4" />
               </Button>
