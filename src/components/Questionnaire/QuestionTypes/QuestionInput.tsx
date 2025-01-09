@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -164,8 +166,13 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2">
-              <div className="space-y-1">
+            <div
+              key={index}
+              className={cn("mt-2", {
+                "gap-2 flex items-end": removeButton,
+              })}
+            >
+              <div className={cn("space-y-1", { "flex-1": removeButton })}>
                 {index === 0 && <QuestionLabel question={question} />}
                 {renderSingleInput(index)}
               </div>
