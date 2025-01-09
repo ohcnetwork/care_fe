@@ -90,6 +90,124 @@ interface QueryParams {
   search: string | null;
 }
 
+interface DateRangeDisplayProps {
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
+  const { t } = useTranslation();
+
+  if (!dateFrom && !dateTo) {
+    return (
+      <span className="text-gray-500">{t("showing_all_appointments")}</span>
+    );
+  }
+
+  const today = new Date();
+
+  // Case 1: Today only
+  if (
+    dateFrom === dateQueryString(today) &&
+    dateTo === dateQueryString(today)
+  ) {
+    return (
+      <>
+        <span className="text-black">{t("today")}</span>
+        <span className="pl-1 text-gray-500">
+          ({formatDate(dateFrom, "dd MMM yyyy")})
+        </span>
+      </>
+    );
+  }
+
+  // Case 2: Pre-defined ranges
+  const ranges = [
+    {
+      label: t("last_fortnight_short"),
+      from: subDays(today, 14),
+      to: today,
+    },
+    {
+      label: t("last_week_short"),
+      from: subDays(today, 7),
+      to: today,
+    },
+    {
+      label: t("next_week_short"),
+      from: today,
+      to: addDays(today, 7),
+    },
+    {
+      label: t("next_fortnight_short"),
+      from: today,
+      to: addDays(today, 14),
+    },
+  ];
+
+  const matchingRange = ranges.find(
+    (range) =>
+      dateFrom &&
+      dateTo &&
+      dateQueryString(range.from) === dateFrom &&
+      dateQueryString(range.to) === dateTo,
+  );
+
+  if (matchingRange && dateFrom && dateTo) {
+    return (
+      <>
+        <span className="text-black">{matchingRange.label}</span>
+        <span className="pl-1 text-gray-500">
+          ({formatDate(dateFrom, "dd MMM yyyy")} -{" "}
+          {formatDate(dateTo, "dd MMM yyyy")})
+        </span>
+      </>
+    );
+  }
+
+  // Case 3: Same date with relative labels
+  if (dateFrom && dateFrom === dateTo) {
+    const date = new Date(dateFrom);
+    let relativeDay = null;
+
+    if (isToday(date)) {
+      relativeDay = t("today");
+    } else if (isTomorrow(date)) {
+      relativeDay = t("tomorrow");
+    } else if (isYesterday(date)) {
+      relativeDay = t("yesterday");
+    }
+
+    if (relativeDay) {
+      return (
+        <>
+          <span className="text-black">{relativeDay}</span>
+          <span className="pl-1 text-gray-500">
+            ({formatDate(dateFrom, "dd MMM yyyy")})
+          </span>
+        </>
+      );
+    }
+
+    return (
+      <span className="text-black">{formatDate(dateFrom, "dd MMM yyyy")}</span>
+    );
+  }
+
+  // Case 4: Date range or single date
+  return (
+    <span className="text-black">
+      {formatDate(dateFrom!, "dd MMM yyyy")}
+      {dateTo && (
+        <>
+          {" - "}
+          {formatDate(dateTo, "dd MMM yyyy")}
+        </>
+      )}
+    </span>
+  );
+}
+
 export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -112,9 +230,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     ? resources?.find((r) => r.username === qParams.practitioner)
     : undefined;
 
-  // Sets the practitioner filter to the current user if they are in the list of
-  // shedulable users and no practitioner was selected on first load.
   useEffect(() => {
+    const updates: Partial<QueryParams> = {};
+
+    // Sets the practitioner filter to the current user if they are in the list of
+    // shedulable users and no practitioner was selected.
     if (
       !shedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
@@ -122,9 +242,21 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         (r) => r.username === authUser.username,
       )
     ) {
+      updates.practitioner = authUser.username;
+    }
+
+    // Set today's date range if no dates are present
+    if (!qParams.date_from && !qParams.date_to) {
+      const today = new Date();
+      updates.date_from = dateQueryString(today);
+      updates.date_to = dateQueryString(today);
+    }
+
+    // Only update if there are changes
+    if (Object.keys(updates).length > 0) {
       setQParams({
         ...qParams,
-        practitioner: authUser.username,
+        ...updates,
       });
     }
   }, [shedulableUsersQuery.isLoading]);
@@ -272,28 +404,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           <div>
             <div className="flex items-center gap-1 -mt-2">
               <Label>
-                {(() => {
-                  if (!qParams.date_from) return null;
-                  const relative =
-                    (isYesterday(qParams.date_from) && t("yesterday")) ||
-                    (isToday(qParams.date_from) && t("today")) ||
-                    (isTomorrow(qParams.date_from) && t("tomorrow"));
-                  if (relative) {
-                    return (
-                      <>
-                        <span className="text-black">{relative}</span>
-                        <span className="pl-1 text-gray-500">
-                          ({formatDate(qParams.date_from, "dd MMM yyyy")})
-                        </span>
-                      </>
-                    );
-                  }
-                  return (
-                    <span className="text-black">
-                      {formatDate(qParams.date_from, "dd MMM yyyy")}
-                    </span>
-                  );
-                })()}
+                <DateRangeDisplay
+                  dateFrom={qParams.date_from}
+                  dateTo={qParams.date_to}
+                />
               </Label>
               <Popover modal>
                 <PopoverTrigger asChild>
