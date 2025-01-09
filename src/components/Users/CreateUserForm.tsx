@@ -133,7 +133,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       pathParams: { username: usernameInput },
       silent: true,
     }),
-    enabled: usernameInput?.length >= 4,
+    enabled: !form.formState.errors.username,
   });
 
   const renderUsernameFeedback = (usernameInput: string) => {
@@ -156,7 +156,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       );
     } else if (error) {
       return validateRule(false, <>{t("username_not_available")}</>);
-    } else if (usernameInput && !form.formState.errors.username && !isLoading) {
+    } else if (usernameInput) {
       return validateRule(true, <>{t("username_available")}</>);
     }
   };
@@ -364,7 +364,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>
-                  {t("whataapp_number_same_as_phone_number")}
+                  {t("whatsapp_number_same_as_phone_number")}
                 </FormLabel>
               </div>
             </FormItem>
