@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircle, CalendarIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -33,6 +34,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
 
   const {
     mutate: verifyPatient,
@@ -76,7 +78,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Missing required parameters for patient verification
+            {t("missing_required_param_for_patient_verify")}
           </AlertDescription>
         </Alert>
       ) : patientData ? (
@@ -116,9 +118,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>{t("quick_action")}</CardTitle>
               <CardDescription>
-                Schedule an appointment or create a new encounter
+                {t("schedule_appoitment_or_create_new_encounter")}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
@@ -138,10 +140,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     </div>
                     <div className="flex flex-col items-start gap-0.5">
                       <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                        Schedule Appointment
+                        {t("schedule_appointment")}
                       </span>
                       <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                        Book a new appointment
+                        {t("book_new_appoitment")}
                       </span>
                     </div>
                     <CareIcon
@@ -172,10 +174,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
                         </div>
                         <div className="flex flex-col items-start gap-0.5">
                           <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                            Create Encounter
+                            {t("create_encounter")}
                           </span>
                           <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                            Start a new clinical encounter
+                            {t("start_new_clinical_encounter")}
                           </span>
                         </div>
                         <CareIcon
@@ -192,9 +194,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Active Encounters</CardTitle>
+              <CardTitle>{t("active_encounter")}</CardTitle>
               <CardDescription>
-                View and manage patient encounters
+                {t("view_and_manage_encounter")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-2">
@@ -213,10 +215,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     />
                   </div>
                   <h3 className="text-base md:text-lg font-semibold mb-1">
-                    No encounters found
+                    {t("no_encounter_found")}
                   </h3>
                   <p className="text-xs md:text-sm text-muted-foreground">
-                    Create a new encounter to get started
+                    {t("create_new_encounter")}
                   </p>
                 </div>
               )}
@@ -227,16 +229,18 @@ export default function VerifyPatient(props: { facilityId: string }) {
         isError && (
           <div className="h-screen w-full flex items-center justify-center">
             <div className="flex flex-col items-center justify-center text-center">
-              <h3 className="text-xl font-semibold">Verification Failed</h3>
+              <h3 className="text-xl font-semibold mb-1">
+                {t("verification_failed")}
+              </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Please enter a correct birth year to verify the patient details.
+                {t("please_enter_correct_bith_year")}
               </p>
               <Button
                 variant={"primary_gradient"}
                 className="gap-3 group"
                 onClick={() => goBack()}
               >
-                Go Back
+                {t("go_back")}
               </Button>
             </div>
           </div>
