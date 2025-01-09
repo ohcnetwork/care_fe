@@ -41,6 +41,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const hasTrailing = !!(trailing || trailingFocused);
   const hasIcon = hasLeading || hasTrailing;
   const [showPassword, setShowPassword] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const getPasswordFieldType = () => {
     return showPassword ? "text" : "password";
@@ -72,7 +73,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         ref={ref as React.Ref<HTMLInputElement>}
         id={field.id}
         className={classNames(
-          "cui-input-base peer",
+          "cui-input-base",
           hasLeading && (props.leadingPadding || "pl-10"),
           hasTrailing && (props.trailingPadding || "pr-10"),
           field.error && "border-danger-500",
@@ -84,6 +85,8 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         value={field.value}
         required={field.required}
         onChange={(e) => field.handleChange(e.target.value)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
       {props.clearable && field.value && (
         <button
@@ -121,10 +124,14 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         </div>
       ) : (
         <>
-          <div className="absolute inset-y-0 left-0 flex translate-y-0 items-center pl-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
+          <div
+            className={`absolute inset-y-0 left-0 flex  items-center pl-3 transition-all delay-300 duration-500 ease-in-out ${isFocused ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"}`}
+          >
             {leading}
           </div>
-          <div className="absolute inset-y-0 left-0 flex -translate-y-1 items-center pl-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
+          <div
+            className={`absolute inset-y-0 left-0 flex  items-center pl-3  transition-all delay-300 duration-500 ease-in-out ${isFocused ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+          >
             {leadingFocused}
           </div>
         </>
@@ -136,10 +143,14 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         </div>
       ) : (
         <>
-          <div className="absolute inset-y-0 right-0 flex translate-y-0 items-center pr-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
+          <div
+            className={`absolute inset-y-0 right-0 flex items-center pr-3 transition-all delay-300 duration-500 ease-in-out ${isFocused ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"}`}
+          >
             {trailing}
           </div>
-          <div className="absolute inset-y-0 right-0 flex -translate-y-1 items-center pr-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
+          <div
+            className={`absolute inset-y-0 right-0 flex items-center pr-3 transition-all delay-300 duration-500 ease-in-out ${isFocused ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"}`}
+          >
             {trailingFocused}
           </div>
         </>
