@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { DIET_PREFERENCE_OPTIONS } from "@/common/constants";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
@@ -374,14 +376,11 @@ export function EncounterQuestion({
                   <SelectValue placeholder="Select diet preference" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="diary_free">Dairy Free</SelectItem>
-                  <SelectItem value="nut_free">Nut Free</SelectItem>
-                  <SelectItem value="gluten_free">Gluten Free</SelectItem>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="halal">Halal</SelectItem>
-                  <SelectItem value="kosher">Kosher</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
+                  {DIET_PREFERENCE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

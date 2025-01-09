@@ -909,3 +909,19 @@ export const HEADER_CONTENT_TYPES = {
 } as const;
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
+
+/**
+ * @deprecated use `LocalStorageKeys.patientTokenKey` instead
+ */
+export const CarePatientTokenKey = LocalStorageKeys.patientTokenKey;
+
+export const DIET_PREFERENCE_OPTIONS = [
+  { label: "Vegetarian", value: "vegetarian" },
+  { label: "Dairy Free", value: "diary_free" },
+  { label: "Nut Free", value: "nut_free" },
+  { label: "Gluten Free", value: "gluten_free" },
+  { label: "Vegan", value: "vegan" },
+  { label: "Halal", value: "halal" },
+  { label: "Kosher", value: "kosher" },
+  { label: "None", value: "none" },
+] as const;
