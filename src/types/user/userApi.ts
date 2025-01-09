@@ -20,4 +20,9 @@ export default {
 
     TRes: Type<UserBase>(),
   },
+  checkUsername: {
+    path: "/api/v1/users/{username}/check_availability/",
+    method: HttpMethod.GET,
+    TRes: Type<void>,
+  },
 };

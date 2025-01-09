@@ -177,13 +177,17 @@ export default function CreateFacilityForm({
                   <FormLabel>Facility Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger data-cy="facility-type">
                         <SelectValue placeholder="Select facility type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {FACILITY_TYPES.map((type) => (
-                        <SelectItem key={type.text} value={type.text}>
+                        <SelectItem
+                          key={type.text}
+                          value={type.text}
+                          data-cy="facility-type-option"
+                        >
                           {type.text}
                         </SelectItem>
                       ))}
@@ -201,7 +205,11 @@ export default function CreateFacilityForm({
                 <FormItem>
                   <FormLabel>Facility Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter facility name" {...field} />
+                    <Input
+                      data-cy="facility-name"
+                      placeholder="Enter facility name"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -218,6 +226,7 @@ export default function CreateFacilityForm({
                 <FormControl>
                   <Textarea
                     {...field}
+                    data-cy="facility-description"
                     placeholder="Describe your facility (Markdown supported)"
                     className="h-24"
                   />
@@ -243,6 +252,7 @@ export default function CreateFacilityForm({
                     optionValue={(o) => o.id}
                     onChange={handleFeatureChange}
                     error={form.formState.errors.features?.message}
+                    id="facility-features"
                   />
                 </FormControl>
                 <FormMessage />
@@ -262,7 +272,11 @@ export default function CreateFacilityForm({
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+91XXXXXXXXXX" {...field} />
+                    <Input
+                      data-cy="facility-phone"
+                      placeholder="+91XXXXXXXXXX"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -276,7 +290,11 @@ export default function CreateFacilityForm({
                 <FormItem>
                   <FormLabel>Pincode</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter pincode" {...field} />
+                    <Input
+                      data-cy="facility-pincode"
+                      placeholder="Enter pincode"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -293,6 +311,7 @@ export default function CreateFacilityForm({
                 <FormControl>
                   <Textarea
                     {...field}
+                    data-cy="facility-address"
                     placeholder="Enter complete address"
                     className="h-20"
                   />
@@ -314,6 +333,7 @@ export default function CreateFacilityForm({
               onClick={handleGetCurrentLocation}
               disabled={isGettingLocation}
               className="flex items-center gap-2"
+              data-cy="get-location-button"
             >
               {isGettingLocation ? (
                 <>
@@ -339,6 +359,7 @@ export default function CreateFacilityForm({
                   <FormControl>
                     <Input
                       {...field}
+                      data-cy="facility-latitude"
                       placeholder="Enter latitude"
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
@@ -358,6 +379,7 @@ export default function CreateFacilityForm({
                   <FormControl>
                     <Input
                       {...field}
+                      data-cy="facility-longitude"
                       placeholder="Enter longitude"
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
@@ -382,6 +404,7 @@ export default function CreateFacilityForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    data-cy="make-facility-public"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -418,7 +441,12 @@ export default function CreateFacilityForm({
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isPending}
+          data-cy="submit-facility"
+        >
           {isPending ? (
             <>
               <CareIcon
