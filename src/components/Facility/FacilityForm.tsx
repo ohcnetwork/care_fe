@@ -132,7 +132,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
     },
   });
 
-  const { mutate: updateFacility, isPending: isUpdatePenidng } = useMutation({
+  const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
     mutationFn: mutate(routes.updateFacility, {
       pathParams: { id: facilityId || "" },
     }), // Use the update route
@@ -562,14 +562,14 @@ export default function CreateFacilityForm(props: FacilityProps) {
           )}
         </div>
 
-        {facilityId ? (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isUpdatePenidng}
-            data-cy="update-facility"
-          >
-            {isUpdatePenidng ? (
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={facilityId ? isUpdatePending : isPending}
+          data-cy={facilityId ? "update-facility" : "submit-facility"}
+        >
+          {facilityId ? (
+            isUpdatePending ? (
               <>
                 <CareIcon
                   icon="l-spinner"
@@ -579,28 +579,19 @@ export default function CreateFacilityForm(props: FacilityProps) {
               </>
             ) : (
               "Update Facility"
-            )}
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isPending}
-            data-cy="submit-facility"
-          >
-            {isPending ? (
-              <>
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
-                />
-                Creating Facility...
-              </>
-            ) : (
-              "Create Facility"
-            )}
-          </Button>
-        )}
+            )
+          ) : isPending ? (
+            <>
+              <CareIcon
+                icon="l-spinner"
+                className="mr-2 h-4 w-4 animate-spin"
+              />
+              Creating Facility...
+            </>
+          ) : (
+            "Create Facility"
+          )}
+        </Button>
       </form>
     </Form>
   );
