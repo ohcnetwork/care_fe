@@ -125,7 +125,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       } = await request(UserApi.create, {
         body: {
           ...data,
-          email: "invalid-email-format",
           // Omit c_password as it's not needed in the API
           c_password: undefined,
         } as unknown as UserBase,
