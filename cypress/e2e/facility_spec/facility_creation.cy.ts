@@ -57,7 +57,8 @@ describe("Facility Management", () => {
   });
 
   it("Should show validation errors for required fields", () => {
-    facilityPage.navigateToFacilities();
+    facilityPage.navigateToOrganization("Kerala");
+    facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
     facilityPage.submitFacilityCreationForm();
     facilityPage.verifyValidationErrors();
