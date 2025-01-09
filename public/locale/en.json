@@ -1632,6 +1632,7 @@
   "select": "Select",
   "select_all": "Select All",
   "select_date": "Select date",
+  "select_department": "Select Department",
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_facility_for_discharged_patients_warning": "Facility needs to be selected to view discharged patients.",
   "select_for_administration": "Select for Administration",
