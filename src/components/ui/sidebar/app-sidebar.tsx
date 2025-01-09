@@ -126,7 +126,9 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        {(facilitySidebar || selectedOrganization) && <FacilityNavUser />}
+        {(facilitySidebar || selectedOrganization) && (
+          <FacilityNavUser selectedFacilityId={selectedFacility?.id} />
+        )}
         {patientSidebar && <PatientNavUser />}
       </SidebarFooter>
 
