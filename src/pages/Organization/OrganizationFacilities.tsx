@@ -18,6 +18,7 @@ import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import OrganizationLayout from "./components/OrganizationLayout";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   id: string;
@@ -32,7 +33,7 @@ export default function OrganizationFacilities({
     useFilters({ limit: 14, cacheBlacklist: ["facility"] });
 
   const [debouncedParams, setDebouncedParams] = useDebouncedState(qParams, 500);
-
+  const { t } = useTranslation();
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, debouncedParams],
     queryFn: query(routes.facility.list, {
@@ -63,7 +64,7 @@ export default function OrganizationFacilities({
         <div className="flex gap-2">
           <Input
             type="text"
-            placeholder="Search facilities..."
+            placeholder={t("search_facilities")}
             value={qParams.name || ""}
             onChange={(e) => {
               updateQuery({
@@ -106,7 +107,7 @@ export default function OrganizationFacilities({
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No facilities found.
+                {t("no_facilities_found")}
               </CardContent>
             </Card>
           ) : (
@@ -149,7 +150,7 @@ export default function OrganizationFacilities({
                       href={`/facility/${facility.id}`}
                       className="text-sm text-primary hover:underline"
                     >
-                      View Facility
+                     {t("view_facility")}
                       <Button
                         variant="ghost"
                         size="icon"

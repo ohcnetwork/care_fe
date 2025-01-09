@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
-
+import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +32,8 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     searchQuery,
     500,
   );
-
   const limit = 12; // 3x4 grid
-
+  const { t } = useTranslation();
   const { data: children, isLoading } = useQuery({
     queryKey: ["organization", id, "children", page, limit, debouncedParams],
     queryFn: query(organizationApi.list, {
@@ -59,7 +58,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
           <h2 className="text-lg font-semibold">Organizations</h2>
           <div className="w-72">
             <Input
-              placeholder="Search by name..."
+              placeholder={t("search_by_name")}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -137,8 +136,8 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {searchQuery
-                      ? `No organizations found matching "${searchQuery}"`
-                      : "No sub-organizations found."}
+                      ? `${t("no_organizations_found_matching")} "${searchQuery}"`
+                      : `${t("no_sub_organizations_found")}`}
                   </CardContent>
                 </Card>
               )}

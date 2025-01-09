@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
-
+import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     searchQuery,
     500,
   );
-
+ const {t}=useTranslation();
   const { data: children, isLoading } = useQuery({
     queryKey: [
       "facilityOrganization",
@@ -58,11 +58,11 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-lg font-semibold">Organizations</h2>
+          <h2 className="text-lg font-semibold">{t("organizations")}</h2>
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <div className="w-full sm:w-72">
               <Input
-                placeholder="Search by name..."
+                placeholder={t("search_by_name")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -138,8 +138,8 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {searchQuery
-                      ? `No organizations found matching "${searchQuery}"`
-                      : "No sub-organizations found."}
+                      ? `${t("no_organizations_found_matching")} "${searchQuery}"`
+                      : `${t("no_sub_organizations_found")}`}
                   </CardContent>
                 </Card>
               )}
