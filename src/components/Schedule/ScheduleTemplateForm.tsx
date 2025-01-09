@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowRightIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -22,7 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetClose,
@@ -42,37 +50,8 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Template name is required"),
-  valid_from: z.date({
-    required_error: "Valid from date is required",
-  }),
-  valid_to: z.date({
-    required_error: "Valid to date is required",
-  }),
-  weekdays: z
-    .array(z.number() as unknown as z.ZodType<DayOfWeekValue>)
-    .min(1, "At least one weekday is required"),
-  availabilities: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Session name is required"),
-        slot_type: z.enum(["appointment", "open", "closed"]),
-        reason: z.string(),
-        start_time: z
-          .string()
-          .min(1, "Start time is required") as unknown as z.ZodType<Time>,
-        end_time: z
-          .string()
-          .min(1, "End time is required") as unknown as z.ZodType<Time>,
-        slot_size_in_minutes: z.number().min(1, "Must be greater than 0"),
-        tokens_per_slot: z.number().min(1, "Must be greater than 0"),
-      }),
-    )
-    .min(1, "At least one session is required"),
-});
 
 interface Props {
   facilityId: string;
@@ -85,6 +64,57 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
 
   const [open, setOpen] = useState(false);
 
+  const formSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    valid_from: z.date({
+      required_error: t("field_required"),
+    }),
+    valid_to: z.date({
+      required_error: t("field_required"),
+    }),
+    weekdays: z
+      .array(z.number() as unknown as z.ZodType<DayOfWeekValue>)
+      .min(1, t("schedule_weekdays_min_error")),
+    availabilities: z
+      .array(
+        z.discriminatedUnion("slot_type", [
+          // Schema for appointment type
+          z.object({
+            slot_type: z.literal("appointment"),
+            name: z.string().min(1, t("field_required")),
+            reason: z.string(),
+            start_time: z
+              .string()
+              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+            end_time: z
+              .string()
+              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+            slot_size_in_minutes: z
+              .number()
+              .min(1, t("number_min_error", { min: 1 })),
+            tokens_per_slot: z
+              .number()
+              .min(1, t("number_min_error", { min: 1 })),
+          }),
+          // Schema for open and closed types
+          z.object({
+            slot_type: z.enum(["open", "closed"]),
+            name: z.string().min(1, t("field_required")),
+            reason: z.string(),
+            start_time: z
+              .string()
+              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+            end_time: z
+              .string()
+              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+            slot_size_in_minutes: z.literal(null),
+            tokens_per_slot: z.literal(null),
+          }),
+        ]),
+      )
+      .min(1, t("schedule_sessions_min_error")),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,12 +125,12 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
       availabilities: [
         {
           name: "",
-          slot_type: undefined,
+          slot_type: "appointment",
           reason: "",
           start_time: undefined,
           end_time: undefined,
-          tokens_per_slot: 0,
-          slot_size_in_minutes: 0,
+          tokens_per_slot: null as unknown as undefined,
+          slot_size_in_minutes: null as unknown as undefined,
         },
       ],
     },
@@ -126,18 +156,21 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
       valid_to: dateQueryString(values.valid_to),
       name: values.name,
       user: userId,
-      availabilities: values.availabilities.map((availability) => ({
-        name: availability.name,
-        slot_type: availability.slot_type,
-        slot_size_in_minutes: availability.slot_size_in_minutes,
-        tokens_per_slot: availability.tokens_per_slot,
-        reason: availability.reason,
-        availability: values.weekdays.map((day) => ({
-          day_of_week: day,
-          start_time: availability.start_time,
-          end_time: availability.end_time,
-        })),
-      })),
+      availabilities: values.availabilities.map(
+        (availability) =>
+          ({
+            name: availability.name,
+            slot_type: availability.slot_type,
+            slot_size_in_minutes: availability.slot_size_in_minutes,
+            tokens_per_slot: availability.tokens_per_slot,
+            reason: availability.reason,
+            availability: values.weekdays.map((day) => ({
+              day_of_week: day,
+              start_time: availability.start_time,
+              end_time: availability.end_time,
+            })),
+          }) as ScheduleAvailabilityCreateRequest,
+      ),
     });
   }
 
@@ -164,10 +197,13 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
 
     return (
       <Callout variant="alert" badge="Info">
-        Allocating <strong>{Math.floor(slotsPerSession)} slots</strong> in this
-        session provides approximately{" "}
-        <strong>{tokenDuration.toFixed(1).replace(".0", "")} mins.</strong> for
-        each patient.
+        <Trans
+          i18nKey="schedule_slots_allocation_callout"
+          values={{
+            slots: Math.floor(slotsPerSession),
+            token_duration: tokenDuration.toFixed(1).replace(".0", ""),
+          }}
+        />
       </Callout>
     );
   };
@@ -176,12 +212,12 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="primary" disabled={isPending}>
-          Create Template
+          {t("create_template")}
         </Button>
       </SheetTrigger>
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
         <SheetHeader>
-          <SheetTitle>Create Schedule Template</SheetTitle>
+          <SheetTitle>{t("create_schedule_template")}</SheetTitle>
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
@@ -192,9 +228,14 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>Template Name</FormLabel>
+                    <FormLabel required>
+                      {t("schedule_template_name")}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Regular OP Day" {...field} />
+                      <Input
+                        placeholder={t("schedule_template_name_placeholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -207,7 +248,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                   name="valid_from"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>Valid From</FormLabel>
+                      <FormLabel required>{t("valid_from")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -222,7 +263,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                   name="valid_to"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>Valid Till</FormLabel>
+                      <FormLabel required>{t("valid_to")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
@@ -235,12 +276,10 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
 
               <div>
                 <FormLabel className="text-lg font-semibold">
-                  Weekly Schedule
+                  {t("weekly_schedule")}
                 </FormLabel>
                 <span className="block text-sm">
-                  Select the weekdays for applying the{" "}
-                  <strong className="font-medium">Regular OP Day</strong>{" "}
-                  template to schedule appointments
+                  {t("schedule_weekdays_description")}
                 </span>
                 <div className="py-2">
                   <FormField
@@ -290,7 +329,7 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                         }}
                       >
                         <CareIcon icon="l-trash" className="text-base" />
-                        <span className="ml-2">Remove</span>
+                        <span className="ml-2">{t("remove")}</span>
                       </Button>
                     </div>
 
@@ -300,9 +339,12 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                         name={`availabilities.${index}.name`}
                         render={({ field }) => (
                           <FormItem className="col-span-2 md:col-span-1">
-                            <FormLabel required>Session Title</FormLabel>
+                            <FormLabel required>{t("session_title")}</FormLabel>
                             <FormControl>
-                              <Input placeholder="IP Rounds" {...field} />
+                              <Input
+                                placeholder={t("session_title_placeholder")}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -313,63 +355,42 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                         control={form.control}
                         name={`availabilities.${index}.slot_type`}
                         render={({ field }) => (
-                          <FormItem className="space-y-3 col-span-2 md:col-span-1">
-                            <FormLabel required>Appointment Type</FormLabel>
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                className="flex space-x-4"
-                              >
+                          <FormItem className="col-span-2 md:col-span-1">
+                            <FormLabel required>{t("session_type")}</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue asChild>
+                                    <span>
+                                      {t(
+                                        `SCHEDULE_AVAILABILITY_TYPE__${field.value}`,
+                                      )}
+                                    </span>
+                                  </SelectValue>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
                                 {["appointment", "open", "closed"].map(
                                   (type) => (
-                                    <div
-                                      key={type}
-                                      className="flex items-center space-x-2"
-                                    >
-                                      <RadioGroupItem
-                                        value={type}
-                                        id={`slot-type-${type}-${index}`}
-                                      />
-                                      <label
-                                        htmlFor={`slot-type-${type}-${index}`}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                      >
-                                        {t(`SCHEDULE_SLOT_TYPE__${type}`)}
-                                      </label>
-                                    </div>
+                                    <SelectItem key={type} value={type}>
+                                      <p>
+                                        {t(
+                                          `SCHEDULE_AVAILABILITY_TYPE__${type}`,
+                                        )}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {t(
+                                          `SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__${type}`,
+                                        )}
+                                      </p>
+                                    </SelectItem>
                                   ),
                                 )}
-                              </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`availabilities.${index}.start_time`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Start Time</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`availabilities.${index}.end_time`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>End Time</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -378,51 +399,94 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                       <div className="flex items-center gap-4 col-span-2 md:col-span-1">
                         <FormField
                           control={form.control}
-                          name={`availabilities.${index}.slot_size_in_minutes`}
+                          name={`availabilities.${index}.start_time`}
                           render={({ field }) => (
                             <FormItem className="flex-1">
-                              <FormLabel required>Slot size (mins.)</FormLabel>
+                              <FormLabel required>{t("start_time")}</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min={0}
-                                  placeholder="e.g. 10"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(e.target.valueAsNumber)
-                                  }
-                                />
+                                <Input type="time" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
 
+                        <ArrowRightIcon className="size-4 mt-5" />
+
                         <FormField
                           control={form.control}
-                          name={`availabilities.${index}.tokens_per_slot`}
+                          name={`availabilities.${index}.end_time`}
                           render={({ field }) => (
                             <FormItem className="flex-1">
-                              <FormLabel required>
-                                {t("patients_per_slot")}
-                              </FormLabel>
+                              <FormLabel required>{t("end_time")}</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min={0}
-                                  placeholder="e.g. 1"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(e.target.valueAsNumber)
-                                  }
-                                />
+                                <Input type="time" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                      {timeAllocationCallout(index)}
+
+                      {form.watch(`availabilities.${index}.slot_type`) ===
+                        "appointment" && (
+                        <>
+                          <div className="flex items-center gap-4 col-span-2 md:col-span-1">
+                            <FormField
+                              control={form.control}
+                              name={`availabilities.${index}.slot_size_in_minutes`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormLabel required>
+                                    {t("schedule_slot_size_label")}
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      placeholder="e.g. 10"
+                                      {...field}
+                                      value={field.value ?? ""}
+                                      onChange={(e) =>
+                                        field.onChange(e.target.valueAsNumber)
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`availabilities.${index}.tokens_per_slot`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormLabel required>
+                                    {t("patients_per_slot")}
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      placeholder="e.g. 1"
+                                      {...field}
+                                      value={field.value ?? ""}
+                                      onChange={(e) =>
+                                        field.onChange(e.target.valueAsNumber)
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            {timeAllocationCallout(index)}
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="mt-4">
@@ -431,10 +495,10 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                         name={`availabilities.${index}.reason`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Remarks</FormLabel>
+                            <FormLabel>{t("remarks")}</FormLabel>
                             <FormControl>
                               <Textarea
-                                placeholder="Enter remarks for this session"
+                                placeholder={t("remarks_placeholder")}
                                 className="resize-none"
                                 {...field}
                               />
@@ -462,29 +526,29 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
                     ...availabilities,
                     {
                       name: "",
-                      slot_type: "open",
+                      slot_type: "appointment",
                       reason: "",
                       start_time: "00:00",
                       end_time: "00:00",
-                      tokens_per_slot: 0,
-                      slot_size_in_minutes: 0,
+                      tokens_per_slot: null as unknown as number,
+                      slot_size_in_minutes: null as unknown as number,
                     },
                   ]);
                 }}
               >
                 <CareIcon icon="l-plus" className="text-lg" />
-                <span>Add another Session</span>
+                <span>{t("add_another_session")}</span>
               </Button>
 
               <SheetFooter className="absolute inset-x-0 bottom-0 border-t bg-white p-6">
                 <SheetClose asChild>
                   <Button variant="outline" type="button" disabled={isPending}>
-                    Cancel
+                    {t("cancel")}
                   </Button>
                 </SheetClose>
 
                 <Button variant="primary" type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : "Save & Generate Slots"}
+                  {isPending ? t("saving") : t("save")}
                 </Button>
               </SheetFooter>
             </form>

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Edit3Icon, Trash2Icon } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -123,7 +123,8 @@ const ScheduleTemplateItem = ({
             <div className="flex flex-col">
               <span className="text-lg font-semibold">{template.name}</span>
               <span className="text-sm text-gray-700">
-                Scheduled for{" "}
+                {t("schedule_for")}
+                {": "}
                 <strong className="font-medium">
                   {getDaysOfWeekFromAvailabilities(template.availabilities)
                     .map((day) => t(`DAYS_OF_WEEK_SHORT__${day}`))
@@ -172,17 +173,21 @@ const ScheduleTemplateItem = ({
                             ]
                           }
                         </span>
-                        <span className="px-2 text-gray-300">|</span>
-                        <span className="text-sm">
-                          {Math.floor(
-                            getSlotsPerSession(
-                              slot.availability[0].start_time,
-                              slot.availability[0].end_time,
-                              slot.slot_size_in_minutes,
-                            ) ?? 0,
-                          )}{" "}
-                          slots of {slot.slot_size_in_minutes} mins.
-                        </span>
+                        {slot.slot_type === "appointment" && (
+                          <>
+                            <span className="px-2 text-gray-300">|</span>
+                            <span className="text-sm">
+                              {Math.floor(
+                                getSlotsPerSession(
+                                  slot.availability[0].start_time,
+                                  slot.availability[0].end_time,
+                                  slot.slot_size_in_minutes,
+                                ) ?? 0,
+                              )}{" "}
+                              slots of {slot.slot_size_in_minutes} mins.
+                            </span>
+                          </>
+                        )}
                       </p>
                     </div>
                     <span className="text-sm">
@@ -193,16 +198,17 @@ const ScheduleTemplateItem = ({
               </li>
             ))}
           </ul>
-          <span className="text-sm text-gray-500">
-            Valid from{" "}
-            <strong className="font-semibold">
-              {format(parseISO(template.valid_from), "EEE, dd MMM yyyy")}
-            </strong>{" "}
-            till{" "}
-            <strong className="font-semibold">
-              {format(parseISO(template.valid_to), "EEE, dd MMM yyyy")}
-            </strong>
-          </span>
+          <Trans
+            i18nKey="schedule_valid_from_till_range"
+            values={{
+              from_date: format(
+                parseISO(template.valid_from),
+                "EEE, dd MMM yyyy",
+              ),
+              to_date: format(parseISO(template.valid_to), "EEE, dd MMM yyyy"),
+            }}
+            components={{ strong: <strong className="font-semibold" /> }}
+          />
         </div>
       </div>
       <Sheet

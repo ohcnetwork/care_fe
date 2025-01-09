@@ -195,16 +195,18 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                                   {formatAvailabilityTime(availability)}
                                 </span>
                               </p>
-                              <p className="text-sm text-gray-600">
-                                {Math.floor(
-                                  getSlotsPerSession(
-                                    availability[0].start_time,
-                                    availability[0].end_time,
-                                    slot_size_in_minutes,
-                                  ) ?? 0,
-                                )}{" "}
-                                slots of {slot_size_in_minutes} mins.
-                              </p>
+                              {slot_type === "appointment" && (
+                                <p className="text-sm text-gray-600">
+                                  {Math.floor(
+                                    getSlotsPerSession(
+                                      availability[0].start_time,
+                                      availability[0].end_time,
+                                      slot_size_in_minutes,
+                                    ) ?? 0,
+                                  )}{" "}
+                                  slots of {slot_size_in_minutes} mins.
+                                </p>
+                              )}
                             </div>
                           ),
                         )}

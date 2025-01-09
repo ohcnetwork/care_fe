@@ -1,4 +1,4 @@
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -9,7 +9,6 @@ import {
   isTomorrow,
   isYesterday,
 } from "date-fns";
-import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,7 +18,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Command,
   CommandEmpty,
@@ -29,6 +27,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -64,7 +63,6 @@ import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import FiltersCache from "@/Utils/FiltersCache";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -81,25 +79,19 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface QueryParams {
-  practitioner?: string;
-  slot?: string;
-  date?: string;
-  search?: string;
+  practitioner: string | null;
+  slot: string | null;
+  date_from: string | null;
+  date_to: string | null;
+  search: string | null;
 }
 
 export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
-
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
-  const date = qParams.date ?? dateQueryString(new Date());
-
-  const setQParams = (params: QueryParams) => {
-    // TODO: use null for deletion as per raviger's docs
-    params = FiltersCache.utils.clean({ ...qParams, ...params });
-    _setQParams(params, { replace: true });
-  };
-
   const authUser = useAuthUser();
+
+  const [qParams, setQParams] = useQueryParams<QueryParams>();
+
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
@@ -114,16 +106,19 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const resources = resourcesQuery.data?.users;
   const practitioner = resources?.find((r) => r.id === qParams.practitioner);
 
+  // We'll need to update the backend to get slots for a range of dates
+  // But it'd be better to get schedule and exceptions and compute slots on the frontend
+  // TODO: handle this properly
   const slotsQuery = useQuery({
-    queryKey: ["slots", facilityId, qParams.practitioner, date],
+    queryKey: ["slots", facilityId, qParams.practitioner, qParams.date_from],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
         user: qParams.practitioner ?? "",
-        day: date,
+        day: qParams.date_from ?? "",
       },
     }),
-    enabled: !!qParams.practitioner,
+    enabled: !!qParams.practitioner && !!qParams.date_from,
   });
   const slots = slotsQuery.data?.results;
   const slot = slots?.find((s) => s.id === qParams.slot);
@@ -197,8 +192,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           value="all"
                           onSelect={() =>
                             setQParams({
-                              practitioner: undefined,
-                              slot: undefined,
+                              ...qParams,
+                              practitioner: null,
+                              slot: null,
                             })
                           }
                           className="cursor-pointer"
@@ -215,8 +211,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                             value={formatName(user)}
                             onSelect={() =>
                               setQParams({
+                                ...qParams,
                                 practitioner: user.id,
-                                slot: undefined,
+                                slot: null,
                               })
                             }
                             className="cursor-pointer"
@@ -249,28 +246,29 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             <div className="flex items-center gap-1 -mt-2">
               <Label>
                 {(() => {
+                  if (!qParams.date_from) return null;
                   const relative =
-                    (isYesterday(date) && t("yesterday")) ||
-                    (isToday(date) && t("today")) ||
-                    (isTomorrow(date) && t("tomorrow"));
+                    (isYesterday(qParams.date_from) && t("yesterday")) ||
+                    (isToday(qParams.date_from) && t("today")) ||
+                    (isTomorrow(qParams.date_from) && t("tomorrow"));
                   if (relative) {
                     return (
                       <>
                         <span className="text-black">{relative}</span>
                         <span className="pl-1 text-gray-500">
-                          ({formatDate(date, "dd MMM yyyy")})
+                          ({formatDate(qParams.date_from, "dd MMM yyyy")})
                         </span>
                       </>
                     );
                   }
                   return (
                     <span className="text-black">
-                      {formatDate(date, "dd MMM yyyy")}
+                      {formatDate(qParams.date_from, "dd MMM yyyy")}
                     </span>
                   );
                 })()}
               </Label>
-              <Popover modal>
+              {/* <Popover modal>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <Edit3Icon />
@@ -279,17 +277,18 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 <PopoverContent className="w-auto p-0" align="end">
                   <Calendar
                     mode="single"
-                    selected={new Date(date)}
+                    selected={new Date(date_from)}
                     onSelect={(date) => {
                       setQParams({
-                        date: dateQueryString(date),
-                        slot: undefined,
+                        ...qParams,
+                        date_from: dateQueryString(date),
+                        slot: null,
                       });
                     }}
                     initialFocus
                   />
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
             </div>
 
             <SlotFilter
@@ -297,9 +296,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
               selectedSlot={qParams.slot}
               onSelect={(slot) => {
                 if (slot === "all") {
-                  setQParams({ slot: undefined });
+                  setQParams({ ...qParams, slot: null });
                 } else {
-                  setQParams({ slot });
+                  setQParams({ ...qParams, slot });
                 }
               }}
             />
@@ -310,10 +309,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           <Input
             className="w-[300px]"
             placeholder={t("search")}
-            value={qParams.search}
-            onChange={(e) => setQParams({ search: e.target.value })}
+            value={qParams.search ?? ""}
+            onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
           />
-          {/* <Popover>
+          <Popover>
             <PopoverTrigger asChild>
               <Button variant="secondary">
                 <CareIcon icon="l-filter" className="mr-2" />
@@ -323,24 +322,41 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             <PopoverContent className="mr-11">
               <div>
                 <Label className="mb-2">{t("date")}</Label>
-                <DatePicker
-                  date={new Date(date)}
+                <DateRangePicker
+                  date={{
+                    from: qParams.date_from
+                      ? new Date(qParams.date_from)
+                      : undefined,
+                    to: qParams.date_to ? new Date(qParams.date_to) : undefined,
+                  }}
                   onChange={(date) =>
                     setQParams({
-                      date: dateQueryString(date),
-                      slot: undefined,
+                      ...qParams,
+                      date_from: date?.from ? dateQueryString(date.from) : null,
+                      date_to: date?.to ? dateQueryString(date?.to) : null,
                     })
                   }
                 />
               </div>
               <div className="flex justify-end bg-gray-100 mt-6 -m-4 py-3 px-4 rounded-md">
-                <Button variant="outline" onClick={() => _setQParams({})}>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setQParams({
+                      date_from: null,
+                      date_to: null,
+                      slot: null,
+                      search: null,
+                      practitioner: null,
+                    })
+                  }
+                >
                   <ReloadIcon className="mr-2" />
                   {t("clear_all_filters")}
                 </Button>
               </div>
             </PopoverContent>
-          </Popover> */}
+          </Popover>
         </div>
       </div>
 
@@ -362,7 +378,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 facilityId={facilityId}
                 slot={slot?.id}
                 practitioner={qParams.practitioner}
-                date={date}
+                date_from={qParams.date_from}
+                date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
               />
             ))}
@@ -374,7 +391,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           facilityId={facilityId}
           practitioner={qParams.practitioner}
           slot={qParams.slot}
-          date={date}
+          date_from={qParams.date_from}
+          date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
         />
       )}
@@ -385,9 +403,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 function AppointmentColumn(props: {
   facilityId: string;
   status: Appointment["status"];
-  practitioner?: string;
-  slot?: string;
-  date: string;
+  practitioner: string | null;
+  slot?: string | null;
+  date_from: string | null;
+  date_to: string | null;
   search?: string;
 }) {
   const { t } = useTranslation();
@@ -399,7 +418,8 @@ function AppointmentColumn(props: {
       props.status,
       props.practitioner,
       props.slot,
-      props.date,
+      props.date_from,
+      props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
@@ -408,9 +428,8 @@ function AppointmentColumn(props: {
         limit: 100,
         slot: props.slot,
         user: props.practitioner,
-        // TODO: update this
-        // date_after: props.date,
-        // date_before: props.date,
+        date_after: props.date_from,
+        date_before: props.date_to,
       },
     }),
   });
@@ -492,9 +511,10 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
 }
 function AppointmentRow(props: {
   facilityId: string;
-  practitioner?: string;
-  slot?: string;
-  date: string;
+  practitioner: string | null;
+  slot: string | null;
+  date_from: string | null;
+  date_to: string | null;
   search?: string;
 }) {
   const { t } = useTranslation();
@@ -507,7 +527,8 @@ function AppointmentRow(props: {
       status,
       props.practitioner,
       props.slot,
-      props.date,
+      props.date_from,
+      props.date_to,
     ],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
@@ -516,7 +537,8 @@ function AppointmentRow(props: {
         limit: 100,
         slot: props.slot,
         user: props.practitioner,
-        date: props.date,
+        date_after: props.date_from,
+        date_before: props.date_to,
       },
     }),
   });
@@ -739,7 +761,7 @@ interface SlotFilterProps {
   slots: TokenSlot[];
   disableInline?: boolean;
   disabled?: boolean;
-  selectedSlot: string | undefined;
+  selectedSlot: string | null;
   onSelect: (slot: string) => void;
 }
 
@@ -852,23 +874,5 @@ export const SlotFilter = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-
-  return (
-    <Select value={selectedSlot ?? "all"} onValueChange={onSelect}>
-      <SelectTrigger>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">{t("show_all_slots")}</SelectItem>
-        {slots.map((slot) => (
-          <SelectItem key={slot.id} value={slot.id}>
-            {format(slot.start_datetime, "h:mm a")}
-            {" - "}
-            {format(slot.end_datetime, "h:mm a")}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 };

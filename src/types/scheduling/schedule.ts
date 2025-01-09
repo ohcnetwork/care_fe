@@ -30,19 +30,29 @@ export interface ScheduleTemplate {
   updated_by: UserBase;
 }
 
+type ScheduleAvailabilityBase = {
+  name: string;
+  reason: string;
+  availability: AvailabilityDateTime[];
+} & (
+  | {
+      slot_type: "appointment";
+      slot_size_in_minutes: number;
+      tokens_per_slot: number;
+    }
+  | {
+      slot_type: "open" | "closed";
+      slot_size_in_minutes: null;
+      tokens_per_slot: null;
+    }
+);
+
 export interface ScheduleTemplateCreateRequest {
   user: string;
   name: string;
   valid_from: string; // datetime
   valid_to: string; // datetime
-  availabilities: {
-    name: string;
-    slot_type: ScheduleSlotType;
-    slot_size_in_minutes: number;
-    tokens_per_slot: number;
-    reason: string;
-    availability: AvailabilityDateTime[];
-  }[];
+  availabilities: ScheduleAvailabilityBase[];
 }
 
 export interface ScheduleTemplateUpdateRequest {
@@ -51,28 +61,15 @@ export interface ScheduleTemplateUpdateRequest {
   valid_to: string;
 }
 
-export interface ScheduleAvailability {
+export type ScheduleAvailability = ScheduleAvailabilityBase & {
   id: string;
-  name: string;
-  slot_type: ScheduleSlotType;
-  slot_size_in_minutes: number;
-  tokens_per_slot: number;
-  reason: string;
-  availability: AvailabilityDateTime[];
-}
+};
 
-export interface ScheduleAvailabilityCreateRequest {
-  name: string;
-  slot_type: ScheduleSlotType;
-  slot_size_in_minutes: number;
-  tokens_per_slot: number;
-  reason: string;
-  availability: AvailabilityDateTime[];
-}
+export type ScheduleAvailabilityCreateRequest = ScheduleAvailabilityBase;
 
 export interface ScheduleAvailabilityUpdateRequest {
   name: string;
-  tokens_per_slot: number;
+  tokens_per_slot: number | null;
   reason: string;
 }
 

@@ -13,7 +13,6 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import * as Notification from "@/Utils/Notifications";
-import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
@@ -66,8 +65,6 @@ export default function UserHome(props: UserHomeProps) {
     return <Loading />;
   }
 
-  const editPermissions = editUserPermissions(authUser, userData);
-
   const TABS = {
     PROFILE: {
       body: UserSummaryTab,
@@ -75,7 +72,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !editPermissions || !props.facilityId,
+      hidden: !props.facilityId,
     },
   } satisfies Record<string, TabChildProp>;
 

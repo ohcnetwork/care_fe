@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -33,26 +34,11 @@ import { dateQueryString } from "@/Utils/utils";
 import {
   AvailabilityDateTime,
   ScheduleAvailability,
+  ScheduleAvailabilityUpdateRequest,
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import { DayOfWeek } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
-
-const templateFormSchema = z.object({
-  name: z.string().min(1, "Template name is required"),
-  valid_from: z.date({
-    required_error: "Valid from date is required",
-  }),
-  valid_to: z.date({
-    required_error: "Valid to date is required",
-  }),
-});
-
-const availabilityFormSchema = z.object({
-  name: z.string().min(1, "Session name is required"),
-  tokens_per_slot: z.number().min(1, "Must be greater than 0"),
-  reason: z.string(),
-});
 
 export default function ScheduleTemplateEditForm({
   template,
@@ -71,7 +57,7 @@ export default function ScheduleTemplateEditForm({
         userId={userId}
       />
       {template.availabilities.map((availability) => (
-        <ScheduleAvailabilityEditor
+        <AvailabilityEditor
           key={availability.id}
           availability={availability}
           scheduleId={template.id}
@@ -92,7 +78,18 @@ const ScheduleTemplateEditor = ({
   facilityId: string;
   userId: string;
 }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const templateFormSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    valid_from: z.date({
+      required_error: t("field_required"),
+    }),
+    valid_to: z.date({
+      required_error: t("field_required"),
+    }),
+  });
 
   const form = useForm<z.infer<typeof templateFormSchema>>({
     resolver: zodResolver(templateFormSchema),
@@ -135,9 +132,12 @@ const ScheduleTemplateEditor = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>Template Name</FormLabel>
+                <FormLabel required>{t("schedule_template_name")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Regular OP Day" {...field} />
+                  <Input
+                    placeholder={t("schedule_template_name_placeholder")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,7 +150,7 @@ const ScheduleTemplateEditor = ({
               name="valid_from"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel required>Valid From</FormLabel>
+                  <FormLabel required>{t("valid_from")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -165,7 +165,7 @@ const ScheduleTemplateEditor = ({
               name="valid_to"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel required>Valid Till</FormLabel>
+                  <FormLabel required>{t("valid_to")}</FormLabel>
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
@@ -178,7 +178,7 @@ const ScheduleTemplateEditor = ({
 
           <div className="flex justify-end">
             <Button variant="primary" type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending ? t("saving") : t("save")}
             </Button>
           </div>
         </form>
@@ -187,7 +187,7 @@ const ScheduleTemplateEditor = ({
   );
 };
 
-const ScheduleAvailabilityEditor = ({
+const AvailabilityEditor = ({
   availability,
   scheduleId,
   facilityId,
@@ -198,16 +198,8 @@ const ScheduleAvailabilityEditor = ({
   facilityId: string;
   userId: string;
 }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
-
-  const form = useForm<z.infer<typeof availabilityFormSchema>>({
-    resolver: zodResolver(availabilityFormSchema),
-    defaultValues: {
-      name: availability.name,
-      tokens_per_slot: availability.tokens_per_slot,
-      reason: availability.reason || "",
-    },
-  });
 
   const { mutate: updateAvailability, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.update, {
@@ -218,7 +210,7 @@ const ScheduleAvailabilityEditor = ({
       },
     }),
     onSuccess: () => {
-      toast.success("Schedule availability updated successfully");
+      toast.success(t("schedule_availability_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["user-schedule-templates", { facilityId, userId }],
       });
@@ -234,14 +226,58 @@ const ScheduleAvailabilityEditor = ({
       },
     }),
     onSuccess: () => {
-      toast.success("Schedule availability deleted successfully");
+      toast.success(t("schedule_availability_deleted_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["user-schedule-templates", { facilityId, userId }],
       });
     },
   });
 
-  function onSubmit(values: z.infer<typeof availabilityFormSchema>) {
+  return availability.slot_type === "appointment" ? (
+    <AppointmentAvailabilityEditor
+      availability={availability}
+      updateAvailability={updateAvailability}
+      deleteAvailability={deleteAvailability}
+      isProcessing={isUpdating || isDeleting}
+    />
+  ) : (
+    <NonAppointmentAvailabilityEditor
+      availability={availability}
+      updateAvailability={updateAvailability}
+      deleteAvailability={deleteAvailability}
+      isProcessing={isUpdating || isDeleting}
+    />
+  );
+};
+
+const AppointmentAvailabilityEditor = ({
+  availability,
+  updateAvailability,
+  deleteAvailability,
+  isProcessing,
+}: {
+  availability: ScheduleAvailability & { slot_type: "appointment" };
+  updateAvailability: (request: ScheduleAvailabilityUpdateRequest) => void;
+  deleteAvailability: () => void;
+  isProcessing: boolean;
+}) => {
+  const { t } = useTranslation();
+  const appointmentAvailabilityFormSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    tokens_per_slot: z.number().min(1, t("number_min_error", { min: 1 })),
+    reason: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof appointmentAvailabilityFormSchema>>({
+    resolver: zodResolver(appointmentAvailabilityFormSchema),
+    defaultValues: {
+      name: availability.name,
+      tokens_per_slot: availability.tokens_per_slot,
+      reason: availability.reason || "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof appointmentAvailabilityFormSchema>) {
     updateAvailability({
       name: values.name,
       tokens_per_slot: values.tokens_per_slot,
@@ -297,11 +333,11 @@ const ScheduleAvailabilityEditor = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => deleteAvailability()}
-              disabled={isUpdating || isDeleting}
+              disabled={isProcessing}
               className="text-red-600"
             >
               <CareIcon icon="l-trash" className="mr-2" />
-              Delete
+              {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -315,7 +351,7 @@ const ScheduleAvailabilityEditor = ({
               name="name"
               render={({ field }) => (
                 <FormItem className="flex-[2]">
-                  <FormLabel required>Session Title</FormLabel>
+                  <FormLabel required>{t("schedule_session_title")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -329,7 +365,9 @@ const ScheduleAvailabilityEditor = ({
               name="tokens_per_slot"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel required>Patients per slot</FormLabel>
+                  <FormLabel required>
+                    {t("schedule_tokens_per_slot")}
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -343,6 +381,152 @@ const ScheduleAvailabilityEditor = ({
               )}
             />
           </div>
+
+          <div>
+            <span className="text-sm font-medium text-gray-500">
+              {t("schedule")}
+            </span>
+            <div className="mt-2 space-y-2">
+              {Object.entries(availabilitiesByDay).map(([day, times]) => (
+                <p
+                  key={day}
+                  className="flex items-center gap-2 rounded px-3 text-sm"
+                >
+                  <span className="font-medium w-24 text-gray-600">
+                    {DayOfWeek[parseInt(day)].charAt(0) +
+                      DayOfWeek[parseInt(day)].slice(1).toLowerCase()}
+                  </span>
+                  <span className="text-gray-500">
+                    {times
+                      .map((time) => formatAvailabilityTime([time]))
+                      .join(", ")}
+                  </span>
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="reason"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Remarks</FormLabel>
+                <FormControl>
+                  <Textarea className="resize-none" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end">
+            <Button variant="primary" type="submit" disabled={isProcessing}>
+              {isProcessing ? t("saving") : t("save")}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+};
+
+const NonAppointmentAvailabilityEditor = ({
+  availability,
+  updateAvailability,
+  deleteAvailability,
+  isProcessing,
+}: {
+  availability: ScheduleAvailability & { slot_type: "open" | "closed" };
+  updateAvailability: (request: ScheduleAvailabilityUpdateRequest) => void;
+  deleteAvailability: () => void;
+  isProcessing: boolean;
+}) => {
+  const { t } = useTranslation();
+
+  const nonAppointmentAvailabilityFormSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    reason: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof nonAppointmentAvailabilityFormSchema>>({
+    resolver: zodResolver(nonAppointmentAvailabilityFormSchema),
+    defaultValues: {
+      name: availability.name,
+      reason: availability.reason || "",
+    },
+  });
+
+  function onSubmit(
+    values: z.infer<typeof nonAppointmentAvailabilityFormSchema>,
+  ) {
+    updateAvailability({
+      name: values.name,
+      reason: values.reason,
+      tokens_per_slot: null,
+    });
+  }
+
+  // Group availabilities by day of week
+  const availabilitiesByDay = availability.availability.reduce(
+    (acc, curr) => {
+      const day = curr.day_of_week;
+      if (!acc[day]) {
+        acc[day] = [];
+      }
+      acc[day].push(curr);
+      return acc;
+    },
+    {} as Record<DayOfWeek, AvailabilityDateTime[]>,
+  );
+
+  return (
+    <div className="mt-4 rounded-lg bg-white p-4 shadow">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CareIcon icon="l-clock" className="text-lg text-blue-600" />
+          <div>
+            <span className="font-semibold">{availability.name}</span>
+            <p className="text-sm text-gray-500">
+              <span className="capitalize">{availability.slot_type}</span>
+            </p>
+          </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <CareIcon icon="l-ellipsis-v" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => deleteAvailability()}
+              disabled={isProcessing}
+              className="text-red-600"
+            >
+              <CareIcon icon="l-trash" className="mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Session Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div>
             <span className="text-sm font-medium text-gray-500">Schedule</span>
@@ -381,8 +565,8 @@ const ScheduleAvailabilityEditor = ({
           />
 
           <div className="flex justify-end">
-            <Button variant="primary" type="submit" disabled={isUpdating}>
-              {isUpdating ? "Saving..." : "Save Changes"}
+            <Button variant="primary" type="submit" disabled={isProcessing}>
+              {isProcessing ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
