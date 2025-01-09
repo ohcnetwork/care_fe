@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import query from "@/Utils/request/query";
 import { OrganizationUserRole } from "@/types/organization/organization";
@@ -28,6 +29,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     sheet: string;
     username: string;
   }>();
+  const { t } = useTranslation();
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
@@ -70,7 +72,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Users</h2>
+          <h2 className="text-lg font-semibold">{t("users")}</h2>
           <div className="flex gap-2">
             <AddUserSheet
               open={openAddUserSheet}
@@ -96,7 +98,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
           {users?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No users found.
+                {t("no_users_found")}
               </CardContent>
             </Card>
           ) : (
@@ -110,7 +112,6 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         imageUrl={userRole.user.profile_picture_url}
                         className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
                       />
-
                       <div className="flex flex-col min-w-0 flex-1">
                         <div className="flex flex-col gap-1">
                           <h1 className="text-base font-bold break-words pr-2">
@@ -120,15 +121,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                             <span className="text-sm text-gray-500 truncate">
                               {userRole.user.username}
                             </span>
-                            <Badge
-                              variant="secondary"
-                              className="bg-green-100 whitespace-nowrap"
-                            >
-                              <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
-                              <span className="text-xs text-green-700">
-                                online
-                              </span>
-                            </Badge>
+                            <UserStatusIndicator user={userRole.user} />
                           </div>
                         </div>
                       </div>
@@ -136,13 +129,13 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <div className="text-gray-500">Role</div>
+                        <div className="text-gray-500">{t("role")}</div>
                         <div className="font-medium truncate">
                           {userRole.role.name}
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Phone Number</div>
+                        <div className="text-gray-500">{t("phone_number")}</div>
                         <div className="font-medium truncate">
                           {userRole.user.phone_number}
                         </div>
@@ -163,7 +156,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               icon="l-arrow-up-right"
                               className="h-4 w-4"
                             />
-                            <span>More details</span>
+                            <span>{t("more_details")}</span>
                           </Button>
                         }
                       />
