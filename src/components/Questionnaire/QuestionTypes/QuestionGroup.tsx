@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Label } from "@/components/ui/label";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -20,6 +20,7 @@ interface QuestionGroupProps {
   disabled?: boolean;
   activeGroupId?: string;
   facilityId: string;
+  patientId: string;
 }
 
 function isQuestionEnabled(
@@ -83,6 +84,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   disabled,
   activeGroupId,
   facilityId,
+  patientId,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -101,6 +103,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         clearError={() => clearError(question.id)}
         disabled={disabled}
         facilityId={facilityId}
+        patientId={patientId}
       />
     );
   }
@@ -108,46 +111,46 @@ export const QuestionGroup = memo(function QuestionGroup({
   const isActive = activeGroupId === question.id;
 
   return (
-    <div className="pt-4">
+    <div
+      title="group_styling"
+      className={cn(
+        "space-y-4 rounded-lg",
+        isActive && "ring-2 ring-primary",
+        question.styling_metadata?.classes && question.styling_metadata.classes,
+      )}
+    >
+      {question.text && (
+        <div className="space-y-1">
+          <QuestionLabel question={question} groupLabel />
+          {question.description && (
+            <p className="text-sm text-muted-foreground">
+              {question.description}
+            </p>
+          )}
+        </div>
+      )}
       <div
+        title="group_container_styling"
         className={cn(
-          "space-y-4 rounded-lg border p-4",
-          isActive && "ring-2 ring-primary",
+          "gap-2",
+          question.styling_metadata?.containerClasses &&
+            question.styling_metadata.containerClasses,
         )}
       >
-        {question.text && (
-          <div className="space-y-1">
-            <Label className="text-lg font-semibold text-green-600">
-              {question.text}
-            </Label>
-            {question.description && (
-              <p className="text-sm text-muted-foreground">
-                {question.description}
-              </p>
-            )}
-          </div>
-        )}
-        <div
-          className={cn(
-            "gap-2",
-            question.styling_metadata?.classes &&
-              question.styling_metadata.classes,
-          )}
-        >
-          {question.questions?.map((subQuestion) => (
-            <QuestionGroup
-              facilityId={facilityId}
-              key={subQuestion.id}
-              question={subQuestion}
-              questionnaireResponses={questionnaireResponses}
-              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-              errors={errors}
-              clearError={clearError}
-              disabled={disabled}
-              activeGroupId={activeGroupId}
-            />
-          ))}
-        </div>
+        {question.questions?.map((subQuestion) => (
+          <QuestionGroup
+            facilityId={facilityId}
+            key={subQuestion.id}
+            question={subQuestion}
+            questionnaireResponses={questionnaireResponses}
+            updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+            errors={errors}
+            clearError={clearError}
+            disabled={disabled}
+            activeGroupId={activeGroupId}
+            patientId={patientId}
+          />
+        ))}
       </div>
     </div>
   );

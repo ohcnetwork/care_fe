@@ -15,7 +15,7 @@ import {
   SlotAvailability,
 } from "@/components/Schedule/types";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -23,7 +23,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
-import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 
 export default function PatientSelect({
@@ -38,10 +37,10 @@ export default function PatientSelect({
     localStorage.getItem("selectedSlot") ?? "",
   ) as SlotAvailability;
   const reason = localStorage.getItem("reason");
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+
+  const patientUserContext = usePatientContext();
+  const tokenData = patientUserContext?.tokenData;
 
   const queryClient = useQueryClient();
 

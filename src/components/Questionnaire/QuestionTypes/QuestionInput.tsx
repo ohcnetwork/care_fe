@@ -2,6 +2,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FollowUpAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpAppointmentQuestion";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -35,6 +36,7 @@ interface QuestionInputProps {
   clearError: () => void;
   disabled?: boolean;
   facilityId: string;
+  patientId: string;
 }
 
 export function QuestionInput({
@@ -46,6 +48,7 @@ export function QuestionInput({
   clearError,
   disabled,
   facilityId,
+  patientId,
 }: QuestionInputProps) {
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
@@ -79,8 +82,10 @@ export function QuestionInput({
       questionnaireResponse,
       updateQuestionnaireResponseCB,
       disabled,
+      withLabel: false,
       clearError,
       index,
+      patientId,
     };
 
     switch (question.type) {
@@ -143,7 +148,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="space-y-2">
+      <div className="">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -159,8 +164,11 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2">
-              <div>{renderSingleInput(index)}</div>
+            <div key={index} className="mt-2 gap-2 flex items-end">
+              <div className="flex-1 space-y-1">
+                {index === 0 && <QuestionLabel question={question} />}
+                {renderSingleInput(index)}
+              </div>
               {removeButton}
             </div>
           );
