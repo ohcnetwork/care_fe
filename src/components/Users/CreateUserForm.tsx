@@ -283,7 +283,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("password")}</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder="Password" {...field} />
+                  <PasswordInput placeholder={t("password")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -297,7 +297,10 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("confirm_password")}</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder="Confirm password" {...field} />
+                  <PasswordInput
+                    placeholder={t("confirm_password")}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
