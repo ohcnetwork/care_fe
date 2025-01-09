@@ -141,8 +141,15 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     const {
       errors: { username },
     } = form.formState;
+    const isInitialRender = usernameInput === "";
+
     if (username?.message) {
-      return validateRule(false, username.message);
+      return validateRule(
+        false,
+        username.message,
+        isInitialRender,
+        t("username_available"),
+      );
     } else if (isLoading) {
       return (
         <div className="flex items-center gap-1">
@@ -156,9 +163,19 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         </div>
       );
     } else if (error) {
-      return validateRule(false, t("username_not_available"));
+      return validateRule(
+        false,
+        t("username_not_available"),
+        isInitialRender,
+        t("username_available"),
+      );
     } else if (usernameInput) {
-      return validateRule(true, t("username_available"));
+      return validateRule(
+        true,
+        t("username_not_available"),
+        isInitialRender,
+        t("username_available"),
+      );
     }
   };
 
@@ -272,6 +289,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("password")}</FormLabel>
+                <FormControl>
                   <PasswordInput placeholder="Password" {...field} />
                 </FormControl>
                 <FormMessage />
