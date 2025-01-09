@@ -298,10 +298,12 @@ const MedicationRequestGridRow: React.FC<{
                     period: dosageInstruction?.timing?.repeat?.period ?? 1,
                     period_unit:
                       dosageInstruction?.timing?.repeat?.period_unit ?? "d",
-                    bounds_duration: {
-                      value: value?.value,
-                      unit: value?.unit as keyof typeof BOUNDS_DURATION_UNITS,
-                    },
+                    bounds_duration: value?.value
+                      ? {
+                          value: value.value,
+                          unit: value.unit as keyof typeof BOUNDS_DURATION_UNITS,
+                        }
+                      : undefined,
                   },
                 },
               })
