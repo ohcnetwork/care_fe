@@ -69,66 +69,6 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],
 ];
 
-const formSchema = z
-  .object({
-    name: z.string().nonempty("Name is required"),
-    phone_number: z
-      .string()
-      .regex(/^\+\d{12}$/, "Phone number must be a 10-digit mobile number"),
-    same_phone_number: z.boolean(),
-    emergency_phone_number: z
-      .string()
-      .regex(
-        /^\+\d{12}$/,
-        "Emergency phone number must be a 10-digit mobile number",
-      ),
-    gender: z.enum(GENDERS, { required_error: "Gender is required" }),
-    blood_group: z.enum(BLOOD_GROUPS, {
-      required_error: "Blood group is required",
-    }),
-    yob_or_dob: z.enum(["dob", "age"]),
-    date_of_birth: z
-      .string()
-      .regex(
-        /^\d{4}-\d{2}-\d{2}$/,
-        "Date of birth must be in YYYY-MM-DD format",
-      )
-      .optional(),
-    year_of_birth: z
-      .string()
-      .regex(/^\d{4}$/, "Year of birth must be in YYYY format")
-      .optional(),
-    address: z.string().nonempty("Address is required"),
-    same_address: z.boolean(),
-    permanent_address: z.string().nonempty("Emergency address is required"),
-    pincode: z
-      .number()
-      .int()
-      .positive()
-      .min(100000, "Pincode must be a 6-digit number")
-      .max(999999, "Pincode must be a 6-digit number"),
-    nationality: z.string().nonempty("Nationality is required"),
-    geo_organization: z
-      .string()
-      .uuid("Geo organization must be a valid UUID")
-      .optional(),
-  })
-  .refine((data) => (data.yob_or_dob === "dob" ? !!data.date_of_birth : true), {
-    message: "Date of birth must be present",
-    path: ["date_of_birth"],
-  })
-  .refine((data) => (data.yob_or_dob === "age" ? !!data.year_of_birth : true), {
-    message: "Year of birth must be present",
-    path: ["year_of_birth"],
-  })
-  .refine(
-    (data) => (data.nationality === "India" ? !!data.geo_organization : true),
-    {
-      message: "Geo organization is required when nationality is India",
-      path: ["geo_organization"],
-    },
-  );
-
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
@@ -141,6 +81,70 @@ export default function PatientRegistration(
     useState(!!patientId);
   const [debouncedNumber, setDebouncedNumber] = useState<string>();
 
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          name: z.string().nonempty(t("name_is_required")),
+          phone_number: z
+            .string()
+            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+          same_phone_number: z.boolean(),
+          emergency_phone_number: z
+            .string()
+            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+          gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+          blood_group: z.enum(BLOOD_GROUPS, {
+            required_error: t("blood_group_is_required"),
+          }),
+          yob_or_dob: z.enum(["dob", "age"]),
+          date_of_birth: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
+            .optional(),
+          year_of_birth: z
+            .string()
+            .regex(/^\d{4}$/, t("year_of_birth_format"))
+            .optional(),
+          address: z.string().nonempty(t("address_is_required")),
+          same_address: z.boolean(),
+          permanent_address: z
+            .string()
+            .nonempty(t("permanent_address_is_required")),
+          pincode: z
+            .number()
+            .int()
+            .positive()
+            .min(100000, t("pincode_must_be_6_digits"))
+            .max(999999, t("pincode_must_be_6_digits")),
+          nationality: z.string().nonempty(t("nationality_is_required")),
+          geo_organization: z.string().uuid().optional(),
+        })
+        .refine(
+          (data) => (data.yob_or_dob === "dob" ? !!data.date_of_birth : true),
+          {
+            message: t("date_of_birth_must_be_present"),
+            path: ["date_of_birth"],
+          },
+        )
+        .refine(
+          (data) => (data.yob_or_dob === "age" ? !!data.year_of_birth : true),
+          {
+            message: t("year_of_birth_must_be_present"),
+            path: ["year_of_birth"],
+          },
+        )
+        .refine(
+          (data) =>
+            data.nationality === "India" ? !!data.geo_organization : true,
+          {
+            message: t("geo_organization_required"),
+            path: ["geo_organization"],
+          },
+        ),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -151,7 +155,8 @@ export default function PatientRegistration(
     },
   });
 
-  const createPatientMutation = useMutation({
+  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+    mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
     onSuccess: (resp: PatientModel) => {
       Notification.Success({
@@ -176,7 +181,7 @@ export default function PatientRegistration(
     },
   });
 
-  const updatePatientMutation = useMutation({
+  const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
     mutationFn: mutate(routes.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
@@ -195,11 +200,11 @@ export default function PatientRegistration(
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatientMutation.mutate({ ...values, ward_old: undefined });
+      updatePatient({ ...values, ward_old: undefined });
       return;
     }
 
-    createPatientMutation.mutate({
+    createPatient({
       ...values,
       facility: facilityId,
       ward_old: undefined,
@@ -313,10 +318,7 @@ export default function PatientRegistration(
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("name")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("name")}</FormLabel>
                     <FormControl>
                       <Input placeholder={t("type_patient_name")} {...field} />
                     </FormControl>
@@ -330,10 +332,7 @@ export default function PatientRegistration(
                 name="phone_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("phone_number")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("phone_number")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -386,9 +385,8 @@ export default function PatientRegistration(
                 disabled={form.watch("same_phone_number")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
+                    <FormLabel required>
                       {t("emergency_phone_number")}
-                      <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input {...field} />
@@ -403,10 +401,7 @@ export default function PatientRegistration(
                 name="gender"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel>
-                      {t("sex")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("sex")}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         {...field}
@@ -415,7 +410,10 @@ export default function PatientRegistration(
                         className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <FormItem className="flex items-center space-x-2 space-y-0">
+                          <FormItem
+                            key={g.id}
+                            className="flex items-center space-x-2 space-y-0"
+                          >
                             <FormControl>
                               <RadioGroupItem value={g.id} />
                             </FormControl>
@@ -436,10 +434,7 @@ export default function PatientRegistration(
                 name="blood_group"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("blood_group")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("blood_group")}</FormLabel>
                     <Select
                       {...field}
                       onValueChange={field.onChange}
@@ -454,7 +449,9 @@ export default function PatientRegistration(
                       </FormControl>
                       <SelectContent>
                         {BLOOD_GROUP_CHOICES.map((bg) => (
-                          <SelectItem value={bg.id}>{bg.text}</SelectItem>
+                          <SelectItem key={bg.id} value={bg.id}>
+                            {bg.text}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -482,10 +479,8 @@ export default function PatientRegistration(
                         <FormControl>
                           <div className="flex items-center gap-2">
                             <div className="flex flex-col gap-1">
-                              <div className="flex items-center">
-                                <FormLabel>{t("day")}</FormLabel>
-                                <span className="text-red-500">*</span>
-                              </div>
+                              <FormLabel required>{t("day")}</FormLabel>
+
                               <Input
                                 type="number"
                                 placeholder="DD"
@@ -503,10 +498,8 @@ export default function PatientRegistration(
                             </div>
 
                             <div className="flex flex-col gap-1">
-                              <div className="flex items-center">
-                                <FormLabel>{t("month")}</FormLabel>
-                                <span className="text-red-500">*</span>
-                              </div>
+                              <FormLabel required>{t("month")}</FormLabel>
+
                               <Input
                                 type="number"
                                 placeholder="MM"
@@ -524,10 +517,8 @@ export default function PatientRegistration(
                             </div>
 
                             <div className="flex flex-col gap-1">
-                              <div className="flex items-center">
-                                <FormLabel>{t("year")}</FormLabel>
-                                <span className="text-red-500">*</span>
-                              </div>
+                              <FormLabel required>{t("year")}</FormLabel>
+
                               <Input
                                 type="number"
                                 placeholder="YYYY"
@@ -562,10 +553,7 @@ export default function PatientRegistration(
                     name="year_of_birth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          {t("age")}
-                          <span className="text-red-500">*</span>
-                        </FormLabel>
+                        <FormLabel required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -598,10 +586,7 @@ export default function PatientRegistration(
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("current_address")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("current_address")}</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -651,10 +636,7 @@ export default function PatientRegistration(
                 disabled={form.watch("same_address")}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("permanent_address")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("permanent_address")}</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -668,10 +650,7 @@ export default function PatientRegistration(
                 name="pincode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {t("pincode")}
-                      <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -692,10 +671,7 @@ export default function PatientRegistration(
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {t("nationality")}
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel required>{t("nationality")}</FormLabel>
                       <FormControl>
                         <Autocomplete
                           options={countryList.map((c) => ({
@@ -748,10 +724,7 @@ export default function PatientRegistration(
               <Button
                 type="submit"
                 variant="primary"
-                disabled={
-                  createPatientMutation.isPending ||
-                  updatePatientMutation.isPending
-                }
+                disabled={isCreatingPatient || isUpdatingPatient}
               >
                 {patientId ? t("save") : t("save_and_continue")}
               </Button>
