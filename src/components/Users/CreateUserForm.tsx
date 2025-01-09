@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -27,13 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { validateRule } from "@/components/Users/UserFormValidations";
+
 import { GENDER_TYPES } from "@/common/constants";
-import { validateUsername } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { classNames } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -100,130 +99,8 @@ interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
 }
 
-export const validateRule = (
-  condition: boolean,
-  content: JSX.Element | string,
-  isInitialState: boolean = false,
-) => {
-  return (
-    <div>
-      {isInitialState ? (
-        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
-      ) : condition ? (
-        <CareIcon icon="l-check-circle" className="text-xl text-primary-500" />
-      ) : (
-        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
-      )}{" "}
-      <span
-        className={classNames(
-          isInitialState
-            ? "text-black"
-            : condition
-              ? "text-primary-500"
-              : "text-red-500",
-        )}
-      >
-        {content}
-      </span>
-    </div>
-  );
-};
-
 export default function CreateUserForm({ onSubmitSuccess }: Props) {
   const { t } = useTranslation();
-
-  const userExistsEnums = {
-    idle: 0,
-    checking: 1,
-    exists: 2,
-    available: 3,
-  };
-
-  const [usernameExists, setUsernameExists] = useState<number>(
-    userExistsEnums.idle,
-  );
-  const [usernameInput, setUsernameInput] = useState("");
-
-  const { data, error, isLoading } = useQuery({
-    queryKey: ["checkUsername", usernameInput],
-    queryFn: query(userApi.checkUsername, {
-      pathParams: { username: usernameInput },
-      silent: true,
-    }),
-    enabled: validateUsername(usernameInput),
-  });
-
-  useEffect(() => {
-    if (!validateUsername(usernameInput)) {
-      setUsernameExists(userExistsEnums.idle);
-      return;
-    }
-
-    if (isLoading) {
-      setUsernameExists(userExistsEnums.checking);
-    } else if (error) {
-      if (error instanceof Error && "status" in error) {
-        const status = (error as any).status;
-
-        if (status === 409) {
-          setUsernameExists(userExistsEnums.exists);
-        } else if (status === 404) {
-          toast.error(
-            "Some error occurred while checking username availability. Please try again later.",
-          );
-          setUsernameExists(userExistsEnums.idle);
-        }
-      } else {
-        toast.error(
-          "Some error occurred while checking username availability. Please try again later.",
-        );
-        setUsernameExists(userExistsEnums.idle);
-      }
-    } else {
-      setUsernameExists(userExistsEnums.available);
-    }
-  }, [data, error, isLoading, usernameInput]);
-
-  const renderFeedback = () => {
-    switch (usernameExists) {
-      case userExistsEnums.checking:
-        return (
-          <div className="flex items-center gap-1">
-            <CareIcon icon="l-spinner" className="text-xl animate-spin" />
-            <span className="text-md text-gray-500">Checking username...</span>
-          </div>
-        );
-      case userExistsEnums.available:
-        return (
-          <div className="flex items-center gap-1">
-            <CareIcon
-              icon="l-check-circle"
-              className="text-xl text-primary-500"
-            />
-            <span className="text-md text-primary-500">
-              {t("username_available")}
-            </span>
-          </div>
-        );
-      case userExistsEnums.exists:
-        return (
-          <div className="flex items-center gap-1">
-            <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
-            <span className="text-md text-red-500">
-              {t("username_not_available")}
-            </span>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setUsernameInput(value);
-    setUsernameExists(userExistsEnums.idle);
-  };
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -237,6 +114,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
   });
 
   const userType = form.watch("user_type");
+  const usernameInput = form.watch("username");
   const phoneNumber = form.watch("phone_number");
   const isWhatsApp = form.watch("phone_number_is_whatsapp");
 
@@ -244,7 +122,44 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     if (isWhatsApp) {
       form.setValue("alt_phone_number", phoneNumber);
     }
-  }, [phoneNumber, isWhatsApp, form]);
+    if (usernameInput && usernameInput.length > 0) {
+      form.trigger("username");
+    }
+  }, [phoneNumber, isWhatsApp, form, usernameInput]);
+
+  const { error, isLoading } = useQuery({
+    queryKey: ["checkUsername", usernameInput],
+    queryFn: query(userApi.checkUsername, {
+      pathParams: { username: usernameInput },
+      silent: true,
+    }),
+    enabled: usernameInput?.length >= 4,
+  });
+
+  const renderUsernameFeedback = (usernameInput: string) => {
+    if (
+      form.formState.errors.username &&
+      form.formState.errors.username?.message
+    ) {
+      return validateRule(false, form.formState.errors.username.message);
+    } else if (isLoading) {
+      return (
+        <div className="flex items-center gap-1">
+          <CareIcon
+            icon="l-spinner"
+            className="text-xl text-gray-500 animate-spin"
+          />
+          <span className="text-gray-500 text-sm">
+            {t("checking_availability")}
+          </span>
+        </div>
+      );
+    } else if (error) {
+      return validateRule(false, <>{t("username_not_available")}</>);
+    } else if (usernameInput && !form.formState.errors.username && !isLoading) {
+      return validateRule(true, <>{t("username_available")}</>);
+    }
+  };
 
   const onSubmit = async (data: UserFormValues) => {
     try {
@@ -341,40 +256,10 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormLabel>{t("username")}</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input
-                    placeholder={t("username")}
-                    {...field}
-                    value={usernameInput}
-                    onChange={handleInputChange}
-                  />
+                  <Input placeholder={t("username")} {...field} />
                 </div>
               </FormControl>
-              {renderFeedback()}
-              {validateRule(
-                usernameInput.length >= 4,
-                "Username must be at least 4 characters",
-                usernameInput.length === 0,
-              )}
-              {validateRule(
-                usernameInput.length < 16,
-                "Username must be less than 16 characters",
-                usernameInput.length === 0,
-              )}
-              {validateRule(
-                /^[a-z0-9._-]*$/.test(usernameInput),
-                "Username can only contain lowercase letters, numbers, and . _ -",
-                usernameInput.length === 0,
-              )}
-              {validateRule(
-                /^[a-z0-9].*[a-z0-9]$/.test(usernameInput),
-                "Username must start and end with a letter or number",
-                usernameInput.length === 0,
-              )}
-              {validateRule(
-                !usernameInput.match(/(?:[._-]{2,})/),
-                "Username cannot contain consecutive special characters",
-                usernameInput.length === 0,
-              )}
+              {renderUsernameFeedback(usernameInput)}
             </FormItem>
           )}
         />
@@ -604,7 +489,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         />
 
         <Button type="submit" className="w-full">
-          Create User
+          {t("create_user")}
         </Button>
       </form>
     </Form>
