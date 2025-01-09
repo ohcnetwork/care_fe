@@ -128,7 +128,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     }
   }, [phoneNumber, isWhatsApp, form, usernameInput]);
 
-  const { error, isLoading } = useQuery({
+  const { isLoading, isError } = useQuery({
     queryKey: ["checkUsername", usernameInput],
     queryFn: query(userApi.checkUsername, {
       pathParams: { username: usernameInput },
@@ -162,16 +162,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           </span>
         </div>
       );
-    } else if (error) {
+    } else {
       return validateRule(
-        false,
-        t("username_not_available"),
-        isInitialRender,
-        t("username_available"),
-      );
-    } else if (usernameInput) {
-      return validateRule(
-        true,
+        !isError,
         t("username_not_available"),
         isInitialRender,
         t("username_available"),
