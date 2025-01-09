@@ -18,6 +18,7 @@ interface Props<TUnit extends string> {
   units: readonly TUnit[];
   disabled?: boolean;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 const QuantityInput = <TUnit extends string>({
@@ -26,6 +27,7 @@ const QuantityInput = <TUnit extends string>({
   onChange,
   disabled,
   placeholder,
+  autoFocus,
 }: Props<TUnit>) => {
   const handleChange = (update: Partial<QuantityValue<TUnit>>) => {
     onChange({ ...quantity, ...update });
@@ -44,6 +46,7 @@ const QuantityInput = <TUnit extends string>({
             value: e.target.value ? Number(e.target.value) : undefined,
           })
         }
+        autoFocus={autoFocus}
       />
       <Select
         disabled={disabled}

@@ -223,6 +223,7 @@ const MedicationRequestGridRow: React.FC<{
               })
             }
             disabled={disabled}
+            autoFocus={true}
           />
         </div>
 
