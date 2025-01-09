@@ -1,24 +1,16 @@
-import { LoginPage } from "../../pageObject/auth/LoginPage";
 import { FacilityCreation } from "../../pageObject/facility/FacilityCreation";
 import { generatePhoneNumber } from "../../utils/commonUtils";
 import { generateFacilityData } from "../../utils/facilityData";
 
 describe("Facility Management", () => {
-  const loginPage = new LoginPage();
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
   const testFacility = generateFacilityData();
   const phoneNumber = generatePhoneNumber();
 
   beforeEach(() => {
-    cy.clearLocalStorage();
-    cy.saveLocalStorage();
     cy.visit("/login");
-    loginPage.loginByRole("nurse");
-  });
-
-  afterEach(() => {
-    cy.saveLocalStorage();
+    cy.loginByApi("nurse");
   });
 
   it("Create a new facility using the admin role", () => {
