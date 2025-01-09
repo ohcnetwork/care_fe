@@ -104,7 +104,10 @@ export default function UserDashboard() {
       {organizations.length > 0 && (
         <section className="space-y-3 md:space-y-4">
           <h2 className="text-lg font-semibold px-1">Your Organizations</h2>
-          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            data-cy="organization-list"
+          >
             {organizations.map((org) => (
               <Link key={org.id} href={`/organization/${org.id}`}>
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">

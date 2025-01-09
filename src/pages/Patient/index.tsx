@@ -21,7 +21,7 @@ import Loading from "@/components/Common/Loading";
 import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
 import { Appointment } from "@/components/Schedule/types";
 
-import { usePatientContext } from "@/hooks/useAuthOrPatientUser";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
@@ -159,7 +159,7 @@ function PatientIndex() {
     const appointmentDate = appointmentTime.format("DD MMMM YYYY");
     const appointmentTimeSlot = appointmentTime.format("hh:mm a");
     return (
-      <Card className="shadow overflow-hidden">
+      <Card key={appointment.id} className="shadow overflow-hidden">
         <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
           <CardTitle>
             <div className="flex flex-col">

@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -139,13 +140,13 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
-      encounter_class: encounterClass || "amb",
+      encounter_class: encounterClass || careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
     },
   });
 
-  const { mutate: createEncounter } = useMutation({
+  const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(routes.encounter.create),
     onSuccess: (data: Encounter) => {
       toast.success("Encounter created successfully");
@@ -318,8 +319,8 @@ export default function CreateEncounterForm({
               }}
             />
 
-            <Button type="submit" className="w-full">
-              Create Encounter
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Creating..." : "Create Encounter"}
             </Button>
           </form>
         </Form>

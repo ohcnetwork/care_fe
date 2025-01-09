@@ -17,6 +17,10 @@ export interface QuestionnaireDetail {
   subject_type: SubjectType;
 }
 
+export interface QuestionnaireUpdate extends QuestionnaireDetail {
+  organizations: string[];
+}
+
 export interface QuestionnaireForms {
   count: number;
   results: QuestionnaireDetail[];
