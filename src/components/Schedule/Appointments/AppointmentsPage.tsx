@@ -10,7 +10,7 @@ import {
   isYesterday,
 } from "date-fns";
 import { Link, navigate, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -54,6 +54,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
+import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import {
   formatSlotTimeRange,
@@ -96,15 +97,34 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
-  const resourcesQuery = useQuery({
-    queryKey: ["appointments-resources", facilityId],
+  const shedulableUsersQuery = useQuery({
+    queryKey: ["schedulable-users", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
 
-  const resources = resourcesQuery.data?.users;
-  const practitioner = resources?.find((r) => r.id === qParams.practitioner);
+  const resources = shedulableUsersQuery.data?.users;
+  const practitioner = qParams.practitioner
+    ? resources?.find((r) => r.username === qParams.practitioner)
+    : undefined;
+
+  // Sets the practitioner filter to the current user if they are in the list of
+  // shedulable users and no practitioner was selected on first load.
+  useEffect(() => {
+    if (
+      !shedulableUsersQuery.isLoading &&
+      !qParams.practitioner &&
+      shedulableUsersQuery.data?.users.some(
+        (r) => r.username === authUser.username,
+      )
+    ) {
+      setQParams({
+        ...qParams,
+        practitioner: authUser.username,
+      });
+    }
+  }, [shedulableUsersQuery.isLoading]);
 
   // We'll need to update the backend to get slots for a range of dates
   // But it'd be better to get schedule and exceptions and compute slots on the frontend
@@ -114,14 +134,18 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        user: qParams.practitioner ?? "",
+        user: practitioner?.id ?? "",
         day: qParams.date_from ?? "",
       },
     }),
-    enabled: !!qParams.practitioner && !!qParams.date_from,
+    enabled: !!qParams.date_from && !!practitioner,
   });
   const slots = slotsQuery.data?.results;
   const slot = slots?.find((s) => s.id === qParams.slot);
+
+  if (shedulableUsersQuery.isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Page
@@ -153,7 +177,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
               {t("select_practitioner")}
             </Label>
             <Popover>
-              <PopoverTrigger asChild disabled={resourcesQuery.isLoading}>
+              <PopoverTrigger asChild disabled={shedulableUsersQuery.isLoading}>
                 <Button
                   variant="outline"
                   role="combobox"
@@ -182,7 +206,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                   />
                   <CommandList>
                     <CommandEmpty>
-                      {resourcesQuery.isFetching
+                      {shedulableUsersQuery.isFetching
                         ? t("searching")
                         : t("no_results")}
                     </CommandEmpty>
@@ -200,19 +224,19 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           className="cursor-pointer"
                         >
                           <span>{t("show_all")}</span>
-                          {qParams.practitioner === undefined && (
+                          {!qParams.practitioner && (
                             <CheckIcon className="ml-auto" />
                           )}
                         </CommandItem>
                       </PopoverClose>
-                      {resourcesQuery.data?.users.map((user) => (
+                      {shedulableUsersQuery.data?.users.map((user) => (
                         <PopoverClose className="w-full" key={user.id}>
                           <CommandItem
                             value={formatName(user)}
                             onSelect={() =>
                               setQParams({
                                 ...qParams,
-                                practitioner: user.id,
+                                practitioner: user.username,
                                 slot: null,
                               })
                             }
@@ -229,7 +253,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                                 {user.user_type}
                               </span>
                             </div>
-                            {qParams.practitioner === user.id && (
+                            {qParams.practitioner === user.username && (
                               <CheckIcon className="ml-auto" />
                             )}
                           </CommandItem>
@@ -377,7 +401,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 status={status}
                 facilityId={facilityId}
                 slot={slot?.id}
-                practitioner={qParams.practitioner}
+                practitioner={practitioner?.id ?? null}
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
@@ -389,7 +413,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       ) : (
         <AppointmentRow
           facilityId={facilityId}
-          practitioner={qParams.practitioner}
+          practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
@@ -427,7 +451,7 @@ function AppointmentColumn(props: {
         status: props.status,
         limit: 100,
         slot: props.slot,
-        user: props.practitioner,
+        user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
       },
@@ -536,7 +560,7 @@ function AppointmentRow(props: {
         status: status,
         limit: 100,
         slot: props.slot,
-        user: props.practitioner,
+        user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
       },
