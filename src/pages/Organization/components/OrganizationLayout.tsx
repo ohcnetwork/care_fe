@@ -179,6 +179,7 @@ export default function OrganizationLayout({
             .map((item) => (
               <MenubarMenu key={item.path}>
                 <MenubarTrigger
+                  data-testid={`org-nav-${item.title.toLowerCase()}`}
                   className={`${
                     path === item.path
                       ? "font-medium text-primary-700 bg-gray-100"

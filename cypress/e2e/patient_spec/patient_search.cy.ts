@@ -1,9 +1,6 @@
-import { LoginPage } from "pageObject/auth/LoginPage";
-
 import { patientSearch } from "../../pageObject/Patients/PatientSearch";
 
 describe("Patient Search", () => {
-  const loginPage = new LoginPage();
   const TEST_PHONE = "9495031234";
   const PATIENT_DETAILS = {
     name: "Nihal",
@@ -12,12 +9,13 @@ describe("Patient Search", () => {
   };
 
   beforeEach(() => {
-    loginPage.loginByRole("nurse");
+    cy.visit("/login");
+    cy.loginByApi("nurse");
   });
 
   it("search patient with phone number and verifies details", () => {
     patientSearch
-      .selectFacility("PHC Kakkanad -1")
+      .selectFacility("Arike")
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
       .verifySearchResults(PATIENT_DETAILS);
