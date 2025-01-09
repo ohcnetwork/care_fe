@@ -1,69 +1,37 @@
 import "cypress-localstorage-commands";
 
-const apiUrl = Cypress.env("API_URL");
+const LOCAL_STORAGE_MEMORY = {};
 
-Cypress.Commands.add("login", (username: string, password: string) => {
-  cy.log(`Logging in the user: ${username}:${password}`);
-  cy.visit("/");
-  cy.get("input[id='username']").type(username);
-  cy.get("input[id='password']").type(password);
-  cy.get("button").contains("Login").click();
-  return cy.url().should("include", "/facility");
-});
+Cypress.Commands.add("loginByApi", (role: string) => {
+  const token = LOCAL_STORAGE_MEMORY["care_token"];
 
-Cypress.Commands.add("refreshApiLogin", (username, password) => {
-  cy.request({
-    method: "POST",
-    url: `${apiUrl}/api/v1/auth/login/`,
-    body: {
-      username,
-      password,
-    },
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 200) {
-      cy.writeFile("cypress/fixtures/token.json", {
-        username: username,
-        access: response.body.access,
-        refresh: response.body.refresh,
-      });
-      cy.setLocalStorage("care_access_token", response.body.access);
-      cy.setLocalStorage("care_refresh_token", response.body.refresh);
-    } else {
-      cy.log("An error occurred while logging in");
-    }
-  });
-});
+  if (!token) {
+    cy.fixture("users").then((users) => {
+      const user = users[role];
 
-Cypress.Commands.add("loginByApi", (username, password) => {
-  cy.log(`Logging in the user: ${username}:${password}`);
-  cy.task("readFileMaybe", "cypress/fixtures/token.json").then(
-    (tkn: unknown) => {
-      const token = JSON.parse(tkn as string); // Cast tkn to string
-      if (tkn && token.access && token.username === username) {
-        cy.request({
-          method: "POST",
-          url: `${apiUrl}/api/v1/auth/token/verify/`,
-          body: {
-            token: token.access,
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-          failOnStatusCode: false,
-        }).then((response) => {
-          if (response.status === 200) {
-            cy.setLocalStorage("care_access_token", token.access);
-            cy.setLocalStorage("care_refresh_token", token.refresh);
-          } else {
-            cy.refreshApiLogin(username, password);
-          }
-        });
-      } else {
-        cy.refreshApiLogin(username, password);
+      if (!user) {
+        throw new Error(`User role "${role}" not found in users fixture`);
       }
-    },
-  );
+
+      // First do UI login to get tokens
+      cy.get('[data-cy="username"]').type(user.username);
+      cy.get('[data-cy="password"]').type(user.password);
+      cy.get('[data-cy="submit"]').click();
+
+      // Verify successful login by checking we're not on login page
+      cy.url().should("not.include", "/login");
+
+      // Save session after successful login
+      Object.keys(localStorage).forEach((key) => {
+        LOCAL_STORAGE_MEMORY[key] = localStorage[key];
+      });
+    });
+  } else {
+    // If token exists, just restore the session
+    Object.keys(LOCAL_STORAGE_MEMORY).forEach((key) => {
+      localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
+    });
+  }
 });
 
 Cypress.on("uncaught:exception", () => {
@@ -113,8 +81,11 @@ Cypress.Commands.add(
   },
 );
 
-Cypress.Commands.add("verifyNotification", (text) => {
-  return cy.get(".pnotify-container").should("exist").contains(text);
+Cypress.Commands.add("verifyNotification", (text: string) => {
+  return cy
+    .get("li[data-sonner-toast] div[data-title]")
+    .should("exist")
+    .contains(text);
 });
 
 Cypress.Commands.add("clearAllFilters", () => {
@@ -237,13 +208,9 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
 });
 
 Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
-  const selector = ".error-text"; // Static selector
-  cy.get(selector).then(($errors) => {
-    const displayedErrorMessages = $errors
-      .map((_, el) => Cypress.$(el).text())
-      .get();
-    errorMessages.forEach((errorMessage) => {
-      expect(displayedErrorMessages).to.include(errorMessage);
+  cy.get("body").within(() => {
+    errorMessages.forEach((message) => {
+      cy.contains(message).scrollIntoView().should("be.visible");
     });
   });
 });
