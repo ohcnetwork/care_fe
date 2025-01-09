@@ -121,6 +121,7 @@ export function AllergyQuestion({
   });
 
   useEffect(() => {
+    console.log("this got triggered");
     if (patientAllergies?.results && !allergies.length) {
       updateQuestionnaireResponseCB({
         ...questionnaireResponse,
@@ -137,12 +138,7 @@ export function AllergyQuestion({
         );
       }
     }
-  }, [
-    patientAllergies,
-    allergies.length,
-    questionnaireResponse,
-    updateQuestionnaireResponseCB,
-  ]);
+  }, [patientAllergies]);
 
   const handleAddAllergy = (code: Code) => {
     const newAllergies = [
