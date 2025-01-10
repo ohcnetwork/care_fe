@@ -132,9 +132,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
       pathParams: { id: facilityId || "" },
     }), // Use the update route
     onSuccess: (_data: FacilityModel) => {
-      Notification.Success({
-        msg: t("facility_updated_successfully"),
-      });
+      toast.success(t("facility_updated_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
       onSubmitSuccess?.();
@@ -143,12 +141,10 @@ export default function CreateFacilityForm(props: FacilityProps) {
       const errorData = error.cause as { errors: { msg: string[] } };
       if (errorData?.errors?.msg) {
         errorData.errors.msg.forEach((msg) => {
-          Notification.Error({ msg });
+          toast.error(msg);
         });
       } else {
-        Notification.Error({
-          msg: t("facility_update_error"),
-        });
+        toast.error(t("facility_update_error"));
       }
     },
   });

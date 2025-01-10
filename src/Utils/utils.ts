@@ -190,10 +190,6 @@ export const getPincodeDetails = async (pincode: string, apiKey: string) => {
     `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
   );
   const data = await response.json();
-  if (!data.records || data.records.length === 0) {
-    Notification.Error({ msg: "Invalid pincode" });
-    return null;
-  }
   return data.records[0];
 };
 
