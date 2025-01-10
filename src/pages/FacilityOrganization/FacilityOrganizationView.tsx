@@ -54,10 +54,10 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
   return (
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
           <h2 className="text-lg font-semibold">{t("organizations")}</h2>
-          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center w-full sm:justify-end ">
-            <div className="w-full mb-1 sm:mb-0 lg:w-1/3 md:w-fit">
+          <div className="flex flex-col items-center md:flex-row sm:items-center gap-4 w-full lg:justify-end">
+            <div className="w-full lg:w-1/3">
               <Input
                 placeholder="Search by name..."
                 value={searchQuery}
