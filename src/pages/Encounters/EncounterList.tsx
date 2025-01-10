@@ -151,8 +151,8 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, clearSearch, resultsPerPage } =
     useFilters({
       limit: 14,
+      cacheBlacklist: ["name", "encounter_id", "external_identifier"],
     });
-
   const {
     status,
     encounter_class: encounterClass,
