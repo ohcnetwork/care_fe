@@ -192,7 +192,7 @@
   "ROUNDS_TYPE__TELEMEDICINE": "Tele-medicine Log",
   "ROUNDS_TYPE__VENTILATOR": "Detailed Update",
   "SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__appointment": "Patients can be booked for slots in this session",
-  "SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__closed": "Inidcates the practitioner is not available for in this session's time",
+  "SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__closed": "Indicates the practitioner is not available for this session's time",
   "SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__open": "Indicates the practitioner is available in this session",
   "SCHEDULE_AVAILABILITY_TYPE__appointment": "Appointment",
   "SCHEDULE_AVAILABILITY_TYPE__closed": "Closed",
