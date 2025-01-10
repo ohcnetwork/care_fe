@@ -82,6 +82,21 @@ export default function query<TData, TBody>(
  *   }),
  * });
  * ```
+ *
+ * The debounced query leverages TanStack Query's built-in cancellation through
+ * `AbortSignal`. Here's how it works:
+ *
+ * 1. When a new query is triggered, TanStack Query automatically creates an
+ * `AbortSignal`
+ * 2. If a new query starts before the debounce delay finishes:
+ *    - The previous signal is aborted automatically by TanStack Query
+ *    - The previous `sleep` promise is cancelled
+ *    - A new debounce timer starts
+ *
+ * No explicit cleanup is needed because:
+ * - The `AbortSignal` is passed through to the underlying `fetch` call
+ * - When aborted, both the `sleep` promise and the fetch request are cancelled automatically
+ * - TanStack Query handles the abortion and cleanup of previous in-flight requests
  */
 const debouncedQuery = <TData, TBody>(
   route: Route<TData, TBody>,

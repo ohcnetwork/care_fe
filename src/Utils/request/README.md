@@ -96,7 +96,7 @@ useQuery({
 
 For search inputs or other scenarios requiring debounced API calls, use `query.debounced`:
 
-```typescript
+```tsx
 function SearchComponent() {
   const [search, setSearch] = useState("");
   
