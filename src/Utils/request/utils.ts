@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import { QueryParams, RequestOptions } from "@/Utils/request/types";
 
 export function makeUrl(
@@ -50,7 +50,7 @@ const ensurePathNotMissingReplacements = (path: string) => {
     const msg = `Missing path params: ${missingParams.join(
       ", ",
     )}. Path: ${path}`;
-    Notification.Error({ msg });
+    toast.error(msg);
     throw new Error(msg);
   }
 };
