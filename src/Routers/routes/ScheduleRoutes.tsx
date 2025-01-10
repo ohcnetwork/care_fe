@@ -1,4 +1,4 @@
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import BookAppointment from "@/pages/Appointments/BookAppointment";

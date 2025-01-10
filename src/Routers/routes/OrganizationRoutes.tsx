@@ -1,4 +1,4 @@
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 import OrganizationFacilities from "@/pages/Organization/OrganizationFacilities";
 import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
 import OrganizationPatients from "@/pages/Organization/OrganizationPatients";

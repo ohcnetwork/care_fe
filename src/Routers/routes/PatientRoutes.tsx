@@ -4,7 +4,7 @@ import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 import { EncounterList } from "@/pages/Encounters/EncounterList";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 

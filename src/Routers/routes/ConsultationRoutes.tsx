@@ -3,7 +3,7 @@ import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire"
 import FileUploadPage from "@/components/Patient/FileUploadPage";
 import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 

@@ -19,6 +19,7 @@ import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
+import { AppRoutes } from "@/Routers/types";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
@@ -29,21 +30,6 @@ import QuestionnaireRoutes from "./routes/questionnaireRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
-
-export type RouteParams<T extends string> =
-  T extends `${string}:${infer Param}/${infer Rest}`
-    ? { [K in Param | keyof RouteParams<Rest>]: string }
-    : T extends `${string}:${infer Param}`
-      ? { [K in Param]: string }
-      : Record<string, never>;
-
-export type RouteFunction<T extends string> = (
-  params: RouteParams<T>,
-) => JSX.Element;
-
-export type AppRoutes = {
-  [K in string]: RouteFunction<K>;
-};
 
 const Routes: AppRoutes = {
   "/": () => <UserDashboard />,

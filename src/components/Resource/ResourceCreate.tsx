@@ -33,7 +33,7 @@ import { parsePhoneNumber } from "@/Utils/utils";
 import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
-  facilityId: number;
+  facilityId: string;
 }
 
 const initForm: Partial<CreateResourceRequest> = {

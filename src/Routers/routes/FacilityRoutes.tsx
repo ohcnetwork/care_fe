@@ -5,7 +5,7 @@ import { FacilityHome } from "@/components/Facility/FacilityHome";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 import FacilityOrganizationIndex from "@/pages/FacilityOrganization/FacilityOrganizationIndex";
 import FacilityOrganizationUsers from "@/pages/FacilityOrganization/FacilityOrganizationUsers";
 import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrganizationView";

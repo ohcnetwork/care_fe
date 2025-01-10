@@ -5,7 +5,7 @@ import ResourceDetails from "@/components/Resource/ResourceDetails";
 import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpdate";
 import ListView from "@/components/Resource/ResourceList";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 
 const getDefaultView = () =>
   localStorage.getItem("defaultResourceView") === "list" ? "list" : "board";

@@ -1,6 +1,6 @@
 import UserHome from "@/components/Users/UserHome";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/types";
 
 const UserRoutes: AppRoutes = {
   "/facility/:facilityId/users/:username": ({ facilityId, username }) => (

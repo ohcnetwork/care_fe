@@ -1,16 +1,15 @@
 import { LazyExoticComponent } from "react";
 
 import { FacilityModel } from "@/components/Facility/models";
+import { FormContextValue } from "@/components/Form/FormContext";
+import { PatientMeta } from "@/components/Patient/models";
+import { QuestionnaireFormState } from "@/components/Questionnaire/QuestionnaireForm";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import { AppRoutes } from "@/Routers/types";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
-
-import { AppRoutes } from "./Routers/AppRouter";
-import { FormContextValue } from "./components/Form/FormContext";
-import { PatientMeta } from "./components/Patient/models";
-import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
-import { pluginMap } from "./pluginMap";
-import { PatientModel } from "./types/emr/patient";
+import { pluginMap } from "@/pluginMap";
+import { PatientModel } from "@/types/emr/patient";
 
 export type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
