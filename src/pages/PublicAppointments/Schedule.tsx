@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { format } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,8 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
-import { SlotAvailability } from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -28,7 +26,9 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { TokenSlot } from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -40,7 +40,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { facilityId, staffId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<SlotAvailability>();
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
 
   const patientUserContext = usePatientContext();
@@ -81,7 +81,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     toast.error(t("error_fetching_user_data"));
   }
 
-  const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
+  const slotsQuery = useQuery<{ results: TokenSlot[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
       body: {
@@ -246,11 +246,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 className="flex flex-col items-center group py-6 gap-1"
                               >
                                 <span className="font-semibold">
-                                  {/* TODO: remove this once BE is updated */}
-                                  {dayjs(slot.start_datetime)
-                                    .add(-5, "hours")
-                                    .add(-30, "minutes")
-                                    .format("HH:mm")}
+                                  {format(slot.start_datetime, "HH:mm")}
                                 </span>
                                 <span
                                   className={cn(
