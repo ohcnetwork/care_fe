@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -18,17 +18,19 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
-import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
-import { Appointment } from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { Appointment } from "@/types/scheduling/schedule";
 
 function PatientIndex() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const [selectedAppointment, setSelectedAppointment] = useState<
     Appointment | undefined
@@ -53,6 +55,19 @@ function PatientIndex() {
     enabled: !!tokenData?.token,
   });
 
+  const { mutate: cancelAppointment, isPending } = useMutation({
+    mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+      headers: {
+        Authorization: `Bearer ${tokenData?.token}`,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", tokenData?.phoneNumber],
+      });
+    },
+  });
+
   const getStatusChip = (status: string) => {
     return (
       <Badge
@@ -75,17 +90,6 @@ function PatientIndex() {
 
   const appointments = appointmentsData?.results
     .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
-    .map((appointment) => ({
-      ...appointment,
-      token_slot: {
-        ...appointment.token_slot,
-        // TODO: remove this once BE is updated
-        start_datetime: dayjs(appointment.token_slot.start_datetime)
-          .add(-5, "hours")
-          .add(-30, "minutes")
-          .toISOString(),
-      },
-    }))
     .sort(
       (a, b) =>
         new Date(a.token_slot.start_datetime).getTime() -
@@ -141,7 +145,16 @@ function PatientIndex() {
               {t(appointment.status)}
             </span>
             <span className="flex flex-row gap-2">
-              <Button variant="destructive">
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() =>
+                  cancelAppointment({
+                    appointment: appointment.id,
+                    patient: appointment.patient.id,
+                  })
+                }
+              >
                 <span>{t("cancel")}</span>
               </Button>
               <Button variant="secondary">

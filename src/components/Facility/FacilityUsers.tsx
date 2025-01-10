@@ -82,7 +82,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
   }
 
   return (
-    <Page title={`${t("users")}`} hideBack={true} breadcrumbs={false}>
+    <Page title={t("users")} hideBack={true} breadcrumbs={false}>
       <CountBlock
         text={t("total_users")}
         count={userListData.count}

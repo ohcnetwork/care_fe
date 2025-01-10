@@ -6,10 +6,10 @@ import ResetPassword from "@/components/Auth/ResetPassword";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
-import PatientLogin from "@/pages/Appoinments/auth/PatientLogin";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
+import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
 
 const LicensesPage = lazy(() => import("@/components/Licenses/LicensesPage"));
 

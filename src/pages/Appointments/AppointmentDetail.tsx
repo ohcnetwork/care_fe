@@ -12,15 +12,25 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { PrinterIcon } from "lucide-react";
+import { BanIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,13 +47,6 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FacilityModel } from "@/components/Facility/models";
-import { AppointmentTokenCard } from "@/components/Schedule/Appointments/AppointmentTokenCard";
-import {
-  formatAppointmentSlotTime,
-  printAppointment,
-} from "@/components/Schedule/Appointments/utils";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { Appointment, AppointmentStatuses } from "@/components/Schedule/types";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -53,13 +56,24 @@ import {
   getReadableDuration,
   saveElementAsImage,
 } from "@/Utils/utils";
+import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import {
+  formatAppointmentSlotTime,
+  printAppointment,
+} from "@/pages/Appointments/utils";
+import {
+  Appointment,
+  AppointmentStatuses,
+  AppointmentUpdateRequest,
+} from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   facilityId: string;
   appointmentId: string;
 }
 
-export default function AppointmentDetailsPage(props: Props) {
+export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -74,7 +88,7 @@ export default function AppointmentDetailsPage(props: Props) {
 
   const appointmentQuery = useQuery({
     queryKey: ["appointment", props.appointmentId],
-    queryFn: query(ScheduleAPIs.appointments.retrieve, {
+    queryFn: query(scheduleApis.appointments.retrieve, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
@@ -95,9 +109,9 @@ export default function AppointmentDetailsPage(props: Props) {
   const { mutate: updateAppointment, isPending } = useMutation<
     Appointment,
     unknown,
-    { status: Appointment["status"] }
+    AppointmentUpdateRequest
   >({
-    mutationFn: mutate(ScheduleAPIs.appointments.update, {
+    mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: {
         facility_id: props.facilityId,
         id: props.appointmentId,
@@ -175,6 +189,7 @@ export default function AppointmentDetailsPage(props: Props) {
             <Separator className="my-4" />
             <div className="mx-6 mt-10">
               <AppointmentActions
+                facilityId={props.facilityId}
                 appointment={appointment}
                 onChange={(status) => updateAppointment({ status })}
                 onViewPatient={redirectToPatientPage}
@@ -216,7 +231,9 @@ const AppointmentDetails = ({
                     entered_in_error: "destructive",
                     cancelled: "destructive",
                     noshow: "destructive",
-                  } as Record<Appointment["status"], BadgeProps["variant"]>
+                  } as Partial<
+                    Record<Appointment["status"], BadgeProps["variant"]>
+                  >
                 )[appointment.status] ?? "outline"
               }
             >
@@ -357,19 +374,37 @@ const AppointmentDetails = ({
 };
 
 interface AppointmentActionsProps {
+  facilityId: string;
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
 }
 
 const AppointmentActions = ({
+  facilityId,
   appointment,
   onChange,
   onViewPatient,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+
+  const { mutate: cancelAppointment } = useMutation({
+    mutationFn: mutate(scheduleApis.appointments.cancel, {
+      pathParams: {
+        facility_id: facilityId,
+        id: appointment.id,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", appointment.id],
+      });
+    },
+  });
 
   if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
     return null;
@@ -449,10 +484,65 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      <Button variant="outline" onClick={() => onChange("cancelled")} size="lg">
-        <CareIcon icon="l-ban" className="text-lg mr-2" />
-        {t("cancel_appointment")}
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            <BanIcon className="size-4 mr-2" />
+            {t("cancel_appointment")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("cancel_appointment_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cancelAppointment({ reason: "cancelled" })}
+            >
+              {t("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            <BanIcon className="size-4 mr-2" />
+            {t("mark_as_entered_in_error")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("mark_as_entered_in_error")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("entered_in_error_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+            >
+              {t("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

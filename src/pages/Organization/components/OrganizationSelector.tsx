@@ -8,8 +8,6 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
-
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -30,7 +28,7 @@ interface AutoCompleteOption {
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const headers = props.authToken
     ? {
@@ -42,7 +40,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
 
   const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
@@ -60,7 +58,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       selectedLevels[selectedLevels.length - 1]?.id,
       searchQuery,
     ],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",

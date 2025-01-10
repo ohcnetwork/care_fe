@@ -5,11 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
-import { getFakeTokenNumber } from "@/components/Schedule/helpers";
-import { Appointment } from "@/components/Schedule/types";
 
 import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
+import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
+import { Appointment } from "@/types/scheduling/schedule";
 
 interface Props {
   id?: string;

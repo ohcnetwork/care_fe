@@ -17,10 +17,10 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -28,7 +28,7 @@ export const Appointments = (props: PatientProps) => {
 
   const { data } = useQuery({
     queryKey: ["patient-appointments", id],
-    queryFn: query(ScheduleAPIs.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { patient: id, limit: 100 },
     }),

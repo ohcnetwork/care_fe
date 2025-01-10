@@ -20,7 +20,10 @@ interface Plugin {
 function readAppsConfig(): Plugin[] {
   const appsConfig = process.env.REACT_ENABLED_APPS
     ? process.env.REACT_ENABLED_APPS.split(",").map((app) => {
-        const [package_] = app.split("@");
+        const package_ = app.includes("|")
+          ? app.split("|")[1].split("@")[0]
+          : app.split("@")[0];
+        console.log(package_);
         const [, repo] = package_.split("/");
         return {
           repo,
@@ -41,7 +44,7 @@ const plugins = readAppsConfig();
 
 // Generate pluginMap.ts
 const pluginMapPath = path.join(__dirname, "..", "src", "pluginMap.ts");
-const pluginMapContent = `// Use type assertion for the static import${plugins
+const pluginMapContent = `// Use type assertion for the static import\n${plugins
   .map(
     (plugin) =>
       `// @ts-expect-error Remote module will be available at runtime\nimport ${plugin.camelCaseName}Manifest from "${plugin.repo}/manifest";`,
