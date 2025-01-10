@@ -299,7 +299,7 @@ export function QuestionnaireForm({
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg p-6 space-y-6"
+            className="rounded-lg py-6 px-4 space-y-6"
           >
             <div className="flex justify-between items-center max-w-4xl">
               <div className="space-y-1">
@@ -371,7 +371,7 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div className="flex gap-4 items-center max-w-4xl">
+        <div className="flex gap-4 items-center ml-4 max-w-4xl">
           <QuestionnaireSearch
             subjectType={subjectType}
             onSelect={(selected) => {
@@ -428,7 +428,7 @@ export function QuestionnaireForm({
         )}
 
         {/* Add a Preview of the QuestionnaireForm */}
-        {!import.meta.env.DEV && (
+        {import.meta.env.DEV && (
           <div className="p-4 space-y-6 max-w-4xl">
             <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
             <pre className="text-sm text-muted-foreground">
