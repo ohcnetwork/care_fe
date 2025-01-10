@@ -168,51 +168,77 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     switch (selectedOption.type) {
       case "phone":
         return (
-          <PhoneNumberFormField
-            id={id}
-            name={selectedOption.key}
-            placeholder={selectedOption.placeholder}
-            types={["mobile", "landline"]}
-            {...commonProps}
-            errorClassName="hidden"
-            hideHelp={true}
-            onError={(error: FieldError) => setError(error)}
-          />
+          <div className="relative">
+            <PhoneNumberFormField
+              id={id}
+              name={selectedOption.key}
+              placeholder={selectedOption.placeholder}
+              types={["mobile", "landline"]}
+              {...commonProps}
+              errorClassName="hidden"
+              hideHelp={true}
+              onError={(error: FieldError) => setError(error)}
+            />
+            <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
+              {open ? (
+                <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                  ESC
+                </span>
+              ) : (
+                <span>
+                  {isAppleDevice ? (
+                    <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                      ⌘K
+                    </span>
+                  ) : (
+                    <div className="flex gap-1 font-medium">
+                      <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                        Ctrl
+                      </span>
+                      <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                        K
+                      </span>
+                    </div>
+                  )}
+                </span>
+              )}
+            </div>
+          </div>
         );
       default:
         return (
           <div className="relative">
-          <Input
-            id={id}
-            type="text"
-            placeholder={selectedOption.placeholder}
-            {...commonProps}
-          />
-          <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
-            {open ? (
-              <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                ESC
-              </span>
-            ) : (
-              <span>
-                {isAppleDevice ? (
-                  <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                    ⌘K
-                  </span>
-                ) : (
-                  <div className="flex gap-1 font-medium">
+            <Input
+              id={id}
+              type="text"
+              placeholder={selectedOption.placeholder}
+              {...commonProps}
+            />
+            <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
+              {open ? (
+                <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                  ESC
+                </span>
+              ) : (
+                <span>
+                  {isAppleDevice ? (
                     <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                      Ctrl
+                      ⌘K
                     </span>
-                    <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                      K
-                    </span>
-                  </div>
-                )}
-              </span>
-            )}
+                  ) : (
+                    <div className="flex gap-1 font-medium">
+                      <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                        Ctrl
+                      </span>
+                      <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                        K
+                      </span>
+                    </div>
+                  )}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
         );
     }
   }, [
