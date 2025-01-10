@@ -17,6 +17,9 @@ type Props<T, V = string> = FormFieldBaseProps<V | null> & {
   layout?: "vertical" | "horizontal" | "grid" | "auto";
 };
 
+/**
+ * @deprecated use shadcn/ui's radio-group instead
+ */
 const RadioFormField = <T, V extends string>(props: Props<T, V>) => {
   const field = useFormFieldPropsResolver(props);
   return (

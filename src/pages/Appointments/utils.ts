@@ -11,13 +11,6 @@ import { TFunction } from "i18next";
 import { toast } from "sonner";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { getFakeTokenNumber } from "@/components/Schedule/helpers";
-import {
-  Appointment,
-  AvailabilityHeatmap,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import query from "@/Utils/request/query";
 import {
@@ -26,11 +19,18 @@ import {
   formatPatientAge,
   getMonthStartAndEnd,
 } from "@/Utils/utils";
+import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
+import {
+  Appointment,
+  AvailabilityHeatmapResponse,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
-export const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
+export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   const result: {
-    availability: SlotAvailability["availability"];
-    slots: Omit<SlotAvailability, "availability">[];
+    availability: TokenSlot["availability"];
+    slots: Omit<TokenSlot, "availability">[];
   }[] = [];
 
   for (const slot of slots) {
@@ -76,7 +76,7 @@ export const useAvailabilityHeatmap = ({
   const fromDate = dateQueryString(max([start, startOfToday()]));
   const toDate = dateQueryString(end);
 
-  let queryFn = query(ScheduleAPIs.slots.availabilityHeatmap, {
+  let queryFn = query(scheduleApis.slots.availabilityStats, {
     pathParams: { facility_id: facilityId },
     body: {
       user: userId,
@@ -105,7 +105,7 @@ const getInfiniteAvailabilityHeatmap = ({
 }) => {
   const dates = eachDayOfInterval({ start: fromDate, end: toDate });
 
-  const result: AvailabilityHeatmap = {};
+  const result: AvailabilityHeatmapResponse = {};
 
   for (const date of dates) {
     result[dateQueryString(date)] = { total_slots: Infinity, booked_slots: 0 };
