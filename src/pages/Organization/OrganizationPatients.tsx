@@ -28,8 +28,14 @@ interface Props {
 
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
-  const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 14, cacheBlacklist: ["patient"] });
+  const {
+    qParams,
+    Pagination,
+    advancedFilter,
+    resultsPerPage,
+    clearSearch,
+    updateQuery,
+  } = useFilters({ limit: 14, cacheBlacklist: ["name", "phone_number"] });
   const [organization, setOrganization] = useState<Organization | null>(null);
 
   const handleSearch = useCallback((key: string, value: string) => {
@@ -44,6 +50,16 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     };
     updateQuery(searchParams);
   }, []);
+
+  const handleFieldChange = () => {
+    {
+      updateQuery({
+        name: undefined,
+        phone_number: undefined,
+      });
+      clearSearch.value = true;
+    }
+  };
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
@@ -95,15 +111,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
           ]}
           onSearch={handleSearch}
           clearSearch={{ value: !qParams.name && !qParams.phone_number }}
-          onFieldChange={(option) => {
-            const clearParams = {
-              name: option.key === "name" ? qParams.name || "" : "",
-              phone_number:
-                option.key === "phone_number" ? qParams.phone_number || "" : "",
-              page: 1,
-            };
-            updateQuery(clearParams);
-          }}
+          onFieldChange={handleFieldChange}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

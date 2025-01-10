@@ -74,7 +74,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const [error, setError] = useState<string | undefined | boolean>();
 
   useEffect(() => {
@@ -108,6 +108,11 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     [onSearch],
   );
 
+  const unselectedOptions = useMemo(
+    () => options.filter((option) => option.key !== selectedOption.key),
+    [options, selectedOption],
+  );
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -117,18 +122,22 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       if (e.key === "Escape") {
         inputRef.current?.focus();
         setOpen(false);
+        setSearchValue("");
       }
       if (open) {
         if (e.key === "ArrowDown") {
           setFocusedIndex((prevIndex) =>
-            prevIndex === options.length - 1 ? 0 : prevIndex + 1,
+            prevIndex === unselectedOptions.length - 1 ? 0 : prevIndex + 1,
           );
         } else if (e.key === "ArrowUp") {
           setFocusedIndex((prevIndex) =>
-            prevIndex === 0 ? options.length - 1 : prevIndex - 1,
+            prevIndex === 0 ? unselectedOptions.length - 1 : prevIndex - 1,
           );
-        } else if (e.key === "Enter") {
-          handleOptionChange(focusedIndex);
+        } else if (e.key === "Enter" && focusedIndex !== -1) {
+          const selectedOptionIndex = options.findIndex(
+            (option) => option.key === unselectedOptions[focusedIndex].key,
+          );
+          handleOptionChange(selectedOptionIndex);
         }
       }
     };
@@ -276,58 +285,66 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                 <CareIcon icon="l-search" className="mr-2 text-base" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0">
+            <PopoverContent className="absolute p-0">
               <Command>
                 <CommandList>
                   <CommandGroup>
-                    <div className="p-2">
+                    <div className="p-4">
+                      {/* Search by section */}
                       <div className="mb-4">
                         <p className="text-sm font-medium text-gray-600">
                           Search by
                         </p>
-                        <div className="flex mt-1">
+                        <div className="flex mt-2">
                           <Button
                             onClick={() => setOpen(false)}
                             variant="outline"
                             size="xs"
                             className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                           >
-                            <CareIcon icon="l-check" className="" />
+                            <CareIcon icon="l-check" className="mr-1" />
                             {t(options[selectedOptionIndex].key)}
                           </Button>
                         </div>
                       </div>
-
+                      <hr className="border-gray-200 mb-3" />
                       <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Search by other options
+                        <p className="text-xs font-semibold text-gray-500 mb-2">
+                          Choose other search types
                         </p>
-                        {options.map((option, index) => {
-                          if (selectedOption.key === option.key) return null;
+                        <div className="space-y-2">
+                          {unselectedOptions.map((option, index) => {
+                            if (selectedOption.key === option.key) return null;
 
-                          return (
-                            <CommandItem
-                              key={option.key}
-                              onSelect={() => handleOptionChange(index)}
-                              className={cn({
-                                "bg-gray-100": focusedIndex === index,
-                                "hover:bg-secondary-100": true,
-                              })}
-                              onMouseEnter={() => setFocusedIndex(index)}
-                              onMouseLeave={() => setFocusedIndex(-1)}
-                            >
-                              <span className="flex-1">{t(option.key)}</span>
-                              {focusedIndex === index && (
-                                <kbd
-                                  className="ml-auto px-2 py-1 text-xs font-medium text-gray-800 bg-gray-200 rounded shadow-sm hover:bg-gray-300"
-                                  title="Press Enter to select"
-                                >
-                                  ⏎ Enter
-                                </kbd>
-                              )}
-                            </CommandItem>
-                          );
-                        })}
+                            return (
+                              <CommandItem
+                                key={option.key}
+                                onSelect={() => handleOptionChange(index)}
+                                className={cn(
+                                  "flex items-center p-2 rounded-md cursor-pointer",
+                                  {
+                                    "bg-gray-100": focusedIndex === index,
+                                    "hover:bg-secondary-100": true,
+                                  },
+                                )}
+                                onMouseEnter={() => setFocusedIndex(index)}
+                                onMouseLeave={() => setFocusedIndex(-1)}
+                              >
+                                <span className="flex-1 text-sm">
+                                  {t(option.key)}
+                                </span>
+                                {focusedIndex === index && (
+                                  <kbd
+                                    className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
+                                    title="Press Enter to select"
+                                  >
+                                    ⏎ Enter
+                                  </kbd>
+                                )}
+                              </CommandItem>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </CommandGroup>
