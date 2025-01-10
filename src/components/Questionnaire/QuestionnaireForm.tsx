@@ -296,7 +296,7 @@ export function QuestionnaireForm({
         formState={questionnaireForms}
         setFormState={setQuestionnaireForms}
       />
-      <div className="flex-1 overflow-y-auto  w-full pb-8 space-y-2">
+      <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
           <div
