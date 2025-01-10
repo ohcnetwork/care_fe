@@ -30,7 +30,6 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import FiltersCache from "@/Utils/FiltersCache";
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
@@ -171,7 +170,7 @@ const Login = (props: LoginProps) => {
         errorMessage = error.message;
       }
       setOtpValidationError(errorMessage);
-      Notification.Error({ msg: errorMessage });
+      toast.error(errorMessage);
     },
   });
 
