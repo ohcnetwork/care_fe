@@ -125,6 +125,7 @@ export const FilesTab = (props: FilesTabProps) => {
 
   const fileUpload = useFileUpload({
     type: type,
+    multiple: true,
     allowedExtensions: [
       "jpg",
       "jpeg",
@@ -577,26 +578,44 @@ const FileUploadDialog = ({
         aria-describedby="file-upload"
       >
         <DialogHeader>
-          <DialogTitle>{t("upload_file")}</DialogTitle>
+          <DialogTitle>
+            {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
+          </DialogTitle>
         </DialogHeader>
-        <div className="mb-1 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-          <span>
-            <CareIcon icon="l-paperclip" className="mr-2" />
-            {fileUpload.files?.[0]?.name}
-          </span>
+        <div className="space-y-4">
+          {fileUpload.files.map((file, index) => (
+            <div key={index} className="space-y-2">
+              <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                <span className="flex items-center truncate">
+                  <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
+                  <span className="truncate">{file.name}</span>
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fileUpload.removeFile(index)}
+                  disabled={fileUpload.uploading}
+                >
+                  <CareIcon icon="l-times" />
+                </Button>
+              </div>
+              <TextFormField
+                name={`file_name_${index}`}
+                type="text"
+                label={t("enter_file_name")}
+                id={`upload-file-name-${index}`}
+                required
+                value={fileUpload.fileNames[index] || ""}
+                disabled={fileUpload.uploading}
+                onChange={(e) => fileUpload.setFileName(e.value, index)}
+                error={
+                  index === 0 && fileUpload.error ? fileUpload.error : undefined
+                }
+              />
+            </div>
+          ))}
         </div>
-        <TextFormField
-          name="consultation_file"
-          type="text"
-          label={t("enter_file_name")}
-          id="upload-file-name"
-          required
-          value={fileUpload.fileNames[0] || ""}
-          disabled={fileUpload.uploading}
-          onChange={(e) => fileUpload.setFileName(e.value)}
-          error={fileUpload.error || undefined}
-        />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-4">
           <Button
             variant="outline_primary"
             onClick={() => fileUpload.handleFileUpload(associatingId)}
