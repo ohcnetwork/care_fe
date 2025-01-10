@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
@@ -35,7 +36,6 @@ import {
 import countryList from "@/common/static/countries.json";
 import { validatePincode } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -123,9 +123,7 @@ export default function PatientRegistration(
   const createPatientMutation = useMutation({
     mutationFn: mutate(routes.addPatient),
     onSuccess: (resp: PatientModel) => {
-      Notification.Success({
-        msg: t("patient_registration_success"),
-      });
+      toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
@@ -139,9 +137,7 @@ export default function PatientRegistration(
       });
     },
     onError: () => {
-      Notification.Error({
-        msg: t("patient_registration_error"),
-      });
+      toast.error(t("patient_registration_error"));
     },
   });
 
@@ -150,15 +146,11 @@ export default function PatientRegistration(
       pathParams: { id: patientId || "" },
     }),
     onSuccess: () => {
-      Notification.Success({
-        msg: t("patient_update_success"),
-      });
+      toast.success(t("patient_update_success"));
       goBack();
     },
     onError: () => {
-      Notification.Error({
-        msg: t("patient_update_error"),
-      });
+      toast.error(t("patient_update_error"));
     },
   });
 
@@ -265,9 +257,7 @@ export default function PatientRegistration(
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      Notification.Error({
-        msg: t("please_fix_errors"),
-      });
+      toast.error(t("please_fix_errors"));
       setFeErrors(validate);
     }
   };

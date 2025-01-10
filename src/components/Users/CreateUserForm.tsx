@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -30,7 +31,6 @@ import { validateRule } from "@/components/Users/UserFormValidations";
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
@@ -176,19 +176,13 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       });
 
       if (res?.ok) {
-        Notification.Success({
-          msg: t("user_added_successfully"),
-        });
+        toast.success(t("user_added_successfully"));
         onSubmitSuccess?.(user!);
       } else {
-        Notification.Error({
-          msg: error?.message ?? t("user_add_error"),
-        });
+        toast.error((error?.message as string) ?? t("user_add_error"));
       }
     } catch (error) {
-      Notification.Error({
-        msg: t("user_add_error"),
-      });
+      toast.error(t("user_add_error"));
     }
   };
 

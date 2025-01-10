@@ -151,8 +151,8 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, clearSearch, resultsPerPage } =
     useFilters({
       limit: 14,
+      cacheBlacklist: ["name", "encounter_id", "external_identifier"],
     });
-
   const {
     status,
     encounter_class: encounterClass,
@@ -180,7 +180,7 @@ export function EncounterList({
     PaginatedResponse<Encounter>
   >({
     queryKey: ["encounters", facilityId, qParams],
-    queryFn: query(routes.encounter.list, {
+    queryFn: query.debounced(routes.encounter.list, {
       queryParams: {
         ...buildQueryParams(status, facilityId, encounterClass, priority),
         name,
@@ -238,7 +238,7 @@ export function EncounterList({
   const { t } = useTranslation();
 
   return (
-    <Page title="Encounters" hideBack={true}>
+    <Page title={t("encounters")} hideBack={true}>
       <div className="space-y-4 mt-2">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
@@ -261,14 +261,14 @@ export function EncounterList({
                           {name || encounter_id || external_identifier}
                         </span>
                       ) : (
-                        "Search"
+                        t("search")
                       )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[320px] p-3" align="start">
                     <div className="space-y-4">
                       <h4 className="font-medium leading-none">
-                        Search Encounters
+                        {t("search_encounters")}
                       </h4>
                       <SearchByMultipleFields
                         id="encounter-search"
@@ -295,7 +295,7 @@ export function EncounterList({
                           }}
                         >
                           <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
-                          Clear search
+                          {t("clear_search")}
                         </Button>
                       )}
                     </div>
@@ -316,7 +316,7 @@ export function EncounterList({
                   }}
                 >
                   <SelectTrigger className="h-8 w-[120px]">
-                    <SelectValue placeholder="Priority" />
+                    <SelectValue placeholder={t("priority")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Priorities</SelectItem>

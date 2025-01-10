@@ -1,6 +1,7 @@
 import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
+import { toast } from "sonner";
 
 import Card from "@/CAREUI/display/Card";
 
@@ -23,7 +24,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { RESOURCE_CHOICES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -178,10 +178,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
       if (res && res.status == 200 && data) {
         dispatch({ type: "set_form", form: data });
-        Notification.Success({
-          msg: "Request updated successfully",
-        });
-
+        toast.success(t("request_updated_successfully"));
         navigate(`/resource/${props.id}`);
       } else {
         setIsLoading(false);
