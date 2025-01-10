@@ -115,14 +115,14 @@ const ResourcePage = () => {
       hideBack={true}
       breadcrumbs={false}
       options={
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col md:flex-row">
           <Tabs value={viewMode} onValueChange={handleViewMode}>
-            <TabsList>
-              <TabsTrigger value="board">
+            <TabsList className="w-full">
+              <TabsTrigger value="board" className="w-1/2">
                 <CareIcon icon="l-kanban" className="mr-2" />
                 <span>{t("board")}</span>
               </TabsTrigger>
-              <TabsTrigger value="list">
+              <TabsTrigger value="list" className="w-1/2">
                 <CareIcon icon="l-list-ul" className="mr-2" />
                 <span>{t("list")}</span>
               </TabsTrigger>
