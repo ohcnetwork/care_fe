@@ -53,7 +53,7 @@
     "@googlemaps/typescript-guards": "^2.0.3",
     "@headlessui/react": "^2.2.0",
     "@hello-pangea/dnd": "^17.0.0",
-    "@hookform/resolvers": "^3.9.1",
+    "@hookform/resolvers": "^3.10.0",
     "@originjs/vite-plugin-federation": "^1.3.7",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.2",
@@ -76,14 +76,14 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.1.6",
-    "@sentry/browser": "^8.47.0",
+    "@sentry/browser": "^8.48.0",
     "@tanstack/react-query": "^5.62.8",
-    "@tanstack/react-query-devtools": "^5.62.15",
+    "@tanstack/react-query-devtools": "^5.63.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@yudiel/react-qr-scanner": "^2.1.0",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
-    "browserslist": "^4.24.3",
+    "browserslist": "^4.24.4",
     "browserslist-useragent-regexp": "^4.1.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -183,8 +183,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.29.1",
-    "@rollup/rollup-linux-x64-gnu": "4.29.1"
+    "@rollup/rollup-linux-arm64-gnu": "4.30.1",
+    "@rollup/rollup-linux-x64-gnu": "4.30.1"
   },
   "browserslist": {
     "production": [

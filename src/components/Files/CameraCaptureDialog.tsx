@@ -1,6 +1,7 @@
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -9,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import DialogModal from "@/components/Common/Dialog";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-
-import * as Notify from "@/Utils/Notifications";
 
 export interface CameraCaptureDialogProps {
   show: boolean;
@@ -44,9 +43,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         stream = mediaStream;
       })
       .catch(() => {
-        Notify.Warn({
-          msg: t("camera_permission_denied"),
-        });
+        toast.warning(t("camera_permission_denied"));
         onHide();
       });
 
@@ -72,9 +69,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         prevMode === "environment" ? "user" : "environment",
       );
     } else {
-      Notify.Warn({
-        msg: t("switch_camera_is_not_available"),
-      });
+      toast.warning(t("switch_camera_is_not_available"));
     }
   }, []);
 

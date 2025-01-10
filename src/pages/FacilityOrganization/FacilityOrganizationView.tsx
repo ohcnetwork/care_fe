@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Link } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -24,6 +24,8 @@ interface Props {
 }
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
+  const { t } = useTranslation();
+
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 12; // 3x4 grid
@@ -38,7 +40,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       limit,
       searchQuery,
     ],
-    queryFn: query(routes.facilityOrganization.list, {
+    queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
         parent: id,
