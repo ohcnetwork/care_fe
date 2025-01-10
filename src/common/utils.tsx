@@ -41,7 +41,7 @@ export const parseOptionId: (
     humanizeStrings(
       options
         .filter((option) => {
-          return id instanceof Array
+          return Array.isArray(id)
             ? id.map((i) => String(i)).includes(String(option.id))
             : String(option.id) === String(id);
         })
