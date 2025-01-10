@@ -33,7 +33,7 @@ export function FacilitiesPage() {
     PaginatedResponse<FacilityModel>
   >({
     queryKey: ["facilities", qParams],
-    queryFn: query(routes.getAllFacilities, {
+    queryFn: query.debounced(routes.getAllFacilities, {
       queryParams: {
         ...(qParams.organization && {
           organization: qParams.organization,
