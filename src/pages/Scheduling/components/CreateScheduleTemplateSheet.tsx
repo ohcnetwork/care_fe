@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isBefore, parse } from "date-fns";
 import { ArrowRightIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -43,25 +44,26 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  getSlotsPerSession,
-  getTokenDuration,
-} from "@/components/Schedule/helpers";
-
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
 import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   facilityId: string;
   userId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
+export default function CreateScheduleTemplateSheet({
+  facilityId,
+  userId,
+  trigger,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -71,56 +73,79 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
     md: "short",
   } as const);
 
-  const formSchema = z.object({
-    name: z.string().min(1, t("field_required")),
-    valid_from: z.date({
-      required_error: t("field_required"),
-    }),
-    valid_to: z.date({
-      required_error: t("field_required"),
-    }),
-    weekdays: z
-      .array(z.number() as unknown as z.ZodType<DayOfWeek>)
-      .min(1, t("schedule_weekdays_min_error")),
-    availabilities: z
-      .array(
-        z.discriminatedUnion("slot_type", [
-          // Schema for appointment type
-          z.object({
-            slot_type: z.literal("appointment"),
-            name: z.string().min(1, t("field_required")),
-            reason: z.string(),
-            start_time: z
-              .string()
-              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-            end_time: z
-              .string()
-              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-            slot_size_in_minutes: z
-              .number()
-              .min(1, t("number_min_error", { min: 1 })),
-            tokens_per_slot: z
-              .number()
-              .min(1, t("number_min_error", { min: 1 })),
-          }),
-          // Schema for open and closed types
-          z.object({
-            slot_type: z.enum(["open", "closed"]),
-            name: z.string().min(1, t("field_required")),
-            reason: z.string(),
-            start_time: z
-              .string()
-              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-            end_time: z
-              .string()
-              .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-            slot_size_in_minutes: z.literal(null),
-            tokens_per_slot: z.literal(null),
-          }),
-        ]),
-      )
-      .min(1, t("schedule_sessions_min_error")),
-  });
+  const formSchema = z
+    .object({
+      name: z.string().min(1, t("field_required")),
+      valid_from: z.date({
+        required_error: t("field_required"),
+      }),
+      valid_to: z.date({
+        required_error: t("field_required"),
+      }),
+      weekdays: z
+        .array(z.number() as unknown as z.ZodType<DayOfWeek>)
+        .min(1, t("schedule_weekdays_min_error")),
+      availabilities: z
+        .array(
+          z
+            .discriminatedUnion("slot_type", [
+              // Schema for appointment type
+              z.object({
+                slot_type: z.literal("appointment"),
+                name: z.string().min(1, t("field_required")),
+                reason: z.string(),
+                start_time: z
+                  .string()
+                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                end_time: z
+                  .string()
+                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                slot_size_in_minutes: z
+                  .number()
+                  .min(1, t("number_min_error", { min: 1 })),
+                tokens_per_slot: z
+                  .number()
+                  .min(1, t("number_min_error", { min: 1 })),
+              }),
+              // Schema for open and closed types
+              z.object({
+                slot_type: z.enum(["open", "closed"]),
+                name: z.string().min(1, t("field_required")),
+                reason: z.string(),
+                start_time: z
+                  .string()
+                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                end_time: z
+                  .string()
+                  .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+                slot_size_in_minutes: z.literal(null),
+                tokens_per_slot: z.literal(null),
+              }),
+            ])
+            .refine(
+              (data) => {
+                // Validate each availability's time range
+                const startTime = parse(data.start_time, "HH:mm", new Date());
+                const endTime = parse(data.end_time, "HH:mm", new Date());
+                return isBefore(startTime, endTime);
+              },
+              {
+                message: t("start_time_must_be_before_end_time"),
+                path: ["start_time"], // This will show error at the start_time field
+              },
+            ),
+        )
+        .min(1, t("schedule_sessions_min_error")),
+    })
+    .refine(
+      (data) => {
+        return isBefore(data.valid_from, data.valid_to);
+      },
+      {
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"],
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -218,9 +243,11 @@ export default function ScheduleTemplateForm({ facilityId, userId }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="primary" disabled={isPending}>
-          {t("create_template")}
-        </Button>
+        {trigger ?? (
+          <Button variant="primary" disabled={isPending}>
+            {t("create_template")}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
         <SheetHeader>

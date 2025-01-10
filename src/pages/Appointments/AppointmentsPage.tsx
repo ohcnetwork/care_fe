@@ -59,11 +59,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import {
-  formatSlotTimeRange,
-  groupSlotsByAvailability,
-} from "@/components/Schedule/Appointments/utils";
-import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -75,6 +70,11 @@ import {
   formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import {
+  formatSlotTimeRange,
+  groupSlotsByAvailability,
+} from "@/pages/Appointments/utils";
+import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import {
   Appointment,
   AppointmentStatuses,
@@ -190,20 +190,41 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
     }
 
     return (
-      <span className="text-black">{formatDate(dateFrom, "dd MMM yyyy")}</span>
+      <>
+        <span>{t("on")} </span>
+        <span className="text-black">
+          {formatDate(dateFrom, "dd MMM yyyy")}
+        </span>
+      </>
     );
   }
 
-  // Case 4: Date range or single date
+  // Case 4: Single date (before or after)
+  if (dateFrom && !dateTo) {
+    return (
+      <>
+        <span>{t("after")} </span>
+        <span className="text-black">
+          {formatDate(dateFrom, "dd MMM yyyy")}
+        </span>
+      </>
+    );
+  }
+
+  if (!dateFrom && dateTo) {
+    return (
+      <>
+        <span>{t("before")} </span>
+        <span className="text-black">{formatDate(dateTo, "dd MMM yyyy")}</span>
+      </>
+    );
+  }
+
+  // Case 5: Date range
   return (
     <span className="text-black">
-      {formatDate(dateFrom!, "dd MMM yyyy")}
-      {dateTo && (
-        <>
-          {" - "}
-          {formatDate(dateTo, "dd MMM yyyy")}
-        </>
-      )}
+      {formatDate(dateFrom!, "dd MMM yyyy")} -{" "}
+      {formatDate(dateTo!, "dd MMM yyyy")}
     </span>
   );
 }
@@ -218,27 +239,27 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
 
-  const shedulableUsersQuery = useQuery({
+  const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
 
-  const resources = shedulableUsersQuery.data?.users;
-  const practitioner = qParams.practitioner
-    ? resources?.find((r) => r.username === qParams.practitioner)
-    : undefined;
+  const resources = schedulableUsersQuery.data?.users;
+  const practitioner = resources?.find(
+    (r) => r.username === qParams.practitioner,
+  );
 
   useEffect(() => {
     const updates: Partial<QueryParams> = {};
 
     // Sets the practitioner filter to the current user if they are in the list of
-    // shedulable users and no practitioner was selected.
+    // schedulable users and no practitioner was selected.
     if (
-      !shedulableUsersQuery.isLoading &&
+      !schedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
-      shedulableUsersQuery.data?.users.some(
+      schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
       )
     ) {
@@ -259,26 +280,30 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...updates,
       });
     }
-  }, [shedulableUsersQuery.isLoading]);
+  }, [schedulableUsersQuery.isLoading]);
 
-  // We'll need to update the backend to get slots for a range of dates
-  // But it'd be better to get schedule and exceptions and compute slots on the frontend
-  // TODO: handle this properly
+  // Enabled only if filtered by a practitioner and a single day
+  const slotsFilterEnabled =
+    !!qParams.date_from &&
+    !!practitioner &&
+    (qParams.date_from === qParams.date_to || !qParams.date_to);
+
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, qParams.practitioner, qParams.date_from],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        user: practitioner?.id ?? "",
-        day: qParams.date_from ?? "",
+        user: practitioner?.id,
+        day: qParams.date_from,
       },
     }),
-    enabled: !!qParams.date_from && !!practitioner,
+    enabled: slotsFilterEnabled,
   });
-  const slots = slotsQuery.data?.results;
+
+  const slots = slotsQuery.data?.results?.filter((s) => s.allocated > 0);
   const slot = slots?.find((s) => s.id === qParams.slot);
 
-  if (shedulableUsersQuery.isLoading) {
+  if (schedulableUsersQuery.isLoading) {
     return <Loading />;
   }
 
@@ -306,13 +331,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       }
     >
       <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div>
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start">
+          <div className="mt-1">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
             <Popover>
-              <PopoverTrigger asChild disabled={shedulableUsersQuery.isLoading}>
+              <PopoverTrigger
+                asChild
+                disabled={schedulableUsersQuery.isLoading}
+              >
                 <Button
                   variant="outline"
                   role="combobox"
@@ -341,7 +369,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                   />
                   <CommandList>
                     <CommandEmpty>
-                      {shedulableUsersQuery.isFetching
+                      {schedulableUsersQuery.isFetching
                         ? t("searching")
                         : t("no_results")}
                     </CommandEmpty>
@@ -364,7 +392,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           )}
                         </CommandItem>
                       </PopoverClose>
-                      {shedulableUsersQuery.data?.users.map((user) => (
+                      {schedulableUsersQuery.data?.users.map((user) => (
                         <PopoverClose className="w-full" key={user.id}>
                           <CommandItem
                             value={formatName(user)}
@@ -524,17 +552,19 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
               </Popover>
             </div>
 
-            <SlotFilter
-              slots={slots ?? []}
-              selectedSlot={qParams.slot}
-              onSelect={(slot) => {
-                if (slot === "all") {
-                  setQParams({ ...qParams, slot: null });
-                } else {
-                  setQParams({ ...qParams, slot });
-                }
-              }}
-            />
+            {slotsFilterEnabled && !!slots?.length && (
+              <SlotFilter
+                slots={slots}
+                selectedSlot={slot}
+                onSelect={(slot) => {
+                  if (slot === "all") {
+                    setQParams({ ...qParams, slot: null });
+                  } else {
+                    setQParams({ ...qParams, slot });
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
 
@@ -931,6 +961,9 @@ const AppointmentStatusDropdown = ({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
+        queryKey: ["appointments", facilityId],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
     },
@@ -994,24 +1027,21 @@ interface SlotFilterProps {
   slots: TokenSlot[];
   disableInline?: boolean;
   disabled?: boolean;
-  selectedSlot: string | null;
+  selectedSlot: TokenSlot | undefined;
   onSelect: (slot: string) => void;
 }
 
 export const SlotFilter = ({
+  slots,
   selectedSlot,
   onSelect,
   ...props
 }: SlotFilterProps) => {
   const { t } = useTranslation();
-  const slots = props.slots.filter((slot) => slot.allocated > 0);
-
-  const resolvedSlot =
-    selectedSlot && slots.find((slot) => slot.id === selectedSlot);
 
   if (slots.length <= 3 && !props.disableInline) {
     return (
-      <Tabs value={selectedSlot ?? "all"} onValueChange={onSelect}>
+      <Tabs value={selectedSlot?.id ?? "all"} onValueChange={onSelect}>
         <TabsList>
           <TabsTrigger
             value="all"
@@ -1047,9 +1077,9 @@ export const SlotFilter = ({
           className="min-w-60 justify-start"
           disabled={props.disabled}
         >
-          {resolvedSlot ? (
+          {selectedSlot ? (
             <div className="flex items-center gap-2">
-              <span>{formatSlotTimeRange(resolvedSlot)}</span>
+              <span>{formatSlotTimeRange(selectedSlot)}</span>
             </div>
           ) : (
             <span>{t("show_all_slots")}</span>
@@ -1095,7 +1125,7 @@ export const SlotFilter = ({
                       <span className="text-xs text-gray-500 font-medium">
                         {slot.allocated} / {availability.tokens_per_slot}
                       </span>
-                      {selectedSlot === slot.id && (
+                      {selectedSlot?.id === slot.id && (
                         <CheckIcon className="ml-auto" />
                       )}
                     </CommandItem>

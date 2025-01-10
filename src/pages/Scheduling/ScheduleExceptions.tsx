@@ -23,7 +23,7 @@ interface Props {
   userId: string;
 }
 
-export default function ScheduleExceptionsList({
+export default function ScheduleExceptions({
   items,
   facilityId,
   userId,

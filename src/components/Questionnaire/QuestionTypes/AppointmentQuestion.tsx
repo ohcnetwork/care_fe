@@ -15,12 +15,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName } from "@/Utils/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   QuestionnaireResponse,
   ResponseValue,

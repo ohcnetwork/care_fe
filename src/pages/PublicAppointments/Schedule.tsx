@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -27,6 +26,7 @@ import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { TokenSlot } from "@/types/scheduling/schedule";
 

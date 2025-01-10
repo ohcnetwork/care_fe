@@ -18,13 +18,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
-import { formatAppointmentSlotTime } from "@/components/Schedule/Appointments/utils";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 

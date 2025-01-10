@@ -24,16 +24,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
-import {
-  groupSlotsByAvailability,
-  useAvailabilityHeatmap,
-} from "@/components/Schedule/Appointments/utils";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/pages/Appointments/utils";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
@@ -41,7 +41,7 @@ interface Props {
   patientId: string;
 }
 
-export default function AppointmentCreatePage(props: Props) {
+export default function BookAppointment(props: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 

@@ -11,7 +11,6 @@ import { TFunction } from "i18next";
 import { toast } from "sonner";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { getFakeTokenNumber } from "@/components/Schedule/helpers";
 
 import query from "@/Utils/request/query";
 import {
@@ -20,6 +19,7 @@ import {
   formatPatientAge,
   getMonthStartAndEnd,
 } from "@/Utils/utils";
+import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
 import {
   Appointment,
   AvailabilityHeatmapResponse,

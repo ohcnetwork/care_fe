@@ -16,20 +16,20 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import Loading from "@/components/Common/Loading";
-import ScheduleExceptionForm from "@/components/Schedule/ScheduleExceptionForm";
-import ScheduleExceptionsList from "@/components/Schedule/ScheduleExceptionsList";
-import ScheduleTemplateForm from "@/components/Schedule/ScheduleTemplateForm";
-import ScheduleTemplatesList from "@/components/Schedule/ScheduleTemplatesList";
-import {
-  filterAvailabilitiesByDayOfWeek,
-  getSlotsPerSession,
-  isDateInRange,
-} from "@/components/Schedule/helpers";
 
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { formatTimeShort } from "@/Utils/utils";
+import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
+import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
+import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
+import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import {
+  filterAvailabilitiesByDayOfWeek,
+  getSlotsPerSession,
+  isDateInRange,
+} from "@/pages/Scheduling/utils";
 import { AvailabilityDateTime } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 import { UserBase } from "@/types/user/user";
@@ -242,17 +242,23 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             </Button>
           </div>
           {view === "schedule" && (
-            <ScheduleTemplateForm facilityId={facilityId} userId={user.id} />
+            <CreateScheduleTemplateSheet
+              facilityId={facilityId}
+              userId={user.id}
+            />
           )}
           {view === "exceptions" && (
-            <ScheduleExceptionForm facilityId={facilityId} userId={user.id} />
+            <CreateScheduleExceptionSheet
+              facilityId={facilityId}
+              userId={user.id}
+            />
           )}
         </div>
 
         <div>
           <ScrollArea className="h-[calc(100vh-24rem)] -mr-3 pr-3 pb-4">
             {view === "schedule" && (
-              <ScheduleTemplatesList
+              <ScheduleTemplates
                 facilityId={facilityId}
                 userId={user.id}
                 items={
@@ -264,7 +270,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             )}
 
             {view === "exceptions" && (
-              <ScheduleExceptionsList
+              <ScheduleExceptions
                 items={
                   exceptionsQuery.isLoading
                     ? undefined

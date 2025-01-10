@@ -13,9 +13,19 @@ export enum DayOfWeek {
   SUNDAY = 6,
 }
 
+const dayOfWeekKeys = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+] as const;
+
 interface Props {
-  value?: DayOfWeek[];
-  onChange?: (value: DayOfWeek[]) => void;
+  value: DayOfWeek[] | undefined;
+  onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
 }
 
@@ -38,15 +48,7 @@ export default function WeekdayCheckbox({
 
   return (
     <div className="flex gap-2 md:gap-4">
-      {[
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY",
-      ].map((day) => {
+      {dayOfWeekKeys.map((day) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
         const isSelected = value.includes(dow);
 
@@ -57,6 +59,9 @@ export default function WeekdayCheckbox({
             variant={isSelected ? "outline_primary" : "outline"}
             onClick={() => handleDayToggle(dow)}
             size={format === "alphabet" ? "icon" : "default"}
+            aria-pressed={isSelected}
+            aria-checked={isSelected}
+            aria-label={t(`DAYS_OF_WEEK__${dow}`)}
           >
             {format === "alphabet"
               ? day[0]

@@ -35,11 +35,6 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FacilityModel } from "@/components/Facility/models";
-import { AppointmentTokenCard } from "@/components/Schedule/Appointments/AppointmentTokenCard";
-import {
-  formatAppointmentSlotTime,
-  printAppointment,
-} from "@/components/Schedule/Appointments/utils";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -49,6 +44,11 @@ import {
   getReadableDuration,
   saveElementAsImage,
 } from "@/Utils/utils";
+import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import {
+  formatAppointmentSlotTime,
+  printAppointment,
+} from "@/pages/Appointments/utils";
 import {
   Appointment,
   AppointmentStatuses,
@@ -61,7 +61,7 @@ interface Props {
   appointmentId: string;
 }
 
-export default function AppointmentDetailsPage(props: Props) {
+export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 

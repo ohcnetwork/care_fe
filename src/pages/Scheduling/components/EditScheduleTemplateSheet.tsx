@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightIcon } from "lucide-react";
+import { isBefore, parse } from "date-fns";
+import { ArrowRightIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -32,17 +33,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  getSlotsPerSession,
-  getTokenDuration,
-} from "@/components/Schedule/helpers";
 import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
   ScheduleAvailability,
@@ -51,51 +56,69 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
-export default function ScheduleTemplateEditForm({
+export default function EditScheduleTemplateSheet({
   template,
   facilityId,
   userId,
+  trigger,
+  open,
+  onOpenChange,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
   userId: string;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="overflow-auto -mx-6 px-6 pb-16">
-      <ScheduleTemplateEditor
-        template={template}
-        facilityId={facilityId}
-        userId={userId}
-      />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetTrigger asChild>
+        {trigger || <Button variant="outline" size="sm"></Button>}
+      </SheetTrigger>
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
+        <SheetHeader>
+          <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
+        </SheetHeader>
+        <div className="overflow-auto -mx-6 px-6 pb-16">
+          <ScheduleTemplateEditor
+            template={template}
+            facilityId={facilityId}
+            userId={userId}
+          />
 
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold">{t("availabilities")}</h2>
-      </div>
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold">{t("availabilities")}</h2>
+          </div>
 
-      {template.availabilities.length === 0 && (
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">{t("no_availabilities_yet")}</p>
+          {template.availabilities.length === 0 && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-500">
+                {t("no_availabilities_yet")}
+              </p>
+            </div>
+          )}
+
+          {template.availabilities.map((availability) => (
+            <AvailabilityEditor
+              key={availability.id}
+              availability={availability}
+              scheduleId={template.id}
+              facilityId={facilityId}
+              userId={userId}
+            />
+          ))}
+
+          <NewAvailabilityCard
+            scheduleId={template.id}
+            facilityId={facilityId}
+            userId={userId}
+          />
         </div>
-      )}
-
-      {template.availabilities.map((availability) => (
-        <AvailabilityEditor
-          key={availability.id}
-          availability={availability}
-          scheduleId={template.id}
-          facilityId={facilityId}
-          userId={userId}
-        />
-      ))}
-
-      <NewAvailabilityCard
-        scheduleId={template.id}
-        facilityId={facilityId}
-        userId={userId}
-      />
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -111,15 +134,25 @@ const ScheduleTemplateEditor = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const templateFormSchema = z.object({
-    name: z.string().min(1, t("field_required")),
-    valid_from: z.date({
-      required_error: t("field_required"),
-    }),
-    valid_to: z.date({
-      required_error: t("field_required"),
-    }),
-  });
+  const templateFormSchema = z
+    .object({
+      name: z.string().min(1, t("field_required")),
+      valid_from: z.date({
+        required_error: t("field_required"),
+      }),
+      valid_to: z.date({
+        required_error: t("field_required"),
+      }),
+    })
+    .refine(
+      (data) => {
+        return isBefore(data.valid_from, data.valid_to);
+      },
+      {
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"],
+      },
+    );
 
   const form = useForm<z.infer<typeof templateFormSchema>>({
     resolver: zodResolver(templateFormSchema),
@@ -130,7 +163,7 @@ const ScheduleTemplateEditor = ({
     },
   });
 
-  const { mutate: updateTemplate, isPending } = useMutation({
+  const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
     mutationFn: mutate(scheduleApis.templates.update, {
       pathParams: {
         facility_id: facilityId,
@@ -144,6 +177,23 @@ const ScheduleTemplateEditor = ({
       });
     },
   });
+
+  const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(scheduleApis.templates.delete, {
+      pathParams: {
+        facility_id: facilityId,
+        id: template.id,
+      },
+    }),
+    onSuccess: () => {
+      toast.success(t("template_deleted"));
+      queryClient.invalidateQueries({
+        queryKey: ["user-schedule-templates", { facilityId, userId }],
+      });
+    },
+  });
+
+  const isProcessing = isUpdating || isDeleting;
 
   function onSubmit(values: z.infer<typeof templateFormSchema>) {
     updateTemplate({
@@ -206,9 +256,24 @@ const ScheduleTemplateEditor = ({
             />
           </div>
 
-          <div className="flex justify-end">
-            <Button variant="primary" type="submit" disabled={isPending}>
-              {isPending ? t("saving") : t("save")}
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => deleteTemplate()}
+              disabled={isProcessing}
+            >
+              <Trash2Icon />
+              {isDeleting ? t("deleting") : t("delete")}
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isUpdating}
+              size="sm"
+            >
+              <SaveIcon />
+              {isUpdating ? t("saving") : t("save")}
             </Button>
           </div>
         </form>
@@ -400,22 +465,36 @@ const NewAvailabilityCard = ({
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const formSchema = z.object({
-    name: z.string().min(1, t("field_required")),
-    slot_type: z.enum(["appointment", "open", "closed"]),
-    start_time: z
-      .string()
-      .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-    end_time: z
-      .string()
-      .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-    slot_size_in_minutes: z.number().nullable(),
-    tokens_per_slot: z.number().nullable(),
-    reason: z.string(),
-    weekdays: z
-      .array(z.number() as unknown as z.ZodType<DayOfWeek>)
-      .min(1, t("schedule_weekdays_min_error")),
-  });
+  const formSchema = z
+    .object({
+      name: z.string().min(1, t("field_required")),
+      slot_type: z.enum(["appointment", "open", "closed"]),
+      start_time: z
+        .string()
+        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      end_time: z
+        .string()
+        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      slot_size_in_minutes: z.number().nullable(),
+      tokens_per_slot: z.number().nullable(),
+      reason: z.string(),
+      weekdays: z
+        .array(z.number() as unknown as z.ZodType<DayOfWeek>)
+        .min(1, t("schedule_weekdays_min_error")),
+    })
+    .refine(
+      (data) => {
+        // Parse time strings into Date objects for comparison
+        const startTime = parse(data.start_time, "HH:mm", new Date());
+        const endTime = parse(data.end_time, "HH:mm", new Date());
+
+        return isBefore(startTime, endTime);
+      },
+      {
+        message: t("start_time_must_be_before_end_time"),
+        path: ["start_time"], // This will show the error on the start_time field
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
