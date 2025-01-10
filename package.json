@@ -90,7 +90,7 @@
     "cmdk": "^1.0.4",
     "cross-env": "^7.0.3",
     "cypress": "^13.17.0",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "echarts": "^5.5.1",
     "echarts-for-react": "^3.0.2",
