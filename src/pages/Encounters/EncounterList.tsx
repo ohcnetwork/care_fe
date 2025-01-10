@@ -161,7 +161,19 @@ export function EncounterList({
     encounter_id,
     external_identifier,
   } = qParams;
-
+  const handleFieldChange = () => {
+    {
+      updateQuery({
+        status,
+        encounter_class: encounterClass,
+        priority,
+        name: undefined,
+        encounter_id: undefined,
+        external_identifier: undefined,
+      });
+      clearSearch.value = true;
+    }
+  };
   const handleSearch = useCallback(
     (key: string, value: string) => {
       updateQuery({
@@ -273,6 +285,7 @@ export function EncounterList({
                       <SearchByMultipleFields
                         id="encounter-search"
                         options={searchOptions}
+                        onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
                         clearSearch={clearSearch}
                         className="w-full border-none shadow-none"
