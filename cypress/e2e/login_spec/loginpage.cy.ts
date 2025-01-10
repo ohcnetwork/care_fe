@@ -4,19 +4,11 @@ describe("Login Page", () => {
   const loginPage = new LoginPage();
 
   beforeEach(() => {
-    cy.clearLocalStorage();
-    cy.saveLocalStorage();
     cy.visit("/login");
   });
 
-  afterEach(() => {
-    cy.saveLocalStorage();
-  });
-
   it("should successfully login with admin credentials", () => {
-    loginPage.interceptLogin();
-    loginPage.loginByRole("admin");
-    loginPage.verifyLoginResponse();
+    cy.loginByApi("staff");
     cy.url().should("include", "/");
   });
 

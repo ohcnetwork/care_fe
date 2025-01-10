@@ -8,6 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
@@ -19,7 +20,6 @@ import {
 
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import uploadFile from "@/Utils/request/uploadFile";
@@ -187,25 +187,21 @@ export default function useFileUpload(
         (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            Notification.Success({
-              msg: t("file_uploaded"),
-            });
+            toast.success(t("file_uploaded"));
             setError(null);
             onUpload && onUpload(data);
             resolve();
           } else {
-            Notification.Error({
-              msg: t("file_error__dynamic", { statusText: xhr.statusText }),
-            });
+            toast.error(
+              t("file_error__dynamic", { statusText: xhr.statusText }),
+            );
             setProgress(null);
             reject();
           }
         },
         setProgress as any,
         () => {
-          Notification.Error({
-            msg: t("file_error__network"),
-          });
+          toast.error(t("file_error__network"));
           setProgress(null);
           reject();
         },

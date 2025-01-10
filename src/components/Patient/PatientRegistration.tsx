@@ -4,6 +4,7 @@ import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
@@ -45,7 +46,6 @@ import {
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -159,9 +159,7 @@ export default function PatientRegistration(
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
     onSuccess: (resp: PatientModel) => {
-      Notification.Success({
-        msg: t("patient_registration_success"),
-      });
+      toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
@@ -175,9 +173,7 @@ export default function PatientRegistration(
       });
     },
     onError: () => {
-      Notification.Error({
-        msg: t("patient_registration_error"),
-      });
+      toast.error(t("patient_registration_error"));
     },
   });
 
@@ -186,15 +182,11 @@ export default function PatientRegistration(
       pathParams: { id: patientId || "" },
     }),
     onSuccess: () => {
-      Notification.Success({
-        msg: t("patient_update_success"),
-      });
+      toast.success(t("patient_update_success"));
       goBack();
     },
     onError: () => {
-      Notification.Error({
-        msg: t("patient_update_error"),
-      });
+      toast.error(t("patient_update_error"));
     },
   });
 
