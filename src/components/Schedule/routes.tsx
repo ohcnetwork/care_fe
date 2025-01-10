@@ -37,8 +37,8 @@ const ScheduleRoutes: AppRoutes = {
     appointmentId,
   }) => (
     <AppointmentDetailsPage
-      facilityId={facilityId || ""}
-      appointmentId={appointmentId || ""}
+      facilityId={facilityId ?? ""}
+      appointmentId={appointmentId ?? ""}
     />
   ),
 };

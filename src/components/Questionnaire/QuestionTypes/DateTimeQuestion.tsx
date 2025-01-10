@@ -57,7 +57,7 @@ export function DateTimeQuestion({
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const [hours, minutes] = event.target.value.split(":").map((value) => {
       const number = Number(value);
-      return isNaN(number) ? undefined : number;
+      return Number.isNaN(number) ? undefined : number;
     });
     if (hours === undefined || minutes === undefined) return;
 

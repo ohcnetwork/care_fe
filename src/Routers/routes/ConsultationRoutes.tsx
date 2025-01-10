@@ -13,8 +13,8 @@ const consultationRoutes: AppRoutes = {
     encounterId,
   }) => (
     <PrintPrescription
-      facilityId={facilityId || ""}
-      encounterId={encounterId || ""}
+      facilityId={facilityId ?? ""}
+      encounterId={encounterId ?? ""}
     />
   ),
   "/facility/:facilityId/encounter/:encounterId/:tab": ({
@@ -23,8 +23,8 @@ const consultationRoutes: AppRoutes = {
     tab,
   }) => (
     <EncounterShow
-      facilityId={facilityId || ""}
-      encounterId={encounterId || ""}
+      facilityId={facilityId ?? ""}
+      encounterId={encounterId ?? ""}
       tab={tab}
     />
   ),
@@ -33,18 +33,18 @@ const consultationRoutes: AppRoutes = {
     patientId,
   }) => (
     <EncounterQuestionnaire
-      facilityId={facilityId || ""}
-      patientId={patientId || ""}
+      facilityId={facilityId ?? ""}
+      patientId={patientId ?? ""}
       questionnaireSlug="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/edit_encounter":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
-        facilityId={facilityId || ""}
+        facilityId={facilityId ?? ""}
         encounterId={encounterId}
         questionnaireSlug="encounter"
-        patientId={patientId || ""}
+        patientId={patientId ?? ""}
       />
     ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
@@ -52,17 +52,17 @@ const consultationRoutes: AppRoutes = {
     patientId,
   }) => (
     <EncounterQuestionnaire
-      facilityId={facilityId || ""}
-      patientId={patientId || ""}
+      facilityId={facilityId ?? ""}
+      patientId={patientId ?? ""}
       subjectType="patient"
     />
   ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
-        facilityId={facilityId || ""}
+        facilityId={facilityId ?? ""}
         encounterId={encounterId}
-        patientId={patientId || ""}
+        patientId={patientId ?? ""}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":

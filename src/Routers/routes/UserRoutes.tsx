@@ -11,15 +11,15 @@ const UserRoutes: AppRoutes = {
     username,
     tab,
   }) => (
-    <UserHome facilityId={facilityId} username={username} tab={tab || ""} />
+    <UserHome facilityId={facilityId} username={username} tab={tab ?? ""} />
   ),
   "/users/:username": ({ username }) => (
     <UserHome username={username} tab="profile" />
   ),
   "/users/:username/:tab": ({ username, tab }) => (
-    <UserHome username={username} tab={tab || ""} />
+    <UserHome username={username} tab={tab ?? ""} />
   ),
-  "/user/:tab": ({ tab }) => <UserHome tab={tab || ""} />,
+  "/user/:tab": ({ tab }) => <UserHome tab={tab ?? ""} />,
 };
 
 export default UserRoutes;

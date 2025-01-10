@@ -6,8 +6,8 @@ import { AppRoutes } from "../AppRouter";
 
 const QuestionnaireRoutes: AppRoutes = {
   "/questionnaire": () => <QuestionnaireList />,
-  "/questionnaire/:id": ({ id }) => <QuestionnaireShow id={id || ""} />,
-  "/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id || ""} />,
+  "/questionnaire/:id": ({ id }) => <QuestionnaireShow id={id ?? ""} />,
+  "/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id ?? ""} />,
 };
 
 export default QuestionnaireRoutes;
