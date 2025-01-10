@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { TooltipComponent } from "@/components/ui/tooltip";
@@ -11,7 +12,6 @@ import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import * as Notification from "@/Utils/Notifications";
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -58,7 +58,7 @@ export default function UserAvatar({
         if (xhr.status === 200) {
           await sleep(1000);
           refetchUserData?.();
-          Notification.Success({ msg: t("avatar_updated_success") });
+          toast.success(t("avatar_updated_success"));
           setEditAvatar(false);
         }
       },
@@ -74,7 +74,7 @@ export default function UserAvatar({
       pathParams: { username },
     });
     if (res?.ok) {
-      Notification.Success({ msg: "Profile picture deleted" });
+      toast.success(t("profile_picture_deleted"));
       refetchUserData?.();
       setEditAvatar(false);
     } else {

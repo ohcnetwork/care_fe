@@ -7,13 +7,6 @@ export class LoginPage {
     return cy.intercept("POST", this.routes.login).as("loginRequest");
   }
 
-  verifyLoginResponse() {
-    return cy
-      .wait("@loginRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-  }
-
   // Add selectors for existing elements
   private readonly usernameInput = "[data-cy=username]";
   private readonly passwordInput = "[data-cy=password]";

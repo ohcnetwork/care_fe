@@ -1,8 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,13 +27,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { validateRule } from "@/components/Users/UserFormValidations";
+
 import { GENDER_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
+import userApi from "@/types/user/userApi";
 
 const userFormSchema = z
   .object({
@@ -109,6 +116,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
   });
 
   const userType = form.watch("user_type");
+  const usernameInput = form.watch("username");
   const phoneNumber = form.watch("phone_number");
   const isWhatsApp = form.watch("phone_number_is_whatsapp");
 
@@ -116,7 +124,44 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     if (isWhatsApp) {
       form.setValue("alt_phone_number", phoneNumber);
     }
-  }, [phoneNumber, isWhatsApp, form]);
+    if (usernameInput && usernameInput.length > 0) {
+      form.trigger("username");
+    }
+  }, [phoneNumber, isWhatsApp, form, usernameInput]);
+
+  const { error, isLoading } = useQuery({
+    queryKey: ["checkUsername", usernameInput],
+    queryFn: query(userApi.checkUsername, {
+      pathParams: { username: usernameInput },
+      silent: true,
+    }),
+    enabled: !form.formState.errors.username,
+  });
+
+  const renderUsernameFeedback = (usernameInput: string) => {
+    const {
+      errors: { username },
+    } = form.formState;
+    if (username?.message) {
+      return validateRule(false, username.message);
+    } else if (isLoading) {
+      return (
+        <div className="flex items-center gap-1">
+          <CareIcon
+            icon="l-spinner"
+            className="text-sm text-gray-500 animate-spin"
+          />
+          <span className="text-gray-500 text-sm">
+            {t("checking_availability")}
+          </span>
+        </div>
+      );
+    } else if (error) {
+      return validateRule(false, t("username_not_available"));
+    } else if (usernameInput) {
+      return validateRule(true, t("username_available"));
+    }
+  };
 
   const onSubmit = async (data: UserFormValues) => {
     try {
@@ -133,19 +178,13 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       });
 
       if (res?.ok) {
-        Notification.Success({
-          msg: t("user_added_successfully"),
-        });
+        toast.success(t("user_added_successfully"));
         onSubmitSuccess?.(user!);
       } else {
-        Notification.Error({
-          msg: error?.message ?? t("user_add_error"),
-        });
+        toast.error((error?.message as string) ?? t("user_add_error"));
       }
     } catch (error) {
-      Notification.Error({
-        msg: t("user_add_error"),
-      });
+      toast.error(t("user_add_error"));
     }
   };
 
@@ -165,10 +204,10 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="doctor">Doctor</SelectItem>
-                  <SelectItem value="nurse">Nurse</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="volunteer">Volunteer</SelectItem>
+                  <SelectItem value="doctor">{t("doctor")}</SelectItem>
+                  <SelectItem value="nurse">{t("nurse")}</SelectItem>
+                  <SelectItem value="staff">{t("staff")}</SelectItem>
+                  <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -205,7 +244,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="username"
@@ -213,9 +251,11 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             <FormItem>
               <FormLabel>{t("username")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("username")} {...field} />
+                <div className="relative">
+                  <Input placeholder={t("username")} {...field} />
+                </div>
               </FormControl>
-              <FormMessage />
+              {renderUsernameFeedback(usernameInput)}
             </FormItem>
           )}
         />
@@ -265,7 +305,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             <FormItem>
               <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="Email" {...field} />
+                <Input type="email" placeholder={t("email")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -292,7 +332,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             name="alt_phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("alternative_phone_number")}</FormLabel>
+                <FormLabel>{t("alternate_phone_number")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="+91XXXXXXXXXX"
@@ -320,7 +360,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>
-                  {t("whatsapp_number_is_same_as_phone_number")}
+                  {t("whatsapp_number_same_as_phone_number")}
                 </FormLabel>
               </div>
             </FormItem>
@@ -427,7 +467,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             </div>
           </>
         )}
-
         <FormField
           control={form.control}
           name="geo_organization"

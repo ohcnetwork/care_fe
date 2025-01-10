@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -15,8 +16,6 @@ import { Button } from "@/components/ui/button";
 import DialogModal from "@/components/Common/Dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
-
-import { Warn } from "@/Utils/Notifications";
 
 interface Props {
   title: string;
@@ -108,7 +107,7 @@ const AvatarEditModal = ({
       return;
     }
     if (!isImageFile(e.target.files[0])) {
-      Warn({ msg: "Please upload an image file!" });
+      toast.warning(t("please_upload_an_image_file"));
       return;
     }
     setSelectedFile(e.target.files[0]);
@@ -340,7 +339,7 @@ const AvatarEditModal = ({
                       videoConstraints={constraint}
                       onUserMediaError={(_e) => {
                         setIsCameraOpen(false);
-                        Warn({ msg: t("camera_permission_denied") });
+                        toast.warning(t("camera_permission_denied"));
                       }}
                     />
                   </>

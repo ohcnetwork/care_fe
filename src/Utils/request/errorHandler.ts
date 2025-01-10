@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 
@@ -10,7 +11,7 @@ export function handleHttpError(error: Error) {
   }
 
   if (!(error instanceof HTTPError)) {
-    Notifications.Error({ msg: error.message || "Something went wrong!" });
+    toast.error(error.message || t("something_went_wrong"));
     return;
   }
 
@@ -21,7 +22,7 @@ export function handleHttpError(error: Error) {
   const cause = error.cause;
 
   if (isNotFound(error)) {
-    toast.error((cause?.detail as string) || "Not found");
+    toast.error((cause?.detail as string) || t("not_found"));
     return;
   }
 
@@ -40,9 +41,7 @@ export function handleHttpError(error: Error) {
     return;
   }
 
-  Notifications.Error({
-    msg: cause?.detail || "Something went wrong...!",
-  });
+  toast.error((cause?.detail as string) || t("something_went_wrong"));
 }
 
 function isSessionExpired(error: HTTPError["cause"]) {
