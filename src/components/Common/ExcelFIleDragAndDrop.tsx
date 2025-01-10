@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -15,8 +16,6 @@ import schemaParser, {
   ParsedData,
   SchemaType,
 } from "@/common/schemaParser";
-
-import * as Notification from "@/Utils/Notifications";
 
 interface Props {
   handleSubmit: (data: any) => void;
@@ -83,9 +82,7 @@ export default function ExcelFileDragAndDrop({
 
       reader.readAsBinaryString(file);
     } catch (e: any) {
-      Notification.Error({
-        msg: e.message,
-      });
+      toast.error(e.message);
     }
   };
 
