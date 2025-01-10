@@ -1,12 +1,11 @@
 import { Redirect } from "raviger";
 
-import AppointmentCreatePage from "@/components/Schedule/Appointments/AppointmentCreatePage";
-import AppointmentDetailsPage from "@/components/Schedule/Appointments/AppointmentDetailsPage";
-import AppointmentsPage from "@/components/Schedule/Appointments/AppointmentsPage";
-
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
+import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
+import BookAppointment from "@/pages/Appointments/BookAppointment";
 
 const HomeFacilityRedirect = ({ suffix }: { suffix: string }) => {
   const authUser = useAuthUser();
@@ -26,7 +25,7 @@ const ScheduleRoutes: AppRoutes = {
     facilityId,
     patientId,
   }) => (
-    <AppointmentCreatePage
+    <BookAppointment
       facilityId={facilityId ?? ""}
       patientId={patientId ?? ""}
     />
@@ -36,7 +35,7 @@ const ScheduleRoutes: AppRoutes = {
     facilityId,
     appointmentId,
   }) => (
-    <AppointmentDetailsPage
+    <AppointmentDetail
       facilityId={facilityId ?? ""}
       appointmentId={appointmentId ?? ""}
     />
