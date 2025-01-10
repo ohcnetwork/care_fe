@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building, Check, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Building, Check, Loader2 } from "lucide-react";
+import { useNavigate } from "raviger";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -27,35 +28,29 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
+import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  questionnaireId: string;
+  questionnaire: QuestionnaireDetail;
   trigger?: React.ReactNode;
 }
 
-export default function ManageQuestionnaireOrganizationsSheet({
-  questionnaireId,
+export default function CloneQuestionnaireSheet({
+  questionnaire,
   trigger,
 }: Props) {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [newSlug, setNewSlug] = useState(questionnaire.slug + "-copy");
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const { data: organizations, isLoading } = useQuery({
-    queryKey: ["questionnaire", questionnaireId, "organizations"],
-    queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { id: questionnaireId },
-    }),
-    enabled: open,
-  });
 
   const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
     useQuery({
       queryKey: ["organizations", searchQuery],
-      queryFn: query.debounced(organizationApi.list, {
+      queryFn: query(organizationApi.list, {
         queryParams: {
           org_type: "role",
           name: searchQuery || undefined,
@@ -64,25 +59,40 @@ export default function ManageQuestionnaireOrganizationsSheet({
       enabled: open,
     });
 
-  const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
-    mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { id: questionnaireId },
+  const { mutate: cloneQuestionnaire, isPending: isCloning } = useMutation({
+    mutationFn: mutate(questionnaireApi.create, {
+      silent: true,
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["questionnaire", questionnaireId, "organizations"],
-      });
-      toast.success("Organizations updated successfully");
+    onSuccess: async (data: QuestionnaireDetail) => {
+      navigate(`/questionnaire/${data.slug}`);
       setOpen(false);
+    },
+    onError: (error: any) => {
+      if (error.response?.status === 400) {
+        setError("This slug is already in use. Please choose a different one.");
+      } else {
+        setError("Failed to clone questionnaire. Please try again.");
+      }
     },
   });
 
-  // Initialize selected IDs when organizations are loaded
-  useEffect(() => {
-    if (organizations?.results) {
-      setSelectedIds(organizations.results.map((org) => org.id));
+  const handleClone = () => {
+    if (!newSlug.trim()) {
+      setError("Slug is required");
+      return;
     }
-  }, [organizations?.results]);
+
+    const clonedQuestionnaire = {
+      ...questionnaire,
+      slug: newSlug.trim(),
+      id: undefined,
+      status: "draft" as const,
+      title: `${questionnaire.title} (Clone)`,
+      organizations: selectedIds,
+    };
+
+    cloneQuestionnaire(clonedQuestionnaire);
+  };
 
   const handleToggleOrganization = (orgId: string) => {
     setSelectedIds((current) =>
@@ -92,83 +102,68 @@ export default function ManageQuestionnaireOrganizationsSheet({
     );
   };
 
-  const handleSave = () => {
-    setOrganizations({ organizations: selectedIds });
-  };
-
-  const selectedOrganizations = organizations?.results.filter((org) =>
-    selectedIds.includes(org.id),
-  );
-
-  const hasChanges = !organizations?.results
-    ? false
-    : new Set(organizations.results.map((org) => org.id)).size !==
-        new Set(selectedIds).size ||
-      !organizations.results.every((org) => selectedIds.includes(org.id));
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button variant="outline" size="sm">
-            <Building className="mr-2 h-4 w-4" />
-            {t("manage_organizations")}
-          </Button>
-        )}
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("manage_organizations")}</SheetTitle>
+          <SheetTitle>Clone Questionnaire</SheetTitle>
           <SheetDescription>
-            {t("manage_organizations_description")}
+            Create a copy of this questionnaire with a new slug and select
+            organizations.
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-6 py-4">
+          {/* Slug Input */}
+          <div className="space-y-2">
+            <Label htmlFor="slug">Slug</Label>
+            <Input
+              id="slug"
+              value={newSlug}
+              onChange={(e) => {
+                setNewSlug(e.target.value);
+                setError(null);
+              }}
+              placeholder="Enter a unique slug"
+            />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+          </div>
+
           {/* Selected Organizations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">
-              {t("selected_organizations")}
-            </h3>
+            <h3 className="text-sm font-medium">Selected Organizations</h3>
             <div className="flex flex-wrap gap-2">
-              {selectedOrganizations?.map((org) => (
-                <Badge
-                  key={org.id}
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  {org.name}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => handleToggleOrganization(org.id)}
-                    disabled={isUpdating}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-              {!isLoading &&
-                (!selectedOrganizations ||
-                  selectedOrganizations.length === 0) && (
-                  <p className="text-sm text-muted-foreground">
-                    {t("no_organizations_selected")}
-                  </p>
-                )}
+              {selectedIds.length > 0 ? (
+                availableOrganizations?.results
+                  .filter((org) => selectedIds.includes(org.id))
+                  .map((org) => (
+                    <Badge
+                      key={org.id}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
+                      {org.name}
+                    </Badge>
+                  ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No organizations selected
+                </p>
+              )}
             </div>
           </div>
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
+            <h3 className="text-sm font-medium">Add Organizations</h3>
             <Command className="rounded-lg border shadow-md">
               <CommandInput
                 placeholder="Search organizations..."
                 onValueChange={setSearchQuery}
               />
               <CommandList>
-                <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
+                <CommandEmpty>No organizations found.</CommandEmpty>
                 <CommandGroup>
                   {isLoadingOrganizations ? (
                     <div className="flex items-center justify-center py-6">
@@ -207,22 +202,25 @@ export default function ManageQuestionnaireOrganizationsSheet({
             <Button
               variant="outline"
               onClick={() => {
-                if (organizations?.results) {
-                  setSelectedIds(organizations.results.map((org) => org.id));
-                }
+                setNewSlug(questionnaire.slug + "-copy");
+                setSelectedIds([]);
+                setError(null);
                 setOpen(false);
               }}
             >
-              {t("cancel")}
+              Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
-              {isUpdating ? (
+            <Button
+              onClick={handleClone}
+              disabled={isCloning || !newSlug.trim()}
+            >
+              {isCloning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("saving")}
+                  Cloning...
                 </>
               ) : (
-                t("save")
+                "Clone"
               )}
             </Button>
           </div>

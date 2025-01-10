@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import useMutation from "@/Utils/request/useMutation";
 import useQuery from "@/Utils/request/useQuery";
@@ -29,7 +30,7 @@ import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
-interface QuestionnaireFormState {
+export interface QuestionnaireFormState {
   questionnaire: QuestionnaireDetail;
   responses: QuestionnaireResponse[];
   errors: QuestionValidationError[];
@@ -294,6 +295,11 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
+      <PLUGIN_Component
+        __name="Scribe"
+        formState={questionnaireForms}
+        setFormState={setQuestionnaireForms}
+      />
       <div className="flex-1 overflow-y-auto max-w-3xl pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (

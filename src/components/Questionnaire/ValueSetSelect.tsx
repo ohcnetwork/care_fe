@@ -19,8 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Code, ValueSetSystem } from "@/types/questionnaire/code";
@@ -46,11 +44,11 @@ export default function ValueSetSelect({
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useDebouncedState("", 500);
+  const [search, setSearch] = useState("");
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
-    queryFn: query(routes.valueset.expand, {
+    queryFn: query.debounced(routes.valueset.expand, {
       pathParams: { system },
       body: { count, search: search + searchPostFix },
     }),
