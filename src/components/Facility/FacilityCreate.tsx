@@ -57,7 +57,6 @@ import {
   validatePincode,
 } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -150,7 +149,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      console.log(facilityData);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
@@ -209,11 +207,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           });
 
       if (res?.ok && responseData) {
-        Notification.Success({
-          msg: facilityId
-            ? "Facility updated successfully"
-            : "Facility added successfully",
-        });
+        toast.success(
+          facilityId
+            ? t("facility_updated_success")
+            : t("facility_added_successfully"),
+        );
         navigate(`/facility/${responseData.id}`);
       }
     } catch (error) {

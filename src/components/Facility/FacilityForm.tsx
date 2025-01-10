@@ -38,7 +38,6 @@ import {
   validatePincode,
 } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -111,9 +110,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(routes.facility.create),
     onSuccess: (_data: BaseFacility) => {
-      Notification.Success({
-        msg: t("facility_added_successfully"),
-      });
+      toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
       onSubmitSuccess?.();
@@ -122,12 +119,10 @@ export default function CreateFacilityForm(props: FacilityProps) {
       const errorData = error.cause as { errors: { msg: string[] } };
       if (errorData?.errors?.msg) {
         errorData.errors.msg.forEach((msg) => {
-          Notification.Error({ msg });
+          toast.error(msg);
         });
       } else {
-        Notification.Error({
-          msg: t("facility_add_error"),
-        });
+        toast.error(t("facility_add_error"));
       }
     },
   });
@@ -217,22 +212,16 @@ export default function CreateFacilityForm(props: FacilityProps) {
           form.setValue("latitude", position.coords.latitude.toString());
           form.setValue("longitude", position.coords.longitude.toString());
           setIsGettingLocation(false);
-          Notification.Success({
-            msg: "Location updated successfully",
-          });
+          toast.success(t("location_updated_successfully"));
         },
         (error) => {
           setIsGettingLocation(false);
-          Notification.Error({
-            msg: "Unable to get location: " + error.message,
-          });
+          toast.error(t("unable_to_get_location") + error.message);
         },
         { timeout: 10000 }, // 10 second timeout
       );
     } else {
-      Notification.Error({
-        msg: "Geolocation is not supported by this browser",
-      });
+      toast.error(t("geolocation_is_not_supported_by_this_browser"));
     }
   };
 

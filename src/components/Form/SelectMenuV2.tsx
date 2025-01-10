@@ -5,13 +5,12 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
 
-import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -55,8 +54,6 @@ type SelectMenuProps<T, V = T> = {
  * customizability.
  */
 const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const valueOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
     return {
@@ -92,27 +89,8 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const value = options.find((o) => props.value == o.value) ?? defaultOption;
 
-  const domValue = useValueInjectionObserver<V>({
-    targetElement: menuRef.current,
-    attribute: "data-cui-listbox-value",
-  });
-
-  useEffect(() => {
-    if (props.value !== domValue && typeof domValue !== "undefined")
-      props.onChange(domValue);
-  }, [domValue]);
-
   return (
-    <div
-      className={props.className}
-      ref={menuRef}
-      id={props.id}
-      data-cui-listbox
-      data-cui-listbox-options={JSON.stringify(
-        options.map((option) => [option.value, option.label?.toString()]),
-      )}
-      data-cui-listbox-value={JSON.stringify(props.value)}
-    >
+    <div className={props.className} id={props.id}>
       <Listbox
         disabled={props.disabled || valueOptions?.length === 0}
         value={value}

@@ -1,8 +1,7 @@
 import { isSameDay, isWithinInterval } from "date-fns";
 
-import { Appointment, ScheduleTemplate } from "@/components/Schedule/types";
-
 import { Time } from "@/Utils/types";
+import { Appointment, ScheduleAvailability } from "@/types/scheduling/schedule";
 
 export const isDateInRange = (
   date: Date,
@@ -51,7 +50,7 @@ export function getTokenDuration(
 }
 
 export const getDaysOfWeekFromAvailabilities = (
-  availabilities: ScheduleTemplate["availabilities"],
+  availabilities: ScheduleAvailability[],
 ) => {
   return [
     ...new Set(
@@ -63,7 +62,7 @@ export const getDaysOfWeekFromAvailabilities = (
 };
 
 export const filterAvailabilitiesByDayOfWeek = (
-  availabilities: ScheduleTemplate["availabilities"],
+  availabilities: ScheduleAvailability[],
   date?: Date,
 ) => {
   // Doing this weird things because backend uses python's 0-6.

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,7 +11,6 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { UserBase } from "@/types/user/user";
@@ -89,11 +89,9 @@ export default function UserResetPassword({
     });
 
     if (res?.ok) {
-      Notification.Success({ msg: data?.message as string });
+      toast.success(data?.message as string);
     } else {
-      Notification.Error({
-        msg: error?.message ?? t("password_update_error"),
-      });
+      toast.error((error?.message as string) ?? t("password_update_error"));
     }
     setisSubmitting(false);
   };

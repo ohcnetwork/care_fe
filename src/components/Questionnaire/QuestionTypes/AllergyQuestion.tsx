@@ -137,12 +137,7 @@ export function AllergyQuestion({
         );
       }
     }
-  }, [
-    patientAllergies,
-    allergies.length,
-    questionnaireResponse,
-    updateQuestionnaireResponseCB,
-  ]);
+  }, [patientAllergies]);
 
   const handleAddAllergy = (code: Code) => {
     const newAllergies = [

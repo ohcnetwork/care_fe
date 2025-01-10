@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import { QueryParams, RequestOptions } from "@/Utils/request/types";
 
 export function makeUrl(
@@ -43,6 +43,10 @@ const makeQueryParams = (query: QueryParams) => {
   return qParams.toString();
 };
 
+/**
+ * TODO: consider replacing this with inferring the types from the route and using a generic
+ * to ensure that the path params are not missing.
+ */
 const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 
@@ -50,7 +54,7 @@ const ensurePathNotMissingReplacements = (path: string) => {
     const msg = `Missing path params: ${missingParams.join(
       ", ",
     )}. Path: ${path}`;
-    Notification.Error({ msg });
+    toast.error(msg);
     throw new Error(msg);
   }
 };
