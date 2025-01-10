@@ -92,6 +92,35 @@ useQuery({
 });
 ```
 
+### Debounced Queries
+
+For search inputs or other scenarios requiring debounced API calls, use `query.debounced`:
+
+```tsx
+function SearchComponent() {
+  const [search, setSearch] = useState("");
+  
+  const { data } = useQuery({
+    queryKey: ['search', search],
+    queryFn: query.debounced(routes.search, {
+      queryParams: { q: search },
+      debounceInterval: 500 // Optional: defaults to 500ms
+    }),
+    enabled: search.length > 0
+  });
+
+  return (
+    <Input 
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Search..."
+    />
+  );
+}
+```
+
+The debounced query will wait for the specified interval after the last call before executing the request, helping to reduce unnecessary API calls during rapid user input.
+
 ### Error Handling
 
 All API errors are now handled globally. Common scenarios like:
