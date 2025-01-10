@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { Link } from "raviger";
 import { useState } from "react";
 
@@ -17,10 +18,7 @@ import useSlug from "@/hooks/useSlug";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
-import {
-  BOUNDS_DURATION_UNITS,
-  MedicationRequest,
-} from "@/types/emr/medicationRequest";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 
 interface Props {
   readonly?: boolean;
@@ -329,12 +327,10 @@ const PrescriptionEntry = ({
       </div>
       {instruction.timing?.repeat?.bounds_duration && (
         <div className="mt-1 text-xs text-muted-foreground">
-          <span className="text-muted-foreground">Duration:</span>{" "}
+          <span className="text-muted-foreground">{t("duration")}:</span>{" "}
           {instruction.timing.repeat.bounds_duration.value}{" "}
           {instruction.timing.repeat.bounds_duration.unit &&
-            BOUNDS_DURATION_UNITS[
-              instruction.timing.repeat.bounds_duration.unit
-            ]?.label}
+            t(`${instruction.timing.repeat.bounds_duration.unit}`)}
         </div>
       )}
 

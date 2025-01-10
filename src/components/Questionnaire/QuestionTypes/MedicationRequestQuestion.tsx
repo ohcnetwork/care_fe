@@ -20,7 +20,6 @@ import {
   DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
-  MedicationRequestBoundsDurationUnit,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
 } from "@/types/emr/medicationRequest";
@@ -177,7 +176,10 @@ const MedicationRequestGridRow: React.FC<{
   onUpdate?: (medication: Partial<MedicationRequest>) => void;
   onRemove?: () => void;
 }> = ({ medication, disabled, onUpdate, onRemove }) => {
-  const dosageInstruction = medication.dosage_instruction[0];
+  const dosageInstruction =
+    medication.dosage_instruction.length > 0
+      ? medication.dosage_instruction[0]
+      : undefined;
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => {
@@ -186,6 +188,8 @@ const MedicationRequestGridRow: React.FC<{
     });
   };
 
+  const as_needed_boolean = dosageInstruction?.as_needed_boolean;
+  const isFrequencySet = dosageInstruction?.timing?.repeat?.frequency;
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name and Controls */}
@@ -215,9 +219,7 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <QuantityInput
             units={DOSAGE_UNITS}
-            quantity={
-              medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
-            }
+            quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
             onChange={(value) =>
               handleUpdateDosageInstruction({
                 dose_and_rate: { type: "ordered", dose_quantity: value },
@@ -235,7 +237,7 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <Select
             value={
-              medication.dosage_instruction[0]?.as_needed_boolean
+              dosageInstruction?.as_needed_boolean
                 ? "PRN"
                 : reverseFrequencyOption(dosageInstruction?.timing)
             }
@@ -281,36 +283,29 @@ const MedicationRequestGridRow: React.FC<{
             {t("duration")}
           </Label>
           <QuantityInput
-            units={
-              Object.keys(
-                BOUNDS_DURATION_UNITS,
-              ) as Array<MedicationRequestBoundsDurationUnit>
-            }
+            units={BOUNDS_DURATION_UNITS}
             quantity={{
-              value:
-                medication.dosage_instruction[0]?.timing?.repeat
-                  ?.bounds_duration?.value,
+              value: dosageInstruction?.timing?.repeat?.bounds_duration?.value,
               unit:
-                medication.dosage_instruction[0]?.timing?.repeat
-                  ?.bounds_duration?.unit ?? "d",
+                dosageInstruction?.timing?.repeat?.bounds_duration?.unit ?? "d",
             }}
             onChange={(value) => {
-              handleUpdateDosageInstruction({
-                timing: {
-                  ...dosageInstruction?.timing,
-                  repeat: {
-                    ...dosageInstruction?.timing?.repeat,
-                    bounds_duration: {
-                      value: value?.value,
-                      unit: value?.unit as MedicationRequestBoundsDurationUnit,
+              if (dosageInstruction?.timing?.repeat) {
+                handleUpdateDosageInstruction({
+                  timing: {
+                    ...dosageInstruction.timing,
+                    repeat: {
+                      ...dosageInstruction.timing.repeat,
+                      bounds_duration: {
+                        value: value?.value,
+                        unit: value?.unit as (typeof BOUNDS_DURATION_UNITS)[number],
+                      },
                     },
                   },
-                },
-              });
+                });
+              }
             }}
-            disabled={
-              disabled || medication.dosage_instruction[0]?.as_needed_boolean
-            }
+            disabled={disabled || !isFrequencySet || as_needed_boolean}
           />
         </div>
 
@@ -321,14 +316,12 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <ValueSetSelect
             system="system-as-needed-reason"
-            value={medication.dosage_instruction[0]?.as_needed_for}
+            value={dosageInstruction?.as_needed_for}
             onSelect={(reason) =>
               handleUpdateDosageInstruction({ as_needed_for: reason })
             }
             placeholder={t("select_prn_reason")}
-            disabled={
-              disabled || !medication.dosage_instruction[0]?.as_needed_boolean
-            }
+            disabled={disabled || !dosageInstruction?.as_needed_boolean}
             wrapTextForSmallScreen={true}
           />
         </div>
@@ -340,9 +333,7 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <ValueSetSelect
             system="system-additional-instruction"
-            value={
-              medication.dosage_instruction[0]?.additional_instruction?.[0]
-            }
+            value={dosageInstruction?.additional_instruction?.[0]}
             onSelect={(instruction) =>
               handleUpdateDosageInstruction({
                 additional_instruction: [instruction],
@@ -358,7 +349,7 @@ const MedicationRequestGridRow: React.FC<{
           <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
           <ValueSetSelect
             system="system-route"
-            value={medication.dosage_instruction[0]?.route}
+            value={dosageInstruction?.route}
             onSelect={(route) => handleUpdateDosageInstruction({ route })}
             placeholder={t("select_route")}
             disabled={disabled}
@@ -370,7 +361,7 @@ const MedicationRequestGridRow: React.FC<{
           <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
           <ValueSetSelect
             system="system-body-site"
-            value={medication.dosage_instruction[0]?.site}
+            value={dosageInstruction?.site}
             onSelect={(site) => handleUpdateDosageInstruction({ site })}
             placeholder={t("select_site")}
             disabled={disabled}
@@ -385,7 +376,7 @@ const MedicationRequestGridRow: React.FC<{
           </Label>
           <ValueSetSelect
             system="system-administration-method"
-            value={medication.dosage_instruction[0]?.method}
+            value={dosageInstruction?.method}
             onSelect={(method) => handleUpdateDosageInstruction({ method })}
             placeholder={t("select_method")}
             disabled={disabled}
