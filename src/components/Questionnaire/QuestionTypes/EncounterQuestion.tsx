@@ -157,9 +157,9 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(ENCOUNTER_STATUS).map(([key, value]) => (
-                <SelectItem key={key} value={value}>
-                  {t(key)}
+              {ENCOUNTER_STATUS.map((encounterStatus) => (
+                <SelectItem key={encounterStatus} value={encounterStatus}>
+                  {t(`encounter_status__${encounterStatus}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -181,9 +181,9 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_class")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(ENCOUNTER_CLASS).map(([key, value]) => (
-                <SelectItem key={key} value={value}>
-                  {t(key)}
+              {ENCOUNTER_CLASS.map((encounterClass) => (
+                <SelectItem key={encounterClass} value={encounterClass}>
+                  {t(`encounter_class__${encounterClass}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -205,9 +205,9 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_priority")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(ENCOUNTER_PRIORITY).map(([key, value]) => (
-                <SelectItem key={key} value={value}>
-                  {t(key)}
+              {ENCOUNTER_PRIORITY.map((priority) => (
+                <SelectItem key={priority} value={priority}>
+                  {t(`encounter_priority__${priority}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -284,13 +284,11 @@ export function EncounterQuestion({
                   <SelectValue placeholder={t("select_admit_source")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(ENCOUNTER_ADMIT_SOURCE).map(
-                    ([key, value]) => (
-                      <SelectItem key={key} value={value}>
-                        {t(key)}
-                      </SelectItem>
-                    ),
-                  )}
+                  {ENCOUNTER_ADMIT_SOURCE.map((admitSource) => (
+                    <SelectItem key={admitSource} value={admitSource}>
+                      {t(`encounter_admit_sources__${admitSource}`)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -324,10 +322,15 @@ export function EncounterQuestion({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(ENCOUNTER_DISCHARGE_DISPOSITION).map(
-                      ([key, value]) => (
-                        <SelectItem key={key} value={value}>
-                          {t(key)}
+                    {ENCOUNTER_DISCHARGE_DISPOSITION.map(
+                      (dischargeDisposition) => (
+                        <SelectItem
+                          key={dischargeDisposition}
+                          value={dischargeDisposition}
+                        >
+                          {t(
+                            `encounter_discharge_disposition__${dischargeDisposition}`,
+                          )}
                         </SelectItem>
                       ),
                     )}
@@ -361,13 +364,11 @@ export function EncounterQuestion({
                   <SelectValue placeholder={t("select_diet_preference")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(ENCOUNTER_DIET_PREFERENCE).map(
-                    ([key, value]) => (
-                      <SelectItem key={key} value={value}>
-                        {t(key)}
-                      </SelectItem>
-                    ),
-                  )}
+                  {ENCOUNTER_DIET_PREFERENCE.map((dietPreference) => (
+                    <SelectItem key={dietPreference} value={dietPreference}>
+                      {t(`encounter_diet_preference__${dietPreference}`)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
