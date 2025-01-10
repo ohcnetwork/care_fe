@@ -1,41 +1,44 @@
-name: Auto label failed preview deploys
-
+name: Auto label deploy preview status
 permissions:
   pull-requests: write
+  issues: write
 
 on:
   issue_comment:
-    types:
-      - created
-      - edited
+    types: [created, edited]
 
 jobs:
   auto-label-deploy-failed:
     runs-on: ubuntu-24.04-arm
     if: |
-      github.repository == 'ohcnetwork/care_fe' && github.event.issue.pull_request &&
+      github.repository == 'ohcnetwork/care_fe' &&
+      github.event.issue.pull_request &&
       contains(github.event.comment.body, 'Deploy Preview')
-    steps:
-      - name: Add 'Deploy-Failed'
-        if: contains(github.event.comment.body, 'failed')
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["Deploy-Failed"]
-            })
 
-      - name: Remove 'Deploy-Failed' label
-        if: contains(github.event.comment.body, 'ready')
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Check deploy status
+        id: check-status
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["Deploy-Failed"]
-            })
+            const comment = context.payload.comment.body;
+            return {
+              isDeployFailed: /deploy preview.*failed|failed to deploy/i.test(comment),
+              isDeploySuccessful: /deploy preview.*ready|successfully deployed/i.test(comment),
+            };
+
+      - name: Add Deploy-Failed label if needed
+        if: steps.check-status.outputs.isDeployFailed == 'true'
+        uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Remove Deploy-Failed label if deploy is successful
+        if: steps.check-status.outputs.isDeploySuccessful == 'true'
+        run: |
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels/Deploy-Failed
