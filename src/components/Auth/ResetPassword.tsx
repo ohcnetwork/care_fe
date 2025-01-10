@@ -1,6 +1,7 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +11,6 @@ import { validateRule } from "@/components/Users/UserFormValidations";
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
@@ -82,9 +82,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
       });
       if (res?.ok) {
         localStorage.removeItem(LocalStorageKeys.accessToken);
-        Notification.Success({
-          msg: t("password_reset_success"),
-        });
+        toast.success(t("password_reset_success"));
         navigate("/login");
       } else if (res && error) {
         setErrors(error);

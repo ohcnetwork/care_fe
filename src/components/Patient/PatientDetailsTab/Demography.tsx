@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -11,7 +12,6 @@ import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import { formatPatientAge } from "@/Utils/utils";
 import {
   Organization,
@@ -94,9 +94,7 @@ export const Demography = (props: PatientProps) => {
 
   const withPermissionCheck = (action: () => void) => () => {
     if (!hasEditPermission()) {
-      Notification.Error({
-        msg: t("permission_denied"),
-      });
+      toast.error(t("permission_denied"));
       return;
     }
     action();

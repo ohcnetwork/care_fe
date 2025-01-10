@@ -8,6 +8,7 @@ import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { AppRoutes } from "./Routers/AppRouter";
 import { FormContextValue } from "./components/Form/FormContext";
 import { PatientMeta } from "./components/Patient/models";
+import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
 import { PatientModel } from "./types/emr/patient";
 
@@ -18,7 +19,10 @@ export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
 
-export type ScribeComponentType = React.FC;
+export type ScribeComponentType = React.FC<{
+  formState: QuestionnaireFormState[];
+  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
+}>;
 export type ManageFacilityOptionsComponentType = React.FC<{
   facility?: FacilityModel;
 }>;

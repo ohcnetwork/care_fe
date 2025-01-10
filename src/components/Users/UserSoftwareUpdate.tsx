@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
 import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
-
-import * as Notification from "@/Utils/Notifications";
 
 export default function UserSoftwareUpdate() {
   const [updateStatus, setUpdateStatus] = useState({
@@ -29,9 +28,7 @@ export default function UserSoftwareUpdate() {
         isUpdateAvailable: false,
         isChecking: false,
       });
-      Notification.Success({
-        msg: "No update available",
-      });
+      toast.success(t("no_update_available"));
     }
   };
 

@@ -24,24 +24,24 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
-import {
-  groupSlotsByAvailability,
-  useAvailabilityHeatmap,
-} from "@/components/Schedule/Appointments/utils";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/pages/Appointments/utils";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
   facilityId: string;
   patientId: string;
 }
 
-export default function AppointmentCreatePage(props: Props) {
+export default function BookAppointment(props: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
@@ -54,7 +54,7 @@ export default function AppointmentCreatePage(props: Props) {
 
   const resourcesQuery = useQuery({
     queryKey: ["availableResources", props.facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
+    queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: {
         facility_id: props.facilityId,
       },
@@ -75,7 +75,7 @@ export default function AppointmentCreatePage(props: Props) {
       resourceId,
       dateQueryString(selectedDate),
     ],
-    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
+    queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: props.facilityId },
       body: {
         user: resourceId,
@@ -86,7 +86,7 @@ export default function AppointmentCreatePage(props: Props) {
   });
 
   const { mutateAsync: createAppointment } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.slots.createAppointment, {
+    mutationFn: mutate(scheduleApis.slots.createAppointment, {
       pathParams: {
         facility_id: props.facilityId,
         slot_id: selectedSlotId ?? "",
