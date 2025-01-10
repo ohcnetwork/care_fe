@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Input } from "./input";
+import { Input } from "@/components/ui/input";
 
 const PasswordInput = React.forwardRef<
   HTMLInputElement,
