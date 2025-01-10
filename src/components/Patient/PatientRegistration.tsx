@@ -36,6 +36,7 @@ import countryList from "@/common/static/countries.json";
 import { validatePincode } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -302,6 +303,51 @@ export default function PatientRegistration(
     return <Loading />;
   }
 
+  const MIN_YEAR = 1900;
+  const MAX_YEAR = new Date().getFullYear();
+
+  const handleDateOfBirth = (
+    part: "day" | "month" | "year",
+    value: string,
+    min: number,
+    max: number,
+    maxLength: number,
+  ) => {
+    const trimmedValue = value.slice(0, maxLength);
+
+    setForm((prevState) => {
+      const [currentYear, currentMonth, currentDay] =
+        prevState.date_of_birth?.split("-") || ["", "", ""];
+      const updatedDateParts = {
+        day: part === "day" ? trimmedValue : currentDay,
+        month: part === "month" ? trimmedValue : currentMonth,
+        year: part === "year" ? trimmedValue : currentYear,
+      };
+
+      const { day, month, year } = updatedDateParts;
+      let errorMessage = "";
+
+      if (day && month && year && year.length === 4) {
+        const dateString = `${year}-${month}-${day}`;
+        const selectedDate = dayjs(dateString, "YYYY-MM-DD", true);
+        if (!selectedDate.isValid()) {
+          errorMessage = t("INVALID_DATE");
+        } else if (selectedDate.isAfter(dayjs())) {
+          errorMessage = t("DATE_NOT_ALLOWED");
+        }
+      }
+      setFeErrors((errors) => ({
+        ...errors,
+        date_of_birth: errorMessage ? [errorMessage] : [],
+      }));
+
+      return {
+        ...prevState,
+        date_of_birth: `${year}-${month}-${day}`,
+      };
+    });
+  };
+
   return (
     <Page title={title}>
       <hr className="mt-4" />
@@ -486,66 +532,53 @@ export default function PatientRegistration(
               </TabsList>
               <TabsContent value="dob">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("day")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="DD"
-                      type="number"
-                      value={form.date_of_birth?.split("-")[2] || ""}
-                      maxLength={2}
-                      max={31}
-                      min={1}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("month")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="MM"
-                      type="number"
-                      value={form.date_of_birth?.split("-")[1] || ""}
-                      maxLength={2}
-                      max={12}
-                      min={1}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="mb-2">
-                      {t("year")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="YYYY"
-                      value={form.date_of_birth?.split("-")[0] || ""}
-                      maxLength={4}
-                      max={new Date().getFullYear()}
-                      min={1900}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
-                        }))
-                      }
-                    />
-                  </div>
+                  {["day", "month", "year"].map((part) => {
+                    const key = part as "day" | "month" | "year";
+                    const placeholders = {
+                      day: "DD",
+                      month: "MM",
+                      year: "YYYY",
+                    };
+                    const maxLengths = { day: 2, month: 2, year: 4 };
+                    const limits = {
+                      day: { min: 1, max: 31 },
+                      month: { min: 1, max: 12 },
+                      year: { min: MIN_YEAR, max: MAX_YEAR },
+                    };
+                    return (
+                      <div className="flex-1" key={key}>
+                        <Label className="mb-2">
+                          {t(key)}
+                          <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          placeholder={placeholders[key]}
+                          type="text"
+                          value={
+                            form.date_of_birth?.split("-")[
+                              ["year", "month", "day"].indexOf(key)
+                            ] || ""
+                          }
+                          maxLength={maxLengths[key]}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (
+                              value.length <= maxLengths[key] &&
+                              Number(value) <= limits[key].max
+                            ) {
+                              handleDateOfBirth(
+                                key,
+                                value,
+                                limits[key].min,
+                                limits[key].max,
+                                maxLengths[key],
+                              );
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
                 {errors["date_of_birth"] && (
                   <div className="mt-1" data-input-error>
@@ -554,6 +587,9 @@ export default function PatientRegistration(
                         {error}
                       </div>
                     ))}
+                    <p className="mt-2 text-xs text-warning-500">
+                      {t("DATE_FORMAT")}
+                    </p>
                   </div>
                 )}
               </TabsContent>
