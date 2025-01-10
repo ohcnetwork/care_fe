@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -34,14 +34,9 @@ import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
-
-interface PatientListResponse {
-  results: PartialPatientModel[];
-  count: number;
-}
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -49,10 +44,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [selectedPatient, setSelectedPatient] =
     useState<PartialPatientModel | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
-  const [patientList, setPatientList] = useState<PatientListResponse>({
-    results: [],
-    count: 0,
-  });
   const { t } = useTranslation();
 
   const handleCreatePatient = useCallback(() => {
@@ -104,19 +95,14 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     }
   }, []);
 
-  const { mutate: listPatients, isPending } = useMutation({
-    mutationFn: () =>
-      mutate(routes.searchPatient, {
-        body: {
-          phone_number: parsePhoneNumber(phoneNumber) || "",
-        },
-      })({ phone_number: parsePhoneNumber(phoneNumber) || "" }),
-    onSuccess: (data) => {
-      setPatientList({
-        results: data.results,
-        count: data.count,
-      });
-    },
+  const { data: patientList, isFetching } = useQuery({
+    queryKey: ["patient-search", facilityId, phoneNumber],
+    queryFn: query.debounced(routes.searchPatient, {
+      body: {
+        phone_number: parsePhoneNumber(phoneNumber) || "",
+      },
+    }),
+    enabled: !!phoneNumber,
   });
 
   const handlePatientSelect = (patient: PartialPatientModel) => {
@@ -139,12 +125,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       },
     });
   };
-
-  useEffect(() => {
-    if (phoneNumber) {
-      listPatients();
-    }
-  }, [phoneNumber, listPatients]);
 
   return (
     <div>
@@ -174,7 +154,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               <div className="min-h-[200px]" id="patient-search-results">
                 {!!phoneNumber && (
                   <>
-                    {isPending ? (
+                    {isFetching || !patientList ? (
                       <div className="flex items-center justify-center h-[200px]">
                         <Loading />
                       </div>
