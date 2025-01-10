@@ -36,6 +36,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import {
   BOUNDS_DURATION_UNITS,
+  BoundsDuration,
   DOSAGE_UNITS,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
@@ -336,6 +337,8 @@ const MedicationRequestGridRow: React.FC<{
     });
   };
 
+  const [boundsDurationUnit, setBoundsDurationUnit] = useState<string>("d");
+
   const as_needed_boolean = dosageInstruction?.as_needed_boolean;
   const isFrequencySet = dosageInstruction?.timing?.repeat?.frequency;
   return (
@@ -427,19 +430,33 @@ const MedicationRequestGridRow: React.FC<{
             quantity={{
               value: dosageInstruction?.timing?.repeat?.bounds_duration?.value,
               unit:
-                dosageInstruction?.timing?.repeat?.bounds_duration?.unit ?? "d",
+                dosageInstruction?.timing?.repeat?.bounds_duration?.unit ??
+                boundsDurationUnit,
             }}
             onChange={(value) => {
+              if (value?.unit) {
+                setBoundsDurationUnit(
+                  value?.unit as (typeof BOUNDS_DURATION_UNITS)[number],
+                );
+              }
               if (dosageInstruction?.timing?.repeat) {
+                let updatedBoundsDuration: BoundsDuration | undefined =
+                  undefined;
+                const updatedValue = value.value;
+                if (updatedValue === undefined || updatedValue === 0) {
+                  updatedBoundsDuration = undefined;
+                } else {
+                  updatedBoundsDuration = {
+                    value: updatedValue,
+                    unit: value?.unit as (typeof BOUNDS_DURATION_UNITS)[number],
+                  };
+                }
                 handleUpdateDosageInstruction({
                   timing: {
                     ...dosageInstruction.timing,
                     repeat: {
                       ...dosageInstruction.timing.repeat,
-                      bounds_duration: {
-                        value: value?.value,
-                        unit: value?.unit as (typeof BOUNDS_DURATION_UNITS)[number],
-                      },
+                      bounds_duration: updatedBoundsDuration,
                     },
                   },
                 });

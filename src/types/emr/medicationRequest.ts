@@ -79,7 +79,7 @@ export interface DosageQuantity {
 }
 
 export interface BoundsDuration {
-  value?: number;
+  value: number;
   unit: (typeof BOUNDS_DURATION_UNITS)[number];
 }
 
