@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import RecordMeta from "@/CAREUI/display/RecordMeta";
@@ -31,6 +31,19 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 14, cacheBlacklist: ["patient"] });
   const [organization, setOrganization] = useState<Organization | null>(null);
+
+  const handleSearch = useCallback((key: string, value: string) => {
+    const searchParams = {
+      name: key === "name" ? value : "",
+      phone_number:
+        key === "phone_number"
+          ? value.length >= 13 || value === ""
+            ? value
+            : undefined
+          : undefined,
+    };
+    updateQuery(searchParams);
+  }, []);
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
@@ -80,18 +93,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               shortcutKey: "p",
             },
           ]}
-          onSearch={(key, value) => {
-            const searchParams = {
-              name: key === "name" ? value : "",
-              phone_number:
-                key === "phone_number"
-                  ? value.length >= 13 || value === ""
-                    ? value
-                    : undefined
-                  : undefined,
-            };
-            updateQuery(searchParams);
-          }}
+          onSearch={handleSearch}
           clearSearch={{ value: !qParams.name && !qParams.phone_number }}
           onFieldChange={(option) => {
             const clearParams = {
