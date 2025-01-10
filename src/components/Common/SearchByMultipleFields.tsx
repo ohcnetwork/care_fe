@@ -77,7 +77,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
   useEffect(() => {
     if (!(selectedOption?.type === "phone" && searchValue.length < 13)) {
-      setSearchValue(options[selectedOptionIndex]?.value || "");
+      setSearchValue(options[selectedOptionIndex]?.value ?? "");
     }
   }, [options]);
 
@@ -100,7 +100,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       setOpen(false);
       inputRef.current?.focus();
       setError(false);
-      onSearch(option?.key || "", option?.value || "");
+      onSearch(option?.key ?? "", option?.value ?? "");
       if (option) {
         onFieldChange?.(option);
       }
@@ -160,7 +160,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
   useEffect(() => {
     if (selectedOption?.value !== searchValue) {
-      onSearch(selectedOption?.key || "", searchValue);
+      onSearch(selectedOption?.key ?? "", searchValue);
     }
   }, [searchValue, selectedOption?.key, selectedOption?.value, onSearch]);
 

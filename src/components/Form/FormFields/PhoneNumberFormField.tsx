@@ -192,7 +192,7 @@ const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
   );
 };
 const conditionPhoneCode = (code: string) => {
-  code = (code || "").split(" ")[0] || "";
+  code = code.split(" ")[0] ?? "";
   return code.startsWith("+") ? code : "+" + code;
 };
 

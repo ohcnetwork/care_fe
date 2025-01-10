@@ -299,7 +299,7 @@ const diagonalStripes = {
 export const formatAvailabilityTime = (
   availability: ScheduleAvailability["availability"],
 ) => {
-  const startTime = availability[0]?.start_time || "00:00";
-  const endTime = availability[0]?.end_time || "23:59";
+  const startTime = availability[0]?.start_time ?? "00:00";
+  const endTime = availability[0]?.end_time ?? "23:59";
   return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
 };

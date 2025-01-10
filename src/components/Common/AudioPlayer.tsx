@@ -93,8 +93,6 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
     if (audioRef.current) {
       if (value[0] !== undefined) {
         audioRef.current.currentTime = value[0];
-      }
-      if (value[0] !== undefined) {
         setCurrentTime(value[0]);
       }
     }

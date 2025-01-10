@@ -92,13 +92,13 @@ const parseDataWithSchema = (
   const dataWithErrors: DataWithError[] = data.map((item, index) => {
     return Object.keys(schema).reduce((acc, key) => {
       const { value, error } =
-        validateAndParse(key, item[key], schema[key] as SingleKeySchema)[key] ||
+        validateAndParse(key, item[key], schema[key] as SingleKeySchema)[key] ??
         {};
-      const parsedRow = { [schema[key]?.prop || key]: value };
+      const parsedRow = { [schema[key]?.prop ?? key]: value };
       if (error) {
         errors.push({ index, key, error });
       }
-      const prop = schema[key]?.prop || key;
+      const prop = schema[key]?.prop ?? key;
 
       if (schema[key]?.parent) {
         const indexKey = schema[key].parent || key;

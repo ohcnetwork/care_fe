@@ -62,7 +62,10 @@ export default function DateTextInput(props: {
   const getBlurredValue = (rawValue: string, key: string) => {
     const maxMap = [31, 12, 2999, 23, 59];
     const index = Object.keys(editingText).findIndex((et) => et === key);
-    const value = Math.min(maxMap[index] ?? 0, parseInt(rawValue));
+    const value =
+      index !== -1 && maxMap[index] != null
+        ? Math.min(maxMap[index], parseInt(rawValue))
+        : parseInt(rawValue);
     const finalValue =
       rawValue.trim() !== ""
         ? ("000" + value).slice(key === "year" ? -4 : -2)

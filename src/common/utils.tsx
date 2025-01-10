@@ -36,15 +36,17 @@ export const useAbortableEffect = (
 export const parseOptionId: (
   options: readonly OptionsType[],
   id: string | string[],
-) => string | undefined = (options, id) => {
-  return humanizeStrings(
-    options
-      .filter((option) => {
-        return id instanceof Array
-          ? id.map((i) => String(i)).includes(String(option.id))
-          : String(option.id) === String(id);
-      })
-      .map((option) => option.text),
+) => string = (options, id) => {
+  return (
+    humanizeStrings(
+      options
+        .filter((option) => {
+          return id instanceof Array
+            ? id.map((i) => String(i)).includes(String(option.id))
+            : String(option.id) === String(id);
+        })
+        .map((option) => option.text),
+    ) ?? ""
   );
 };
 

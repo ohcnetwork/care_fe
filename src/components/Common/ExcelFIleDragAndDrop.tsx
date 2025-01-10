@@ -63,13 +63,10 @@ export default function ExcelFileDragAndDrop({
           cellDates: true,
         });
         const worksheetName = workbook.SheetNames[0];
-        const worksheet = worksheetName
-          ? workbook.Sheets[worksheetName]
-          : undefined;
-        if (!worksheet) {
-          throw new Error("Worksheet not found");
-        }
-        const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        const worksheet = worksheetName && workbook.Sheets[worksheetName];
+        const data = worksheet
+          ? XLSX.utils.sheet_to_json(worksheet, { defval: "" })
+          : [];
         //converts the date to string
         data.forEach((row: any) => {
           Object.keys(row).forEach((key) => {
@@ -124,7 +121,7 @@ export default function ExcelFileDragAndDrop({
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
 
-    if (!fileTypes.includes(droppedFile?.type || "")) {
+    if (!fileTypes.includes(droppedFile?.type ?? "")) {
       dragProps.setFileDropError("Please drop a Excel / CSV file to upload!");
       setSelectedFile(null);
       return;

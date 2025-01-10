@@ -181,9 +181,7 @@ export const RestoreDraftButton = () => {
       className="flex items-center space-x-2"
       onClick={() =>
         handleDraftSelect(
-          (draftStarted
-            ? drafts[0]?.draft
-            : drafts[drafts.length - 1]?.draft) || {},
+          (draftStarted ? drafts[0] : drafts[drafts.length - 1])?.draft,
         )
       }
     >

@@ -30,7 +30,7 @@ const stringToInt = (name: string): number => {
 
 const toColor = (name: string): [string, string] => {
   const index = stringToInt(name) % colors.length;
-  const backgroundColor = colors[index] || "#FFFFFF"; // Default to white if undefined
+  const backgroundColor = colors[index] ?? "#FFFFFF";
   return [backgroundColor, "#333333"]; // Using dark gray for text
 };
 

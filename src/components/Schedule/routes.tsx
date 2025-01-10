@@ -27,8 +27,8 @@ const ScheduleRoutes: AppRoutes = {
     patientId,
   }) => (
     <AppointmentCreatePage
-      facilityId={facilityId || ""}
-      patientId={patientId || ""}
+      facilityId={facilityId ?? ""}
+      patientId={patientId ?? ""}
     />
   ),
 
