@@ -4,7 +4,7 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import {
   ReactNode,
@@ -33,12 +33,10 @@ import useFilters from "@/hooks/useFilters";
 import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import { callApi } from "@/Utils/request/query";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { QueryRoute } from "@/Utils/request/types";
-import useTanStackQueryInstead, {
-  QueryOptions,
-} from "@/Utils/request/useQuery";
+import { QueryOptions } from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
@@ -79,16 +77,16 @@ const ResourcePage = () => {
   const appliedFilters = formatFilter(qParams);
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
   const { exportFile } = useExport();
-  const { loading, data, refetch } = useTanStackQueryInstead(
-    routes.listResourceRequests,
-    {
-      query: formatFilter({
+  const { isLoading, data, refetch } = useQuery({
+    queryKey: ["title"],
+    queryFn: query(routes.listResourceRequests, {
+      queryParams: formatFilter({
         ...qParams,
         limit: resultsPerPage,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
       }),
-    },
-  );
+    }),
+  });
 
   const exportAction = async () => {
     const { data } = await request(routes.downloadResourceRequests, {
@@ -227,7 +225,7 @@ const ResourcePage = () => {
         </>
       ) : (
         <div className="w-full">
-          {loading ? (
+          {isLoading ? (
             <Loading />
           ) : (
             <div className="w-full flex flex-col">
@@ -345,14 +343,13 @@ function ResourceCard<T extends { id: string }>(
   const options = section.fetchOptions(section.id);
   const fetchPage = async ({ pageParam = 0 }) => {
     try {
-      const data = await callApi(options.route, {
-        ...options.options,
+      const data = await query(options.route, {
         queryParams: {
           ...options.options?.query,
           offset: pageParam,
           limit: defaultLimit,
         },
-      });
+      })({ signal: new AbortController().signal });
       return data as QueryResponse<T>;
     } catch (error) {
       return { results: [], next: null, count: 0 };
