@@ -103,6 +103,9 @@ export default function PatientRegistration(
     "ration_card_category",
   ];
 
+  const MIN_YEAR = 1900;
+  const MAX_YEAR = new Date().getFullYear();
+
   const mutationData: Partial<PatientModel> = {
     ...Object.fromEntries(
       Object.entries(form).filter(([key]) =>
@@ -292,9 +295,6 @@ export default function PatientRegistration(
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
   }
-
-  const MIN_YEAR = 1900;
-  const MAX_YEAR = new Date().getFullYear();
 
   const handleDateOfBirth = (
     part: "day" | "month" | "year",
