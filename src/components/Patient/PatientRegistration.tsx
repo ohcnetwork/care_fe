@@ -467,11 +467,15 @@ export default function PatientRegistration(
               }
             >
               <TabsList className="mb-4">
-                {[
-                  ["dob", t("date_of_birth")],
-                  ["age", t("age")],
-                ].map(([key, label]) => (
-                  <TabsTrigger value={key as string}>{label}</TabsTrigger>
+                {(
+                  [
+                    ["dob", t("date_of_birth")],
+                    ["age", t("age")],
+                  ] as const
+                ).map(([key, label]) => (
+                  <TabsTrigger key={key} value={key}>
+                    {label}
+                  </TabsTrigger>
                 ))}
               </TabsList>
               <TabsContent value="dob">

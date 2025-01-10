@@ -125,13 +125,14 @@ const ScheduleTemplateItem = ({
                         <>
                           <span className="px-2 text-gray-300">|</span>
                           <span className="text-sm">
-                            {Math.floor(
-                              getSlotsPerSession(
-                                slot.availability[0]?.start_time ?? "00:00",
-                                slot.availability[0]?.end_time ?? "23:59",
-                                slot.slot_size_in_minutes,
-                              ) ?? 0,
-                            )}{" "}
+                            {slot.availability[0] &&
+                              Math.floor(
+                                getSlotsPerSession(
+                                  slot.availability[0].start_time,
+                                  slot.availability[0].end_time,
+                                  slot.slot_size_in_minutes,
+                                ) ?? 0,
+                              )}{" "}
                             slots of {slot.slot_size_in_minutes} mins.
                           </span>
                         </>

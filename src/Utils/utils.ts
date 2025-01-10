@@ -285,12 +285,11 @@ export const formatPhoneNumber = (phoneNumber: string) => {
     const countryCode = getCountryCode(phoneNumber);
     if (!countryCode) return phoneNumber;
     const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-    return (
-      "+" +
-      (phoneCodes[countryCode]?.code ?? "") +
-      " " +
-      phoneNumber.slice((phoneCodes[countryCode]?.code.length ?? 0) + 1)
-    );
+    const countryData = phoneCodes[countryCode];
+
+    if (!countryData) return phoneNumber;
+
+    return `+${countryData.code} ${phoneNumber.slice(countryData.code.length + 1)}`;
   }
   return phoneNumber;
 };
@@ -302,18 +301,18 @@ export const getCountryCode = (phoneNumber: string) => {
     phoneNumber = phoneNumber.slice(1);
     const allMatchedCountries: { name: string; code: string }[] = [];
     for (let i = 0; i < phoneCodesArr.length; i++) {
-      if (
-        phoneNumber.startsWith(
-          phoneCodesArr[i] && phoneCodes[phoneCodesArr[i] as string]?.code
-            ? phoneCodes[phoneCodesArr[i] as string]!.code.replaceAll("-", "")
-            : "",
-        )
-      ) {
+      const countryCode = phoneCodesArr[i];
+      if (!countryCode) continue;
+
+      const countryData = phoneCodes[countryCode];
+      if (!countryData || !countryData.code) continue;
+
+      const formattedCode = countryData.code.replaceAll("-", "");
+
+      if (phoneNumber.startsWith(formattedCode)) {
         allMatchedCountries.push({
-          name: phoneCodesArr[i] ?? "",
-          code:
-            phoneCodes[phoneCodesArr[i] as string]?.code.replaceAll("-", "") ??
-            "",
+          name: countryCode,
+          code: formattedCode,
         });
       }
     }

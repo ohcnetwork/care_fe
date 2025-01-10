@@ -51,12 +51,12 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   );
 
   // sort availability by first slot start time
-  result.sort((a, b) =>
-    compareAsc(
-      a.slots[0]?.start_datetime ?? "00:00",
-      b.slots[0]?.start_datetime ?? "00:00",
-    ),
-  );
+  result.sort((a, b) => {
+    if (a.slots[0]?.start_datetime && b.slots[0]?.start_datetime) {
+      return compareAsc(a.slots[0].start_datetime, b.slots[0].start_datetime);
+    }
+    return 0;
+  });
 
   return result;
 };

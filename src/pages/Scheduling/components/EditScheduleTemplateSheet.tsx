@@ -330,13 +330,15 @@ const AvailabilityEditor = ({
     if (availability.slot_type !== "appointment")
       return { totalSlots: null, tokenDuration: null };
 
-    const slots = Math.floor(
-      getSlotsPerSession(
-        availability.availability[0]?.start_time ?? "00:00",
-        availability.availability[0]?.end_time ?? "23:59",
-        availability.slot_size_in_minutes,
-      ) ?? 0,
-    );
+    const slots =
+      availability.availability[0] &&
+      Math.floor(
+        getSlotsPerSession(
+          availability.availability[0].start_time,
+          availability.availability[0].end_time,
+          availability.slot_size_in_minutes,
+        ) ?? 0,
+      );
 
     const duration = getTokenDuration(
       availability.slot_size_in_minutes,
@@ -432,19 +434,24 @@ const AvailabilityEditor = ({
             {t("schedule")}
           </span>
           <div className="mt-2 space-y-1 pl-2">
-            {Object.entries(availabilitiesByDay).map(([day, times]) => (
-              <p key={day} className="flex items-center gap-2 text-sm">
-                <span className="font-medium w-24 text-gray-600">
-                  {(DayOfWeek[parseInt(day)] || "").charAt(0) +
-                    DayOfWeek[parseInt(day)]?.slice(1).toLowerCase()}
-                </span>
-                <span className="text-gray-500">
-                  {times
-                    .map((time) => formatAvailabilityTime([time]))
-                    .join(", ")}
-                </span>
-              </p>
-            ))}
+            {Object.entries(availabilitiesByDay).map(([day, times]) => {
+              const dayofWeek = DayOfWeek[parseInt(day)];
+              if (!dayofWeek) return;
+              const formattedDay =
+                dayofWeek?.charAt(0) + dayofWeek?.slice(1).toLowerCase();
+              return (
+                <p key={day} className="flex items-center gap-2 text-sm">
+                  <span className="font-medium w-24 text-gray-600">
+                    {formattedDay}
+                  </span>
+                  <span className="text-gray-500">
+                    {times
+                      .map((time) => formatAvailabilityTime([time]))
+                      .join(", ")}
+                  </span>
+                </p>
+              );
+            })}
           </div>
         </div>
       </div>

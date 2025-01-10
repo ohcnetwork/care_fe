@@ -50,10 +50,7 @@ export function AppointmentQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as CreateAppointmentQuestion[]) || [];
 
-  const value: CreateAppointmentQuestion = values[0] ?? {
-    reason_for_visit: "",
-    slot_id: "",
-  };
+  const value: Partial<CreateAppointmentQuestion> = values[0] ?? {};
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const appointment = { ...value, ...updates };

@@ -13,7 +13,7 @@ export default function useAppHistory() {
   const goBack = (fallbackUrl?: string) => {
     if (history.length > 1) {
       // Otherwise, navigate to history present in the app navigation history stack.
-      return navigate(history[1] || fallbackUrl || "/");
+      if (history[1]) return navigate(history[1]);
     }
 
     if (fallbackUrl)

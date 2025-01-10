@@ -151,7 +151,7 @@ export function QuestionnaireForm({
     const updatedForms = [...questionnaireForms];
     const errorMessages: string[] = [];
 
-    results.forEach((result, index) => {
+    results?.forEach((result, index) => {
       const form = updatedForms[index];
 
       result.data.errors.forEach(

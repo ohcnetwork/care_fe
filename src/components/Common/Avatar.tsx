@@ -58,7 +58,7 @@ const Avatar: React.FC<AvatarProps> = ({
   className,
   icon,
 }) => {
-  const [bgColor] = propColors || (name ? toColor(name) : toColor(""));
+  const [bgColor] = propColors || toColor(name || "");
   return (
     <div
       title={name}

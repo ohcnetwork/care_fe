@@ -174,27 +174,19 @@ export const RestoreDraftButton = () => {
     return null;
   }
 
+  const draft = draftStarted ? drafts[0] : drafts[drafts.length - 1];
+
   return (
     <Button
       variant="outline"
       type="button"
       className="flex items-center space-x-2"
-      onClick={() =>
-        handleDraftSelect(
-          (draftStarted ? drafts[0] : drafts[drafts.length - 1])?.draft,
-        )
-      }
+      onClick={() => handleDraftSelect(draft?.draft)}
     >
       <CareIcon icon="l-pen" />
       <span>Restore draft</span>
       <span className="text-sm text-secondary-500">
-        (
-        {relativeTime(
-          draftStarted
-            ? drafts[0]?.timestamp
-            : drafts[drafts.length - 1]?.timestamp,
-        )}
-        )
+        ({relativeTime(draft?.timestamp)})
       </span>
     </Button>
   );

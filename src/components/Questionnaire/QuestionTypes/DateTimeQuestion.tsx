@@ -55,11 +55,13 @@ export function DateTimeQuestion({
   };
 
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const [hours, minutes] = event.target.value.split(":").map((value) => {
-      const number = Number(value);
-      return Number.isNaN(number) ? undefined : number;
-    });
-    if (hours === undefined || minutes === undefined) return;
+    const [hoursStr, minutesStr] = event.target.value.split(":");
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+
+    if (isNaN(hours) || isNaN(minutes)) {
+      return;
+    }
 
     const date = currentValue || new Date();
     date.setHours(hours);

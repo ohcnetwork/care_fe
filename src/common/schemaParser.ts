@@ -98,7 +98,7 @@ const parseDataWithSchema = (
       if (error) {
         errors.push({ index, key, error });
       }
-      const prop = schema[key]?.prop ?? key;
+      const prop = schema[key]?.prop || key;
 
       if (schema[key]?.parent) {
         const indexKey = schema[key].parent || key;
@@ -185,7 +185,7 @@ const schemaParser = (
   const ParsedDataWithOutErrors = parsedData.filter((item, index) => {
     return (
       dataWithErrors[index] &&
-      !Object.values(dataWithErrors[index])?.some((item) => item.error)
+      !Object.values(dataWithErrors[index]).some((item) => item.error)
     );
   });
 

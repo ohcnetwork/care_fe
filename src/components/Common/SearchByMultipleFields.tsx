@@ -95,13 +95,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     (index: number) => {
       setSelectedOptionIndex(index);
       const option = options[index];
-      setSearchValue(option?.value || "");
       setFocusedIndex(options.findIndex((op) => op.key === option?.key));
       setOpen(false);
       inputRef.current?.focus();
       setError(false);
-      onSearch(option?.key ?? "", option?.value ?? "");
       if (option) {
+        setSearchValue(option.value);
+        onSearch(option.key, option.value);
         onFieldChange?.(option);
       }
     },
