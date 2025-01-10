@@ -97,6 +97,18 @@ const ResourcePage = () => {
     return data ?? null;
   };
 
+  const handleViewMode = () => {
+    const newMode = viewMode === "board" ? "list" : "board";
+    setViewMode(newMode);
+    localStorage.setItem("ResourceView", newMode);
+  };
+
+  useEffect(() => {
+    const mode =
+      localStorage.getItem("ResourceView") === "list" ? "list" : "board";
+    setViewMode(mode);
+  }, []);
+
   const { t } = useTranslation();
 
   return (
@@ -106,10 +118,7 @@ const ResourcePage = () => {
       breadcrumbs={false}
       options={
         <div className="flex gap-2">
-          <Tabs
-            value={viewMode}
-            onValueChange={(value) => setViewMode(value as "board" | "list")}
-          >
+          <Tabs value={viewMode} onValueChange={handleViewMode}>
             <TabsList>
               <TabsTrigger value="board">
                 <CareIcon icon="l-kanban" className="mr-2" />
