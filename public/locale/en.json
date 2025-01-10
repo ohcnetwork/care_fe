@@ -1546,6 +1546,8 @@
   "questionnaire": "Questionnaire",
   "questionnaire_error_loading": "Error loading questionnaire",
   "questionnaire_not_exist": "The questionnaire you tried to access does not exist.",
+  "questionnaire_submission_failed": "Failed to submit questionnaire",
+  "questionnaire_submitted_successfully": "Questionnaire submitted successfully",
   "raise_consent_request": "Raise a consent request to fetch patient records over ABDM",
   "ration_card__APL": "APL",
   "ration_card__BPL": "BPL",
