@@ -377,7 +377,7 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div className="flex gap-4 items-center ml-4 max-w-4xl">
+        <div className="flex gap-4 items-center m-4 max-w-4xl">
           <QuestionnaireSearch
             subjectType={subjectType}
             onSelect={(selected) => {
@@ -404,7 +404,7 @@ export function QuestionnaireForm({
 
         {/* Submit and Cancel Buttons */}
         {questionnaireForms.length > 0 && (
-          <div className="flex justify-end gap-4 mt-4 max-w-4xl">
+          <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
             <Button
               type="button"
               variant="outline"

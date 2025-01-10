@@ -1585,6 +1585,8 @@
   "rejected": "Rejected",
   "reload": "Reload",
   "remove": "Remove",
+  "remove_medication": "Remove Medication",
+  "remove_medication_confirmation": "Are you sure you want to remove {{medication}}?",
   "remove_user": "Remove User",
   "remove_user_organization": "Remove User from Organization",
   "remove_user_warn": "Are you sure you want to remove {{firstName}} {{lastName}} from this organization? This action cannot be undone.",
