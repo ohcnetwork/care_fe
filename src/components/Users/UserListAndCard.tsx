@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
+
 import { Avatar } from "@/components/Common/Avatar";
 import Tabs from "@/components/Common/Tabs";
 import SearchInput from "@/components/Form/SearchInput";
@@ -14,12 +16,7 @@ import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import { USER_TYPE_OPTIONS } from "@/common/constants";
 
-import {
-  classNames,
-  formatName,
-  isUserOnline,
-  relativeTime,
-} from "@/Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 export const GetUserTypes = () => {
@@ -65,11 +62,7 @@ const GetDetailsButton = (username: string) => {
     </div>
   );
 };
-const getNameAndStatusCard = (
-  user: UserBase,
-  cur_online: boolean,
-  showDetailsButton = false,
-) => {
+const getNameAndStatusCard = (user: UserBase, showDetailsButton = false) => {
   return (
     <div>
       <div className="flex flex-row justify-between gap-x-3">
@@ -78,14 +71,7 @@ const getNameAndStatusCard = (
             <h1 id={`name-${user.username}`} className="text-base font-bold">
               {formatName(user)}
             </h1>
-            <div
-              className={classNames(
-                "flex items-center gap-2 rounded-full px-3 py-1",
-                cur_online ? "bg-green-100" : "bg-gray-100",
-              )}
-            >
-              <UserStatusIndicator user={user} />
-            </div>
+            <UserStatusIndicator user={user} />
           </div>
           <span
             className="text-sm text-gray-500"
@@ -102,8 +88,8 @@ const getNameAndStatusCard = (
 
 export const UserStatusIndicator = ({
   user,
-  className,
   addPadding = false,
+  className = "",
 }: {
   user: UserBase;
   className?: string;
@@ -111,37 +97,32 @@ export const UserStatusIndicator = ({
 }) => {
   const authUser = useAuthUser();
   const isAuthUser = user.id === authUser.external_id;
-  const isOnline = isUserOnline(user) || isAuthUser;
   const { t } = useTranslation();
 
   return (
-    <div
-      className={classNames(
-        "inline-flex items-center gap-2 rounded-full",
-        addPadding ? "px-3 py-1" : "py-px",
-        isOnline ? "bg-green-100" : "bg-gray-100",
-        className,
-      )}
+    <span
+      title={`${new Date(user.last_login).toLocaleString()}`}
+      className={`${addPadding ? "px-3 py-1" : "py-px"} ${className}`}
     >
-      <span
-        className={classNames(
-          "inline-block h-2 w-2 shrink-0 rounded-full",
-          isOnline ? "bg-green-500" : "bg-gray-400",
-        )}
-      ></span>
-      <span
-        className={classNames(
-          "whitespace-nowrap text-xs",
-          isOnline ? "text-green-700" : "text-gray-500",
-        )}
-      >
-        {isOnline
-          ? t("online")
-          : user.last_login
-            ? relativeTime(user.last_login)
-            : t("never")}
-      </span>
-    </div>
+      {isUserOnline(user) || isAuthUser ? (
+        <Badge variant="secondary" className="bg-green-100 whitespace-nowrap">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-green-500 mr-2" />
+          <span className="text-xs text-green-700">{t("online")}</span>
+        </Badge>
+      ) : user.last_login ? (
+        <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
+          <span className="text-xs text-yellow-700">
+            {relativeTime(user.last_login)}
+          </span>
+        </Badge>
+      ) : (
+        <Badge variant="secondary" className="bg-gray-100 whitespace-nowrap">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
+          <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
+        </Badge>
+      )}
+    </span>
   );
 };
 const UserCard = ({ user }: { user: UserBase }) => {
@@ -173,7 +154,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
             </div>
             <div className="flex flex-col w-full">
               {!isMediumScreen &&
-                getNameAndStatusCard(user, userOnline, !isLessThanXLargeScreen)}
+                getNameAndStatusCard(user, !isLessThanXLargeScreen)}
               <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="text-sm">
                   <div className="text-gray-500">{t("role")}</div>
@@ -312,7 +293,7 @@ export default function UserListView({
               text: (
                 <div className="flex items-center gap-2">
                   <CareIcon icon="l-credit-card" className="text-lg" />
-                  <span>Card</span>
+                  <span>{t("card")}</span>
                 </div>
               ),
               value: 0,
@@ -322,7 +303,7 @@ export default function UserListView({
               text: (
                 <div className="flex items-center gap-2">
                   <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>List</span>
+                  <span>{t("list")}</span>
                 </div>
               ),
               value: 1,
@@ -345,7 +326,7 @@ export default function UserListView({
       ) : (
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-            No Users Found
+            {t("no_users_found")}
           </div>
         </div>
       )}

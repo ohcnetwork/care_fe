@@ -1,4 +1,4 @@
-import { ChevronRight, LogOut, Settings } from "lucide-react";
+import { ChevronRight, ClipboardList, LogOut, Settings } from "lucide-react";
 import { Link } from "raviger";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,19 @@ export default function UserDashboard() {
               Edit Profile
             </Link>
           </Button>
+          {user.username === "admin" && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              asChild
+            >
+              <Link href="/questionnaire" className="gap-2 text-inherit">
+                <ClipboardList className="h-4 w-4" />
+                Questionnaires
+              </Link>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -104,7 +117,10 @@ export default function UserDashboard() {
       {organizations.length > 0 && (
         <section className="space-y-3 md:space-y-4">
           <h2 className="text-lg font-semibold px-1">Your Organizations</h2>
-          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            data-cy="organization-list"
+          >
             {organizations.map((org) => (
               <Link key={org.id} href={`/organization/${org.id}`}>
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
