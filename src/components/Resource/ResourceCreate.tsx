@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,7 +26,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import { phonePreg } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -204,10 +204,7 @@ export default function ResourceCreate(props: resourceProps) {
 
       if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Request created successfully",
-        });
-
+        toast.success(t("resource_created_successfully"));
         navigate(`/resource/${data.id}`);
       }
     }

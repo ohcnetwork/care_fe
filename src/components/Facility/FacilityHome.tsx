@@ -4,6 +4,7 @@ import { Hospital, MapPin, MoreVertical, Settings, Trash2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -122,9 +122,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
       onResponse: ({ res }) => {
         if (res?.ok) {
-          Notification.Success({
-            msg: t("deleted_successfully", { name: facilityData?.name }),
-          });
+          toast.success(
+            t("deleted_successfully", { name: facilityData?.name }),
+          );
         }
         navigate("/facility");
       },
@@ -145,7 +145,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         if (xhr.status === 200) {
           await sleep(1000);
           facilityFetch();
-          Notification.Success({ msg: "Cover image updated." });
+          toast.success(t("cover_image_updated"));
           setEditCoverImage(false);
         } else {
           onError();
@@ -163,7 +163,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     });
     if (res?.ok) {
-      Notification.Success({ msg: "Cover image deleted" });
+      toast.success(t("cover_image_deleted"));
       facilityFetch();
       setEditCoverImage(false);
     } else {

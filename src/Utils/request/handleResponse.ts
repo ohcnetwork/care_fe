@@ -1,4 +1,6 @@
+import { t } from "i18next";
 import { navigate } from "raviger";
+import { toast } from "sonner";
 
 import * as Notifications from "@/Utils/Notifications";
 import { RequestResult } from "@/Utils/request/types";
@@ -15,7 +17,7 @@ export default function handleResponse(
 
   // 404 Not Found
   if (res.status === 404) {
-    notify?.Error({ msg: "Not Found" });
+    toast.error(t("not_found"));
     return;
   }
 
@@ -39,7 +41,7 @@ export default function handleResponse(
       return;
     }
 
-    notify?.Error({ msg: error?.detail || "Something went wrong...!" });
+    toast.error((error?.detail as string) || t("something_went_wrong"));
     return;
   }
 }

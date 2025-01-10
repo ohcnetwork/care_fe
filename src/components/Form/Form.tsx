@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +17,6 @@ import {
 } from "@/components/Form/Utils";
 
 import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
-import * as Notification from "@/Utils/Notifications";
 import { classNames, isEmpty, omitBy } from "@/Utils/utils";
 
 type Props<T extends FormDetails> = {
@@ -74,7 +74,7 @@ const Form = <T extends FormDetails>({
         dispatch({ type: "set_errors", errors });
 
         if (errors.$all) {
-          Notification.Error({ msg: errors.$all });
+          toast.error(errors.$all);
         }
         return;
       }
