@@ -132,10 +132,10 @@ export default function AppointmentDetailsPage(props: Props) {
         [appointment.id]: { name: `Appointment on ${appointmentDate}` },
       }}
     >
-      <div className="container mx-auto max-w-7xl">
+      <div className="container mx-auto p-6 max-w-7xl">
         <div
           className={cn(
-            "flex flex-col lg:flex-row",
+            "flex flex-col md:flex-row",
             isPending && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
@@ -150,7 +150,7 @@ export default function AppointmentDetailsPage(props: Props) {
                 facility={facilityQuery.data}
               />
             </div>
-            <div className="flex gap-2 justify-center lg:justify-end px-6">
+            <div className="flex gap-2 justify-end px-6">
               <Button
                 variant="outline"
                 onClick={() => printAppointment({ t, facility, appointment })}
