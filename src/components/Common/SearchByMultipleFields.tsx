@@ -157,14 +157,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [selectedOptionIndex]);
 
   useEffect(() => {
-    const timeout = setTimeout(
-      () =>
-        selectedOption.value !== searchValue &&
-        onSearch(selectedOption.key, searchValue),
-      1000,
-    );
-    return () => clearTimeout(timeout);
-  }, [searchValue]);
+    if (selectedOption.value !== searchValue) {
+      onSearch(selectedOption.key, searchValue);
+    }
+  }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
 
   const handleSearchChange = useCallback((event: EventType) => {
     const value = "target" in event ? event.target.value : event.value;
