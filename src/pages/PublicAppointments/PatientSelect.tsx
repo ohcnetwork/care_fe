@@ -10,11 +10,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -24,6 +19,11 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 export default function PatientSelect({
   facilityId,
@@ -35,7 +35,7 @@ export default function PatientSelect({
   const { t } = useTranslation();
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
-  ) as SlotAvailability;
+  ) as TokenSlot;
   const reason = localStorage.getItem("reason");
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
@@ -71,7 +71,7 @@ export default function PatientSelect({
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreate) =>
+    mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,

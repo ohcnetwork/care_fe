@@ -14,11 +14,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import mutate from "@/Utils/request/mutate";
@@ -27,6 +33,7 @@ import type { Question } from "@/types/questionnaire/question";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import Loading from "../Common/Loading";
+import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
@@ -76,6 +83,7 @@ function QuestionItem({
 export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabValue>("details");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const {
     data: questionnaire,
@@ -137,7 +145,6 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           <p className="text-gray-600">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <ManageQuestionnaireOrganizationsSheet questionnaireId={id} />
           <Button variant="outline" onClick={() => navigate("/questionnaire")}>
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Back to List
@@ -146,13 +153,48 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={isPending}>
-                <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-                {isPending ? "Deleting..." : "Delete"}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <CareIcon icon="l-cog" className="mr-2 h-4 w-4" />
+                Manage
+                <CareIcon icon="l-angle-down" className="ml-2 h-4 w-4" />
               </Button>
-            </AlertDialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[200px]">
+              <ManageQuestionnaireOrganizationsSheet
+                questionnaireId={id}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <CareIcon icon="l-building" className="mr-2 h-4 w-4" />
+                    Manage Organizations
+                  </DropdownMenuItem>
+                }
+              />
+              <CloneQuestionnaireSheet
+                questionnaire={questionnaire}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                    Clone Questionnaire
+                  </DropdownMenuItem>
+                }
+              />
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setShowDeleteDialog(true)}
+              >
+                <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+                Delete Questionnaire
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Questionnaire</AlertDialogTitle>

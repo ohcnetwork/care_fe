@@ -673,9 +673,7 @@ function QuestionEditor({
                     <SelectItem value="symptom">Symptom</SelectItem>
                     <SelectItem value="diagnosis">Diagnosis</SelectItem>
                     <SelectItem value="encounter">Encounter</SelectItem>
-                    <SelectItem value="follow_up_appointment">
-                      Follow-up Appointment
-                    </SelectItem>
+                    <SelectItem value="appointment">Appointment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

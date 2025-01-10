@@ -15,19 +15,19 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { groupSlotsByAvailability } from "@/components/Schedule/Appointments/utils";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { FollowUpAppointmentRequest } from "@/components/Schedule/types";
 
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName } from "@/Utils/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 import { UserBase } from "@/types/user/user";
 
 interface FollowUpVisitQuestionProps {
@@ -37,7 +37,7 @@ interface FollowUpVisitQuestionProps {
   disabled?: boolean;
 }
 
-export function FollowUpAppointmentQuestion({
+export function AppointmentQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -48,18 +48,18 @@ export function FollowUpAppointmentQuestion({
 
   const values =
     (questionnaireResponse.values?.[0]
-      ?.value as unknown as FollowUpAppointmentRequest[]) || [];
+      ?.value as unknown as CreateAppointmentQuestion[]) || [];
 
   const value = values[0] ?? {};
 
-  const handleUpdate = (updates: Partial<FollowUpAppointmentRequest>) => {
-    const followUpAppointment = { ...value, ...updates };
+  const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
+    const appointment = { ...value, ...updates };
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
       values: [
         {
-          type: "follow_up_appointment",
-          value: [followUpAppointment] as unknown as ResponseValue["value"],
+          type: "appointment",
+          value: [appointment] as unknown as ResponseValue["value"],
         },
       ],
     });
@@ -69,7 +69,7 @@ export function FollowUpAppointmentQuestion({
 
   const resourcesQuery = useQuery({
     queryKey: ["availableResources", facilityId],
-    queryFn: query(ScheduleAPIs.appointments.availableUsers, {
+    queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
   });
@@ -81,7 +81,7 @@ export function FollowUpAppointmentQuestion({
       resource?.id,
       dateQueryString(selectedDate),
     ],
-    queryFn: query(ScheduleAPIs.slots.getSlotsForDay, {
+    queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
         user: resource?.id,
