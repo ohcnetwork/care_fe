@@ -332,8 +332,8 @@ const AvailabilityEditor = ({
 
     const slots = Math.floor(
       getSlotsPerSession(
-        availability.availability[0].start_time,
-        availability.availability[0].end_time,
+        availability.availability[0]?.start_time ?? "00:00",
+        availability.availability[0]?.end_time ?? "23:59",
         availability.slot_size_in_minutes,
       ) ?? 0,
     );
@@ -435,8 +435,8 @@ const AvailabilityEditor = ({
             {Object.entries(availabilitiesByDay).map(([day, times]) => (
               <p key={day} className="flex items-center gap-2 text-sm">
                 <span className="font-medium w-24 text-gray-600">
-                  {DayOfWeek[parseInt(day)].charAt(0) +
-                    DayOfWeek[parseInt(day)].slice(1).toLowerCase()}
+                  {(DayOfWeek[parseInt(day)] || "").charAt(0) +
+                    DayOfWeek[parseInt(day)]?.slice(1).toLowerCase()}
                 </span>
                 <span className="text-gray-500">
                   {times
