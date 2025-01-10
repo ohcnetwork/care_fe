@@ -346,7 +346,6 @@ function ResourceCard<T extends { id: string }>(
       });
       return data as QueryResponse<T>;
     } catch (error) {
-      console.error("Error fetching section data:", error);
       return { results: [], next: null, count: 0 };
     }
   };
