@@ -36,7 +36,7 @@ export const useAbortableEffect = (
 export const parseOptionId: (
   options: readonly OptionsType[],
   id: string | string[],
-) => string = (options, id) => {
+) => string | undefined = (options, id) => {
   return humanizeStrings(
     options
       .filter((option) => {

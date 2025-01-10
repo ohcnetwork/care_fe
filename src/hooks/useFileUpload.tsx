@@ -105,7 +105,7 @@ export default function useFileUpload(
     setFiles((prev) => [...prev, ...selectedFiles]);
 
     selectedFiles.forEach((file) => {
-      const ext: string = file.name.split(".")[1];
+      const ext: string = file.name.split(".")[1] || "";
       if (ExtImage.includes(ext)) {
         const options = {
           initialQuality: 0.6,

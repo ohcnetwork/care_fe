@@ -30,7 +30,7 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
     return <Loading />;
   }
 
-  const currentTabId = qParams.plot || data[0].id;
+  const currentTabId = qParams.plot || data[0]?.id;
   const currentTab = data.find((tab) => tab.id === currentTabId);
 
   if (!currentTab) {

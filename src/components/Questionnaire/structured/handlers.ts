@@ -149,7 +149,7 @@ const handlers: {
   },
   follow_up_appointment: {
     getRequests: (followUpAppointment, { facilityId, patientId }) => {
-      const { reason_for_visit, slot_id } = followUpAppointment[0];
+      const { reason_for_visit = "", slot_id } = followUpAppointment[0] || {};
       return [
         {
           url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,

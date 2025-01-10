@@ -63,7 +63,12 @@ export default function ExcelFileDragAndDrop({
           cellDates: true,
         });
         const worksheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[worksheetName];
+        const worksheet = worksheetName
+          ? workbook.Sheets[worksheetName]
+          : undefined;
+        if (!worksheet) {
+          throw new Error("Worksheet not found");
+        }
         const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
         //converts the date to string
         data.forEach((row: any) => {
@@ -119,12 +124,14 @@ export default function ExcelFileDragAndDrop({
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
 
-    if (!fileTypes.includes(droppedFile?.type)) {
+    if (!fileTypes.includes(droppedFile?.type || "")) {
       dragProps.setFileDropError("Please drop a Excel / CSV file to upload!");
       setSelectedFile(null);
       return;
     }
-    onSelectFile(droppedFile);
+    if (droppedFile) {
+      onSelectFile(droppedFile);
+    }
   };
 
   return (
@@ -179,7 +186,9 @@ export default function ExcelFileDragAndDrop({
           onChange={(e) => {
             const files = e.target.files;
             if (files && files.length > 0) {
-              onSelectFile(files[0]);
+              if (files[0]) {
+                onSelectFile(files[0]);
+              }
             }
           }}
           className="hidden"

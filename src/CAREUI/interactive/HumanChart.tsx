@@ -36,7 +36,7 @@ export default function HumanBodyChart({
               >
                 {getTitle(
                   `${path.region}`.replace(
-                    new RegExp(Object.keys(HumanBodyPaths)[i], "i"),
+                    new RegExp(Object.keys(HumanBodyPaths)[i] || "", "i"),
                     "",
                   ),
                 )}

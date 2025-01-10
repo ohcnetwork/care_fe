@@ -52,7 +52,10 @@ export const groupSlotsByAvailability = (slots: SlotAvailability[]) => {
 
   // sort availability by first slot start time
   result.sort((a, b) =>
-    compareAsc(a.slots[0].start_datetime, b.slots[0].start_datetime),
+    compareAsc(
+      a.slots[0]?.start_datetime ?? "00:00",
+      b.slots[0]?.start_datetime ?? "00:00",
+    ),
   );
 
   return result;

@@ -331,7 +331,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   // Auto-select first thread
   useEffect(() => {
     if (threadsData?.results.length && !selectedThread) {
-      setSelectedThread(threadsData.results[0].id);
+      setSelectedThread(threadsData?.results[0]?.id ?? null);
     }
   }, [threadsData, selectedThread]);
 

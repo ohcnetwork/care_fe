@@ -166,8 +166,7 @@ export const EncounterShow = (props: Props) => {
   if (!encounterData) {
     return <ErrorPage />;
   }
-
-  const SelectedTab = tabs[props.tab];
+  const SelectedTab = tabs[props.tab] || EncounterUpdatesTab;
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${

@@ -104,7 +104,13 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
           setCountry({ flag: "🌍", name: "Other", code: "+" });
           return;
         }
-        setCountry(phoneCodes[getCountryCode(field.value)!]);
+        const countryCode = getCountryCode(field.value);
+        if (countryCode) {
+          const countryData = phoneCodes[countryCode];
+          if (countryData) {
+            setCountry(countryData);
+          }
+        }
       }
     }, [field.value]);
 
@@ -186,7 +192,7 @@ const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
   );
 };
 const conditionPhoneCode = (code: string) => {
-  code = code.split(" ")[0];
+  code = (code || "").split(" ")[0] || "";
   return code.startsWith("+") ? code : "+" + code;
 };
 

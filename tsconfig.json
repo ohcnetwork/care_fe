@@ -22,7 +22,8 @@
       "@core/*": ["src/*"],
       "@careConfig": ["./care.config.ts"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"]
+    "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"],
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "care.config.ts"],
   "exclude": ["src/**/*.gen.tsx"]

@@ -147,11 +147,13 @@ export function QuestionnaireForm({
         (error: QuestionValidationError | DetailedValidationError) => {
           // Handle question-specific errors
           if ("question_id" in error) {
-            form.errors.push({
+            form?.errors.push({
               question_id: error.question_id,
               error: error.error ?? error.msg,
             } as QuestionValidationError);
-            updatedForms[index] = form;
+            if (form) {
+              updatedForms[index] = form;
+            }
           }
 
           // Handle form-level errors

@@ -137,7 +137,7 @@ const Map: React.FC<MapProps> = ({
 
   React.useEffect(() => {
     if (searchRef.current && map && !searchBox) {
-      map.controls[google.maps.ControlPosition.TOP_CENTER].push(
+      map?.controls[google.maps.ControlPosition.TOP_CENTER]?.push(
         searchRef.current,
       );
 
@@ -156,7 +156,7 @@ const Map: React.FC<MapProps> = ({
           handleOnChange &&
           places &&
           places.length > 0 &&
-          places[0].geometry?.location
+          places[0]?.geometry?.location
         ) {
           const selectedLocation = places[0].geometry.location;
           handleOnChange(selectedLocation);
@@ -168,7 +168,7 @@ const Map: React.FC<MapProps> = ({
 
   React.useEffect(() => {
     if (mapCloseRef.current && map) {
-      map.controls[google.maps.ControlPosition.TOP_RIGHT].push(
+      map?.controls[google.maps.ControlPosition.TOP_RIGHT]?.push(
         mapCloseRef.current,
       );
     }
@@ -176,7 +176,7 @@ const Map: React.FC<MapProps> = ({
 
   React.useEffect(() => {
     if (currentLocationSelectRef.current && map) {
-      map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+      map?.controls[google.maps.ControlPosition.TOP_LEFT]?.push(
         currentLocationSelectRef.current,
       );
     }

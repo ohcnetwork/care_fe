@@ -91,8 +91,12 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
 
   const handleSliderChange = useCallback((value: number[]) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = value[0];
-      setCurrentTime(value[0]);
+      if (value[0] !== undefined) {
+        audioRef.current.currentTime = value[0];
+      }
+      if (value[0] !== undefined) {
+        setCurrentTime(value[0]);
+      }
     }
   }, []);
 

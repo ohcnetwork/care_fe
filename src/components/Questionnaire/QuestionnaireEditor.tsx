@@ -131,7 +131,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
     const items = Array.from(questionnaire.questions);
     const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (reorderedItem) {
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
 
     updateQuestionnaireField("questions", items);
   };
@@ -1149,7 +1151,9 @@ function QuestionEditor({
 
                   const items = Array.from(questions || []);
                   const [reorderedItem] = items.splice(result.source.index, 1);
-                  items.splice(result.destination.index, 0, reorderedItem);
+                  if (reorderedItem) {
+                    items.splice(result.destination.index, 0, reorderedItem);
+                  }
 
                   updateField("questions", items);
                 }}

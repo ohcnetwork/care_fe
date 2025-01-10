@@ -62,15 +62,15 @@ export const ExportMenu = ({
         className="gap-2"
         disabled={isExporting || disabled}
         onClick={() => {
-          let action = item.action;
-          if (item.route) {
+          let action = item?.action;
+          if (item?.route) {
             action = async () => {
               const { data } = await request(item.route!);
               return data ?? null;
             };
           }
           if (action) {
-            exportFile(action, item.filePrefix, item.type, item.parse);
+            exportFile(action, item?.filePrefix, item?.type, item?.parse);
           }
         }}
       >

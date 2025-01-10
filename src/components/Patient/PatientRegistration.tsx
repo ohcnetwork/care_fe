@@ -471,7 +471,7 @@ export default function PatientRegistration(
                   ["dob", t("date_of_birth")],
                   ["age", t("age")],
                 ].map(([key, label]) => (
-                  <TabsTrigger value={key}>{label}</TabsTrigger>
+                  <TabsTrigger value={key as string}>{label}</TabsTrigger>
                 ))}
               </TabsList>
               <TabsContent value="dob">

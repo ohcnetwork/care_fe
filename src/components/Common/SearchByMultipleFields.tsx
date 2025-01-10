@@ -69,15 +69,15 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     initialOptionIndex || 0,
   );
   const selectedOption = options[selectedOptionIndex];
-  const [searchValue, setSearchValue] = useState(selectedOption.value || "");
+  const [searchValue, setSearchValue] = useState(selectedOption?.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
 
   useEffect(() => {
-    if (!(selectedOption.type === "phone" && searchValue.length < 13)) {
-      setSearchValue(options[selectedOptionIndex].value);
+    if (!(selectedOption?.type === "phone" && searchValue.length < 13)) {
+      setSearchValue(options[selectedOptionIndex]?.value || "");
     }
   }, [options]);
 
@@ -95,13 +95,15 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     (index: number) => {
       setSelectedOptionIndex(index);
       const option = options[index];
-      setSearchValue(option.value || "");
-      setFocusedIndex(options.findIndex((op) => op.key === option.key));
+      setSearchValue(option?.value || "");
+      setFocusedIndex(options.findIndex((op) => op.key === option?.key));
       setOpen(false);
       inputRef.current?.focus();
       setError(false);
-      onSearch(option.key, option.value);
-      onFieldChange?.(options[index]);
+      onSearch(option?.key || "", option?.value || "");
+      if (option) {
+        onFieldChange?.(option);
+      }
     },
     [onSearch],
   );
@@ -157,10 +159,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [selectedOptionIndex]);
 
   useEffect(() => {
-    if (selectedOption.value !== searchValue) {
-      onSearch(selectedOption.key, searchValue);
+    if (selectedOption?.value !== searchValue) {
+      onSearch(selectedOption?.key || "", searchValue);
     }
-  }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
+  }, [searchValue, selectedOption?.key, selectedOption?.value, onSearch]);
 
   const handleSearchChange = useCallback((event: EventType) => {
     const value = "target" in event ? event.target.value : event.value;
@@ -178,12 +180,12 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       ),
     } as const;
 
-    switch (selectedOption.type) {
+    switch (selectedOption?.type) {
       case "phone":
         return (
           <PhoneNumberFormField
             id={id}
-            name={selectedOption.key}
+            name={selectedOption?.key}
             placeholder={selectedOption.placeholder}
             types={["mobile", "landline"]}
             {...commonProps}
@@ -197,7 +199,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <Input
             id={id}
             type="text"
-            placeholder={selectedOption.placeholder}
+            placeholder={selectedOption?.placeholder}
             {...commonProps}
           />
         );
@@ -271,7 +273,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               size="xs"
               data-test-id={id + "__" + option.key}
               className={cn(
-                selectedOption.key === option.key
+                selectedOption?.key === option.key
                   ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200",
                 buttonClassName,

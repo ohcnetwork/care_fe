@@ -65,7 +65,8 @@ const Routes: AppRoutes = {
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 
   "/apps": () => <PlugConfigList />,
-  "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
+  "/apps/plug-configs/:slug": ({ slug }) =>
+    slug ? <PlugConfigEdit slug={slug} /> : <ErrorPage />,
   "/login": () => <Redirect to="/" />,
 };
 

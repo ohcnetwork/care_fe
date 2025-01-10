@@ -113,7 +113,7 @@ export function DraftSection(props: {
   const saveKey = useRef(`form_draft_${window.location.pathname}`);
   const draftStarted =
     drafts.length > 0
-      ? drafts[drafts.length - 1].draft == props.formData
+      ? (drafts[drafts.length - 1]?.draft ?? {}) == props.formData
       : false;
 
   useEffect(() => {
@@ -181,7 +181,9 @@ export const RestoreDraftButton = () => {
       className="flex items-center space-x-2"
       onClick={() =>
         handleDraftSelect(
-          (draftStarted ? drafts[0] : drafts[drafts.length - 1]).draft,
+          (draftStarted
+            ? drafts[0]?.draft
+            : drafts[drafts.length - 1]?.draft) || {},
         )
       }
     >
@@ -191,8 +193,8 @@ export const RestoreDraftButton = () => {
         (
         {relativeTime(
           draftStarted
-            ? drafts[0].timestamp
-            : drafts[drafts.length - 1].timestamp,
+            ? drafts[0]?.timestamp
+            : drafts[drafts.length - 1]?.timestamp,
         )}
         )
       </span>

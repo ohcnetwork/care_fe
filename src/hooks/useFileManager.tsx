@@ -81,8 +81,9 @@ export default function useFileManager(
   const queryClient = useQueryClient();
 
   const getExtension = (url: string) => {
-    const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1].toLowerCase();
+    const div1 = url.split("?")[0]?.split(".") || [];
+    const ext: string =
+      div1.length > 0 ? (div1[div1.length - 1]?.toLowerCase() ?? "") : "";
     return ext;
   };
 

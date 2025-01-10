@@ -17,22 +17,22 @@ const FacilityRoutes: AppRoutes = {
     <FacilityCreate facilityId={facilityId} />
   ),
   "/facility/:facilityId": ({ facilityId }) => (
-    <FacilityHome facilityId={facilityId} />
+    <FacilityHome facilityId={facilityId || ""} />
   ),
   "/facility/:facilityId/users": ({ facilityId }) => (
-    <FacilityUsers facilityId={facilityId} />
+    <FacilityUsers facilityId={Number(facilityId) || 0} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
-    <ResourceCreate facilityId={facilityId} />
+    <ResourceCreate facilityId={facilityId || 0} />
   ),
   "/facility/:facilityId/organization": ({ facilityId }) => (
-    <FacilityOrganizationIndex facilityId={facilityId} />
+    <FacilityOrganizationIndex facilityId={facilityId || ""} />
   ),
   "/facility/:facilityId/organization/:id": ({ facilityId, id }) => (
-    <FacilityOrganizationView facilityId={facilityId} id={id} />
+    <FacilityOrganizationView facilityId={facilityId || ""} id={id || ""} />
   ),
   "/facility/:facilityId/organization/:id/users": ({ facilityId, id }) => (
-    <FacilityOrganizationUsers facilityId={facilityId} id={id} />
+    <FacilityOrganizationUsers facilityId={facilityId || ""} id={id || ""} />
   ),
 };
 

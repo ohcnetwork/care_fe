@@ -107,8 +107,8 @@ const ScheduleTemplateItem = (props: ScheduleTemplate) => {
                       <span className="text-sm">
                         {Math.floor(
                           getSlotsPerSession(
-                            slot.availability[0].start_time,
-                            slot.availability[0].end_time,
+                            slot.availability[0]?.start_time ?? "00:00",
+                            slot.availability[0]?.end_time ?? "23:59",
                             slot.slot_size_in_minutes,
                           ) ?? 0,
                         )}{" "}

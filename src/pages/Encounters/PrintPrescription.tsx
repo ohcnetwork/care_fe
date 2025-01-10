@@ -194,10 +194,10 @@ export const PrintPrescription = (props: {
               {Array.from(usedFrequencies).map((key) => (
                 <div key={key} className="flex items-center gap-1.5">
                   <Badge variant="outline" className="font-medium">
-                    {FREQUENCY_DISPLAY[key].code}
+                    {FREQUENCY_DISPLAY[key]?.code}
                   </Badge>
                   <span className="text-muted-foreground">
-                    = {FREQUENCY_DISPLAY[key].meaning}
+                    = {FREQUENCY_DISPLAY[key]?.meaning}
                   </span>
                 </div>
               ))}

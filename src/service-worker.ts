@@ -35,7 +35,7 @@ self.addEventListener("push", async function (event) {
 
     if (["PUSH_MESSAGE", "MESSAGE"].includes(data?.type)) {
       self.clients.matchAll().then((clients) => {
-        clients[0].postMessage(data);
+        clients[0]?.postMessage(data);
       });
     } else {
       event.waitUntil(

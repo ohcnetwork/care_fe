@@ -200,8 +200,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                               <p className="text-sm text-gray-600">
                                 {Math.floor(
                                   getSlotsPerSession(
-                                    availability[0].start_time,
-                                    availability[0].end_time,
+                                    availability[0]?.start_time || "00:00",
+                                    availability[0]?.end_time || "23:59",
                                     slot_size_in_minutes,
                                   ) ?? 0,
                                 )}{" "}
@@ -299,7 +299,7 @@ const diagonalStripes = {
 export const formatAvailabilityTime = (
   availability: ScheduleAvailability["availability"],
 ) => {
-  const startTime = availability[0].start_time;
-  const endTime = availability[0].end_time;
+  const startTime = availability[0]?.start_time || "00:00";
+  const endTime = availability[0]?.end_time || "23:59";
   return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
 };

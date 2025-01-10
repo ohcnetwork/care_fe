@@ -25,15 +25,20 @@ const ScheduleRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/book-appointment": ({
     facilityId,
     patientId,
-  }) => <AppointmentCreatePage facilityId={facilityId} patientId={patientId} />,
+  }) => (
+    <AppointmentCreatePage
+      facilityId={facilityId || ""}
+      patientId={patientId || ""}
+    />
+  ),
 
   "/facility/:facilityId/patient/:patientId/appointments/:appointmentId": ({
     facilityId,
     appointmentId,
   }) => (
     <AppointmentDetailsPage
-      facilityId={facilityId}
-      appointmentId={appointmentId}
+      facilityId={facilityId || ""}
+      appointmentId={appointmentId || ""}
     />
   ),
 };

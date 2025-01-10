@@ -351,10 +351,10 @@ export const ObservationVisualizer = ({
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Avatar
-                                name={observations[0].details.enteredBy}
+                                name={observations[0]?.details.enteredBy}
                                 className="h-6 w-6"
                               />
-                              <span>{observations[0].details.enteredBy}</span>
+                              <span>{observations[0]?.details.enteredBy}</span>
                             </div>
                           </TableCell>
                           <TableCell>

@@ -287,9 +287,9 @@ export const formatPhoneNumber = (phoneNumber: string) => {
     const phoneCodes: Record<string, CountryData> = phoneCodesJson;
     return (
       "+" +
-      phoneCodes[countryCode].code +
+      (phoneCodes[countryCode]?.code ?? "") +
       " " +
-      phoneNumber.slice(phoneCodes[countryCode].code.length + 1)
+      phoneNumber.slice((phoneCodes[countryCode]?.code.length ?? 0) + 1)
     );
   }
   return phoneNumber;
@@ -304,12 +304,16 @@ export const getCountryCode = (phoneNumber: string) => {
     for (let i = 0; i < phoneCodesArr.length; i++) {
       if (
         phoneNumber.startsWith(
-          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
+          phoneCodesArr[i] && phoneCodes[phoneCodesArr[i] as string]?.code
+            ? phoneCodes[phoneCodesArr[i] as string]!.code.replaceAll("-", "")
+            : "",
         )
       ) {
         allMatchedCountries.push({
-          name: phoneCodesArr[i],
-          code: phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
+          name: phoneCodesArr[i] ?? "",
+          code:
+            phoneCodes[phoneCodesArr[i] as string]?.code.replaceAll("-", "") ??
+            "",
         });
       }
     }

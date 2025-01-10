@@ -50,8 +50,10 @@ export function FollowUpAppointmentQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as FollowUpAppointmentRequest[]) || [];
 
-  const value = values[0] ?? {};
-
+  const value: FollowUpAppointmentRequest = values[0] ?? {
+    reason_for_visit: "",
+    slot_id: "",
+  };
   const handleUpdate = (updates: Partial<FollowUpAppointmentRequest>) => {
     const followUpAppointment = { ...value, ...updates };
     updateQuestionnaireResponseCB({

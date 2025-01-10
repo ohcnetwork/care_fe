@@ -94,7 +94,9 @@ export default function useFilters({
           name={name}
           value={
             value === undefined
-              ? humanizeStrings(paramKey.map((k) => qParams[k]).filter(Boolean))
+              ? humanizeStrings(
+                  paramKey.map((k) => qParams[k]).filter(Boolean),
+                ) || ""
               : value
           }
           onRemove={() => removeFilters(paramKey)}
@@ -128,7 +130,7 @@ export default function useFilters({
     },
     range(name: string, paramKey: string, minKey = "min", maxKey = "max") {
       const paramKeys = [paramKey + "_" + minKey, paramKey + "_" + maxKey];
-      const values = [qParams[paramKeys[0]], qParams[paramKeys[1]]];
+      const values = [qParams[paramKeys[0] || ""], qParams[paramKeys[1] || ""]];
       if (values[0] === values[1])
         return [{ name, value: values[0], paramKey: paramKeys }];
       return [name + " " + minKey, name + " " + maxKey].map((name, i) => {

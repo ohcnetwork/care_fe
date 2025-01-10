@@ -50,7 +50,9 @@ export default function PatientUserProvider({ children }: Props) {
       const selectedPatient =
         userData.results.find((patient) => patient.id === localPatient?.id) ||
         userData.results[0];
-      setSelectedPatient(selectedPatient);
+      if (selectedPatient) {
+        setSelectedPatient(selectedPatient);
+      }
       localStorage.setItem("selectedPatient", JSON.stringify(selectedPatient));
     }
   }, [userData]);

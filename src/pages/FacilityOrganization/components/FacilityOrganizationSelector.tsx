@@ -100,8 +100,12 @@ export default function FacilityOrganizationSelector(
     setSelectedLevels(newLevels);
     if (newLevels.length > 0) {
       const lastOrg = newLevels[newLevels.length - 1];
-      setSelectedOrganization(lastOrg);
-      onChange(lastOrg.id);
+      if (lastOrg) {
+        setSelectedOrganization(lastOrg);
+      }
+      if (lastOrg?.id) {
+        onChange(lastOrg.id);
+      }
     } else {
       setSelectedOrganization(null);
     }
