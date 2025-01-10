@@ -172,7 +172,10 @@ export function QuestionInput({
                 "gap-2 flex items-end": removeButton,
               })}
             >
-              <div className={cn("space-y-1", { "flex-1": removeButton })}>
+              <div
+                className={cn("space-y-1", { "flex-1": removeButton })}
+                data-question-id={question.id}
+              >
                 {index === 0 && <QuestionLabel question={question} />}
                 {renderSingleInput(index)}
               </div>
