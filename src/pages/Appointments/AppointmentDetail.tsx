@@ -19,6 +19,18 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -472,22 +484,65 @@ const AppointmentActions = ({
         </Button>
       )}
 
-      <Button
-        variant="outline"
-        onClick={() => cancelAppointment({ reason: "cancelled" })}
-        size="lg"
-      >
-        <BanIcon className="size-4 mr-2" />
-        {t("cancel_appointment")}
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => cancelAppointment({ reason: "entered_in_error" })}
-        size="lg"
-      >
-        <BanIcon className="size-4 mr-2" />
-        {t("mark_as_entered_in_error")}
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            <BanIcon className="size-4 mr-2" />
+            {t("cancel_appointment")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("cancel_appointment_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cancelAppointment({ reason: "cancelled" })}
+            >
+              {t("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            <BanIcon className="size-4 mr-2" />
+            {t("mark_as_entered_in_error")}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("mark_as_entered_in_error")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>{t("warning")}</AlertTitle>
+                <AlertDescription>
+                  {t("entered_in_error_warning")}
+                </AlertDescription>
+              </Alert>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+            >
+              {t("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -24,7 +24,7 @@ const dayOfWeekKeys = [
 ] as const;
 
 interface Props {
-  value: DayOfWeek[] | undefined;
+  value: DayOfWeek[] | null;
   onChange: (value: DayOfWeek[] | null) => void;
   format?: "alphabet" | "short" | "long";
 }
@@ -34,15 +34,16 @@ export default function WeekdayCheckbox({
   onChange,
   format = "alphabet",
 }: Props) {
+  const selectedDays = value ?? [];
   const { t } = useTranslation();
 
   const handleDayToggle = (day: DayOfWeek) => {
     if (!onChange) return;
 
-    if (value.includes(day)) {
-      onChange(value.filter((d) => d !== day));
+    if (selectedDays.includes(day)) {
+      onChange(selectedDays.filter((d) => d !== day));
     } else {
-      onChange([...value, day]);
+      onChange([...selectedDays, day]);
     }
   };
 
@@ -50,7 +51,7 @@ export default function WeekdayCheckbox({
     <div className="flex gap-2 md:gap-4">
       {dayOfWeekKeys.map((day) => {
         const dow = DayOfWeek[day as keyof typeof DayOfWeek];
-        const isSelected = value.includes(dow);
+        const isSelected = selectedDays.includes(dow);
 
         return (
           <Button
