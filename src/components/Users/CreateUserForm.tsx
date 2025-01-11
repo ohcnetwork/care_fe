@@ -66,8 +66,8 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         .regex(/[A-Z]/, t("password_uppercase_validation"))
         .regex(/[0-9]/, t("password_number_validation")),
       c_password: z.string(),
-      first_name: z.string().min(1, t("first_name_required")),
-      last_name: z.string().min(1, t("last_name_required")),
+      first_name: z.string().min(1, t("field_required")),
+      last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
       phone_number: z
         .string()
@@ -77,12 +77,12 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
         .optional(),
       phone_number_is_whatsapp: z.boolean().default(true),
-      date_of_birth: z.string().min(1, t("dob_required")),
+      date_of_birth: z.string().min(1, t("field_required")),
       gender: z.enum(["male", "female", "other"]),
       qualification: z.string().optional(),
       doctor_experience_commenced_on: z.string().optional(),
       doctor_medical_council_registration: z.string().optional(),
-      geo_organization: z.string().min(1, t("org_required")),
+      geo_organization: z.string().min(1, t("field_required")),
     })
     .refine((data) => data.password === data.c_password, {
       message: t("password_mismatch"),
