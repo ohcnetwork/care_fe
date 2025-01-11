@@ -13,6 +13,7 @@ import {
   Send,
   Users,
 } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -47,6 +48,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -110,32 +112,42 @@ const ThreadItem = ({
   isSelected: boolean;
   onClick: () => void;
 }) => (
-  <button
-    className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
-      isSelected
-        ? "bg-primary-100 hover:bg-primary/15 border-primary"
-        : "hover:bg-gray-100 hover:border-gray-200",
-    )}
-    onClick={onClick}
-  >
-    <div className="flex items-start justify-between gap-3">
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate">{thread.title}</h4>
-        {/* Todo: Replace with thread.created */}
-        <p className="text-xs text-gray-500 mt-1">12/12/2024</p>
-      </div>
-      {isSelected && (
-        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
+  useEffect(() => {
+    console.log(thread);
+  }, [thread]),
+  (
+    <button
+      className={cn(
+        "group relative w-full p-4 text-left rounded-lg transition-colors border ",
+        isSelected
+          ? "bg-primary-100 hover:bg-primary/15 border-primary"
+          : "hover:bg-gray-100 hover:border-gray-200",
       )}
-    </div>
-  </button>
+      onClick={onClick}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-medium text-sm truncate">{thread.title}</h4>
+          {/* Todo: Replace with thread.created */}
+          <p className="text-xs text-gray-500 mt-1">{thread.created}</p>
+        </div>
+        {isSelected && (
+          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
+        )}
+      </div>
+    </button>
+  )
 );
 
 // Message item component
 const MessageItem = ({ message }: { message: Message }) => {
   const authUser = useAuthUser();
   const isCurrentUser = authUser?.external_id === message.created_by.id;
+  const facilityId = useSlug("facility");
+
+  const navigateToUser = () => {
+    navigate(`/facility/${facilityId}/users/${message.created_by.username}`);
+  };
 
   return (
     <div
@@ -153,7 +165,10 @@ const MessageItem = ({ message }: { message: Message }) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex-shrink-0">
+              <div
+                className="flex-shrink-0 cursor-pointer"
+                onClick={navigateToUser}
+              >
                 <Avatar
                   name={message.created_by.username}
                   imageUrl={message.created_by.profile_picture_url}
@@ -173,7 +188,10 @@ const MessageItem = ({ message }: { message: Message }) => {
             isCurrentUser ? "items-end" : "items-start",
           )}
         >
-          <span className="text-xs text-gray-500 mb-1">
+          <span
+            className="text-xs text-gray-500 mb-1 cursor-pointer"
+            onClick={navigateToUser}
+          >
             {message.created_by.username}
           </span>
           <div
@@ -410,7 +428,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
 
   // Scroll to bottom on initial load and thread change
   useEffect(() => {
-    if (messagesData && !messagesLoading && !isFetchingNextPage) {
+    if (
+      messagesData &&
+      !messagesLoading &&
+      !isFetchingNextPage &&
+      messagesData.pages.length === 1
+    ) {
       messagesEndRef.current?.scrollIntoView();
     }
   }, [selectedThread, messagesData, messagesLoading, isFetchingNextPage]);
@@ -592,8 +615,16 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                         ))
                       )}
                       {isFetchingNextPage && (
-                        <div className="py-2">
-                          <MessageSkeleton />
+                        <div className="flex justify-center absolute top-2 inset-x-0">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-26 flex gap-2 px-2 py-1 bg-primary-200 rounded-md">
+                              <div>{t("loading")}</div>
+                              <Loader2
+                                className="h-5 w-5 animate-spin top-0.5 relative"
+                                size={8}
+                              />
+                            </div>
+                          </div>
                         </div>
                       )}
                       <div ref={ref} />
@@ -616,6 +647,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                               }
                             }
                           }}
+                          className="max-h-[150px]"
                         />
                         <Button
                           type="submit"
