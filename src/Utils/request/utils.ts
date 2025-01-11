@@ -43,6 +43,10 @@ const makeQueryParams = (query: QueryParams) => {
   return qParams.toString();
 };
 
+/**
+ * TODO: consider replacing this with inferring the types from the route and using a generic
+ * to ensure that the path params are not missing.
+ */
 const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 

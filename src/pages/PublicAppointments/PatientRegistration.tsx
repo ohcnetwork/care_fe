@@ -24,11 +24,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import DateFormField from "@/components/Form/FormFields/DateFormField";
-import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -45,6 +40,11 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
@@ -71,7 +71,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
-  ) as SlotAvailability;
+  ) as TokenSlot;
   const reason = localStorage.getItem("reason");
 
   const { t } = useTranslation();
@@ -141,7 +141,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreate) =>
+    mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,

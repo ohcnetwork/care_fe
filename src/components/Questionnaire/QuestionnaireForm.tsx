@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -13,7 +14,7 @@ import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
-import useMutation from "@/Utils/request/useMutation";
+import mutate from "@/Utils/request/mutate";
 import useQuery from "@/Utils/request/useQuery";
 import {
   DetailedValidationError,
@@ -78,10 +79,20 @@ export function QuestionnaireForm({
     prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
-  const { mutate: submitBatch, isProcessing } = useMutation(
-    routes.batchRequest,
-    { silent: true },
-  );
+  const { mutate: submitBatch, isPending } = useMutation({
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    onSuccess: () => {
+      toast.success(t("questionnaire_submitted_successfully"));
+      onSubmit?.();
+    },
+    onError: (error) => {
+      const errorData = error.cause;
+      if (errorData?.results) {
+        handleSubmissionError(errorData.results as ValidationErrorResponse[]);
+      }
+      toast.error(t("questionnaire_submission_failed"));
+    },
+  });
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -200,9 +211,9 @@ export function QuestionnaireForm({
 
     // Then, add questionnaire submission requests
     questionnaireForms.forEach((form) => {
-      const nonStructuredResponses = form.responses.filter((response) => {
-        return !response.structured_type;
-      });
+      const nonStructuredResponses = form.responses.filter(
+        (response) => !response.structured_type,
+      );
 
       if (nonStructuredResponses.length > 0) {
         requests.push({
@@ -234,22 +245,7 @@ export function QuestionnaireForm({
       }
     });
 
-    const response = await submitBatch({
-      body: { requests },
-    });
-
-    if (!response.data) {
-      if (response.error) {
-        handleSubmissionError(
-          response.error.results as ValidationErrorResponse[],
-        );
-        toast.error("Failed to submit questionnaire");
-      }
-      return;
-    }
-
-    toast.success("Questionnaire submitted successfully");
-    onSubmit?.();
+    submitBatch({ requests });
   };
 
   return (
@@ -265,7 +261,7 @@ export function QuestionnaireForm({
                   "bg-gray-100 text-green-600",
               )}
               onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
-              disabled={isProcessing}
+              disabled={isPending}
             >
               {form.questionnaire.title}
             </button>
@@ -284,7 +280,7 @@ export function QuestionnaireForm({
                       setActiveQuestionnaireId(form.questionnaire.id);
                       setActiveGroupId(group.id);
                     }}
-                    disabled={isProcessing}
+                    disabled={isPending}
                   >
                     {group.text}
                   </button>
@@ -331,7 +327,7 @@ export function QuestionnaireForm({
                       ),
                     );
                   }}
-                  disabled={isProcessing}
+                  disabled={isPending}
                 >
                   <CareIcon icon="l-times-circle" />
                   <span>Remove</span>
@@ -353,7 +349,7 @@ export function QuestionnaireForm({
                   ),
                 );
               }}
-              disabled={isProcessing}
+              disabled={isPending}
               activeGroupId={activeGroupId}
               errors={form.errors}
               patientId={patientId}
@@ -398,7 +394,7 @@ export function QuestionnaireForm({
                 },
               ]);
             }}
-            disabled={isProcessing}
+            disabled={isPending}
           />
         </div>
 
@@ -409,17 +405,17 @@ export function QuestionnaireForm({
               type="button"
               variant="outline"
               onClick={onCancel}
-              disabled={isProcessing}
+              disabled={isPending}
             >
               {t("cancel")}
             </Button>
             <Button
               type="button"
               onClick={handleSubmit}
-              disabled={isProcessing || hasErrors}
+              disabled={isPending || hasErrors}
               className="relative"
             >
-              {isProcessing ? (
+              {isPending ? (
                 <>
                   <span className="opacity-0">{t("submit")}</span>
                   <div className="absolute inset-0 flex items-center justify-center">

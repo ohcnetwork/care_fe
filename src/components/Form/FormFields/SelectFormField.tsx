@@ -21,6 +21,9 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
   inputClassName?: string;
 };
 
+/**
+ * @deprecated use shadcn/ui's select instead
+ */
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
   const field = useFormFieldPropsResolver<V>(props);
   return (
@@ -58,6 +61,9 @@ type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
   optionDisabled?: OptionCallback<T, boolean>;
 };
 
+/**
+ * @deprecated
+ */
 export const MultiSelectFormField = <T, V>(
   props: MultiSelectFormFieldProps<T, V>,
 ) => {
