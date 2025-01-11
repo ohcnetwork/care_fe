@@ -1,7 +1,6 @@
 import { LazyExoticComponent } from "react";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { FormContextValue } from "@/components/Form/FormContext";
 import { PatientMeta } from "@/components/Patient/models";
 import { QuestionnaireFormState } from "@/components/Questionnaire/QuestionnaireForm";
 import { UserAssignedModel } from "@/components/Users/models";
@@ -30,21 +29,6 @@ export type ExtendFacilityConfigureComponentType = React.FC<{
   facilityId: string;
 }>;
 
-export type ExtendPatientRegisterFormComponentType = React.FC<{
-  facilityId: string;
-  patientId?: string;
-  state: {
-    form: {
-      [key: string]: any;
-    };
-    errors: {
-      [key: string]: string;
-    };
-  };
-  dispatch: React.Dispatch<any>;
-  field: FormContextValue<PatientForm>;
-}>;
-
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -52,7 +36,6 @@ export type SupportedPluginComponents = {
   ManageFacilityOptions: ManageFacilityOptionsComponentType;
   EncounterContextEnabler: React.FC;
   ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
-  ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType;
 };
 
 // Create a type for lazy-loaded components
