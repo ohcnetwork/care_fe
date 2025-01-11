@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import {
   ENCOUNTER_ADMIT_SOURCE,
   ENCOUNTER_CLASS,
@@ -19,11 +21,6 @@ import {
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
   ENCOUNTER_STATUS,
-} from "@/common/constants";
-
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
-import {
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
