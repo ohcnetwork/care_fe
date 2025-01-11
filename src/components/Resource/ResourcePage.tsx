@@ -142,7 +142,7 @@ const ResourcePage = () => {
     >
       <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <div>
+          <div className="w-full">
             <Label className="mb-2 text-black">{t("select_status")}</Label>
 
             <Select
@@ -487,8 +487,22 @@ function ResourceRow({ data }: ResourceRowProps) {
           <div className="text-sm font-bold capitalize">{resource.title}</div>
         </div>
 
-        <div className="col-span-1 flex flex-col px-3 text-left">
-          <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row ">
+        <div className="col-span-1 flex flex-col text-left">
+          <div className="category">
+            <dt
+              title={t("LOG_UPDATE_FIELD_LABEL__patient_category")}
+              className="flex items-center text-sm font-medium leading-5 text-secondary-500"
+            >
+              <CareIcon icon="l-box" className="text-lg mr-1" />
+              <dd className="text-sm font-bold leading-5 text-secondary-900">
+                {resource.category || ""}
+              </dd>
+            </dt>
+          </div>
+        </div>
+
+        <div className="col-span-1 flex flex-col text-left">
+          <div className="3xl:flex-row mb-2 flex gap-1 sm:flex-row flex-wrap md:flex-row lg:flex-col xl:flex-row 2xl:flex-row ">
             {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
               <dt
                 title={t("resource_status")}
@@ -496,7 +510,7 @@ function ResourceRow({ data }: ResourceRowProps) {
               >
                 <Badge
                   variant="secondary"
-                  className="text-lg font-bold text-sky-600 truncate bg-gray-300 rounded-full uppercase text-center"
+                  className="text-[12px] font-semibold text-sky-600 truncate bg-gray-300 rounded-full uppercase text-center"
                 >
                   <span className="mr-1">
                     <CareIcon icon="l-truck" />
@@ -513,7 +527,7 @@ function ResourceRow({ data }: ResourceRowProps) {
                   variant={
                     resource.status === "APPROVED" ? "primary" : "secondary"
                   }
-                  className={`text-lg font-bold rounded-full uppercase ${
+                  className={`text-[12px] font-semibold rounded-full uppercase ${
                     resource.status === "APPROVED"
                       ? "bg-sky-200"
                       : "bg-yellow-200"
@@ -549,10 +563,10 @@ function ResourceRow({ data }: ResourceRowProps) {
           </div>
         </div>
 
-        <div className="col-span-1 text-left">
+        <div className="col-span-1 text-left flex flex-col gap-2 justify-center">
           <dt
             title={t("origin_facility")}
-            className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+            className="flex items-center text-left text-md font-medium leading-5 text-secondary-500"
           >
             <CareIcon icon="l-plane-departure" className="mr-2" />
             <dd className="text-sm font-bold leading-5 text-secondary-900">
@@ -562,7 +576,7 @@ function ResourceRow({ data }: ResourceRowProps) {
 
           <dt
             title={t("resource_approving_facility")}
-            className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+            className="flex items-center text-left text-sd font-medium leading-5 text-secondary-500"
           >
             <CareIcon icon="l-user-check" className="mr-2" />
             <dd className="text-sm font-bold leading-5 text-secondary-900">
@@ -572,7 +586,7 @@ function ResourceRow({ data }: ResourceRowProps) {
 
           <dt
             title={t("assigned_facility")}
-            className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+            className="flex items-center text-left text-md font-medium leading-5 text-secondary-500"
           >
             <CareIcon icon="l-plane-arrival" className="mr-2" />
             <dd className="text-sm font-bold leading-5 text-secondary-900">
