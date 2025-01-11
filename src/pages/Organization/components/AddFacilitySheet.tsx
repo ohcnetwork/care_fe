@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -37,24 +38,24 @@ export default function AddFacilitySheet({
             className="text-primary-400 text-sm"
           >
             <CareIcon icon="l-edit" className="mr-1 h-4 w-4" />
-            Edit Facility
+            {t("edit_facility")}
           </Button>
         ) : (
           <Button variant="outline" data-cy="add-facility-button">
             <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-            Add Facility
+            {t("add_facility")}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            {facilityId ? "Edit Facility" : "Add New Facility"}
+            {facilityId ? t("edit_facility") : t("add_new_facility")}
           </SheetTitle>
           <SheetDescription>
             {facilityId
-              ? "Update the details of the existing facility."
-              : "Create a new facility and add it to the organization."}
+              ? t("update_existing_facility")
+              : t("create_new_facility")}
           </SheetDescription>
         </SheetHeader>
         <div className="mt-6">

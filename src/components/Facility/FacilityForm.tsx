@@ -180,7 +180,6 @@ export default function CreateFacilityForm(props: FacilityProps) {
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      console.log(facilityData);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
@@ -218,15 +217,11 @@ export default function CreateFacilityForm(props: FacilityProps) {
     }
   };
 
-  const { data: pincodeData, isError: isPincodeError } = useQuery({
+  const { data: pincodeData } = useQuery({
     queryKey: ["pincodeDetails", pincode],
     queryFn: () => getPincodeDetails(pincode, careConfig.govDataApiKey),
     enabled: validatePincode(pincode) && pincode != facilityData?.pincode,
   });
-
-  if (isPincodeError) {
-    toast.error("Invalid pincode");
-  }
 
   const stateName = pincodeData?.statename;
 
@@ -256,7 +251,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Basic Information</h3>
+          <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -352,7 +347,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
 
         {/* Contact Information */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Contact Information</h3>
+          <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -382,6 +377,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
                     <Input
                       data-cy="facility-pincode"
                       placeholder="Enter pincode"
+                      maxLength={6}
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -428,7 +424,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
         {/* Location Information */}
         <div className="space-y-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Location Details</h3>
+            <h3 className="text-lg font-medium">{t("location_details")}</h3>
             <Button
               type="button"
               variant="outline"
@@ -441,12 +437,12 @@ export default function CreateFacilityForm(props: FacilityProps) {
               {isGettingLocation ? (
                 <>
                   <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                  Getting Location...
+                  {t("getting_location")}
                 </>
               ) : (
                 <>
                   <CareIcon icon="l-location-point" className="h-4 w-4" />
-                  Get Current Location
+                  {t("get_current_location")}
                 </>
               )}
             </Button>
@@ -497,7 +493,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
 
         {/* Visibility Settings */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Visibility Settings</h3>
+          <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
@@ -557,10 +553,10 @@ export default function CreateFacilityForm(props: FacilityProps) {
                   icon="l-spinner"
                   className="mr-2 h-4 w-4 animate-spin"
                 />
-                Updating Facility...
+                {t("updating_facility")}
               </>
             ) : (
-              "Update Facility"
+              t("update_facility")
             )
           ) : isPending ? (
             <>
@@ -568,10 +564,10 @@ export default function CreateFacilityForm(props: FacilityProps) {
                 icon="l-spinner"
                 className="mr-2 h-4 w-4 animate-spin"
               />
-              Creating Facility...
+              {t("creating_facility")}
             </>
           ) : (
-            "Create Facility"
+            t("create_facility")
           )}
         </Button>
       </form>
