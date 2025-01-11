@@ -155,7 +155,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode?.toString() || "",
-        geo_organization: facilityData.geo_organization,
+        geo_organization: facilityData.geo_organization || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude?.toString() || "",

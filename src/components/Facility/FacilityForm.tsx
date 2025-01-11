@@ -86,7 +86,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const { organizationId, facilityId, onSubmitSuccess } = props;
+  const { facilityId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [pincode, setPincode] = useState("");
 
@@ -186,7 +186,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode?.toString() || "",
-        geo_organization: facilityData.geo_organization,
+        geo_organization: facilityData.geo_organization || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude?.toString() || "",
@@ -220,7 +220,9 @@ export default function CreateFacilityForm(props: FacilityProps) {
   const { data: pincodeData } = useQuery({
     queryKey: ["pincodeDetails", pincode],
     queryFn: () => getPincodeDetails(pincode, careConfig.govDataApiKey),
-    enabled: validatePincode(pincode) && pincode != facilityData?.pincode,
+    enabled:
+      validatePincode(pincode) &&
+      Number(pincode) !== Number(facilityData?.pincode),
   });
 
   const stateName = pincodeData?.statename;
@@ -392,7 +394,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
             <div className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
               <OrganizationSelector
                 required={true}
-                value={facilityData?.geo_organization}
+                value={form.watch("geo_organization")}
                 parentSelectedLevels={selectedLevels}
                 onChange={(value) => {
                   form.setValue("geo_organization", value);
@@ -519,25 +521,6 @@ export default function CreateFacilityForm(props: FacilityProps) {
               </FormItem>
             )}
           />
-
-          {!organizationId && (
-            <FormField
-              name="geo_organization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization</FormLabel>
-                  <FormControl>
-                    <OrganizationSelector
-                      value={field.value}
-                      onChange={field.onChange}
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
         </div>
 
         <Button
