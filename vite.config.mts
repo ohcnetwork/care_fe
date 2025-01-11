@@ -60,66 +60,70 @@ function getPluginAliases() {
   return aliases;
 }
 
-function getPluginDependencies(): string[] {
-  const pluginsDir = path.resolve(__dirname, "apps");
-  // Make sure the `apps` folder exists
-  if (!fs.existsSync(pluginsDir)) {
-    return [];
-  }
-  const pluginFolders = fs.readdirSync(pluginsDir);
-
-  const dependencies = new Set<string>();
-
-  pluginFolders.forEach((pluginFolder) => {
-    const packageJsonPath = path.join(pluginsDir, pluginFolder, "package.json");
-    if (fs.existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-      const pluginDependencies = packageJson.dependencies
-        ? Object.keys(packageJson.dependencies)
-        : [];
-      pluginDependencies.forEach((dep) => dependencies.add(dep));
-    }
-  });
-
-  return Array.from(dependencies);
+/**
+ * Parses a remote app configuration string into its components
+ * @param appConfig - Configuration string for a remote app
+ * @returns Parsed configuration object
+ */
+interface ParsedRemoteConfig {
+  url: string;
+  org: string;
+  repo: string;
 }
 
-// Recursive function to check if the module is statically imported by an entry point
-function isStaticallyImportedByEntry(
-  getModuleInfo: (moduleId: string) => any,
-  moduleId: string,
-  visited = new Set(),
-) {
-  if (visited.has(moduleId)) return false;
-  visited.add(moduleId);
-
-  const modInfo = getModuleInfo(moduleId);
-  if (!modInfo) return false;
-
-  // Check if the module is an entry point
-  if (modInfo.isEntry) {
-    return true;
+function parseRemoteConfig(appConfig: string): ParsedRemoteConfig {
+  if (!appConfig.includes("/")) {
+    throw new Error(
+      `Invalid app configuration format: ${appConfig}. Expected 'org/repo' or 'org/repo@url'.`,
+    );
   }
-
-  // Check all static importers
-  for (const importerId of modInfo.importers) {
-    if (isStaticallyImportedByEntry(getModuleInfo, importerId, visited)) {
-      return true;
+  // Handle custom URLs (both localhost and custom hosted)
+  if (appConfig.includes("@")) {
+    const [package_, url] = appConfig.split("@");
+    const [org, repo] = package_.split("/");
+    if (!org || !repo || !url) {
+      throw new Error(
+        `Invalid custom URL configuration: ${appConfig}. Expected 'org/repo@url'.`,
+      );
     }
+    // Add appropriate protocol based on whether it's localhost
+    const protocol = url.includes("localhost") ? "http://" : "https://";
+    const fullUrl = url.startsWith("http") ? url : `${protocol}${url}`;
+
+    return {
+      url: `${fullUrl}/assets/remoteEntry.js`,
+      org,
+      repo,
+    };
   }
 
-  return false;
+  // Handle GitHub Pages URLs
+  const [org, repo] = appConfig.split("/");
+  if (!org || !repo) {
+    throw new Error(
+      `Invalid GitHub Pages configuration: ${appConfig}. Expected 'org/repo'.`,
+    );
+  }
+  return {
+    url: `https://${org}.github.io/${repo}/assets/remoteEntry.js`,
+    org,
+    repo,
+  };
 }
 
 /**
  * Generates remote module configurations for Module Federation
  *
  * Supports two formats for REACT_ENABLED_APPS:
- * 1. GitHub Pages: "organization/repository[@branch]"
- *    Example: "coronasafe/care_fe@main"
+ * 1. GitHub Pages: "organization/repository"
+ *    Example: "coronasafe/care_fe"
  *
- * 2. Custom URL: "prot://localhost:port|organization/repository[@branch]"
- *    Example: "http://localhost:5173|coronasafe/care_fe@main"
+ * 2. Custom URL: "organization/repository@url"
+ *    Example: "coronasafe/care_fe@localhost:5173"
+ *    Example: "coronasafe/care_fe@care.coronasafe.network"
+ *    Note: Protocol (http/https) is automatically added based on the URL:
+ *    - localhost URLs use http://
+ *    - all other URLs use https://
  *
  * @param enabledApps - Comma-separated list of enabled apps
  * @returns Remote module configuration object for Module Federation
@@ -128,35 +132,13 @@ function getRemotes(enabledApps: string) {
   if (!enabledApps) return {};
 
   return enabledApps.split(",").reduce((acc, app) => {
-    const [package_, branch = "main"] = app.split("@");
+    const { repo, url } = parseRemoteConfig(app);
+    console.log(`Configuring Remote Module for ${repo}:`, url);
 
-    // Handle custom URLs
-    if ((package_.includes("|"))) {
-      const [host, pathParts] = package_.split("|");
-      const [org, repo] = pathParts.split("/");
-      const remoteUrl = `"${host}/assets/remoteEntry.js"`;
-      console.log(`Using Local Remote Module for ${org}/${repo}:`, remoteUrl);
-      return {
-        ...acc,
-        [repo]: {
-          external: `Promise.resolve(${remoteUrl})`,
-          from: "vite",
-          externalType: "promise",
-        },
-      };
-    }
-
-    // Handle GitHub Pages URLs
-    const [org, repo] = package_.split("/");
-    const remoteUrl = `"https://${org}.github.io/${repo}/assets/remoteEntry.js"`;
-    console.log(
-      `Using GitHub Pages Remote Module for ${org}/${repo}:`,
-      remoteUrl,
-    );
     return {
       ...acc,
       [repo]: {
-        external: `Promise.resolve(${remoteUrl})`,
+        external: `Promise.resolve("${url}")`,
         from: "vite",
         externalType: "promise",
       },

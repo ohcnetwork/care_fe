@@ -173,7 +173,7 @@ const routes = {
   updatePassword: {
     path: "/api/v1/password_change/",
     method: "PUT",
-    TRes: Type<Record<string, string | string[]>>(),
+    TRes: Type<{ message: string }>(),
     TBody: Type<UpdatePasswordForm>(),
   },
   // User Endpoints
