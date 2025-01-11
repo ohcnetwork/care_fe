@@ -10,7 +10,7 @@ describe("Patient Search", () => {
 
   beforeEach(() => {
     cy.visit("/login");
-    cy.loginByApi("nurse");
+    cy.loginByApi("staff");
   });
 
   it("search patient with phone number and verifies details", () => {
