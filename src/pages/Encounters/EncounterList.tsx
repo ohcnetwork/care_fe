@@ -214,7 +214,6 @@ export function EncounterList({
     }),
     enabled: !!encounter_id,
   });
-
   const searchOptions = [
     {
       key: "name",
@@ -222,7 +221,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by patient name",
       value: name || "",
-      shortcutKey: "n",
     },
     {
       key: "encounter_id",
@@ -230,7 +228,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by encounter ID",
       value: encounter_id || "",
-      shortcutKey: "i",
     },
     {
       key: "external_identifier",
@@ -238,7 +235,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by external ID",
       value: external_identifier || "",
-      shortcutKey: "e",
     },
   ];
 
@@ -285,6 +281,9 @@ export function EncounterList({
                       <SearchByMultipleFields
                         id="encounter-search"
                         options={searchOptions}
+                        initialOptionIndex={searchOptions.findIndex(
+                          (option) => option.value !== "",
+                        )}
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
                         clearSearch={clearSearch}

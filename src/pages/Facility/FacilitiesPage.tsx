@@ -67,7 +67,6 @@ export function FacilitiesPage() {
               type: "text" as const,
               placeholder: t("facility_search_placeholder_text"),
               value: qParams.name || "",
-              shortcutKey: "f",
             },
           ]}
           className="w-full sm:w-1/2"

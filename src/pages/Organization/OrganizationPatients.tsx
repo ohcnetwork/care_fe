@@ -99,14 +99,12 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               type: "text",
               placeholder: "Search by name",
               value: qParams.name || "",
-              shortcutKey: "n",
             },
             {
               key: "phone_number",
               type: "phone",
               placeholder: "Search by phone number",
               value: qParams.phone_number || "",
-              shortcutKey: "p",
             },
           ]}
           onSearch={handleSearch}

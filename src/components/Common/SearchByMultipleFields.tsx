@@ -35,7 +35,6 @@ interface SearchOption {
   type: "text" | "phone";
   placeholder: string;
   value: string;
-  shortcutKey: string;
   component?: React.ComponentType<HTMLDivElement>;
 }
 

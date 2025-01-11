@@ -85,7 +85,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       type: "phone" as const,
       placeholder: t("search_by_phone_number"),
       value: phoneNumber,
-      shortcutKey: "p",
     },
   ];
 
