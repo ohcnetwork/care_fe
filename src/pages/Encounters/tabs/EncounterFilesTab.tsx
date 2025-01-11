@@ -356,7 +356,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
 
   const RenderTable = () => {
     return (
-      <Table className="border-separate border-spacing-y-3 mx-2 min-w-[800px] lg:max-w-[calc(100%-12px)]">
+      <Table className="border-separate border-spacing-y-3 mx-2 min-w-[800px] lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
             <TableHead className="w-[30%] bg-white rounded-l">
