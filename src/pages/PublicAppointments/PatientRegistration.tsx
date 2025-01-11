@@ -4,6 +4,7 @@ import { navigate } from "raviger";
 import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -21,18 +22,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import DateFormField from "@/components/Form/FormFields/DateFormField";
-import {
-  Appointment,
-  AppointmentCreate,
-  SlotAvailability,
-} from "@/components/Schedule/types";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -43,6 +38,11 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 import OrganizationSelector from "../Organization/components/OrganizationSelector";
 
@@ -69,7 +69,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   const { staffId } = props;
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
-  ) as SlotAvailability;
+  ) as TokenSlot;
   const reason = localStorage.getItem("reason");
 
   const { t } = useTranslation();
@@ -139,7 +139,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   });
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreate) =>
+    mutationFn: (body: AppointmentCreateRequest) =>
       mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id },
         body,
@@ -148,7 +148,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         },
       })(body),
     onSuccess: (data: Appointment) => {
-      Notification.Success({ msg: t("appointment_created_success") });
+      toast.success(t("appointment_created_success"));
       queryClient.invalidateQueries({
         queryKey: [
           ["patients", tokenData.phoneNumber],
@@ -163,9 +163,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       );
     },
     onError: (error) => {
-      Notification.Error({
-        msg: error?.message || t("failed_to_create_appointment"),
-      });
+      toast.error(error?.message || t("failed_to_create_appointment"));
     },
   });
 
@@ -178,7 +176,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         },
       })(body),
     onSuccess: (data: AppointmentPatient) => {
-      Notification.Success({ msg: "Patient created successfully" });
+      toast.success(t("patient_created_successfully"));
       publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
@@ -190,13 +188,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       const errors = errorData?.errors;
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0];
-        Notification.Error({
-          msg: firstError.msg,
-        });
+        toast.error(firstError.msg);
       } else {
-        Notification.Error({
-          msg: error.message,
-        });
+        toast.error(error.message);
       }
     },
   });

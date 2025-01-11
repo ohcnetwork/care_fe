@@ -21,7 +21,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
   return (
     <>
-      <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
+      <div className="pb-16 block relative border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
         <Badge
           variant={
             completedEncounterStatus.includes(encounter.status)

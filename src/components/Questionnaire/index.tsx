@@ -45,7 +45,7 @@ export function QuestionnaireList() {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Version
+                Slug
               </th>
             </tr>
           </thead>
@@ -78,7 +78,7 @@ export function QuestionnaireList() {
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {questionnaire.version}
+                  {questionnaire.slug}
                 </td>
               </tr>
             ))}

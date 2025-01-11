@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
+  const { t } = useTranslation();
+
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 12; // 3x4 grid
@@ -37,7 +40,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       limit,
       searchQuery,
     ],
-    queryFn: query(routes.facilityOrganization.list, {
+    queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
         parent: id,
@@ -52,7 +55,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-lg font-semibold">Organizations</h2>
+          <h2 className="text-lg font-semibold">{t("organizations")}</h2>
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <div className="w-full sm:w-72">
               <Input

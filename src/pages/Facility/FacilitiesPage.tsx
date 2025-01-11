@@ -47,7 +47,7 @@ export function FacilitiesPage() {
     PaginatedResponse<FacilityModel>
   >({
     queryKey: ["facilities", qParams],
-    queryFn: query(routes.getAllFacilities, {
+    queryFn: query.debounced(routes.getAllFacilities, {
       queryParams: {
         name: qParams.name,
         ...(qParams.facility_type && { facility_type: qParams.facility_type }),

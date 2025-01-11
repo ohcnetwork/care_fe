@@ -11,7 +11,6 @@ export class LoginPage {
   private readonly usernameInput = "[data-cy=username]";
   private readonly passwordInput = "[data-cy=password]";
   private readonly submitButton = "[data-cy=submit]";
-  private readonly errorMessage = ".text-red-500";
 
   // Add new methods while keeping existing loginByRole
   typeUsername(username: string) {
@@ -25,7 +24,7 @@ export class LoginPage {
   }
 
   clickSubmit() {
-    cy.get(this.submitButton).click();
+    cy.clickSubmitButton("Login");
     return this;
   }
 
@@ -37,7 +36,10 @@ export class LoginPage {
   }
 
   verifyValidationErrors() {
-    cy.get(this.errorMessage).should("be.visible");
+    cy.verifyErrorMessages([
+      "This field is required",
+      "This field is required",
+    ]);
     return this;
   }
 

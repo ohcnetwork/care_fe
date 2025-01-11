@@ -17,10 +17,10 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -28,7 +28,7 @@ export const Appointments = (props: PatientProps) => {
 
   const { data } = useQuery({
     queryKey: ["patient-appointments", id],
-    queryFn: query(ScheduleAPIs.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { patient: id, limit: 100 },
     }),
@@ -38,13 +38,20 @@ export const Appointments = (props: PatientProps) => {
 
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {
-      booked: "bg-yellow-100 text-yellow-800",
-      checked_in: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      booked:
+        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:text-yellow-900",
+      checked_in:
+        "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900",
+      cancelled: "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900",
     };
 
     return (
-      <Badge className={statusColors[status] || "bg-gray-100 text-gray-800"}>
+      <Badge
+        className={
+          statusColors[status] ||
+          "bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-gray-900"
+        }
+      >
         {status.replace("_", " ").toUpperCase()}
       </Badge>
     );
