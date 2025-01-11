@@ -177,7 +177,7 @@ export default function ResourceCreate(props: resourceProps) {
   const handleSubmit = async () => {
     const validForm = validateForm();
 
-    if (!validForm) {
+    if (validForm) {
       setIsLoading(true);
 
       const resourceData: CreateResourceRequest = {
