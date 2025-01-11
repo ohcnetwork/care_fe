@@ -10,6 +10,9 @@ type Options<TData, TBody> = RequestOptions<TData, TBody> & {
 
 /**
  * @deprecated use useQuery/useMutation/callApi instead
+ *
+ * This no longer ensures that the path params are provided correctly during runtime.
+ * Usages so far works as path params were passed correctly, but this should not be used anymore.
  */
 export default async function request<TData, TBody>(
   { path, method, noAuth }: ApiRoute<TData, TBody>,
