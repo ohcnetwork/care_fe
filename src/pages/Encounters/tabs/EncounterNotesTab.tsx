@@ -112,31 +112,26 @@ const ThreadItem = ({
   isSelected: boolean;
   onClick: () => void;
 }) => (
-  useEffect(() => {
-    console.log(thread);
-  }, [thread]),
-  (
-    <button
-      className={cn(
-        "group relative w-full p-4 text-left rounded-lg transition-colors border ",
-        isSelected
-          ? "bg-primary-100 hover:bg-primary/15 border-primary"
-          : "hover:bg-gray-100 hover:border-gray-200",
-      )}
-      onClick={onClick}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm truncate">{thread.title}</h4>
-          {/* Todo: Replace with thread.created */}
-          <p className="text-xs text-gray-500 mt-1">{thread.created}</p>
-        </div>
-        {isSelected && (
-          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
-        )}
+  <button
+    className={cn(
+      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
+      isSelected
+        ? "bg-primary-100 hover:bg-primary/15 border-primary"
+        : "hover:bg-gray-100 hover:border-gray-200",
+    )}
+    onClick={onClick}
+  >
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1 min-w-0">
+        <h4 className="font-medium text-sm truncate">{thread.title}</h4>
+        {/* Todo: Replace with thread.created */}
+        <p className="text-xs text-gray-500 mt-1">12/12/24</p>
       </div>
-    </button>
-  )
+      {isSelected && (
+        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
+      )}
+    </div>
+  </button>
 );
 
 // Message item component
@@ -346,6 +341,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     }),
   });
 
+  useEffect(() => {
+    const pagesElement = document.getElementById("pages");
+    if (pagesElement) {
+      pagesElement.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
   // Auto-select first thread
   useEffect(() => {
     if (threadsData?.results.length && !selectedThread) {
