@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
 import { FilterState } from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -25,17 +24,11 @@ export function useOrganizationLevel({
   onChange,
   getParentId,
 }: UseOrganizationLevelProps) {
-  const [levelSearch, setLevelSearch] = useDebouncedState("", 500);
+  const [levelSearch, setLevelSearch] = useState("");
 
   const { data: availableOrgs } = useQuery<{ results: Organization[] }>({
-    queryKey: ["organizations-available", getParentId(index), levelSearch],
-    queryFn: query(organizationApi.getPublicOrganizations, {
-      queryParams: {
-        ...(index > 0 && { parent: getParentId(index) }),
-        ...(index === 0 && { level_cache: 1 }),
-        name: levelSearch || undefined,
-      },
-    }),
+    queryKey: ["organizations-available", getParentId(index)],
+    queryFn: query.debounced(organizationApi.getPublicOrganizations),
     enabled:
       !skip &&
       index <= selectedLevels.length &&
