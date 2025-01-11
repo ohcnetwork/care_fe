@@ -88,17 +88,20 @@ export default function UserHome(props: UserHomeProps) {
     ? `/facility/${props.facilityId}/users/${username}`
     : `/users/${username}`;
 
+  const crumbsReplacements = {
+    ...(loggedInUser
+      ? { [username]: { name: "Profile" } }
+      : { [username]: { name: username } }),
+    ...(!props.facilityId && { users: { hide: true } }),
+  };
+
   return (
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={
-          loggedInUser
-            ? { [username]: { name: "Profile" } }
-            : { [username]: { name: username } }
-        }
+        crumbsReplacements={crumbsReplacements}
         focusOnLoad={true}
-        backUrl="/users"
+        backUrl={props.facilityId ? `/users` : "/"}
         hideTitleOnPage
       >
         {
