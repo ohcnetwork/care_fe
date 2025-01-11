@@ -836,6 +836,7 @@
   "encounter_class__imp": "Inpatient",
   "encounter_class__in_progress": "In Progress",
   "encounter_class__obsenc": "Observation",
+  "encounter_class__planned": "Planned",
   "encounter_class__vr": "Virtual",
   "encounter_date_field_label__A": "Date & Time of Admission to the Facility",
   "encounter_date_field_label__DC": "Date & Time of Domiciliary Care commencement",
