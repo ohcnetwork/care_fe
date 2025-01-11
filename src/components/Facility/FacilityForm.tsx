@@ -130,7 +130,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
     mutationFn: mutate(routes.updateFacility, {
       pathParams: { id: facilityId || "" },
-    }), // Use the update route
+    }),
     onSuccess: (_data: FacilityModel) => {
       toast.success(t("facility_updated_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
@@ -160,18 +160,15 @@ export default function CreateFacilityForm(props: FacilityProps) {
   const onSubmit: (data: FacilityFormValues) => void = (
     data: FacilityFormValues,
   ) => {
+    const requestData = {
+      ...data,
+      phone_number: parsePhoneNumber(data.phone_number),
+    };
+
     if (facilityId) {
-      return updateFacility({
-        ...data,
-        phone_number: parsePhoneNumber(data.phone_number),
-        geo_organization: organizationId,
-      });
+      updateFacility(requestData);
     } else {
-      createFacility({
-        ...data,
-        phone_number: parsePhoneNumber(data.phone_number),
-        geo_organization: organizationId,
-      });
+      createFacility(requestData);
     }
   };
 
@@ -214,7 +211,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
           setIsGettingLocation(false);
           toast.error(t("unable_to_get_location") + error.message);
         },
-        { timeout: 10000 }, // 10 second timeout
+        { timeout: 10000 },
       );
     } else {
       toast.error(t("geolocation_is_not_supported_by_this_browser"));
