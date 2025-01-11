@@ -114,7 +114,10 @@ export default function OrganizationFacilities({
             </Card>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
-              <Card className="h-full hover:border-primary/50 transition-colors overflow-hidden">
+              <Card
+                key={facility.id}
+                className="h-full hover:border-primary/50 transition-colors overflow-hidden"
+              >
                 <div className="relative h-48 bg-gray-100">
                   {facility.read_cover_image_url ? (
                     <img
