@@ -7,6 +7,10 @@
     "username": "nihal-nurse",
     "password": "Test@123"
   },
+  "doctor": {
+    "username": "arjun-doctor",
+    "password": "Test@123"
+  },
   "staff": {
     "username": "nihal-staff",
     "password": "Test@123"

@@ -1,71 +1,77 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 // 0 is Monday, 6 is Sunday - Python's convention.
-const DAYS_OF_WEEK = {
-  MONDAY: 0,
-  TUESDAY: 1,
-  WEDNESDAY: 2,
-  THURSDAY: 3,
-  FRIDAY: 4,
-  SATURDAY: 5,
-  SUNDAY: 6,
-} as const;
-
-export type DayOfWeekValue = (typeof DAYS_OF_WEEK)[keyof typeof DAYS_OF_WEEK];
-
-interface Props {
-  value?: DayOfWeekValue[];
-  onChange?: (value: DayOfWeekValue[]) => void;
+export enum DayOfWeek {
+  MONDAY = 0,
+  TUESDAY = 1,
+  WEDNESDAY = 2,
+  THURSDAY = 3,
+  FRIDAY = 4,
+  SATURDAY = 5,
+  SUNDAY = 6,
 }
 
-export default function WeekdayCheckbox({ value = [], onChange }: Props) {
+const dayOfWeekKeys = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+] as const;
+
+interface Props {
+  value: DayOfWeek[] | null;
+  onChange: (value: DayOfWeek[] | null) => void;
+  format?: "alphabet" | "short" | "long";
+}
+
+export default function WeekdayCheckbox({
+  value = [],
+  onChange,
+  format = "alphabet",
+}: Props) {
+  const selectedDays = value ?? [];
   const { t } = useTranslation();
 
-  const handleDayToggle = (day: DayOfWeekValue) => {
+  const handleDayToggle = (day: DayOfWeek) => {
     if (!onChange) return;
 
-    if (value.includes(day)) {
-      onChange(value.filter((d) => d !== day));
+    if (selectedDays.includes(day)) {
+      onChange(selectedDays.filter((d) => d !== day));
     } else {
-      onChange([...value, day]);
+      onChange([...selectedDays, day]);
     }
   };
 
   return (
-    <ul className="flex justify-between">
-      {Object.values(DAYS_OF_WEEK).map((day) => {
-        const isChecked = value.includes(day);
+    <div className="flex gap-2 md:gap-4">
+      {dayOfWeekKeys.map((day) => {
+        const dow = DayOfWeek[day as keyof typeof DayOfWeek];
+        const isSelected = selectedDays.includes(dow);
 
         return (
-          <li key={day}>
-            <div
-              className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-lg border px-8 py-6 transition-all duration-200 ease-in-out",
-                isChecked
-                  ? "border-primary-500 bg-white shadow"
-                  : "border-gray-300",
-              )}
-            >
-              <Checkbox
-                id={`day_of_week_checkbox_${day}`}
-                checked={isChecked}
-                onCheckedChange={() => handleDayToggle(day)}
-              />
-              <label
-                htmlFor={`day_of_week_checkbox_${day}`}
-                className="cursor-pointer text-xs font-semibold uppercase"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {t(`DAYS_OF_WEEK_SHORT__${day}`)}
-              </label>
-            </div>
-          </li>
+          <Button
+            key={dow}
+            type="button"
+            variant={isSelected ? "outline_primary" : "outline"}
+            onClick={() => handleDayToggle(dow)}
+            size={format === "alphabet" ? "icon" : "default"}
+            aria-pressed={isSelected}
+            aria-checked={isSelected}
+            aria-label={t(`DAYS_OF_WEEK__${dow}`)}
+          >
+            {format === "alphabet"
+              ? day[0]
+              : format === "short"
+                ? t(`DAYS_OF_WEEK_SHORT__${dow}`)
+                : t(`DAYS_OF_WEEK__${dow}`)}
+          </Button>
         );
       })}
-    </ul>
+    </div>
   );
 }

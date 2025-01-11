@@ -10,12 +10,12 @@ import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
-import { PatientRegistration } from "@/pages/Appoinments/PatientRegistration";
-import PatientSelect from "@/pages/Appoinments/PatientSelect";
-import { ScheduleAppointment } from "@/pages/Appoinments/Schedule";
-import { AppointmentSuccess } from "@/pages/Appoinments/Success";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import PatientIndex from "@/pages/Patient/index";
+import { PatientRegistration } from "@/pages/PublicAppointments/PatientRegistration";
+import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
+import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
+import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
 

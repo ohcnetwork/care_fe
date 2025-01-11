@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isBefore, parse } from "date-fns";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -28,40 +30,68 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { ScheduleAPIs } from "@/components/Schedule/api";
-
-import useSlug from "@/hooks/useSlug";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
-
-const formSchema = z.object({
-  reason: z.string().min(1, "Reason is required"),
-  valid_from: z.date({ required_error: "From date is required" }),
-  valid_to: z.date({ required_error: "To date is required" }),
-  start_time: z
-    .string()
-    .min(1, "Start time is required") as unknown as z.ZodType<Time>,
-  end_time: z
-    .string()
-    .min(1, "End time is required") as unknown as z.ZodType<Time>,
-  unavailable_all_day: z.boolean(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface Props {
-  onRefresh?: () => void;
-  user: UserBase;
+  facilityId: string;
+  userId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
-  const [open, setOpen] = useState(false);
-  const facilityId = useSlug("facility");
+export default function CreateScheduleExceptionSheet({
+  facilityId,
+  userId,
+  trigger,
+}: Props) {
+  const { t } = useTranslation();
 
-  const form = useForm<FormValues>({
+  const formSchema = z
+    .object({
+      reason: z.string().min(1, t("field_required")),
+      valid_from: z.date({ required_error: t("field_required") }),
+      valid_to: z.date({ required_error: t("field_required") }),
+      start_time: z
+        .string()
+        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      end_time: z
+        .string()
+        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      unavailable_all_day: z.boolean(),
+    })
+    .refine(
+      (data) => {
+        // Skip time validation if unavailable all day
+        if (data.unavailable_all_day) return true;
+
+        // Parse time strings into Date objects for comparison
+        const startTime = parse(data.start_time, "HH:mm", new Date());
+        const endTime = parse(data.end_time, "HH:mm", new Date());
+
+        return isBefore(startTime, endTime);
+      },
+      {
+        message: t("start_time_must_be_before_end_time"),
+        path: ["start_time"], // This will show the error on the start_time field
+      },
+    )
+    .refine(
+      (data) => {
+        return isBefore(data.valid_from, data.valid_to);
+      },
+      {
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"], // This will show the error on the valid_from field
+      },
+    );
+
+  const queryClient = useQueryClient();
+
+  const [open, setOpen] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       valid_from: undefined,
@@ -73,14 +103,18 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
     },
   });
 
-  const {
-    mutate: createException,
-    isPending,
-    isSuccess,
-  } = useMutation({
-    mutationFn: mutate(ScheduleAPIs.exceptions.create, {
+  const { mutate: createException, isPending } = useMutation({
+    mutationFn: mutate(scheduleApis.exceptions.create, {
       pathParams: { facility_id: facilityId },
     }),
+    onSuccess: () => {
+      toast.success(t("exception_created"));
+      setOpen(false);
+      form.reset();
+      queryClient.invalidateQueries({
+        queryKey: ["user-schedule-exceptions", { facilityId, userId }],
+      });
+    },
   });
 
   const unavailableAllDay = form.watch("unavailable_all_day");
@@ -95,38 +129,31 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
     }
   }, [unavailableAllDay]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Exception created successfully");
-      setOpen(false);
-      form.reset();
-      onRefresh?.();
-    }
-  }, [isSuccess]);
-
-  async function onSubmit(data: FormValues) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     createException({
       reason: data.reason,
       valid_from: dateQueryString(data.valid_from),
       valid_to: dateQueryString(data.valid_to),
       start_time: data.start_time,
       end_time: data.end_time,
-      user: user.id,
+      user: userId,
     });
   }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="primary" disabled={isPending}>
-          Add Exception
-        </Button>
+        {trigger ?? (
+          <Button variant="primary" disabled={isPending}>
+            {t("add_exception")}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
         <SheetHeader>
-          <SheetTitle>Add Schedule Exceptions</SheetTitle>
+          <SheetTitle>{t("add_schedule_exceptions")}</SheetTitle>
           <SheetDescription>
-            Configure absences or add availability beyond the regular schedule.
+            {t("add_schedule_exceptions_description")}
           </SheetDescription>
         </SheetHeader>
 
@@ -249,11 +276,11 @@ export default function ScheduleExceptionForm({ user, onRefresh }: Props) {
                       type="button"
                       disabled={isPending}
                     >
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   </SheetClose>
                   <Button variant="primary" type="submit" disabled={isPending}>
-                    Confirm Unavailability
+                    {t("confirm_unavailability")}
                   </Button>
                 </SheetFooter>
               </form>

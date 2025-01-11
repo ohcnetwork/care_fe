@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction } from "react";
-import { toast } from "sonner";
 
 import { LocalStorageKeys } from "@/common/constants";
 
@@ -16,8 +15,6 @@ export function makeUrl(
       path,
     );
   }
-
-  ensurePathNotMissingReplacements(path);
 
   if (query) {
     path += `?${makeQueryParams(query)}`;
@@ -41,18 +38,6 @@ const makeQueryParams = (query: QueryParams) => {
   });
 
   return qParams.toString();
-};
-
-const ensurePathNotMissingReplacements = (path: string) => {
-  const missingParams = path.match(/\{.*\}/g);
-
-  if (missingParams) {
-    const msg = `Missing path params: ${missingParams.join(
-      ", ",
-    )}. Path: ${path}`;
-    toast.error(msg);
-    throw new Error(msg);
-  }
 };
 
 export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
