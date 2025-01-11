@@ -35,7 +35,7 @@ export default function AddFacilitySheet({
           <Button
             variant="link"
             data-cy="edit-facility-button"
-            className="text-primary-400 text-sm"
+            className="text-primary text-sm"
           >
             <CareIcon icon="l-edit" className="mr-1 h-4 w-4" />
             {t("edit_facility")}

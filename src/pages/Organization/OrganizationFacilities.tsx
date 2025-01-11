@@ -146,28 +146,28 @@ export default function OrganizationFacilities({
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <div className="mt-2">
+                  <div>
                     <AddFacilitySheet
                       organizationId={id}
                       facilityId={facility.id}
                     />
                   </div>
-                  <Link
-                    href={`/facility/${facility.id}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    View Facility
+                  <div>
                     <Button
-                      variant="ghost"
+                      variant="link"
                       size="icon"
-                      className="shrink-0"
+                      className="text-primary"
                       asChild
                     >
-                      <div>
+                      <Link
+                        href={`/facility/${facility.id}`}
+                        className="text-sm w-full hover:underline"
+                      >
+                        {t("view_facility")}
                         <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                      </div>
+                      </Link>
                     </Button>
-                  </Link>
+                  </div>
                 </CardFooter>
               </Card>
             ))

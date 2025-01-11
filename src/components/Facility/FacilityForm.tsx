@@ -389,7 +389,7 @@ export default function CreateFacilityForm(props: FacilityProps) {
                 </FormItem>
               )}
             />
-            <div className="col-span-2 grid grid-cols-2 gap-5">
+            <div className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
               <OrganizationSelector
                 required={true}
                 value={facilityData?.geo_organization}
