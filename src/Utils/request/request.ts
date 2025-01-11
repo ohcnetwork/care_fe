@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 
 import handleResponse from "@/Utils/request/handleResponse";
-import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
+import { ApiRoute, RequestOptions, RequestResult } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
 type Options<TData, TBody> = RequestOptions<TData, TBody> & {
@@ -12,7 +12,7 @@ type Options<TData, TBody> = RequestOptions<TData, TBody> & {
  * @deprecated use useQuery/useMutation/callApi instead
  */
 export default async function request<TData, TBody>(
-  { path, method, noAuth }: Route<TData, TBody>,
+  { path, method, noAuth }: ApiRoute<TData, TBody>,
   {
     query,
     body,
