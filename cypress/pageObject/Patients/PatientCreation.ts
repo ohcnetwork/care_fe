@@ -74,12 +74,8 @@ export class PatientCreation {
     // Split the date string (expected format: "DD-MM-YYYY")
     const [day, month, year] = dateString.split("-");
 
-    // Remove leading zeros from day and month
-    const dayWithoutLeadingZero = parseInt(day).toString();
-    const monthWithoutLeadingZero = parseInt(month).toString();
-
-    cy.get('[data-cy="dob-day-input"]').type(dayWithoutLeadingZero);
-    cy.get('[data-cy="dob-month-input"]').type(monthWithoutLeadingZero);
+    cy.get('[data-cy="dob-day-input"]').type(day);
+    cy.get('[data-cy="dob-month-input"]').type(month);
     cy.get('[data-cy="dob-year-input"]').type(year);
 
     return this;
