@@ -20,7 +20,7 @@ const FacilityRoutes: AppRoutes = {
     <FacilityHome facilityId={facilityId ? facilityId : ""} />
   ),
   "/facility/:facilityId/users": ({ facilityId }) => (
-    <FacilityUsers facilityId={facilityId ? facilityId : 0} />
+    <FacilityUsers facilityId={facilityId ? facilityId : ""} />
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId ? facilityId : 0} />
