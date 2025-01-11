@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 import {
   Select,
   SelectContent,
@@ -38,69 +39,57 @@ import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 import userApi from "@/types/user/userApi";
 
-const userFormSchema = z
-  .object({
-    user_type: z.enum(["doctor", "nurse", "staff", "volunteer"]),
-    username: z
-      .string()
-      .min(4, "Username must be at least 4 characters")
-      .max(16, "Username must be less than 16 characters")
-      .regex(
-        /^[a-z0-9._-]*$/,
-        "Username can only contain lowercase letters, numbers, and . _ -",
-      )
-      .regex(
-        /^[a-z0-9].*[a-z0-9]$/,
-        "Username must start and end with a letter or number",
-      )
-      .refine(
-        (val) => !val.match(/(?:[._-]{2,})/),
-        "Username can't contain consecutive special characters",
-      ),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
-    c_password: z.string(),
-    first_name: z.string().min(1, "First name is required"),
-    last_name: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email address"),
-    phone_number: z
-      .string()
-      .regex(
-        /^\+91[0-9]{10}$/,
-        "Phone number must start with +91 followed by 10 digits",
-      ),
-    alt_phone_number: z
-      .string()
-      .regex(
-        /^\+91[0-9]{10}$/,
-        "Phone number must start with +91 followed by 10 digits",
-      )
-      .optional(),
-    phone_number_is_whatsapp: z.boolean().default(true),
-    date_of_birth: z.string().min(1, "Date of birth is required"),
-    gender: z.enum(["male", "female", "other"]),
-    qualification: z.string().optional(),
-    doctor_experience_commenced_on: z.string().optional(),
-    doctor_medical_council_registration: z.string().optional(),
-    geo_organization: z.string().min(1, "Organization is required"),
-  })
-  .refine((data) => data.password === data.c_password, {
-    message: "Passwords don't match",
-    path: ["c_password"],
-  });
-
-type UserFormValues = z.infer<typeof userFormSchema>;
-
 interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
 }
 
 export default function CreateUserForm({ onSubmitSuccess }: Props) {
   const { t } = useTranslation();
+
+  const userFormSchema = z
+    .object({
+      user_type: z.enum(["doctor", "nurse", "staff", "volunteer"]),
+      username: z
+        .string()
+        .min(4, t("username_min_length_validation"))
+        .max(16, t("username_max_length_validation"))
+        .regex(/^[a-z0-9._-]*$/, t("username_characters_validation"))
+        .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_start_end_validation"))
+        .refine(
+          (val) => !val.match(/(?:[._-]{2,})/),
+          t("username_consecutive_validation"),
+        ),
+      password: z
+        .string()
+        .min(8, t("password_length_validation"))
+        .regex(/[a-z]/, t("password_lowercase_validation"))
+        .regex(/[A-Z]/, t("password_uppercase_validation"))
+        .regex(/[0-9]/, t("password_number_validation")),
+      c_password: z.string(),
+      first_name: z.string().min(1, t("field_required")),
+      last_name: z.string().min(1, t("field_required")),
+      email: z.string().email(t("invalid_email_address")),
+      phone_number: z
+        .string()
+        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
+      alt_phone_number: z
+        .string()
+        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
+        .optional(),
+      phone_number_is_whatsapp: z.boolean().default(true),
+      date_of_birth: z.string().min(1, t("field_required")),
+      gender: z.enum(["male", "female", "other"]),
+      qualification: z.string().optional(),
+      doctor_experience_commenced_on: z.string().optional(),
+      doctor_medical_council_registration: z.string().optional(),
+      geo_organization: z.string().min(1, t("field_required")),
+    })
+    .refine((data) => data.password === data.c_password, {
+      message: t("password_mismatch"),
+      path: ["c_password"],
+    });
+
+  type UserFormValues = z.infer<typeof userFormSchema>;
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -127,7 +116,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     }
   }, [phoneNumber, isWhatsApp, form, usernameInput]);
 
-  const { error, isLoading } = useQuery({
+  const { isLoading: isUsernameChecking, isError: isUsernameTaken } = useQuery({
     queryKey: ["checkUsername", usernameInput],
     queryFn: query(userApi.checkUsername, {
       pathParams: { username: usernameInput },
@@ -140,9 +129,16 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     const {
       errors: { username },
     } = form.formState;
+    const isInitialRender = usernameInput === "";
+
     if (username?.message) {
-      return validateRule(false, username.message);
-    } else if (isLoading) {
+      return validateRule(
+        false,
+        username.message,
+        isInitialRender,
+        t("username_valid"),
+      );
+    } else if (isUsernameChecking) {
       return (
         <div className="flex items-center gap-1">
           <CareIcon
@@ -154,10 +150,13 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           </span>
         </div>
       );
-    } else if (error) {
-      return validateRule(false, t("username_not_available"));
     } else if (usernameInput) {
-      return validateRule(true, t("username_available"));
+      return validateRule(
+        !isUsernameTaken,
+        t("username_not_available"),
+        isInitialRender,
+        t("username_available"),
+      );
     }
   };
 
@@ -266,11 +265,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("password")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder={t("password")}
-                    {...field}
-                  />
+                  <PasswordInput placeholder={t("password")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -284,8 +279,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("confirm_password")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
+                  <PasswordInput
                     placeholder={t("confirm_password")}
                     {...field}
                   />

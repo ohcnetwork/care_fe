@@ -48,6 +48,9 @@ export const FieldErrorText = (props: ErrorProps) => {
   );
 };
 
+/**
+ * @deprecated use shadcn/ui's solution for form fields instead along with react-hook-form
+ */
 const FormField = ({
   field,
   ...props

@@ -1,22 +1,22 @@
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { Patient } from "@/types/emr/newPatient";
 
 import { AppRoutes } from "./Routers/AppRouter";
+import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
 
-export type ScribeComponentType = React.FC;
-export type ManageFacilityOptionsComponentType = React.FC<{
-  facility?: FacilityModel;
+export type ScribeComponentType = React.FC<{
+  formState: QuestionnaireFormState[];
+  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
 }>;
 
 export type PatientHomeActionsComponentType = React.FC<{

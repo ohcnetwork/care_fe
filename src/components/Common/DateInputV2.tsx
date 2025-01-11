@@ -8,7 +8,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import DateTextInput from "@/components/Common/DateTextInput";
 
 import dayjs from "@/Utils/dayjs";
-import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 import { classNames } from "@/Utils/utils";
 
 type DatePickerType = "date" | "month" | "year";
@@ -65,7 +64,6 @@ const DateInputV2: React.FC<Props> = ({
   const minutes = dayjs(value).minute();
   const ampm = dayjs(value).hour() > 11 ? "PM" : "AM";
 
-  const dateInputRef = useRef<HTMLDivElement>(null);
   const hourScrollerRef = useRef<HTMLDivElement>(null);
   const minuteScrollerRef = useRef<HTMLDivElement>(null);
 
@@ -351,25 +349,10 @@ const DateInputV2: React.FC<Props> = ({
     return `${right ? "sm:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)]" : ""} ${right ? "max-sm:-translate-x-1/2" : ""} ${top ? "max-sm:-translate-y-[calc(100%+50px)]" : ""}`.trim();
   };
 
-  const domValue = useValueInjectionObserver<string>({
-    targetElement: dateInputRef.current,
-    attribute: "data-cui-dateinput-value",
-  });
-
-  useEffect(() => {
-    if (value !== domValue && typeof domValue !== "undefined")
-      onChange(dayjs(domValue).toDate());
-  }, [domValue]);
-
   return (
     <div>
       <div
-        ref={dateInputRef}
         className={`${containerClassName ?? "container mx-auto text-black"}`}
-        data-cui-dateinput
-        data-cui-dateinput-value={JSON.stringify(
-          dayjs(value).format("YYYY-MM-DDTHH:mm"),
-        )}
       >
         <Popover className="relative">
           {({ open, close }) => {
