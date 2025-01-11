@@ -179,6 +179,7 @@ const ResourcePage = () => {
           </Button>
         </div>
       </div>
+      <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       {viewMode === "board" ? (
         <>
@@ -186,7 +187,6 @@ const ResourcePage = () => {
             <ScrollArea>
               <div className="flex w-max space-x-4">
                 <ResourceColumn<ResourceRequest>
-                  title={<BadgesList {...{ appliedFilters, FilterBadges }} />}
                   sections={boardFilter.map((board) => ({
                     id: board,
                     title: (
@@ -230,8 +230,6 @@ const ResourcePage = () => {
           ) : (
             <div className="w-full flex flex-col">
               <div className="-mb-4 mr-2 mt-4 flex justify-end">
-                <BadgesList {...{ appliedFilters, FilterBadges }} />
-
                 <button
                   className="text-xs hover:text-blue-800 w-[90px]"
                   onClick={() => refetch()}
@@ -250,7 +248,7 @@ const ResourcePage = () => {
                   {t("resource")}
                 </div>
                 <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                  {t("LOG_UPDATE_FIELD_LABEL__patient_category")}
+                  {t("resource_category")}
                 </div>
                 <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
                   {t("consent__status")}
@@ -259,7 +257,7 @@ const ResourcePage = () => {
                   {t("facilities")}
                 </div>
                 <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                  {t("LOG_UPDATE_FIELD_LABEL__action")}
+                  {t("action")}
                 </div>
               </div>
               <ResourceRow data={data?.results || []} />
@@ -281,7 +279,6 @@ const ResourcePage = () => {
 };
 
 interface ResourceColumnProps<T extends { id: string }> {
-  title?: ReactNode;
   onDragEnd: OnDragEndResponder<string>;
   sections: {
     id: string;
@@ -304,9 +301,6 @@ function ResourceColumn<T extends { id: string }>(
 
   return (
     <div>
-      <div className="flex flex-col justify-between md:flex-row">
-        <div>{props.title}</div>
-      </div>
       <DragDropContext onDragEnd={props.onDragEnd}>
         <div className="h-full overflow-x-auto scrollbar-hide" ref={board}>
           <div className="flex items-stretch px-0 pb-2">
@@ -443,20 +437,26 @@ function ResourceCard<T extends { id: string }>(
                 <p className="text-gray-500">{t("no_results_found")}</p>
               </div>
             )}
-            {items.map((item, index) => (
-              <Draggable key={item.id} draggableId={item.id} index={index}>
-                {(provided, _snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className="mx-2 mt-2 w-[284px] rounded-lg border border-secondary-300 bg-white"
-                  >
-                    {props.itemRender(item)}
-                  </div>
-                )}
-              </Draggable>
-            ))}
+
+            {items.map((item: any, index) => {
+              if (item.status === section.id) {
+                return (
+                  <Draggable key={item.id} draggableId={item.id} index={index}>
+                    {(provided, _snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="mx-4 mt-2 w-[284px] rounded-lg border border-secondary-300 bg-white"
+                      >
+                        {props.itemRender(item)}
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              }
+              return null;
+            })}
 
             {provided.placeholder}
             {isFetchingNextPage && (
@@ -497,7 +497,7 @@ function ResourceRow({ data }: ResourceRowProps) {
         <div className="col-span-1 flex flex-col text-left">
           <div className="category">
             <dt
-              title={t("LOG_UPDATE_FIELD_LABEL__patient_category")}
+              title={t("Category")}
               className="flex items-center text-sm font-medium leading-5 text-secondary-500"
             >
               <CareIcon icon="l-box" className="text-lg mr-1" />
@@ -509,7 +509,7 @@ function ResourceRow({ data }: ResourceRowProps) {
         </div>
 
         <div className="col-span-1 flex flex-col text-left">
-          <div className="3xl:flex-row mb-2 flex gap-1 sm:flex-row flex-wrap md:flex-row lg:flex-col xl:flex-row 2xl:flex-row ">
+          <div className="3xl:flex-row mb-2 flex gap-1 sm:flex-row flex-wrap md:flex-row lg:flex-col xl:flex-row 2xl:flex-row items-center">
             {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
               <dt
                 title={t("resource_status")}
@@ -528,13 +528,13 @@ function ResourceRow({ data }: ResourceRowProps) {
             ) : (
               <dt
                 title={t("resource_status")}
-                className="w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full  leading-4"
+                className="w-fit h-fit flex h-5 shrink-0 items-center rounded-full  leading-4"
               >
                 <Badge
                   variant={
                     resource.status === "APPROVED" ? "primary" : "secondary"
                   }
-                  className={`text-[12px] font-semibold rounded-full uppercase ${
+                  className={`text-[12px]  font-semibold rounded-full uppercase ${
                     resource.status === "APPROVED"
                       ? "bg-sky-200"
                       : "bg-yellow-200"
@@ -550,7 +550,7 @@ function ResourceRow({ data }: ResourceRowProps) {
 
             <div>
               {resource.emergency && (
-                <span className="mt-1.5 inline-block shrink-0 rounded-full bg-red-100 px-2 py-1 text-xs font-medium leading-4 text-red-800">
+                <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-1 text-xs font-medium leading-4 text-red-800">
                   {t("emergency")}
                 </span>
               )}

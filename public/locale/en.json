@@ -1665,6 +1665,7 @@
   "reset_password_note_self": "Enter your current password, then create and confirm your new password",
   "resource": "Resource",
   "resource_approving_facility": "Resource approving facility",
+  "resource_category": "Category",
   "resource_created_successfully": "Request created successfully",
   "resource_details": "Resource details",
   "resource_origin_facility": "Origin Facility",
