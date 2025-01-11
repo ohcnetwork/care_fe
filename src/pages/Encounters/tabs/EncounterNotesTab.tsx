@@ -125,7 +125,7 @@ const ThreadItem = ({
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-sm truncate">{thread.title}</h4>
         {/* Todo: Replace with thread.created */}
-        <p className="text-xs text-gray-500 mt-1">12/12/24</p>
+        <p className="text-xs text-gray-500 mt-1">12/12/2024</p>
       </div>
       {isSelected && (
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
