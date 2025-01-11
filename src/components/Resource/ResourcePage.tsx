@@ -301,6 +301,7 @@ function ResourceColumn<T extends { id: string }>(
   props: ResourceColumnProps<T>,
 ) {
   const board = useRef<HTMLDivElement>(null);
+
   return (
     <div>
       <div className="flex flex-col justify-between md:flex-row">
@@ -341,6 +342,7 @@ function ResourceCard<T extends { id: string }>(
   const defaultLimit = 14;
   const { t } = useTranslation();
   const options = section.fetchOptions(section.id);
+
   const fetchPage = async ({ pageParam = 0 }) => {
     try {
       const data = await query(options.route, {
@@ -350,6 +352,7 @@ function ResourceCard<T extends { id: string }>(
           limit: defaultLimit,
         },
       })({ signal: new AbortController().signal });
+
       return data as QueryResponse<T>;
     } catch (error) {
       return { results: [], next: null, count: 0 };
@@ -374,7 +377,11 @@ function ResourceCard<T extends { id: string }>(
   });
 
   const items = data?.pages?.flatMap((page) => page.results || []) ?? [];
-  const totalCount = data?.pages[0]?.count ?? 0;
+
+  const totalCount = data?.pages[0]?.results.filter(
+    (item: any) => item.status === section.id,
+  ).length;
+
   const { qParams } = useFilters({
     limit: 12,
     cacheBlacklist: ["title"],
