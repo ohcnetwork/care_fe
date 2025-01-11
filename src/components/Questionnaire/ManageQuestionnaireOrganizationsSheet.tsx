@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
   trigger,
 }: Props) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -53,7 +55,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
     useQuery({
       queryKey: ["organizations", searchQuery],
-      queryFn: query(organizationApi.list, {
+      queryFn: query.debounced(organizationApi.list, {
         queryParams: {
           org_type: "role",
           name: searchQuery || undefined,
@@ -110,22 +112,24 @@ export default function ManageQuestionnaireOrganizationsSheet({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 h-4 w-4" />
-            Manage Organizations
+            {t("manage_organizations")}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Manage Organizations</SheetTitle>
+          <SheetTitle>{t("manage_organizations")}</SheetTitle>
           <SheetDescription>
-            Add or remove organizations from this questionnaire
+            {t("manage_organizations_description")}
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-6 py-4">
           {/* Selected Organizations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Selected Organizations</h3>
+            <h3 className="text-sm font-medium">
+              {t("selected_organizations")}
+            </h3>
             <div className="flex flex-wrap gap-2">
               {selectedOrganizations?.map((org) => (
                 <Badge
@@ -149,7 +153,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
                 (!selectedOrganizations ||
                   selectedOrganizations.length === 0) && (
                   <p className="text-sm text-muted-foreground">
-                    No organizations selected
+                    {t("no_organizations_selected")}
                   </p>
                 )}
             </div>
@@ -157,14 +161,14 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Add Organizations</h3>
+            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
             <Command className="rounded-lg border shadow-md">
               <CommandInput
                 placeholder="Search organizations..."
                 onValueChange={setSearchQuery}
               />
               <CommandList>
-                <CommandEmpty>No organizations found.</CommandEmpty>
+                <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
                 <CommandGroup>
                   {isLoadingOrganizations ? (
                     <div className="flex items-center justify-center py-6">
@@ -209,16 +213,16 @@ export default function ManageQuestionnaireOrganizationsSheet({
                 setOpen(false);
               }}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
               {isUpdating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t("saving")}
                 </>
               ) : (
-                "Save Changes"
+                t("save")
               )}
             </Button>
           </div>
