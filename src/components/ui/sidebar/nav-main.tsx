@@ -42,7 +42,6 @@ export function NavMain({
             >
               <ActiveLink
                 href={link.url}
-                activeClass="bg-white text-green-700 shadow"
                 exactActiveClass="bg-white text-green-700 shadow"
               >
                 {link.icon && <CareIcon icon={link.icon as IconName} />}
