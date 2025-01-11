@@ -27,8 +27,14 @@ export function useOrganizationLevel({
   const [levelSearch, setLevelSearch] = useState("");
 
   const { data: availableOrgs } = useQuery<{ results: Organization[] }>({
-    queryKey: ["organizations-available", getParentId(index)],
-    queryFn: query.debounced(organizationApi.getPublicOrganizations),
+    queryKey: ["organizations-available", getParentId(index), levelSearch],
+    queryFn: query.debounced(organizationApi.getPublicOrganizations, {
+      queryParams: {
+        ...(index > 0 && { parent: getParentId(index) }),
+        ...(index === 0 && { level_cache: 1 }),
+        name: levelSearch || undefined,
+      },
+    }),
     enabled:
       !skip &&
       index <= selectedLevels.length &&

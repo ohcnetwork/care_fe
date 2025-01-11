@@ -71,7 +71,7 @@ export function FacilitiesPage() {
         </Link>
         <LoginHeader />
       </div>
-      <div className="flex flex-col items-start justify-between gap-5 mt-4 sm:flex-row">
+      <div className="flex flex-col items-start justify-between gap-5 mt-4 xl:flex-row">
         <OrganizationFilter
           skipLevels={[]}
           selected={selectedOrgs}
