@@ -97,14 +97,17 @@ export default function PatientRegistration(
           blood_group: z.enum(BLOOD_GROUPS, {
             required_error: t("blood_group_is_required"),
           }),
-          yob_or_dob: z.enum(["dob", "age"]),
+          age_or_dob: z.enum(["dob", "age"]),
           date_of_birth: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
             .optional(),
-          year_of_birth: z
-            .string()
-            .regex(/^\d{4}$/, t("year_of_birth_format"))
+          age: z
+            .number()
+            .int()
+            .positive()
+            .min(1, t("age_must_be_positive"))
+            .max(120, t("age_must_be_below_120"))
             .optional(),
           address: z.string().nonempty(t("address_is_required")),
           same_address: z.boolean(),
@@ -121,19 +124,16 @@ export default function PatientRegistration(
           geo_organization: z.string().uuid().optional(),
         })
         .refine(
-          (data) => (data.yob_or_dob === "dob" ? !!data.date_of_birth : true),
+          (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
           {
             message: t("date_of_birth_must_be_present"),
             path: ["date_of_birth"],
           },
         )
-        .refine(
-          (data) => (data.yob_or_dob === "age" ? !!data.year_of_birth : true),
-          {
-            message: t("year_of_birth_must_be_present"),
-            path: ["year_of_birth"],
-          },
-        )
+        .refine((data) => (data.age_or_dob === "age" ? !!data.age : true), {
+          message: t("age_must_be_present"),
+          path: ["age"],
+        })
         .refine(
           (data) =>
             data.nationality === "India" ? !!data.geo_organization : true,
@@ -151,7 +151,7 @@ export default function PatientRegistration(
       nationality: "India",
       phone_number: phone_number || "+91",
       emergency_phone_number: "+91",
-      yob_or_dob: "dob",
+      age_or_dob: "dob",
     },
   });
 
@@ -165,7 +165,7 @@ export default function PatientRegistration(
         query: {
           phone_number: resp.phone_number,
           year_of_birth:
-            form.getValues("yob_or_dob") === "dob"
+            form.getValues("age_or_dob") === "dob"
               ? new Date(resp.date_of_birth!).getFullYear()
               : new Date().getFullYear() - Number(resp.age!),
           partial_id: resp?.id?.slice(0, 5),
@@ -254,7 +254,7 @@ export default function PatientRegistration(
           patientQuery.data.emergency_phone_number,
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
-        yob_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
@@ -328,6 +328,7 @@ export default function PatientRegistration(
                     <FormControl>
                       <Input
                         {...field}
+                        maxLength={13}
                         onChange={(e) => {
                           form.setValue("phone_number", e.target.value);
                           if (form.watch("same_phone_number")) {
@@ -381,7 +382,7 @@ export default function PatientRegistration(
                       {t("emergency_phone_number")}
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} maxLength={13} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -453,10 +454,15 @@ export default function PatientRegistration(
               />
 
               <Tabs
-                value={form.watch("yob_or_dob")}
-                onValueChange={(v) =>
-                  form.setValue("yob_or_dob", v as "dob" | "age")
-                }
+                value={form.watch("age_or_dob")}
+                onValueChange={(v) => {
+                  form.setValue("age_or_dob", v as "dob" | "age");
+                  if (v === "age") {
+                    form.setValue("date_of_birth", undefined);
+                  } else {
+                    form.setValue("age", undefined);
+                  }
+                }}
               >
                 <TabsList className="mb-2" defaultValue="dob">
                   <TabsTrigger value="dob">{t("date_of_birth")}</TabsTrigger>
@@ -542,7 +548,7 @@ export default function PatientRegistration(
 
                   <FormField
                     control={form.control}
-                    name="year_of_birth"
+                    name="age"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>{t("age")}</FormLabel>
@@ -550,18 +556,15 @@ export default function PatientRegistration(
                           <Input
                             type="number"
                             placeholder={t("age")}
+                            min={1}
+                            max={120}
                             {...field}
-                            value={
-                              new Date().getFullYear() -
-                              Number(form.watch("year_of_birth"))
-                            }
                             onChange={(e) =>
                               form.setValue(
-                                "year_of_birth",
-                                String(
-                                  new Date().getFullYear() -
-                                    Number(e.target.value),
-                                ),
+                                "age",
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
                               )
                             }
                           />
@@ -648,7 +651,12 @@ export default function PatientRegistration(
                         type="number"
                         {...field}
                         onChange={(e) =>
-                          form.setValue("pincode", Number(e.target.value))
+                          form.setValue(
+                            "pincode",
+                            e.target.value
+                              ? Number(e.target.value)
+                              : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
+                          )
                         }
                       />
                     </FormControl>
