@@ -6,7 +6,7 @@ import { Button, ButtonProps } from "@/components/ui/button";
 
 import Pagination from "@/components/Common/Pagination";
 
-import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
+import { ApiRoute, PaginatedResponse } from "@/Utils/request/types";
 import useTanStackQueryInstead, {
   QueryOptions,
 } from "@/Utils/request/useQuery";
@@ -35,7 +35,7 @@ function useContextualized<TItem>() {
 }
 
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
-  route: QueryRoute<PaginatedResponse<TItem>>;
+  route: ApiRoute<PaginatedResponse<TItem>>;
   perPage?: number;
   initialPage?: number;
   onPageChange?: (page: number) => void;

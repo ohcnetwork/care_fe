@@ -84,7 +84,9 @@ export function AppointmentQuestion({
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        user: resource?.id,
+        // voluntarily coalesce to empty string since we know query would be
+        // enabled only if resource and selectedDate are present
+        user: resource?.id ?? "",
         day: dateQueryString(selectedDate),
       },
     }),
