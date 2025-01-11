@@ -14,7 +14,7 @@ import DropdownMenu, {
 import useExport from "@/hooks/useExport";
 
 import request from "@/Utils/request/request";
-import { Route } from "@/Utils/request/types";
+import { ApiRoute } from "@/Utils/request/types";
 
 interface ExportItem {
   options?: DropdownItemProps;
@@ -23,7 +23,7 @@ interface ExportItem {
   label: string;
   parse?: (data: string) => string;
   action?: Parameters<ReturnType<typeof useExport>["exportFile"]>[0];
-  route?: Route<string | { results: object[] }, unknown>;
+  route?: ApiRoute<string | { results: object[] }, unknown>;
 }
 
 interface ExportMenuProps {
@@ -38,7 +38,7 @@ interface ExportButtonProps {
   tooltipClassName?: string;
   type?: "csv" | "json";
   action?: Parameters<ReturnType<typeof useExport>["exportFile"]>[0];
-  route?: Route<string | { results: object[] }, unknown>;
+  route?: ApiRoute<string | { results: object[] }, unknown>;
   parse?: (data: string) => string;
   filenamePrefix: string;
   className?: string;

@@ -52,29 +52,34 @@ export const editContactInfoFields: Array<keyof UserForm> = [
 ];
 
 export const validateRule = (
-  condition: boolean,
-  content: JSX.Element | string,
-  isInitialState: boolean = false,
+  isConditionMet: boolean,
+  initialMessage: JSX.Element | string,
+  isInitialRender: boolean = false,
+  successMessage: JSX.Element | string,
 ) => {
   return (
-    <div className="text-sm">
-      {isInitialState ? (
-        <CareIcon icon="l-circle" className="text-gray-500" />
-      ) : condition ? (
-        <CareIcon icon="l-check-circle" className="text-green-500" />
+    <div>
+      {isInitialRender ? (
+        <CareIcon icon="l-circle" className="text-sm text-gray-500" />
+      ) : isConditionMet ? (
+        <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
       ) : (
-        <CareIcon icon="l-times-circle" className="text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-sm text-red-500" />
       )}{" "}
       <span
         className={classNames(
-          isInitialState
-            ? "text-black"
-            : condition
-              ? "text-primary-500"
-              : "text-red-500",
+          isInitialRender
+            ? "text-black text-sm"
+            : isConditionMet
+              ? "text-primary-500 text-sm"
+              : "text-red-500 text-sm",
         )}
       >
-        {content}
+        {isInitialRender
+          ? initialMessage
+          : isConditionMet
+            ? successMessage
+            : initialMessage}
       </span>
     </div>
   );
