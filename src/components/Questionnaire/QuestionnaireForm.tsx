@@ -296,14 +296,14 @@ export function QuestionnaireForm({
         formState={questionnaireForms}
         setFormState={setQuestionnaireForms}
       />
-      <div className="flex-1 overflow-y-auto max-w-3xl pb-8 space-y-2">
+      <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
           <div
             key={`${form.questionnaire.id}-${index}`}
-            className="border rounded-lg p-6 space-y-6"
+            className="rounded-lg py-6 px-4 space-y-6"
           >
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center max-w-4xl">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -373,7 +373,7 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center m-4 max-w-4xl">
           <QuestionnaireSearch
             subjectType={subjectType}
             onSelect={(selected) => {
@@ -400,7 +400,7 @@ export function QuestionnaireForm({
 
         {/* Submit and Cancel Buttons */}
         {questionnaireForms.length > 0 && (
-          <div className="flex justify-end gap-4 mt-4">
+          <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
             <Button
               type="button"
               variant="outline"
@@ -431,7 +431,7 @@ export function QuestionnaireForm({
 
         {/* Add a Preview of the QuestionnaireForm */}
         {import.meta.env.DEV && (
-          <div className="p-4 space-y-6">
+          <div className="p-4 space-y-6 max-w-4xl">
             <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
             <pre className="text-sm text-muted-foreground">
               {JSON.stringify(questionnaireForms, null, 2)}

@@ -62,6 +62,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         variant={outline ? "outline" : "primary_gradient"}
         className={cn("gap-3 group")}
         onClick={handleCreatePatient}
+        data-cy="create-new-patient-button"
       >
         <CareIcon icon="l-plus" className="h-4 w-4" />
         {t("add_new_patient")}

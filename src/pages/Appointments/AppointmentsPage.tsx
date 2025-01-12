@@ -293,8 +293,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        user: practitioner?.id,
-        day: qParams.date_from,
+        // voluntarily coalesce to empty string since we know query would be
+        // enabled only if practitioner and date_from are present
+        user: practitioner?.id ?? "",
+        day: qParams.date_from ?? "",
       },
     }),
     enabled: slotsFilterEnabled,

@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import * as Notifications from "@/Utils/Notifications";
 import { RequestResult } from "@/Utils/request/types";
 
+/**
+ * @deprecated in favor of useQuery/useMutation/callApi
+ */
 export default function handleResponse(
   { res, error }: RequestResult<unknown>,
   silent?: boolean,

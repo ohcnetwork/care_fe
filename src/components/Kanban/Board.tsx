@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { callApi } from "@/Utils/request/query";
-import { QueryRoute } from "@/Utils/request/types";
+import { ApiRoute } from "@/Utils/request/types";
 import { QueryOptions } from "@/Utils/request/useQuery";
 
 interface KanbanBoardProps<T extends { id: string }> {
@@ -24,7 +24,7 @@ interface KanbanBoardProps<T extends { id: string }> {
       id: string,
       ...args: unknown[]
     ) => {
-      route: QueryRoute<unknown>;
+      route: ApiRoute<unknown>;
       options?: QueryOptions<unknown>;
     };
   }[];

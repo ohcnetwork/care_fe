@@ -59,12 +59,15 @@ export const Appointments = (props: PatientProps) => {
 
   return (
     <div className="mt-4 px-3 md:px-0">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold leading-tight">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+        <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
         <Button variant="outline_primary" asChild>
-          <Link href={`/facility/${facilityId}/patient/${id}/book-appointment`}>
+          <Link
+            href={`/facility/${facilityId}/patient/${id}/book-appointment`}
+            className="flex items-center justify-center w-full sm:w-auto"
+          >
             <CareIcon icon="l-plus" className="mr-2" />
             {t("schedule_appointment")}
           </Link>
