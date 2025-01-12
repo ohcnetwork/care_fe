@@ -372,7 +372,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <div className="col-span-2 grid grid-cols-2 gap-5">
                 <OrganizationSelector
                   required={true}
-                  value={facilityData?.geo_organization}
+                  value={form.watch("geo_organization")}
                   parentSelectedLevels={selectedLevels}
                   onChange={(value) => {
                     form.setValue("geo_organization", value);
