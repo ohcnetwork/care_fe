@@ -60,7 +60,7 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 
 interface FacilityProps {
   facilityId?: string;
@@ -330,7 +330,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
               </div>
               <div className="col-span-2 grid grid-cols-2 gap-5">
-                <OrganizationSelector
+                <GovtOrganizationSelector
                   required={true}
                   onChange={(value) => form.setValue("geo_organization", value)}
                 />

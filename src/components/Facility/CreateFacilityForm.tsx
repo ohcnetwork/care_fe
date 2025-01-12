@@ -40,7 +40,7 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 
 const facilityFormSchema = z.object({
@@ -418,7 +418,7 @@ export default function CreateFacilityForm({
                 <FormItem>
                   <FormLabel>Organization</FormLabel>
                   <FormControl>
-                    <OrganizationSelector
+                    <GovtOrganizationSelector
                       value={field.value}
                       onChange={field.onChange}
                       required
