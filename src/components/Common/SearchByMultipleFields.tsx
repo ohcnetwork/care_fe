@@ -399,7 +399,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           className="w-full justify-start text-muted-foreground"
           onClick={() => {
             setSearchValue("");
-            setOpen(false);
           }}
         >
           <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
