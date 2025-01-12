@@ -73,7 +73,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           setFocusedIndex((prevIndex) =>
             prevIndex === 0 ? unselectedOptions.length - 1 : prevIndex - 1,
           );
-        } else if (e.key === "Enter" && focusedIndex !== -1) {
+        } else if (e.key === "Enter") {
           const selectedOptionIndex = options.findIndex(
             (option) => option.key === unselectedOptions[focusedIndex].key,
           );
@@ -318,7 +318,15 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                             return (
                               <CommandItem
                                 key={option.key}
-                                onSelect={() => handleOptionChange(index)}
+                                onSelect={() =>
+                                  handleOptionChange(
+                                    options.findIndex(
+                                      (option) =>
+                                        option.key ===
+                                        unselectedOptions[index].key,
+                                    ),
+                                  )
+                                }
                                 className={cn(
                                   "flex items-center p-2 rounded-md cursor-pointer",
                                   {
