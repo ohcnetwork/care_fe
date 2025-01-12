@@ -329,6 +329,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const [isThreadsExpanded, setIsThreadsExpanded] = useState(false);
   const [showNewThreadDialog, setShowNewThreadDialog] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  const [scrollToBottom, setScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
 
@@ -413,6 +414,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       setNewMessage("");
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        setScrollToBottom(true);
       }, 100);
     },
     onError: () => {
@@ -433,9 +435,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       messagesData &&
       !messagesLoading &&
       !isFetchingNextPage &&
-      messagesData.pages.length === 1
+      (messagesData.pages.length === 1 || scrollToBottom)
     ) {
       messagesEndRef.current?.scrollIntoView();
+      setScrollToBottom(false);
     }
   }, [selectedThread, messagesData, messagesLoading, isFetchingNextPage]);
 
