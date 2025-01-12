@@ -42,7 +42,7 @@ interface SearchByMultipleFieldsProps {
   id: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
-  initialOptionIndex?: number;
+  initialOptionIndex: number;
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
@@ -67,7 +67,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(
-    initialOptionIndex || 0,
+    initialOptionIndex == -1 ? 0 : initialOptionIndex,
   );
   const selectedOption = options[selectedOptionIndex];
   const [searchValue, setSearchValue] = useState(selectedOption.value || "");

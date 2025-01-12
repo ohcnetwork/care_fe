@@ -145,6 +145,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchByMultipleFields
+                initialOptionIndex={0}
                 id="patient-search"
                 options={searchOptions}
                 onSearch={handleSearch}

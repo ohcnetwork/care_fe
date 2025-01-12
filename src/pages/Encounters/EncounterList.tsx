@@ -174,6 +174,7 @@ export function EncounterList({
       clearSearch.value = true;
     }
   };
+
   const handleSearch = useCallback(
     (key: string, value: string) => {
       updateQuery({

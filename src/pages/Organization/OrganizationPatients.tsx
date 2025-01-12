@@ -38,6 +38,21 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   } = useFilters({ limit: 14, cacheBlacklist: ["name", "phone_number"] });
   const [organization, setOrganization] = useState<Organization | null>(null);
 
+  const searchOptions = [
+    {
+      key: "name",
+      type: "text" as const,
+      placeholder: "Search by name",
+      value: qParams.name || "",
+    },
+    {
+      key: "phone_number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+    },
+  ];
+
   const handleSearch = useCallback((key: string, value: string) => {
     const searchParams = {
       name: key === "name" ? value : "",
@@ -93,20 +108,10 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
 
         <SearchByMultipleFields
           id="patient-search"
-          options={[
-            {
-              key: "name",
-              type: "text",
-              placeholder: "Search by name",
-              value: qParams.name || "",
-            },
-            {
-              key: "phone_number",
-              type: "phone",
-              placeholder: "Search by phone number",
-              value: qParams.phone_number || "",
-            },
-          ]}
+          options={searchOptions}
+          initialOptionIndex={searchOptions.findIndex(
+            (option) => option.value !== "",
+          )}
           onSearch={handleSearch}
           clearSearch={{ value: !qParams.name && !qParams.phone_number }}
           onFieldChange={handleFieldChange}

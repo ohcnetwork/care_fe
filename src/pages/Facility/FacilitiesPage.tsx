@@ -70,6 +70,7 @@ export function FacilitiesPage() {
             },
           ]}
           className="w-full sm:w-1/2"
+          initialOptionIndex={0}
           onSearch={(key, value) => updateQuery({ name: value })}
           clearSearch={clearSearch}
           enableOptionButtons={false}
