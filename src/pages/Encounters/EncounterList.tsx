@@ -290,27 +290,6 @@ export function EncounterList({
                         clearSearch={clearSearch}
                         className="w-full border-none shadow-none"
                       />
-                      {(name || encounter_id || external_identifier) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => {
-                            updateQuery({
-                              status,
-                              encounter_class: encounterClass,
-                              priority,
-                              name: undefined,
-                              encounter_id: undefined,
-                              external_identifier: undefined,
-                            });
-                            clearSearch.value = true;
-                          }}
-                        >
-                          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
-                          {t("clear_search")}
-                        </Button>
-                      )}
                     </div>
                   </PopoverContent>
                 </Popover>

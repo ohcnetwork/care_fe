@@ -392,6 +392,20 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           ))}
         </div>
       )}
+      {searchValue.length !== 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground"
+          onClick={() => {
+            setSearchValue("");
+            setOpen(false);
+          }}
+        >
+          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
+          {t("clear_search")}
+        </Button>
+      )}
     </div>
   );
 };
