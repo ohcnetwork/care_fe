@@ -342,12 +342,6 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     }),
   });
 
-  useEffect(() => {
-    const pagesElement = document.getElementById("pages");
-    if (pagesElement) {
-      pagesElement.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
   // Auto-select first thread
   useEffect(() => {
     if (threadsData?.results.length && !selectedThread) {
