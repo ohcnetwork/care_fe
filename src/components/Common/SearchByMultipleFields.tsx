@@ -152,11 +152,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [selectedOptionIndex]);
 
   useEffect(() => {
-    if (
-      selectedOption.key === "phone_number"
-        ? searchValue.length == 13 || searchValue.length == 3
-        : selectedOption.value !== searchValue
-    ) {
+    if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
   }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
