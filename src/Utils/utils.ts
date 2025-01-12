@@ -1,83 +1,14 @@
 import { differenceInMinutes, format } from "date-fns";
 import html2canvas from "html2canvas";
-import { t } from "i18next";
-import { toast } from "sonner";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { DoseRange, Timing } from "@/types/emr/medicationRequest";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
-import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
-
-interface ApacheParams {
-  age: number;
-  organFailure: boolean;
-  temperatureC: number;
-  heartRate: number;
-  respiratoryRate: number;
-  sodium: number;
-  potassium: number;
-  creatinine: number;
-  acuteRenalFailure: boolean;
-  hematocrit: number;
-  wbcCount: number;
-  glasgowComaScore: number;
-  fiO2: number;
-}
-
-export const calculateApache2Score = (apacheParams: ApacheParams): number => {
-  const {
-    age,
-    organFailure,
-    temperatureC,
-    heartRate,
-    respiratoryRate,
-    sodium,
-    potassium,
-    creatinine,
-    acuteRenalFailure,
-    hematocrit,
-    wbcCount,
-    glasgowComaScore,
-    fiO2,
-  } = apacheParams;
-
-  const ageScore = age < 65 ? 1 : 0;
-  const organFailureScore = organFailure ? 1 : 0;
-  const temperatureScore = temperatureC < 37.5 ? 1 : 0;
-  const heartRateScore = heartRate < 60 ? 1 : 0;
-  const respiratoryRateScore = respiratoryRate < 12 ? 1 : 0;
-  const sodiumScore = sodium < 135 ? 1 : 0;
-  const potassiumScore = potassium < 3.5 ? 1 : 0;
-  const creatinineScore = creatinine < 0.7 ? 1 : 0;
-  const acuteRenalFailureScore = acuteRenalFailure ? 1 : 0;
-  const hematocritScore = hematocrit < 0.45 ? 1 : 0;
-  const wbcCountScore = wbcCount < 10 ? 1 : 0;
-  const glasgowComaScoreScore = glasgowComaScore < 6 ? 1 : 0;
-  const fiO2Score = fiO2 < 0.7 ? 1 : 0;
-
-  const totalScore =
-    ageScore +
-    organFailureScore +
-    temperatureScore +
-    heartRateScore +
-    respiratoryRateScore +
-    sodiumScore +
-    potassiumScore +
-    creatinineScore +
-    acuteRenalFailureScore +
-    hematocritScore +
-    wbcCountScore +
-    glasgowComaScoreScore +
-    fiO2Score;
-
-  return totalScore;
-};
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -100,15 +31,9 @@ export const formatDateTime = (date: DateLike, format?: string) => {
   return obj.format(DATE_TIME_FORMAT);
 };
 
-export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
-  formatDateTime(date, format);
-
 export const formatTimeShort = (time: Time) => {
   return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
 };
-
-export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
-  formatDateTime(date, format);
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
@@ -168,11 +93,6 @@ function _isAppleDevice() {
 export const isAppleDevice = _isAppleDevice();
 
 /**
- * `true` if device is an iOS device, else `false`
- */
-export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-/**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
  *
  * **Example Usage:**
@@ -180,6 +100,8 @@ export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
  * <div className={classNames("md:flex", true && "p-0", false && "p-10")} />
  * // "md:flex p-0"
  * ```
+ *
+ * @deprecated Use `cn` from `@/lib/utils` instead.
  */
 export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
@@ -192,42 +114,6 @@ export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const data = await response.json();
   return data.records[0];
 };
-
-export const includesIgnoreCase = (str1: string, str2: string) => {
-  if (!str1 || !str2) return false;
-  const lowerCaseStr1 = str1.toLowerCase();
-  const lowerCaseStr2 = str2.toLowerCase();
-  return (
-    lowerCaseStr1.includes(lowerCaseStr2) ||
-    lowerCaseStr2.includes(lowerCaseStr1)
-  );
-};
-
-export const getExperienceSuffix = (date?: Date) => {
-  if (!date) return "0 Years";
-
-  const today = new Date();
-
-  let m = (today.getFullYear() - date.getFullYear()) * 12;
-  m -= date.getMonth();
-  m += today.getMonth();
-
-  let str = "";
-
-  const years = Math.floor(m / 12);
-  const months = m % 12;
-
-  if (years) str += `${years} years `;
-  if (months) str += `${months} months`;
-
-  return str;
-};
-
-export const formatCurrency = (price: number) =>
-  price?.toLocaleString("en-IN", {
-    style: "currency",
-    currency: "INR",
-  });
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
@@ -378,20 +264,6 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const patientAgeInYears = (obj: PatientModel) => {
-  const start = dayjs(
-    obj.date_of_birth
-      ? new Date(obj.date_of_birth)
-      : new Date(obj.year_of_birth!, 0, 1),
-  );
-
-  const end = dayjs(
-    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
-  );
-
-  return end.diff(start, "years");
-};
-
 export const formatPatientAge = (
   obj: PatientModel | Patient,
   abbreviated = false,
@@ -429,29 +301,6 @@ export const formatPatientAge = (
   return `${day}${suffixes.day}`;
 };
 
-export const compareBy = <T extends object>(key: keyof T) => {
-  return (a: T, b: T) => {
-    return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
-  };
-};
-
-export const compareByDateString = <T extends object>(key: keyof T) => {
-  return (a: T, b: T) => {
-    const aV = new Date(a[key] as string);
-    const bV = new Date(b[key] as string);
-    return aV < bV ? -1 : aV > bV ? 1 : 0;
-  };
-};
-
-export const isValidUrl = (url?: string) => {
-  try {
-    new URL(url ?? "");
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 export const mergeQueryOptions = <T extends object>(
   selected: T[],
   queryOptions: T[],
@@ -464,13 +313,6 @@ export const mergeQueryOptions = <T extends object>(
       (option) => !selected.find((s) => compareBy(s) === compareBy(option)),
     ),
   ];
-};
-
-export const properRoundOf = (value: number) => {
-  if (value % 1 === 0) {
-    return value.toFixed();
-  }
-  return value.toFixed(2);
 };
 
 /**
@@ -492,79 +334,12 @@ export const humanizeStrings = (strings: readonly string[], empty = "") => {
   return `${items.reverse().join(", ")} and ${last}`;
 };
 
-export type ValueDescription = {
-  till?: number;
-  text: React.ReactNode;
-  className?: string;
-  color?: string;
-};
-
-export const getValueDescription = (
-  valueDescriptions: ValueDescription[],
-  value: number,
-) => {
-  return valueDescriptions.find((vd) => (vd.till || 0) >= (value || 0));
-};
-
-export const rangeValueDescription = (range: {
-  low?: number;
-  high?: number;
-}) => {
-  const results: ValueDescription[] = [];
-
-  if (range.low != null) {
-    results.push({
-      till: range.low,
-      text: "Low",
-      className: "text-red-500",
-    });
-  }
-
-  results.push({
-    till: range.high,
-    text: "Normal",
-    className: "text-green-500",
-  });
-
-  if (range.high != null) {
-    results.push({
-      text: "High",
-      className: "text-red-500",
-    });
-  }
-
-  return results;
-};
-
-export const celsiusToFahrenheit = (celsius: number) => {
-  return (celsius * 9) / 5 + 32;
-};
-
-export const fahrenheitToCelsius = (fahrenheit: number) => {
-  return ((fahrenheit - 32) * 5) / 9;
-};
-
 /**
  * Although same as `Objects.keys(...)`, this provides better type-safety.
  */
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
-
-// Utility to check if a value is "empty"
-export const isEmpty = (value: unknown) => {
-  return value === "" || value == undefined;
-};
-
-// equivalent to lodash omitBy
-export function omitBy<T extends Record<string, unknown>>(
-  obj: T,
-  predicate: (value: unknown) => boolean,
-): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, value]) => !predicate(value)),
-  ) as Partial<T>;
-}
 
 export const properCase = (str: string) => {
   return str
@@ -580,31 +355,10 @@ export const getMonthStartAndEnd = (date: Date) => {
   };
 };
 
-export const displayCode = (code?: Code) => {
-  if (!code) return "N/A";
-
-  return code.display ?? code.code;
-};
-
 export const displayQuantity = (quantity?: Quantity) => {
   if (!quantity) return "N/A";
 
   return [quantity.value ?? "N/A", quantity.unit].join(" ");
-};
-
-// TODO: make it generic
-export const displayDoseRange = (range?: DoseRange) => {
-  if (!range) return "N/A";
-
-  return ([range.low, range.high] as Quantity[])
-    .map(displayQuantity)
-    .join(" - ");
-};
-
-export const displayTiming = (timing?: Timing) => {
-  if (!timing || !timing.repeat) return "N/A";
-
-  return `${timing.repeat.frequency} every ${timing.repeat.period} ${timing.repeat.period_unit}`;
 };
 
 /**
@@ -640,15 +394,6 @@ export const saveElementAsImage = async (id: string, filename: string) => {
   link.download = filename;
   link.href = canvas.toDataURL("image/png", 1);
   link.click();
-};
-
-export const copyToClipboard = async (content: string) => {
-  try {
-    await navigator.clipboard.writeText(content);
-    toast.success(t("copied_to_clipboard"));
-  } catch (err) {
-    toast.error(t("copying_is_not_allowed"));
-  }
 };
 
 export const conditionalAttribute = <T>(
