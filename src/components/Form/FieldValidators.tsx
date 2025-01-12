@@ -1,5 +1,4 @@
 export type FieldError = string | undefined;
-export type FieldValidator<T> = (value: T, ...args: any) => FieldError;
 
 export const RegexValidator = (regex: RegExp, message = "Invalid input") => {
   return (value: string): FieldError => {

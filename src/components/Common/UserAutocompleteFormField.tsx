@@ -6,9 +6,8 @@ import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "@/components/Form/FormFields/Utils";
+import { UserType } from "@/components/Users/UserFormValidations";
 import { UserBareMinimum } from "@/components/Users/models";
-
-import { UserRole } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -23,13 +22,8 @@ import { Avatar } from "./Avatar";
 
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;
-  userType?: UserRole;
+  userType?: UserType;
   noResultsError?: string;
-};
-
-type LinkedFacilitySearchProps = BaseProps & {
-  facilityId: string;
-  homeFacility?: undefined;
 };
 
 type UserSearchProps = BaseProps & {
@@ -106,63 +100,6 @@ export default function UserAutocomplete(props: UserSearchProps) {
     </FormField>
   );
 }
-
-export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
-  const field = useFormFieldPropsResolver(props);
-
-  const [query, setQuery] = useState("");
-
-  const { data, loading } = useTanStackQueryInstead(routes.getFacilityUsers, {
-    pathParams: { facility_id: props.facilityId },
-    query: {
-      user_type: props.userType,
-      search_text: query,
-      limit: 50,
-      offset: 0,
-    },
-  });
-
-  const noResultError =
-    (!query &&
-      !loading &&
-      field.required &&
-      !data?.results?.length &&
-      props.noResultsError) ||
-    undefined;
-
-  useEffect(() => {
-    if (noResultError) {
-      field.handleChange(undefined as unknown as UserBareMinimum);
-    }
-  }, [noResultError]);
-
-  return (
-    <FormField field={field}>
-      <Autocomplete
-        id={field.id}
-        disabled={field.disabled || !!noResultError}
-        // Voluntarily casting type as true to ignore type errors.
-        required={field.required as true}
-        placeholder={noResultError || props.placeholder}
-        value={field.value}
-        onChange={field.handleChange}
-        options={mergeQueryOptions(
-          field.value ? [field.value] : [],
-          data?.results ?? [],
-          (obj) => obj.username,
-        )}
-        optionLabel={formatName}
-        optionIcon={userOnlineDot}
-        optionDescription={(option) =>
-          `${option.user_type} - ${option.username}`
-        }
-        optionValue={(option) => option}
-        onQuery={setQuery}
-        isLoading={loading}
-      />
-    </FormField>
-  );
-};
 
 const userOnlineDot = (user: UserBareMinimum) => (
   <div

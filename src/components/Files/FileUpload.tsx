@@ -369,11 +369,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 : dischargeSummaryFileManager
             }
             associating_id={associatedId}
-            editable={
-              item?.uploaded_by?.username === authUser.username ||
-              authUser.user_type === "DistrictAdmin" ||
-              authUser.user_type === "StateAdmin"
-            }
+            editable={item?.uploaded_by?.username === authUser.username}
             archivable={tab !== "DISCHARGE_SUMMARY"}
           />
         ))}

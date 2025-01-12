@@ -1,18 +1,10 @@
-import React from "react";
+import { UserType } from "@/components/Users/UserFormValidations";
 
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+export type AuthorizedForCB = (userType: UserType) => boolean;
 
-import useAuthUser from "@/hooks/useAuthUser";
-
-import { UserRole } from "@/common/constants";
-
-export type AuthorizedForCB = (userType: UserRole) => boolean;
-
-interface AuthorizeUserRouteProps {
-  userTypes: UserRole[];
-  children: React.ReactNode;
-}
-
+/**
+ * @deprecated
+ */
 export type AuthorizedElementProps = {
   /**
    * Restrict access of this button to specific roles.
@@ -30,23 +22,11 @@ export type AuthorizedElementProps = {
   authorizeFor?: AuthorizedForCB | undefined;
 };
 
-export const NonReadOnlyUsers = (userType: UserRole) =>
+/**
+ * @deprecated
+ * Use permissions from backend instead
+ */
+export const NonReadOnlyUsers = (userType: UserType) =>
   !userType.includes("ReadOnly");
 
 export const Anyone = () => true;
-
-export default function (userTypes: UserRole[]) {
-  return (userType: UserRole) => userTypes.includes(userType);
-}
-
-export const AuthorizeUserRoute: React.FC<AuthorizeUserRouteProps> = ({
-  userTypes,
-  children,
-}) => {
-  const authUser = useAuthUser();
-  if (userTypes.includes(authUser.user_type)) {
-    return <>{children}</>;
-  } else {
-    return <ErrorPage />;
-  }
-};
