@@ -14,8 +14,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
 
-import { USER_TYPE_OPTIONS } from "@/common/constants";
-
 import {
   formatName,
   formatPhoneNumber,
@@ -24,33 +22,6 @@ import {
 } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
-export const GetUserTypes = () => {
-  const authUser = useAuthUser();
-  const defaultAllowedUserTypes = USER_TYPE_OPTIONS;
-
-  // Superuser gets all options
-  if (authUser.is_superuser) {
-    return [...USER_TYPE_OPTIONS];
-  }
-
-  switch (authUser.user_type) {
-    // case "StaffReadOnly":
-    //   return readOnlyUsers.slice(0, 1);
-    // case "DistrictReadOnlyAdmin":
-    //   return readOnlyUsers.slice(0, 2);
-    // case "StateReadOnlyAdmin":
-    //   return readOnlyUsers.slice(0, 3);
-    // case "Pharmacist":
-    //   return USER_TYPE_OPTIONS.slice(0, 1);
-    // case "Nurse":
-    // case "Staff":
-    //   if (editForm) return [...defaultAllowedUserTypes];
-    //   // Temporarily allows creation of users with elevated permissions due to introduction of new roles.
-    //   return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
-    default:
-  }
-  return defaultAllowedUserTypes;
-};
 const GetDetailsButton = (username: string) => {
   const { t } = useTranslation();
   const facilityId = useSlug("facility");

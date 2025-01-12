@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-
-import { statusType, useAbortableEffect } from "@/common/utils";
 
 interface PaginationProps {
   data: { totalCount: number };
@@ -23,19 +21,14 @@ const Pagination = ({
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      if (!status.aborted) {
-        if (defaultPerPage) {
-          setRowsPerPage(defaultPerPage);
-        }
-        if (cPage) {
-          setCurrentPage(parseInt(`${cPage}`));
-        }
-      }
-    },
-    [defaultPerPage, cPage],
-  );
+  useEffect(() => {
+    if (defaultPerPage) {
+      setRowsPerPage(defaultPerPage);
+    }
+    if (cPage) {
+      setCurrentPage(parseInt(`${cPage}`));
+    }
+  }, [defaultPerPage, cPage]);
 
   const getPageNumbers = () => {
     const totalPage = Math.ceil(data.totalCount / rowsPerPage);

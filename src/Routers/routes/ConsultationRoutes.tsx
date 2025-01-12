@@ -1,7 +1,6 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
-import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -72,14 +71,6 @@ const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
-    ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
-    ({ facilityId, patientId, id }) => (
-      <PatientConsentRecords
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
     ),
   "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
     facilityId,
