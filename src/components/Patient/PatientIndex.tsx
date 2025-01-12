@@ -91,7 +91,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
-      setPhoneNumber(value.length >= 13 || value === "" ? value : "");
+      setPhoneNumber(value.length == 3 ? "" : value);
     }
   }, []);
 

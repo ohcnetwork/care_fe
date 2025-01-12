@@ -57,12 +57,9 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     const searchParams = {
       name: key === "name" ? value : "",
       phone_number:
-        key === "phone_number"
-          ? value.length >= 13 || value === ""
-            ? value
-            : undefined
-          : undefined,
+        key === "phone_number" ? (value.length == 3 ? "" : value) : "",
     };
+    console.log(searchParams.phone_number);
     updateQuery(searchParams);
   }, []);
 

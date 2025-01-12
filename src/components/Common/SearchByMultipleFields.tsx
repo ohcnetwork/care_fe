@@ -77,12 +77,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [error, setError] = useState<string | undefined | boolean>();
 
   useEffect(() => {
-    if (!(selectedOption.type === "phone" && searchValue.length < 13)) {
-      setSearchValue(options[selectedOptionIndex].value);
-    }
-  }, [options]);
-
-  useEffect(() => {
     if (clearSearch?.value) {
       const clearinput = options
         .map((op) => op.key)
@@ -158,7 +152,11 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [selectedOptionIndex]);
 
   useEffect(() => {
-    if (selectedOption.value !== searchValue) {
+    if (
+      selectedOption.key === "phone_number"
+        ? searchValue.length == 13 || searchValue.length == 3
+        : selectedOption.value !== searchValue
+    ) {
       onSearch(selectedOption.key, searchValue);
     }
   }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
