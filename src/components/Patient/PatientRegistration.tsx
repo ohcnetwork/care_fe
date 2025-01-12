@@ -311,6 +311,7 @@ export default function PatientRegistration(
             <Input
               {...fieldProps("name")}
               placeholder={t("type_patient_name")}
+              data-cy="patient-name-input"
             />
             <div className="mt-1" data-input-error>
               {errors["name"] &&
@@ -337,6 +338,7 @@ export default function PatientRegistration(
                     : f.emergency_phone_number,
                 }));
               }}
+              data-cy="patient-phone-input"
             />
             <div className="mt-1" data-input-error>
               {errors["phone_number"] &&
@@ -361,6 +363,7 @@ export default function PatientRegistration(
                   }
                 }}
                 id="same-phone-number"
+                data-cy="same-phone-number-checkbox"
               />
               <Label htmlFor="same-phone-number">
                 {t("use_phone_number_for_emergency")}
@@ -416,6 +419,7 @@ export default function PatientRegistration(
                   <RadioGroupItem
                     value={g.id.toString()}
                     id={"gender_" + g.id}
+                    data-cy={`gender-radio-${g.id.toLowerCase()}`}
                   />
                   <Label htmlFor={"gender_" + g.id}>
                     {t(`GENDER__${g.id}`)}
@@ -439,7 +443,7 @@ export default function PatientRegistration(
               <span className="text-red-500">*</span>
             </Label>
             <Select {...selectProps("blood_group")}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-cy="blood-group-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -488,6 +492,7 @@ export default function PatientRegistration(
                       maxLength={2}
                       max={31}
                       min={1}
+                      data-cy="dob-day-input"
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
@@ -508,6 +513,7 @@ export default function PatientRegistration(
                       maxLength={2}
                       max={12}
                       min={1}
+                      data-cy="dob-month-input"
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
@@ -528,6 +534,7 @@ export default function PatientRegistration(
                       maxLength={4}
                       max={new Date().getFullYear()}
                       min={1900}
+                      data-cy="dob-year-input"
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
@@ -605,6 +612,7 @@ export default function PatientRegistration(
                     : f.permanent_address,
                 }))
               }
+              data-cy="current-address-input"
             />
             <div className="mt-1" data-input-error>
               {errors["address"] &&
@@ -657,7 +665,11 @@ export default function PatientRegistration(
               {t("pincode")}
               <span className="text-red-500">*</span>
             </Label>
-            <Input {...fieldProps("pincode")} type="number" />
+            <Input
+              {...fieldProps("pincode")}
+              type="number"
+              data-cy="pincode-input"
+            />
             <div className="mt-1" data-input-error>
               {errors["pincode"] &&
                 errors["pincode"]?.map((error, i) => (
@@ -694,6 +706,7 @@ export default function PatientRegistration(
                       nationality: value,
                     }));
                   }}
+                  data-cy="nationality-input"
                 />
                 <div className="mt-1" data-input-error>
                   {errors["nationality"] &&
