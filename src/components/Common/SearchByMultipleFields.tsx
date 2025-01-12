@@ -295,10 +295,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                 <CommandList>
                   <CommandGroup>
                     <div className="p-4">
-                      {/* Search by section */}
                       <div className="mb-4">
                         <p className="text-sm font-medium text-gray-600">
-                          Search by
+                          {t("search_by")}
                         </p>
                         <div className="flex mt-2">
                           <Button
@@ -315,7 +314,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                       <hr className="border-gray-200 mb-3" />
                       <div>
                         <p className="text-xs font-semibold text-gray-500 mb-2">
-                          Choose other search types
+                          {t("choose_other_search_type")}
                         </p>
                         <div className="space-y-2">
                           {unselectedOptions.map((option, index) => {
@@ -398,7 +397,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-muted-foreground"
+          className="w-full flex items-center justify-center text-muted-foreground"
           onClick={() => {
             setSearchValue("");
           }}
