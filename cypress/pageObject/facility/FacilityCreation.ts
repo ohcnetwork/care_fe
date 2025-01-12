@@ -29,7 +29,9 @@ export class FacilityCreation {
   }
 
   enterPhoneNumber(phone: string) {
-    cy.typeIntoField('[data-cy="facility-phone"]', phone);
+    cy.typeIntoField('[data-cy="facility-phone"]', phone, {
+      skipVerification: true,
+    });
   }
 
   enterPincode(pincode: string) {
