@@ -248,6 +248,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           <Settings className="mr-2 h-4 w-4" />
                           {t("update_facility")}
                         </DropdownMenuItem>
+                        {/* TODO: get permissions from backend */}
                         {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem
                             className="text-destructive"
