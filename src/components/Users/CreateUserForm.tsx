@@ -197,7 +197,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user type" />
+                    <SelectValue placeholder={t("select_user_type")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -386,7 +386,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
