@@ -95,9 +95,7 @@ export class FacilityCreation {
   }
 
   searchFacility(facilityName: string) {
-    cy.typeIntoField('[data-cy="search-facility"]', facilityName, {
-      delay: 500,
-    });
+    cy.typeIntoField('[data-cy="search-facility"]', facilityName);
   }
 
   verifyFacilityNameInCard(facilityName: string) {
