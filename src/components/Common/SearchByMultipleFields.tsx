@@ -223,30 +223,32 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               placeholder={selectedOption.placeholder}
               {...commonProps}
             />
-            <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
-              {open ? (
-                <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                  ESC
-                </span>
-              ) : (
-                <span>
-                  {isAppleDevice ? (
-                    <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                      ⌘K
-                    </span>
-                  ) : (
-                    <div className="flex gap-1 font-medium">
+            {!isSingleOption && (
+              <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
+                {open ? (
+                  <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                    ESC
+                  </span>
+                ) : (
+                  <span>
+                    {isAppleDevice ? (
                       <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                        Ctrl
+                        ⌘K
                       </span>
-                      <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                        K
-                      </span>
-                    </div>
-                  )}
-                </span>
-              )}
-            </div>
+                    ) : (
+                      <div className="flex gap-1 font-medium">
+                        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                          Ctrl
+                        </span>
+                        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+                          K
+                        </span>
+                      </div>
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         );
     }
