@@ -86,6 +86,8 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     if (!selectedOrg.has_children) {
       onChange(selectedOrg.id);
     }
+
+    setSearchQuery("");
   };
 
   const getOrganizationOptions = (
