@@ -235,22 +235,29 @@ Cypress.Commands.add(
   (
     selector: string,
     value: string,
-    options: { clearBeforeTyping?: boolean; skipVerification?: boolean } = {},
+    options: {
+      clearBeforeTyping?: boolean;
+      skipVerification?: boolean;
+      delay?: number;
+    } = {},
   ) => {
-    const { clearBeforeTyping = false, skipVerification = false } = options;
+    const {
+      clearBeforeTyping = false,
+      skipVerification = false,
+      delay = 50,
+    } = options;
     const inputField = cy.get(selector);
 
     if (clearBeforeTyping) {
-      inputField.clear(); // Clear the input field if specified
+      inputField.clear();
     }
 
     inputField
       .scrollIntoView()
       .should("be.visible")
       .click()
-      .type(value)
+      .type(value, { delay })
       .then(() => {
-        // Only verify after typing is completely finished
         if (!skipVerification) {
           cy.get(selector).should("have.value", value);
         }

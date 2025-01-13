@@ -96,7 +96,7 @@ export class FacilityCreation {
 
   searchFacility(facilityName: string) {
     cy.typeIntoField('[data-cy="search-facility"]', facilityName, {
-      skipVerification: true,
+      delay: 500,
     });
   }
 
