@@ -1,8 +1,13 @@
 import { useState } from "react";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -11,48 +16,52 @@ interface NotesInputProps {
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export function NotesInput({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  className,
 }: NotesInputProps) {
-  const [showNotes, setShowNotes] = useState(false);
+  const [open, setOpen] = useState(false);
   const notes = questionnaireResponse.note || "";
   const hasNotes = notes.length > 0;
 
   return (
-    <div className="space-y-2">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.preventDefault();
-          setShowNotes(!showNotes);
-        }}
-        className={`h-6 px-2 ${
-          hasNotes ? "text-blue-500" : "text-gray-500"
-        } hover:bg-gray-100`}
-        disabled={disabled}
-      >
-        <CareIcon icon="l-notes" className="mr-2 h-4 w-4" />
-        {showNotes ? "Hide Notes" : hasNotes ? "Show Notes" : "Add Notes"}
-      </Button>
-      {showNotes && (
-        <Textarea
-          value={notes}
-          onChange={(e) =>
-            updateQuestionnaireResponseCB({
-              ...questionnaireResponse,
-              note: e.target.value,
-            })
-          }
-          placeholder="Add notes..."
-          className="min-h-[100px]"
-          disabled={disabled}
-        />
-      )}
+    <div className={cn("space-y-2 rounded-md flex items-center", className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-full w-28 text-sm font-normal text-gray-700 hover:text-gray-900"
+            disabled={disabled}
+          >
+            {hasNotes ? (
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-400 " />
+            ) : (
+              <span className=" text-base">+</span>
+            )}
+            {hasNotes ? "View Note" : "Add Note"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="bg-yellow-100 border border-yellow-200 text-gray-900 shadow-lg p-2">
+          <Textarea
+            value={notes}
+            onChange={(e) =>
+              updateQuestionnaireResponseCB({
+                ...questionnaireResponse,
+                note: e.target.value,
+              })
+            }
+            className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
+            placeholder="Add notes..."
+            disabled={disabled}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

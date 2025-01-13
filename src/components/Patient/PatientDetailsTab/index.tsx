@@ -6,6 +6,7 @@ import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 import { Patient } from "@/types/emr/newPatient";
 
 import { Appointments } from "./Appointments";
+import { PatientFilesTab } from "./PatientFiles";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
 
@@ -43,5 +44,9 @@ export const patientTabs = [
   {
     route: "users",
     component: PatientUsers,
+  },
+  {
+    route: "files",
+    component: PatientFilesTab,
   },
 ];
