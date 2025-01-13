@@ -97,7 +97,7 @@ export class FacilityCreation {
   searchFacility(facilityName: string) {
     cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
     cy.typeIntoField('[data-cy="search-facility"]', facilityName, {
-      delay: 100,
+      delay: 500,
     });
     cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
