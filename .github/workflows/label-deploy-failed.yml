@@ -17,18 +17,18 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check deploy status
         id: check-status
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const comment = context.payload.comment.body;
-            return {
+            core.setOutput('result', JSON.stringify({
               isDeployFailed: /deploy preview.*failed|failed to deploy/i.test(comment),
               isDeploySuccessful: /deploy preview.*ready|successfully deployed/i.test(comment),
-            };
+            }));
 
       - name: Add Deploy-Failed label if needed
         if: steps.check-status.outputs.isDeployFailed == 'true'
