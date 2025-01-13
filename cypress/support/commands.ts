@@ -85,7 +85,11 @@ Cypress.Commands.add("verifyNotification", (text: string) => {
   return cy
     .get("li[data-sonner-toast] div[data-title]")
     .should("exist")
-    .contains(text);
+    .contains(text)
+    .should("be.visible")
+    .then(() => {
+      cy.closeNotification();
+    });
 });
 
 Cypress.Commands.add("clearAllFilters", () => {
@@ -104,13 +108,19 @@ Cypress.Commands.add("clickCancelButton", (buttonText = "Cancel") => {
 
 Cypress.Commands.add(
   "typeAndSelectOption",
-  (element: string, reference: string) => {
-    cy.get(element)
-      .click()
-      .type(reference)
-      .then(() => {
-        cy.get("[role='option']").contains(reference).click();
-      });
+  (selector: string, value: string) => {
+    // Click to open the dropdown
+    cy.get(selector).click();
+
+    // Type in the command input
+    cy.get("[cmdk-input]").should("be.visible").clear().type(value);
+
+    // Select the filtered option from command menu
+    cy.get("[cmdk-list]")
+      .find("[cmdk-item]")
+      .contains(value)
+      .should("be.visible")
+      .click();
   },
 );
 
@@ -192,10 +202,15 @@ Cypress.Commands.add("preventPrint", () => {
 });
 
 Cypress.Commands.add("closeNotification", () => {
-  cy.get(".pnotify")
-    .should("exist")
-    .each(($div) => {
-      cy.wrap($div).click();
+  return cy
+    .get("li[data-sonner-toast] div[data-title]")
+    .first()
+    .parents("li[data-sonner-toast]")
+    .then(($toast) => {
+      cy.wrap($toast)
+        .find('button[aria-label="Close toast"]', { timeout: 5000 })
+        .should("be.visible")
+        .click();
     });
 });
 
