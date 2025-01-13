@@ -38,7 +38,17 @@ jobs:
 
       - name: Remove Deploy-Failed label if deploy is successful
         if: steps.check-status.outputs.isDeploySuccessful == 'true'
-        run: |
-          curl -X DELETE \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels/Deploy-Failed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.name,
+                name: 'Deploy-Failed'
+              })
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              // Ignore 404 errors when label doesn't exist
+            }
