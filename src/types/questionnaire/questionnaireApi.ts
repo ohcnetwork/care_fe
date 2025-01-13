@@ -2,11 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Organization } from "../organization/organization";
-import {
-  QuestionnaireCreate,
-  QuestionnaireDetail,
-  QuestionnaireUpdate,
-} from "./questionnaire";
+import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
 import { QuestionnaireTag } from "./tags";
 
 export default {
@@ -32,7 +28,7 @@ export default {
   update: {
     path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<QuestionnaireUpdate>(),
+    TRes: Type<QuestionnaireDetail>(),
     TBody: Type<QuestionnaireDetail>(),
   },
 
