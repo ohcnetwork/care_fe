@@ -97,27 +97,10 @@ export class FacilityCreation {
   searchFacility(facilityName: string) {
     cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
 
-    // Clear first
-    cy.get('[data-cy="search-facility"]').clear().should("have.value", "");
-
-    // Function to attempt typing with verification
-    function attemptType(retries = 0, maxRetries = 3) {
-      cy.get('[data-cy="search-facility"]')
-        .type(facilityName)
-        .then(($input) => {
-          const currentValue = $input.val();
-          if (currentValue !== facilityName && retries < maxRetries) {
-            cy.get('[data-cy="search-facility"]').clear();
-            attemptType(retries + 1);
-          }
-        });
-    }
-
-    // Start the typing attempt
-    attemptType();
-
-    // Final verification
-    cy.get('[data-cy="search-facility"]').should("have.value", facilityName);
+    cy.get('[data-cy="search-facility"]')
+      .focus()
+      .type(facilityName, { force: true })
+      .should("have.value", facilityName);
 
     cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
