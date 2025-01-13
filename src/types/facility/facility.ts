@@ -1,3 +1,5 @@
+import { FeatureFlag } from "@/Utils/featureFlags";
+
 import { Organization } from "../organization/organization";
 
 export interface BaseFacility {
@@ -27,5 +29,10 @@ export interface FacilityData {
   features: number[];
   geo_organization: Organization;
   pincode?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  facility_flags?: FeatureFlag[];
   is_public: boolean;
 }

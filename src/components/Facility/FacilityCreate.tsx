@@ -155,11 +155,11 @@ export const FacilityCreate = (props: FacilityProps) => {
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode?.toString() || "",
-        geo_organization: facilityData.geo_organization || "",
+        geo_organization: JSON.stringify(facilityData?.geo_organization) || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude?.toString() || "",
-        longitude: facilityData.longitude?.toString() || "",
+        latitude: facilityData.location?.latitude?.toString() || "",
+        longitude: facilityData.location?.longitude?.toString() || "",
         is_public: facilityData.is_public,
       });
     }

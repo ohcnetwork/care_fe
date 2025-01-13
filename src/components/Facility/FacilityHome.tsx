@@ -31,6 +31,7 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
   Organization,
@@ -241,12 +242,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/facility/${facilityId}/update`)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           <Settings className="mr-2 h-4 w-4" />
-                          {t("update_facility")}
+                          <EditFacilitySheet facilityId={facilityId} />
                         </DropdownMenuItem>
                         {/* TODO: get permissions from backend */}
                         {/* {hasPermissionToDeleteFacility && (
@@ -260,6 +261,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         )} */}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    <EditFacilitySheet facilityId={facilityId} />
                   </div>
                 </div>
               </div>

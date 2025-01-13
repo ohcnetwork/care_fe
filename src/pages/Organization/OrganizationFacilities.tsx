@@ -17,6 +17,7 @@ import query from "@/Utils/request/query";
 import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
+import EditFacilitySheet from "./components/EditFacilitySheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -147,7 +148,7 @@ export default function OrganizationFacilities({
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   <div>
-                    <AddFacilitySheet
+                    <EditFacilitySheet
                       organizationId={id}
                       facilityId={facility.id}
                     />

@@ -4,17 +4,16 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import { FacilityModel } from "@/components/Facility/models";
-
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
+import { FacilityData } from "@/types/facility/facility";
 import { Appointment } from "@/types/scheduling/schedule";
 
 interface Props {
   id?: string;
   appointment: Appointment;
-  facility: FacilityModel;
+  facility: FacilityData;
 }
 
 const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {

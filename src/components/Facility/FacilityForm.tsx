@@ -77,12 +77,12 @@ const facilityFormSchema = z.object({
 type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
 interface FacilityProps {
-  organizationId: string;
+  organizationId?: string;
   facilityId?: string;
   onSubmitSuccess?: () => void;
 }
 
-export default function CreateFacilityForm(props: FacilityProps) {
+export default function FacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -115,16 +115,6 @@ export default function CreateFacilityForm(props: FacilityProps) {
       form.reset();
       onSubmitSuccess?.();
     },
-    onError: (error: Error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      if (errorData?.errors?.msg) {
-        errorData.errors.msg.forEach((msg) => {
-          toast.error(msg);
-        });
-      } else {
-        toast.error(t("facility_add_error"));
-      }
-    },
   });
 
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
@@ -136,16 +126,6 @@ export default function CreateFacilityForm(props: FacilityProps) {
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
       onSubmitSuccess?.();
-    },
-    onError: (error: Error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      if (errorData?.errors?.msg) {
-        errorData.errors.msg.forEach((msg) => {
-          toast.error(msg);
-        });
-      } else {
-        toast.error(t("facility_update_error"));
-      }
     },
   });
 
@@ -186,11 +166,11 @@ export default function CreateFacilityForm(props: FacilityProps) {
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode?.toString() || "",
-        geo_organization: facilityData.geo_organization || "",
+        geo_organization: JSON.stringify(facilityData?.geo_organization) || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude?.toString() || "",
-        longitude: facilityData.longitude?.toString() || "",
+        latitude: facilityData.location?.latitude?.toString() || "",
+        longitude: facilityData.location?.longitude?.toString() || "",
         is_public: facilityData.is_public,
       });
     }
@@ -224,10 +204,8 @@ export default function CreateFacilityForm(props: FacilityProps) {
       validatePincode(pincode) &&
       Number(pincode) !== Number(facilityData?.pincode),
   });
-
-  const stateName = pincodeData?.statename;
-
-  const districtName = pincodeData?.districtname;
+  const { statename: stateName, districtname: districtName } =
+    pincodeData || {};
 
   const { data: stateOrg } = useFetchOrganizationByName(stateName);
   const { data: districtOrg } = useFetchOrganizationByName(

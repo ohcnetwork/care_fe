@@ -1,11 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { FacilityModel } from "@/components/Facility/models";
-
 import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { FacilityData } from "@/types/facility/facility";
 
 export type FeatureFlag = "SCRIBE_ENABLED"; // "HCX_ENABLED" | "ABDM_ENABLED" |
 
@@ -48,9 +47,9 @@ export const FeatureFlagsProvider = (props: { children: React.ReactNode }) => {
   );
 };
 
-export const useFeatureFlags = (facility?: FacilityModel | string) => {
+export const useFeatureFlags = (facility?: FacilityData | string) => {
   const [facilityObject, setFacilityObject] = useState<
-    FacilityModel | undefined
+    FacilityData | undefined
   >(typeof facility === "string" ? undefined : facility);
 
   const context = useContext(FeatureFlagsContext);
