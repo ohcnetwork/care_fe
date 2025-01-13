@@ -39,7 +39,7 @@ declare global {
         reference: string,
       ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
-      closeNotification(): Chainable<Element>;
+      closeNotification(): Chainable<JQuery<HTMLElement>>;
       verifyContentPresence(
         selector: string,
         texts: string[],
@@ -48,7 +48,11 @@ declare global {
       typeIntoField(
         selector: string,
         value: string,
-        options?: { clearBeforeTyping?: boolean; skipVerification?: boolean },
+        options?: {
+          clearBeforeTyping?: boolean;
+          skipVerification?: boolean;
+          delay?: number;
+        },
       ): Chainable<Element>;
     }
   }

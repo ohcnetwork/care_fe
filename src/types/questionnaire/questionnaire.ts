@@ -17,11 +17,9 @@ export interface QuestionnaireDetail {
   subject_type: SubjectType;
 }
 
-export interface QuestionnaireUpdate extends QuestionnaireDetail {
+export interface QuestionnaireCreate extends Omit<QuestionnaireDetail, "id"> {
   organizations: string[];
 }
-
-export type QuestionnaireCreate = Omit<QuestionnaireUpdate, "id">;
 
 export interface QuestionnaireForms {
   count: number;

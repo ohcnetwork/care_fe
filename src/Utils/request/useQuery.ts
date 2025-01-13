@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef } from "react";
 
 import request from "@/Utils/request/request";
-import { QueryRoute, RequestOptions } from "@/Utils/request/types";
+import { ApiRoute, RequestOptions } from "@/Utils/request/types";
 
 import { mergeRequestOptions } from "./utils";
 
@@ -15,7 +15,7 @@ export interface QueryOptions<TData> extends RequestOptions<TData> {
  * @deprecated use `useQuery` from `@tanstack/react-query` instead.
  */
 export default function useTanStackQueryInstead<TData, TBody = unknown>(
-  route: QueryRoute<TData, TBody>,
+  route: ApiRoute<TData, TBody>,
   options?: QueryOptions<TData>,
 ) {
   const overridesRef = useRef<QueryOptions<TData>>();

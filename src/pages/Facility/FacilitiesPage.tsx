@@ -8,15 +8,15 @@ import { Card } from "@/components/ui/card";
 import Loading from "@/components/Common/Loading";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import { FacilityModel } from "@/components/Facility/models";
 
 import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { FacilityData } from "@/types/facility/facility";
+import facilityApi from "@/types/facility/facilityApi";
 
 import { FacilityCard } from "./components/FacilityCard";
 
@@ -30,10 +30,10 @@ export function FacilitiesPage() {
   const { t } = useTranslation();
 
   const { data: facilitiesResponse, isLoading } = useQuery<
-    PaginatedResponse<FacilityModel>
+    PaginatedResponse<FacilityData>
   >({
     queryKey: ["facilities", qParams],
-    queryFn: query.debounced(routes.getAllFacilities, {
+    queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
         ...(qParams.organization && {
           organization: qParams.organization,

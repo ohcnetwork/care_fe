@@ -15,7 +15,7 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 
-export default function FacilityUsers(props: { facilityId: number }) {
+export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 18,

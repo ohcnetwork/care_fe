@@ -40,7 +40,6 @@ import {
 import {
   QuestionStatus,
   QuestionnaireDetail,
-  QuestionnaireUpdate,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -80,14 +79,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireUpdate | null>(null);
+    useState<QuestionnaireDetail | null>(null);
 
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire({
-        ...initialQuestionnaire,
-        organizations: ["628b44da-3da0-4321-a75d-e53697b281bb"],
-      });
+      setQuestionnaire(initialQuestionnaire);
     }
   }, [initialQuestionnaire]);
 
