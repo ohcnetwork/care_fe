@@ -186,11 +186,6 @@ const routes = {
     TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
-  getAllFacilities: {
-    path: "/api/v1/getallfacilities/",
-    TRes: Type<PaginatedResponse<FacilityModel>>(),
-  },
-
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
