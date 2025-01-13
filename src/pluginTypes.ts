@@ -4,6 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import { AppRoutes } from "./Routers/AppRouter";
@@ -24,6 +25,11 @@ export type PatientHomeActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientInfoCardActionsComponentType = React.FC<{
+  encounter: Encounter;
+  className?: string;
+}>;
+
 export type PatientRegistrationFormComponentType = React.FC<{
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   patientId?: string;
@@ -34,6 +40,7 @@ export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
+  PatientInfoCardActions: PatientInfoCardActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
 };
 

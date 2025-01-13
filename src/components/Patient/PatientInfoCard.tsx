@@ -30,6 +30,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -342,6 +343,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   <DropdownMenuItem onClick={handleMarkAsComplete}>
                     {t("mark_as_complete")}
                   </DropdownMenuItem>
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
