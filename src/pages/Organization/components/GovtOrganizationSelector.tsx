@@ -87,6 +87,8 @@ export default function GovtOrganizationSelector(
     if (!selectedOrg.has_children) {
       onChange(selectedOrg.id);
     }
+
+    setSearchQuery("");
   };
 
   const getOrganizationOptions = (

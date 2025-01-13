@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { FacilityModel } from "@/components/Facility/models";
+
+import { FacilityData } from "@/types/facility/facility";
 
 import { FeatureBadge } from "../Utils";
 
 interface Props {
-  facility: FacilityModel;
+  facility: FacilityData;
   className?: string;
 }
 
