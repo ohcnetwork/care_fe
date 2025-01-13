@@ -32,15 +32,6 @@ const consultationRoutes: AppRoutes = {
       questionnaireSlug="encounter"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/edit_encounter":
-    ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        questionnaireSlug="encounter"
-        patientId={patientId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
     facilityId,
     patientId,

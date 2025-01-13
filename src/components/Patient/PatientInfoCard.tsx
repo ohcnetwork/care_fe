@@ -51,7 +51,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const questionnaireOptions = useQuestionnaireOptions(["encounter_actions"]);
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
