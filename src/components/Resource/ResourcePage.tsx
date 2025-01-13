@@ -35,7 +35,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { QueryRoute } from "@/Utils/request/types";
+import { ApiRoute } from "@/Utils/request/types";
 import { QueryOptions } from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
@@ -287,7 +287,7 @@ interface ResourceColumnProps<T extends { id: string }> {
       id: string,
       ...args: unknown[]
     ) => {
-      route: QueryRoute<unknown>;
+      route: ApiRoute<unknown>;
       options?: QueryOptions<unknown>;
     };
   }[];
