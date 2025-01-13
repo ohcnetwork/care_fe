@@ -99,4 +99,11 @@ export class FacilityCreation {
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
   }
+
+  waitForFacilityCardsToLoad(timeout = 10000) {
+    cy.get('[data-cy="facility-cards"]', { timeout })
+      .should("be.visible")
+      .should("not.be.empty");
+    return this;
+  }
 }
