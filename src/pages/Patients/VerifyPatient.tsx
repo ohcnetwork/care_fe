@@ -87,7 +87,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     </div>
                     <div>
                       <h1
-                        id="patient-name"
+                        data-cy="verify-patient-name"
                         className="text-xl font-bold capitalize text-gray-950"
                       >
                         {patientData.name}
@@ -152,6 +152,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 trigger={
                   <Button
                     variant="outline"
+                    data-cy="create-encounter-button"
                     className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-gradient-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
                   >
                     <div className="p-4 md:p-6">

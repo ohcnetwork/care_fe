@@ -33,6 +33,7 @@ interface AutocompleteProps {
   disabled?: boolean;
   align?: "start" | "center" | "end";
   popoverClassName?: string;
+  "data-cy"?: string;
 }
 
 export default function Autocomplete({
@@ -45,6 +46,7 @@ export default function Autocomplete({
   disabled,
   align = "center",
   popoverClassName,
+  "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -62,6 +64,7 @@ export default function Autocomplete({
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled}
+          data-cy={dataCy}
         >
           <span className="overflow-hidden">
             {value

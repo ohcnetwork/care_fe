@@ -216,6 +216,7 @@ export default function CreateEncounterForm({
                         <Button
                           key={value}
                           type="button"
+                          data-cy={`encounter-type-${value}`}
                           className="h-24 w-full justify-start text-lg"
                           variant={
                             field.value === value ? "default" : "outline"
@@ -250,7 +251,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-cy="encounter-status">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -276,7 +277,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-cy="encounter-priority">
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
