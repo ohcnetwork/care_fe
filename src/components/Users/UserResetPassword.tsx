@@ -225,7 +225,7 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty}
+                disabled={!form.formState.isDirty || isPending}
                 variant="primary"
               >
                 {isPending ? t("updating") : t("update_password")}
