@@ -164,7 +164,7 @@ export default function CreateFacilityForm({
               name="facility_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Facility Type</FormLabel>
+                  <FormLabel required>Facility Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
@@ -193,7 +193,7 @@ export default function CreateFacilityForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Facility Name</FormLabel>
+                  <FormLabel required>Facility Name</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -260,7 +260,7 @@ export default function CreateFacilityForm({
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel required>Phone Number</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-phone"
@@ -278,7 +278,7 @@ export default function CreateFacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Pincode</FormLabel>
+                  <FormLabel required>Pincode</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
@@ -297,7 +297,7 @@ export default function CreateFacilityForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel required>Address</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
