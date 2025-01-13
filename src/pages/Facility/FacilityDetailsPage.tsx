@@ -101,7 +101,7 @@ export function FacilityDetailsPage({ id }: Props) {
           className="border border-secondary-400"
         >
           <Link href="/facilities">
-            <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
+            <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
             <span className="text-sm underline">{t("back")}</span>
           </Link>
         </Button>

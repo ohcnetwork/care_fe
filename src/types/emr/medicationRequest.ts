@@ -13,6 +13,18 @@ export const DOSAGE_UNITS = [
   "unit(s)",
 ] as const;
 
+export const BOUNDS_DURATION_UNITS = [
+  // TODO: Are these smaller units required?
+  // "ms",
+  // "s,
+  // "min",
+  "h",
+  "d",
+  "wk",
+  "mo",
+  "a",
+] as const;
+
 export const MEDICATION_REQUEST_STATUS = [
   "active",
   "on-hold",
@@ -66,6 +78,11 @@ export interface DosageQuantity {
   unit?: (typeof DOSAGE_UNITS)[number];
 }
 
+export interface BoundsDuration {
+  value: number;
+  unit: (typeof BOUNDS_DURATION_UNITS)[number];
+}
+
 export interface DoseRange {
   low: DosageQuantity;
   high: DosageQuantity;
@@ -73,10 +90,10 @@ export interface DoseRange {
 
 export interface Timing {
   repeat?: {
-    frequency?: number;
+    frequency: number;
     period: number;
     period_unit: "s" | "min" | "h" | "d" | "wk" | "mo" | "a";
-    bounds_duration?: DosageQuantity;
+    bounds_duration?: BoundsDuration;
   };
   code?: Code;
 }

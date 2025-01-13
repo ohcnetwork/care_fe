@@ -2,8 +2,6 @@ import {
   CommentModel,
   FacilityModel,
   FacilityRequest,
-  IUserFacilityRequest,
-  PatientConsentModel,
 } from "@/components/Facility/models";
 import {
   CreateFileRequest,
@@ -11,7 +9,6 @@ import {
   FileUploadModel,
 } from "@/components/Patient/models";
 import {
-  SkillModel,
   UpdatePasswordForm,
   UserAssignedModel,
   UserModel,
@@ -23,7 +20,6 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
@@ -88,7 +84,7 @@ export enum HttpMethod {
   DELETE = "DELETE",
 }
 
-export const API = <TResponse = undefined, TBody = undefined>(
+export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
 ) => {
   const [method, path] = route.split(" ") as [HttpMethod, string];
@@ -97,23 +93,6 @@ export const API = <TResponse = undefined, TBody = undefined>(
     method,
     TRes: Type<TResponse>(),
     TBody: Type<TBody>(),
-  };
-};
-
-export const ModelCrudApis = <
-  TModel extends object,
-  TCreate = TModel,
-  TListResponse = TModel,
-  TUpdate = TModel,
->(
-  route: string,
-) => {
-  return {
-    list: API<PaginatedResponse<TListResponse>>(`GET ${route}/`),
-    create: API<TModel, TCreate>(`POST ${route}/`),
-    retrieve: API<TModel>(`GET ${route}/{id}/`),
-    update: API<TModel, TUpdate>(`PUT ${route}/{id}/`),
-    delete: API(`DELETE ${route}/{id}/`),
   };
 };
 
@@ -188,82 +167,6 @@ const routes = {
     TRes: Type<PaginatedResponse<UserModel>>(),
   },
 
-  getUserList: {
-    path: "/api/v1/users/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<UserBase>>(),
-  },
-
-  userListSkill: {
-    path: "/api/v1/users/{username}/skill/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<SkillModel>>(),
-  },
-
-  userListFacility: {
-    path: "/api/v1/users/{username}/get_facilities/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FacilityModel>>(),
-  },
-
-  addUserFacility: {
-    path: "/api/v1/users/{username}/add_facility/",
-    method: "PUT",
-    TBody: Type<IUserFacilityRequest>(),
-    TRes: Type<UserModel>(),
-  },
-
-  addUserSkill: {
-    path: "/api/v1/users/{username}/skill/",
-    method: "POST",
-    TBody: Type<{ skill: string }>(),
-    TRes: Type<SkillModel>(),
-  },
-
-  deleteUserFacility: {
-    path: "/api/v1/users/{username}/delete_facility/",
-    method: "DELETE",
-    TBody: Type<IUserFacilityRequest>(),
-    TRes: Type<Record<string, never>>(),
-  },
-
-  clearHomeFacility: {
-    path: "/api/v1/users/{username}/clear_home_facility/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
-  deleteUserSkill: {
-    path: "/api/v1/users/{username}/skill/{id}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
-  createUser: {
-    path: "/api/v1/users/",
-    method: "POST",
-    noAuth: true,
-  },
-
-  updateUser: {
-    path: "/api/v1/users/",
-    method: "PUT",
-  },
-
-  partialUpdateUser: {
-    path: "/api/v1/users/{username}/",
-    method: "PATCH",
-    TRes: Type<UserBase>(),
-    TBody: Type<Partial<UserBase>>(),
-  },
-
-  updateProfilePicture: {
-    path: "/api/v1/users/{username}/profile_picture/",
-    method: "PATCH",
-    TRes: Type<UserModel>(),
-    TBody: Type<{ profile_picture_url: string }>(),
-  },
-
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
@@ -274,20 +177,6 @@ const routes = {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  addUser: {
-    path: "/api/v1/users/",
-    method: "POST",
-    TRes: Type<UserModel>(),
-  },
-
-  searchUser: {
-    path: "/api/v1/users/",
-  },
-
-  getOnlineDoctors: {
-    path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
   },
 
   // Facility Endpoints
@@ -328,13 +217,6 @@ const routes = {
     TBody: Type<FacilityRequest>(),
   },
 
-  partialUpdateFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "PATCH",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<Partial<FacilityModel>>(),
-  },
-
   deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
@@ -370,11 +252,7 @@ const routes = {
     method: "POST",
     TRes: Type<PaginatedResponse<PartialPatientModel>>(),
   },
-  patientList: {
-    path: "/api/v1/patient/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientModel>>(),
-  },
+
   addPatient: {
     path: "/api/v1/patient/",
     method: "POST",
@@ -391,36 +269,6 @@ const routes = {
     method: "PUT",
     TRes: Type<PatientModel>(),
   },
-  patchPatient: {
-    path: "/api/v1/patient/{id}/",
-    method: "PATCH",
-    TBody: Type<Partial<PatientModel>>(),
-    TRes: Type<PatientModel>(),
-  },
-
-  // Consents
-  listConsents: {
-    path: "/api/v1/consultation/{consultationId}/consents/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<PatientConsentModel>>(),
-  },
-  getConsent: {
-    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
-    method: "GET",
-    TRes: Type<PatientConsentModel>(),
-  },
-  createConsent: {
-    path: "/api/v1/consultation/{consultationId}/consents/",
-    method: "POST",
-    TRes: Type<PatientConsentModel>(),
-    TBody: Type<Partial<PatientConsentModel>>(),
-  },
-  partialUpdateConsent: {
-    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
-    method: "PATCH",
-    TRes: Type<PatientConsentModel>(),
-    TBody: Type<Partial<PatientConsentModel>>(),
-  },
 
   //Profile
 
@@ -428,10 +276,6 @@ const routes = {
     path: "/api/v1/users/{username}/",
     method: "GET",
     TRes: Type<UserBase>(),
-  },
-  updateUserDetails: {
-    path: "/api/v1/users/",
-    method: "PUT",
   },
 
   // FileUpload Create
@@ -812,26 +656,6 @@ const routes = {
       path: "/api/v1/patient/{patientId}/medication/request/",
       method: "GET",
       TRes: Type<PaginatedResponse<MedicationRequest>>(),
-    },
-    discontinue: {
-      path: "/api/v1/patient/{patientId}/medication/request/{id}/discontinue/",
-      method: "POST",
-      TBody: Type<{ status_reason: MedicationRequest["status_reason"] }>(),
-      TRes: Type<MedicationRequest>(),
-    },
-  },
-
-  medicationAdministration: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/administration/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationAdministration>>(),
-    },
-    create: {
-      path: "/api/v1/patient/{patientId}/medication/administration/",
-      method: "POST",
-      TBody: Type<MedicationAdministration>(),
-      TRes: Type<MedicationAdministration>(),
     },
   },
 

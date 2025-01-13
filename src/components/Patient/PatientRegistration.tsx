@@ -312,7 +312,11 @@ export default function PatientRegistration(
                   <FormItem>
                     <FormLabel required>{t("name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("type_patient_name")} {...field} />
+                      <Input
+                        placeholder={t("type_patient_name")}
+                        {...field}
+                        data-cy="patient-name-input"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -338,6 +342,7 @@ export default function PatientRegistration(
                             );
                           }
                         }}
+                        data-cy="patient-phone-input"
                       />
                     </FormControl>
                     <FormDescription>
@@ -358,6 +363,7 @@ export default function PatientRegistration(
                                     );
                                   }
                                 }}
+                                data-cy="same-phone-number-checkbox"
                               />
                             </FormControl>
                             <FormLabel>
@@ -382,7 +388,11 @@ export default function PatientRegistration(
                       {t("emergency_phone_number")}
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} maxLength={13} />
+                      <Input
+                        {...field}
+                        maxLength={13}
+                        data-cy="patient-emergency-phone-input"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -408,7 +418,10 @@ export default function PatientRegistration(
                             className="flex items-center space-x-2 space-y-0"
                           >
                             <FormControl>
-                              <RadioGroupItem value={g.id} />
+                              <RadioGroupItem
+                                value={g.id}
+                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
+                              />
                             </FormControl>
                             <FormLabel className="font-normal">
                               {t(`GENDER__${g.id}`)}
@@ -434,7 +447,7 @@ export default function PatientRegistration(
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-cy="blood-group-select">
                           <SelectValue
                             placeholder={t("please_select_blood_group")}
                           />
@@ -492,6 +505,7 @@ export default function PatientRegistration(
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
                                   )
                                 }
+                                data-cy="dob-day-input"
                               />
                             </div>
 
@@ -511,6 +525,7 @@ export default function PatientRegistration(
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
                                   )
                                 }
+                                data-cy="dob-month-input"
                               />
                             </div>
 
@@ -530,6 +545,7 @@ export default function PatientRegistration(
                                     `${e.target.value}-${form.watch("date_of_birth")?.split("-")[1]}-${form.watch("date_of_birth")?.split("-")[2]}`,
                                   )
                                 }
+                                data-cy="dob-year-input"
                               />
                             </div>
                           </div>
@@ -567,6 +583,7 @@ export default function PatientRegistration(
                                   : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
                               )
                             }
+                            data-cy="age-input"
                           />
                         </FormControl>
                         <FormMessage />
@@ -591,6 +608,7 @@ export default function PatientRegistration(
                             form.setValue("permanent_address", e.target.value);
                           }
                         }}
+                        data-cy="current-address-input"
                       />
                     </FormControl>
                     <FormDescription>
@@ -611,6 +629,7 @@ export default function PatientRegistration(
                                     );
                                   }
                                 }}
+                                data-cy="same-address-checkbox"
                               />
                             </FormControl>
                             <FormLabel>
@@ -633,7 +652,7 @@ export default function PatientRegistration(
                   <FormItem>
                     <FormLabel required>{t("permanent_address")}</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Textarea {...field} data-cy="permanent-address-input" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -658,6 +677,7 @@ export default function PatientRegistration(
                               : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
                           )
                         }
+                        data-cy="pincode-input"
                       />
                     </FormControl>
                     <FormMessage />
@@ -682,6 +702,7 @@ export default function PatientRegistration(
                           onChange={(value) =>
                             form.setValue("nationality", value)
                           }
+                          data-cy="nationality-input"
                         />
                       </FormControl>
                       <FormMessage />
