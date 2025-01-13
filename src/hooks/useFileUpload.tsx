@@ -172,7 +172,7 @@ export default function useFileUpload(
         })(body),
       onSuccess: (_, { data, associating_id }) => {
         queryClient.invalidateQueries({
-          queryKey: [`${fileType}-files`, associating_id],
+          queryKey: ["files", fileType, associating_id],
         });
         toast.success(t("file_uploaded"));
         setError(null);

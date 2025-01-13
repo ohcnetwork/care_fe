@@ -83,9 +83,9 @@ export const FilesTab = (props: FilesTabProps) => {
     { value: "lab_reports", label: "Lab Reports" },
     { value: "documents", label: "Documents" },
     { value: "audio", label: "Audio" },
-  ];
+  ] as const;
 
-  const handleTabChange = (value: string) => {
+  const handleTabChange = (value: (typeof fileCategories)[number]["value"]) => {
     updateQuery({ file_category: value === "all" ? undefined : value });
   };
 
@@ -94,7 +94,7 @@ export const FilesTab = (props: FilesTabProps) => {
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: [type + "-files", associatingId, qParams],
+    queryKey: ["files", type, associatingId, qParams],
     queryFn: query(routes.viewUpload, {
       queryParams: {
         file_type: type,
@@ -524,7 +524,9 @@ export const FilesTab = (props: FilesTabProps) => {
       <Tabs
         defaultValue="all"
         value={qParams.file_category || "all"}
-        onValueChange={handleTabChange}
+        onValueChange={(value) =>
+          handleTabChange(value as (typeof fileCategories)[number]["value"])
+        }
       >
         <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between">
           <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
