@@ -30,7 +30,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 export function FacilityNavUser({
   selectedFacilityId,
 }: {
-  selectedFacilityId?: string;
+  selectedFacilityId: string | undefined;
 }) {
   const { t } = useTranslation();
   const user = useAuthUser();

@@ -88,11 +88,15 @@ export default function UserHome(props: UserHomeProps) {
     ? `/facility/${props.facilityId}/users/${username}`
     : `/users/${username}`;
 
+  const usernameCrumb = {
+    [username]: { name: loggedInUser ? "Profile" : username },
+  };
+
+  const hideUsersCrumb = { users: { hide: true } };
+
   const crumbsReplacements = {
-    ...(loggedInUser
-      ? { [username]: { name: "Profile" } }
-      : { [username]: { name: username } }),
-    ...(!props.facilityId && { users: { hide: true } }),
+    ...usernameCrumb,
+    ...(!props.facilityId && hideUsersCrumb),
   };
 
   return (
