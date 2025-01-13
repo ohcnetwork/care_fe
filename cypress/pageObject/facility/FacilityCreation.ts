@@ -95,8 +95,10 @@ export class FacilityCreation {
   }
 
   searchFacility(facilityName: string) {
-    cy.intercept("GET", `**/api/v1/facility/**`).as("searchFacility");
-    cy.typeIntoField('[data-cy="search-facility"]', facilityName);
+    cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
+    cy.typeIntoField('[data-cy="search-facility"]', facilityName, {
+      delay: 100,
+    });
     cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
 
@@ -108,6 +110,5 @@ export class FacilityCreation {
     cy.get('[data-cy="facility-cards"]', { timeout })
       .should("be.visible")
       .should("not.be.empty");
-    return this;
   }
 }
