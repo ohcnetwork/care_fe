@@ -132,9 +132,16 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               ?.id,
           });
         }}
+        disabled={selected.length === 0}
       >
         <SelectTrigger className="sm:max-w-56 h-[38px]">
-          <SelectValue placeholder={t("select_facility_type")} />
+          <SelectValue
+            placeholder={
+              selected.length === 0
+                ? t("select_location_first")
+                : t("select_facility_type")
+            }
+          />
         </SelectTrigger>
         <SelectContent>
           {FACILITY_TYPES.map((type) => (

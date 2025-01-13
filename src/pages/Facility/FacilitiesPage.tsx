@@ -115,6 +115,12 @@ export function FacilitiesPage() {
       <div className="flex flex-col w-full gap-4 mt-4">
         {isLoading ? (
           <Loading />
+        ) : !qParams.organization ? (
+          <Card className="p-6">
+            <div className="text-lg font-medium text-muted-foreground">
+              {t("select_location_first")}
+            </div>
+          </Card>
         ) : !facilitiesResponse?.results.length ? (
           <Card className="p-6">
             <div className="text-lg font-medium text-muted-foreground">
