@@ -274,7 +274,11 @@ export function EncounterList({
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start">
+                  <PopoverContent
+                    className="w-[320px] p-3"
+                    align="start"
+                    onEscapeKeyDown={(event) => event.preventDefault()}
+                  >
                     <div className="space-y-4">
                       <h4 className="font-medium leading-none">
                         {t("search_encounters")}
