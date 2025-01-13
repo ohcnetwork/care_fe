@@ -32,7 +32,7 @@ import {
 import { QuantityInput } from "@/components/Common/QuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import {
   BOUNDS_DURATION_UNITS,
@@ -76,7 +76,7 @@ export function MedicationRequestQuestion({
   const [medicationToDelete, setMedicationToDelete] = useState<number | null>(
     null,
   );
-  const isMobile = useIsMobile();
+  const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationRequest[] = [
@@ -168,7 +168,7 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn("max-w-[2144px] relative lg:border rounded-md", {
-                "bg-gray-50/50": isMobile,
+                "bg-gray-50/50": !desktopLayout,
               })}
             >
               {/* Header - Only show on desktop */}
@@ -207,10 +207,14 @@ export function MedicationRequestQuestion({
               </div>
 
               {/* Body */}
-              <div className={cn("bg-white", { "bg-transparent": isMobile })}>
+              <div
+                className={cn("bg-white", {
+                  "bg-transparent": !desktopLayout,
+                })}
+              >
                 {medications.map((medication, index) => (
                   <React.Fragment key={index}>
-                    {isMobile ? (
+                    {!desktopLayout ? (
                       <Collapsible
                         open={expandedMedicationIndex === index}
                         onOpenChange={() => {
