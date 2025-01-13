@@ -23,16 +23,16 @@ export interface FacilityData {
   name: string;
   description?: string;
   address?: string;
-  phone_number?: string;
+  phone_number: string;
   facility_type: string;
   read_cover_image_url?: string;
   features: number[];
   geo_organization: Organization;
-  pincode?: string;
   location?: {
     latitude: number;
     longitude: number;
   };
   facility_flags?: FeatureFlag[];
+  pincode: string;
   is_public: boolean;
 }

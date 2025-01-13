@@ -103,6 +103,14 @@ const careConfig = {
   },
 
   appointments: {
+    /**
+     * Relative number of days to show in the appointments page by default.
+     * 0 means today, positive for future days, negative for past days.
+     */
+    defaultDateFilter: env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER
+      ? parseInt(env.REACT_APPOINTMENTS_DEFAULT_DATE_FILTER)
+      : 7,
+
     // Kill switch in-case the heatmap API doesn't scale as expected
     useAvailabilityStatsAPI: boolean(
       "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",

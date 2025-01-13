@@ -373,7 +373,10 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div className="flex gap-4 items-center m-4 max-w-4xl">
+        <div
+          key={`${questionnaireForms.length}`}
+          className="flex gap-4 items-center m-4 max-w-4xl"
+        >
           <QuestionnaireSearch
             subjectType={subjectType}
             onSelect={(selected) => {
