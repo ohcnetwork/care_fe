@@ -244,7 +244,7 @@ Cypress.Commands.add(
     const {
       clearBeforeTyping = false,
       skipVerification = false,
-      delay = 50,
+      delay = 0,
     } = options;
     const inputField = cy.get(selector);
 
