@@ -48,7 +48,11 @@ declare global {
       typeIntoField(
         selector: string,
         value: string,
-        options?: { clearBeforeTyping?: boolean; skipVerification?: boolean },
+        options?: {
+          clearBeforeTyping?: boolean;
+          skipVerification?: boolean;
+          delay?: number;
+        },
       ): Chainable<Element>;
     }
   }

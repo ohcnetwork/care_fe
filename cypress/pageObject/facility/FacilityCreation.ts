@@ -95,10 +95,22 @@ export class FacilityCreation {
   }
 
   searchFacility(facilityName: string) {
-    cy.typeIntoField('[data-cy="search-facility"]', facilityName);
+    cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
+
+    cy.get('[data-cy="search-facility"]')
+      .focus()
+      .type(facilityName, { force: true });
+
+    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
 
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
+  }
+
+  waitForFacilityCardsToLoad(timeout = 10000) {
+    cy.get('[data-cy="facility-cards"]', { timeout })
+      .should("be.visible")
+      .should("not.be.empty");
   }
 }
