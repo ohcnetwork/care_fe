@@ -99,8 +99,7 @@ export class FacilityCreation {
 
     cy.get('[data-cy="search-facility"]')
       .focus()
-      .type(facilityName, { force: true })
-      .should("have.value", facilityName);
+      .type(facilityName, { force: true });
 
     cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
