@@ -31,6 +31,7 @@ interface AutocompleteProps {
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
+  "data-cy"?: string;
 }
 
 export default function Autocomplete({
@@ -41,6 +42,7 @@ export default function Autocomplete({
   placeholder = "Select...",
   noOptionsMessage = "No options found",
   disabled,
+  "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -58,6 +60,7 @@ export default function Autocomplete({
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled}
+          data-cy={dataCy}
         >
           <span className="overflow-hidden">
             {value
