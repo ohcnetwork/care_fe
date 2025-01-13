@@ -711,28 +711,28 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
+                {form.watch("nationality") === "India" && (
+                  <FormField
+                    control={form.control}
+                    name="geo_organization"
+                    render={({ field }) => (
+                      <FormItem className="contents">
+                        <FormControl>
+                          <GovtOrganizationSelector
+                            {...field}
+                            required={true}
+                            value={form.watch("geo_organization")}
+                            onChange={(value) =>
+                              form.setValue("geo_organization", value)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
-              {form.watch("nationality") === "India" && (
-                <FormField
-                  control={form.control}
-                  name="geo_organization"
-                  render={({ field }) => (
-                    <FormItem className="contents">
-                      <FormControl>
-                        <GovtOrganizationSelector
-                          {...field}
-                          required={true}
-                          value={form.watch("geo_organization")}
-                          onChange={(value) =>
-                            form.setValue("geo_organization", value)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </div>
 
             <div className="flex justify-end gap-4">
