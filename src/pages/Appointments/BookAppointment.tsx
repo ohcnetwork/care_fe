@@ -78,7 +78,9 @@ export default function BookAppointment(props: Props) {
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: props.facilityId },
       body: {
-        user: resourceId,
+        // voluntarily coalesce to empty string since we know query would be
+        // enabled only if resourceId and selectedDate are present
+        user: resourceId ?? "",
         day: dateQueryString(selectedDate),
       },
     }),
