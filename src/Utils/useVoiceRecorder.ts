@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-import * as Notify from "./Notifications";
+import { toast } from "sonner";
 
 const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [audioURL, setAudioURL] = useState("");
@@ -30,9 +29,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
           error instanceof Error
             ? error.message
             : "Please grant microphone permission to record audio.";
-        Notify.Error({
-          msg: errorMessage,
-        });
+        toast.error(errorMessage);
         setIsRecording(false);
         handleMicPermission(false);
       }

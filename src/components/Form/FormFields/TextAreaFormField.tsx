@@ -19,6 +19,9 @@ export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
 };
 
+/**
+ * @deprecated use shadcn/ui's textarea instead
+ */
 const TextAreaFormField = forwardRef(
   (
     { rows = 3, ...props }: TextAreaFormFieldProps,

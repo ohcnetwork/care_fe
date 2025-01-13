@@ -1,16 +1,16 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/input-password";
 
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserFormValidations";
 
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
@@ -33,7 +33,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
 
   const { t } = useTranslation();
   const handleChange = (e: any) => {
-    const { value, name } = e;
+    const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
     if (errorField[name]) {
@@ -82,9 +82,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
       });
       if (res?.ok) {
         localStorage.removeItem(LocalStorageKeys.accessToken);
-        Notification.Success({
-          msg: t("password_reset_success"),
-        });
+        toast.success(t("password_reset_success"));
         navigate("/login");
       } else if (res && error) {
         setErrors(error);
@@ -109,89 +107,105 @@ const ResetPassword = (props: ResetPasswordProps) => {
   }, []);
 
   return (
-    <div className="py-10 md:py-40">
-      <div>
-        <div>
-          <form
-            className="mx-auto max-w-xl rounded-lg bg-white shadow"
-            onSubmit={(e) => {
-              handleSubmit(e);
-            }}
-          >
-            <div className="py-4 text-center text-xl font-bold">
-              {t("reset_password")}
-            </div>
-            <div className="px-4">
-              <TextFormField
-                type="password"
-                name="password"
-                placeholder={t("new_password")}
-                onChange={handleChange}
-                error={errors.password}
-                onFocus={() => setPasswordInputInFocus(true)}
-                onBlur={() => setPasswordInputInFocus(false)}
-              />
-              {passwordInputInFocus && (
-                <div className="text-small mb-2 pl-2 text-secondary-500">
-                  {validateRule(
-                    form.password?.length >= 8,
-                    t("password_length_validation"),
-                    !form.password,
-                  )}
-                  {validateRule(
-                    form.password !== form.password.toUpperCase(),
-                    t("password_lowercase_validation"),
-                    !form.password,
-                  )}
-                  {validateRule(
-                    form.password !== form.password.toLowerCase(),
-                    t("password_uppercase_validation"),
-                    !form.password,
-                  )}
-                  {validateRule(
-                    /\d/.test(form.password),
-                    t("password_number_validation"),
-                    !form.password,
-                  )}
-                </div>
-              )}
-              <TextFormField
-                type="password"
-                name="confirm"
-                placeholder={t("confirm_password")}
-                onChange={handleChange}
-                error={errors.confirm}
-                onFocus={() => setConfirmPasswordInputInFocus(true)}
-                onBlur={() => setConfirmPasswordInputInFocus(false)}
-              />
-              {confirmPasswordInputInFocus &&
-                form.confirm.length > 0 &&
-                form.password.length > 0 &&
-                validateRule(
-                  form.confirm === form.password,
-                  t("password_mismatch"),
-                  !form.password && form.password.length > 0,
-                )}
-            </div>
-            <div className="grid p-4 sm:flex sm:justify-between">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => navigate("/login")}
-              >
-                <span>{t("cancel")}</span>
-              </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-              >
-                <span>{t("reset")}</span>
-              </Button>
-            </div>
-          </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        className="w-full max-w-md mx-auto rounded-lg bg-white shadow-lg p-6"
+        onSubmit={(e) => {
+          handleSubmit(e);
+        }}
+      >
+        <div className="py-4 text-center text-xl font-bold">
+          {t("reset_password")}
         </div>
-      </div>
+
+        <div className="space-y-6">
+          <div>
+            <PasswordInput
+              name="password"
+              placeholder={t("new_password")}
+              onChange={handleChange}
+              onFocus={() => setPasswordInputInFocus(true)}
+              onBlur={() => setPasswordInputInFocus(false)}
+            />
+            {errors.password && (
+              <div className="mt-1 text-red-500 text-xs" data-input-error>
+                {errors.password}
+              </div>
+            )}
+            {passwordInputInFocus && (
+              <div className="text-sm mt-2 pl-2 text-secondary-500">
+                {validateRule(
+                  form.password?.length >= 8,
+                  t("password_length_validation"),
+                  !form.password,
+                  t("password_length_met"),
+                )}
+                {validateRule(
+                  form.password !== form.password.toUpperCase(),
+                  t("password_lowercase_validation"),
+                  !form.password,
+                  t("password_lowercase_met"),
+                )}
+                {validateRule(
+                  form.password !== form.password.toLowerCase(),
+                  t("password_uppercase_validation"),
+                  !form.password,
+                  t("password_uppercase_met"),
+                )}
+                {validateRule(
+                  /\d/.test(form.password),
+                  t("password_number_validation"),
+                  !form.password,
+                  t("password_number_met"),
+                )}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <PasswordInput
+              name="confirm"
+              placeholder={t("confirm_password")}
+              onChange={handleChange}
+              onFocus={() => setConfirmPasswordInputInFocus(true)}
+              onBlur={() => setConfirmPasswordInputInFocus(false)}
+            />
+            {errors.confirm && (
+              <div className="mt-1 text-red-500 text-xs" data-input-error>
+                {errors.confirm}
+              </div>
+            )}
+            {confirmPasswordInputInFocus &&
+              form.confirm.length > 0 &&
+              form.password.length > 0 &&
+              validateRule(
+                form.confirm === form.password,
+                t("password_mismatch"),
+                !form.password && form.password.length > 0,
+                t("password_match"),
+              )}
+          </div>
+        </div>
+
+        <div className="grid p-4 sm:flex sm:justify-between gap-4 mt-6">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => navigate("/login")}
+            className="w-full sm:w-auto"
+          >
+            <span>{t("cancel")}</span>
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            onClick={(e) => handleSubmit(e)}
+            className="w-full sm:w-auto"
+          >
+            <span>{t("reset")}</span>
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

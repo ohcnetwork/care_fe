@@ -38,4 +38,4 @@ General Guidelines
 
 # Testing Guidelines
 
-For Cypress testing guidelines, refer to cypress/docs/cypress.md
+For Cypress testing guidelines, refer to cypress/docs/*.md

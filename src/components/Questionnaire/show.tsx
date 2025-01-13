@@ -1,19 +1,39 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import useQuery from "@/Utils/request/useQuery";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import type { Question } from "@/types/questionnaire/question";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import Loading from "../Common/Loading";
+import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
@@ -63,15 +83,33 @@ function QuestionItem({
 export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabValue>("details");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const {
     data: questionnaire,
-    loading,
+    isLoading,
     error,
-  } = useQuery(questionnaireApi.detail, {
-    pathParams: { id },
+  } = useQuery({
+    queryKey: [questionnaireApi.detail.path, id],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id },
+    }),
   });
 
-  if (loading) {
+  const { mutate: deleteQuestionnaire, isPending } = useMutation({
+    mutationFn: mutate(questionnaireApi.delete, {
+      pathParams: { id },
+    }),
+    onSuccess: () => {
+      navigate("/questionnaire");
+    },
+  });
+
+  const handleDelete = () => {
+    deleteQuestionnaire({});
+  };
+
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -107,7 +145,6 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           <p className="text-gray-600">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <ManageQuestionnaireOrganizationsSheet questionnaireId={id} />
           <Button variant="outline" onClick={() => navigate("/questionnaire")}>
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Back to List
@@ -116,6 +153,68 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
             Edit
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <CareIcon icon="l-cog" className="mr-2 h-4 w-4" />
+                Manage
+                <CareIcon icon="l-angle-down" className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[200px]">
+              <ManageQuestionnaireOrganizationsSheet
+                questionnaireId={id}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <CareIcon icon="l-building" className="mr-2 h-4 w-4" />
+                    Manage Organizations
+                  </DropdownMenuItem>
+                }
+              />
+              <CloneQuestionnaireSheet
+                questionnaire={questionnaire}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                    Clone Questionnaire
+                  </DropdownMenuItem>
+                }
+              />
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setShowDeleteDialog(true)}
+              >
+                <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+                Delete Questionnaire
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Questionnaire</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this questionnaire? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isPending}
+                >
+                  {isPending ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

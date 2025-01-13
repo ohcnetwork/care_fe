@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -15,7 +16,6 @@ import { UserAssignedModel } from "@/components/Users/models";
 
 import useFilters from "@/hooks/useFilters";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
@@ -53,7 +53,7 @@ export function FacilityDetailsPage({ id }: Props) {
         silent: true,
       });
       if (response.res?.status !== 200) {
-        Notification.Error({ msg: "Error while fetching users data" });
+        toast.error(t("error_fetching_users_data"));
       }
       return response;
     },
@@ -101,7 +101,7 @@ export function FacilityDetailsPage({ id }: Props) {
           className="border border-secondary-400"
         >
           <Link href="/facilities">
-            <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
+            <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
             <span className="text-sm underline">{t("back")}</span>
           </Link>
         </Button>

@@ -16,6 +16,7 @@ export type AppointmentPatient = {
   external_id: string;
   name: string;
   phone_number: string;
+  emergency_phone_number: string;
   address: string;
   date_of_birth?: string;
   year_of_birth?: string;

@@ -19,18 +19,7 @@ type Props = FormFieldBaseProps<Date> & {
 };
 
 /**
- * A FormField to pick date.
- *
- * Example usage:
- *
- * ```jsx
- * <DateFormField
- *   {...field("user_date_of_birth")}
- *   label="Date of birth"
- *   required
- *   disableFuture // equivalent to max={new Date()}
- * />
- * ```
+ * @deprecated use shadcn/ui's date-picker instead
  */
 const DateFormField = (props: Props) => {
   const field = useFormFieldPropsResolver(props);

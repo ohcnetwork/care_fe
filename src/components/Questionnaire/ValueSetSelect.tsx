@@ -19,8 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { Code, ValueSetSystem } from "@/types/questionnaire/code";
@@ -33,6 +31,7 @@ interface Props {
   disabled?: boolean;
   count?: number;
   searchPostFix?: string;
+  wrapTextForSmallScreen?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -43,14 +42,15 @@ export default function ValueSetSelect({
   disabled,
   count = 10,
   searchPostFix = "",
+  wrapTextForSmallScreen = false,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useDebouncedState("", 500);
+  const [search, setSearch] = useState("");
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
-    queryFn: query(routes.valueset.expand, {
+    queryFn: query.debounced(routes.valueset.expand, {
       pathParams: { system },
       body: { count, search: search + searchPostFix },
     }),
@@ -69,7 +69,10 @@ export default function ValueSetSelect({
           variant="outline"
           role="combobox"
           className={cn(
-            "w-full justify-between truncate",
+            "w-full justify-between",
+            wrapTextForSmallScreen
+              ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+              : "truncate",
             !value?.display && "text-gray-400",
           )}
         >
