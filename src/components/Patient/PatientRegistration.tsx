@@ -49,8 +49,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { parsePhoneNumber } from "@/Utils/utils";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
@@ -711,37 +711,28 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-                <div className="mt-1" data-input-error>
-                  {errors["nationality"] &&
-                    errors["nationality"]?.map((error, i) => (
-                      <div key={i} className="text-red-500 text-xs">
-                        {error}
-                      </div>
-                    ))}
-                </div>
               </div>
-                {form.watch("nationality") === "India" && (
-                  <FormField
-                    control={form.control}
-                    name="geo_organization"
-                    render={({ field }) => (
-                      <FormItem className="contents">
-                        <FormControl>
-                          <OrganizationSelector
-                            {...field}
-                            required={true}
-                            value={form.watch("geo_organization")}
-                            onChange={(value) =>
-                              form.setValue("geo_organization", value)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
+              {form.watch("nationality") === "India" && (
+                <FormField
+                  control={form.control}
+                  name="geo_organization"
+                  render={({ field }) => (
+                    <FormItem className="contents">
+                      <FormControl>
+                        <GovtOrganizationSelector
+                          {...field}
+                          required={true}
+                          value={form.watch("geo_organization")}
+                          onChange={(value) =>
+                            form.setValue("geo_organization", value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <div className="flex justify-end gap-4">
