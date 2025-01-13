@@ -244,11 +244,16 @@ Cypress.Commands.add(
       inputField.clear(); // Clear the input field if specified
     }
 
-    inputField.scrollIntoView().should("be.visible").click().type(value);
-
-    // Conditionally skip verification based on the skipVerification flag
-    if (!skipVerification) {
-      inputField.should("have.value", value); // Verify the value if skipVerification is false
-    }
+    inputField
+      .scrollIntoView()
+      .should("be.visible")
+      .click()
+      .type(value)
+      .then(() => {
+        // Only verify after typing is completely finished
+        if (!skipVerification) {
+          cy.get(selector).should("have.value", value);
+        }
+      });
   },
 );
