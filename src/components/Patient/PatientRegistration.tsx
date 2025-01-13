@@ -152,6 +152,7 @@ export default function PatientRegistration(
       phone_number: phone_number || "+91",
       emergency_phone_number: "+91",
       age_or_dob: "dob",
+      same_phone_number: true,
     },
   });
 
