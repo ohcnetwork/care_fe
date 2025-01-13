@@ -95,7 +95,9 @@ export class FacilityCreation {
   }
 
   searchFacility(facilityName: string) {
+    cy.intercept("GET", `**/api/v1/facility/**`).as("searchFacility");
     cy.typeIntoField('[data-cy="search-facility"]', facilityName);
+    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
 
   verifyFacilityNameInCard(facilityName: string) {
