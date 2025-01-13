@@ -75,7 +75,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
-
+  const isSingleOption = options.length == 1;
   useEffect(() => {
     if (clearSearch?.value) {
       const clearinput = options
@@ -121,7 +121,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       if (e.key === "Escape") {
         inputRef.current?.focus();
         setOpen(false);
-        setSearchValue("");
       }
       if (open) {
         if (e.key === "ArrowDown") {
@@ -187,7 +186,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               hideHelp={true}
               onError={(error: FieldError) => setError(error)}
             />
-            {options.length != 1 && (
+            {!isSingleOption && (
               <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
                 {open ? (
                   <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
@@ -274,7 +273,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         aria-haspopup="listbox"
         className="flex items-center rounded-t-lg"
       >
-        {options.length > 1 && (
+        {!isSingleOption && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
