@@ -1,7 +1,5 @@
 import { UserModel } from "@/components/Users/models";
 
-import { UserRole } from "@/common/constants";
-
 import { UserBase } from "@/types/user/user";
 
 // To do: Rewrite to check if belongs to same org and in higher
@@ -62,10 +60,3 @@ export const editUserPermissions = (
   // To do: check above
   //return checkIfStateOrDistrictAdminInSameLocation(authUser, targetUser);
 };
-
-export const CameraFeedPermittedUserTypes: UserRole[] = [
-  "DistrictAdmin",
-  "StateAdmin",
-  "StateReadOnlyAdmin",
-  "Doctor",
-];

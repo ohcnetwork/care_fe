@@ -26,7 +26,7 @@ export default function AddFacilitySheet({ organizationId }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" data-cy="add-facility-button">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           Add Facility
         </Button>

@@ -1,55 +1,47 @@
 import { LazyExoticComponent } from "react";
+import { UseFormReturn } from "react-hook-form";
 
-import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { Encounter } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 
 import { AppRoutes } from "./Routers/AppRouter";
-import { FormContextValue } from "./components/Form/FormContext";
-import { PatientMeta } from "./components/Patient/models";
+import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
-import { PatientModel } from "./types/emr/patient";
-
-export type PatientForm = PatientModel &
-  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
 
-export type ScribeComponentType = React.FC;
-export type ManageFacilityOptionsComponentType = React.FC<{
-  facility?: FacilityModel;
+export type ScribeComponentType = React.FC<{
+  formState: QuestionnaireFormState[];
+  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
 }>;
 
-export type ExtendFacilityConfigureComponentType = React.FC<{
-  facilityId: string;
+export type PatientHomeActionsComponentType = React.FC<{
+  patient: Patient;
+  className?: string;
 }>;
 
-export type ExtendPatientRegisterFormComponentType = React.FC<{
-  facilityId: string;
+export type PatientInfoCardActionsComponentType = React.FC<{
+  encounter: Encounter;
+  className?: string;
+}>;
+
+export type PatientRegistrationFormComponentType = React.FC<{
+  form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   patientId?: string;
-  state: {
-    form: {
-      [key: string]: any;
-    };
-    errors: {
-      [key: string]: string;
-    };
-  };
-  dispatch: React.Dispatch<any>;
-  field: FormContextValue<PatientForm>;
 }>;
 
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
-  ManageFacilityOptions: ManageFacilityOptionsComponentType;
-  EncounterContextEnabler: React.FC;
-  ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
-  ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType;
+  PatientHomeActions: PatientHomeActionsComponentType;
+  PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  PatientRegistrationForm: PatientRegistrationFormComponentType;
 };
 
 // Create a type for lazy-loaded components

@@ -34,7 +34,12 @@ const capitalize = (string: string) =>
 
 interface BreadcrumbsProps {
   replacements?: {
-    [key: string]: { name?: string; uri?: string; style?: string };
+    [key: string]: {
+      name?: string;
+      uri?: string;
+      style?: string;
+      hide?: boolean;
+    };
   };
   className?: string;
   hideBack?: boolean;
@@ -56,6 +61,7 @@ export default function Breadcrumbs({
   const crumbs = path
     ?.slice(1)
     .split("/")
+    .filter((field) => replacements[field]?.hide !== true)
     .map((field, i) => ({
       name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
       uri:

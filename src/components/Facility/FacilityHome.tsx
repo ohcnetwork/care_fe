@@ -1,9 +1,10 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Hospital, MapPin, MoreVertical, Settings, Trash2 } from "lucide-react";
+import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,11 +23,8 @@ import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -39,15 +37,6 @@ import type {
   OrganizationParent,
 } from "@/types/organization/organization";
 import { getOrgLabel } from "@/types/organization/organization";
-
-import type { UserModel } from "../Users/models";
-
-export function canUserRegisterPatient(
-  authUser: UserModel,
-  facilityId: string,
-) {
-  return authUser.home_facility_object?.id === facilityId;
-}
 
 type Props = {
   facilityId: string;
@@ -100,7 +89,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
-  const authUser = useAuthUser();
 
   const {
     data: facilityData,
@@ -122,9 +110,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
       onResponse: ({ res }) => {
         if (res?.ok) {
-          Notification.Success({
-            msg: t("deleted_successfully", { name: facilityData?.name }),
-          });
+          toast.success(
+            t("deleted_successfully", { name: facilityData?.name }),
+          );
         }
         navigate("/facility");
       },
@@ -145,7 +133,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         if (xhr.status === 200) {
           await sleep(1000);
           facilityFetch();
-          Notification.Success({ msg: "Cover image updated." });
+          toast.success(t("cover_image_updated"));
           setEditCoverImage(false);
         } else {
           onError();
@@ -163,7 +151,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     });
     if (res?.ok) {
-      Notification.Success({ msg: "Cover image deleted" });
+      toast.success(t("cover_image_deleted"));
       facilityFetch();
       setEditCoverImage(false);
     } else {
@@ -176,9 +164,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   }
 
   const hasPermissionToEditCoverImage = true;
-  const hasPermissionToDeleteFacility =
-    authUser.user_type === "DistrictAdmin" ||
-    authUser.user_type === "StateAdmin";
 
   return (
     <div>
@@ -263,7 +248,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           <Settings className="mr-2 h-4 w-4" />
                           {t("update_facility")}
                         </DropdownMenuItem>
-                        {hasPermissionToDeleteFacility && (
+                        {/* TODO: get permissions from backend */}
+                        {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setOpenDeleteDialog(true)}
@@ -271,7 +257,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t("delete_facility")}
                           </DropdownMenuItem>
-                        )}
+                        )} */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

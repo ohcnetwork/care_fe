@@ -8,50 +8,55 @@ type QueryParamValue =
 
 export type QueryParams = Record<string, QueryParamValue>;
 
-interface RouteBase<TData> {
+export interface ApiRoute<TData, TBody = unknown> {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  TBody?: TBody;
   path: string;
   TRes: TData;
   noAuth?: boolean;
 }
 
-export interface QueryRoute<TData, TBody = unknown> extends RouteBase<TData> {
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  TBody?: TBody;
-}
-
-export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
-  method: "POST" | "PUT" | "PATCH" | "DELETE";
-  TBody?: TBody;
-}
-
-export type Route<TData, TBody> =
-  | QueryRoute<TData, TBody>
-  | MutationRoute<TData, TBody>;
-
+/**
+ * @deprecated in favor of useQuery/useMutation/callApi
+ */
 export interface RequestResult<TData> {
   res: Response | undefined;
   data: TData | undefined;
   error: undefined | Record<string, unknown>;
 }
 
+/**
+ * @deprecated in favor of ApiCallOptions used by useQuery/useMutation/callApi
+ */
 export interface RequestOptions<TData = unknown, TBody = unknown> {
   query?: QueryParams;
   body?: TBody;
-  pathParams?: Record<string, string | number>;
+  pathParams?: Record<string, string>;
   onResponse?: (res: RequestResult<TData>) => void;
   silent?: boolean;
 }
 
-export interface APICallOptions<TBody = unknown> {
-  pathParams?: Record<string, string | number>;
+type ExtractRouteParams<T extends string> =
+  T extends `${infer _Start}{${infer Param}}${infer Rest}`
+    ? Param | ExtractRouteParams<Rest>
+    : never;
+
+type PathParams<T extends string> = {
+  [K in ExtractRouteParams<T>]: string;
+};
+
+export interface ApiCallOptions<Route extends ApiRoute<unknown, unknown>> {
+  pathParams?: PathParams<Route["path"]>;
   queryParams?: QueryParams;
-  body?: TBody;
+  body?: Route["TBody"];
   silent?: boolean;
   signal?: AbortSignal;
   headers?: HeadersInit;
 }
 
-type HTTPErrorCause = Record<string, unknown> | undefined;
+export type StructuredError = Record<string, string | string[]>;
+
+type HTTPErrorCause = StructuredError | Record<string, unknown> | undefined;
 
 export class HTTPError extends Error {
   status: number;

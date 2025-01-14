@@ -4,9 +4,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable<Subject> {
-      login(username: string, password: string): Chainable<Subject>;
-      refreshApiLogin(username: string, password: string): Chainable<Subject>;
-      loginByApi(username: string, password: string): Chainable<Subject>;
+      loginByApi(role: string): Chainable<Subject>;
       verifyNotification(msg: string): Chainable<Subject>;
       awaitUrl(
         url: string,
@@ -41,7 +39,7 @@ declare global {
         reference: string,
       ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
-      closeNotification(): Chainable<Element>;
+      closeNotification(): Chainable<JQuery<HTMLElement>>;
       verifyContentPresence(
         selector: string,
         texts: string[],
@@ -50,7 +48,11 @@ declare global {
       typeIntoField(
         selector: string,
         value: string,
-        options?: { clearBeforeTyping?: boolean; skipVerification?: boolean },
+        options?: {
+          clearBeforeTyping?: boolean;
+          skipVerification?: boolean;
+          delay?: number;
+        },
       ): Chainable<Element>;
     }
   }

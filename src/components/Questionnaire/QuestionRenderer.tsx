@@ -1,10 +1,20 @@
 import { useEffect, useRef } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { Question } from "@/types/questionnaire/question";
+import {
+  Question,
+  StructuredQuestionType,
+} from "@/types/questionnaire/question";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
+
+// Questions that should be rendered full width
+const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
+  "medication_request",
+];
 
 interface QuestionRendererProps {
   questions: Question[];
@@ -55,12 +65,20 @@ export function QuestionRenderer({
     onResponseChange(newResponses);
   };
 
+  const shouldBeFullWidth = (question: Question): boolean =>
+    question.type === "structured" &&
+    !!question.structured_type &&
+    FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
+
   return (
     <div className="space-y-4">
       {questions.map((question) => (
         <div
           key={question.id}
           ref={(el) => (questionRefs.current[question.id] = el)}
+          className={cn(
+            shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
+          )}
         >
           <QuestionGroup
             facilityId={facilityId}
