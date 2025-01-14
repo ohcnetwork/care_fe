@@ -114,6 +114,7 @@ export const AppointmentNonCancelledStatuses = [
 export const AppointmentCancelledStatuses = [
   "cancelled",
   "entered_in_error",
+  "rescheduled",
 ] as const;
 
 export const AppointmentStatuses = [
