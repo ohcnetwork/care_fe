@@ -86,9 +86,9 @@ export default function FacilityUsers(props: { facilityId: string }) {
   }
 
   return (
-    <Page title="Users Management">
+    <Page title={t("users_management")}>
       <Badge
-        className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3"
+        className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
         variant="outline"
       >
         {`${userListData ? userListData.count : ""} Users`}
@@ -112,13 +112,13 @@ export default function FacilityUsers(props: { facilityId: string }) {
             <TabsTrigger value="card" id="user-card-view">
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-credit-card" className="text-lg" />
-                <span>Card</span>
+                <span>{t("card")}</span>
               </div>
             </TabsTrigger>
             <TabsTrigger value="list" id="user-list-view">
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-list-ul" className="text-lg" />
-                <span>List</span>
+                <span>{t("list")}</span>
               </div>
             </TabsTrigger>
           </TabsList>

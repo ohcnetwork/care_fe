@@ -2118,6 +2118,7 @@
   "username_userdetails_not_found": "Unable to fetch details as username or user details not found",
   "username_valid": "Username is valid",
   "users": "Users",
+  "users_management": "Users Management",
   "vacant": "Vacant",
   "vaccinated": "Vaccinated",
   "vaccine_name": "Vaccine name",

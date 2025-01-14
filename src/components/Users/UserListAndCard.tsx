@@ -100,7 +100,6 @@ export const UserStatusIndicator = ({
   );
 };
 const UserCard = ({ user }: { user: UserBase }) => {
-  const userOnline = isUserOnline(user);
   const { width } = useWindowDimensions();
   const mediumScreenBreakpoint = 640;
   const isMediumScreen = width <= mediumScreenBreakpoint;
@@ -124,7 +123,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
                 name={formatName(user)}
                 className="h-16 w-16 self-center text-2xl sm:self-auto"
               />
-              {isMediumScreen && getNameAndStatusCard(user, userOnline)}
+              {isMediumScreen && getNameAndStatusCard(user, false)}
             </div>
             <div className="flex flex-col w-full">
               {!isMediumScreen &&
@@ -133,7 +132,15 @@ const UserCard = ({ user }: { user: UserBase }) => {
                 <div className="text-sm">
                   <div className="text-gray-500">{t("role")}</div>
                   <div id="role" className="font-medium">
-                    {user.user_type}
+                    {user.user_type ? user.user_type : "-"}
+                  </div>
+                </div>
+                <div className="text-sm">
+                  <div className="text-gray-500">{t("contact_number")}</div>
+                  <div id="contact" className="font-medium">
+                    {user.phone_number
+                      ? formatPhoneNumber(user.phone_number)
+                      : "-"}
                   </div>
                 </div>
               </div>
