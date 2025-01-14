@@ -117,12 +117,19 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         e.stopPropagation();
+        inputRef.current?.focus();
         setOpen(true);
       }
+
       if (e.key === "Escape") {
         inputRef.current?.focus();
-        setOpen(false);
+        if (open) {
+          setOpen(false);
+        } else {
+          setSearchValue("");
+        }
       }
+
       if (open) {
         if (e.key === "ArrowDown") {
           setFocusedIndex((prevIndex) =>
@@ -253,7 +260,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         className="flex items-center rounded-t-lg"
       >
         {!isSingleOption && (
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover open={open}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
