@@ -298,7 +298,12 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                         </p>
                         <div className="flex mt-2">
                           <Button
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                              setOpen(false);
+                              if (inputRef.current) {
+                                inputRef.current.focus();
+                              }
+                            }}
                             variant="outline"
                             size="xs"
                             className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
