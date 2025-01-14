@@ -234,7 +234,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 {t("verification_failed")}
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                {t("please_enter_correct_bith_year")}
+                {t("please_enter_correct_birth_year")}
               </p>
               <Button
                 variant={"primary_gradient"}
