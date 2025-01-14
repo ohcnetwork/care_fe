@@ -333,6 +333,7 @@ export default function PatientRegistration(
                     <FormLabel required>{t("phone_number")}</FormLabel>
                     <FormControl>
                       <Input
+                        type="tel"
                         {...field}
                         maxLength={13}
                         onChange={(e) => {
@@ -391,6 +392,7 @@ export default function PatientRegistration(
                     </FormLabel>
                     <FormControl>
                       <Input
+                        type="tel"
                         {...field}
                         maxLength={13}
                         data-cy="patient-emergency-phone-input"

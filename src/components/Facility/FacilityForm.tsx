@@ -341,6 +341,7 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormLabel required>Phone Number</FormLabel>
                   <FormControl>
                     <Input
+                      type="tel"
                       data-cy="facility-phone"
                       placeholder="+91XXXXXXXXXX"
                       maxLength={13}
