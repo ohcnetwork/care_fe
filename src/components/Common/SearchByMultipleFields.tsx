@@ -402,6 +402,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           className="w-full flex items-center justify-center text-muted-foreground"
           onClick={() => {
             setSearchValue("");
+            inputRef.current?.focus();
           }}
         >
           <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
