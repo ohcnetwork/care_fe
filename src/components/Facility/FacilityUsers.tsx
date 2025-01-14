@@ -34,7 +34,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const { data: userListData, isLoading: userListLoading } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams],
     queryFn: query.debounced(routes.facility.getUsers, {
-      pathParams: { facility_id: facilityId.toString() },
+      pathParams: { facility_id: facilityId },
       queryParams: {
         username: qParams.username,
         limit: qParams.limit,
@@ -91,7 +91,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
         className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
         variant="outline"
       >
-        {`${userListData ? userListData.count : ""} Users`}
+        {`${userListData ? userListData.count : ""} ${t("users")}`}
       </Badge>
       <hr className="mt-4"></hr>
       <div className="flex items-center justify-between gap-4 m-5 ml-0">
