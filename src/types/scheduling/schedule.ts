@@ -2,6 +2,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Time } from "@/Utils/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
@@ -137,6 +138,7 @@ export interface Appointment {
   reason_for_visit: string;
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
+  facility: FacilityBareMinimum;
 }
 
 export interface AppointmentCreateRequest {
