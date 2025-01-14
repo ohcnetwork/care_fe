@@ -1,8 +1,3 @@
-export const phonePreg = (phone: string) => {
-  const pattern = /^((\+91|91|0)[- ]{0,1})?[123456789]\d{9}$/;
-  return pattern.test(phone);
-};
-
 const valueIsBetween = (val: number, a: number, b: number) =>
   a <= val && val <= b;
 

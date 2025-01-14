@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +36,6 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -100,7 +100,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     queryKey: ["patient-search", facilityId, phoneNumber],
     queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(phoneNumber) || "",
+        phone_number: parsePhoneNumberWithError(phoneNumber).number.toString(),
       },
     }),
     enabled: !!phoneNumber,

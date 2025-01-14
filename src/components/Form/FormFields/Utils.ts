@@ -1,7 +1,5 @@
 import { FocusEvent } from "react";
 
-import { FieldError } from "@/components/Form/FieldValidators";
-
 export type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
 
@@ -30,7 +28,7 @@ export type FormFieldBaseProps<T> = {
   id?: string;
   onChange: FieldChangeEventHandler<T>;
   value?: T;
-  error?: FieldError;
+  error?: string | undefined;
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
 };

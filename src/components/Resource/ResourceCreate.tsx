@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { PhoneInput } from "@/components/ui/input-phone";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -34,8 +39,6 @@ import { Separator } from "@/components/ui/separator";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 
@@ -43,12 +46,10 @@ import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-import { phonePreg } from "@/common/validation";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
@@ -80,22 +81,8 @@ export default function ResourceCreate(props: ResourceProps) {
     referring_facility_contact_number: z
       .string()
       .min(1, { message: t("required") })
-      .refine(
-        (val: string) => {
-          const phoneNumber = parsePhoneNumber(val);
-          if (
-            !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
-            !phonePreg(String(phoneNumber))
-          ) {
-            return false;
-          }
-          return true;
-        },
-        {
-          message: t("invalid_phone_number"),
-        },
-      ),
+      .refine(isValidPhoneNumber, t("invalid_phone_number"))
+      .transform((value) => parsePhoneNumberWithError(value).number.toString()),
     priority: z.number().default(1),
   });
 
@@ -139,7 +126,7 @@ export default function ResourceCreate(props: ResourceProps) {
         reason: data.reason,
         referring_facility_contact_name: data.referring_facility_contact_name,
         referring_facility_contact_number:
-          parsePhoneNumber(data.referring_facility_contact_number) ?? "",
+          data.referring_facility_contact_number,
         related_patient: related_patient,
         priority: data.priority,
       };
@@ -417,11 +404,9 @@ export default function ResourceCreate(props: ResourceProps) {
                       <FormItem>
                         <FormLabel>{t("contact_phone")}</FormLabel>
                         <FormControl>
-                          <PhoneNumberFormField
+                          <PhoneInput
                             {...field}
-                            hideHelp={true}
-                            types={["mobile", "landline"]}
-                            onChange={(value) => field.onChange(value.value)}
+                            onValueChange={field.onChange}
                           />
                         </FormControl>
                         <FormDescription>

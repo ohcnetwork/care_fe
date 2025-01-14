@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,10 +23,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { PhoneInput } from "@/components/ui/input-phone";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
@@ -34,7 +34,6 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
 import { HTTPError } from "@/Utils/request/types";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
 
 const FormSchema = z.object({
@@ -75,16 +74,7 @@ export default function PatientLogin({
     );
   }
   const validate = (phoneNumber: string) => {
-    let errors = "";
-
-    const parsedPhoneNumber = parsePhoneNumber(phoneNumber);
-    if (
-      !parsedPhoneNumber ||
-      !(PhoneNumberValidator(["mobile"])(parsedPhoneNumber ?? "") === undefined)
-    ) {
-      errors = t("invalid_phone");
-    }
-    return errors;
+    return isValidPhoneNumber(phoneNumber) ? "" : t("invalid_phone");
   };
 
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
@@ -168,15 +158,18 @@ export default function PatientLogin({
           className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
         >
           <div className="space-y-4">
-            <PhoneNumberFormField
-              name="phone_number"
-              label={t("phone_number")}
-              required
-              types={["mobile"]}
-              onChange={(e) => setPhoneNumber(e.value)}
-              value={phoneNumber}
-              error={error}
-            />
+            <FormItem>
+              <FormLabel>{t("phone_number")}</FormLabel>
+              <FormControl>
+                <PhoneInput
+                  onValueChange={(value) => {
+                    setPhoneNumber(value);
+                    setError("");
+                  }}
+                />
+              </FormControl>
+              {error && <FormMessage>{error}</FormMessage>}
+            </FormItem>
           </div>
           <Button
             variant="primary"

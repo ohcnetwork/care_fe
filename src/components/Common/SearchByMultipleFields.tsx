@@ -1,3 +1,4 @@
+import { isValidPhoneNumber } from "libphonenumber-js";
 import React, {
   useCallback,
   useEffect,
@@ -19,14 +20,12 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/input-phone";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { FieldError } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 interface SearchOption {
   key: string;
@@ -181,15 +180,17 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     switch (selectedOption.type) {
       case "phone":
         return (
-          <PhoneNumberFormField
+          <PhoneInput
             id={id}
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
-            types={["mobile", "landline"]}
             {...commonProps}
-            errorClassName="hidden"
-            hideHelp={true}
-            onError={(error: FieldError) => setError(error)}
+            onValueChange={(value) => {
+              handleSearchChange({ value });
+              setError(
+                isValidPhoneNumber(value) ? undefined : "Invalid phone number",
+              );
+            }}
           />
         );
       default:

@@ -1,4 +1,3 @@
-import { FieldError } from "@/components/Form/FieldValidators";
 import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
 
 import { classNames } from "@/Utils/utils";
@@ -30,7 +29,7 @@ export const FieldLabel = (props: LabelProps) => {
 };
 
 type ErrorProps = {
-  error: FieldError;
+  error: string | undefined;
   className?: string | undefined;
 };
 

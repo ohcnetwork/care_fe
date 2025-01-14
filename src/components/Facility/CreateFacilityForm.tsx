@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/input-phone";
 import {
   Select,
   SelectContent,
@@ -39,7 +44,6 @@ import {
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 
@@ -52,10 +56,8 @@ const facilityFormSchema = z.object({
   address: z.string().min(1, "Address is required"),
   phone_number: z
     .string()
-    .regex(
-      /^\+91[0-9]{10}$/,
-      "Phone number must start with +91 followed by 10 digits",
-    ),
+    .refine(isValidPhoneNumber, "Invalid phone number")
+    .transform((value) => parsePhoneNumberWithError(value).number.toString()),
   latitude: z
     .string()
     .optional()
@@ -119,11 +121,7 @@ export default function CreateFacilityForm({
   });
 
   const onSubmit = (data: FacilityFormValues) => {
-    createFacility({
-      ...data,
-      phone_number: parsePhoneNumber(data.phone_number),
-      geo_organization: organizationId,
-    });
+    createFacility({ ...data, geo_organization: organizationId });
   };
 
   const handleFeatureChange = (value: any) => {
@@ -262,13 +260,7 @@ export default function CreateFacilityForm({
                 <FormItem>
                   <FormLabel required>Phone Number</FormLabel>
                   <FormControl>
-                    <Input
-                      type="tel"
-                      data-cy="facility-phone"
-                      placeholder="+91XXXXXXXXXX"
-                      maxLength={13}
-                      {...field}
-                    />
+                    <PhoneInput data-cy="facility-phone" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

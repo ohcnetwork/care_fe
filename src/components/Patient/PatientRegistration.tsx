@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -49,7 +50,6 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
@@ -229,10 +229,14 @@ export default function PatientRegistration(
     queryKey: ["patients", "phone-number", debouncedNumber],
     queryFn: query(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(debouncedNumber || "") || "",
+        phone_number: parsePhoneNumberWithError(
+          debouncedNumber || "",
+        ).number.toString(),
       },
     }),
-    enabled: !!parsePhoneNumber(debouncedNumber || ""),
+    enabled: !!parsePhoneNumberWithError(
+      debouncedNumber || "",
+    ).number.toString(),
   });
 
   const duplicatePatients = useMemo(() => {
@@ -759,7 +763,7 @@ export default function PatientRegistration(
       </div>
       {!patientPhoneSearch.isLoading &&
         !!duplicatePatients?.length &&
-        !!parsePhoneNumber(debouncedNumber || "") &&
+        !!parsePhoneNumberWithError(debouncedNumber || "").number.toString() &&
         !suppressDuplicateWarning && (
           <DuplicatePatientDialog
             patientList={duplicatePatients}

@@ -6,6 +6,10 @@ import {
 } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -27,6 +31,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/input-phone";
 import {
   Select,
   SelectContent,
@@ -40,8 +45,6 @@ import GLocationPicker from "@/components/Common/GLocationPicker";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FacilityRequest } from "@/components/Facility/models";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
@@ -50,7 +53,6 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import {
-  phonePreg,
   validateLatitude,
   validateLongitude,
   validatePincode,
@@ -59,7 +61,6 @@ import {
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 
 interface FacilityProps {
@@ -84,20 +85,8 @@ export const FacilityCreate = (props: FacilityProps) => {
     phone_number: z
       .string()
       .min(1, { message: t("required") })
-      .refine(
-        (val: string) => {
-          if (
-            !PhoneNumberValidator(["mobile", "landline"])(val) === undefined ||
-            !phonePreg(val)
-          ) {
-            return false;
-          }
-          return true;
-        },
-        {
-          message: t("invalid_phone_number"),
-        },
-      ),
+      .refine(isValidPhoneNumber, t("invalid_phone_number"))
+      .transform((value) => parsePhoneNumberWithError(value).number.toString()),
     latitude: z
       .string()
       .min(1, { message: t("required") })
@@ -186,10 +175,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const onSubmit = async (data: FacilityFormValues) => {
     setIsLoading(true);
     try {
-      const requestData: FacilityRequest = {
-        ...data,
-        phone_number: parsePhoneNumber(data.phone_number),
-      };
+      const requestData: FacilityRequest = { ...data };
 
       const { res, data: responseData } = facilityId
         ? await request(routes.updateFacility, {
@@ -360,22 +346,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                   control={form.control}
                   name="phone_number"
                   render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
+                    <FormItem>
+                      <FormLabel>{t("emergency_contact_number")}</FormLabel>
                       <FormControl>
-                        <PhoneNumberFormField
-                          label={
-                            <FormLabel>
-                              {t("emergency_contact_number")}
-                            </FormLabel>
-                          }
-                          {...field}
-                          types={["mobile", "landline"]}
-                          onChange={(value) => {
-                            field.onChange(value.value);
-                          }}
-                          error={form.formState.errors.phone_number?.message}
-                        />
+                        <PhoneInput {...field} onValueChange={field.onChange} />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

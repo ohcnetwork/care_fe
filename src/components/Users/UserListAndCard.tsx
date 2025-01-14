@@ -1,3 +1,4 @@
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -14,12 +15,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
 
-import {
-  formatName,
-  formatPhoneNumber,
-  isUserOnline,
-  relativeTime,
-} from "@/Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 const GetDetailsButton = (username: string) => {
@@ -215,7 +211,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.user_type}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
-        {formatPhoneNumber(user.phone_number)}
+        {parsePhoneNumberWithError(user.phone_number).formatInternational()}
       </td>
       <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>
