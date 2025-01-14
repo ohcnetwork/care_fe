@@ -100,7 +100,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 children.results.map((org) => (
                   <Card key={org.id}>
                     <CardContent className="p-6">
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between flex-wrap">
                           <div className="space-y-1 mb-2">
                             <h3 className="text-lg font-semibold">

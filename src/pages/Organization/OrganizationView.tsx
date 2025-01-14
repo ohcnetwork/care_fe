@@ -90,7 +90,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between flex-wrap">
-                          <div className="space-y-1 mb-3">
+                          <div className="space-y-1 mb-2">
                             <h3 className="text-lg font-semibold">
                               {orgChild.name}
                             </h3>
