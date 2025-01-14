@@ -85,6 +85,7 @@ export function QuestionnaireForm({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("questionnaire_submitted_successfully"));
+      setIsDirty(false);
       onSubmit?.();
     },
     onError: (error) => {
