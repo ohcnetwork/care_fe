@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
@@ -33,9 +34,6 @@ export const LoginHeader = () => {
     dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
 
   if (isLoggedIn) {
-    const phoneNumber = tokenData.phoneNumber?.replace("+91", "") || "";
-    const initials = phoneNumber.slice(-2);
-
     return (
       <header className="w-full">
         <div className="flex justify-end items-center gap-2">
@@ -48,16 +46,11 @@ export const LoginHeader = () => {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full p-0 hover:bg-gray-100 border-gray-400 border-2"
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary-50 text-primary-600 text-xs">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
+              <Button variant="ghost" size="icon" className="h-8 w-8 ">
+                <Avatar
+                  name={"User"}
+                  className="h-8 w-8 rounded-full hover:bg-gray-100 border-gray-400 border-2"
+                />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

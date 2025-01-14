@@ -45,7 +45,7 @@ const initials = (name: string): string => {
 
 interface AvatarProps {
   colors?: [string, string];
-  name?: string;
+  name: string;
   imageUrl?: string;
   className?: string;
   icon?: React.ReactNode;
@@ -58,7 +58,7 @@ const Avatar: React.FC<AvatarProps> = ({
   className,
   icon,
 }) => {
-  const avatarText = name?.match(/[a-zA-Z]/g)?.join("");
+  const avatarText = name.match(/[a-zA-Z]/g)?.join("");
   const [bgColor] =
     propColors || (avatarText ? toColor(avatarText) : toColor(""));
   return (
