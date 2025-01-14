@@ -177,7 +177,8 @@ export function QuestionInput({
               >
                 {index === 0 && <QuestionLabel question={question} />}
                 <div
-                  className={cn("flex w-full", {
+                  className={cn({
+                    "flex w-full": !question.structured_type,
                     "flex-col": question.repeats || question.type === "text",
                   })}
                 >
