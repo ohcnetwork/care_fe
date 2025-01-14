@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,10 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  ApppointmentCompletedStatuses,
+} from "@/types/scheduling/schedule";
 
 function PatientIndex() {
   const { t } = useTranslation();
@@ -62,6 +66,9 @@ function PatientIndex() {
       },
     }),
     onSuccess: () => {
+      setSelectedAppointment(undefined);
+      setAppointmentDialogOpen(false);
+      toast.success(t("appointment_cancelled"));
       queryClient.invalidateQueries({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
@@ -144,23 +151,25 @@ function PatientIndex() {
             <span className="text-sm font-semibold text-blue-700">
               {t(appointment.status)}
             </span>
-            <span className="flex flex-row gap-2">
-              <Button
-                variant="destructive"
-                disabled={isPending}
-                onClick={() =>
-                  cancelAppointment({
-                    appointment: appointment.id,
-                    patient: appointment.patient.id,
-                  })
-                }
-              >
-                <span>{t("cancel")}</span>
-              </Button>
-              <Button variant="secondary">
-                <span>{t("reschedule")}</span>
-              </Button>
-            </span>
+            {!ApppointmentCompletedStatuses.includes(appointment.status) && (
+              <span className="flex flex-row gap-2">
+                <Button
+                  variant="destructive"
+                  disabled={isPending}
+                  onClick={() =>
+                    cancelAppointment({
+                      appointment: appointment.id,
+                      patient: appointment.patient.id,
+                    })
+                  }
+                >
+                  <span>{t("cancel")}</span>
+                </Button>
+                <Button variant="secondary">
+                  <span>{t("reschedule")}</span>
+                </Button>
+              </span>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

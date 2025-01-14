@@ -71,9 +71,9 @@ import {
 } from "@/pages/Appointments/utils";
 import {
   Appointment,
-  AppointmentCancelledStatuses,
   AppointmentStatuses,
   AppointmentUpdateRequest,
+  ApppointmentCompletedStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
@@ -414,6 +414,7 @@ const AppointmentActions = ({
       },
     }),
     onSuccess: () => {
+      toast.success(t("appointment_cancelled"));
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
@@ -429,10 +430,10 @@ const AppointmentActions = ({
         },
       }),
       onSuccess: (newAppointment: Appointment) => {
+        toast.success(t("appointment_rescheduled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],
         });
-        toast.success(t("appointment_rescheduled_successfully"));
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         navigate(
@@ -441,7 +442,7 @@ const AppointmentActions = ({
       },
     });
 
-  if (["fulfilled", ...AppointmentCancelledStatuses].includes(currentStatus)) {
+  if (ApppointmentCompletedStatuses.includes(currentStatus)) {
     return null;
   }
 

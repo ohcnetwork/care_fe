@@ -122,6 +122,13 @@ export const AppointmentStatuses = [
   ...AppointmentCancelledStatuses,
 ] as const;
 
+export const ApppointmentCompletedStatuses: AppointmentStatus[] = [
+  "fulfilled",
+  "cancelled",
+  "entered_in_error",
+  "rescheduled",
+];
+
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];
 
