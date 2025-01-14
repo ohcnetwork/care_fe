@@ -2097,6 +2097,8 @@
   "use_phone_number_for_emergency": "Use this phone number for emergency contact",
   "user_add_error": "Error while adding User",
   "user_added_successfully": "User added successfully",
+  "user_count_one": "{{count}} user",
+  "user_count_other": "{{count}} users",
   "user_delete_error": "Error while deleting User",
   "user_deleted_successfully": "User Deleted Successfully",
   "user_deleted_successfuly": "User Deleted Successfully",
