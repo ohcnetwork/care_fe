@@ -66,5 +66,4 @@ src/pluginMap.ts
 
 # Federation Temp files
 /.__mf__temp
-public/licenses/beBomData.json
-public/licenses/feBomData.json
+public/sbom/*
