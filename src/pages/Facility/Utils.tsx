@@ -4,19 +4,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 
-import { SkillObjectModel, UserAssignedModel } from "@/components/Users/models";
-
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
-
-export interface DoctorModel
-  extends Omit<Partial<UserAssignedModel>, "skills"> {
-  role: string;
-  education: string;
-  experience: string;
-  languages: string[];
-  read_profile_picture_url: string;
-  skills: SkillObjectModel[];
-}
 
 export const FeatureBadge = ({ featureId }: { featureId: number }) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);

@@ -41,7 +41,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       searchQuery,
     ],
     queryFn: query.debounced(routes.facilityOrganization.list, {
-      pathParams: { facilityId, organizationId: id },
+      pathParams: { facilityId },
       queryParams: {
         parent: id,
         offset: (page - 1) * limit,

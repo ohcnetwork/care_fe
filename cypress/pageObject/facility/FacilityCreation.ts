@@ -17,7 +17,7 @@ export class FacilityCreation {
 
   // Individual field methods
   enterFacilityName(name: string) {
-    cy.get('[data-cy="facility-name"]').type(name);
+    cy.typeIntoField('[data-cy="facility-name"]', name);
   }
 
   selectFacilityType(facilityType: string) {
@@ -25,27 +25,29 @@ export class FacilityCreation {
   }
 
   enterDescription(description: string) {
-    cy.get('[data-cy="facility-description"]').type(description);
+    cy.typeIntoField('[data-cy="facility-description"]', description);
   }
 
   enterPhoneNumber(phone: string) {
-    cy.get('[data-cy="facility-phone"]').type(phone);
+    cy.typeIntoField('[data-cy="facility-phone"]', phone, {
+      skipVerification: true,
+    });
   }
 
   enterPincode(pincode: string) {
-    cy.get('[data-cy="facility-pincode"]').type(pincode);
+    cy.typeIntoField('[data-cy="facility-pincode"]', pincode);
   }
 
   enterAddress(address: string) {
-    cy.get('[data-cy="facility-address"]').type(address);
+    cy.typeIntoField('[data-cy="facility-address"]', address);
   }
 
   enterLatitude(latitude: string) {
-    cy.get('[data-cy="facility-latitude"]').type(latitude);
+    cy.typeIntoField('[data-cy="facility-latitude"]', latitude);
   }
 
   enterLongitude(longitude: string) {
-    cy.get('[data-cy="facility-longitude"]').type(longitude);
+    cy.typeIntoField('[data-cy="facility-longitude"]', longitude);
   }
 
   // Combined methods using individual functions
@@ -93,10 +95,22 @@ export class FacilityCreation {
   }
 
   searchFacility(facilityName: string) {
-    cy.get('[data-cy="search-facility"]').type(facilityName);
+    cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
+
+    cy.get('[data-cy="search-facility"]')
+      .focus()
+      .type(facilityName, { force: true });
+
+    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
   }
 
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
+  }
+
+  waitForFacilityCardsToLoad(timeout = 10000) {
+    cy.get('[data-cy="facility-cards"]', { timeout })
+      .should("be.visible")
+      .should("not.be.empty");
   }
 }

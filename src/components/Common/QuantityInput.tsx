@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -18,6 +20,7 @@ interface Props<TUnit extends string> {
   units: readonly TUnit[];
   disabled?: boolean;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 const QuantityInput = <TUnit extends string>({
@@ -26,6 +29,7 @@ const QuantityInput = <TUnit extends string>({
   onChange,
   disabled,
   placeholder,
+  autoFocus,
 }: Props<TUnit>) => {
   const handleChange = (update: Partial<QuantityValue<TUnit>>) => {
     onChange({ ...quantity, ...update });
@@ -44,6 +48,7 @@ const QuantityInput = <TUnit extends string>({
             value: e.target.value ? Number(e.target.value) : undefined,
           })
         }
+        autoFocus={autoFocus}
       />
       <Select
         disabled={disabled}
@@ -57,7 +62,7 @@ const QuantityInput = <TUnit extends string>({
         <SelectContent>
           {units.map((unit) => (
             <SelectItem key={unit} value={unit}>
-              {unit}
+              {t(`unit_${unit}`)}
             </SelectItem>
           ))}
         </SelectContent>

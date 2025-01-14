@@ -27,7 +27,11 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-export function FacilityNavUser() {
+export function FacilityNavUser({
+  selectedFacilityId,
+}: {
+  selectedFacilityId: string | undefined;
+}) {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { isMobile, open, setOpenMobile } = useSidebar();
@@ -94,7 +98,10 @@ export function FacilityNavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={() => {
-                  navigate(`/users/${user.username}`);
+                  const profileUrl = selectedFacilityId
+                    ? `/facility/${selectedFacilityId}/users/${user.username}`
+                    : `/users/${user.username}`;
+                  navigate(profileUrl);
                   if (isMobile) {
                     setOpenMobile(false);
                   }

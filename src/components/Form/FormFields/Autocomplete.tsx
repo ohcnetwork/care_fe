@@ -11,67 +11,11 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { DropdownTransition } from "@/components/Common/HelperComponents";
-import FormField from "@/components/Form/FormFields/FormField";
-import {
-  FormFieldBaseProps,
-  useFormFieldPropsResolver,
-} from "@/components/Form/FormFields/Utils";
 import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
 
 import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
-
-type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
-  placeholder?: string;
-  options: readonly T[];
-  optionLabel: OptionCallback<T, string>;
-  optionValue?: OptionCallback<T, V>;
-  optionDescription?: OptionCallback<T, string>;
-  optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, ReactNode | undefined>;
-  optionDisabled?: OptionCallback<T, boolean>;
-  minQueryLength?: number;
-  onQuery?: (query: string) => void;
-  dropdownIcon?: React.ReactNode | undefined;
-  isLoading?: boolean;
-  allowRawInput?: boolean;
-  error?: string;
-};
-
-const AutocompleteFormField = <T, V>(
-  props: AutocompleteFormFieldProps<T, V>,
-) => {
-  const field = useFormFieldPropsResolver(props);
-  return (
-    <FormField field={field}>
-      <Autocomplete
-        id={field.id}
-        disabled={field.disabled}
-        required={field.required}
-        className={field.className}
-        value={field.value}
-        onChange={(value: any) => field.handleChange(value)}
-        options={props.options}
-        placeholder={props.placeholder}
-        optionLabel={props.optionLabel}
-        optionIcon={props.optionIcon}
-        optionImage={props.optionImage}
-        optionValue={props.optionValue}
-        optionDescription={props.optionDescription}
-        optionDisabled={props.optionDisabled}
-        minQueryLength={props.minQueryLength}
-        onQuery={props.onQuery}
-        isLoading={props.isLoading}
-        allowRawInput={props.allowRawInput}
-        error={field.error}
-        requiredError={field.error ? props.required : false}
-      />
-    </FormField>
-  );
-};
-
-export default AutocompleteFormField;
 
 type AutocompleteProps<T, V = T> = {
   id?: string;
