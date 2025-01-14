@@ -260,7 +260,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         className="flex items-center rounded-t-lg"
       >
         {!isSingleOption && (
-          <Popover open={open}>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
@@ -271,7 +271,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                 <CareIcon icon="l-search" className="mr-2 text-base" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="absolute p-0">
+            <PopoverContent
+              className="absolute p-0"
+              onEscapeKeyDown={(event) => event.preventDefault()}
+            >
               <Command>
                 <CommandList>
                   <CommandGroup>
