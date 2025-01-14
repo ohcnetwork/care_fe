@@ -35,20 +35,20 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (value && parentSelectedLevels?.length == 0) {
-      const parsedValue = typeof value === "string" ? JSON.parse(value) : value;
+    if (
+      value &&
+      typeof value === "object" &&
+      parentSelectedLevels?.length == 0
+    ) {
+      const levels: Organization[] = [];
+      let current: OrganizationParent = value;
 
-      if (typeof parsedValue === "object") {
-        const levels: Organization[] = [];
-        let current: OrganizationParent = parsedValue;
-
-        while (current.parent) {
-          levels.unshift(current as Organization);
-          current = current.parent;
-        }
-
-        setSelectedLevels(levels);
+      while (current.parent) {
+        levels.unshift(current as Organization);
+        current = current.parent;
       }
+
+      setSelectedLevels(levels);
     } else if (parentSelectedLevels) {
       setSelectedLevels(parentSelectedLevels);
     }

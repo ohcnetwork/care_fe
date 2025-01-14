@@ -56,7 +56,7 @@ const facilityFormSchema = z.object({
   description: z.string().optional(),
   features: z.array(z.number()).default([]),
   pincode: z.string().refine(validatePincode, "Invalid pincode"),
-  geo_organization: z.string().min(1, t("organization_required")).optional(),
+  geo_organization: z.string().min(1, t("organization_required")),
   address: z.string().min(1, "Address is required"),
   phone_number: z
     .string()
@@ -144,9 +144,6 @@ export default function FacilityForm(props: FacilityProps) {
     const requestData = {
       ...data,
       phone_number: parsePhoneNumber(data.phone_number),
-      geo_organization: data?.geo_organization
-        ? JSON.parse(data.geo_organization)?.id
-        : undefined,
     };
 
     if (facilityId) {
@@ -170,7 +167,7 @@ export default function FacilityForm(props: FacilityProps) {
         description: facilityData.description || "",
         features: facilityData.features || [],
         pincode: facilityData.pincode?.toString() || "",
-        geo_organization: JSON.stringify(facilityData?.geo_organization) || "",
+        geo_organization: facilityData?.geo_organization?.id || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
         latitude: facilityData.latitude?.toString() || "",
@@ -382,7 +379,7 @@ export default function FacilityForm(props: FacilityProps) {
                 <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
                   <FormControl>
                     <OrganizationSelector
-                      value={field.value}
+                      value={facilityData?.geo_organization}
                       parentSelectedLevels={selectedLevels}
                       onChange={field.onChange}
                       required
