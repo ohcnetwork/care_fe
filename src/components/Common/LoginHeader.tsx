@@ -39,18 +39,15 @@ export const LoginHeader = () => {
         <div className="flex justify-end items-center gap-2">
           <Button
             variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+            className="text-sm font-medium hover:bg-gray-100 px-6"
             onClick={() => navigate("/patient/home")}
           >
             {t("dashboard")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 ">
-                <Avatar
-                  name={"User"}
-                  className="h-8 w-8 rounded-full hover:bg-gray-100 border-gray-400 border-2"
-                />
+              <Button variant="ghost" size="icon">
+                <Avatar name={"User"} className="w-7 h-7 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
