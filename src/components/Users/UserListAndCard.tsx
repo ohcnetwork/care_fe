@@ -209,12 +209,15 @@ export const UserList = ({ users }: { users?: UserBase[] }) => {
     </div>
   );
 };
-interface UserListViewProps {
+interface UserListAndCardViewProps {
   users: UserBase[];
   activeTab: "card" | "list";
 }
 
-export default function UserListView({ users, activeTab }: UserListViewProps) {
+export default function UserListAndCardView({
+  users,
+  activeTab,
+}: UserListAndCardViewProps) {
   const { t } = useTranslation();
 
   return (

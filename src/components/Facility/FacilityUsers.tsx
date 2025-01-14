@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import UserListView from "@/components/Users/UserListAndCard";
+import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -145,7 +145,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
   } else {
     usersList = (
       <div>
-        <UserListView
+        <UserListAndCardView
           users={userListData?.results ?? []}
           activeTab={activeTab}
         />
