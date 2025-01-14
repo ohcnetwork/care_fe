@@ -36,7 +36,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     resultsPerPage,
     clearSearch,
     updateQuery,
-  } = useFilters({ limit: 14, cacheBlacklist: ["name", "phone_number"] });
+  } = useFilters({ limit: 15, cacheBlacklist: ["name", "phone_number"] });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 
