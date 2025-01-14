@@ -28,7 +28,7 @@ interface OrganizationFilterProps {
   className?: string;
 }
 
-const DEFAULT_ORG_LEVELS = 3;
+const DEFAULT_ORG_LEVELS = 2;
 
 export default function OrganizationFilter(props: OrganizationFilterProps) {
   const { t } = useTranslation();
