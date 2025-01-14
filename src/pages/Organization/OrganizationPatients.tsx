@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -26,13 +27,14 @@ interface Props {
 }
 
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
+  const { t } = useTranslation();
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 14, cacheBlacklist: ["patient"] });
   const [organization, setOrganization] = useState<Organization | null>(null);
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
-    queryFn: query(organizationApi.listPatients, {
+    queryFn: query.debounced(organizationApi.listPatients, {
       pathParams: { id },
       queryParams: {
         ...(organization?.org_type === "govt" && { organization: id }),
@@ -57,7 +59,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Patients</h2>
+          <h2 className="text-lg font-semibold">{t("patients")}</h2>
         </div>
 
         <SearchByMultipleFields
@@ -132,7 +134,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
           ) : patients?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No patients found.
+                {t("no_patients_found")}
               </CardContent>
             </Card>
           ) : (

@@ -2,7 +2,8 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Organization } from "../organization/organization";
-import { QuestionnaireDetail, QuestionnaireUpdate } from "./questionnaire";
+import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
+import { QuestionnaireTagModel, QuestionnaireTagSet } from "./tags";
 
 export default {
   list: {
@@ -21,13 +22,13 @@ export default {
     path: "/api/v1/questionnaire/",
     method: HttpMethod.POST,
     TRes: Type<QuestionnaireDetail>(),
-    TBody: Type<Partial<QuestionnaireDetail>>(),
+    TBody: Type<QuestionnaireCreate>(),
   },
 
   update: {
     path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.PUT,
-    TRes: Type<QuestionnaireUpdate>(),
+    TRes: Type<QuestionnaireDetail>(),
     TBody: Type<QuestionnaireDetail>(),
   },
 
@@ -71,5 +72,34 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<PaginatedResponse<Organization>>(),
     TBody: {} as { organizations: string[] },
+  },
+
+  setTags: {
+    path: "/api/v1/questionnaire/{slug}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<unknown>(),
+    TBody: Type<QuestionnaireTagSet>(),
+  },
+
+  tags: {
+    list: {
+      path: "/api/v1/questionnaire_tag/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<QuestionnaireTagModel>>(),
+    },
+
+    create: {
+      path: "/api/v1/questionnaire_tag/",
+      method: HttpMethod.POST,
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<Omit<QuestionnaireTagModel, "id">>(),
+    },
+
+    update: {
+      path: "/api/v1/questionnaire_tag/{slug}/",
+      method: HttpMethod.PUT,
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<QuestionnaireTagModel>(),
+    },
   },
 };

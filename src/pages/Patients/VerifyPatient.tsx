@@ -31,10 +31,10 @@ import { formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 
 export default function VerifyPatient(props: { facilityId: string }) {
+  const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
-  const { t } = useTranslation();
 
   const {
     mutate: verifyPatient,
@@ -78,7 +78,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {t("missing_required_param_for_patient_verify")}
+            {t("missing_required_params_for_patient_verification")}
           </AlertDescription>
         </Alert>
       ) : patientData ? (
@@ -96,7 +96,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     </div>
                     <div>
                       <h1
-                        id="patient-name"
+                        data-cy="verify-patient-name"
                         className="text-xl font-bold capitalize text-gray-950"
                       >
                         {patientData.name}
@@ -104,10 +104,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
                       <h3 className="text-sm font-medium text-gray-600">
                         {formatPatientAge(patientData, true)},{"  "}
                         <span className="capitalize">
-                          {patientData.gender.replace("_", " ")},{"  "}
+                          {patientData.gender.replace("_", " ")}
                         </span>
                         {patientData.blood_group &&
-                          patientData.blood_group.replace("_", " ")}
+                          ", " + patientData.blood_group.replace("_", " ")}
                       </h3>
                     </div>
                   </div>
@@ -118,9 +118,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>{t("quick_action")}</CardTitle>
+              <CardTitle>{t("quick_actions")}</CardTitle>
               <CardDescription>
-                {t("schedule_appoitment_or_create_new_encounter")}
+                {t("quick_actions_description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
@@ -143,7 +143,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                         {t("schedule_appointment")}
                       </span>
                       <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                        {t("book_new_appointment")}
+                        {t("book_a_new_appointment")}
                       </span>
                     </div>
                     <CareIcon
@@ -161,6 +161,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 trigger={
                   <Button
                     variant="outline"
+                    data-cy="create-encounter-button"
                     className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-gradient-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
                   >
                     <div className="p-4 md:p-6">
@@ -177,7 +178,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                             {t("create_encounter")}
                           </span>
                           <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                            {t("start_new_clinical_encounter")}
+                            {t("start_a_new_clinical_encounter")}
                           </span>
                         </div>
                         <CareIcon
@@ -194,9 +195,9 @@ export default function VerifyPatient(props: { facilityId: string }) {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>{t("active_encounter")}</CardTitle>
+              <CardTitle>{t("active_encounters")}</CardTitle>
               <CardDescription>
-                {t("view_and_manage_encounter")}
+                {t("view_and_manage_patient_encounters")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-2">
@@ -215,10 +216,10 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     />
                   </div>
                   <h3 className="text-base md:text-lg font-semibold mb-1">
-                    {t("no_encounter_found")}
+                    {t("no_encounters_found")}
                   </h3>
                   <p className="text-xs md:text-sm text-muted-foreground">
-                    {t("create_new_encounter")}
+                    {t("create_a_new_encounter_to_get_started")}
                   </p>
                 </div>
               )}

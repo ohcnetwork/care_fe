@@ -13,10 +13,12 @@ describe("Facility Management", () => {
     cy.loginByApi("nurse");
   });
 
-  it("Create a new facility using the admin role", () => {
+  it("Create a new facility using the admin role and verify validation errors", () => {
     facilityPage.navigateToOrganization("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
+    facilityPage.submitFacilityCreationForm();
+    facilityPage.verifyValidationErrors();
 
     // Fill form
     facilityPage.fillBasicDetails(
@@ -43,16 +45,11 @@ describe("Facility Management", () => {
     facilityPage.submitFacilityCreationForm();
     facilityPage.verifySuccessMessage();
 
+    // Wait for facility cards to load
+    facilityPage.waitForFacilityCardsToLoad();
+
     // Search for the facility and verify in card
     facilityPage.searchFacility(testFacility.name);
     facilityPage.verifyFacilityNameInCard(testFacility.name);
-  });
-
-  it("Should show validation errors for required fields", () => {
-    facilityPage.navigateToOrganization("Kerala");
-    facilityPage.navigateToFacilitiesList();
-    facilityPage.clickAddFacility();
-    facilityPage.submitFacilityCreationForm();
-    facilityPage.verifyValidationErrors();
   });
 });

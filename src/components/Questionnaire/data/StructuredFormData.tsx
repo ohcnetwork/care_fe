@@ -17,6 +17,7 @@ const encounterQuestionnaire: QuestionnaireDetail = {
       structured_type: "encounter",
     },
   ],
+  tags: [],
 };
 
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {

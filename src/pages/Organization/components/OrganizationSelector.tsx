@@ -8,8 +8,6 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import useDebouncedState from "@/hooks/useDebouncedState";
-
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -30,7 +28,7 @@ interface AutoCompleteOption {
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
   const { onChange, required } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const headers = props.authToken
     ? {
@@ -42,7 +40,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
 
   const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
@@ -60,7 +58,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       selectedLevels[selectedLevels.length - 1]?.id,
       searchQuery,
     ],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
@@ -88,6 +86,8 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     if (!selectedOrg.has_children) {
       onChange(selectedOrg.id);
     }
+
+    setSearchQuery("");
   };
 
   const getOrganizationOptions = (
@@ -110,13 +110,16 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     <>
       {/* Selected Levels */}
       {selectedLevels.map((level, index) => (
-        <div>
+        <div key={index}>
           <Label className="mb-2">
             {t(`SYSTEM__govt_org_type__${level.metadata?.govt_org_type}`)}
             {required && <span className="text-red-500">*</span>}
           </Label>
           <div className="flex">
-            <div className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300">
+            <div
+              className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300"
+              data-cy={`select-${level.metadata?.govt_org_type?.toLowerCase()}`}
+            >
               <div className="w-full text-nowrap overflow-x-auto">
                 {level.name}
               </div>
@@ -126,6 +129,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
               size="icon"
               onClick={() => handleEdit(index)}
               type="button"
+              data-cy={`edit-${level.metadata?.govt_org_type?.toLowerCase()}`}
             >
               <CareIcon icon="l-trash" className="h-4 w-4" />
             </Button>
@@ -155,6 +159,11 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
               handleLevelChange(value, selectedLevels.length)
             }
             onSearch={setSearchQuery}
+            data-cy={`select-${
+              lastLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
+              lastLevel?.metadata?.govt_org_type?.toLowerCase() ||
+              "state"
+            }`}
           />
         </div>
       )}

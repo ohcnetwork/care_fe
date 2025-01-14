@@ -11,7 +11,12 @@ export interface PageTitleProps {
   componentRight?: ReactNode;
   breadcrumbs?: boolean;
   crumbsReplacements?: {
-    [key: string]: { name?: string; uri?: string; style?: string };
+    [key: string]: {
+      name?: string;
+      uri?: string;
+      style?: string;
+      hide?: boolean;
+    };
   };
   focusOnLoad?: boolean;
   isInsidePage?: boolean;

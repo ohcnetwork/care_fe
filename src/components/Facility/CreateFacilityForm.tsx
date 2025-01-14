@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -36,7 +37,6 @@ import {
   validatePincode,
 } from "@/common/validation";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { parsePhoneNumber } from "@/Utils/utils";
@@ -101,9 +101,7 @@ export default function CreateFacilityForm({
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(routes.facility.create),
     onSuccess: (_data: BaseFacility) => {
-      Notification.Success({
-        msg: t("facility_added_successfully"),
-      });
+      toast.success(t("facility_added_successfully"));
       queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
       form.reset();
       onSubmitSuccess?.();
@@ -112,12 +110,10 @@ export default function CreateFacilityForm({
       const errorData = error.cause as { errors: { msg: string[] } };
       if (errorData?.errors?.msg) {
         errorData.errors.msg.forEach((msg) => {
-          Notification.Error({ msg });
+          toast.error(msg);
         });
       } else {
-        Notification.Error({
-          msg: t("facility_add_error"),
-        });
+        toast.error(t("facility_add_error"));
       }
     },
   });
@@ -143,22 +139,16 @@ export default function CreateFacilityForm({
           form.setValue("latitude", position.coords.latitude.toString());
           form.setValue("longitude", position.coords.longitude.toString());
           setIsGettingLocation(false);
-          Notification.Success({
-            msg: "Location updated successfully",
-          });
+          toast.success(t("location_updated_successfully"));
         },
         (error) => {
           setIsGettingLocation(false);
-          Notification.Error({
-            msg: "Unable to get location: " + error.message,
-          });
+          toast.error(t("unable_to_get_location") + error.message);
         },
         { timeout: 10000 }, // 10 second timeout
       );
     } else {
-      Notification.Error({
-        msg: "Geolocation is not supported by this browser",
-      });
+      toast.error(t("geolocation_is_not_supported_by_this_browser"));
     }
   };
 
@@ -174,7 +164,7 @@ export default function CreateFacilityForm({
               name="facility_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Facility Type</FormLabel>
+                  <FormLabel required>Facility Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
@@ -203,7 +193,7 @@ export default function CreateFacilityForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Facility Name</FormLabel>
+                  <FormLabel required>Facility Name</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -270,11 +260,12 @@ export default function CreateFacilityForm({
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel required>Phone Number</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-phone"
                       placeholder="+91XXXXXXXXXX"
+                      maxLength={13}
                       {...field}
                     />
                   </FormControl>
@@ -288,7 +279,7 @@ export default function CreateFacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Pincode</FormLabel>
+                  <FormLabel required>Pincode</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
@@ -307,7 +298,7 @@ export default function CreateFacilityForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel required>Address</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}

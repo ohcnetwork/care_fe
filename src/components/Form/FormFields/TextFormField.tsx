@@ -32,6 +32,9 @@ export type TextFormFieldProps = FormFieldBaseProps<string> &
     clearable?: boolean | undefined;
   };
 
+/**
+ * @deprecated use shadcn/ui's Input instead
+ */
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const field = useFormFieldPropsResolver(props);
   const { leading, trailing } = props;

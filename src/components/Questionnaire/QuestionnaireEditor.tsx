@@ -40,7 +40,6 @@ import {
 import {
   QuestionStatus,
   QuestionnaireDetail,
-  QuestionnaireUpdate,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -80,14 +79,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireUpdate | null>(null);
+    useState<QuestionnaireDetail | null>(null);
 
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire({
-        ...initialQuestionnaire,
-        organizations: ["628b44da-3da0-4321-a75d-e53697b281bb"],
-      });
+      setQuestionnaire(initialQuestionnaire);
     }
   }, [initialQuestionnaire]);
 
@@ -673,9 +669,7 @@ function QuestionEditor({
                     <SelectItem value="symptom">Symptom</SelectItem>
                     <SelectItem value="diagnosis">Diagnosis</SelectItem>
                     <SelectItem value="encounter">Encounter</SelectItem>
-                    <SelectItem value="follow_up_appointment">
-                      Follow-up Appointment
-                    </SelectItem>
+                    <SelectItem value="appointment">Appointment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

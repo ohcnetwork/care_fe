@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction } from "react";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import { QueryParams, RequestOptions } from "@/Utils/request/types";
 
 export function makeUrl(
@@ -16,8 +15,6 @@ export function makeUrl(
       path,
     );
   }
-
-  ensurePathNotMissingReplacements(path);
 
   if (query) {
     path += `?${makeQueryParams(query)}`;
@@ -41,18 +38,6 @@ const makeQueryParams = (query: QueryParams) => {
   });
 
   return qParams.toString();
-};
-
-const ensurePathNotMissingReplacements = (path: string) => {
-  const missingParams = path.match(/\{.*\}/g);
-
-  if (missingParams) {
-    const msg = `Missing path params: ${missingParams.join(
-      ", ",
-    )}. Path: ${path}`;
-    Notification.Error({ msg });
-    throw new Error(msg);
-  }
 };
 
 export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
