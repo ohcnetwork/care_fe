@@ -180,6 +180,9 @@ export function AppointmentSlotPicker({
                       {slots.map((slot) => {
                         const percentage =
                           slot.allocated / availability.tokens_per_slot;
+                        const isPastSlot =
+                          isSameDay(selectedDate, new Date()) &&
+                          isBefore(slot.start_datetime, new Date());
 
                         return (
                           <Button
@@ -198,7 +201,8 @@ export function AppointmentSlotPicker({
                               );
                             }}
                             disabled={
-                              slot.allocated === availability.tokens_per_slot
+                              slot.allocated === availability.tokens_per_slot ||
+                              isPastSlot
                             }
                             className="flex flex-col items-center group gap-0"
                           >
