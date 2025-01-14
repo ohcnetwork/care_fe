@@ -160,7 +160,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !facilityData) {
     return <Loading />;
   }
 
@@ -211,7 +211,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
                       <Avatar
-                        name={facilityData?.name}
+                        name={facilityData.name}
                         className="h-12 w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
                       <div>
