@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -107,19 +107,30 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
   const today = new Date();
 
-  // Case 1: Today only
+  // Case 1: Today only and Yesterday only
   if (
-    dateFrom === dateQueryString(today) &&
-    dateTo === dateQueryString(today)
+    (dateFrom === dateQueryString(today) &&
+      dateTo === dateQueryString(today)) ||
+    (dateFrom === dateQueryString(subDays(today, 1)) &&
+      dateTo === dateQueryString(subDays(today, 1)))
   ) {
-    return (
-      <>
-        <span className="text-black">{t("today")}</span>
-        <span className="pl-1 text-gray-500">
-          ({formatDate(dateFrom, "dd MMM yyyy")})
-        </span>
-      </>
-    );
+    <>
+      {dateFrom === dateQueryString(today) ? (
+        <>
+          <span className="text-black">{t("today")}</span>
+          <span className="pl-1 text-gray-500">
+            ({formatDate(dateFrom, "dd MMM yyyy")})
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="text-black">{t("yesterday")}</span>
+          <span className="pl-1 text-gray-500">
+            ({formatDate(dateFrom, "dd MMM yyyy")})
+          </span>
+        </>
+      )}
+    </>;
   }
 
   // Case 2: Pre-defined ranges
@@ -128,11 +139,6 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       label: t("last_week_short"),
       from: subDays(today, 7),
       to: today,
-    },
-    {
-      label: t("yesterday"),
-      from: subDays(today, 1),
-      to: subDays(today, 1),
     },
     {
       label: t("next_week_short"),
@@ -192,8 +198,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
     return (
       <>
-        <span>{t("on")} </span>
-        <span className="text-black">
+        <span className="text-black">{t("on")} </span>
+        <span className="pl-1 text-gray-500">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -204,8 +210,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (dateFrom && !dateTo) {
     return (
       <>
-        <span>{t("after")} </span>
-        <span className="text-black">
+        <span className="text-black">{t("after")} </span>
+        <span className="pl-1 text-gray-500">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -589,7 +595,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             value={qParams.search ?? ""}
             onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
           />
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button variant="secondary">
                 <CareIcon icon="l-filter" className="mr-2" />
@@ -633,7 +639,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 </Button>
               </div>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
       </div>
 
