@@ -112,7 +112,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
               <div className="font-medium truncate">{user.user_type}</div>
             </div>
             <div>
-              <div className="text-gray-500">{t("phone_number")}</div>
+              <div className="font-medium truncate">
+                {formatPhoneNumber(user.phone_number)}
+              </div>
               <div className="font-medium truncate">{user.phone_number}</div>
             </div>
           </div>

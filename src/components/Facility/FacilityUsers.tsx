@@ -55,7 +55,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
         </thead>
         {/* Body Skeleton */}
         <tbody className="divide-y divide-gray-200 bg-white">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <tr key={i} className="hover:bg-gray-50">
               <td className="sticky left-0 z-10 bg-white px-4 py-4 lg:pr-20">
                 <div className="flex items-center gap-3">
