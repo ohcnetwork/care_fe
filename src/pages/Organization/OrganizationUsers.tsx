@@ -26,19 +26,21 @@ interface Props {
 }
 
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
-  const { qParams, updateQuery, Pagination } = useFilters({
-    limit: 18,
-  });
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({});
   const { t } = useTranslation();
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["organizationUsers", id, qParams.search],
+    queryKey: ["organizationUsers", id, qParams.search, qParams.page],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
-      queryParams: { username: qParams.search },
+      queryParams: {
+        username: qParams.search,
+        limit: resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
+      },
     }),
     enabled: !!id,
   });
