@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,11 +13,12 @@ import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -29,39 +29,35 @@ interface Props {
 
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
-  const { data: facilityResponse, isLoading } = useQuery<
-    RequestResult<FacilityModel>
-  >({
+  const { goBack } = useAppHistory();
+  const { data: facilityResponse, isLoading } = useQuery<FacilityModel>({
     queryKey: ["facility", id],
-    queryFn: () =>
-      request(routes.getAnyFacility, {
-        pathParams: { id },
-      }),
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id },
+    }),
   });
 
   const { Pagination } = useFilters({
     limit: 18,
   });
 
-  const { data: docResponse } = useQuery<
-    RequestResult<PaginatedResponse<UserAssignedModel>>
+  const { data: docResponse, error: docError } = useQuery<
+    PaginatedResponse<UserAssignedModel>
   >({
     queryKey: [routes.getScheduleAbleFacilityUsers, id],
-    queryFn: async () => {
-      const response = await request(routes.getScheduleAbleFacilityUsers, {
-        pathParams: { facility_id: id },
-        silent: true,
-      });
-      if (response.res?.status !== 200) {
-        toast.error(t("error_fetching_users_data"));
-      }
-      return response;
-    },
+    queryFn: query(routes.getScheduleAbleFacilityUsers, {
+      pathParams: { facility_id: id },
+      silent: true,
+    }),
   });
 
-  const users = docResponse?.data?.results ?? [];
+  if (docError) {
+    toast.error(t("error_fetching_users_data"));
+  }
 
-  const facility = facilityResponse?.data;
+  const users = docResponse?.results ?? [];
+
+  const facility = facilityResponse;
 
   if (isLoading) {
     return (
@@ -83,7 +79,7 @@ export function FacilityDetailsPage({ id }: Props) {
           <Button
             variant="outline"
             className="border border-secondary-400"
-            onClick={() => navigate("/facilities")}
+            onClick={() => goBack("/facilities")}
           >
             {t("back_to_facilities")}
           </Button>
@@ -97,13 +93,11 @@ export function FacilityDetailsPage({ id }: Props) {
       <div className="flex justify-between items-center pb-4">
         <Button
           variant="outline"
-          asChild
           className="border border-secondary-400"
+          onClick={() => goBack("/facilities")}
         >
-          <Link href="/facilities">
-            <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
-            <span className="text-sm underline">{t("back")}</span>
-          </Link>
+          <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
+          <span className="text-sm underline">{t("back")}</span>
         </Button>
         <LoginHeader />
       </div>

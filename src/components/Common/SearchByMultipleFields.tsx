@@ -167,7 +167,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       value: searchValue,
       onChange: handleSearchChange,
       className: cn(
-        "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
+        "flex-grow border-none shadow-none focus-visible:ring-0",
         inputClassName,
       ),
     } as const;
@@ -365,12 +365,12 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         <div className="w-full">{renderSearchInput}</div>
       </div>
       {error && (
-        <div className="error-text px-2 mb-1 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
+        <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
           {t("invalid_phone_number")}
         </div>
       )}
       {enableOptionButtons && (
-        <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
+        <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
           {options.map((option, i) => (
             <Button
               key={option.key}
