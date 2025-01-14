@@ -35,6 +35,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import Loading from "../Common/Loading";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
+import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireShowProps {
@@ -90,7 +91,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [questionnaireApi.detail.path, id],
+    queryKey: ["questionnaire", id],
     queryFn: query(questionnaireApi.detail, {
       pathParams: { id },
     }),
@@ -168,6 +169,15 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <CareIcon icon="l-building" className="mr-2 h-4 w-4" />
                     Manage Organizations
+                  </DropdownMenuItem>
+                }
+              />
+              <ManageQuestionnaireTagsSheet
+                questionnaire={questionnaire}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <CareIcon icon="l-tag" className="mr-2 h-4 w-4" />
+                    Manage Tags
                   </DropdownMenuItem>
                 }
               />

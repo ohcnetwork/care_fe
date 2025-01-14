@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Organization } from "../organization/organization";
 import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
-import { QuestionnaireTag } from "./tags";
+import { QuestionnaireTagModel, QuestionnaireTagSet } from "./tags";
 
 export default {
   list: {
@@ -74,25 +74,32 @@ export default {
     TBody: {} as { organizations: string[] },
   },
 
+  setTags: {
+    path: "/api/v1/questionnaire/{slug}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<unknown>(),
+    TBody: Type<QuestionnaireTagSet>(),
+  },
+
   tags: {
     list: {
       path: "/api/v1/questionnaire_tag/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<QuestionnaireTag>>(),
+      TRes: Type<PaginatedResponse<QuestionnaireTagModel>>(),
     },
 
     create: {
       path: "/api/v1/questionnaire_tag/",
       method: HttpMethod.POST,
-      TRes: Type<QuestionnaireTag>(),
-      TBody: Type<Omit<QuestionnaireTag, "id">>(),
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<Omit<QuestionnaireTagModel, "id">>(),
     },
 
     update: {
       path: "/api/v1/questionnaire_tag/{slug}/",
       method: HttpMethod.PUT,
-      TRes: Type<QuestionnaireTag>(),
-      TBody: Type<QuestionnaireTag>(),
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<QuestionnaireTagModel>(),
     },
   },
 };

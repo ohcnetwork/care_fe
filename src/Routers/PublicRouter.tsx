@@ -1,5 +1,4 @@
 import { useRoutes } from "raviger";
-import { lazy } from "react";
 
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
@@ -9,9 +8,8 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
+import { LicensesPage } from "@/pages/Licenses/Licenses";
 import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
-
-const LicensesPage = lazy(() => import("@/components/Licenses/LicensesPage"));
 
 export const routes = {
   "/": () => <LandingPage />,
