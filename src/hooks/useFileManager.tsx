@@ -91,7 +91,7 @@ export default function useFileManager(
     associating_id: string,
   ) => {
     return queryClient.fetchQuery({
-      queryKey: [`${fileType}-files`, associating_id, file.id],
+      queryKey: ["file", fileType, associating_id, file.id],
       queryFn: () =>
         query(routes.retrieveUpload, {
           queryParams: {
@@ -148,7 +148,7 @@ export default function useFileManager(
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
-        queryKey: [`${fileType}-files`, archiveDialogueOpen?.associating_id],
+        queryKey: ["files", fileType, archiveDialogueOpen?.associating_id],
       });
     },
   });
@@ -219,7 +219,7 @@ export default function useFileManager(
       setEditDialogueOpen(null);
       onEdit && onEdit();
       queryClient.invalidateQueries({
-        queryKey: [`${fileType}-files`, associating_id],
+        queryKey: ["files", fileType, associating_id],
       });
     },
   });

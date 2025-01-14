@@ -45,6 +45,9 @@ describe("Facility Management", () => {
     facilityPage.submitFacilityCreationForm();
     facilityPage.verifySuccessMessage();
 
+    // Wait for facility cards to load
+    facilityPage.waitForFacilityCardsToLoad();
+
     // Search for the facility and verify in card
     facilityPage.searchFacility(testFacility.name);
     facilityPage.verifyFacilityNameInCard(testFacility.name);

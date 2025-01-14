@@ -1,5 +1,6 @@
 import { Code } from "./code";
 import { Question } from "./question";
+import { QuestionnaireTagModel } from "./tags";
 
 export type SubjectType = "patient" | "encounter";
 
@@ -15,13 +16,12 @@ export interface QuestionnaireDetail {
   description?: string;
   status: QuestionStatus;
   subject_type: SubjectType;
+  tags: QuestionnaireTagModel[];
 }
 
-export interface QuestionnaireUpdate extends QuestionnaireDetail {
+export interface QuestionnaireCreate extends Omit<QuestionnaireDetail, "id"> {
   organizations: string[];
 }
-
-export type QuestionnaireCreate = Omit<QuestionnaireUpdate, "id">;
 
 export interface QuestionnaireForms {
   count: number;

@@ -159,21 +159,32 @@ export default function useFileUpload(
     }
     return true;
   };
-  const { mutateAsync: markUploadComplete } = useMutation({
-    mutationFn: (body: { data: CreateFileResponse; associating_id: string }) =>
-      mutate(routes.markUploadCompleted, {
-        pathParams: {
-          id: body.data.id,
-        },
-      })(body),
-    onSuccess: (_, { associating_id }) => {
-      queryClient.invalidateQueries({
-        queryKey: [`${fileType}-files`, associating_id],
-      });
-    },
-  });
+  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
+    useMutation({
+      mutationFn: (body: {
+        data: CreateFileResponse;
+        associating_id: string;
+      }) =>
+        mutate(routes.markUploadCompleted, {
+          pathParams: {
+            id: body.data.id,
+          },
+        })(body),
+      onSuccess: (_, { data, associating_id }) => {
+        queryClient.invalidateQueries({
+          queryKey: ["files", fileType, associating_id],
+        });
+        toast.success(t("file_uploaded"));
+        setError(null);
+        onUpload && onUpload(data);
+      },
+    });
 
-  const uploadfile = async (data: CreateFileResponse, file: File) => {
+  const uploadfile = async (
+    data: CreateFileResponse,
+    file: File,
+    associating_id: string,
+  ) => {
     const url = data.signed_url;
     const internal_name = data.internal_name;
     const newFile = new File([file], `${internal_name}`);
@@ -184,12 +195,18 @@ export default function useFileUpload(
         newFile,
         "PUT",
         { "Content-Type": file.type },
-        (xhr: XMLHttpRequest) => {
+        async (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            toast.success(t("file_uploaded"));
-            setError(null);
-            onUpload && onUpload(data);
+            await markUploadComplete({
+              data,
+              associating_id: associating_id,
+            });
+            if (markUploadCompleteError) {
+              toast.error(t("file_error__mark_complete_failed"));
+              reject();
+              return;
+            }
             resolve();
           } else {
             toast.error(
@@ -234,6 +251,7 @@ export default function useFileUpload(
     if (!validateFileUpload()) return;
 
     setProgress(0);
+    const errors: File[] = [];
 
     for (const [index, file] of files.entries()) {
       const filename =
@@ -246,28 +264,33 @@ export default function useFileUpload(
       }
       setUploading(true);
 
-      const data = await createUpload({
-        original_name: file.name ?? "",
-        file_type: fileType,
-        name: filename,
-        associating_id,
-        file_category: category,
-        mime_type: file.type ?? "",
-      });
+      try {
+        const data = await createUpload({
+          original_name: file.name ?? "",
+          file_type: fileType,
+          name: filename,
+          associating_id,
+          file_category: category,
+          mime_type: file.type ?? "",
+        });
 
-      if (data) {
-        await uploadfile(data, file);
-        await markUploadComplete({ data, associating_id });
+        if (data) {
+          await uploadfile(data, file, associating_id);
+        }
+      } catch (error) {
+        errors.push(file);
       }
     }
 
     setUploading(false);
-    setFiles([]);
-    setUploadFileNames([]);
+    setFiles(errors);
+    setUploadFileNames(errors?.map((f) => f.name) ?? []);
+    setError(t("file_error__network"));
   };
 
   const clearFiles = () => {
     setFiles([]);
+    setError(null);
     setUploadFileNames([]);
   };
 

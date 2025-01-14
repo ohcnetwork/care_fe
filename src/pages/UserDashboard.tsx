@@ -55,7 +55,7 @@ export default function UserDashboard() {
               Edit Profile
             </Link>
           </Button>
-          {user.username === "admin" && (
+          {user.is_superuser && (
             <Button
               variant="outline"
               size="sm"
