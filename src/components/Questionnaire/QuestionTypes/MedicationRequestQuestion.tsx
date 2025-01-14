@@ -20,7 +20,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -29,15 +36,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { QuantityInput } from "@/components/Common/QuantityInput";
+import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+
+import { MEDICATION_REQUEST_TIMING_OPTIONS } from "@/common/constants";
 
 import {
   BOUNDS_DURATION_UNITS,
   BoundsDuration,
   DOSAGE_UNITS,
+  DoseRange,
   MEDICATION_REQUEST_INTENT,
   MedicationRequest,
   MedicationRequestDosageInstruction,
@@ -163,8 +173,8 @@ export function MedicationRequestQuestion({
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="md:overflow-x-auto w-auto">
-        {medications.length > 0 && (
+      {medications.length > 0 && (
+        <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
               className={cn("max-w-[2144px] relative lg:border rounded-md", {
@@ -308,8 +318,8 @@ export function MedicationRequestQuestion({
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className="max-w-4xl">
         <ValueSetSelect
           system="system-medication"
@@ -342,9 +352,123 @@ const MedicationRequestGridRow: React.FC<{
   };
 
   const [boundsDurationUnit, setBoundsDurationUnit] = useState<string>("d");
-
+  const [showDosageDialog, setShowDosageDialog] = useState(false);
+  const desktopLayout = useBreakpoints({ lg: true, default: false });
   const as_needed_boolean = dosageInstruction?.as_needed_boolean;
   const isFrequencySet = dosageInstruction?.timing?.repeat?.frequency;
+
+  const DosageDialog = () => {
+    const [localDoseRange, setLocalDoseRange] = useState<DoseRange>({
+      low: dosageInstruction?.dose_and_rate?.dose_range?.low || {
+        value: undefined,
+        unit: undefined,
+      },
+      high: dosageInstruction?.dose_and_rate?.dose_range?.high || {
+        value: undefined,
+        unit: undefined,
+      },
+    });
+
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="font-medium text-base">{t("taper_titrate_dosage")}</div>
+        <div>
+          <Label className="mb-1.5">{t("start_dose")}</Label>
+          <ComboboxQuantityInput
+            units={DOSAGE_UNITS}
+            quantity={localDoseRange.low}
+            onChange={(value) => {
+              setLocalDoseRange((prev) => ({
+                ...prev,
+                low: {
+                  value: value.value,
+                  unit: value.unit as (typeof DOSAGE_UNITS)[number],
+                },
+                high: {
+                  ...prev.high,
+                  unit: value.unit as (typeof DOSAGE_UNITS)[number],
+                },
+              }));
+            }}
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <Label className="mb-1.5">{t("end_dose")}</Label>
+          <ComboboxQuantityInput
+            units={DOSAGE_UNITS}
+            quantity={localDoseRange.high}
+            onChange={(value) => {
+              setLocalDoseRange((prev) => ({
+                ...prev,
+                high: {
+                  value: value.value,
+                  unit: value.unit as (typeof DOSAGE_UNITS)[number],
+                },
+                low: {
+                  ...prev.low,
+                  unit: value.unit as (typeof DOSAGE_UNITS)[number],
+                },
+              }));
+            }}
+            disabled={disabled || !localDoseRange.low.value}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              handleUpdateDosageInstruction({
+                dose_and_rate: {
+                  type: "ordered",
+                  dose_quantity: undefined,
+                  dose_range: undefined,
+                },
+              });
+              setShowDosageDialog(false);
+            }}
+          >
+            {t("clear")}
+          </Button>
+          <Button
+            onClick={() => {
+              handleUpdateDosageInstruction({
+                dose_and_rate: {
+                  type: "calculated",
+                  dose_range: localDoseRange,
+                },
+              });
+              setShowDosageDialog(false);
+            }}
+            disabled={
+              !localDoseRange.low.value ||
+              !localDoseRange.high.value ||
+              !localDoseRange.low.unit ||
+              !localDoseRange.high.unit
+            }
+          >
+            {t("save")}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const formatDoseRange = (range?: DoseRange) => {
+    if (!range?.low?.value) return "";
+
+    const lowPart = range.low.unit
+      ? `${range.low.value} ${range.low.unit}`
+      : `${range.low.value}`;
+    const highPart = range.high?.value
+      ? range.high.unit
+        ? `${range.high.value} ${range.high.unit}`
+        : `${range.high.value}`
+      : "";
+
+    return highPart ? `${lowPart} → ${highPart}` : lowPart;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name and Controls */}
@@ -355,26 +479,92 @@ const MedicationRequestGridRow: React.FC<{
       </div>
 
       {/* Main Fields */}
-      <div
-        className="grid gap-2
-       p-0 lg:contents"
-      >
+      <div className="grid gap-2 p-0 lg:contents">
         {/* Dosage */}
         <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
           <Label className="mb-1.5 block text-sm lg:hidden">
             {t("dosage")}
           </Label>
-          <QuantityInput
-            units={DOSAGE_UNITS}
-            quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
-            onChange={(value) =>
-              handleUpdateDosageInstruction({
-                dose_and_rate: { type: "ordered", dose_quantity: value },
-              })
-            }
-            disabled={disabled}
-            autoFocus={true}
-          />
+          <div>
+            {dosageInstruction?.dose_and_rate?.dose_range ? (
+              <Input
+                readOnly
+                value={formatDoseRange(
+                  dosageInstruction.dose_and_rate.dose_range,
+                )}
+                onClick={() => setShowDosageDialog(true)}
+                className="h-9 text-sm cursor-pointer mb-3"
+              />
+            ) : (
+              <>
+                <ComboboxQuantityInput
+                  units={[...DOSAGE_UNITS]}
+                  quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
+                  onChange={(value) => {
+                    handleUpdateDosageInstruction({
+                      dose_and_rate: {
+                        type: "ordered",
+                        dose_quantity: {
+                          value: value.value,
+                          unit: value.unit as (typeof DOSAGE_UNITS)[number],
+                        },
+                        dose_range: undefined,
+                      },
+                    });
+                  }}
+                  disabled={disabled}
+                  autoFocus={true}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-3 w-3 rounded-full hover:bg-transparent"
+                    onClick={() => {
+                      const currentValue =
+                        dosageInstruction?.dose_and_rate?.dose_quantity?.value;
+                      handleUpdateDosageInstruction({
+                        dose_and_rate: {
+                          type: "calculated",
+                          dose_quantity: undefined,
+                          dose_range: {
+                            low: {
+                              value: currentValue,
+                              unit: undefined,
+                            },
+                            high: {
+                              value: undefined,
+                              unit: undefined,
+                            },
+                          },
+                        },
+                      });
+                      setShowDosageDialog(true);
+                    }}
+                  >
+                    +
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {desktopLayout ? (
+            <Popover open={showDosageDialog} onOpenChange={setShowDosageDialog}>
+              <PopoverTrigger asChild>
+                <div className="w-full" />
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <DosageDialog />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Dialog open={showDosageDialog} onOpenChange={setShowDosageDialog}>
+              <DialogContent>
+                <DosageDialog />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Frequency */}
@@ -400,26 +590,31 @@ const MedicationRequestGridRow: React.FC<{
                   timing: {
                     repeat: {
                       ...dosageInstruction?.timing?.repeat,
-                      ...FREQUENCY_OPTIONS[
-                        value as keyof typeof FREQUENCY_OPTIONS
+                      ...MEDICATION_REQUEST_TIMING_OPTIONS[
+                        value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
                       ].timing.repeat,
                     },
+                    code: MEDICATION_REQUEST_TIMING_OPTIONS[
+                      value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
+                    ].timing.code,
                   },
                 });
               }
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-9 text-sm">
               <SelectValue placeholder={t("select_frequency")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="PRN">{t("as_needed_prn")}</SelectItem>
-              {Object.entries(FREQUENCY_OPTIONS).map(([key, option]) => (
-                <SelectItem key={key} value={key}>
-                  {option.display}
-                </SelectItem>
-              ))}
+              {Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).map(
+                ([key, option]) => (
+                  <SelectItem key={key} value={key}>
+                    {option.display}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -429,7 +624,7 @@ const MedicationRequestGridRow: React.FC<{
           <Label className="mb-1.5 block text-sm lg:hidden">
             {t("duration")}
           </Label>
-          <QuantityInput
+          <ComboboxQuantityInput
             units={BOUNDS_DURATION_UNITS}
             quantity={{
               value: dosageInstruction?.timing?.repeat?.bounds_duration?.value,
@@ -557,7 +752,7 @@ const MedicationRequestGridRow: React.FC<{
             }
             disabled={disabled}
           >
-            <SelectTrigger className="h-8 text-sm capitalize">
+            <SelectTrigger className="h-9 text-sm capitalize">
               <SelectValue
                 className="capitalize"
                 placeholder={t("select_intent")}
@@ -590,91 +785,10 @@ const MedicationRequestGridRow: React.FC<{
   );
 };
 
-const reverseFrequencyOption = (
+export const reverseFrequencyOption = (
   option: MedicationRequest["dosage_instruction"][0]["timing"],
 ) => {
-  return Object.entries(FREQUENCY_OPTIONS).find(
-    ([, value]) =>
-      value.timing.repeat.frequency === option?.repeat?.frequency &&
-      value.timing.repeat.period_unit === option?.repeat?.period_unit &&
-      value.timing.repeat.period === option?.repeat?.period,
-  )?.[0] as keyof typeof FREQUENCY_OPTIONS;
+  return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
+    ([key]) => key === option?.code?.code,
+  )?.[0] as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS;
 };
-
-// TODO: verify period_unit is correct
-const FREQUENCY_OPTIONS = {
-  BID: {
-    display: "Two times a day",
-    timing: { repeat: { frequency: 2, period: 1, period_unit: "d" } },
-  },
-  TID: {
-    display: "Three times a day",
-    timing: { repeat: { frequency: 3, period: 1, period_unit: "d" } },
-  },
-  QID: {
-    display: "Four times a day",
-    timing: { repeat: { frequency: 4, period: 1, period_unit: "d" } },
-  },
-  AM: {
-    display: "Every morning",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  PM: {
-    display: "Every afternoon",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  QD: {
-    display: "Every day",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  QOD: {
-    display: "Every other day",
-    timing: { repeat: { frequency: 1, period: 2, period_unit: "d" } },
-  },
-  Q1H: {
-    display: "Every hour",
-    timing: { repeat: { frequency: 24, period: 1, period_unit: "d" } },
-  },
-  Q2H: {
-    display: "Every 2 hours",
-    timing: { repeat: { frequency: 12, period: 1, period_unit: "d" } },
-  },
-  Q3H: {
-    display: "Every 3 hours",
-    timing: { repeat: { frequency: 8, period: 1, period_unit: "d" } },
-  },
-  Q4H: {
-    display: "Every 4 hours",
-    timing: { repeat: { frequency: 6, period: 1, period_unit: "d" } },
-  },
-  Q6H: {
-    display: "Every 6 hours",
-    timing: { repeat: { frequency: 4, period: 1, period_unit: "d" } },
-  },
-  Q8H: {
-    display: "Every 8 hours",
-    timing: { repeat: { frequency: 3, period: 1, period_unit: "d" } },
-  },
-  BED: {
-    display: "At bedtime",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "d" } },
-  },
-  WK: {
-    display: "Weekly",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "wk" } },
-  },
-  MO: {
-    display: "Monthly",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "mo" } },
-  },
-  STAT: {
-    display: "Immediately",
-    timing: { repeat: { frequency: 1, period: 1, period_unit: "s" } }, // One-time
-  },
-} as const satisfies Record<
-  string,
-  {
-    display: string;
-    timing: MedicationRequest["dosage_instruction"][0]["timing"];
-  }
->;
