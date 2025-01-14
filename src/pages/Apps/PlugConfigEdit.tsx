@@ -58,7 +58,6 @@ export function PlugConfigEdit({ slug }: Props) {
       ? mutate(routes.plugConfig.createPlugConfig)
       : mutate(routes.plugConfig.updatePlugConfig, { pathParams: { slug } }),
     onSuccess: () => navigate("/apps"),
-    onError: (error) => console.error("Error saving config:", error),
   });
 
   const { mutate: deleteConfig } = useMutation({
@@ -66,7 +65,6 @@ export function PlugConfigEdit({ slug }: Props) {
       pathParams: { slug },
     }),
     onSuccess: () => navigate("/apps"),
-    onError: (error) => console.error("Error deleting config:", error),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
