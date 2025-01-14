@@ -1,37 +1,31 @@
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import React from "react";
 
 import { cn } from "@/lib/utils";
 
-const colors: string[] = [
-  "#E6F3FF", // Light Blue
-  "#FFF0E6", // Light Peach
-  "#E6FFE6", // Light Green
-  "#FFE6E6", // Light Pink
-  "#F0E6FF", // Light Purple
-  "#FFFFE6", // Light Yellow
-  "#E6FFFF", // Light Cyan
-  "#FFE6F3", // Light Rose
-  "#F3FFE6", // Light Lime
-  "#E6E6FF", // Light Lavender
-  "#FFE6FF", // Light Magenta
-  "#E6FFF0", // Light Mint
+// Subtle, professional color combinations that blend well with the UI
+const colorPairs: Array<[string, string]> = [
+  ["#E3F2FD", "#1565C0"], // Subtle Blue
+  ["#E8F5E9", "#2E7D32"], // Subtle Green
+  ["#FFF3E0", "#E65100"], // Subtle Orange
+  ["#F3E5F5", "#6A1B9A"], // Subtle Purple
+  ["#E1F5FE", "#0277BD"], // Subtle Light Blue
+  ["#E0F2F1", "#00695C"], // Subtle Teal
+  ["#FBE9E7", "#D84315"], // Subtle Deep Orange
+  ["#F3E5F5", "#6A1B9A"], // Subtle Purple
+  ["#E8EAF6", "#283593"], // Subtle Indigo
+  ["#FFF8E1", "#FF8F00"], // Subtle Amber
+  ["#FCE4EC", "#C2185B"], // Subtle Pink
+  ["#EFEBE9", "#4E342E"], // Subtle Brown
 ];
 
-const stringToInt = (name: string): number => {
-  const aux = (sum: number, remains: string): number => {
-    if (remains === "") return sum;
-    const firstCharacter = remains.slice(0, 1);
-    const newRemains = remains.slice(1);
-    return aux(sum + firstCharacter.charCodeAt(0), newRemains);
-  };
-
-  return Math.floor(aux(0, name));
+const stringToIndex = (name: string): number => {
+  return name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
 };
 
-const toColor = (name: string): [string, string] => {
-  const index = stringToInt(name) % colors.length;
-  const backgroundColor = colors[index];
-  return [backgroundColor, "#333333"]; // Using dark gray for text
+const getColorPair = (name: string): [string, string] => {
+  const index = stringToIndex(name) % colorPairs.length;
+  return colorPairs[index];
 };
 
 const initials = (name: string): string => {
@@ -40,73 +34,67 @@ const initials = (name: string): string => {
     .slice(0, 2)
     .map((word) => word.slice(0, 1))
     .join("")
-    .toUpperCase(); // Ensure initials are uppercase
+    .toUpperCase();
 };
 
 interface AvatarProps {
   colors?: [string, string];
-  name?: string;
+  name: string;
   imageUrl?: string;
   className?: string;
-  icon?: React.ReactNode;
 }
 
-const Avatar: React.FC<AvatarProps> = ({
-  colors: propColors,
-  name,
-  imageUrl,
-  className,
-  icon,
-}) => {
-  const [bgColor] = propColors || (name ? toColor(name) : toColor(""));
+const Avatar = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Root>,
+  AvatarProps
+>(({ colors: propColors, name, imageUrl, className }, ref) => {
+  const avatarText = name.match(/[a-zA-Z]+/g)?.join(" ");
+
+  const [bgColor, textColor] =
+    propColors ||
+    (avatarText ? getColorPair(avatarText) : getColorPair("user"));
+
   return (
-    <div
-      title={name}
-      className={cn(
-        `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
-        className,
-      )}
+    <AvatarPrimitive.Root
+      ref={ref}
+      className={cn("w-full h-full", className)}
       style={{
         background: bgColor,
-        borderRadius: "calc(100% / 15)",
       }}
     >
       {imageUrl ? (
-        <img
+        <AvatarPrimitive.Image
           src={imageUrl}
           alt={name}
           className="aspect-square h-full w-full object-cover"
         />
-      ) : icon ? (
-        <div className="flex items-center justify-center w-full h-full">
-          {icon}
-        </div>
       ) : (
-        // Render initials SVG
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          viewBox="0 0 100 100"
-          className="aspect-square h-full w-full object-cover"
-        >
-          <text
-            fill="black"
-            fillOpacity="0.1"
-            fontSize="40"
-            fontWeight="900"
-            x="50"
-            y="54"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            alignmentBaseline="middle"
+        <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+            viewBox="0 0 100 100"
+            className="aspect-square h-full w-full object-cover"
           >
-            {name ? initials(name) : null}
-          </text>
-        </svg>
+            <text
+              fill={textColor}
+              fillOpacity="0.5"
+              fontSize="50"
+              fontWeight="900"
+              x="50"
+              y="54"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              alignmentBaseline="middle"
+            >
+              {avatarText ? initials(avatarText) : null}
+            </text>
+          </svg>
+        </AvatarPrimitive.Fallback>
       )}
-    </div>
+    </AvatarPrimitive.Root>
   );
-};
+});
 
 export { Avatar };
 export type { AvatarProps };
