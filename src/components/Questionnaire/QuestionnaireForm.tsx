@@ -99,10 +99,7 @@ export function QuestionnaireForm({
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
-  useNavigationPrompt(
-    isDirty,
-    "You have unsaved changes. Are you sure you want to leave?",
-  );
+  useNavigationPrompt(isDirty, t("questionnaire_unsaved_changes"));
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {

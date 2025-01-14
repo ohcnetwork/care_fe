@@ -2044,6 +2044,7 @@
   "unlink_skill_error": "Error while unlinking skill. Try again later.",
   "unlink_skill_success": "Skill unlinked successfully",
   "unlink_this_facility": "Unlink Facility",
+  "unsaved_changes": "You have unsaved changes. Are you sure you want to leave?",
   "unsubscribe": "Unsubscribe",
   "unsubscribe_failed": "Unsubscribe failed.",
   "unsubscribed_successfully": "Unsubscribed Successfully.",
