@@ -17,12 +17,13 @@ import {
 
 import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
-import { MEDICATION_REQUEST_TIMING_OPTIONS } from "@/common/constants";
-
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
+import {
+  MEDICATION_REQUEST_TIMING_OPTIONS,
+  MedicationRequest,
+} from "@/types/emr/medicationRequest";
 
 function getFrequencyDisplay(
   timing?: MedicationRequest["dosage_instruction"][0]["timing"],
@@ -43,13 +44,13 @@ function formatDosage(instruction: MedicationRequest["dosage_instruction"][0]) {
   if (instruction.dose_and_rate.type === "calculated") {
     const { dose_range } = instruction.dose_and_rate;
     if (!dose_range) return "";
-    return `${dose_range.low.value}${dose_range.low.unit} - ${dose_range.high.value}${dose_range.high.unit}`;
+    return `${dose_range.low.value}${dose_range.low.unit.display} - ${dose_range.high.value}${dose_range.high.unit.display}`;
   }
 
   const { dose_quantity } = instruction.dose_and_rate;
-  if (!dose_quantity?.value) return "";
+  if (!dose_quantity?.value || !dose_quantity.unit) return "";
 
-  return `${dose_quantity.value} ${dose_quantity.unit || ""}`.trim();
+  return `${dose_quantity.value} ${dose_quantity.unit.display}`;
 }
 
 // Helper function to format dosage instructions in Rx style

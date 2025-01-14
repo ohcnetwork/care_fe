@@ -1,6 +1,5 @@
 "use client";
 
-import { t } from "i18next";
 import { Check } from "lucide-react";
 import * as React from "react";
 
@@ -20,35 +19,31 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-interface Props<TUnit extends string> {
-  quantity?: QuantityValue<TUnit> | null;
-  onChange: (quantity: QuantityValue<TUnit>) => void;
-  units: readonly TUnit[];
+import {
+  DOSAGE_UNITS_CODES,
+  DosageQuantity,
+} from "@/types/emr/medicationRequest";
+
+interface Props {
+  quantity?: DosageQuantity;
+  onChange: (quantity: DosageQuantity) => void;
   disabled?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
 }
 
-interface QuantityValue<TUnit extends string> {
-  value?: number;
-  unit?: TUnit;
-}
-
-export function ComboboxQuantityInput<TUnit extends string>({
-  quantity = { value: undefined, unit: undefined },
+export function ComboboxQuantityInput({
+  quantity,
   onChange,
-  units,
   disabled,
   placeholder = "Enter a number...",
   autoFocus,
-}: Props<TUnit>) {
+}: Props) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(
-    quantity?.value?.toString() || "",
+    quantity?.value.toString() || "",
   );
-  const [selectedUnit, setSelectedUnit] = React.useState<TUnit | undefined>(
-    quantity?.unit,
-  );
+  const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
 
@@ -59,12 +54,13 @@ export function ComboboxQuantityInput<TUnit extends string>({
     if (value === "" || /^\d+$/.test(value)) {
       setInputValue(value);
       setOpen(true);
-      setSelectedUnit(undefined);
       setActiveIndex(0);
-      onChange({
-        value: value ? parseInt(value, 10) : undefined,
-        unit: selectedUnit,
-      });
+      if (value && selectedUnit) {
+        onChange({
+          value: parseInt(value, 10),
+          unit: selectedUnit,
+        });
+      }
     }
   };
 
@@ -75,15 +71,19 @@ export function ComboboxQuantityInput<TUnit extends string>({
       e.preventDefault();
       setOpen(true);
       setActiveIndex((prev) =>
-        prev === -1 ? 0 : prev < units.length - 1 ? prev + 1 : prev,
+        prev === -1
+          ? 0
+          : prev < DOSAGE_UNITS_CODES.length - 1
+            ? prev + 1
+            : prev,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < units.length) {
-        const unit = units[activeIndex];
+      if (activeIndex >= 0 && activeIndex < DOSAGE_UNITS_CODES.length) {
+        const unit = DOSAGE_UNITS_CODES[activeIndex];
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
@@ -91,15 +91,6 @@ export function ComboboxQuantityInput<TUnit extends string>({
       }
     }
   };
-
-  React.useEffect(() => {
-    if (quantity?.value !== undefined) {
-      setInputValue(quantity.value.toString());
-    }
-    if (quantity?.unit !== undefined) {
-      setSelectedUnit(quantity.unit);
-    }
-  }, [quantity]);
 
   return (
     <div className="relative flex w-full lg:max-w-[200px] flex-col gap-1">
@@ -121,7 +112,7 @@ export function ComboboxQuantityInput<TUnit extends string>({
             />
             {selectedUnit && (
               <div className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                {t(`unit_${selectedUnit}`)}
+                {selectedUnit.display}
               </div>
             )}
           </div>
@@ -138,10 +129,10 @@ export function ComboboxQuantityInput<TUnit extends string>({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {units.map((unit, index) => (
+                {DOSAGE_UNITS_CODES.map((unit, index) => (
                   <CommandItem
-                    key={unit}
-                    value={unit}
+                    key={unit.code}
+                    value={unit.code}
                     onSelect={() => {
                       setSelectedUnit(unit);
                       setOpen(false);
@@ -155,12 +146,14 @@ export function ComboboxQuantityInput<TUnit extends string>({
                     )}
                   >
                     <div>
-                      {inputValue} {t(`unit_${unit}`)}
+                      {inputValue} {unit.display}
                     </div>
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        selectedUnit === unit ? "opacity-100" : "opacity-0",
+                        selectedUnit?.code === unit.code
+                          ? "opacity-100"
+                          : "opacity-0",
                       )}
                     />
                   </CommandItem>
