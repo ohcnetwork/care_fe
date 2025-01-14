@@ -263,6 +263,7 @@ export default function CreateFacilityForm({
                   <FormLabel required>Phone Number</FormLabel>
                   <FormControl>
                     <Input
+                      type="tel"
                       data-cy="facility-phone"
                       placeholder="+91XXXXXXXXXX"
                       maxLength={13}
