@@ -193,6 +193,7 @@ export function QuestionnaireForm({
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
   const handleSubmit = async () => {
+    setIsDirty(false);
     if (hasErrors) return;
 
     const requests: BatchRequest[] = [];
