@@ -28,6 +28,7 @@ interface Props {
 
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
+
   const {
     qParams,
     Pagination,
@@ -36,6 +37,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     clearSearch,
     updateQuery,
   } = useFilters({ limit: 14, cacheBlacklist: ["name", "phone_number"] });
+
   const [organization, setOrganization] = useState<Organization | null>(null);
 
   const searchOptions = [

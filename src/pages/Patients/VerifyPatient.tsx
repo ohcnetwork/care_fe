@@ -21,6 +21,8 @@ import { Avatar } from "@/components/Common/Avatar";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -32,8 +34,13 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
+  const { goBack } = useAppHistory();
 
-  const { mutate: verifyPatient, data: patientData } = useMutation({
+  const {
+    mutate: verifyPatient,
+    data: patientData,
+    isError,
+  } = useMutation({
     mutationFn: mutate(routes.patient.search_retrieve),
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };
@@ -219,7 +226,27 @@ export default function VerifyPatient(props: { facilityId: string }) {
             </CardContent>
           </Card>
         </div>
-      ) : null}
+      ) : (
+        isError && (
+          <div className="h-screen w-full flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center text-center">
+              <h3 className="text-xl font-semibold mb-1">
+                {t("verification_failed")}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                {t("please_enter_correct_birth_year")}
+              </p>
+              <Button
+                variant={"primary_gradient"}
+                className="gap-3 group"
+                onClick={() => goBack()}
+              >
+                {t("go_back")}
+              </Button>
+            </div>
+          </div>
+        )
+      )}
     </div>
   );
 }
