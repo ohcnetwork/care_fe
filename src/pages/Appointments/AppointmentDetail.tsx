@@ -241,6 +241,7 @@ const AppointmentDetails = ({
                     fulfilled: "primary",
                     entered_in_error: "destructive",
                     cancelled: "destructive",
+                    rescheduled: "secondary",
                     noshow: "destructive",
                   } as Partial<
                     Record<Appointment["status"], BadgeProps["variant"]>
