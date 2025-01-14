@@ -143,7 +143,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             className="border border-secondary-400"
           >
             <Link href={`/facility/${facilityId}`}>
-              <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
               <span className="text-sm underline">{t("back")}</span>
             </Link>
           </Button>

@@ -289,16 +289,16 @@ const AppointmentDetails = ({
             <div>
               <p className="font-medium">{appointment.patient.name}</p>
               <p className="text-gray-600">
-                {appointment.patient.date_of_birth && (
+                {appointment.patient.date_of_birth ? (
                   <>
                     {format(appointment.patient.date_of_birth, "MMMM d, yyyy")}{" "}
+                    |{" "}
                     {differenceInYears(
                       new Date(),
                       appointment.patient.date_of_birth!,
                     )}
                   </>
-                )}
-                {appointment.patient.year_of_birth && (
+                ) : (
                   <>
                     {differenceInYears(
                       new Date(),
