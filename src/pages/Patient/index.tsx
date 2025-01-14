@@ -95,6 +95,12 @@ function PatientIndex() {
     return <Loading />;
   }
 
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    navigate(
+      `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
+    );
+  };
+
   const appointments = appointmentsData?.results
     .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
     .sort(
@@ -165,7 +171,10 @@ function PatientIndex() {
                 >
                   <span>{t("cancel")}</span>
                 </Button>
-                <Button variant="secondary">
+                <Button
+                  variant="secondary"
+                  onClick={() => handleRescheduleAppointment(appointment)}
+                >
                   <span>{t("reschedule")}</span>
                 </Button>
               </span>

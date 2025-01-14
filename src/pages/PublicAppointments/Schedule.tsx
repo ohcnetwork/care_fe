@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -22,26 +22,31 @@ import { FacilityModel } from "@/components/Facility/models";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { TokenSlot } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
   staffId: string;
+  appointmentId?: string;
 }
 
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
-  const { facilityId, staffId } = props;
+  const { facilityId, staffId, appointmentId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
+  const queryClient = useQueryClient();
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
@@ -54,16 +59,34 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
-  const { data: facilityResponse, error: facilityError } = useQuery<
-    RequestResult<FacilityModel>
-  >({
-    queryKey: ["facility", facilityId],
-    queryFn: () =>
-      request(routes.getAnyFacility, {
+  const { data: appointmentData } = useQuery<{ results: Appointment[] }>({
+    queryKey: ["appointment", tokenData?.phoneNumber],
+    queryFn: query(PublicAppointmentApi.getAppointments, {
+      headers: {
+        Authorization: `Bearer ${tokenData?.token}`,
+      },
+    }),
+    enabled: !!appointmentId && !!tokenData?.token,
+  });
+
+  const appointment = appointmentData?.results.find(
+    (appointment) => appointment.id === appointmentId,
+  );
+
+  useEffect(() => {
+    if (appointment) {
+      setReason(appointment.reason_for_visit);
+    }
+  }, [appointment]);
+
+  const { data: facilityResponse, error: facilityError } =
+    useQuery<FacilityModel>({
+      queryKey: ["facility", facilityId],
+      queryFn: query(routes.getAnyFacility, {
         pathParams: { id: facilityId },
         silent: true,
       }),
-  });
+    });
 
   if (facilityError) {
     toast.error(t("error_fetching_facility_data"));
@@ -108,6 +131,60 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       toast.error(t("error_fetching_slots_data"));
     }
   }
+
+  const { mutate: createAppointment } = useMutation({
+    mutationFn: (body: AppointmentCreateRequest) =>
+      mutate(PublicAppointmentApi.createAppointment, {
+        pathParams: { id: selectedSlot?.id || "" },
+        body,
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      })(body),
+    onSuccess: (data: Appointment) => {
+      toast.success(t("appointment_created_success"));
+      queryClient.invalidateQueries({
+        queryKey: [
+          ["patients", tokenData.phoneNumber],
+          ["appointment", tokenData.phoneNumber],
+        ],
+      });
+      navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+        replace: true,
+      });
+    },
+    onError: (error) => {
+      toast.error(error?.message || t("failed_to_create_appointment"));
+    },
+  });
+
+  const { mutate: cancelAppointment, isSuccess: cancelledAppointment } =
+    useMutation({
+      mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
+      onSuccess: () => {
+        toast.success(t("appointment_cancelled"));
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", tokenData.phoneNumber],
+        });
+      },
+    });
+
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    cancelAppointment({
+      appointment: appointment.id,
+      patient: appointment.patient.id,
+    });
+    if (cancelledAppointment) {
+      createAppointment({
+        reason_for_visit: reason,
+        patient: appointment.patient.id,
+      });
+    }
+  };
 
   useEffect(() => {
     setSelectedSlot(undefined);
@@ -178,7 +255,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-muted-foreground">
-                      {facilityResponse?.data?.name}
+                      {facilityResponse?.name}
                     </div>
                   </div>
                 </div>
@@ -188,7 +265,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <div className="flex-1 mx-2">
             <div className="flex flex-col gap-6">
               <span className="text-base font-semibold">
-                {t("book_an_appointment_with")}{" "}
+                {appointmentId
+                  ? t("reschedule_appointment_with")
+                  : t("book_an_appointment_with")}{" "}
                 {userData.user_type === "doctor"
                   ? `Dr. ${userData.first_name} ${userData.last_name}`
                   : `${userData.first_name} ${userData.last_name}`}
@@ -284,18 +363,22 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             <Button
               variant="primary_gradient"
               onClick={() => {
-                localStorage.setItem(
-                  "selectedSlot",
-                  JSON.stringify(selectedSlot),
-                );
-                localStorage.setItem("reason", reason);
-                navigate(
-                  `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                );
+                if (appointmentId && appointment) {
+                  handleRescheduleAppointment(appointment);
+                } else {
+                  localStorage.setItem(
+                    "selectedSlot",
+                    JSON.stringify(selectedSlot),
+                  );
+                  localStorage.setItem("reason", reason);
+                  navigate(
+                    `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                  );
+                }
               }}
             >
               <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-              {t("continue")}
+              {appointmentId ? t("reschedule_appointment") : t("continue")}
               <CareIcon icon="l-arrow-right" className="h-4 w-4" />
             </Button>
           </div>
