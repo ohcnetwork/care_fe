@@ -58,7 +58,9 @@ const Avatar: React.FC<AvatarProps> = ({
   className,
   icon,
 }) => {
-  const [bgColor] = propColors || (name ? toColor(name) : toColor(""));
+  const avatarText = name?.match(/[a-zA-Z]/g)?.join("");
+  const [bgColor] =
+    propColors || (avatarText ? toColor(avatarText) : toColor(""));
   return (
     <div
       title={name}
@@ -100,7 +102,7 @@ const Avatar: React.FC<AvatarProps> = ({
             dominantBaseline="middle"
             alignmentBaseline="middle"
           >
-            {name ? initials(name) : null}
+            {avatarText ? initials(avatarText) : null}
           </text>
         </svg>
       )}
