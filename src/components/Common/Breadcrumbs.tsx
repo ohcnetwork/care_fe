@@ -1,8 +1,3 @@
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
 import { Link, usePath } from "raviger";
 import { useState } from "react";
 
@@ -14,7 +9,12 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
@@ -39,7 +39,12 @@ const capitalize = (string: string) =>
 
 interface BreadcrumbsProps {
   replacements?: {
-    [key: string]: { name?: string; uri?: string; style?: string };
+    [key: string]: {
+      name?: string;
+      uri?: string;
+      style?: string;
+      hide?: boolean;
+    };
   };
   className?: string;
   hideBack?: boolean;
@@ -61,6 +66,7 @@ export default function Breadcrumbs({
   const crumbs = path
     ?.slice(1)
     .split("/")
+    .filter((field) => replacements[field]?.hide !== true)
     .map((field, i) => ({
       name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
       uri:
