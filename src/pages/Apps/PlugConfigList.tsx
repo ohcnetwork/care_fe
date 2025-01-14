@@ -21,7 +21,7 @@ import { PlugConfig } from "@/types/plugConfig";
 
 export function PlugConfigList() {
   const { data, isLoading } = useQuery({
-    queryKey: [routes.plugConfig.listPlugConfigs.path],
+    queryKey: ["list-configs"],
     queryFn: query(routes.plugConfig.listPlugConfigs),
   });
 

@@ -60,7 +60,7 @@ export const useFeatureFlags = (facility?: FacilityModel | string) => {
   const facilityId = typeof facility === "string" ? facility : facility?.id;
 
   const { data: facilityObject } = useQuery({
-    queryKey: [routes.getPermittedFacility.path, facilityId],
+    queryKey: ["facility", facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: { id: facilityId || "" },
     }),

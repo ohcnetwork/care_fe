@@ -34,7 +34,7 @@ export function PlugConfigEdit({ slug }: Props) {
   const isNew = slug === "new";
 
   const { data: existingConfig, isLoading } = useQuery({
-    queryKey: [routes.plugConfig.getPlugConfig.path, slug],
+    queryKey: ["plug-config", slug],
     queryFn: query(routes.plugConfig.getPlugConfig, { pathParams: { slug } }),
     enabled: !isNew,
   });
@@ -53,7 +53,7 @@ export function PlugConfigEdit({ slug }: Props) {
     }
   }, [existingConfig]);
 
-  const createOrUpdateConfig = useMutation({
+  const { mutate: upsertConfig } = useMutation({
     mutationFn: isNew
       ? mutate(routes.plugConfig.createPlugConfig)
       : mutate(routes.plugConfig.updatePlugConfig, { pathParams: { slug } }),
@@ -61,7 +61,7 @@ export function PlugConfigEdit({ slug }: Props) {
     onError: (error) => console.error("Error saving config:", error),
   });
 
-  const deleteConfig = useMutation({
+  const { mutate: deleteConfig } = useMutation({
     mutationFn: mutate(routes.plugConfig.deletePlugConfig, {
       pathParams: { slug },
     }),
@@ -73,11 +73,11 @@ export function PlugConfigEdit({ slug }: Props) {
     e.preventDefault();
     const meta = JSON.parse(config.meta);
     const configPayload = { ...config, meta };
-    createOrUpdateConfig.mutate(configPayload);
+    upsertConfig(configPayload);
   };
 
   const handleDelete = () => {
-    deleteConfig.mutate(undefined);
+    deleteConfig();
   };
 
   if (isLoading) {
