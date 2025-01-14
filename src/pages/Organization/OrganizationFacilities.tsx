@@ -147,7 +147,7 @@ export default function OrganizationFacilities({
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <div className="flex items-center pl-6">
+                  <div className="flex items-center pl-7">
                     <EditFacilitySheet
                       organizationId={id}
                       facilityId={facility.id}
@@ -156,12 +156,9 @@ export default function OrganizationFacilities({
                           variant="link"
                           size="icon"
                           className="text-primary"
-                          asChild
                         >
-                          <span className="cursor-pointer">
-                            <CareIcon icon="l-edit" className="h-4 w-4" />
-                            {t("edit_facility")}
-                          </span>
+                          <CareIcon icon="l-edit" className="h-4 w-4" />
+                          <span className="">{t("edit_facility")}</span>
                         </Button>
                       }
                     />
