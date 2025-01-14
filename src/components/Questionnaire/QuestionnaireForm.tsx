@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -63,6 +64,7 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
@@ -93,6 +95,10 @@ export function QuestionnaireForm({
       toast.error(t("questionnaire_submission_failed"));
     },
   });
+
+  // TODO: Use useBlocker hook after switching to tanstack router
+  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  useNavigationPrompt(isDirty, t("unsaved_changes"));
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -186,6 +192,7 @@ export function QuestionnaireForm({
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
   const handleSubmit = async () => {
+    setIsDirty(false);
     if (hasErrors) return;
 
     const requests: BatchRequest[] = [];
@@ -348,6 +355,9 @@ export function QuestionnaireForm({
                       : formItem,
                   ),
                 );
+                if (!isDirty) {
+                  setIsDirty(true);
+                }
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}
@@ -373,7 +383,10 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div className="flex gap-4 items-center m-4 max-w-4xl">
+        <div
+          key={`${questionnaireForms.length}`}
+          className="flex gap-4 items-center m-4 max-w-4xl"
+        >
           <QuestionnaireSearch
             subjectType={subjectType}
             onSelect={(selected) => {

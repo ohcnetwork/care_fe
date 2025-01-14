@@ -197,7 +197,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user type" />
+                    <SelectValue placeholder={t("select_user_type")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -312,7 +312,12 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("phone_number")}</FormLabel>
                 <FormControl>
-                  <Input type="tel" placeholder="+91XXXXXXXXXX" {...field} />
+                  <Input
+                    type="tel"
+                    placeholder="+91XXXXXXXXXX"
+                    maxLength={13}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -329,6 +334,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                   <Input
                     placeholder="+91XXXXXXXXXX"
                     type="tel"
+                    maxLength={13}
                     {...field}
                     disabled={isWhatsApp}
                   />
@@ -386,7 +392,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
