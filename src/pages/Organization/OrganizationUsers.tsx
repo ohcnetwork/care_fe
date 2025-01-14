@@ -13,7 +13,6 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
@@ -110,7 +109,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 </CardContent>
               </Card>
             ) : (
-              users?.results?.map((userRole: OrganizationUserRole) => (
+              users?.results?.map((userRole) => (
                 <Card key={userRole.id} className="h-full">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col h-full gap-4">
