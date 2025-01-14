@@ -116,6 +116,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         setOpen(true);
       }
       if (e.key === "Escape") {
