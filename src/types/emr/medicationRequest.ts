@@ -121,20 +121,14 @@ export interface MedicationRequestDosageInstruction {
    * One of `dose_quantity` or `dose_range` must be present.
    * `type` is optional and defaults to `ordered`.
    *
-   * - If `type` is `ordered`, `dose_quantity` must be present.
-   * - If `type` is `calculated`, `dose_range` must be present. This is used for titrated medications.
+   * - If `type` is `ordered`, the dose specified is as ordered by the prescriber.
+   * - If `type` is `calculated`, the dose specified is calculated by the prescriber or the system.
    */
-  dose_and_rate?:
-    | {
-        type?: "ordered";
-        dose_quantity?: DosageQuantity;
-        dose_range?: undefined;
-      }
-    | {
-        type: "calculated";
-        dose_range?: DoseRange;
-        dose_quantity?: undefined;
-      };
+  dose_and_rate?: {
+    type: "ordered" | "calculated";
+    dose_quantity?: DosageQuantity;
+    dose_range?: DoseRange;
+  };
   max_dose_per_period?: DoseRange;
 }
 

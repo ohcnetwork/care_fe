@@ -434,7 +434,7 @@ const MedicationRequestGridRow: React.FC<{
             onClick={() => {
               handleUpdateDosageInstruction({
                 dose_and_rate: {
-                  type: "calculated",
+                  type: "ordered",
                   dose_range: localDoseRange,
                 },
               });
@@ -455,18 +455,8 @@ const MedicationRequestGridRow: React.FC<{
   };
 
   const formatDoseRange = (range?: DoseRange) => {
-    if (!range?.low?.value) return "";
-
-    const lowPart = range.low.unit
-      ? `${range.low.value} ${range.low.unit}`
-      : `${range.low.value}`;
-    const highPart = range.high?.value
-      ? range.high.unit
-        ? `${range.high.value} ${range.high.unit}`
-        : `${range.high.value}`
-      : "";
-
-    return highPart ? `${lowPart} → ${highPart}` : lowPart;
+    if (!range?.high?.value) return "";
+    return `${range?.low?.value} ${range?.low?.unit} → ${range?.high?.value} ${range?.high?.unit}`;
   };
 
   return (
@@ -525,7 +515,7 @@ const MedicationRequestGridRow: React.FC<{
                         dosageInstruction?.dose_and_rate?.dose_quantity?.value;
                       handleUpdateDosageInstruction({
                         dose_and_rate: {
-                          type: "calculated",
+                          type: "ordered",
                           dose_quantity: undefined,
                           dose_range: {
                             low: {
