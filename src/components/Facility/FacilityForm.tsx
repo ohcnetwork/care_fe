@@ -201,9 +201,6 @@ export default function FacilityForm(props: FacilityProps) {
     return () => setShowAutoFilledPincode(false);
   }, [stateOrg, districtOrg, facilityId]);
 
-  console.log(stateOrg, districtOrg);
-  console.log("selectedLevels", selectedLevels);
-
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {

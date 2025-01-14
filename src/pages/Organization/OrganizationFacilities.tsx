@@ -158,7 +158,7 @@ export default function OrganizationFacilities({
                           className="text-primary"
                           asChild
                         >
-                          <span>
+                          <span className="cursor-pointer">
                             <CareIcon icon="l-edit" className="h-4 w-4" />
                             {t("edit_facility")}
                           </span>
