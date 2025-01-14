@@ -241,11 +241,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("edit_cover_photo")}
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
+                        <DropdownMenuItem>
                           <Settings className="mr-2 h-4 w-4" />
                           <EditFacilitySheet facilityId={facilityId} />
                         </DropdownMenuItem>
