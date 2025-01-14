@@ -28,10 +28,8 @@ export interface FacilityData {
   read_cover_image_url?: string;
   features: number[];
   geo_organization: Organization;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
+  latitude: number;
+  longitude: number;
   facility_flags?: FeatureFlag[];
   pincode: string;
   is_public: boolean;

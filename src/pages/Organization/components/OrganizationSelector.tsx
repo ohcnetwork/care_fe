@@ -9,11 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import query from "@/Utils/request/query";
-import { Organization } from "@/types/organization/organization";
+import {
+  Organization,
+  OrganizationParent,
+} from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationSelectorProps {
-  value?: string;
+  value?: Organization | string;
   onChange: (value: string) => void;
   required?: boolean;
   authToken?: string;
@@ -34,12 +37,13 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
   useEffect(() => {
     if (value && parentSelectedLevels?.length == 0) {
       const parsedValue = typeof value === "string" ? JSON.parse(value) : value;
-      if (parsedValue) {
+
+      if (typeof parsedValue === "object") {
         const levels: Organization[] = [];
-        let current = parsedValue;
+        let current: OrganizationParent = parsedValue;
 
         while (current.parent) {
-          levels.unshift(current);
+          levels.unshift(current as Organization);
           current = current.parent;
         }
 
@@ -169,7 +173,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
             )}
           </Label>
           <Autocomplete
-            value={selectedLevels[selectedLevels.length - 1]?.id || ""}
+            value={""}
             options={getOrganizationOptions(
               selectedLevels.length === 0
                 ? getAllOrganizations?.results

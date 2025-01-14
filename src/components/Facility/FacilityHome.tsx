@@ -235,6 +235,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <DropdownMenuContent align="end" className="w-56">
                         {hasPermissionToEditCoverImage && (
                           <DropdownMenuItem
+                            className="cursor-pointer"
                             onClick={() => setEditCoverImage(true)}
                           >
                             <Settings className="mr-2 h-4 w-4" />
@@ -242,8 +243,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          className=" cursor-pointer"
+                          onSelect={(e) => {
+                            e.preventDefault();
                           }}
                         >
                           <Settings className="mr-2 h-4 w-4" />
@@ -261,7 +263,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         )} */}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <EditFacilitySheet facilityId={facilityId} />
                   </div>
                 </div>
               </div>

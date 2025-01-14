@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -55,7 +56,7 @@ const facilityFormSchema = z.object({
   description: z.string().optional(),
   features: z.array(z.number()).default([]),
   pincode: z.string().refine(validatePincode, "Invalid pincode"),
-  geo_organization: z.string().min(1, { message: "required" }),
+  geo_organization: z.string().min(1, t("organization_required")).optional(),
   address: z.string().min(1, "Address is required"),
   phone_number: z
     .string()
@@ -143,6 +144,9 @@ export default function FacilityForm(props: FacilityProps) {
     const requestData = {
       ...data,
       phone_number: parsePhoneNumber(data.phone_number),
+      geo_organization: data?.geo_organization
+        ? JSON.parse(data.geo_organization)?.id
+        : undefined,
     };
 
     if (facilityId) {
@@ -169,8 +173,8 @@ export default function FacilityForm(props: FacilityProps) {
         geo_organization: JSON.stringify(facilityData?.geo_organization) || "",
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.location?.latitude?.toString() || "",
-        longitude: facilityData.location?.longitude?.toString() || "",
+        latitude: facilityData.latitude?.toString() || "",
+        longitude: facilityData.longitude?.toString() || "",
         is_public: facilityData.is_public,
       });
     }
@@ -370,16 +374,23 @@ export default function FacilityForm(props: FacilityProps) {
                 </FormItem>
               )}
             />
-            <div className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
-              <OrganizationSelector
-                required={true}
-                value={form.watch("geo_organization")}
-                parentSelectedLevels={selectedLevels}
-                onChange={(value) => {
-                  form.setValue("geo_organization", value);
-                }}
-              />
-            </div>
+
+            <FormField
+              name="geo_organization"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
+                  <FormControl>
+                    <OrganizationSelector
+                      value={field.value}
+                      parentSelectedLevels={selectedLevels}
+                      onChange={field.onChange}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField
