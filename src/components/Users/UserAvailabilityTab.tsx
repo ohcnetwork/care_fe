@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useQueryParams } from "raviger";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,44 +16,42 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import Loading from "@/components/Common/Loading";
-import ScheduleExceptionForm from "@/components/Schedule/ScheduleExceptionForm";
-import ScheduleExceptionsList from "@/components/Schedule/ScheduleExceptionsList";
-import ScheduleTemplateForm from "@/components/Schedule/ScheduleTemplateForm";
-import ScheduleTemplatesList from "@/components/Schedule/ScheduleTemplatesList";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import {
-  filterAvailabilitiesByDayOfWeek,
-  getSlotsPerSession,
-  isDateInRange,
-} from "@/components/Schedule/helpers";
-import { ScheduleAvailability } from "@/components/Schedule/types";
 
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { formatTimeShort } from "@/Utils/utils";
+import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
+import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
+import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
+import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import {
+  filterAvailabilitiesByDayOfWeek,
+  getSlotsPerSession,
+  isDateInRange,
+} from "@/pages/Scheduling/utils";
+import { AvailabilityDateTime } from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApis";
 import { UserBase } from "@/types/user/user";
 
 type Props = {
   userData: UserBase;
 };
 
+type AvailabilityTabQueryParams = {
+  view?: "schedule" | "exceptions";
+};
+
 export default function UserAvailabilityTab({ userData: user }: Props) {
-  const [view, setView] = useState<"schedule" | "exceptions">("schedule");
+  const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
+  const view = qParams.view || "schedule";
   const [month, setMonth] = useState(new Date());
 
   const facilityId = useSlug("facility");
 
-  // TODO: remove this once we have a way to get the facilityId
-  useEffect(() => {
-    if (!facilityId) {
-      toast.error("User needs to be linked to a home facility");
-    }
-  }, [facilityId]);
-
   const templatesQuery = useQuery({
-    queryKey: ["user-availability-templates", user.username],
-    queryFn: query(ScheduleAPIs.templates.list, {
+    queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
+    queryFn: query(scheduleApis.templates.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
@@ -61,8 +59,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   });
 
   const exceptionsQuery = useQuery({
-    queryKey: ["user-availability-exceptions", user.username],
-    queryFn: query(ScheduleAPIs.exceptions.list, {
+    queryKey: ["user-schedule-exceptions", { facilityId, userId: user.id }],
+    queryFn: query(scheduleApis.exceptions.list, {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
@@ -73,9 +71,9 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 py-4 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-8 py-4 lg:grid-cols-2">
       <Calendar
-        className="md:order-last"
+        className="lg:order-last"
         month={month}
         onMonthChange={setMonth}
         renderDay={(date: Date) => {
@@ -146,12 +144,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                   <div />
                 </div>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-[24rem] p-6"
-                align="center"
-                side="bottom"
-                sideOffset={5}
-              >
+              <PopoverContent className=" p-6" align="center" sideOffset={5}>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
                     {date.toLocaleDateString("default", {
@@ -197,16 +190,18 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                                   {formatAvailabilityTime(availability)}
                                 </span>
                               </p>
-                              <p className="text-sm text-gray-600">
-                                {Math.floor(
-                                  getSlotsPerSession(
-                                    availability[0].start_time,
-                                    availability[0].end_time,
-                                    slot_size_in_minutes,
-                                  ) ?? 0,
-                                )}{" "}
-                                slots of {slot_size_in_minutes} mins.
-                              </p>
+                              {slot_type === "appointment" && (
+                                <p className="text-sm text-gray-600">
+                                  {Math.floor(
+                                    getSlotsPerSession(
+                                      availability[0].start_time,
+                                      availability[0].end_time,
+                                      slot_size_in_minutes,
+                                    ) ?? 0,
+                                  )}{" "}
+                                  slots of {slot_size_in_minutes} mins.
+                                </p>
+                              )}
                             </div>
                           ),
                         )}
@@ -225,14 +220,14 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() => setView("schedule")}
+              onClick={() => setQParams({ view: "schedule" })}
               className={cn(view === "schedule" && "shadow", "hover:bg-white")}
             >
               Schedule
             </Button>
             <Button
               variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setView("exceptions")}
+              onClick={() => setQParams({ view: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow",
                 "hover:bg-white",
@@ -242,15 +237,15 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             </Button>
           </div>
           {view === "schedule" && (
-            <ScheduleTemplateForm
-              onRefresh={templatesQuery.refetch}
-              user={user}
+            <CreateScheduleTemplateSheet
+              facilityId={facilityId}
+              userId={user.id}
             />
           )}
           {view === "exceptions" && (
-            <ScheduleExceptionForm
-              onRefresh={exceptionsQuery.refetch}
-              user={user}
+            <CreateScheduleExceptionSheet
+              facilityId={facilityId}
+              userId={user.id}
             />
           )}
         </div>
@@ -258,7 +253,9 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         <div>
           <ScrollArea className="h-[calc(100vh-24rem)] -mr-3 pr-3 pb-4">
             {view === "schedule" && (
-              <ScheduleTemplatesList
+              <ScheduleTemplates
+                facilityId={facilityId}
+                userId={user.id}
                 items={
                   templatesQuery.isLoading
                     ? undefined
@@ -268,12 +265,14 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             )}
 
             {view === "exceptions" && (
-              <ScheduleExceptionsList
+              <ScheduleExceptions
                 items={
                   exceptionsQuery.isLoading
                     ? undefined
                     : exceptionsQuery.data?.results
                 }
+                facilityId={facilityId}
+                userId={user.id}
               />
             )}
 
@@ -297,7 +296,7 @@ const diagonalStripes = {
 
 // TODO: remove this in favour of supporting flexible day of week availability
 export const formatAvailabilityTime = (
-  availability: ScheduleAvailability["availability"],
+  availability: AvailabilityDateTime[],
 ) => {
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;

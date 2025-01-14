@@ -1,6 +1,7 @@
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -12,8 +13,6 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import * as Notification from "@/Utils/Notifications";
-import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
@@ -52,21 +51,17 @@ export default function UserHome(props: UserHomeProps) {
         } else if (res?.status === 400) {
           navigate("/users");
         } else if (error) {
-          Notification.Error({
-            msg: "Error while fetching user details: " + (error?.message || ""),
-          });
+          toast.error(
+            t("error_fetching_user_details") + (error?.message || ""),
+          );
         }
       },
     },
   );
 
-  console.log(userData);
-
   if (loading || !userData) {
     return <Loading />;
   }
-
-  const editPermissions = editUserPermissions(authUser, userData);
 
   const TABS = {
     PROFILE: {
@@ -75,7 +70,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !editPermissions || !props.facilityId,
+      hidden: !props.facilityId,
     },
   } satisfies Record<string, TabChildProp>;
 
@@ -89,18 +84,28 @@ export default function UserHome(props: UserHomeProps) {
   }
 
   const SelectedTab = TABS[currentTab].body;
+  const userUrl = props.facilityId
+    ? `/facility/${props.facilityId}/users/${username}`
+    : `/users/${username}`;
+
+  const usernameCrumb = {
+    [username]: { name: loggedInUser ? "Profile" : username },
+  };
+
+  const hideUsersCrumb = { users: { hide: true } };
+
+  const crumbsReplacements = {
+    ...usernameCrumb,
+    ...(!props.facilityId && hideUsersCrumb),
+  };
 
   return (
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={
-          loggedInUser
-            ? { [username]: { name: "Profile" } }
-            : { [username]: { name: username } }
-        }
+        crumbsReplacements={crumbsReplacements}
         focusOnLoad={true}
-        backUrl="/users"
+        backUrl={props.facilityId ? `/users` : "/"}
         hideTitleOnPage
       >
         {
@@ -125,7 +130,7 @@ export default function UserHome(props: UserHomeProps) {
                                 ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
                                 : "text-secondary-700 hover:text-secondary-700",
                             )}
-                            href={`/facility/${props.facilityId}/users/${username}/${p.toLocaleLowerCase()}`}
+                            href={`${userUrl}/${p.toLocaleLowerCase()}`}
                           >
                             <div className="px-3 py-1.5" id={p.toLowerCase()}>
                               {t(`USERMANAGEMENT_TAB__${p}`)}

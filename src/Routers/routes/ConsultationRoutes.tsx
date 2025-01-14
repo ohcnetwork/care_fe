@@ -1,7 +1,6 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
-import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -33,35 +32,6 @@ const consultationRoutes: AppRoutes = {
       questionnaireSlug="encounter"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/edit_encounter":
-    ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        questionnaireSlug="encounter"
-        patientId={patientId}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
-    ({ facilityId, patientId, id }) => (
-      <PatientConsentRecords
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
-    facilityId,
-    patientId,
-    id,
-  }) => (
-    <FileUploadPage
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={id}
-      type="encounter"
-    />
-  ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
     facilityId,
     patientId,
@@ -80,10 +50,6 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
-    ({ patientId, id }) => (
-      <QuestionnaireResponseView responseId={id} patientId={patientId} />
-    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (
       <EncounterQuestionnaire
@@ -93,6 +59,22 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
+    ({ patientId, id }) => (
+      <QuestionnaireResponseView responseId={id} patientId={patientId} />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
+    facilityId,
+    patientId,
+    id,
+  }) => (
+    <FileUploadPage
+      facilityId={facilityId}
+      patientId={patientId}
+      encounterId={id}
+      type="encounter"
+    />
+  ),
 };
 
 export default consultationRoutes;

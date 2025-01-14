@@ -3,7 +3,6 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +18,6 @@ import useFileUpload from "@/hooks/useFileUpload";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
@@ -261,91 +259,81 @@ export const FileUpload = (props: FileUploadProps) => {
       {fileManager.Dialogues}
       {dischargeSummaryFileManager.Dialogues}
       {!hideUpload && (
-        <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
-          {({ isAuthorized }) =>
-            isAuthorized ? (
-              <>
-                <h4 className="mb-6 text-2xl">{UPLOAD_HEADING[type]}</h4>
-                {fileUpload.files[0] ? (
-                  <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
-                    <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                      <span>
-                        <CareIcon icon="l-paperclip" className="mr-2" />
-                        {fileUpload.files[0].name}
-                      </span>
-                      <button
-                        onClick={fileUpload.clearFiles}
-                        disabled={fileUpload.uploading}
-                        className="text-lg"
-                      >
-                        <CareIcon icon="l-times" />
-                      </button>
-                    </div>
-                    <TextFormField
-                      name="consultation_file"
-                      type="text"
-                      label={t("enter_file_name")}
-                      id="upload-file-name"
-                      required
-                      value={fileUpload.fileNames[0] || ""}
-                      disabled={fileUpload.uploading}
-                      onChange={(e) => fileUpload.setFileName(e.value)}
-                      error={fileUpload.error || undefined}
-                    />
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline_primary"
-                        onClick={() =>
-                          fileUpload.handleFileUpload(associatedId)
-                        }
-                        disabled={fileUpload.uploading} // Disable the button when loading
-                        className={`w-full ${fileUpload.uploading ? "opacity-50" : ""}`}
-                        id="upload_file_button"
-                      >
-                        {fileUpload.uploading ? (
-                          <Loader2 className="animate-spin mr-2" size={16} />
-                        ) : (
-                          <CareIcon icon="l-check" className="" />
-                        )}
-                        {t("upload")}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={fileUpload.clearFiles}
-                        disabled={fileUpload.uploading}
-                      >
-                        <CareIcon icon="l-trash-alt" className="" />
-                        {t("discard")}
-                      </Button>
-                    </div>
-                    {!!fileUpload.progress && (
-                      <LinearProgressWithLabel value={fileUpload.progress} />
-                    )}
-                  </div>
-                ) : (
-                  <div className="mb-8 flex flex-col items-center gap-4 md:flex-row">
-                    {uploadButtons
-                      .filter((b) => b.show !== false)
-                      .map((button, i) => (
-                        <label
-                          key={i}
-                          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
-                          onClick={button.onClick}
-                          id={button.id}
-                        >
-                          <CareIcon icon={button.icon} className="text-2xl" />
-                          <div className="text-lg">{button.name}</div>
-                          {button.children}
-                        </label>
-                      ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <></>
-            )
-          }
-        </AuthorizedChild>
+        <>
+          <h4 className="mb-6 text-2xl">{UPLOAD_HEADING[type]}</h4>
+          {fileUpload.files[0] ? (
+            <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
+              <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                <span>
+                  <CareIcon icon="l-paperclip" className="mr-2" />
+                  {fileUpload.files[0].name}
+                </span>
+                <button
+                  onClick={fileUpload.clearFiles}
+                  disabled={fileUpload.uploading}
+                  className="text-lg"
+                >
+                  <CareIcon icon="l-times" />
+                </button>
+              </div>
+              <TextFormField
+                name="consultation_file"
+                type="text"
+                label={t("enter_file_name")}
+                id="upload-file-name"
+                required
+                value={fileUpload.fileNames[0] || ""}
+                disabled={fileUpload.uploading}
+                onChange={(e) => fileUpload.setFileName(e.value)}
+                error={fileUpload.error || undefined}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline_primary"
+                  onClick={() => fileUpload.handleFileUpload(associatedId)}
+                  disabled={fileUpload.uploading} // Disable the button when loading
+                  className={`w-full ${fileUpload.uploading ? "opacity-50" : ""}`}
+                  id="upload_file_button"
+                >
+                  {fileUpload.uploading ? (
+                    <Loader2 className="animate-spin mr-2" size={16} />
+                  ) : (
+                    <CareIcon icon="l-check" className="" />
+                  )}
+                  {t("upload")}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={fileUpload.clearFiles}
+                  disabled={fileUpload.uploading}
+                >
+                  <CareIcon icon="l-trash-alt" className="" />
+                  {t("discard")}
+                </Button>
+              </div>
+              {!!fileUpload.progress && (
+                <LinearProgressWithLabel value={fileUpload.progress} />
+              )}
+            </div>
+          ) : (
+            <div className="mb-8 flex flex-col items-center gap-4 md:flex-row">
+              {uploadButtons
+                .filter((b) => b.show !== false)
+                .map((button, i) => (
+                  <label
+                    key={i}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
+                    onClick={button.onClick}
+                    id={button.id}
+                  >
+                    <CareIcon icon={button.icon} className="text-2xl" />
+                    <div className="text-lg">{button.name}</div>
+                    {button.children}
+                  </label>
+                ))}
+            </div>
+          )}
+        </>
       )}
       <div className="mb-4 flex flex-col items-center justify-between gap-4 md:flex-row">
         <h3>{VIEW_HEADING[type]}</h3>
@@ -369,11 +357,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 : dischargeSummaryFileManager
             }
             associating_id={associatedId}
-            editable={
-              item?.uploaded_by?.username === authUser.username ||
-              authUser.user_type === "DistrictAdmin" ||
-              authUser.user_type === "StateAdmin"
-            }
+            editable={item?.uploaded_by?.username === authUser.username}
             archivable={tab !== "DISCHARGE_SUMMARY"}
           />
         ))}

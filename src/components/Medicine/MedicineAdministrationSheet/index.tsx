@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { Link } from "raviger";
 import { useState } from "react";
 
@@ -324,6 +325,14 @@ const PrescriptionEntry = ({
           </span>
         )}
       </div>
+      {instruction.timing?.repeat?.bounds_duration && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          <span className="text-muted-foreground">{t("duration")}:</span>{" "}
+          {instruction.timing.repeat.bounds_duration.value}{" "}
+          {instruction.timing.repeat.bounds_duration.unit &&
+            t(`${instruction.timing.repeat.bounds_duration.unit}`)}
+        </div>
+      )}
 
       {/* Additional Instructions */}
       {additionalInstructions && additionalInstructions.length > 0 && (

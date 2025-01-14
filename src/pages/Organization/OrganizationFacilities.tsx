@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,12 +28,14 @@ export default function OrganizationFacilities({
   id,
   navOrganizationId,
 }: Props) {
+  const { t } = useTranslation();
+
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 14, cacheBlacklist: ["facility"] });
 
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
-    queryFn: query(routes.facility.list, {
+    queryFn: query.debounced(routes.facility.list, {
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
@@ -53,7 +56,7 @@ export default function OrganizationFacilities({
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Facilities</h2>
+          <h2 className="text-lg font-semibold">{t("facilities")}</h2>
           <AddFacilitySheet organizationId={id} />
         </div>
 
@@ -69,10 +72,14 @@ export default function OrganizationFacilities({
               })
             }
             className="max-w-sm"
+            data-cy="search-facility"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="facility-cards"
+        >
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
@@ -102,7 +109,7 @@ export default function OrganizationFacilities({
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No facilities found.
+                {t("no_facilities_found")}
               </CardContent>
             </Card>
           ) : (
