@@ -6,19 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { FacilityModel } from "@/components/Facility/models";
+
+import { FacilityData } from "@/types/facility/facility";
 
 import { FeatureBadge } from "../Utils";
 
 interface Props {
-  facility: FacilityModel;
+  facility: FacilityData;
   className?: string;
 }
 
 export function FacilityCard({ facility, className }: Props) {
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="h-32 w-32 shrink-0 overflow-hidden rounded-lg">

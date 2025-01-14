@@ -4,8 +4,8 @@ import { useCallback } from "react";
 import { FacilityModel } from "@/components/Facility/models";
 import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
 
-import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import facilityApi from "@/types/facility/facilityApi";
 
 interface BaseFacilitySelectProps {
   name: string;
@@ -57,8 +57,6 @@ export const FacilitySelect = ({
   showNOptions,
   className = "",
   facilityType,
-  district,
-  state,
   allowNone = false,
   freeText = false,
   errors = "",
@@ -75,19 +73,9 @@ export const FacilitySelect = ({
         all: searchAll,
         facility_type: facilityType,
         exclude_user: exclude_user,
-        district,
-        state,
       };
 
-      const { data } = await request(
-        showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
-        { query },
-      );
-
-      if (freeText)
-        data?.results?.push({
-          name: text,
-        });
+      const { data } = await request(facilityApi.getAllFacilities, { query });
 
       if (allowNone)
         return [
@@ -97,7 +85,7 @@ export const FacilitySelect = ({
 
       return data?.results;
     },
-    [searchAll, showAll, facilityType, district, exclude_user, freeText],
+    [searchAll, showAll, facilityType, exclude_user, freeText],
   );
 
   return (

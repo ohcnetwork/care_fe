@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -124,14 +125,14 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   // Case 2: Pre-defined ranges
   const ranges = [
     {
-      label: t("last_fortnight_short"),
-      from: subDays(today, 14),
-      to: today,
-    },
-    {
       label: t("last_week_short"),
       from: subDays(today, 7),
       to: today,
+    },
+    {
+      label: t("yesterday"),
+      from: subDays(today, 1),
+      to: subDays(today, 1),
     },
     {
       label: t("next_week_short"),
@@ -139,9 +140,9 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       to: addDays(today, 7),
     },
     {
-      label: t("next_fortnight_short"),
+      label: t("next_month"),
       from: today,
-      to: addDays(today, 14),
+      to: addDays(today, 30),
     },
   ];
 
@@ -266,11 +267,22 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       updates.practitioner = authUser.username;
     }
 
-    // Set today's date range if no dates are present
+    // Set default date range if no dates are present
     if (!qParams.date_from && !qParams.date_to) {
       const today = new Date();
-      updates.date_from = dateQueryString(today);
-      updates.date_to = dateQueryString(today);
+      const defaultDays = careConfig.appointments.defaultDateFilter;
+
+      if (defaultDays === 0) {
+        // Today only
+        updates.date_from = dateQueryString(today);
+        updates.date_to = dateQueryString(today);
+      } else {
+        // Past or future days based on configuration
+        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
+        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+        updates.date_from = dateQueryString(fromDate);
+        updates.date_to = dateQueryString(toDate);
+      }
     }
 
     // Only update if there are changes
@@ -455,13 +467,13 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           const today = new Date();
                           setQParams({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 14)),
+                            date_from: dateQueryString(subDays(today, 7)),
                             date_to: dateQueryString(today),
                             slot: null,
                           });
                         }}
                       >
-                        {t("last_fortnight_short")}
+                        {t("last_week_short")}
                       </Button>
 
                       <Button
@@ -471,13 +483,13 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           const today = new Date();
                           setQParams({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 7)),
-                            date_to: dateQueryString(today),
+                            date_from: dateQueryString(subDays(today, 1)),
+                            date_to: dateQueryString(subDays(today, 1)),
                             slot: null,
                           });
                         }}
                       >
-                        {t("last_week_short")}
+                        {t("yesterday")}
                       </Button>
 
                       <Button
@@ -520,12 +532,12 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           setQParams({
                             ...qParams,
                             date_from: dateQueryString(today),
-                            date_to: dateQueryString(addDays(today, 14)),
+                            date_to: dateQueryString(addDays(today, 30)),
                             slot: null,
                           });
                         }}
                       >
-                        {t("next_fortnight_short")}
+                        {t("next_month")}
                       </Button>
                     </div>
 
