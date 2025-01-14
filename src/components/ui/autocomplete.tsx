@@ -31,6 +31,9 @@ interface AutocompleteProps {
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
+  align?: "start" | "center" | "end";
+  popoverClassName?: string;
+  "data-cy"?: string;
 }
 
 export default function Autocomplete({
@@ -41,12 +44,15 @@ export default function Autocomplete({
   placeholder = "Select...",
   noOptionsMessage = "No options found",
   disabled,
+  align = "center",
+  popoverClassName,
+  "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild className={popoverClassName}>
         <Button
           title={
             value
@@ -58,6 +64,7 @@ export default function Autocomplete({
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled}
+          data-cy={dataCy}
         >
           <span className="overflow-hidden">
             {value
@@ -67,7 +74,10 @@ export default function Autocomplete({
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 pointer-events-auto">
+      <PopoverContent
+        className="sm:w-full p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+        align={align}
+      >
         <Command>
           <CommandInput
             placeholder="Search option..."

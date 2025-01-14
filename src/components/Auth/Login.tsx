@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -515,10 +516,9 @@ const Login = (props: LoginProps) => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="password">Password</Label>
-                          <Input
+                          <PasswordInput
                             id="password"
                             name="password"
-                            type="password"
                             data-cy="password"
                             value={form.password}
                             onChange={handleChange}

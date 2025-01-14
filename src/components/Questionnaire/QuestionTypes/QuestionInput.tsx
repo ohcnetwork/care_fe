@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -78,6 +80,7 @@ export function QuestionInput({
   const renderSingleInput = (index: number = 0) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
+      disableRightBorder: true,
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
@@ -164,26 +167,61 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2 flex items-end">
-              <div className="flex-1 space-y-1" data-question-id={question.id}>
+            <div
+              key={index}
+              className={cn("mt-2", removeButton && "gap-2 flex items-end")}
+            >
+              <div
+                className={cn("space-y-1", { "flex-1": removeButton })}
+                data-question-id={question.id}
+              >
                 {index === 0 && <QuestionLabel question={question} />}
-                {renderSingleInput(index)}
+                <div
+                  className={cn("flex w-full", {
+                    "flex-col": question.repeats || question.type === "text",
+                  })}
+                >
+                  <div className="flex-1">{renderSingleInput(index)}</div>
+                  {/* Notes are not available for structured questions */}
+                  {!question.structured_type && !question.repeats && (
+                    <NotesInput
+                      className={cn({
+                        "bg-white border rounded-l-none -ml-2": !(
+                          question.type === "text"
+                        ),
+                        "mt-2": question.type === "text",
+                      })}
+                      questionnaireResponse={questionnaireResponse}
+                      updateQuestionnaireResponseCB={
+                        updateQuestionnaireResponseCB
+                      }
+                      disabled={disabled}
+                    />
+                  )}
+                </div>
               </div>
               {removeButton}
             </div>
           );
         })}
         {question.repeats && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddValue}
-            className="mt-2"
-            disabled={disabled}
-          >
-            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-            Add Another
-          </Button>
+          <div className="mt-2 flex items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddValue}
+              className=""
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+              Add Another
+            </Button>
+            <NotesInput
+              questionnaireResponse={questionnaireResponse}
+              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              disabled={disabled}
+            />
+          </div>
         )}
       </div>
     );
@@ -195,14 +233,6 @@ export function QuestionInput({
     <div className="space-y-2">
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
-      {/* Notes are not available for structured questions */}
-      {!question.structured_type && (
-        <NotesInput
-          questionnaireResponse={questionnaireResponse}
-          updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-          disabled={disabled}
-        />
-      )}
     </div>
   );
 }

@@ -144,12 +144,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                   <div />
                 </div>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-[24rem] p-6"
-                align="center"
-                side="left"
-                sideOffset={5}
-              >
+              <PopoverContent className=" p-6" align="center" sideOffset={5}>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
                     {date.toLocaleDateString("default", {
