@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
@@ -32,6 +31,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
 
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
+
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import {
   validateLatitude,
@@ -42,11 +43,10 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { getPincodeDetails, parsePhoneNumber } from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
-import { useFetchOrganizationByName } from "@/types/organization/organizationApi";
 
 import { FacilityModel } from "./models";
 
@@ -89,7 +89,7 @@ export default function FacilityForm(props: FacilityProps) {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { facilityId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [pincode, setPincode] = useState("");
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilityFormSchema),
@@ -158,25 +158,6 @@ export default function FacilityForm(props: FacilityProps) {
     form.setValue("features", features);
   };
 
-  // Update form when facility data is loaded
-  useEffect(() => {
-    if (facilityData) {
-      form.reset({
-        facility_type: facilityData.facility_type,
-        name: facilityData.name,
-        description: facilityData.description || "",
-        features: facilityData.features || [],
-        pincode: facilityData.pincode?.toString() || "",
-        geo_organization: facilityData?.geo_organization?.id || "",
-        address: facilityData.address,
-        phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude?.toString() || "",
-        longitude: facilityData.longitude?.toString() || "",
-        is_public: facilityData.is_public,
-      });
-    }
-  }, [facilityData, form]);
-
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       setIsGettingLocation(true);
@@ -198,34 +179,54 @@ export default function FacilityForm(props: FacilityProps) {
     }
   };
 
-  const { data: pincodeData } = useQuery({
-    queryKey: ["pincodeDetails", pincode],
-    queryFn: () => getPincodeDetails(pincode, careConfig.govDataApiKey),
-    enabled:
-      validatePincode(pincode) &&
-      Number(pincode) !== Number(facilityData?.pincode),
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
   });
-  const { statename: stateName, districtname: districtName } =
-    pincodeData || {};
-
-  const { data: stateOrg } = useFetchOrganizationByName(stateName);
-  const { data: districtOrg } = useFetchOrganizationByName(
-    districtName,
-    stateOrg?.id,
-  );
 
   useEffect(() => {
-    if (stateOrg && districtOrg) {
-      setSelectedLevels([stateOrg, districtOrg]);
-    } else {
-      setSelectedLevels([]);
-    }
-  }, [stateOrg, districtOrg]);
+    // Fill by pincode for patient registration
+    if (facilityId) return;
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+    setSelectedLevels(levels);
 
-  const handlePincodeChange = (value: string) => {
-    setPincode(value);
-    setSelectedLevels([]);
-  };
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg, facilityId]);
+
+  console.log(stateOrg, districtOrg);
+  console.log("selectedLevels", selectedLevels);
+
+  // Update form when facility data is loaded
+  useEffect(() => {
+    if (facilityData) {
+      setSelectedLevels([
+        facilityData.geo_organization as unknown as Organization,
+      ]);
+      form.reset({
+        facility_type: facilityData.facility_type,
+        name: facilityData.name,
+        description: facilityData.description || "",
+        features: facilityData.features || [],
+        pincode: facilityData.pincode?.toString() || "",
+        geo_organization: (
+          facilityData.geo_organization as unknown as Organization
+        )?.id,
+        address: facilityData.address,
+        phone_number: facilityData.phone_number,
+        latitude: facilityData.latitude?.toString() || "",
+        longitude: facilityData.longitude?.toString() || "",
+        is_public: facilityData.is_public,
+      });
+    }
+  }, [facilityData, form]);
 
   return (
     <Form {...form}>
@@ -364,11 +365,26 @@ export default function FacilityForm(props: FacilityProps) {
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        handlePincodeChange(e.target.value);
                       }}
                     />
                   </FormControl>
                   <FormMessage />
+                  {showAutoFilledPincode && (
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="flex items-center"
+                    >
+                      <CareIcon
+                        icon="l-check-circle"
+                        className="mr-2 text-sm text-green-500"
+                        aria-hidden="true"
+                      />
+                      <span className="text-sm text-primary-500">
+                        {t("pincode_autofill")}
+                      </span>
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
@@ -379,9 +395,12 @@ export default function FacilityForm(props: FacilityProps) {
                 <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
                   <FormControl>
                     <OrganizationSelector
-                      value={facilityData?.geo_organization}
-                      parentSelectedLevels={selectedLevels}
-                      onChange={field.onChange}
+                      {...field}
+                      value={form.watch("geo_organization")}
+                      selected={selectedLevels}
+                      onChange={(value) =>
+                        form.setValue("geo_organization", value)
+                      }
                       required
                     />
                   </FormControl>

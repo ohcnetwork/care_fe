@@ -16,19 +16,16 @@ import FacilityForm from "@/components/Facility/FacilityForm";
 interface Props {
   organizationId?: string;
   facilityId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function EditFacilitySheet({ facilityId }: Props) {
+export default function EditFacilitySheet({ facilityId, trigger }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <p className="text-sm" data-cy="edit-facility-button">
-          {t("edit_facility")}
-        </p>
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("edit_facility")}</SheetTitle>

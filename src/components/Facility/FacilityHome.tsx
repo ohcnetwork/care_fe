@@ -242,15 +242,21 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("edit_cover_photo")}
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem
-                          className=" cursor-pointer"
-                          onSelect={(e) => {
-                            e.preventDefault();
-                          }}
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          <EditFacilitySheet facilityId={facilityId} />
-                        </DropdownMenuItem>
+
+                        <EditFacilitySheet
+                          facilityId={facilityId}
+                          trigger={
+                            <DropdownMenuItem
+                              className=" cursor-pointer"
+                              onSelect={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              {t("update_facility")}
+                            </DropdownMenuItem>
+                          }
+                        />
                         {/* TODO: get permissions from backend */}
                         {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem

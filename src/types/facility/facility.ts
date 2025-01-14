@@ -31,6 +31,6 @@ export interface FacilityData {
   latitude: number;
   longitude: number;
   facility_flags?: FeatureFlag[];
-  pincode: string;
+  pincode: number;
   is_public: boolean;
 }

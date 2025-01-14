@@ -1,13 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-
 import { HttpMethod, Type } from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Patient } from "../emr/newPatient";
 import { Organization, OrganizationUserRole } from "./organization";
 
-const organizationApi = {
+export default {
   listMine: {
     path: "/api/v1/organization/mine/",
     method: HttpMethod.GET,
@@ -61,23 +58,3 @@ const organizationApi = {
     TRes: Type<Organization>(),
   },
 };
-
-export function useFetchOrganizationByName(name: string, parentId?: string) {
-  return useQuery({
-    queryKey: ["organization", name, parentId],
-    queryFn: async () => {
-      const data = await query(organizationApi.list, {
-        queryParams: {
-          org_type: "govt",
-          parent: parentId || "",
-          name: name,
-        },
-      })({ signal: new AbortController().signal });
-
-      return data.results?.[0] || null;
-    },
-    enabled: name != undefined,
-  });
-}
-
-export default organizationApi;
