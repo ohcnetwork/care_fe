@@ -132,7 +132,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
                 <div className="text-sm">
                   <div className="text-gray-500">{t("role")}</div>
                   <div id="role" className="font-medium">
-                    {user.user_type ? user.user_type : "-"}
+                    {user.user_type ?? "-"}
                   </div>
                 </div>
                 <div className="text-sm">
@@ -243,7 +243,7 @@ export const UserList = ({ users }: { users?: UserBase[] }) => {
 };
 interface UserListViewProps {
   users: UserBase[];
-  activeTab: string;
+  activeTab: "card" | "list";
 }
 
 export default function UserListView({ users, activeTab }: UserListViewProps) {
