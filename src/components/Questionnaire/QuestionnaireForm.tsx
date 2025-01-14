@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,8 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-
-import { usePreventNavigation } from "@/hooks/usePreventNavigation";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -97,7 +96,12 @@ export function QuestionnaireForm({
     },
   });
 
-  usePreventNavigation({ isDirty });
+  // TODO: Use useBlocker hook after switching to tanstack router
+  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  useNavigationPrompt(
+    isDirty,
+    "You have unsaved changes. Are you sure you want to leave?",
+  );
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -116,19 +120,6 @@ export function QuestionnaireForm({
       }
     }
   }, [questionnaireData, isInitialized, questionnaireSlug]);
-
-  useEffect(() => {
-    const hasEdits = questionnaireForms.some((form) =>
-      form.responses.some(
-        (response) =>
-          response.values.length > 0 ||
-          response.note ||
-          response.body_site ||
-          response.method,
-      ),
-    );
-    setIsDirty(hasEdits);
-  }, [questionnaireForms]);
 
   if (isQuestionnaireLoading) {
     return <Loading />;
@@ -366,6 +357,9 @@ export function QuestionnaireForm({
                       : formItem,
                   ),
                 );
+                if (!isDirty) {
+                  setIsDirty(true);
+                }
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}
