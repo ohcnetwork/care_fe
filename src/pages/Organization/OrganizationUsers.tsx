@@ -26,7 +26,9 @@ interface Props {
 }
 
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({});
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    cacheBlacklist: ["search"],
+  });
   const { t } = useTranslation();
 
   const openAddUserSheet = qParams.sheet === "add";
