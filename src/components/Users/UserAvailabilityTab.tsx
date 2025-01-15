@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -20,7 +21,7 @@ import Loading from "@/components/Common/Loading";
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
-import { formatTimeShort } from "@/Utils/utils";
+import { dateQueryString, formatTimeShort } from "@/Utils/utils";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -39,12 +40,16 @@ type Props = {
 };
 
 type AvailabilityTabQueryParams = {
-  view?: "schedule" | "exceptions";
+  tab?: "schedule" | "exceptions" | null;
+  sheet?: "create_template" | "add_exception" | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
 };
 
 export default function UserAvailabilityTab({ userData: user }: Props) {
+  const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
-  const view = qParams.view || "schedule";
+  const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
 
   const facilityId = useSlug("facility");
@@ -153,8 +158,19 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                       year: "numeric",
                     })}
                   </p>
-                  <Button variant="outline" size="sm">
-                    Add Exception
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setQParams({
+                        tab: "exceptions",
+                        sheet: "add_exception",
+                        valid_from: dateQueryString(date),
+                        valid_to: dateQueryString(date),
+                      })
+                    }
+                  >
+                    {t("add_exception")}
                   </Button>
                 </div>
 
@@ -220,20 +236,20 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
           <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() => setQParams({ view: "schedule" })}
+              onClick={() => setQParams({ tab: "schedule" })}
               className={cn(view === "schedule" && "shadow", "hover:bg-white")}
             >
-              Schedule
+              {t("schedule")}
             </Button>
             <Button
               variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setQParams({ view: "exceptions" })}
+              onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow",
                 "hover:bg-white",
               )}
             >
-              Exceptions
+              {t("exceptions")}
             </Button>
           </div>
           {view === "schedule" && (
