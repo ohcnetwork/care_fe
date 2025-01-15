@@ -185,10 +185,12 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             {...commonProps}
-            onValueChange={(value) => {
-              handleSearchChange({ value });
+            onChange={(e) => {
+              handleSearchChange({ value: e.target.value });
               setError(
-                isValidPhoneNumber(value) ? undefined : "Invalid phone number",
+                isValidPhoneNumber(e.target.value)
+                  ? undefined
+                  : "Invalid phone number",
               );
             }}
           />
