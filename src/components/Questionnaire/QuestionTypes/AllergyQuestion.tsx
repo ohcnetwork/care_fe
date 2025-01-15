@@ -47,8 +47,10 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
 import {
+  ALLERGY_VERIFICATION_STATUS,
   AllergyIntolerance,
   AllergyIntoleranceRequest,
+  AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { Code } from "@/types/questionnaire/code";
@@ -350,7 +352,8 @@ export function AllergyQuestion({
                       value={allergy.verification_status}
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, {
-                          verification_status: value,
+                          verification_status:
+                            value as AllergyVerificationStatus,
                         })
                       }
                       disabled={disabled}
@@ -359,9 +362,13 @@ export function AllergyQuestion({
                         <SelectValue placeholder="Verify" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-                        <SelectItem value="refuted">Refuted</SelectItem>
+                        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                          ([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ),
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -500,18 +507,26 @@ const AllergyTableRow = ({
         <TableCell className="min-w-[85px] py-1 px-0.5">
           <Select
             value={allergy.verification_status}
-            onValueChange={(value) =>
-              onUpdate?.({ verification_status: value })
-            }
+            onValueChange={(value) => {
+              if (value in ALLERGY_VERIFICATION_STATUS) {
+                onUpdate?.({
+                  verification_status: value as AllergyVerificationStatus,
+                });
+              }
+            }}
             disabled={disabled}
           >
             <SelectTrigger className="h-7 w-[85px] px-1">
               <SelectValue placeholder="Verify" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-              <SelectItem value="refuted">Refuted</SelectItem>
+              {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </TableCell>

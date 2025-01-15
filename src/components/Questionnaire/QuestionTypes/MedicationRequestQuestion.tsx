@@ -1,6 +1,8 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -41,6 +43,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import query from "@/Utils/request/query";
 import {
   DoseRange,
   MEDICATION_REQUEST_INTENT,
@@ -51,10 +54,12 @@ import {
   UCUM_TIME_UNITS,
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 interface MedicationRequestQuestionProps {
+  patientId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
@@ -64,9 +69,36 @@ export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  patientId,
 }: MedicationRequestQuestionProps) {
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
+
+  const { data: patientMedications } = useQuery({
+    queryKey: ["medications", patientId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+    }),
+  });
+
+  useEffect(() => {
+    if (patientMedications?.results && !medications.length) {
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [
+          {
+            type: "medication_request",
+            value: patientMedications.results,
+          },
+        ],
+      });
+      if (patientMedications.count > patientMedications.results.length) {
+        toast.info(
+          `Showing first ${patientMedications.results.length} of ${patientMedications.count} medications`,
+        );
+      }
+    }
+  }, [patientMedications]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null

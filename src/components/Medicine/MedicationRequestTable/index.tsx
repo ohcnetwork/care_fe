@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 
@@ -13,12 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 
-import useSlug from "@/hooks/useSlug";
-
-import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { classNames } from "@/Utils/utils";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 interface Props {
   readonly?: boolean;
@@ -45,21 +45,22 @@ function getFrequencyDisplay(
   return FREQUENCY_DISPLAY[key];
 }
 
-const MedicineAdministrationSheet = ({ facilityId }: Props) => {
-  const encounterId = useSlug("encounter");
-  const { patient } = useEncounter();
+export default function MedicationRequestTable({ facilityId }: Props) {
+  const { patient, encounter } = useEncounter();
+
+  const patientId = patient?.id;
+  const encounterId = encounter?.id;
+
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: medications, loading } = useTanStackQueryInstead(
-    routes.medicationRequest.list,
-    {
-      pathParams: { patientId: patient!.id },
-      query: {
-        encounter: encounterId,
-        limit: 100,
-      },
-    },
-  );
+  const { data: medications, isLoading: loading } = useQuery({
+    queryKey: ["medications", patientId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId: encounter?.patient?.id || "" },
+      queryParams: { encounter: encounterId },
+    }),
+    enabled: !!encounter?.patient?.id,
+  });
 
   const filteredMedications = medications?.results?.filter(
     (med: MedicationRequest) => {
@@ -103,6 +104,14 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
         title="Prescriptions"
         options={
           <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
+              >
+                <PencilIcon />
+                Edit
+              </Link>
+            </Button>
             <Button asChild variant="outline" size="sm">
               <Link
                 href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
@@ -185,7 +194,7 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
       </div>
     </div>
   );
-};
+}
 
 const PrescriptionEntry = ({
   medication,
@@ -349,5 +358,3 @@ const PrescriptionEntry = ({
     </div>
   );
 };
-
-export default MedicineAdministrationSheet;

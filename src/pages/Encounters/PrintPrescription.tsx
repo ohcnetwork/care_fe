@@ -24,6 +24,7 @@ import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequest,
 } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 function getFrequencyDisplay(
   timing?: MedicationRequest["dosage_instruction"][0]["timing"],
@@ -92,7 +93,7 @@ export const PrintPrescription = (props: {
 
   const { data: medications } = useQuery({
     queryKey: ["medications", encounter?.patient?.id],
-    queryFn: query(api.medicationRequest.list, {
+    queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: encounter?.patient?.id || "" },
       queryParams: { encounter: encounterId },
     }),

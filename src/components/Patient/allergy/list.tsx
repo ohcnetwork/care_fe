@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { PencilIcon } from "lucide-react";
+import { Link } from "raviger";
+import { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,11 +23,16 @@ import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntole
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 
 interface AllergyListProps {
+  facilityId?: string;
   patientId: string;
   encounterId?: string;
 }
 
-export function AllergyList({ patientId, encounterId }: AllergyListProps) {
+export function AllergyList({
+  facilityId,
+  patientId,
+  encounterId,
+}: AllergyListProps) {
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
@@ -35,27 +43,29 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Allergies</CardTitle>
-        </CardHeader>
+      <AllergyListLayout
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+      >
         <CardContent>
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
-      </Card>
+      </AllergyListLayout>
     );
   }
 
   if (!allergies?.results?.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Allergies</CardTitle>
-        </CardHeader>
+      <AllergyListLayout
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+      >
         <CardContent>
-          <p className="text-muted-foreground">No allergies recorded</p>
+          <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
         </CardContent>
-      </Card>
+      </AllergyListLayout>
     );
   }
 
@@ -84,23 +94,30 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
   };
 
   return (
-    <Card className="p-0">
-      <CardHeader className="px-4 py-0 pt-4">
-        <CardTitle>{t("allergies")}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("allergen")}</TableHead>
-              <TableHead>{t("category")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("criticality")}</TableHead>
-              <TableHead>{t("created_by")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allergies.results.map((allergy: AllergyIntolerance) => (
+    <AllergyListLayout
+      facilityId={facilityId}
+      patientId={patientId}
+      encounterId={encounterId}
+    >
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("allergen")}</TableHead>
+            <TableHead>{t("category")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("criticality")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {allergies.results
+            .sort((a, _b) => {
+              if (a.clinical_status === "inactive") {
+                return 1;
+              }
+              return -1;
+            })
+            .map((allergy: AllergyIntolerance) => (
               <TableRow key={allergy.id}>
                 <TableCell className="font-medium">
                   {allergy.code.display}
@@ -140,9 +157,38 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
                 </TableCell>
               </TableRow>
             ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+        </TableBody>
+      </Table>
+    </AllergyListLayout>
   );
 }
+
+const AllergyListLayout = ({
+  facilityId,
+  patientId,
+  encounterId,
+  children,
+}: {
+  facilityId?: string;
+  patientId: string;
+  encounterId?: string;
+  children: ReactNode;
+}) => {
+  return (
+    <Card>
+      <CardHeader className="px-4 py-0 pt-4 flex justify-between flex-row">
+        <CardTitle>{t("allergies")}</CardTitle>
+        {facilityId && encounterId && (
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
+            className="flex items-center gap-1 text-sm hover:text-gray-500"
+          >
+            <PencilIcon size={12} />
+            {t("edit")}
+          </Link>
+        )}
+      </CardHeader>
+      {children}
+    </Card>
+  );
+};
