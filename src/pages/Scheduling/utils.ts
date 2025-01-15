@@ -82,8 +82,6 @@ export function computeAppointmentSlots(
     time = slotEndTime;
   }
 
-  console.log("slots", slots);
-
   for (const exception of exceptions) {
     const exceptionTime = parse(
       exception.start_time,
