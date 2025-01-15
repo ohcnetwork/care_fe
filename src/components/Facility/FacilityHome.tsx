@@ -1,6 +1,12 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
+import {
+  Hospital,
+  MapPin,
+  MoreVertical,
+  Settings,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -100,11 +106,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
-
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
-
+  console.log(facilityData);
   const handleDeleteSubmit = async () => {
     await request(routes.deleteFacility, {
       pathParams: { id: facilityId },
@@ -273,11 +278,22 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>
                         {facilityData?.geo_organization && (
-                          <div className="mt-2 text-sm">
+                          <div className="mt-1 text-sm">
                             {renderGeoOrganizations(
                               facilityData?.geo_organization,
                             )}
                           </div>
+                        )}
+                        {facilityData?.latitude && facilityData?.longitude && (
+                          <a
+                            className="text-sm text-primary flex items-center gap-1 w-max"
+                            href={`https://www.google.com/maps/search/?api=1&query=${facilityData.latitude},${facilityData.longitude}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {t("google_maps")}
+                            <SquareArrowOutUpRight className="h-3 w-3" />
+                          </a>
                         )}
                       </div>
                     </div>

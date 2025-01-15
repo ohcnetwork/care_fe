@@ -28,4 +28,6 @@ export interface FacilityData {
   geo_organization: Organization;
   pincode: string;
   is_public: boolean;
+  latitude: string;
+  longitude: string;
 }
