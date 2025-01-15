@@ -516,12 +516,22 @@ export default function PatientRegistration(
                                 value={
                                   form.watch("date_of_birth")?.split("-")[2]
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
-                                  )
-                                }
+                                  );
+                                  const day = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    day >= 1 &&
+                                    day <= 31
+                                  ) {
+                                    document
+                                      .getElementById("dob-month-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-day-input"
                               />
                             </div>
@@ -531,17 +541,28 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-month-input"
                                 placeholder="MM"
                                 {...field}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[1]
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
-                                  )
-                                }
+                                  );
+                                  const month = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    month >= 1 &&
+                                    month <= 12
+                                  ) {
+                                    document
+                                      .getElementById("dob-year-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-month-input"
                               />
                             </div>
@@ -551,6 +572,7 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-year-input"
                                 placeholder="YYYY"
                                 {...field}
                                 value={
