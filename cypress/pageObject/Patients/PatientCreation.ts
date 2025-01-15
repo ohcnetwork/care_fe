@@ -48,11 +48,6 @@ export class PatientCreation {
     cy.verifyContentPresence(this.selectors.patientDetails, detailsArray);
   }
 
-  selectFacility(facilityName: string) {
-    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
-    return this;
-  }
-
   clickSearchPatients() {
     cy.get('[data-sidebar="content"]').contains("Search Patients").click();
     return this;
