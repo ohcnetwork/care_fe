@@ -5,7 +5,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -142,18 +141,5 @@ export const OrganizationLayoutSkeleton = () => {
         ))}
       </div>
     </div>
-  );
-};
-
-export const PatientListSkeleton = ({ title }: { title: string }) => {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-[100px] w-full" />
-      </CardContent>
-    </Card>
   );
 };
