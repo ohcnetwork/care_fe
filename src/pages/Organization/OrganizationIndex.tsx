@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { OrganizationIndexSkeleton } from "@/components/Common/UseSkeletons";
+import { OrganizationIndexSkeleton } from "@/components/Common/SkeletonComponents.tsx";
 
 import query from "@/Utils/request/query";
 import {

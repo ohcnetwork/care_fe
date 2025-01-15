@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { PatientListSkeleton } from "@/components/Common/UseSkeletons";
+import { PatientListSkeleton } from "@/components/Common/SkeletonComponents.tsx";
 
 import query from "@/Utils/request/query";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";

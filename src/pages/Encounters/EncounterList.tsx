@@ -34,7 +34,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import { EncounterListSkeleton } from "@/components/Common/UseSkeletons";
+import { EncounterListSkeleton } from "@/components/Common/SkeletonComponents.tsx";
 
 import useFilters from "@/hooks/useFilters";
 

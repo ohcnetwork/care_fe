@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { PatientListSkeleton } from "@/components/Common/UseSkeletons";
+import { PatientListSkeleton } from "@/components/Common/SkeletonComponents.tsx";
 
 import query from "@/Utils/request/query";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
