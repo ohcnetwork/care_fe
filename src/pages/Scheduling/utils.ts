@@ -45,6 +45,8 @@ export function getDurationInMinutes(startTime: Time, endTime: Time) {
 type VirtualSlot = {
   start_time: Time;
   end_time: Time;
+  isAvailable: boolean;
+  exceptions: ScheduleException[];
 };
 
 export function computeAppointmentSlots(
@@ -63,7 +65,7 @@ export function computeAppointmentSlots(
     referenceDate,
   );
   const slotSizeInMinutes = availability.slot_size_in_minutes;
-  let slots: VirtualSlot[] = [];
+  const slots: VirtualSlot[] = [];
 
   let time = startTime;
   while (time < endTime) {
@@ -74,9 +76,13 @@ export function computeAppointmentSlots(
     slots.push({
       start_time: format(time, "HH:mm") as Time,
       end_time: format(slotEndTime, "HH:mm") as Time,
+      isAvailable: true,
+      exceptions: [],
     });
     time = slotEndTime;
   }
+
+  console.log("slots", slots);
 
   for (const exception of exceptions) {
     const exceptionTime = parse(
@@ -90,19 +96,22 @@ export function computeAppointmentSlots(
       referenceDate,
     );
 
-    slots = slots.filter((slot) => {
+    slots.forEach((slot) => {
       const slotStart = parse(slot.start_time, "HH:mm", referenceDate);
       const slotEnd = parse(slot.end_time, "HH:mm", referenceDate);
-      return (
-        !isWithinInterval(slotStart, {
+      if (
+        isWithinInterval(slotStart, {
           start: exceptionTime,
           end: exceptionEndTime,
-        }) &&
-        !isWithinInterval(slotEnd, {
+        }) ||
+        isWithinInterval(slotEnd, {
           start: exceptionTime,
           end: exceptionEndTime,
         })
-      );
+      ) {
+        slot.isAvailable = false;
+        slot.exceptions.push(exception);
+      }
     });
   }
 
