@@ -30,6 +30,9 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -37,21 +40,6 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
-
-const QUESTIONNAIRE_OPTIONS = [
-  {
-    slug: "encounter",
-    title: "Update Encounter",
-  },
-  {
-    slug: "community-nurse",
-    title: "Community Nurse Form",
-  },
-  {
-    slug: "recommend_discharge_v2",
-    title: "Recommend Discharge",
-  },
-] as const;
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -63,6 +51,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -327,7 +316,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {QUESTIONNAIRE_OPTIONS.map((option) => (
+                  {questionnaireOptions.map((option) => (
                     <DropdownMenuItem key={option.slug} asChild>
                       <Link
                         href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
@@ -342,6 +331,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   <DropdownMenuItem onClick={handleMarkAsComplete}>
                     {t("mark_as_complete")}
                   </DropdownMenuItem>
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

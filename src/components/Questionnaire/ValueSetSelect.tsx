@@ -31,6 +31,7 @@ interface Props {
   disabled?: boolean;
   count?: number;
   searchPostFix?: string;
+  wrapTextForSmallScreen?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -41,6 +42,7 @@ export default function ValueSetSelect({
   disabled,
   count = 10,
   searchPostFix = "",
+  wrapTextForSmallScreen = false,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -67,7 +69,10 @@ export default function ValueSetSelect({
           variant="outline"
           role="combobox"
           className={cn(
-            "w-full justify-between truncate",
+            "w-full justify-between",
+            wrapTextForSmallScreen
+              ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+              : "truncate",
             !value?.display && "text-gray-400",
           )}
         >

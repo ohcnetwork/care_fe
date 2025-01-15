@@ -5,8 +5,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
@@ -207,7 +205,6 @@ export default function PatientSelect({
             )
           }
         >
-          <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
           <span className="text-sm underline">{t("back")}</span>
         </Button>
       </div>
