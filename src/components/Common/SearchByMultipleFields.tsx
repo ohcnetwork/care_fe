@@ -88,7 +88,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       clearinput ? setSearchValue("") : null;
       inputRef.current?.focus();
     }
-  }, [clearSearch]);
+  }, [clearSearch?.value]);
 
   const handleOptionChange = useCallback(
     (index: number) => {
@@ -159,7 +159,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
-  }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
+  }, [searchValue]);
 
   const handleSearchChange = useCallback((event: EventType) => {
     const value = "target" in event ? event.target.value : event.value;
