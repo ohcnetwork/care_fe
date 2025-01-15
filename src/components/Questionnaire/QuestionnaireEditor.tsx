@@ -63,7 +63,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [questionnaireApi.detail.path, id],
+    queryKey: ["questionnaire-detail", id],
     queryFn: query(questionnaireApi.detail, {
       pathParams: { id },
     }),

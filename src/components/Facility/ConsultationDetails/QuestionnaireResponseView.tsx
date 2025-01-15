@@ -24,7 +24,7 @@ export default function QuestionnaireResponseView({
 }) {
   const { t } = useTranslation();
   const { data: formResponse, isLoading } = useQuery({
-    queryKey: [routes.getQuestionnaireResponse.path, patientId, responseId],
+    queryKey: ["getQuestionnaireResponse", patientId, responseId],
     queryFn: query(routes.getQuestionnaireResponse, {
       pathParams: { patientId, responseId },
     }),

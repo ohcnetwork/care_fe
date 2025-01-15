@@ -77,7 +77,7 @@ export function QuestionnaireForm({
     isLoading: isQuestionnaireLoading,
     error: questionnaireError,
   } = useQuery({
-    queryKey: [questionnaireApi.detail.path, questionnaireSlug],
+    queryKey: ["questionnaire-detail", questionnaireSlug],
     queryFn: query(questionnaireApi.detail, {
       pathParams: { id: questionnaireSlug ?? "" },
     }),
