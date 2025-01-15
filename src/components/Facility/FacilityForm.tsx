@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -51,27 +50,24 @@ import { Organization } from "@/types/organization/organization";
 import { FacilityModel } from "./models";
 
 const facilityFormSchema = z.object({
-  facility_type: z.string().min(1, "Facility type is required"),
-  name: z.string().min(1, "Name is required"),
+  facility_type: z.string().min(1, t("facility_type_required")),
+  name: z.string().min(1, t("name_is_required")),
   description: z.string().optional(),
   features: z.array(z.number()).default([]),
-  pincode: z.string().refine(validatePincode, "Invalid pincode"),
+  pincode: z.string().refine(validatePincode, t("invalid_pincode")),
   geo_organization: z.string().min(1, t("organization_required")),
-  address: z.string().min(1, "Address is required"),
+  address: z.string().min(1, t("address_is_required")),
   phone_number: z
     .string()
-    .regex(
-      /^\+91[0-9]{10}$/,
-      "Phone number must start with +91 followed by 10 digits",
-    ),
+    .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
   latitude: z
     .string()
     .optional()
-    .refine((val) => !val || validateLatitude(val), "Invalid latitude"),
+    .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
   longitude: z
     .string()
     .optional()
-    .refine((val) => !val || validateLongitude(val), "Invalid longitude"),
+    .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
   is_public: z.boolean().default(false),
 });
 
@@ -84,7 +80,6 @@ interface FacilityProps {
 }
 
 export default function FacilityForm(props: FacilityProps) {
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { facilityId, onSubmitSuccess } = props;
@@ -223,7 +218,7 @@ export default function FacilityForm(props: FacilityProps) {
         is_public: facilityData.is_public,
       });
     }
-  }, [facilityData, form]);
+  }, [facilityData]);
 
   return (
     <Form {...form}>
