@@ -20,8 +20,13 @@ import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
-function AppointmentDialog(props: {
-  appointment: Appointment | undefined;
+function AppointmentDialog({
+  appointment,
+  open,
+  onOpenChange,
+  setAppointmentDialogOpen,
+}: {
+  appointment: Appointment;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setAppointmentDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -40,12 +45,9 @@ function AppointmentDialog(props: {
       queryClient.invalidateQueries({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
-      props.setAppointmentDialogOpen(false);
+      setAppointmentDialogOpen(false);
     },
   });
-  const { appointment, open, onOpenChange } = props;
-
-  if (!appointment) return <></>;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,11 +93,12 @@ function AppointmentDialog(props: {
                 });
               }}
             >
-              <span>{t("Cancel")}</span>
+              <span>{t("cancel")}</span>
             </Button>
-            <Button variant="secondary">
+            {/* TODO: wire this */}
+            {/* <Button variant="secondary">
               <span>{t("reschedule")}</span>
-            </Button>
+            </Button> */}
           </span>
         </DialogFooter>
       </DialogContent>
