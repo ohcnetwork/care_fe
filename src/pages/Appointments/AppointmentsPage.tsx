@@ -597,51 +597,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             value={qParams.search ?? ""}
             onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
           />
-          {/* <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="secondary">
-                <CareIcon icon="l-filter" className="mr-2" />
-                <span>{t("filter")}</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="mr-11">
-              <div>
-                <Label className="mb-2">{t("date")}</Label>
-                <DateRangePicker
-                  date={{
-                    from: qParams.date_from
-                      ? new Date(qParams.date_from)
-                      : undefined,
-                    to: qParams.date_to ? new Date(qParams.date_to) : undefined,
-                  }}
-                  onChange={(date) =>
-                    setQParams({
-                      ...qParams,
-                      date_from: date?.from ? dateQueryString(date.from) : null,
-                      date_to: date?.to ? dateQueryString(date?.to) : null,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex justify-end bg-gray-100 mt-6 -m-4 py-3 px-4 rounded-md">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setQParams({
-                      date_from: null,
-                      date_to: null,
-                      slot: null,
-                      search: null,
-                      practitioner: null,
-                    })
-                  }
-                >
-                  <ReloadIcon className="mr-2" />
-                  {t("clear_all_filters")}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover> */}
         </div>
       </div>
 
