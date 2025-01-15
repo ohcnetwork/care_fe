@@ -405,7 +405,7 @@ function ScheduleTemplateAvailabilityItem({
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span>
+                <span className="cursor-pointer underline">
                   <Trans
                     i18nKey="session_slots_info_striked"
                     components={{
@@ -420,7 +420,7 @@ function ScheduleTemplateAvailabilityItem({
                 </span>
               </TooltipTrigger>
               {hasExceptions && (
-                <TooltipContent className="max-w-xs">
+                <TooltipContent className="max-w-xs" side="bottom">
                   <p className="font-medium mb-1">
                     {t("exceptions")}:{" "}
                     {humanizeStrings(exceptions.map((e) => e.reason))}
