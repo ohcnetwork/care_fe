@@ -105,7 +105,7 @@ export default function PatientRegistration(
             .refine((date) => {
               const parsedDate = dayjs(date);
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
-            }, "Please enter a valid date")
+            }, t("enter_valid_date"))
             .optional(),
           age: z
             .number()
