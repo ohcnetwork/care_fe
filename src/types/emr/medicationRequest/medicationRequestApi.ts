@@ -1,14 +1,14 @@
 import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { MedicationRequest } from "../medicationRequest";
+import { MedicationRequestRead } from "../medicationRequest";
 
 const medicationRequestApi = {
   // Medication
   list: {
     path: "/api/v1/patient/{patientId}/medication/request/",
     method: "GET",
-    TRes: Type<PaginatedResponse<MedicationRequest>>(),
+    TRes: Type<PaginatedResponse<MedicationRequestRead>>(),
   },
 } as const;
 
