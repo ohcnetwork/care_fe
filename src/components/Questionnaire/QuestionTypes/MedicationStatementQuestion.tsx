@@ -215,7 +215,8 @@ const MedicationStatementItem: React.FC<{
                       icon: "l-user",
                     },
                     {
-                      value: MedicationStatementInformationSourceType.USER,
+                      value:
+                        MedicationStatementInformationSourceType.PRACTITIONER,
                       icon: "l-user-nurse",
                     },
                     {
