@@ -5,8 +5,6 @@ import { generateFacilityData } from "../../utils/facilityData";
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
-  const testFacility = generateFacilityData();
-  const phoneNumber = generatePhoneNumber();
 
   beforeEach(() => {
     cy.visit("/login");
@@ -14,6 +12,9 @@ describe("Facility Management", () => {
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {
+    const testFacility = generateFacilityData();
+    const phoneNumber = generatePhoneNumber();
+
     facilityPage.navigateToOrganization("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();

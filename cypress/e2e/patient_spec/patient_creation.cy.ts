@@ -1,13 +1,15 @@
 import { patientCreation } from "pageObject/Patients/PatientCreation";
 import { patientDashboard } from "pageObject/Patients/PatientDashboard";
 import { patientVerify } from "pageObject/Patients/PatientVerify";
+import { FacilityCreation } from "pageObject/facility/FacilityCreation";
 
 import {
   generateAddress,
-  generatePatientName,
+  generateName,
   generatePhoneNumber,
 } from "../../utils/commonUtils";
 
+const facilityCreation = new FacilityCreation();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
@@ -21,7 +23,7 @@ describe("Patient Management", () => {
   };
 
   const testPatientData = {
-    name: generatePatientName(),
+    name: generateName(),
     phoneNumber: generatePhoneNumber(),
     gender: "male",
     bloodGroup: "B+",
@@ -40,8 +42,8 @@ describe("Patient Management", () => {
 
   it("create a new patient and verify details", () => {
     cy.loginByApi("doctor");
+    facilityCreation.selectFacility("Arike");
     patientCreation
-      .selectFacility("Arike")
       .clickSearchPatients()
       .clickCreateNewPatient()
       .fillPatientDetails(testPatientData)
@@ -65,8 +67,8 @@ describe("Patient Management", () => {
 
   it("search patient with phone number and verifies details", () => {
     cy.loginByApi("staff");
+    facilityCreation.selectFacility("Arike");
     patientCreation
-      .selectFacility("Arike")
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
       .verifySearchResults(PATIENT_DETAILS);
