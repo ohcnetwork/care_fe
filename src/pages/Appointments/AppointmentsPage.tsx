@@ -107,7 +107,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
   const today = new Date();
 
-  // Case 1: Today only and Yesterday only
+  // Case 1: Today only or Yesterday only
   if (
     (dateFrom === dateQueryString(today) &&
       dateTo === dateQueryString(today)) ||
@@ -198,8 +198,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
     return (
       <>
-        <span className="text-black">{t("on")} </span>
-        <span className="pl-1 text-gray-500">
+        <span className="capitalize text-gray-500">{t("on")} </span>
+        <span className="pl-1 text-black ">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -210,8 +210,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (dateFrom && !dateTo) {
     return (
       <>
-        <span className="text-black">{t("after")} </span>
-        <span className="pl-1 text-gray-500">
+        <span className="capitalize text-gray-500">{t("after")} </span>
+        <span className="pl-1 text-black">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -221,8 +221,10 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (!dateFrom && dateTo) {
     return (
       <>
-        <span>{t("before")} </span>
-        <span className="text-black">{formatDate(dateTo, "dd MMM yyyy")}</span>
+        <span className=" capitalize text-gray-500">{t("before")} </span>
+        <span className="pl-1 text-black">
+          {formatDate(dateTo, "dd MMM yyyy")}
+        </span>
       </>
     );
   }
