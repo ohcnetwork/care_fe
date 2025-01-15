@@ -105,7 +105,7 @@ export default function PatientRegistration(
             .refine((date) => {
               const parsedDate = dayjs(date);
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
-            }, t("enter_valid_date"))
+            }, t("enter_valid_dob"))
             .optional(),
           age: z
             .number()
