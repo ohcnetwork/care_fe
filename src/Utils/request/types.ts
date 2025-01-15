@@ -49,7 +49,7 @@ export interface ApiCallOptions<Route extends ApiRoute<unknown, unknown>> {
   pathParams?: PathParams<Route["path"]>;
   queryParams?: QueryParams;
   body?: Route["TBody"];
-  silent?: boolean;
+  silent?: boolean | ((response: Response) => boolean);
   signal?: AbortSignal;
   headers?: HeadersInit;
 }
