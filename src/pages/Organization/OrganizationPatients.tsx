@@ -29,7 +29,7 @@ interface Props {
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 14, cacheBlacklist: ["patient"] });
+    useFilters({ limit: 15, cacheBlacklist: ["patient"] });
   const [organization, setOrganization] = useState<Organization | null>(null);
 
   const { data: patients, isLoading } = useQuery({

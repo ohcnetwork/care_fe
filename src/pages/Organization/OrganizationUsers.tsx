@@ -27,6 +27,7 @@ interface Props {
 
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
     cacheBlacklist: ["search"],
   });
   const { t } = useTranslation();
