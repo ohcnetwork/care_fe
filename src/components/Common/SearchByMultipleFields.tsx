@@ -66,9 +66,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   enableOptionButtons = true,
 }) => {
   const { t } = useTranslation();
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState(
-    initialOptionIndex == -1 ? 0 : initialOptionIndex,
-  );
+  const [selectedOptionIndex, setSelectedOptionIndex] =
+    useState(initialOptionIndex);
   const selectedOption = options[selectedOptionIndex];
   const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);

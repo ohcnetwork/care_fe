@@ -111,8 +111,9 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         <SearchByMultipleFields
           id="patient-search"
           options={searchOptions}
-          initialOptionIndex={searchOptions.findIndex(
-            (option) => option.value !== "",
+          initialOptionIndex={Math.max(
+            searchOptions.findIndex((option) => option.value !== ""),
+            0,
           )}
           onSearch={handleSearch}
           clearSearch={{ value: !qParams.name && !qParams.phone_number }}

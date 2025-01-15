@@ -286,8 +286,11 @@ export function EncounterList({
                       <SearchByMultipleFields
                         id="encounter-search"
                         options={searchOptions}
-                        initialOptionIndex={searchOptions.findIndex(
-                          (option) => option.value !== "",
+                        initialOptionIndex={Math.max(
+                          searchOptions.findIndex(
+                            (option) => option.value !== "",
+                          ),
+                          0,
                         )}
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
