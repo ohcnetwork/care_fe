@@ -26,7 +26,7 @@ function AppointmentDialog({
   onOpenChange,
   setAppointmentDialogOpen,
 }: {
-  appointment: Appointment;
+  appointment: Appointment | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setAppointmentDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -48,6 +48,8 @@ function AppointmentDialog({
       setAppointmentDialogOpen(false);
     },
   });
+
+  if (!appointment) return <></>;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
