@@ -63,16 +63,22 @@ export class UserCreation {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      "Required",
-      "Required",
-      "Required",
-      "Required",
-      "Required",
-      "Required",
-      "Phone number must start with +91 followed by 10 digits",
-      "Phone number must start with +91 followed by 10 digits",
-      "Required",
-      "Required",
+      { label: "First Name", message: "Required" },
+      { label: "Last Name", message: "Required" },
+      { label: "Username", message: "Required" },
+      { label: "Password", message: "Required" },
+      { label: "Confirm Password", message: "Required" },
+      { label: "Email", message: "Required" },
+      {
+        label: "Phone Number",
+        message: "Phone number must start with +91 followed by 10 digits",
+      },
+      {
+        label: "Alternate Phone Number",
+        message: "Phone number must start with +91 followed by 10 digits",
+      },
+      { label: "Date of Birth", message: "Required" },
+      { label: "State", message: "Required" },
     ]);
     return this;
   }

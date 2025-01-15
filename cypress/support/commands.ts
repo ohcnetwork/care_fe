@@ -189,11 +189,17 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
   });
 });
 
-Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
-  cy.get("body").within(() => {
-    errorMessages.forEach((message) => {
-      cy.contains(message).scrollIntoView().should("be.visible");
-    });
+export interface ErrorMessageItem {
+  label: string;
+  message: string;
+}
+
+Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
+  errors.forEach(({ label, message }) => {
+    // Verify the label is present
+    cy.contains(label).scrollIntoView().should("be.visible");
+    // Verify the error message is present
+    cy.contains(message).scrollIntoView().should("be.visible");
   });
 });
 

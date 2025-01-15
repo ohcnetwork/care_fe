@@ -1,4 +1,4 @@
-import "./commands";
+import { ErrorMessageItem } from "./commands";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -36,7 +36,7 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
-      verifyErrorMessages(errorMessages: string[]): Chainable<Subject>;
+      verifyErrorMessages(errors: ErrorMessageItem[]): Chainable<void>;
       typeIntoField(
         selector: string,
         value: string,

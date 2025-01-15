@@ -89,10 +89,14 @@ export class FacilityCreation {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      "Name is required",
-      "Facility type is required",
-      "Address is required",
-      "Phone number must start with +91 followed by 10 digits",
+      { label: "Facility Name", message: "Name is required" },
+      { label: "Facility Type", message: "Facility type is required" },
+      { label: "Address", message: "Address is required" },
+      {
+        label: "Phone Number",
+        message: "Phone number must start with +91 followed by 10 digits",
+      },
+      { label: "Pincode", message: "Invalid pincode" },
     ]);
   }
 
