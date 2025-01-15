@@ -275,7 +275,7 @@ export function EncounterList({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[320px] p-3"
+                    className="w-[20rem] p-3"
                     align="start"
                     onEscapeKeyDown={(event) => event.preventDefault()}
                   >
