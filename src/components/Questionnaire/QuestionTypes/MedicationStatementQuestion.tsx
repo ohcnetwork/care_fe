@@ -2,9 +2,12 @@ import {
   MinusCircledIcon,
   QuestionMarkCircledIcon,
   TextAlignLeftIcon,
+  TrashIcon,
 } from "@radix-ui/react-icons";
-import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
@@ -20,20 +23,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import query from "@/Utils/request/query";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatement,
   MedicationStatementInformationSourceType,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
+  patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
@@ -56,11 +68,38 @@ export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  patientId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
 
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationStatement[]) || [];
+
+  const { data: patientMedications } = useQuery({
+    queryKey: ["medication_statements", patientId],
+    queryFn: query(medicationStatementApi.list, {
+      pathParams: { patientId },
+    }),
+  });
+
+  useEffect(() => {
+    if (patientMedications?.results && !medications.length) {
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [
+          {
+            type: "medication_statement",
+            value: patientMedications.results,
+          },
+        ],
+      });
+      if (patientMedications.count > patientMedications.results.length) {
+        toast.info(
+          `Showing first ${patientMedications.results.length} of ${patientMedications.count} medication statements`,
+        );
+      }
+    }
+  }, [patientMedications]);
 
   const handleAddMedication = (medication: Code) => {
     const newMedications: Omit<
@@ -82,11 +121,26 @@ export function MedicationStatementQuestion({
   };
 
   const handleRemoveMedication = (index: number) => {
-    const newMedications = medications.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "medication_statement", value: newMedications }],
-    });
+    const medication = medications[index];
+    if (medication.id) {
+      // For existing records, update status to entered-in-error
+      const newMedications = medications.map((med, i) =>
+        i === index
+          ? { ...med, status: "entered_in_error" as MedicationStatementStatus }
+          : med,
+      );
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [{ type: "medication_statement", value: newMedications }],
+      });
+    } else {
+      // For new records, remove them completely
+      const newMedications = medications.filter((_, i) => i !== index);
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [{ type: "medication_statement", value: newMedications }],
+      });
+    }
   };
 
   const handleUpdateMedication = (
@@ -181,14 +235,33 @@ const MedicationStatementItem: React.FC<{
               </SelectContent>
             </Select>
           </div>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={onRemove}
-            disabled={disabled}
-          >
-            <MinusCircledIcon className="size-4" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={medication.id ? "ghost" : "secondary"}
+                  size="icon"
+                  onClick={onRemove}
+                  disabled={
+                    disabled || medication.status === "entered_in_error"
+                  }
+                >
+                  {medication.id ? (
+                    <TrashIcon className="size-4 text-destructive" />
+                  ) : (
+                    <MinusCircledIcon className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {medication.status === "entered_in_error"
+                  ? t("medication_already_marked_as_error")
+                  : medication.id
+                    ? t("mark_as_entered_in_error")
+                    : t("remove_medication")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <div className="flex flex-col gap-4">

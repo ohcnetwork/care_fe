@@ -13,7 +13,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
-import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 
 import query from "@/Utils/request/query";
 import { classNames } from "@/Utils/utils";
@@ -23,6 +22,8 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 interface Props {
   readonly?: boolean;
   facilityId: string;
+  patientId: string;
+  encounterId: string;
 }
 
 const FREQUENCY_DISPLAY: Record<string, { code: string; meaning: string }> = {
@@ -45,21 +46,20 @@ function getFrequencyDisplay(
   return FREQUENCY_DISPLAY[key];
 }
 
-export default function MedicationRequestTable({ facilityId }: Props) {
-  const { patient, encounter } = useEncounter();
-
-  const patientId = patient?.id;
-  const encounterId = encounter?.id;
-
+export default function MedicationRequestTable({
+  facilityId,
+  patientId,
+  encounterId,
+}: Props) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: medications, isLoading: loading } = useQuery({
     queryKey: ["medications", patientId],
     queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: encounter?.patient?.id || "" },
+      pathParams: { patientId: patientId },
       queryParams: { encounter: encounterId },
     }),
-    enabled: !!encounter?.patient?.id,
+    enabled: !!patientId,
   });
 
   const filteredMedications = medications?.results?.filter(
