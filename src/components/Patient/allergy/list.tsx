@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { PatientListSkeleton } from "@/components/Common/SkeletonComponents";
 
 import query from "@/Utils/request/query";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -25,7 +25,6 @@ interface AllergyListProps {
 }
 
 export function AllergyList({ patientId, encounterId }: AllergyListProps) {
-  const { t } = useTranslation();
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
@@ -35,19 +34,26 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
   });
 
   if (isLoading) {
-    return <PatientListSkeleton title={t("allergies")} />;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Allergies</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[100px] w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!allergies?.results?.length) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t("allergies")}</CardTitle>
+          <CardTitle>Allergies</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            {t("allergies_empty_message")}
-          </p>
+          <p className="text-muted-foreground">No allergies recorded</p>
         </CardContent>
       </Card>
     );

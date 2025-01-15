@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { PatientListSkeleton } from "@/components/Common/SkeletonComponents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import symptomApi from "@/types/emr/symptom/symptomApi";
@@ -16,8 +14,6 @@ interface SymptomsListProps {
 }
 
 export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
-  const { t } = useTranslation();
-
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -27,17 +23,26 @@ export function SymptomsList({ patientId, encounterId }: SymptomsListProps) {
   });
 
   if (isLoading) {
-    return <PatientListSkeleton title={t("symptoms")} />;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Symptoms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[100px] w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!symptoms?.results?.length) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t("symptoms")}</CardTitle>
+          <CardTitle>Symptoms</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">{t("symptoms_empty_message")}</p>
+          <p className="text-muted-foreground">No symptoms recorded</p>
         </CardContent>
       </Card>
     );
