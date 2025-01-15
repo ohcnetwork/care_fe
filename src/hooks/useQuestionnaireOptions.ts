@@ -22,6 +22,7 @@ export default function useQuestionnaireOptions(slug: string) {
       queryParams: {
         tag_slug: slug,
       },
+      silent: (res) => res.status === 404,
     }),
   });
 
