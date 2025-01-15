@@ -29,7 +29,7 @@ import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
-  ApppointmentCompletedStatuses,
+  AppointmentFinalStatuses,
 } from "@/types/scheduling/schedule";
 
 function PatientIndex() {
@@ -151,7 +151,7 @@ function PatientIndex() {
             <span className="text-sm font-semibold text-blue-700">
               {t(appointment.status)}
             </span>
-            {!ApppointmentCompletedStatuses.includes(appointment.status) && (
+            {!AppointmentFinalStatuses.includes(appointment.status) && (
               <span className="flex flex-row gap-2">
                 <Button
                   variant="destructive"

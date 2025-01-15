@@ -71,9 +71,9 @@ import {
 } from "@/pages/Appointments/utils";
 import {
   Appointment,
+  AppointmentFinalStatuses,
   AppointmentStatuses,
   AppointmentUpdateRequest,
-  ApppointmentCompletedStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
@@ -442,7 +442,7 @@ const AppointmentActions = ({
       },
     });
 
-  if (ApppointmentCompletedStatuses.includes(currentStatus)) {
+  if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
   }
 
