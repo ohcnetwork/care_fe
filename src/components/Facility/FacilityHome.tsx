@@ -96,7 +96,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     isLoading,
     refetch: facilityFetch,
   } = useQuery<FacilityData>({
-    queryKey: [routes.facility.show.path, facilityId],
+    queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
     }),
