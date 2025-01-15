@@ -53,6 +53,31 @@ interface SearchByMultipleFieldsProps {
 
 type EventType = React.ChangeEvent<HTMLInputElement> | { value: string };
 
+const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
+  return (
+    <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
+      {open ? (
+        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+          ESC
+        </span>
+      ) : isAppleDevice ? (
+        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+          ⌘K
+        </span>
+      ) : (
+        <div className="flex gap-1 font-medium">
+          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+            Ctrl
+          </span>
+          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+            K
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   id,
   options,
@@ -168,32 +193,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     setSearchValue(value);
   }, []);
 
-  const KeyboardShortcutHint: React.FC<{ open: boolean }> = ({ open }) => (
-    <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
-      {open ? (
-        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-          ESC
-        </span>
-      ) : (
-        <span>
-          {isAppleDevice ? (
-            <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-              ⌘K
-            </span>
-          ) : (
-            <div className="flex gap-1 font-medium">
-              <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                Ctrl
-              </span>
-              <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-                K
-              </span>
-            </div>
-          )}
-        </span>
-      )}
-    </div>
-  );
   const renderSearchInput = useMemo(() => {
     const commonProps = {
       ref: inputRef,
