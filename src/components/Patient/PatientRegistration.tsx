@@ -236,16 +236,21 @@ export default function PatientRegistration(
 
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", debouncedNumber],
-    queryFn: query(routes.searchPatient, {
-      body: {
-        phone_number: parsePhoneNumberWithError(
-          debouncedNumber || "",
-        ).number.toString(),
-      },
-    }),
-    enabled: !!parsePhoneNumberWithError(
-      debouncedNumber || "",
-    ).number.toString(),
+    queryFn: async () => {
+      try {
+        const response = await query(routes.searchPatient, {
+          body: {
+            phone_number: parsePhoneNumberWithError(
+              debouncedNumber || "",
+            ).number.toString(),
+          },
+        })({ signal: new AbortController().signal });
+        return response;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    enabled: isValidPhoneNumber(debouncedNumber || ""),
   });
 
   const duplicatePatients = useMemo(() => {

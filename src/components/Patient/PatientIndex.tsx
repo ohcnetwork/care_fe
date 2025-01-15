@@ -98,11 +98,19 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber],
-    queryFn: query.debounced(routes.searchPatient, {
-      body: {
-        phone_number: parsePhoneNumberWithError(phoneNumber).number.toString(),
-      },
-    }),
+    queryFn: () => {
+      try {
+        const response = query.debounced(routes.searchPatient, {
+          body: {
+            phone_number:
+              parsePhoneNumberWithError(phoneNumber).number.toString(),
+          },
+        })({ signal: new AbortController().signal });
+        return response;
+      } catch (error) {
+        console.log(error);
+      }
+    },
     enabled: !!phoneNumber,
   });
 
