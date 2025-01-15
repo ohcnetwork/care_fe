@@ -44,7 +44,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { MessageSkeleton } from "@/components/Common/SkeletonComponents.tsx";
+import { MessageSkeleton } from "@/components/Common/SkeletonComponents";
 
 import useAuthUser from "@/hooks/useAuthUser";
 

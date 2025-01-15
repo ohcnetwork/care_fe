@@ -15,7 +15,7 @@ import {
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
-import { OrganizationIndexSkeleton } from "@/components/Common/SkeletonComponents.tsx";
+import { OrganizationIndexSkeleton } from "@/components/Common/SkeletonComponents";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";

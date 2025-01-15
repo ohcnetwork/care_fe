@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { FacilityOrganizationSkeleton } from "@/components/Common/SkeletonComponents.tsx";
+import { FacilityOrganizationSkeleton } from "@/components/Common/SkeletonComponents";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
