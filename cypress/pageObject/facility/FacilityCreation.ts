@@ -5,10 +5,12 @@ export class FacilityCreation {
   }
 
   navigateToFacilitiesList() {
-    cy.verifyAndClickElement(
-      '[data-testid="org-nav-facilities"]',
-      "Facilities",
-    );
+    cy.verifyAndClickElement('[data-cy="org-nav-facilities"]', "Facilities");
+  }
+
+  selectFacility(facilityName: string) {
+    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
+    return this;
   }
 
   clickAddFacility() {
@@ -97,11 +99,18 @@ export class FacilityCreation {
   searchFacility(facilityName: string) {
     cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
 
-    cy.get('[data-cy="search-facility"]')
-      .focus()
-      .type(facilityName, { force: true });
+    // Split string into array of characters using spread in Array.from
+    Array.from(facilityName).forEach((char, index) => {
+      cy.get('[data-cy="search-facility"]').type(char, {
+        delay: 500,
+        force: true,
+      });
 
-    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+      // Wait for the last character's API call
+      if (index === facilityName.length - 1) {
+        cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+      }
+    });
   }
 
   verifyFacilityNameInCard(facilityName: string) {
