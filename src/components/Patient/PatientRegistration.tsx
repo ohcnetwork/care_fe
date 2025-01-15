@@ -1,6 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { parsePhoneNumberWithError } from "libphonenumber-js";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -88,11 +91,17 @@ export default function PatientRegistration(
           name: z.string().nonempty(t("name_is_required")),
           phone_number: z
             .string()
-            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+            .refine(isValidPhoneNumber, t("phone_number_must_be_10_digits"))
+            .transform((value) =>
+              parsePhoneNumberWithError(value).number.toString(),
+            ),
           same_phone_number: z.boolean(),
           emergency_phone_number: z
             .string()
-            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+            .refine(isValidPhoneNumber, t("phone_number_must_be_10_digits"))
+            .transform((value) =>
+              parsePhoneNumberWithError(value).number.toString(),
+            ),
           gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
           blood_group: z.enum(BLOOD_GROUPS, {
             required_error: t("blood_group_is_required"),

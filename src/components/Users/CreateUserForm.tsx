@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import { isValidNumber, parsePhoneNumberWithError } from "libphonenumber-js";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -71,10 +72,16 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       email: z.string().email(t("invalid_email_address")),
       phone_number: z
         .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
+        .refine(isValidNumber, t("phone_number_validation"))
+        .transform((value) =>
+          parsePhoneNumberWithError(value).number.toString(),
+        ),
       alt_phone_number: z
         .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
+        .refine(isValidNumber, t("phone_number_validation"))
+        .transform((value) =>
+          parsePhoneNumberWithError(value).number.toString(),
+        )
         .optional(),
       phone_number_is_whatsapp: z.boolean().default(true),
       date_of_birth: z.string().min(1, t("field_required")),
