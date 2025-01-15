@@ -12,7 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
-// import { CardTitle, CardDescription } from "@/components/ui/card";
 export const EncounterListSkeleton = () => {
   return (
     <>
@@ -100,7 +99,7 @@ export const OrganizationLayoutSkeleton = () => {
       <Skeleton className="h-8 w-48 mb-4" />
       <Skeleton className="h-4 w-24 mb-4" />
       <div className="flex space-x-4 mb-4">
-        {[...Array(4)].map((_, index) => (
+        {Array.from({ length: 3 }).map((_, index) => (
           <Skeleton key={index} className="h-8 w-24" />
         ))}
       </div>
