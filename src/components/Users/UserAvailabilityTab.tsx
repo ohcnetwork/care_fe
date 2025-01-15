@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,7 @@ import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
 import {
+  computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
   getSlotsPerSession,
   isDateInRange,
@@ -188,42 +189,99 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                       </div>
 
                       <div className="pl-5 py-2 space-y-4">
-                        {template.availabilities.map(
-                          ({
-                            id,
-                            name,
-                            slot_type,
-                            availability,
-                            slot_size_in_minutes,
-                          }) => (
-                            <div key={id}>
-                              <h4 className="font-medium text-base">{name}</h4>
+                        {template.availabilities.map((availability) => {
+                          const intendedSlots =
+                            availability.slot_type === "appointment"
+                              ? getSlotsPerSession(
+                                  availability.availability[0].start_time,
+                                  availability.availability[0].end_time,
+                                  availability.slot_size_in_minutes,
+                                )
+                              : null;
+
+                          const actualSlots =
+                            availability.slot_type === "appointment"
+                              ? computeAppointmentSlots(
+                                  availability,
+                                  unavailableExceptions,
+                                  date,
+                                ).length
+                              : null;
+
+                          return (
+                            <div key={availability.id}>
+                              <h4 className="font-medium text-base">
+                                {availability.name}
+                              </h4>
                               <p className="text-sm text-gray-600">
-                                <span>{slot_type}</span>
+                                <span>
+                                  {t(
+                                    `SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`,
+                                  )}
+                                </span>
                                 <span className="px-2 text-gray-300">|</span>
                                 <span className="text-sm">
                                   {/* TODO: handle multiple days of week */}
-                                  {formatAvailabilityTime(availability)}
+                                  {formatAvailabilityTime(
+                                    availability.availability,
+                                  )}
                                 </span>
                               </p>
-                              {slot_type === "appointment" && (
+                              {availability.slot_type === "appointment" && (
                                 <p className="text-sm text-gray-600">
-                                  {Math.floor(
-                                    getSlotsPerSession(
-                                      availability[0].start_time,
-                                      availability[0].end_time,
-                                      slot_size_in_minutes,
-                                    ) ?? 0,
-                                  )}{" "}
-                                  slots of {slot_size_in_minutes} mins.
+                                  {actualSlots === intendedSlots ? (
+                                    t("session_slots_info", {
+                                      slots: actualSlots,
+                                      minutes:
+                                        availability.slot_size_in_minutes,
+                                    })
+                                  ) : (
+                                    <Trans
+                                      i18nKey="session_slots_info_striked"
+                                      components={{
+                                        s: <s />,
+                                      }}
+                                      values={{
+                                        intended_slots: intendedSlots,
+                                        actual_slots: actualSlots,
+                                        minutes:
+                                          availability.slot_size_in_minutes,
+                                      }}
+                                    />
+                                  )}
                                 </p>
                               )}
                             </div>
-                          ),
-                        )}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
+
+                  {unavailableExceptions.length > 0 && (
+                    <div className="space-y-3 mt-2">
+                      {unavailableExceptions.map((exception) => (
+                        <div key={exception.id} className="flex items-start">
+                          <div
+                            className="mr-2 mt-1 w-3 h-8 rounded bg-yellow-200"
+                            style={diagonalStripes}
+                          />
+                          <div>
+                            <p className="text-sm text-black font-medium">
+                              {t("exception")}: {exception.reason}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <span>
+                                {formatTimeShort(exception.start_time)}
+                              </span>
+                              <span className="px-2 text-gray-300">-</span>
+                              <span>{formatTimeShort(exception.end_time)}</span>
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </PopoverContent>
             </Popover>
