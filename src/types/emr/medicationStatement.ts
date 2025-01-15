@@ -1,9 +1,11 @@
+import { UserBareMinimum } from "@/components/Users/models";
+
 import { Period } from "@/types/questionnaire/base";
 import { Code } from "@/types/questionnaire/code";
 
 export enum MedicationStatementInformationSourceType {
   PATIENT = "patient",
-  USER = "user",
+  PRACTITIONER = "practitioner",
   RELATED_PERSON = "related_person",
 }
 
@@ -36,4 +38,20 @@ export type MedicationStatement = {
   information_source?: MedicationStatementInformationSourceType;
 
   note?: string;
+};
+
+export type MedicationStatementRead = {
+  id: string;
+  status: MedicationStatementStatus;
+  reason?: string;
+  medication: Code;
+  dosage_text?: string;
+  effective_period?: Period;
+  encounter: string;
+  information_source?: MedicationStatementInformationSourceType;
+  note?: string;
+  created_at: string;
+  modified_at: string;
+  created_by: UserBareMinimum;
+  updated_by: UserBareMinimum;
 };
