@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import { DualValueSetSelect } from "@/components/Questionnaire/DualValueSetSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -169,7 +170,7 @@ export function MedicationRequestQuestion({
               })}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -184,9 +185,6 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("instructions")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("additional_instructions")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("route")}
@@ -449,7 +447,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2 hidden lg:block">
@@ -651,33 +649,47 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
-        <ValueSetSelect
-          system="system-as-needed-reason"
-          value={dosageInstruction?.as_needed_for}
-          onSelect={(reason) =>
-            handleUpdateDosageInstruction({ as_needed_for: reason })
-          }
-          placeholder={t("select_prn_reason")}
-          disabled={disabled || !dosageInstruction?.as_needed_boolean}
-          wrapTextForSmallScreen={true}
-        />
-      </div>
-      {/* Additional Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("additional_instructions")}
-        </Label>
-        <ValueSetSelect
-          system="system-additional-instruction"
-          value={dosageInstruction?.additional_instruction?.[0]}
-          onSelect={(instruction) =>
-            handleUpdateDosageInstruction({
-              additional_instruction: [instruction],
-            })
-          }
-          placeholder={t("select_additional_instructions")}
-          disabled={disabled}
-        />
+        {dosageInstruction?.as_needed_boolean ? (
+          <DualValueSetSelect
+            systems={[
+              "system-as-needed-reason",
+              "system-additional-instruction",
+            ]}
+            values={[
+              dosageInstruction?.as_needed_for || null,
+              dosageInstruction?.additional_instruction?.[0] || null,
+            ]}
+            onSelect={(index, value) => {
+              if (index === 0) {
+                handleUpdateDosageInstruction({
+                  as_needed_for: value || undefined,
+                });
+              } else {
+                handleUpdateDosageInstruction({
+                  additional_instruction: value ? [value] : undefined,
+                });
+              }
+            }}
+            labels={[t("prn_reason"), t("additional_instructions")]}
+            placeholders={[
+              t("select_prn_reason"),
+              t("select_additional_instructions"),
+            ]}
+            disabled={disabled}
+          />
+        ) : (
+          <ValueSetSelect
+            system="system-additional-instruction"
+            value={dosageInstruction?.additional_instruction?.[0]}
+            onSelect={(instruction) =>
+              handleUpdateDosageInstruction({
+                additional_instruction: instruction ? [instruction] : undefined,
+              })
+            }
+            placeholder={t("select_additional_instructions")}
+            disabled={disabled}
+          />
+        )}
       </div>
       {/* Route */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
