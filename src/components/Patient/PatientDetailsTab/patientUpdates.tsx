@@ -48,7 +48,7 @@ export const Updates = (props: PatientProps) => {
 
               <PaginatedList.WhenLoading>
                 <div className="grid gap-4">
-                  {[1, 2, 3].map((i) => (
+                  {Array.from({ length: 3 }).map((_, i) => (
                     <Card
                       key={i}
                       className="flex items-center justify-between p-4"
