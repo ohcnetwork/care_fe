@@ -55,6 +55,8 @@ export default function CreateScheduleExceptionSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { replace: false });
 
@@ -140,7 +142,7 @@ export default function CreateScheduleExceptionSheet({
       form.resetField("start_time");
       form.resetField("end_time");
     }
-  }, [unavailableAllDay]);
+  }, [unavailableAllDay, form]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     createException({
