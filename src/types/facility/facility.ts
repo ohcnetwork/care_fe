@@ -1,6 +1,4 @@
-import { FeatureFlag } from "@/Utils/featureFlags";
-
-import { Organization } from "../organization/organization";
+import { Organization } from "@/types/organization/organization";
 
 export interface BaseFacility {
   id: string;
@@ -30,7 +28,6 @@ export interface FacilityData {
   geo_organization: Organization;
   latitude: number;
   longitude: number;
-  facility_flags?: FeatureFlag[];
   pincode: number;
   is_public: boolean;
 }
