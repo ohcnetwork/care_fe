@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  ParseError,
   isValidPhoneNumber,
   parsePhoneNumberWithError,
 } from "libphonenumber-js";
@@ -247,7 +248,9 @@ export default function PatientRegistration(
         })({ signal: new AbortController().signal });
         return response;
       } catch (error) {
-        console.log(error);
+        if (error instanceof ParseError) {
+          toast.error("Invalid Phone Number");
+        }
       }
     },
     enabled: isValidPhoneNumber(debouncedNumber || ""),

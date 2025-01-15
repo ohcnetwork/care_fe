@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { ParseError, parsePhoneNumberWithError } from "libphonenumber-js";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -108,7 +108,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         })({ signal: new AbortController().signal });
         return response;
       } catch (error) {
-        console.log(error);
+        if (error instanceof ParseError) {
+          toast.error("Invalid Phone Number");
+        }
       }
     },
     enabled: !!phoneNumber,
