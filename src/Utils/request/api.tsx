@@ -417,6 +417,7 @@ const routes = {
       path: "/api/v1/plug_config/{slug}/",
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
+      TBody: Type<void>(),
     },
   },
   getQuestionnaireResponses: {
