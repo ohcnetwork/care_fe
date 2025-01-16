@@ -8,7 +8,7 @@ import { validatePincode } from "@/common/validation";
 
 import { getPincodeDetails } from "@/Utils/utils";
 
-import { useOrganization } from "./useOrganization";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface UseStateAndDistrictProps {
   pincode: string;
