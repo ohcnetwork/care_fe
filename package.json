@@ -119,7 +119,7 @@
     "react-pdf": "^9.2.1",
     "react-webcam": "^7.2.0",
     "recharts": "^2.15.0",
-    "sonner": "^1.7.0",
+    "sonner": "^1.7.2",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",
