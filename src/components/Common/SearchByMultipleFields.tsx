@@ -105,12 +105,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
   const isSingleOption = options.length == 1;
+
   useEffect(() => {
     if (clearSearch?.value) {
-      const clearinput = options
-        .map((op) => op.key)
-        .some((element) => clearSearch.params?.includes(element));
-      clearinput ? setSearchValue("") : null;
+      setSearchValue("");
       inputRef.current?.focus();
     }
   }, [clearSearch?.value]);
