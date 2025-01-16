@@ -1,4 +1,4 @@
-import { Organization } from "../organization/organization";
+import { Organization } from "@/types/organization/organization";
 
 export interface BaseFacility {
   id: string;

@@ -42,7 +42,8 @@
   },
   "plugins": [
     "@typescript-eslint",
-    "i18next"
+    "i18next",
+    "no-relative-import-paths"
   ],
   "rules": {
     "no-unused-vars": "off",
@@ -76,6 +77,13 @@
             ".*"
           ]
         }
+      }
+    ],
+    "no-relative-import-paths/no-relative-import-paths": [
+      "error",
+      {
+        "allowSameFolder": true,
+        "prefix": "@" 
       }
     ]
   },
