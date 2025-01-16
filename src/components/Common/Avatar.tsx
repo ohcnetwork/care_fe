@@ -57,7 +57,7 @@ const Avatar = React.forwardRef<
   return (
     <AvatarPrimitive.Root
       ref={ref}
-      className={cn("h-full w-full", className)}
+      className={cn("w-full h-full", className)}
       style={{
         background: bgColor,
       }}
