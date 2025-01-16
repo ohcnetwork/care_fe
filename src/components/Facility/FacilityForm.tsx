@@ -285,7 +285,6 @@ export default function FacilityForm(props: FacilityProps) {
                     {...field}
                     data-cy="facility-description"
                     placeholder="Describe your facility (Markdown supported)"
-                    className="h-24"
                   />
                 </FormControl>
                 <FormMessage />
@@ -409,7 +408,6 @@ export default function FacilityForm(props: FacilityProps) {
                     {...field}
                     data-cy="facility-address"
                     placeholder="Enter complete address"
-                    className="h-20"
                   />
                 </FormControl>
                 <FormMessage />
