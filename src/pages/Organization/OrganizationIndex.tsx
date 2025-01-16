@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { OrganizationIndexSkeleton } from "@/components/Common/SkeletonComponents";
 
 import query from "@/Utils/request/query";
+import OrganizationIndexSkeleton from "@/pages/Organization/components/OrganizationIndexSkeleton";
 import {
   type Organization,
   getOrgLabel,

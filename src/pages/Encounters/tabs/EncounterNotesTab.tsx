@@ -44,7 +44,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { MessageSkeleton } from "@/components/Common/SkeletonComponents";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -53,6 +52,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import EncounterNoteSkeleton from "@/pages/Encounters/components/EncounterNoteSkeleton";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
 
@@ -551,7 +551,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
             <>
               {messagesLoading ? (
                 <div className="flex-1 p-4">
-                  <MessageSkeleton />
+                  <EncounterNoteSkeleton />
                 </div>
               ) : (
                 <>
@@ -576,7 +576,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       )}
                       {isFetchingNextPage && (
                         <div className="py-2">
-                          <MessageSkeleton />
+                          <EncounterNoteSkeleton />
                         </div>
                       )}
                       <div ref={ref} />

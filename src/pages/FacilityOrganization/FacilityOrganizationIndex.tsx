@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { FacilityOrganizationSkeleton } from "@/components/Common/SkeletonComponents";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import FacilityOrganizationSkeleton from "@/pages/FacilityOrganization/components/FacilityOrganizationSkeleton";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";

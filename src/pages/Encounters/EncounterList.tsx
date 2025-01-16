@@ -34,13 +34,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import { EncounterListSkeleton } from "@/components/Common/SkeletonComponents";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import EncounterListSkeleton from "@/pages/Encounters/components/EncounterListSkeleton";
 import { Encounter, EncounterPriority } from "@/types/emr/encounter";
 
 interface EncounterListProps {
