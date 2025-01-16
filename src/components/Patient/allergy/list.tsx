@@ -37,7 +37,7 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Allergies</CardTitle>
+          <CardTitle>{t("allergies")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-[100px] w-full" />
@@ -50,10 +50,10 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Allergies</CardTitle>
+          <CardTitle>{t("allergies")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No allergies recorded</p>
+          <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
         </CardContent>
       </Card>
     );
@@ -136,7 +136,10 @@ export function AllergyList({ patientId, encounterId }: AllergyListProps) {
                     className="w-4 h-4"
                     imageUrl={allergy.created_by.profile_picture_url}
                   />
-                  <span className="text-sm">{allergy.created_by.username}</span>
+                  <span className="text-sm">
+                    {allergy.created_by?.first_name}{" "}
+                    {allergy.created_by?.last_name}
+                  </span>
                 </TableCell>
               </TableRow>
             ))}
