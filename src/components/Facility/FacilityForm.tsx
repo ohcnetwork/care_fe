@@ -184,7 +184,7 @@ export default function FacilityForm(props: FacilityProps) {
     queryFn: query(organizationApi.get, {
       pathParams: { organizationId },
     }),
-    enabled: !!organizationId,
+    enabled: !!organizationId && !facilityId,
   });
 
   useEffect(() => {
