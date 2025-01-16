@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -17,6 +17,8 @@ interface GovtOrganizationSelectorProps {
   onChange: (value: string) => void;
   required?: boolean;
   authToken?: string;
+  selected?: Organization[];
+  errorMessage?: string;
 }
 
 interface AutoCompleteOption {
@@ -38,6 +40,22 @@ export default function GovtOrganizationSelector(
         },
       }
     : {};
+
+  useEffect(() => {
+    if (selected && selected.length > 0) {
+      let currentOrg = selected[0];
+      if (currentOrg.level_cache === 0) {
+        setSelectedLevels(selected);
+      } else {
+        const levels: Organization[] = [];
+        while (currentOrg && currentOrg.level_cache >= 0) {
+          levels.unshift(currentOrg);
+          currentOrg = currentOrg.parent as unknown as Organization;
+        }
+        setSelectedLevels(levels);
+      }
+    }
+  }, [selected]);
 
   const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
@@ -102,7 +120,19 @@ export default function GovtOrganizationSelector(
   };
 
   const handleEdit = (level: number) => {
-    setSelectedLevels((prev) => prev.slice(0, level));
+    const newLevels = selectedLevels.slice(0, level);
+    setSelectedLevels(newLevels);
+
+    if (!newLevels.length) {
+      onChange("");
+    } else {
+      const lastOrg = newLevels[newLevels.length - 1];
+      if (!lastOrg.has_children) {
+        onChange(lastOrg.id);
+      } else {
+        onChange("");
+      }
+    }
   };
 
   const lastLevel = selectedLevels[selectedLevels.length - 1];
