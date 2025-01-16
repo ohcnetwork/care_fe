@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -53,8 +54,6 @@ import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
-
-import Autocomplete from "../ui/autocomplete";
 
 interface PatientRegistrationPageProps {
   facilityId: string;

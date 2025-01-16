@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -27,8 +28,6 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
-
-import { Switch } from "../../../components/ui/switch";
 
 interface EncounterQuestionProps {
   question: Question;
