@@ -13,7 +13,7 @@ import Loading from "../Common/Loading";
 export function QuestionnaireList() {
   const navigate = useNavigate();
   const { data: response, isLoading } = useQuery({
-    queryKey: ["questionnaire"],
+    queryKey: ["questionnaires"],
     queryFn: query(questionnaireApi.list),
   });
 
