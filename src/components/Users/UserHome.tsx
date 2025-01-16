@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,7 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
@@ -59,7 +61,15 @@ export default function UserHome(props: UserHomeProps) {
     },
   );
 
-  if (loading || !userData) {
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: props.facilityId || "" },
+    }),
+    enabled: !!props.facilityId,
+  });
+
+  if (loading || facilityQuery.isLoading || !userData) {
     return <Loading />;
   }
 
@@ -91,10 +101,14 @@ export default function UserHome(props: UserHomeProps) {
   const usernameCrumb = {
     [username]: { name: loggedInUser ? "Profile" : username },
   };
+  const facilityCrumb = {
+    [props.facilityId!]: { name: facilityQuery.data?.name },
+  };
 
   const hideUsersCrumb = { users: { hide: true } };
 
   const crumbsReplacements = {
+    ...facilityCrumb,
     ...usernameCrumb,
     ...(!props.facilityId && hideUsersCrumb),
   };

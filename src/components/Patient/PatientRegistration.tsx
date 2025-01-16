@@ -157,6 +157,15 @@ export default function PatientRegistration(
     },
   });
 
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: props.facilityId,
+      },
+    }),
+  });
+
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
@@ -283,7 +292,12 @@ export default function PatientRegistration(
   }
 
   return (
-    <Page title={title}>
+    <Page
+      title={title}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityQuery.data?.name },
+      }}
+    >
       <hr className="mt-4" />
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />

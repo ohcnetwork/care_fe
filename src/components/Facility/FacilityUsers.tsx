@@ -124,6 +124,14 @@ export default function FacilityUsers(props: { facilityId: string }) {
   const [activeTab, setActiveTab] = useState<"card" | "list">("card");
   const { facilityId } = props;
 
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: props.facilityId,
+      },
+    }),
+  });
   let usersList: JSX.Element = <></>;
 
   const { data: userListData, isLoading: userListLoading } = useQuery({
@@ -157,6 +165,9 @@ export default function FacilityUsers(props: { facilityId: string }) {
   return (
     <Page
       title={t("users_management")}
+      crumbsReplacements={{
+        [props.facilityId!]: { name: facilityQuery.data?.name },
+      }}
       componentRight={
         <Badge
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"

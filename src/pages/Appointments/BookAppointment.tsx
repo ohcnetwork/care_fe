@@ -27,6 +27,7 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName, formatName } from "@/Utils/utils";
@@ -66,6 +67,22 @@ export default function BookAppointment(props: Props) {
     facilityId: props.facilityId,
     userId: resourceId,
     month: selectedMonth,
+  });
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: props.facilityId,
+      },
+    }),
+  });
+  const patientQuery = useQuery({
+    queryKey: ["patient", props.patientId],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: {
+        id: props.patientId,
+      },
+    }),
   });
 
   const slotsQuery = useQuery({
@@ -204,7 +221,13 @@ export default function BookAppointment(props: Props) {
   };
 
   return (
-    <Page title={t("book_appointment")}>
+    <Page
+      title={t("book_appointment")}
+      crumbsReplacements={{
+        [props.facilityId]: { name: facilityQuery.data?.name },
+        [props.patientId]: { name: patientQuery.data?.name },
+      }}
+    >
       <hr className="mt-6 mb-8" />
       <div className="container mx-auto p-4 max-w-5xl">
         <div className="mb-8">

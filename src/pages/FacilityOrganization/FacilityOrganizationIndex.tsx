@@ -36,8 +36,14 @@ export default function FacilityOrganizationIndex({
     }),
     enabled: !!facilityId,
   });
-
-  if (isLoading) {
+  const { data: facilityData, isLoading: isFacilityLoading } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+    enabled: !!facilityId,
+  });
+  if (isLoading || isFacilityLoading) {
     return (
       <div className="px-6 py-6 space-y-6">
         <Skeleton className="h-8 w-48" />
@@ -88,7 +94,13 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title={t("facility_organizations")} hideBack={true}>
+    <Page
+      title={t("facility_organizations")}
+      hideBack={true}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityData?.name },
+      }}
+    >
       <div className="flex justify-center md:justify-end mt-2 mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>

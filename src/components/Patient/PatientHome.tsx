@@ -26,6 +26,14 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
 
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: props.facilityId || "",
+      },
+    }),
+  });
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
     queryFn: query(routes.patient.getPatient, {
@@ -49,6 +57,10 @@ export const PatientHome = (props: {
   return (
     <Page
       title={t("patient_details")}
+      crumbsReplacements={{
+        [patientData.id]: { name: patientData.name },
+        [facilityId || ""]: { name: facilityQuery.data?.name },
+      }}
       options={
         <>
           <Button asChild variant="primary">

@@ -92,7 +92,14 @@ export const EncounterShow = (props: Props) => {
     }),
     enabled: !!encounterId,
   });
-
+  const facilityQuery = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: props.facilityId,
+      },
+    }),
+  });
   // const encounterQuery = useTanStackQueryInstead(routes.encounter.get, {
   //   pathParams: { id: consultationId },
   // });
@@ -194,6 +201,9 @@ export const EncounterShow = (props: Props) => {
             },
             [encounterId]: {
               name: encounterData.status,
+            },
+            [facilityId]: {
+              name: facilityQuery?.data?.name,
             },
           }}
           breadcrumbs={true}

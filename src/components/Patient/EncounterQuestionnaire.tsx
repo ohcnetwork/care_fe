@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 
@@ -7,6 +8,9 @@ import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import useAppHistory from "@/hooks/useAppHistory";
+
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 
 interface Props {
   facilityId: string;
@@ -24,10 +28,33 @@ export default function EncounterQuestionnaire({
   subjectType,
 }: Props) {
   const { goBack } = useAppHistory();
+
+  const { data: encounterData } = useQuery({
+    queryKey: ["encounter", encounterId],
+    queryFn: query(routes.encounter.get, {
+      pathParams: { id: encounterId! },
+      queryParams: {
+        facility: facilityId,
+      },
+    }),
+    enabled: !!encounterId,
+  });
+
   return (
     <Page
       title={t("questionnaire")}
       backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
+      crumbsReplacements={{
+        [facilityId || ""]: {
+          name: encounterData?.facility.name,
+        },
+        [encounterId || ""]: {
+          name: encounterData?.status,
+        },
+        [patientId || ""]: {
+          name: encounterData?.patient.name,
+        },
+      }}
     >
       <Card className="mt-2">
         <CardContent className="lg:p-4 p-0">

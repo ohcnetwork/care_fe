@@ -202,7 +202,14 @@ export function EncounterList({
     }),
     enabled: !!encounter_id,
   });
-
+  const facilityQuery = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: {
+        id: facilityId || "",
+      },
+    }),
+  });
   const searchOptions = [
     {
       key: "name",
@@ -238,7 +245,13 @@ export function EncounterList({
   const { t } = useTranslation();
 
   return (
-    <Page title={t("encounters")} hideBack={true}>
+    <Page
+      title={t("encounters")}
+      hideBack={true}
+      crumbsReplacements={{
+        [facilityId || ""]: { name: facilityQuery.data?.name },
+      }}
+    >
       <div className="space-y-4 mt-2">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
