@@ -29,14 +29,8 @@ interface Props {
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
 
-  const {
-    qParams,
-    Pagination,
-    advancedFilter,
-    resultsPerPage,
-    clearSearch,
-    updateQuery,
-  } = useFilters({ limit: 15, cacheBlacklist: ["name", "phone_number"] });
+  const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
+    useFilters({ limit: 15, cacheBlacklist: ["name", "phone_number"] });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 
@@ -74,7 +68,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         name: undefined,
         phone_number: undefined,
       });
-      clearSearch.value = true;
     }
   };
 
@@ -116,7 +109,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
             0,
           )}
           onSearch={handleSearch}
-          clearSearch={{ value: !qParams.name && !qParams.phone_number }}
           onFieldChange={handleFieldChange}
         />
 

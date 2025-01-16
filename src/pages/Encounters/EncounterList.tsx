@@ -148,11 +148,10 @@ export function EncounterList({
   encounters: propEncounters,
   facilityId,
 }: EncounterListProps) {
-  const { qParams, updateQuery, Pagination, clearSearch, resultsPerPage } =
-    useFilters({
-      limit: 15,
-      cacheBlacklist: ["name", "encounter_id", "external_identifier"],
-    });
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+    cacheBlacklist: ["name", "encounter_id", "external_identifier"],
+  });
   const {
     status,
     encounter_class: encounterClass,
@@ -171,7 +170,6 @@ export function EncounterList({
         encounter_id: undefined,
         external_identifier: undefined,
       });
-      clearSearch.value = true;
     }
   };
 
@@ -294,7 +292,6 @@ export function EncounterList({
                         )}
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
-                        clearSearch={clearSearch}
                         className="w-full border-none shadow-none"
                       />
                     </div>
