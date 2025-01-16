@@ -29,6 +29,7 @@ export type FileUploadOptions = {
   multiple?: boolean;
   type: string;
   category?: FileCategory;
+  CombineToPDF?: boolean;
   onUpload?: (file: FileUploadModel) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
@@ -86,6 +87,7 @@ export default function useFileUpload(
     category = "unspecified",
     multiple,
     allowNameFallback = true,
+    CombineToPDF,
   } = options;
 
   const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
@@ -281,7 +283,16 @@ export default function useFileUpload(
     setProgress(0);
     const errors: File[] = [];
 
-    for (const [index, file] of filesToUpload.entries()) {
+    if (CombineToPDF && files.length > 1) {
+      const pdfFile = await generatePDF(files);
+      if (pdfFile) {
+        files.splice(0, files.length, pdfFile);
+      } else {
+        console.error("Failed to generate PDF from multiple files.");
+        return;
+      }
+    }
+    for (const [index, file] of files.entries()) {
       const filename =
         allowNameFallback && uploadFileNames[index] === "" && file
           ? file.name

@@ -66,6 +66,7 @@ export const FilesTab = (props: FilesTabProps) => {
   });
   const { t } = useTranslation();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [isPdf, setIsPdf] = useState(false);
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
@@ -126,6 +127,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
+    CombineToPDF: isPdf,
     allowedExtensions: [
       "jpg",
       "jpeg",
@@ -357,6 +359,22 @@ export const FilesTab = (props: FilesTabProps) => {
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
+            </label>
+            {fileUpload.Input({ className: "hidden" })}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="flex flex-row items-center"
+            onSelect={(e) => {
+              e.preventDefault();
+              setIsPdf(true);
+            }}
+          >
+            <label
+              htmlFor="file_upload_patient"
+              className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
+            >
+              <CareIcon icon="l-file-upload-alt" className="mr-1" />
+              <span>{t("combine_files_pdf")}</span>
             </label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
