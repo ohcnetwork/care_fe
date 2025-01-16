@@ -109,7 +109,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
-  console.log(facilityData);
   const handleDeleteSubmit = async () => {
     await request(routes.deleteFacility, {
       pathParams: { id: facilityId },
