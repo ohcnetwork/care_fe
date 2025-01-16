@@ -26,10 +26,11 @@ interface AutoCompleteOption {
   value: string;
 }
 
+// TODO: Rename to GovtOrganizationSelector
 export default function GovtOrganizationSelector(
   props: GovtOrganizationSelectorProps,
 ) {
-  const { onChange, required } = props;
+  const { onChange, required, selected } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
