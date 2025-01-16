@@ -3,6 +3,8 @@ import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,11 +74,10 @@ export function FacilitySwitcher({
                     setOpenMobile(false);
                   }
                 }}
-                className={`gap-2 p-2 ${
-                  facility.name === selectedFacility?.name
-                    ? "bg-primary-500 text-white"
-                    : ""
-                }`}
+                className={cn("gap-2 p-2", {
+                  "bg-primary-500 text-white":
+                    facility.name === selectedFacility?.name,
+                })}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Hospital className="size-4 shrink-0" />

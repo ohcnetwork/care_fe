@@ -3,6 +3,8 @@ import { Globe } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,11 +79,10 @@ export function OrganizationSwitcher({
                 setOpenMobile(false);
               }
             }}
-            className={`gap-2 p-2 ${
-              org?.name === selectedOrganization?.name
-                ? "bg-primary-500 text-white"
-                : ""
-            }`}
+            className={cn("gap-2 p-2", {
+              "bg-primary-500 text-white":
+                org?.name === selectedOrganization?.name,
+            })}
           >
             {org.name}
           </DropdownMenuItem>
