@@ -47,6 +47,7 @@ import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
@@ -58,7 +59,7 @@ export default function FacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const { facilityId, onSubmitSuccess } = props;
+  const { facilityId, organizationId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
@@ -178,11 +179,21 @@ export default function FacilityForm(props: FacilityProps) {
     pincode: form.watch("pincode")?.toString() || "",
   });
 
+  const { data: org } = useQuery<Organization>({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
   useEffect(() => {
     if (facilityId) return;
     const levels: Organization[] = [];
     if (stateOrg) levels.push(stateOrg);
     if (districtOrg) levels.push(districtOrg);
+    if (organizationId && org) levels.push(org);
+
     setSelectedLevels(levels);
 
     if (levels.length == 2) {
@@ -193,7 +204,7 @@ export default function FacilityForm(props: FacilityProps) {
       return () => clearTimeout(timer);
     }
     return () => setShowAutoFilledPincode(false);
-  }, [stateOrg, districtOrg, facilityId]);
+  }, [stateOrg, districtOrg, organizationId, facilityId]);
 
   // Update form when facility data is loaded
   useEffect(() => {
