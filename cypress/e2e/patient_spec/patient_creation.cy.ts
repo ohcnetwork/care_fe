@@ -42,7 +42,7 @@ describe("Patient Management", () => {
 
   it("create a new patient and verify details", () => {
     cy.loginByApi("doctor");
-    facilityCreation.selectFacility("Arike");
+    facilityCreation.selectFacility("GHC Trikaripur");
     patientCreation
       .clickSearchPatients()
       .clickCreateNewPatient()
@@ -67,7 +67,7 @@ describe("Patient Management", () => {
 
   it("search patient with phone number and verifies details", () => {
     cy.loginByApi("staff");
-    facilityCreation.selectFacility("Arike");
+    facilityCreation.selectFacility("GHC Trikaripur");
     patientCreation
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
