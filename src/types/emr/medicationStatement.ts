@@ -40,6 +40,16 @@ export type MedicationStatement = {
   note?: string;
 };
 
+export type MedicationStatementRequest = {
+  status: MedicationStatementStatus;
+  reason?: string;
+  medication: Code;
+  dosage_text?: string;
+  effective_period?: Period;
+  information_source?: MedicationStatementInformationSourceType;
+  note?: string;
+};
+
 export type MedicationStatementRead = {
   id: string;
   status: MedicationStatementStatus;
