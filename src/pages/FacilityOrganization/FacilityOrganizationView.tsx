@@ -54,10 +54,10 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
   return (
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
           <h2 className="text-lg font-semibold">{t("organizations")}</h2>
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="w-full sm:w-72">
+          <div className="flex flex-col items-center md:flex-row sm:items-center gap-4 w-full lg:justify-end">
+            <div className="w-full lg:w-1/3">
               <Input
                 placeholder="Search by name..."
                 value={searchQuery}
@@ -68,10 +68,12 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 className="w-full"
               />
             </div>
-            <CreateFacilityOrganizationSheet
-              facilityId={facilityId}
-              parentId={id}
-            />
+            <div className="w-auto">
+              <CreateFacilityOrganizationSheet
+                facilityId={facilityId}
+                parentId={id}
+              />
+            </div>
           </div>
         </div>
 
@@ -99,8 +101,8 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                   <Card key={org.id}>
                     <CardContent className="p-6">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
+                        <div className="flex items-center justify-between flex-wrap">
+                          <div className="space-y-1 mb-2">
                             <h3 className="text-lg font-semibold">
                               {org.name}
                             </h3>
@@ -113,7 +115,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                             <Link
                               href={`/facility/${facilityId}/organization/${org.id}`}
                             >
-                              View Details
+                              {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
                                 className="h-4 w-4"
@@ -134,8 +136,8 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {searchQuery
-                      ? `No organizations found matching "${searchQuery}"`
-                      : "No sub-organizations found."}
+                      ? t("no_organizations_found_matching", { searchQuery })
+                      : t("no_sub_organizations_found")}
                   </CardContent>
                 </Card>
               )}

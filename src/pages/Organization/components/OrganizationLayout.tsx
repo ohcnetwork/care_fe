@@ -173,7 +173,7 @@ export default function OrganizationLayout({
       </Breadcrumb>
       {/* Navigation */}
       <div className="mt-4">
-        <Menubar>
+        <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
             .map((item) => (
