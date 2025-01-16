@@ -182,7 +182,7 @@ export default function FacilityForm(props: FacilityProps) {
   const { data: org } = useQuery<Organization>({
     queryKey: ["organization", organizationId],
     queryFn: query(organizationApi.get, {
-      pathParams: { organizationId },
+      pathParams: { id: organizationId },
     }),
     enabled: !!organizationId && !facilityId,
   });
