@@ -55,7 +55,7 @@ export function OrganizationSwitcher({
         </SidebarMenu>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
         align="start"
         side={isMobile ? "bottom" : "right"}
         sideOffset={4}
@@ -75,6 +75,11 @@ export function OrganizationSwitcher({
                 setOpenMobile(false);
               }
             }}
+            className={`gap-2 p-2 ${
+              org?.name === selectedOrganization?.name
+                ? "bg-primary-500 text-white"
+                : ""
+            }`}
           >
             {org.name}
           </DropdownMenuItem>
