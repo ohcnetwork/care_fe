@@ -205,7 +205,7 @@ export const PrintPrescription = (props: {
                   const dosage = formatDosage(instruction);
                   const duration = instruction?.timing?.repeat?.bounds_duration;
                   const remarks = formatSig(instruction);
-
+                  const notes = medication.note;
                   return (
                     <TableRow
                       key={medication.id}
@@ -230,6 +230,7 @@ export const PrintPrescription = (props: {
                       </TableCell>
                       <TableCell className="py-2 px-3">
                         {remarks || "-"}
+                        {notes ? ` (${t("note")}: ${notes})` : ""}
                       </TableCell>
                     </TableRow>
                   );

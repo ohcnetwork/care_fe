@@ -38,6 +38,7 @@ import {
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { DualValueSetSelect } from "@/components/Questionnaire/DualValueSetSelect";
+import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -170,7 +171,7 @@ export function MedicationRequestQuestion({
               })}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -197,6 +198,9 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("intent")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("notes")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
               </div>
@@ -276,7 +280,7 @@ export function MedicationRequestQuestion({
                           </div>
                         </div>
                         <CollapsibleContent>
-                          <div className="p-4 space-y-4 bg-white mx-2 mb-1 rounded-md shadow-sm">
+                          <div className="py-4 space-y-4 bg-white mx-2 mb-1">
                             <MedicationRequestGridRow
                               medication={medication}
                               disabled={disabled}
@@ -447,7 +451,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,48px] border-b hover:bg-gray-50/50">
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2 hidden lg:block">
@@ -750,6 +754,39 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </SelectContent>
         </Select>
+      </div>
+      {/* Notes */}
+      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
+        <Label className="mb-1.5 block text-sm lg:hidden">{t("notes")}</Label>
+        {desktopLayout ? (
+          <>
+            <Label className="mb-1.5 block text-sm lg:hidden">
+              {t("notes")}
+            </Label>
+            <Input
+              value={medication.note || ""}
+              onChange={(e) => onUpdate?.({ note: e.target.value })}
+              placeholder={t("add_notes")}
+              disabled={disabled}
+              className="h-9 text-sm"
+            />
+          </>
+        ) : (
+          <NotesInput
+            className="mt-2"
+            questionnaireResponse={{
+              question_id: "",
+              structured_type: "medication_request",
+              link_id: "",
+              values: [],
+              note: medication.note,
+            }}
+            updateQuestionnaireResponseCB={(response) => {
+              onUpdate?.({ note: response.note });
+            }}
+            disabled={disabled}
+          />
+        )}
       </div>
       {/* Remove Button */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
