@@ -61,16 +61,21 @@ const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
           <kbd>Esc</kbd>
         </span>
       ) : isAppleDevice ? (
-        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-          <kbd>⌘K</kbd>
-        </span>
+        <div className="flex gap-1 font-medium">
+          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+            <kbd>⌘</kbd>
+          </span>
+          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+            <kbd>K</kbd>
+          </span>
+        </div>
       ) : (
         <div className="flex gap-1 font-medium">
           <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
             <kbd>Ctrl</kbd>
           </span>
           <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>k</kbd>
+            <kbd>K</kbd>
           </span>
         </div>
       )}
