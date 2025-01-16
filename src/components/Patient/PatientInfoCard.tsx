@@ -85,29 +85,29 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
     <>
       <section className="flex flex-col lg:flex-row">
         <div
-          className="flex w-full flex-col bg-white px-4 pt-2 lg:flex-row"
+          className="flex w-full flex-col bg-white px-4 pt-4 lg:flex-row"
           id="patient-infobadges"
         >
-          <div className="flex justify-evenly lg:justify-normal">
+          <div className="flex justify-items-start gap-5 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-24 min-w-20 bg-secondary-200 h-24">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex justify-center">
               <div
-                className="mb-2 flex flex-col justify-center text-xl font-semibold capitalize lg:hidden"
+                className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 {patient.name}
-                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
+                <div className="mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
               </div>
             </div>
           </div>
           <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2">
-            <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
+            <div className="w-full flex flex-col flex-wrap justify-center lg:items-start lg:justify-normal">
               <div
                 className="hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
@@ -117,7 +117,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
               </div>
-              <div className="grid gap-4 grid-cols-3">
+              <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
                   <span className="text-xs text-muted-foreground font-medium">
                     Start Date
@@ -151,7 +151,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row mt-2">
                 <div
-                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
+                  className="flex w-full flex-wrap items-center justify-start gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
                   <Popover>
@@ -177,7 +177,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         </Badge>
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2">
+                    <PopoverContent align={"start"} className="w-auto p-2">
                       <div className="space-y-2">
                         <h4 className="font-medium text-sm">Status History</h4>
                         {encounter.status_history.history.map(
@@ -218,7 +218,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         </Badge>
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2">
+                    <PopoverContent align={"end"} className="w-auto p-2">
                       <div className="space-y-2">
                         <h4 className="font-medium text-sm">Class History</h4>
                         {encounter.encounter_class_history.history.map(
