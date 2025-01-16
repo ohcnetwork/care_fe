@@ -79,10 +79,11 @@ export function OrganizationSwitcher({
                 setOpenMobile(false);
               }
             }}
-            className={cn("gap-2 p-2", {
-              "bg-primary-500 text-white":
-                org?.name === selectedOrganization?.name,
-            })}
+            className={cn(
+              "gap-2 p-2",
+              org?.name === selectedOrganization?.name &&
+                "bg-primary-500 text-white",
+            )}
           >
             {org.name}
           </DropdownMenuItem>

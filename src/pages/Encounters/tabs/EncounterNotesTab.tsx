@@ -157,7 +157,7 @@ const MessageItem = ({ message }: { message: Message }) => {
                 <Avatar
                   name={message.created_by.username}
                   imageUrl={message.created_by.profile_picture_url}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="flex w-8 h-8 rounded-full object-cover"
                 />
               </div>
             </TooltipTrigger>

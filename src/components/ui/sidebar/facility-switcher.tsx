@@ -74,10 +74,11 @@ export function FacilitySwitcher({
                     setOpenMobile(false);
                   }
                 }}
-                className={cn("gap-2 p-2", {
-                  "bg-primary-500 text-white":
-                    facility.name === selectedFacility?.name,
-                })}
+                className={cn(
+                  "gap-2 p-2",
+                  facility.name === selectedFacility?.name &&
+                    "bg-primary-500 text-white",
+                )}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Hospital className="size-4 shrink-0" />

@@ -57,7 +57,7 @@ const Avatar = React.forwardRef<
   return (
     <AvatarPrimitive.Root
       ref={ref}
-      className={cn(className, "flex items-center justify-center")}
+      className={cn("h-full w-full", className)}
       style={{
         background: bgColor,
       }}
@@ -66,7 +66,7 @@ const Avatar = React.forwardRef<
         <AvatarPrimitive.Image
           src={imageUrl}
           alt={name}
-          className="aspect-square object-cover"
+          className="aspect-square h-full w-full object-cover"
         />
       ) : (
         <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
@@ -74,7 +74,7 @@ const Avatar = React.forwardRef<
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
             viewBox="0 0 100 100"
-            className="aspect-square object-cover"
+            className="aspect-square h-full w-full object-cover"
           >
             <text
               fill={textColor}
