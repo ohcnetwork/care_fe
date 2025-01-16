@@ -63,12 +63,10 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   }, []);
 
   const handleFieldChange = () => {
-    {
-      updateQuery({
-        name: undefined,
-        phone_number: undefined,
-      });
-    }
+    updateQuery({
+      name: undefined,
+      phone_number: undefined,
+    });
   };
 
   const { data: patients, isLoading } = useQuery({

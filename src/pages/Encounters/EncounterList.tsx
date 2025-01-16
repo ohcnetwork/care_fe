@@ -161,16 +161,14 @@ export function EncounterList({
     external_identifier,
   } = qParams;
   const handleFieldChange = () => {
-    {
-      updateQuery({
-        status,
-        encounter_class: encounterClass,
-        priority,
-        name: undefined,
-        encounter_id: undefined,
-        external_identifier: undefined,
-      });
-    }
+    updateQuery({
+      status,
+      encounter_class: encounterClass,
+      priority,
+      name: undefined,
+      encounter_id: undefined,
+      external_identifier: undefined,
+    });
   };
 
   const handleSearch = useCallback(
