@@ -179,7 +179,6 @@ export default function FacilityForm(props: FacilityProps) {
   });
 
   useEffect(() => {
-    // Fill by pincode for patient registration
     if (facilityId) return;
     const levels: Organization[] = [];
     if (stateOrg) levels.push(stateOrg);
