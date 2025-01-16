@@ -165,6 +165,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const hasPermissionToEditCoverImage = true;
 
+  const coverImageHint = (
+    <>
+      {t("max_size_for_image_uploaded_should_be")} 1mb.
+      <br />
+      {t("allowed_formats_are")} jpg,png,jpeg.{" "}
+      {t("recommended_aspect_ratio_for")} the image is 16:9
+    </>
+  );
+
   return (
     <div>
       <ConfirmDialog
@@ -187,6 +196,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleUpload={handleCoverImageUpload}
         handleDelete={handleCoverImageDelete}
         onClose={() => setEditCoverImage(false)}
+        hint={coverImageHint}
       />
       <div className="container mx-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
