@@ -37,8 +37,8 @@ export class LoginPage {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      "This field is required",
-      "This field is required",
+      { label: "Username", message: "This field is required" },
+      { label: "Password", message: "This field is required" },
     ]);
     return this;
   }
