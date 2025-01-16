@@ -194,12 +194,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                   <img
                     src={facilityData.read_cover_image_url}
                     alt={facilityData?.name}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
                 <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
@@ -226,7 +226,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <Button
                           variant="secondary"
                           size="icon"
-                          className="bg-white/10 hover:bg-white/20"
+                          className="bg-white/20 hover:bg-white/40"
                         >
                           <MoreVertical className="h-4 w-4 text-white" />
                         </Button>
@@ -270,7 +270,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <CardContent>
                   <div className="flex flex-col gap-4 items-start mt-4">
                     <div className="flex items-start gap-3">
-                      <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                      <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>
                         {facilityData?.geo_organization && (
                           <div className="mt-2 text-sm">
@@ -334,7 +334,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
               {facilityData?.description && (
                 <Card>
-                  <CardContent className="mt-4">
+                  <CardContent className="mt-4 text-justify">
                     <Markdown content={facilityData.description} />
                   </CardContent>
                 </Card>
