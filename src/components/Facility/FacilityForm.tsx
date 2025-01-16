@@ -519,10 +519,7 @@ export default function FacilityForm(props: FacilityProps) {
         <Button
           type="submit"
           className="w-full"
-          disabled={
-            !form.formState.isDirty ||
-            (facilityId ? isUpdatePending : isPending)
-          }
+          disabled={facilityId ? isUpdatePending : isPending}
           data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
           {facilityId ? (
