@@ -170,7 +170,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     const commonProps = {
       ref: inputRef,
       value: searchValue,
-      onChange: handleSearchChange,
       className: cn(
         "flex-grow border-none shadow-none focus-visible:ring-0",
         inputClassName,
@@ -185,12 +184,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             {...commonProps}
-            onChange={(e) => {
-              handleSearchChange({ value: e.target.value });
+            onValueChange={(value) => {
+              handleSearchChange({ value });
               setError(
-                isValidPhoneNumber(e.target.value)
-                  ? undefined
-                  : "Invalid phone number",
+                isValidPhoneNumber(value) ? undefined : "Invalid Phone Number",
               );
             }}
           />
@@ -202,6 +199,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             type="text"
             placeholder={selectedOption.placeholder}
             {...commonProps}
+            onChange={handleSearchChange}
           />
         );
     }
@@ -261,7 +259,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       </div>
       {error && (
         <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
-          {t("invalid_phone_number")}
+          {error}
         </div>
       )}
       {enableOptionButtons && (
