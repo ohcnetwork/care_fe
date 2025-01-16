@@ -2,6 +2,11 @@ import { FacilityCreation } from "../../pageObject/facility/FacilityCreation";
 import { generatePhoneNumber } from "../../utils/commonUtils";
 import { generateFacilityData } from "../../utils/facilityData";
 
+const LOCATION_HIERARCHY = {
+  localBody: "Aluva",
+  ward: "4",
+};
+
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
@@ -35,6 +40,8 @@ describe("Facility Management", () => {
       testFacility.pincode,
       testFacility.address,
     );
+
+    facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 
     facilityPage.fillLocationDetails(
       testFacility.coordinates.latitude,

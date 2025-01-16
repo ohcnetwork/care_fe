@@ -153,7 +153,7 @@ const MessageItem = ({ message }: { message: Message }) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex-shrink-0">
+              <div className="flex">
                 <Avatar
                   name={message.created_by.username}
                   imageUrl={message.created_by.profile_picture_url}
