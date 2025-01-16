@@ -50,7 +50,9 @@ export class UserCreation {
   }
 
   fillEmail(email: string) {
-    cy.typeIntoField('[data-cy="email-input"]', email);
+    cy.typeIntoField('[data-cy="email-input"]', email, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
@@ -68,7 +70,6 @@ export class UserCreation {
       { label: "Username", message: "Required" },
       { label: "Password", message: "Required" },
       { label: "Confirm Password", message: "Required" },
-      { label: "Email", message: "Required" },
       {
         label: "Phone Number",
         message: "Phone number must start with +91 followed by 10 digits",
