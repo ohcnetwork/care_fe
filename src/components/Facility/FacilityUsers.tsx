@@ -15,8 +15,6 @@ import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 
@@ -120,7 +118,7 @@ const UserListSkeleton = () => (
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination } = useFilters({
-    limit: RESULTS_PER_PAGE_LIMIT,
+    limit: 15,
     cacheBlacklist: ["username"],
   });
   const [activeTab, setActiveTab] = useState<"card" | "list">("card");
