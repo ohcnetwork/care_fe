@@ -26,7 +26,6 @@ interface AutoCompleteOption {
   value: string;
 }
 
-// TODO: Rename to GovtOrganizationSelector
 export default function GovtOrganizationSelector(
   props: GovtOrganizationSelectorProps,
 ) {
