@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberWithError,
+} from "libphonenumber-js";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,7 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/input-phone";
 import {
   Select,
   SelectContent,
@@ -44,10 +47,11 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+
+import { PhoneInput } from "../ui/input-phone";
 
 interface FacilityProps {
   organizationId?: string;
@@ -73,7 +77,8 @@ export default function FacilityForm(props: FacilityProps) {
     address: z.string().min(1, t("address_is_required")),
     phone_number: z
       .string()
-      .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
+      .refine(isValidPhoneNumber, "Invalid phone number")
+      .transform((value) => parsePhoneNumberWithError(value).number.toString()),
     latitude: z
       .string()
       .optional()
@@ -137,15 +142,10 @@ export default function FacilityForm(props: FacilityProps) {
   const onSubmit: (data: FacilityFormValues) => void = (
     data: FacilityFormValues,
   ) => {
-    const requestData = {
-      ...data,
-      phone_number: parsePhoneNumber(data.phone_number),
-    };
-
     if (facilityId) {
-      updateFacility(requestData);
+      updateFacility({ ...data, geo_organization: props.organizationId });
     } else {
-      createFacility(requestData);
+      createFacility({ ...data, geo_organization: props.organizationId });
     }
   };
 

@@ -112,7 +112,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div>
               <div className="text-gray-500">{t("phone_number")}</div>
               <div className="font-medium truncate">
-                {formatPhoneNumber(user.phone_number) ?? "-"}
+                {parsePhoneNumberWithError(
+                  user.phone_number,
+                ).formatInternational() ?? "-"}
               </div>
             </div>
           </div>
