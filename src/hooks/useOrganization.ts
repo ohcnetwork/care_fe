@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { t } from "i18next";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 import query from "@/Utils/request/query";
-import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface UseOrganizationParams {
@@ -19,7 +19,7 @@ export function useOrganization({
   name = "",
   enabled = true,
 }: UseOrganizationParams) {
-  const { data, isLoading, isError } = useQuery<{ results: Organization[] }>({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["organization", orgType, name, parentId],
     queryFn: query(organizationApi.list, {
       queryParams: {
@@ -29,12 +29,13 @@ export function useOrganization({
       },
     }),
     enabled: enabled && !!name,
-    select: (res) => ({ results: res.results }),
   });
 
-  const { t } = useTranslation();
-
-  isError && toast.error(t("organizations_fetch_error"));
+  useEffect(() => {
+    if (isError) {
+      toast.error(t("organizations_fetch_error"));
+    }
+  }, [isError]);
 
   return {
     organizations: data?.results || [],

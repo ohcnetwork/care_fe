@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FacilityModel } from "@/components/Facility/models";
 import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
 
 import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
@@ -47,32 +48,6 @@ import OrganizationSelector from "@/pages/Organization/components/OrganizationSe
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 
-import { FacilityModel } from "./models";
-
-const facilityFormSchema = z.object({
-  facility_type: z.string().min(1, t("facility_type_required")),
-  name: z.string().min(1, t("name_is_required")),
-  description: z.string().optional(),
-  features: z.array(z.number()).default([]),
-  pincode: z.string().refine(validatePincode, t("invalid_pincode")),
-  geo_organization: z.string().min(1, t("organization_required")),
-  address: z.string().min(1, t("address_is_required")),
-  phone_number: z
-    .string()
-    .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
-  latitude: z
-    .string()
-    .optional()
-    .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
-  longitude: z
-    .string()
-    .optional()
-    .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
-  is_public: z.boolean().default(false),
-});
-
-type FacilityFormValues = z.infer<typeof facilityFormSchema>;
-
 interface FacilityProps {
   organizationId?: string;
   facilityId?: string;
@@ -80,11 +55,36 @@ interface FacilityProps {
 }
 
 export default function FacilityForm(props: FacilityProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { facilityId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+
+  const facilityFormSchema = z.object({
+    facility_type: z.string().min(1, t("facility_type_required")),
+    name: z.string().min(1, t("name_is_required")),
+    description: z.string().optional(),
+    features: z.array(z.number()).default([]),
+    pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+    geo_organization: z.string().min(1, t("organization_required")),
+    address: z.string().min(1, t("address_is_required")),
+    phone_number: z
+      .string()
+      .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
+    latitude: z
+      .string()
+      .optional()
+      .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
+    longitude: z
+      .string()
+      .optional()
+      .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
+    is_public: z.boolean().default(false),
+  });
+
+  type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilityFormSchema),
@@ -355,9 +355,6 @@ export default function FacilityForm(props: FacilityProps) {
                       placeholder="Enter pincode"
                       maxLength={6}
                       {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -525,7 +522,10 @@ export default function FacilityForm(props: FacilityProps) {
         <Button
           type="submit"
           className="w-full"
-          disabled={facilityId ? isUpdatePending : isPending}
+          disabled={
+            !form.formState.isDirty ||
+            (facilityId ? isUpdatePending : isPending)
+          }
           data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
           {facilityId ? (
