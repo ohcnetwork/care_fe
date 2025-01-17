@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +43,7 @@ export function DualValueSetSelect({
   systems,
   values = [null, null],
   onSelect,
-  placeholders = ["Search...", "Search..."],
+  placeholders = [t("search"), t("search")],
   disabled,
   count = 10,
   searchPostFix = "",
@@ -119,12 +120,13 @@ export function DualValueSetSelect({
                       <span className="text-sm truncate flex-1 mr-2">
                         {value.display}
                       </span>
-                      <button
+                      <Button
                         onClick={(e) => handleRemove(index as TabIndex, e)}
-                        className="hover:text-gray-700 text-gray-500 shrink-0"
+                        variant="ghost"
+                        size="icon"
                       >
                         <X className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </div>
                   ),
               )}
