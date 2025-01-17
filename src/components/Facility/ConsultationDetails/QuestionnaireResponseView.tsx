@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,28 +10,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 export default function QuestionnaireResponseView({
   responseId,
-
   patientId,
 }: {
   responseId: string;
   patientId: string;
 }) {
   const { t } = useTranslation();
-  const { data: formResponse, loading } = useQuery(
-    routes.getQuestionnaireResponse,
-    {
+  const { data: formResponse, isLoading } = useQuery({
+    queryKey: ["getQuestionnaireResponse", patientId, responseId],
+    queryFn: query(routes.getQuestionnaireResponse, {
       pathParams: { patientId, responseId },
-    },
-  );
+    }),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Skeleton className="h-8 w-64" />
