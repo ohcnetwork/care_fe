@@ -61,7 +61,7 @@ export default function ErrorPage({
           <Button
             onClick={() => {
               // Refresh the Page
-              goBack();
+              goBack("/");
               window.location.reload();
             }}
             className="inline-block rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700 hover:text-white"
