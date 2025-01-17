@@ -89,7 +89,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       clearinput ? setSearchValue("") : null;
       inputRef.current?.focus();
     }
-  }, [clearSearch]);
+  }, [clearSearch?.value]);
 
   const handleOptionChange = useCallback(
     (index: number) => {
@@ -160,7 +160,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
-  }, [searchValue, selectedOption.key, selectedOption.value, onSearch]);
+  }, [searchValue]);
 
   const handleSearchChange = useCallback((event: EventType) => {
     const value = "target" in event ? event.target.value : event.value;
@@ -173,7 +173,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       value: searchValue,
       onChange: handleSearchChange,
       className: cn(
-        "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
+        "flex-grow border-none shadow-none focus-visible:ring-0",
         inputClassName,
       ),
     } as const;
@@ -222,7 +222,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="focus:ring-0 px-2 ml-1"
+              className="px-2 ml-1 focus:ring-0"
               size="sm"
               onClick={() => setOpen(true)}
             >
@@ -242,7 +242,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                         "hover:bg-secondary-100": true,
                       })}
                     >
-                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      <CareIcon icon="l-search" className="w-4 h-4 mr-2" />
                       <span className="flex-1">{t(option.key)}</span>
                       <kbd className="ml-auto text-xs text-gray-400">
                         {option.shortcutKey}
@@ -257,12 +257,12 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         <div className="w-full">{renderSearchInput}</div>
       </div>
       {error && (
-        <div className="error-text px-2 mb-1 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
+        <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
           {t("invalid_phone_number")}
         </div>
       )}
       {enableOptionButtons && (
-        <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
+        <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
           {options.map((option, i) => (
             <Button
               key={option.key}

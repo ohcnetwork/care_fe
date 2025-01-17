@@ -19,7 +19,7 @@ interface Props {
 export function FacilityCard({ facility, className }: Props) {
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="h-32 w-32 shrink-0 overflow-hidden rounded-lg">

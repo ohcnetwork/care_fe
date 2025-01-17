@@ -173,13 +173,13 @@ export default function OrganizationLayout({
       </Breadcrumb>
       {/* Navigation */}
       <div className="mt-4">
-        <Menubar>
+        <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
             .map((item) => (
               <MenubarMenu key={item.path}>
                 <MenubarTrigger
-                  data-testid={`org-nav-${item.title.toLowerCase()}`}
+                  data-cy={`org-nav-${item.title.toLowerCase()}`}
                   className={`${
                     path === item.path
                       ? "font-medium text-primary-700 bg-gray-100"
