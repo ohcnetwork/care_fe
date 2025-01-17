@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
