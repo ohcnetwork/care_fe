@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import {
   BLOOD_GROUP_CHOICES, // DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
@@ -83,7 +85,8 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [debouncedNumber, setDebouncedNumber] = useState<string>();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -202,6 +205,28 @@ export default function PatientRegistration(
     },
   });
 
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
+  });
+
+  useEffect(() => {
+    // Fill by pincode for patient registration
+    if (patientId) return;
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+    setSelectedLevels(levels);
+
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg, patientId]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
       updatePatient({ ...values, ward_old: undefined });
@@ -236,14 +261,13 @@ export default function PatientRegistration(
   };
 
   const patientPhoneSearch = useQuery({
-    queryKey: ["patients", "phone-number", debouncedNumber],
-    queryFn: async () => {
+    queryKey: ["patients", "phone-number", form.watch("phone_number")],
+    queryFn: () => {
       try {
-        const response = await query(routes.searchPatient, {
+        const response = query.debounced(routes.searchPatient, {
           body: {
-            phone_number: parsePhoneNumberWithError(
-              debouncedNumber || "",
-            ).number.toString(),
+            phone_number:
+              parsePhoneNumberWithError(form.watch("phone_number") || "") || "",
           },
         })({ signal: new AbortController().signal });
         return response;
@@ -253,7 +277,7 @@ export default function PatientRegistration(
         }
       }
     },
-    enabled: isValidPhoneNumber(debouncedNumber || ""),
+    enabled: isValidPhoneNumber(form.watch("phone_number") || ""),
   });
 
   const duplicatePatients = useMemo(() => {
@@ -270,6 +294,9 @@ export default function PatientRegistration(
 
   useEffect(() => {
     if (patientQuery.data) {
+      setSelectedLevels([
+        patientQuery.data.geo_organization as unknown as Organization,
+      ]);
       form.reset({
         ...patientQuery.data,
         same_phone_number:
@@ -278,26 +305,18 @@ export default function PatientRegistration(
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        age: !patientQuery.data.date_of_birth
+          ? patientQuery.data.age
+          : undefined,
+        date_of_birth: patientQuery.data.date_of_birth
+          ? patientQuery.data.date_of_birth
+          : undefined,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const phoneNumber = form.getValues("phone_number");
-      if (!patientId || patientQuery.data?.phone_number !== phoneNumber) {
-        setSuppressDuplicateWarning(false);
-      }
-      setDebouncedNumber(phoneNumber);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [form.watch("phone_number")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
@@ -728,6 +747,22 @@ export default function PatientRegistration(
                       />
                     </FormControl>
                     <FormMessage />
+                    {showAutoFilledPincode && (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="flex items-center"
+                      >
+                        <CareIcon
+                          icon="l-check-circle"
+                          className="mr-2 text-sm text-green-500"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-primary-500">
+                          {t("pincode_autofill")}
+                        </span>
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -767,6 +802,7 @@ export default function PatientRegistration(
                           <OrganizationSelector
                             {...field}
                             required={true}
+                            selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value)
@@ -802,7 +838,9 @@ export default function PatientRegistration(
       </div>
       {!patientPhoneSearch.isLoading &&
         !!duplicatePatients?.length &&
-        !!parsePhoneNumberWithError(debouncedNumber || "").number.toString() &&
+        !!parsePhoneNumberWithError(
+          form.watch("phone_number") || "",
+        ).number.toString() &&
         !suppressDuplicateWarning && (
           <DuplicatePatientDialog
             patientList={duplicatePatients}
