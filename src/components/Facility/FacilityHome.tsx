@@ -31,6 +31,7 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
   Organization,
@@ -95,7 +96,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     isLoading,
     refetch: facilityFetch,
   } = useQuery<FacilityData>({
-    queryKey: [routes.facility.show.path, facilityId],
+    queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
     }),
@@ -159,7 +160,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !facilityData) {
     return <Loading />;
   }
 
@@ -210,7 +211,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
                       <Avatar
-                        name={facilityData?.name}
+                        name={facilityData.name}
                         className="h-12 w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
                       <div>
@@ -234,20 +235,28 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <DropdownMenuContent align="end" className="w-56">
                         {hasPermissionToEditCoverImage && (
                           <DropdownMenuItem
+                            className="cursor-pointer"
                             onClick={() => setEditCoverImage(true)}
                           >
                             <Settings className="mr-2 h-4 w-4" />
                             {t("edit_cover_photo")}
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/facility/${facilityId}/update`)
+
+                        <EditFacilitySheet
+                          facilityId={facilityId}
+                          trigger={
+                            <DropdownMenuItem
+                              className=" cursor-pointer"
+                              onSelect={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              {t("update_facility")}
+                            </DropdownMenuItem>
                           }
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          {t("update_facility")}
-                        </DropdownMenuItem>
+                        />
                         {/* TODO: get permissions from backend */}
                         {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem

@@ -32,10 +32,15 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
   const data = await getResponseBody<Route["TRes"]>(res);
 
   if (!res.ok) {
+    const isSilent =
+      typeof options?.silent === "function"
+        ? options.silent(res)
+        : (options?.silent ?? false);
+
     throw new HTTPError({
       message: "Request Failed",
       status: res.status,
-      silent: options?.silent ?? false,
+      silent: isSilent,
       cause: data as unknown as Record<string, unknown>,
     });
   }
