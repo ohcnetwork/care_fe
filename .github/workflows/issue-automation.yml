@@ -9,7 +9,7 @@ on:
 jobs:
   issue_opened_and_reopened:
     name: issue_opened_and_reopened
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     if: github.repository == 'ohcnetwork/care_fe' && github.event_name == 'issues' && github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: 'Move issue to "Triage"'

@@ -11,7 +11,7 @@ jobs:
   check-linked-issues:
     if: github.repository == 'ohcnetwork/care_fe'
     name: Check linked issues
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       linked_issues: ${{ steps.issue-output.outputs.linked_issues }}
     steps:
