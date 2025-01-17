@@ -88,10 +88,10 @@ const ResourcePage = () => {
     }),
   });
 
-  const exportAction = async () => {
-    const { data } = await request(routes.downloadResourceRequests, {
-      query: { ...appliedFilters, csv: true },
-    });
+  const exportAction = () => {
+    const data = query(routes.downloadResourceRequests, {
+      queryParams: { ...appliedFilters, csv: true },
+    })({ signal: new AbortController().signal });
     return data ?? null;
   };
 
