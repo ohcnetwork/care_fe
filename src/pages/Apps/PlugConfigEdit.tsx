@@ -1,4 +1,5 @@
-import { navigate } from "raviger";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -21,19 +22,22 @@ import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/components/Common/Loading";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface Props {
   slug: string;
 }
 
 export function PlugConfigEdit({ slug }: Props) {
+  const navigate = useNavigate();
   const isNew = slug === "new";
-  const { data: existingConfig, loading } = useQuery(
-    routes.plugConfig.getPlugConfig,
-    { pathParams: { slug }, prefetch: !isNew },
-  );
+
+  const { data: existingConfig, isLoading } = useQuery({
+    queryKey: ["plug-config", slug],
+    queryFn: query(routes.plugConfig.getPlugConfig, { pathParams: { slug } }),
+    enabled: !isNew,
+  });
 
   const [config, setConfig] = useState({
     slug: "",
@@ -49,40 +53,32 @@ export function PlugConfigEdit({ slug }: Props) {
     }
   }, [existingConfig]);
 
+  const { mutate: upsertConfig } = useMutation({
+    mutationFn: isNew
+      ? mutate(routes.plugConfig.createPlugConfig)
+      : mutate(routes.plugConfig.updatePlugConfig, { pathParams: { slug } }),
+    onSuccess: () => navigate("/apps"),
+  });
+
+  const { mutate: deleteConfig } = useMutation({
+    mutationFn: mutate(routes.plugConfig.deletePlugConfig, {
+      pathParams: { slug },
+    }),
+    onSuccess: () => navigate("/apps"),
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Meta is parsed to a JSON object to clear whitespaces when saving
     const meta = JSON.parse(config.meta);
     const configPayload = { ...config, meta };
-    try {
-      if (isNew) {
-        await request(routes.plugConfig.createPlugConfig, {
-          body: configPayload,
-        });
-      } else {
-        await request(routes.plugConfig.updatePlugConfig, {
-          pathParams: { slug },
-          body: configPayload,
-        });
-      }
-      navigate("/apps");
-    } catch (error) {
-      console.error("Error saving config:", error);
-    }
+    upsertConfig(configPayload);
   };
 
-  const handleDelete = async () => {
-    try {
-      await request(routes.plugConfig.deletePlugConfig, {
-        pathParams: { slug },
-      });
-      navigate("/apps");
-    } catch (error) {
-      console.error("Error deleting config:", error);
-    }
+  const handleDelete = () => {
+    deleteConfig();
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -128,27 +124,21 @@ export function PlugConfigEdit({ slug }: Props) {
           <Input
             value={config.slug}
             onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                slug: e.target.value,
-              }))
+              setConfig((prev) => ({ ...prev, slug: e.target.value }))
             }
             required
           />
         </div>
-
         <div>
           <label className="mb-1 block text-sm font-medium">Meta (JSON)</label>
           <Textarea
             value={config.meta}
-            onChange={(e) => {
-              const meta = e.target.value;
-              setConfig((prev) => ({ ...prev, meta }));
-            }}
+            onChange={(e) =>
+              setConfig((prev) => ({ ...prev, meta: e.target.value }))
+            }
             rows={10}
           />
         </div>
-
         <div className="flex gap-2">
           <Button type="submit">Save</Button>
           <Button

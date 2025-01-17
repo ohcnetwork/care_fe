@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, parse } from "date-fns";
-import { useEffect, useState } from "react";
+import { isAfter, isBefore, parse } from "date-fns";
+import { useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -41,12 +42,23 @@ interface Props {
   trigger?: React.ReactNode;
 }
 
+type QueryParams = {
+  sheet?: "add_exception" | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+};
+
 export default function CreateScheduleExceptionSheet({
   facilityId,
   userId,
   trigger,
 }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
+  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const setQParams = (p: QueryParams) => _setQParams(p, { replace: false });
 
   const formSchema = z
     .object({
@@ -77,19 +89,10 @@ export default function CreateScheduleExceptionSheet({
         path: ["start_time"], // This will show the error on the start_time field
       },
     )
-    .refine(
-      (data) => {
-        return isBefore(data.valid_from, data.valid_to);
-      },
-      {
-        message: t("from_date_must_be_before_to_date"),
-        path: ["valid_from"], // This will show the error on the valid_from field
-      },
-    );
-
-  const queryClient = useQueryClient();
-
-  const [open, setOpen] = useState(false);
+    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
+      message: t("from_date_must_be_before_to_date"),
+      path: ["valid_from"], // This will show the error on the valid_from field
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,13 +106,25 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
+  useEffect(() => {
+    if (qParams.valid_from) {
+      form.setValue("valid_from", new Date(qParams.valid_from));
+    }
+  }, [qParams.valid_from, form]);
+
+  useEffect(() => {
+    if (qParams.valid_to) {
+      form.setValue("valid_to", new Date(qParams.valid_to));
+    }
+  }, [qParams.valid_to, form]);
+
   const { mutate: createException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.create, {
       pathParams: { facility_id: facilityId },
     }),
     onSuccess: () => {
       toast.success(t("exception_created"));
-      setOpen(false);
+      setQParams({ sheet: null, valid_from: null, valid_to: null });
       form.reset();
       queryClient.invalidateQueries({
         queryKey: ["user-schedule-exceptions", { facilityId, userId }],
@@ -127,7 +142,7 @@ export default function CreateScheduleExceptionSheet({
       form.resetField("start_time");
       form.resetField("end_time");
     }
-  }, [unavailableAllDay]);
+  }, [unavailableAllDay, form]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     createException({
@@ -141,7 +156,16 @@ export default function CreateScheduleExceptionSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={qParams.sheet === "add_exception"}
+      onOpenChange={(open) =>
+        setQParams({
+          sheet: open ? "add_exception" : null,
+          valid_from: null,
+          valid_to: null,
+        })
+      }
+    >
       <SheetTrigger asChild>
         {trigger ?? (
           <Button variant="primary" disabled={isPending}>

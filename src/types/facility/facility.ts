@@ -1,4 +1,4 @@
-import { Organization } from "../organization/organization";
+import { Organization } from "@/types/organization/organization";
 
 export interface BaseFacility {
   id: string;
@@ -26,6 +26,8 @@ export interface FacilityData {
   read_cover_image_url?: string;
   features: number[];
   geo_organization: Organization;
-  pincode: string;
+  latitude: number;
+  longitude: number;
+  pincode: number;
   is_public: boolean;
 }
