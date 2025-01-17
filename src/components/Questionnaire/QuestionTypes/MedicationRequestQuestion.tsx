@@ -531,7 +531,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </Label>
         <Select
           value={
-            dosageInstruction.as_needed_boolean
+            dosageInstruction?.as_needed_boolean
               ? "PRN"
               : reverseFrequencyOption(dosageInstruction?.timing)
           }
@@ -580,7 +580,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             <Input
               type="number"
               min={0}
-              value={dosageInstruction.timing.repeat.bounds_duration.value}
+              value={dosageInstruction.timing.repeat.bounds_duration?.value}
               onChange={(e) => {
                 const value = e.target.value;
                 if (!dosageInstruction.timing) return;
