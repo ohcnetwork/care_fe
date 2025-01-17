@@ -344,7 +344,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
               {facilityData?.description && (
                 <Card>
-                  <CardContent className="mt-4 text-justify">
+                  <CardContent className="mt-4">
                     <Markdown content={facilityData.description} />
                   </CardContent>
                 </Card>
