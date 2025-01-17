@@ -298,11 +298,6 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
-      <PLUGIN_Component
-        __name="Scribe"
-        formState={questionnaireForms}
-        setFormState={setQuestionnaireForms}
-      />
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
@@ -441,6 +436,12 @@ export function QuestionnaireForm({
             </Button>
           </div>
         )}
+
+        <PLUGIN_Component
+          __name="Scribe"
+          formState={questionnaireForms}
+          setFormState={setQuestionnaireForms}
+        />
 
         {/* Add a Preview of the QuestionnaireForm */}
         {import.meta.env.DEV && (

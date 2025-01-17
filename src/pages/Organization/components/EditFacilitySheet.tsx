@@ -2,9 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -17,32 +14,31 @@ import {
 import FacilityForm from "@/components/Facility/FacilityForm";
 
 interface Props {
-  organizationId: string;
+  organizationId?: string;
+  facilityId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function AddFacilitySheet({ organizationId }: Props) {
+export default function EditFacilitySheet({ facilityId, trigger }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" data-cy="add-facility-button">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("add_facility")}
-        </Button>
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("add_new_facility")}</SheetTitle>
-          <SheetDescription>{t("create_new_facility")}</SheetDescription>
+          <SheetTitle>{t("edit_facility")}</SheetTitle>
+          <SheetDescription>{t("update_existing_facility")}</SheetDescription>
         </SheetHeader>
         <div className="mt-6">
           <FacilityForm
-            organizationId={organizationId}
+            facilityId={facilityId}
             onSubmitSuccess={() => {
               setOpen(false);
-              queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+              queryClient.invalidateQueries({
+                queryKey: [["facility", facilityId], "organizationFacilities"],
+              });
             }}
           />
         </div>

@@ -195,7 +195,7 @@ const routes = {
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityModel>(),
+    TRes: Type<FacilityData>(),
   },
 
   getAnyFacility: {
@@ -416,6 +416,7 @@ const routes = {
       path: "/api/v1/plug_config/{slug}/",
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
+      TBody: Type<void>(),
     },
   },
   getQuestionnaireResponses: {

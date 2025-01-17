@@ -1,7 +1,5 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
-import { FeatureFlag } from "@/Utils/featureFlags";
-
 export interface FacilityModel {
   id?: string;
   name?: string;
@@ -20,7 +18,6 @@ export interface FacilityModel {
   created_date?: string;
   geo_organization?: string;
   pincode?: string;
-  facility_flags?: FeatureFlag[];
   latitude?: string;
   longitude?: string;
   is_public?: boolean;
