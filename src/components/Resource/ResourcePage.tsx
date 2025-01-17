@@ -18,10 +18,15 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import BadgesList from "@/components/Resource/ResourceBadges";
 import ResourceBlock from "@/components/Resource/ResourceBlock";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
@@ -40,11 +45,6 @@ import { QueryOptions } from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
-import Page from "../Common/Page";
-import { Badge } from "../ui/badge";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -146,13 +146,12 @@ const ResourcePage = () => {
             <Label className="mb-2 text-black">{t("select_status")}</Label>
 
             <Select
-              defaultValue="active"
               onValueChange={(value) =>
                 setBoardFilter(value === "completed" ? COMPLETED : ACTIVE)
               }
             >
               <SelectTrigger className="w-full lg:w-[180px]">
-                <SelectValue defaultValue={"completed"} />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
