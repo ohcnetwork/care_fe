@@ -6,8 +6,6 @@ interface PatientFormData {
   bloodGroup: string;
   address: string;
   pincode: string;
-  state: string;
-  district: string;
   localBody: string;
   ward: string;
 }
@@ -106,20 +104,8 @@ export class PatientCreation {
       .enterDateOfBirth(patient.dateOfBirth)
       .enterAddress(patient.address)
       .enterPincode(patient.pincode)
-      .selectState(patient.state)
-      .selectDistrict(patient.district)
       .selectLocalBody(patient.localBody)
       .selectWard(patient.ward);
-  }
-
-  selectState(state: string) {
-    cy.typeAndSelectOption('[data-cy="select-state"]', state);
-    return this;
-  }
-
-  selectDistrict(district: string) {
-    cy.typeAndSelectOption('[data-cy="select-district"]', district);
-    return this;
   }
 
   selectLocalBody(localBody: string) {
