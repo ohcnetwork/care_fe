@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -31,41 +31,49 @@ import {
 import { validateRule } from "@/components/Users/UserFormValidations";
 
 import { GENDER_TYPES } from "@/common/constants";
+import { GENDERS } from "@/common/constants";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
-import { UserBase } from "@/types/user/user";
-import UserApi from "@/types/user/userApi";
+import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
+  existingUsername?: string;
 }
 
-export default function CreateUserForm({ onSubmitSuccess }: Props) {
+export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
   const { t } = useTranslation();
+  const isEditMode = !!existingUsername;
 
   const userFormSchema = z
     .object({
-      user_type: z.enum(["doctor", "nurse", "staff", "volunteer"]),
-      username: z
-        .string()
-        .min(4, t("username_min_length_validation"))
-        .max(16, t("username_max_length_validation"))
-        .regex(/^[a-z0-9._-]*$/, t("username_characters_validation"))
-        .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_start_end_validation"))
-        .refine(
-          (val) => !val.match(/(?:[._-]{2,})/),
-          t("username_consecutive_validation"),
-        ),
-      password: z
-        .string()
-        .min(8, t("password_length_validation"))
-        .regex(/[a-z]/, t("password_lowercase_validation"))
-        .regex(/[A-Z]/, t("password_uppercase_validation"))
-        .regex(/[0-9]/, t("password_number_validation")),
-      c_password: z.string(),
+      user_type: isEditMode
+        ? z.enum(["doctor", "nurse", "staff", "volunteer"]).optional()
+        : z.enum(["doctor", "nurse", "staff", "volunteer"]),
+      username: isEditMode
+        ? z.string().optional()
+        : z
+            .string()
+            .min(4, t("username_min_length_validation"))
+            .max(16, t("username_max_length_validation"))
+            .regex(/^[a-z0-9._-]*$/, t("username_characters_validation"))
+            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_start_end_validation"))
+            .refine(
+              (val) => !val.match(/(?:[._-]{2,})/),
+              t("username_consecutive_validation"),
+            ),
+      password: isEditMode
+        ? z.string().optional()
+        : z
+            .string()
+            .min(8, t("password_length_validation"))
+            .regex(/[a-z]/, t("password_lowercase_validation"))
+            .regex(/[A-Z]/, t("password_uppercase_validation"))
+            .regex(/[0-9]/, t("password_number_validation")),
+      c_password: isEditMode ? z.string().optional() : z.string(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
@@ -77,17 +85,28 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
         .optional(),
       phone_number_is_whatsapp: z.boolean().default(true),
-      date_of_birth: z.string().min(1, t("field_required")),
-      gender: z.enum(["male", "female", "other"]),
-      qualification: z.string().optional(),
+      gender: z.enum(GENDERS),
+      /* TODO: Userbase doesn't currently support these, neither does BE
+      but we will probably need these */
+      /* qualification: z.string().optional(),
       doctor_experience_commenced_on: z.string().optional(),
-      doctor_medical_council_registration: z.string().optional(),
-      geo_organization: z.string().min(1, t("field_required")),
+      doctor_medical_council_registration: z.string().optional(), */
+      geo_organization: isEditMode
+        ? z.string().optional()
+        : z.string().min(1, t("field_required")),
     })
-    .refine((data) => data.password === data.c_password, {
-      message: t("password_mismatch"),
-      path: ["c_password"],
-    });
+    .refine(
+      (data) => {
+        if (!isEditMode) {
+          return data.password === data.c_password;
+        }
+        return true;
+      },
+      {
+        message: t("password_mismatch"),
+        path: ["c_password"],
+      },
+    );
 
   type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -102,7 +121,31 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     },
   });
 
-  const userType = form.watch("user_type");
+  const { data: userData, isLoading: isLoadingUser } = useQuery({
+    queryKey: ["user", existingUsername],
+    queryFn: query(userApi.get, {
+      pathParams: { username: existingUsername! },
+    }),
+    enabled: !!existingUsername,
+  });
+
+  useEffect(() => {
+    if (userData && isEditMode) {
+      console.log(userData);
+      const formData: Partial<UserFormValues> = {
+        user_type: userData.user_type,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+        phone_number: userData.phone_number || "",
+        gender: userData.gender || "male",
+        phone_number_is_whatsapp: true,
+      };
+      form.reset(formData);
+    }
+  }, [userData, form, isEditMode]);
+
+  //const userType = form.watch("user_type");
   const usernameInput = form.watch("username");
   const phoneNumber = form.watch("phone_number");
   const isWhatsApp = form.watch("phone_number_is_whatsapp");
@@ -111,10 +154,10 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     if (isWhatsApp) {
       form.setValue("alt_phone_number", phoneNumber);
     }
-    if (usernameInput && usernameInput.length > 0) {
+    if (usernameInput && usernameInput.length > 0 && !isEditMode) {
       form.trigger("username");
     }
-  }, [phoneNumber, isWhatsApp, form, usernameInput]);
+  }, [phoneNumber, isWhatsApp, form, usernameInput, isEditMode]);
 
   const { isLoading: isUsernameChecking, isError: isUsernameTaken } = useQuery({
     queryKey: ["checkUsername", usernameInput],
@@ -122,7 +165,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
       pathParams: { username: usernameInput },
       silent: true,
     }),
-    enabled: !form.formState.errors.username,
+    enabled: !form.formState.errors.username && !isEditMode,
   });
 
   const renderUsernameFeedback = (usernameInput: string) => {
@@ -160,57 +203,79 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     }
   };
 
-  const onSubmit = async (data: UserFormValues) => {
-    try {
-      const {
-        res,
-        data: user,
-        error,
-      } = await request(UserApi.create, {
-        body: {
-          ...data,
-          // Omit c_password as it's not needed in the API
-          c_password: undefined,
-        } as unknown as UserBase,
-      });
+  const { mutate: createUser } = useMutation({
+    mutationKey: ["create_user"],
+    mutationFn: mutate(userApi.create),
+    onSuccess: (resp: UserBase) => {
+      toast.success(t("user_added_successfully"));
+      onSubmitSuccess?.(resp);
+    },
+    onError: (error) => {
+      toast.error(error?.message ?? t("user_add_error"));
+    },
+  });
 
-      if (res?.ok) {
-        toast.success(t("user_added_successfully"));
-        onSubmitSuccess?.(user!);
-      } else {
-        toast.error((error?.message as string) ?? t("user_add_error"));
-      }
-    } catch (error) {
-      toast.error(t("user_add_error"));
+  const { mutate: updateUser } = useMutation({
+    mutationKey: ["update_user"],
+    mutationFn: mutate(userApi.update, {
+      pathParams: { username: existingUsername! },
+    }),
+    onSuccess: (resp: UserBase) => {
+      toast.success(t("user_updated_successfully"));
+      onSubmitSuccess?.(resp);
+    },
+    onError: (error) => {
+      toast.error(error?.message ?? t("user_update_error"));
+    },
+  });
+
+  const onSubmit = async (data: UserFormValues) => {
+    if (isEditMode) {
+      updateUser({
+        ...data,
+      } as UpdateUserModel);
+    } else {
+      createUser({
+        ...data,
+        password: data.password,
+        profile_picture_url: "",
+      } as CreateUserModel);
     }
   };
+
+  console.log(form.formState.errors);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="user_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("user_type")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger data-cy="user-type-select">
-                    <SelectValue placeholder={t("select_user_type")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="doctor">{t("doctor")}</SelectItem>
-                  <SelectItem value="nurse">{t("nurse")}</SelectItem>
-                  <SelectItem value="staff">{t("staff")}</SelectItem>
-                  <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditMode && (
+          <FormField
+            control={form.control}
+            name="user_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("user_type")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("select_user_type")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="doctor">{t("doctor")}</SelectItem>
+                    <SelectItem value="nurse">{t("nurse")}</SelectItem>
+                    <SelectItem value="staff">{t("staff")}</SelectItem>
+                    <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -249,63 +314,59 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("username")}</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Input
-                    data-cy="username-input"
-                    placeholder={t("username")}
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              {renderUsernameFeedback(usernameInput)}
-            </FormItem>
-          )}
-        />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("password")}</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    data-cy="password-input"
-                    placeholder={t("password")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {!isEditMode && (
+          <>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("username")}</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input placeholder={t("username")} {...field} />
+                    </div>
+                  </FormControl>
+                  {renderUsernameFeedback(usernameInput ?? "")}
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="c_password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("confirm_password")}</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    data-cy="confirm-password-input"
-                    placeholder={t("confirm_password")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("password")}</FormLabel>
+                    <FormControl>
+                      <PasswordInput placeholder={t("password")} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="c_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("confirm_password")}</FormLabel>
+                    <FormControl>
+                      <PasswordInput
+                        placeholder={t("confirm_password")}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        )}
 
         <FormField
           control={form.control}
@@ -393,20 +454,6 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="date_of_birth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("date_of_birth")}</FormLabel>
-                <FormControl>
-                  <Input data-cy="dob-input" type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="gender"
             render={({ field }) => (
               <FormItem>
@@ -438,7 +485,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           />
         </div>
 
-        {(userType === "doctor" || userType === "nurse") && (
+        {/* TODO: Userbase doesn't currently support these, neither does BE
+        but we will probably need these */}
+        {/* {(userType === "doctor" || userType === "nurse") && (
           <FormField
             control={form.control}
             name="qualification"
@@ -499,27 +548,28 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               />
             </div>
           </>
+        )} */}
+        {!isEditMode && (
+          <FormField
+            control={form.control}
+            name="geo_organization"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <OrganizationSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                    required={!isEditMode}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
-        <FormField
-          control={form.control}
-          name="geo_organization"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <OrganizationSelector
-                  data-cy="organization-selector"
-                  value={field.value}
-                  onChange={field.onChange}
-                  required
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <Button type="submit" className="w-full" data-cy="submit-user-form">
-          {t("create_user")}
+        <Button type="submit" className="w-full" disabled={isLoadingUser}>
+          {isEditMode ? t("update_user") : t("create_user")}
         </Button>
       </form>
     </Form>
