@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+
 import useAppHistory from "@/hooks/useAppHistory";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";

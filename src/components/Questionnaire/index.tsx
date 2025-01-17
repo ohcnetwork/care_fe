@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
-import useQuery from "@/Utils/request/useQuery";
 import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
