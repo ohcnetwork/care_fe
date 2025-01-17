@@ -37,6 +37,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -135,13 +141,28 @@ export function MedicationRequestQuestion({
   const confirmRemoveMedication = () => {
     if (medicationToDelete === null) return;
 
-    const newMedications = medications.filter(
-      (_, i) => i !== medicationToDelete,
-    );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "medication_request", value: newMedications }],
-    });
+    const medication = medications[medicationToDelete];
+    if (medication.id) {
+      // For existing records, update status to entered-in-error
+      const newMedications = medications.map((med, i) =>
+        i === medicationToDelete
+          ? { ...med, status: "entered_in_error" as const }
+          : med,
+      );
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [{ type: "medication_request", value: newMedications }],
+      });
+    } else {
+      // For new records, remove them completely
+      const newMedications = medications.filter(
+        (_, i) => i !== medicationToDelete,
+      );
+      updateQuestionnaireResponseCB({
+        ...questionnaireResponse,
+        values: [{ type: "medication_request", value: newMedications }],
+      });
+    }
     setMedicationToDelete(null);
   };
 
@@ -295,18 +316,32 @@ export function MedicationRequestQuestion({
                                 </svg>
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveMedication(index);
-                              }}
-                              disabled={disabled}
-                              className="h-8 w-8"
-                            >
-                              <MinusCircledIcon className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveMedication(index);
+                                    }}
+                                    disabled={
+                                      disabled ||
+                                      medication.status === "entered_in_error"
+                                    }
+                                    className="h-8 w-8"
+                                  >
+                                    <MinusCircledIcon className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {medication.status === "entered_in_error"
+                                    ? t("medication_already_marked_as_error")
+                                    : t("remove_medication")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <CollapsibleContent>
@@ -481,7 +516,14 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50">
+    <div
+      className={cn(
+        "grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,230px,180px,250px,180px,160px,48px] border-b hover:bg-gray-50/50",
+        {
+          "opacity-50": medication.status === "entered_in_error",
+        },
+      )}
+    >
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2 hidden lg:block">
