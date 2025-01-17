@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { SymptomTable } from "@/components/Patient/symptoms/SymptomTable";
+
 import query from "@/Utils/request/query";
 import symptomApi from "@/types/emr/symptom/symptomApi";
-
-import { SymptomTable } from "./SymptomTable";
 
 interface SymptomsListProps {
   patientId: string;
