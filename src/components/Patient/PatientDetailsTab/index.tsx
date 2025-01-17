@@ -1,7 +1,7 @@
-import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
-import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Appointments } from "@/components/Patient/PatientDetailsTab/Appointments";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
+import EncounterHistory from "@/components/Patient/PatientDetailsTab/EncounterHistory";
+import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab/HealthProfileSummary";
 import { PatientFilesTab } from "@/components/Patient/PatientDetailsTab/PatientFiles";
 import { PatientUsers } from "@/components/Patient/PatientDetailsTab/PatientUsers";
 import { ResourceRequests } from "@/components/Patient/PatientDetailsTab/ResourceRequests";
