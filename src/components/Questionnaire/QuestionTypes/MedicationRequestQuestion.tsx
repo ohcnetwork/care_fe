@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { DualValueSetSelect } from "@/components/Questionnaire/DualValueSetSelect";
+import { DualValueSetSelect } from "@/components/Medicine/DualValueSetSelect";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
