@@ -3,8 +3,7 @@ import { useMemo, useRef } from "react";
 
 import request from "@/Utils/request/request";
 import { ApiRoute, RequestOptions } from "@/Utils/request/types";
-
-import { mergeRequestOptions } from "./utils";
+import { mergeRequestOptions } from "@/Utils/request/utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;

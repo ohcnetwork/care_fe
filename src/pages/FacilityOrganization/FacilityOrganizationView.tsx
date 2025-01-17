@@ -14,9 +14,8 @@ import Pagination from "@/components/Common/Pagination";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-
-import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
-import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
+import CreateFacilityOrganizationSheet from "@/pages/FacilityOrganization/components/CreateFacilityOrganizationSheet";
+import FacilityOrganizationLayout from "@/pages/FacilityOrganization/components/FacilityOrganizationLayout";
 
 interface Props {
   id: string;

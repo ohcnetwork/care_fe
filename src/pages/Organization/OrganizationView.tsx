@@ -13,10 +13,9 @@ import { Input } from "@/components/ui/input";
 import Pagination from "@/components/Common/Pagination";
 
 import query from "@/Utils/request/query";
+import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-
-import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;

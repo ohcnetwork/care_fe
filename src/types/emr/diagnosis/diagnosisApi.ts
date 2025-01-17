@@ -1,7 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { Diagnosis } from "./diagnosis";
+import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export default {
   listDiagnosis: {

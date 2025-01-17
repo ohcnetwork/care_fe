@@ -16,12 +16,11 @@ import query from "@/Utils/request/query";
 import { formatDateTime, keysOf } from "@/Utils/utils";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
+import { EncounterNotesTab } from "@/pages/Encounters/tabs/EncounterNotesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
   facilityId: string;

@@ -19,9 +19,8 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { FeatureBadge } from "./Utils";
-import { UserCard } from "./components/UserCard";
+import { FeatureBadge } from "@/pages/Facility/Utils";
+import { UserCard } from "@/pages/Facility/components/UserCard";
 
 interface Props {
   id: string;

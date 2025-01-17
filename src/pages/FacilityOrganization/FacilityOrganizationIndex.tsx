@@ -19,9 +19,8 @@ import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import CreateFacilityOrganizationSheet from "@/pages/FacilityOrganization/components/CreateFacilityOrganizationSheet";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
-
-import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 
 export default function FacilityOrganizationIndex({
   facilityId,

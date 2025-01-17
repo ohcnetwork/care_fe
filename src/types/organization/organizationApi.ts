@@ -1,8 +1,10 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Patient } from "@/types/emr/newPatient";
-
-import { Organization, OrganizationUserRole } from "./organization";
+import {
+  Organization,
+  OrganizationUserRole,
+} from "@/types/organization/organization";
 
 export default {
   listMine: {

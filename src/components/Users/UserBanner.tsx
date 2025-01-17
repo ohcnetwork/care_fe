@@ -1,9 +1,8 @@
 import { Avatar } from "@/components/Common/Avatar";
+import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import { formatDisplayName, formatName } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
-
-import { UserStatusIndicator } from "./UserListAndCard";
 
 export default function UserBanner({ userData }: { userData: UserBase }) {
   if (!userData) {

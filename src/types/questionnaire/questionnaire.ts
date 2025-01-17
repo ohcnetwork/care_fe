@@ -1,6 +1,6 @@
-import { Code } from "./code";
-import { Question } from "./question";
-import { QuestionnaireTagModel } from "./tags";
+import { Code } from "@/types/questionnaire/code";
+import { Question } from "@/types/questionnaire/question";
+import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 export type SubjectType = "patient" | "encounter";
 

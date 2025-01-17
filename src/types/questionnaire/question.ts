@@ -1,4 +1,4 @@
-import { Code } from "./code";
+import { Code } from "@/types/questionnaire/code";
 
 export type QuestionType =
   | "group"

@@ -28,16 +28,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
+import CloneQuestionnaireSheet from "@/components/Questionnaire/CloneQuestionnaireSheet";
+import ManageQuestionnaireOrganizationsSheet from "@/components/Questionnaire/ManageQuestionnaireOrganizationsSheet";
+import ManageQuestionnaireTagsSheet from "@/components/Questionnaire/ManageQuestionnaireTagsSheet";
+import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import type { Question } from "@/types/questionnaire/question";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-
-import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
-import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
-import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
-import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireShowProps {
   id: string;

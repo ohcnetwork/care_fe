@@ -3,12 +3,11 @@ import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import { QuestionInput } from "@/components/Questionnaire/QuestionTypes/QuestionInput";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
-
-import { QuestionInput } from "./QuestionInput";
 
 interface QuestionGroupProps {
   question: Question;

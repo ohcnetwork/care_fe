@@ -1,7 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { FacilityData } from "./facility";
+import { FacilityData } from "@/types/facility/facility";
 
 export default {
   getAllFacilities: {

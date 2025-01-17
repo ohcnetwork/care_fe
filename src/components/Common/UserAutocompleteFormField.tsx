@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { Avatar } from "@/components/Common/Avatar";
 import { Autocomplete } from "@/components/Form/FormFields/Autocomplete";
 import FormField from "@/components/Form/FormFields/FormField";
 import {
@@ -17,8 +18,6 @@ import {
   isUserOnline,
   mergeQueryOptions,
 } from "@/Utils/utils";
-
-import { Avatar } from "./Avatar";
 
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;

@@ -17,9 +17,8 @@ import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
+import { PubSubProvider } from "@/Utils/pubsubContext";
 import { handleHttpError } from "@/Utils/request/errorHandler";
-
-import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {

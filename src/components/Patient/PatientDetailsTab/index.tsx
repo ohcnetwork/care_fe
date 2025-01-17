@@ -1,14 +1,13 @@
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
+import { Appointments } from "@/components/Patient/PatientDetailsTab/Appointments";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
+import { PatientFilesTab } from "@/components/Patient/PatientDetailsTab/PatientFiles";
+import { PatientUsers } from "@/components/Patient/PatientDetailsTab/PatientUsers";
+import { ResourceRequests } from "@/components/Patient/PatientDetailsTab/ResourceRequests";
 import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 
 import { Patient } from "@/types/emr/newPatient";
-
-import { Appointments } from "./Appointments";
-import { PatientFilesTab } from "./PatientFiles";
-import { PatientUsers } from "./PatientUsers";
-import { ResourceRequests } from "./ResourceRequests";
 
 export interface PatientProps {
   facilityId: string;

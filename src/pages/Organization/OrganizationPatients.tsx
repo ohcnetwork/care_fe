@@ -15,11 +15,10 @@ import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { Patient } from "@/types/emr/newPatient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-
-import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;

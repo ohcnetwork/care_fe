@@ -1,15 +1,14 @@
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
 
+import { QuestionnaireFormState } from "@/components/Questionnaire/QuestionnaireForm";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { pluginMap } from "@/pluginMap";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import { AppRoutes } from "./Routers/AppRouter";
-import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
-import { pluginMap } from "./pluginMap";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;

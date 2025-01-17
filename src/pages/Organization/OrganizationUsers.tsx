@@ -13,12 +13,11 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
+import EditUserRoleSheet from "@/pages/Organization/components/EditUserRoleSheet";
+import LinkUserSheet from "@/pages/Organization/components/LinkUserSheet";
+import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import organizationApi from "@/types/organization/organizationApi";
-
-import AddUserSheet from "./components/AddUserSheet";
-import EditUserRoleSheet from "./components/EditUserRoleSheet";
-import LinkUserSheet from "./components/LinkUserSheet";
-import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;

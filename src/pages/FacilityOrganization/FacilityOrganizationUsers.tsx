@@ -12,12 +12,11 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import EditFacilityUserRoleSheet from "@/pages/FacilityOrganization/components/EditFacilityUserRoleSheet";
+import FacilityOrganizationLayout from "@/pages/FacilityOrganization/components/FacilityOrganizationLayout";
+import LinkFacilityUserSheet from "@/pages/FacilityOrganization/components/LinkFacilityUserSheet";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
 import { OrganizationUserRole } from "@/types/organization/organization";
-
-import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";
-import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
-import LinkFacilityUserSheet from "./components/LinkFacilityUserSheet";
 
 interface Props {
   id: string;

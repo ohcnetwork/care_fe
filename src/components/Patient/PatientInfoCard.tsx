@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ManageEncounterOrganizations from "@/components/Patient/ManageEncounterOrganizations";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
@@ -38,8 +39,6 @@ import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
 
 export interface PatientInfoCardProps {
   patient: Patient;

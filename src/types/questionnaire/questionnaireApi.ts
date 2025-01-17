@@ -1,9 +1,14 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
-
-import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
-import { QuestionnaireTagModel, QuestionnaireTagSet } from "./tags";
+import {
+  QuestionnaireCreate,
+  QuestionnaireDetail,
+} from "@/types/questionnaire/questionnaire";
+import {
+  QuestionnaireTagModel,
+  QuestionnaireTagSet,
+} from "@/types/questionnaire/tags";
 
 export default {
   list: {
