@@ -533,7 +533,7 @@ export default function PatientRegistration(
                                 onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
-                                    `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value.slice(0, 2)}`,
+                                    `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
                                   );
                                   const day = parseInt(e.target.value);
                                   if (
@@ -566,7 +566,7 @@ export default function PatientRegistration(
                                 onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
-                                    `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value.slice(0, 2)}-${form.watch("date_of_birth")?.split("-")[2]}`,
+                                    `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
                                   );
                                   const month = parseInt(e.target.value);
                                   if (
@@ -599,7 +599,7 @@ export default function PatientRegistration(
                                 onChange={(e) =>
                                   form.setValue(
                                     "date_of_birth",
-                                    `${e.target.value.slice(0, 4)}-${form.watch("date_of_birth")?.split("-")[1]}-${form.watch("date_of_birth")?.split("-")[2]}`,
+                                    `${e.target.value}-${form.watch("date_of_birth")?.split("-")[1]}-${form.watch("date_of_birth")?.split("-")[2]}`,
                                   )
                                 }
                                 data-cy="dob-year-input"
