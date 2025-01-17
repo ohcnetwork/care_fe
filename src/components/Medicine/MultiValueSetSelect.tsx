@@ -16,32 +16,30 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { Code, ValueSetSystem } from "@/types/questionnaire/code";
 
-type TabIndex = 0 | 1;
+interface ValueSetOption {
+  system: ValueSetSystem;
+  value: Code | null;
+  placeholder?: string;
+  label: string;
+  onSelect: (value: Code | null) => void;
+}
 
-interface DualValueSetSelectProps {
-  systems: [ValueSetSystem, ValueSetSystem];
-  values?: [Code | null, Code | null];
-  onSelect: (index: TabIndex, value: Code | null) => void;
-  placeholders?: [string, string];
+interface MultiValueSetSelectProps {
+  options: ValueSetOption[];
   disabled?: boolean;
   count?: number;
   searchPostFix?: string;
-  labels: [string, string];
 }
 
-export function DualValueSetSelect({
-  systems,
-  values = [null, null],
-  onSelect,
-  placeholders = [t("search"), t("search")],
+export function MultiValueSetSelect({
+  options,
   disabled,
   count = 10,
   searchPostFix = "",
-  labels,
-}: DualValueSetSelectProps) {
-  const [activeTab, setActiveTab] = useState<TabIndex>(0);
+}: MultiValueSetSelectProps) {
+  const [activeTab, setActiveTab] = useState<number>(0);
   const [open, setOpen] = useState(false);
-  const hasValues = values.some((v) => v !== null);
+  const hasValues = options.some((opt) => opt.value !== null);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -64,28 +62,28 @@ export function DualValueSetSelect({
             )}
           >
             {!hasValues ? (
-              <span>{placeholders[0]}</span>
+              <span>{options[0]?.placeholder || t("search")}</span>
             ) : (
               <div className="flex flex-col gap-1 w-full">
-                {values.map(
-                  (value, index) =>
-                    value && (
+                {options.map(
+                  (option, index) =>
+                    option.value && (
                       <div
-                        key={value.code}
+                        key={option.value.code}
                         className="flex items-center justify-between bg-gray-100 rounded px-2 py-1 min-w-0"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveTab(index as TabIndex);
+                          setActiveTab(index);
                           setOpen(true);
                         }}
                       >
                         <span className="text-sm truncate flex-1 mr-2">
-                          {value.display}
+                          {option.value.display}
                         </span>
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelect(index as TabIndex, null);
+                            option.onSelect(null);
                           }}
                           variant="ghost"
                           size="icon"
@@ -99,34 +97,42 @@ export function DualValueSetSelect({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0">
+        <PopoverContent
+          className="p-0 inline-block min-w-[300px]"
+          align="start"
+          sideOffset={4}
+        >
           <Tabs
             value={activeTab.toString()}
             onValueChange={(value) => {
-              setActiveTab(Number(value) as TabIndex);
+              setActiveTab(Number(value));
             }}
+            className="w-fit"
           >
-            <TabsList className="w-full">
-              <TabsTrigger value="0" className="flex-1">
-                {labels[0]}
-              </TabsTrigger>
-              <TabsTrigger value="1" className="flex-1">
-                {labels[1]}
-              </TabsTrigger>
+            <TabsList className="flex">
+              {options.map((option, index) => (
+                <TabsTrigger
+                  key={index}
+                  value={index.toString()}
+                  className="whitespace-nowrap px-3"
+                >
+                  {option.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
-            <div className="">
+            <div className="w-full">
               <ValueSetSelect
-                system={systems[activeTab]}
-                value={values[activeTab]}
+                system={options[activeTab].system}
+                value={options[activeTab].value}
                 onSelect={(value) => {
-                  onSelect(activeTab, value);
-                  if (activeTab === 0) {
-                    setActiveTab(1);
+                  options[activeTab].onSelect(value);
+                  if (activeTab < options.length - 1) {
+                    setActiveTab(activeTab + 1);
                   } else {
                     setOpen(false);
                   }
                 }}
-                placeholder={placeholders[activeTab]}
+                placeholder={options[activeTab].placeholder || t("search")}
                 disabled={disabled}
                 count={count}
                 searchPostFix={searchPostFix}

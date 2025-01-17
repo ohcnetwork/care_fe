@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
-import { DualValueSetSelect } from "@/components/Medicine/DualValueSetSelect";
+import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -641,30 +641,30 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <DualValueSetSelect
-            systems={[
-              "system-as-needed-reason",
-              "system-additional-instruction",
-            ]}
-            values={[
-              dosageInstruction?.as_needed_for || null,
-              dosageInstruction?.additional_instruction?.[0] || null,
-            ]}
-            onSelect={(index, value) => {
-              if (index === 0) {
-                handleUpdateDosageInstruction({
-                  as_needed_for: value || undefined,
-                });
-              } else {
-                handleUpdateDosageInstruction({
-                  additional_instruction: value ? [value] : undefined,
-                });
-              }
-            }}
-            labels={[t("prn_reason"), t("additional_instructions")]}
-            placeholders={[
-              t("select_prn_reason"),
-              t("select_additional_instructions"),
+          <MultiValueSetSelect
+            options={[
+              {
+                system: "system-as-needed-reason",
+                value: dosageInstruction?.as_needed_for || null,
+                label: t("prn_reason"),
+                placeholder: t("select_prn_reason"),
+                onSelect: (value: Code | null) => {
+                  handleUpdateDosageInstruction({
+                    as_needed_for: value || undefined,
+                  });
+                },
+              },
+              {
+                system: "system-additional-instruction",
+                value: dosageInstruction?.additional_instruction?.[0] || null,
+                label: t("additional_instructions"),
+                placeholder: t("select_additional_instructions"),
+                onSelect: (value: Code | null) => {
+                  handleUpdateDosageInstruction({
+                    additional_instruction: value ? [value] : undefined,
+                  });
+                },
+              },
             ]}
             disabled={disabled}
           />
