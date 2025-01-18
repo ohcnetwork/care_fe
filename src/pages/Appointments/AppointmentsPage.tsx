@@ -453,19 +453,19 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
           <div>
             <div className="flex items-center gap-1 -mt-2">
+              <Label>
+                <DateRangeDisplay
+                  dateFrom={qParams.date_from}
+                  dateTo={qParams.date_to}
+                />
+              </Label>
               <Popover modal>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost">
-                    <Label>
-                      <DateRangeDisplay
-                        dateFrom={qParams.date_from}
-                        dateTo={qParams.date_to}
-                      />
-                    </Label>
-                    <Edit3Icon />
+                  <Button variant="ghost" size="icon">
+                    <Edit3Icon className="size-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto" align="start">
+                <PopoverContent className="w-auto">
                   <div className="flex flex-col gap-4">
                     <div className="flex justify-between">
                       <Button
