@@ -30,8 +30,6 @@ describe("Patient Management", () => {
     dateOfBirth: "01-01-1990",
     address: generateAddress(),
     pincode: "682001",
-    state: "Kerala",
-    district: "Ernakulam",
     localBody: "Aluva",
     ward: "4",
   };
