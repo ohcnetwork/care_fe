@@ -124,6 +124,8 @@ export default function useFileUpload(
       return pdfFile;
     } catch (error) {
       console.error("Error generating PDF:", error);
+      toast.error(t("file_error__generate_pdf"));
+      setError(t("file_error__generate_pdf"));
       return null;
     }
   };
@@ -288,7 +290,8 @@ export default function useFileUpload(
       if (pdfFile) {
         files.splice(0, files.length, pdfFile);
       } else {
-        console.error("Failed to generate PDF from multiple files.");
+        clearFiles();
+        setError(t("file_error__generate_pdf"));
         return;
       }
     }

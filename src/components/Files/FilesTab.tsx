@@ -128,33 +128,37 @@ export const FilesTab = (props: FilesTabProps) => {
     type: type,
     multiple: true,
     CombineToPDF: isPdf,
-    allowedExtensions: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "bmp",
-      "tiff",
-      "mp4",
-      "mov",
-      "avi",
-      "wmv",
-      "mp3",
-      "wav",
-      "ogg",
-      "txt",
-      "csv",
-      "rtf",
-      "doc",
-      "odt",
-      "pdf",
-      "xls",
-      "xlsx",
-      "ods",
-      "pdf",
-    ],
+    allowedExtensions: isPdf
+      ? ["jpg", "jpeg", "png"]
+      : [
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "bmp",
+          "tiff",
+          "mp4",
+          "mov",
+          "avi",
+          "wmv",
+          "mp3",
+          "wav",
+          "ogg",
+          "txt",
+          "csv",
+          "rtf",
+          "doc",
+          "odt",
+          "pdf",
+          "xls",
+          "xlsx",
+          "ods",
+        ],
     allowNameFallback: false,
-    onUpload: () => refetch(),
+    onUpload: () => {
+      refetch();
+      setIsPdf(false);
+    },
   });
 
   useEffect(() => {
@@ -162,12 +166,14 @@ export const FilesTab = (props: FilesTabProps) => {
       setOpenUploadDialog(true);
     } else {
       setOpenUploadDialog(false);
+      setIsPdf(false);
     }
   }, [fileUpload.files]);
 
   useEffect(() => {
     if (!openUploadDialog) {
       fileUpload.clearFiles();
+      setIsPdf(false);
     }
   }, [openUploadDialog]);
 
@@ -350,6 +356,7 @@ export const FilesTab = (props: FilesTabProps) => {
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
+              setIsPdf(false);
               e.preventDefault();
             }}
           >

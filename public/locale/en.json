@@ -1025,6 +1025,7 @@
   "file_error__file_name": "Please give a name for all files!",
   "file_error__file_size": "Maximum size of files is 100 MB",
   "file_error__file_type": "Invalid file type \".{{extension}}\" Allowed types: {{allowedExtensions}}",
+  "file_error__generate_pdf": "Failed to generate PDF",
   "file_error__mark_complete_failed": "Error while marking file upload as complete",
   "file_error__network": "Error Uploading File: Network Error",
   "file_error__single_file_name": "Please give a name for the file",
