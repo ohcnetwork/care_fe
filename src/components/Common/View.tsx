@@ -7,7 +7,7 @@ export default function View({
   board,
   list,
 }: {
-  name: "shifting";
+  name: "resource";
   board: ComponentType;
   list: ComponentType;
 }) {

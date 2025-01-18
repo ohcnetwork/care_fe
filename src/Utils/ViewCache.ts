@@ -13,7 +13,7 @@ const invalidate = (name: string) => {
  * Clears all the view preferences.
  */
 const invalidateAll = () => {
-  const viewKeys = ["users", "resource", "shifting"];
+  const viewKeys = ["users", "resource", "appointments"];
   viewKeys.forEach(invalidate);
 };
 
