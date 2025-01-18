@@ -90,7 +90,7 @@ export default function ManageEncounterOrganizations({
         <SheetHeader>
           <SheetTitle>{t("manage_organizations")}</SheetTitle>
           <SheetDescription>
-            {t("manage_organizations_description")}
+            {t("encounter_manage_organization_description")}
           </SheetDescription>
         </SheetHeader>
 
