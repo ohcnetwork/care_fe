@@ -11,7 +11,12 @@ export interface PageTitleProps {
   componentRight?: ReactNode;
   breadcrumbs?: boolean;
   crumbsReplacements?: {
-    [key: string]: { name?: string; uri?: string; style?: string };
+    [key: string]: {
+      name?: string;
+      uri?: string;
+      style?: string;
+      hide?: boolean;
+    };
   };
   focusOnLoad?: boolean;
   isInsidePage?: boolean;
@@ -66,7 +71,7 @@ export default function PageTitle({
 
       <div
         className={classNames(
-          "mt-1 flex items-center",
+          "mt-1 flex",
           !!componentRight &&
             "flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0",
         )}

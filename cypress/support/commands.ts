@@ -138,54 +138,21 @@ Cypress.Commands.add(
       });
   },
 );
-Cypress.Commands.add(
-  "typeAndMultiSelectOption",
-  (selector: string, input: string, options: string | string[]) => {
-    const optionArray = Array.isArray(options) ? options : [options];
-    cy.get(selector)
-      .click()
-      .type(input)
-      .then(() => {
-        optionArray.forEach((options) => {
-          cy.get("[role='option']").contains(options).click();
-        });
-        cy.get(selector).find("#dropdown-toggle").click();
-      });
-  },
-);
 
 Cypress.Commands.add(
   "clickAndSelectOption",
-  (element: string, reference: string, skipVerification: boolean = false) => {
-    cy.get(element)
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(reference).click();
-      })
-      .then(() => {
-        // Skip verification if skipVerification is true
-        if (!skipVerification) {
-          cy.get(element).should("contain", reference);
-        }
-      });
+  (element: string, reference: string) => {
+    // Click to open the select dropdown
+    cy.get(element).click();
+
+    // Select the option from the popover content
+    cy.get('[role="listbox"]')
+      .find('[role="option"]')
+      .contains(reference)
+      .should("be.visible")
+      .click();
   },
 );
-
-Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
-  cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
-});
-
-Cypress.Commands.add("clickAndTypeDate", (selector, date) => {
-  cy.get(selector).scrollIntoView();
-  cy.get(selector).click();
-  cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
-    cy.wrap(el).clear(),
-  );
-  cy.get(`[data-test-id="date-input"]:visible [data-time-input="0"]`)
-    .click()
-    .type(date);
-  cy.get("body").click(0, 0);
-});
 
 Cypress.Commands.add(
   "verifyAndClickElement",
@@ -222,11 +189,17 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
   });
 });
 
-Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
-  cy.get("body").within(() => {
-    errorMessages.forEach((message) => {
-      cy.contains(message).scrollIntoView().should("be.visible");
-    });
+export interface ErrorMessageItem {
+  label: string;
+  message: string;
+}
+
+Cypress.Commands.add("verifyErrorMessages", (errors: ErrorMessageItem[]) => {
+  errors.forEach(({ label, message }) => {
+    // Verify the label is present
+    cy.contains(label).scrollIntoView().should("be.visible");
+    // Verify the error message is present
+    cy.contains(message).scrollIntoView().should("be.visible");
   });
 });
 
@@ -235,20 +208,32 @@ Cypress.Commands.add(
   (
     selector: string,
     value: string,
-    options: { clearBeforeTyping?: boolean; skipVerification?: boolean } = {},
+    options: {
+      clearBeforeTyping?: boolean;
+      skipVerification?: boolean;
+      delay?: number;
+    } = {},
   ) => {
-    const { clearBeforeTyping = false, skipVerification = false } = options;
+    const {
+      clearBeforeTyping = false,
+      skipVerification = false,
+      delay = 0,
+    } = options;
     const inputField = cy.get(selector);
 
     if (clearBeforeTyping) {
-      inputField.clear(); // Clear the input field if specified
+      inputField.clear();
     }
 
-    inputField.scrollIntoView().should("be.visible").click().type(value);
-
-    // Conditionally skip verification based on the skipVerification flag
-    if (!skipVerification) {
-      inputField.should("have.value", value); // Verify the value if skipVerification is false
-    }
+    inputField
+      .scrollIntoView()
+      .should("be.visible")
+      .click()
+      .type(value, { delay })
+      .then(() => {
+        if (!skipVerification) {
+          cy.get(selector).should("have.value", value);
+        }
+      });
   },
 );

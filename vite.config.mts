@@ -164,6 +164,7 @@ export default defineConfig(({ mode }) => {
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
+      __CORE_ENV__: { ...env },
     },
     plugins: [
       federation({
@@ -176,7 +177,12 @@ export default defineConfig(({ mode }) => {
         //   from: "vite",
         // },
         // },
-        shared: ["react", "react-dom"],
+        shared: [
+          "react",
+          "react-dom",
+          "react-i18next",
+          "@tanstack/react-query",
+        ],
       }),
       ValidateEnv({
         validator: "zod",
@@ -203,7 +209,15 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       react(),
-      checker({ typescript: true }),
+      checker({
+        typescript: true,
+        eslint: {
+          lintCommand: "eslint ./src",
+          dev: {
+            logLevel: ["error"],
+          },
+        },
+      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),

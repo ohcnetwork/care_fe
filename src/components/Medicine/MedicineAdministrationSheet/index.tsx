@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { Link } from "raviger";
 import { useState } from "react";
 
@@ -283,7 +284,8 @@ const PrescriptionEntry = ({
       <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
         {instruction.dose_and_rate && (
           <span className="font-medium">
-            {instruction.dose_and_rate.type === "calculated" ? (
+            {/* TODO: Rebuild Medicine Administration Sheet */}
+            {/* {instruction.dose_and_rate.type === "calculated" ? (
               <span>
                 {instruction.dose_and_rate.dose_range?.low.value}{" "}
                 {instruction.dose_and_rate.dose_range?.low.unit} →{" "}
@@ -295,7 +297,7 @@ const PrescriptionEntry = ({
                 {instruction.dose_and_rate.dose_quantity?.value}{" "}
                 {instruction.dose_and_rate.dose_quantity?.unit}
               </span>
-            )}
+            )} */}
           </span>
         )}
         {instruction.route && (
@@ -324,6 +326,14 @@ const PrescriptionEntry = ({
           </span>
         )}
       </div>
+      {instruction.timing?.repeat?.bounds_duration && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          <span className="text-muted-foreground">{t("duration")}:</span>{" "}
+          {instruction.timing.repeat.bounds_duration.value}{" "}
+          {instruction.timing.repeat.bounds_duration.unit &&
+            t(`${instruction.timing.repeat.bounds_duration.unit}`)}
+        </div>
+      )}
 
       {/* Additional Instructions */}
       {additionalInstructions && additionalInstructions.length > 0 && (

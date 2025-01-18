@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -17,6 +17,8 @@ interface OrganizationSelectorProps {
   onChange: (value: string) => void;
   required?: boolean;
   authToken?: string;
+  selected?: Organization[];
+  errorMessage?: string;
 }
 
 interface AutoCompleteOption {
@@ -26,7 +28,7 @@ interface AutoCompleteOption {
 
 // TODO: Rename to GovtOrganizationSelector
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
-  const { onChange, required } = props;
+  const { onChange, required, selected } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -37,6 +39,22 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
         },
       }
     : {};
+
+  useEffect(() => {
+    if (selected && selected.length > 0) {
+      let currentOrg = selected[0];
+      if (currentOrg.level_cache === 0) {
+        setSelectedLevels(selected);
+      } else {
+        const levels: Organization[] = [];
+        while (currentOrg && currentOrg.level_cache >= 0) {
+          levels.unshift(currentOrg);
+          currentOrg = currentOrg.parent as unknown as Organization;
+        }
+        setSelectedLevels(levels);
+      }
+    }
+  }, [selected]);
 
   const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
@@ -86,6 +104,8 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     if (!selectedOrg.has_children) {
       onChange(selectedOrg.id);
     }
+
+    setSearchQuery("");
   };
 
   const getOrganizationOptions = (
@@ -99,7 +119,19 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
   };
 
   const handleEdit = (level: number) => {
-    setSelectedLevels((prev) => prev.slice(0, level));
+    const newLevels = selectedLevels.slice(0, level);
+    setSelectedLevels(newLevels);
+
+    if (!newLevels.length) {
+      onChange("");
+    } else {
+      const lastOrg = newLevels[newLevels.length - 1];
+      if (!lastOrg.has_children) {
+        onChange(lastOrg.id);
+      } else {
+        onChange("");
+      }
+    }
   };
 
   const lastLevel = selectedLevels[selectedLevels.length - 1];

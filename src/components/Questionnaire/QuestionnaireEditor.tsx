@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   AnswerOption,
   EnableWhen,
@@ -40,7 +40,6 @@ import {
 import {
   QuestionStatus,
   QuestionnaireDetail,
-  QuestionnaireUpdate,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -61,10 +60,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const {
     data: initialQuestionnaire,
-    loading,
+    isLoading,
     error,
-  } = useQuery(questionnaireApi.detail, {
-    pathParams: { id },
+  } = useQuery({
+    queryKey: ["questionnaireDetail", id],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id },
+    }),
   });
 
   const { mutate: updateQuestionnaire, isPending } = useMutation({
@@ -80,18 +82,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireUpdate | null>(null);
+    useState<QuestionnaireDetail | null>(null);
 
   useEffect(() => {
     if (initialQuestionnaire) {
-      setQuestionnaire({
-        ...initialQuestionnaire,
-        organizations: ["628b44da-3da0-4321-a75d-e53697b281bb"],
-      });
+      setQuestionnaire(initialQuestionnaire);
     }
   }, [initialQuestionnaire]);
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
   if (error) {
     return (
       <Alert variant="destructive">

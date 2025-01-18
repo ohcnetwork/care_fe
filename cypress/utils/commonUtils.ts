@@ -6,7 +6,7 @@ function getRandomIndex(max: number): number {
 }
 
 // Data Generators
-export function generatePatientName(): string {
+export function generateName(): string {
   const firstNames = [
     "John",
     "Jane",
@@ -68,4 +68,14 @@ export function generateAddress(): string {
   const randomArea = areas[getRandomIndex(areas.length)];
 
   return `${randomHouse}, ${randomStreet}, ${randomArea}`;
+}
+
+export function generateUsername(firstName: string): string {
+  // Generate a random 4-byte (32-bit) array
+  const randomBytes = new Uint32Array(1);
+  crypto.getRandomValues(randomBytes);
+
+  // Convert to a 4-digit string, ensuring leading zeros
+  const randomSuffix = (randomBytes[0] % 10000).toString().padStart(4, "0");
+  return `${firstName.toLowerCase()}${randomSuffix}dev`;
 }

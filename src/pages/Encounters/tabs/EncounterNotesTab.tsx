@@ -161,7 +161,7 @@ const MessageItem = ({ message }: { message: Message }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className="flex-shrink-0 cursor-pointer"
+                className="flex cursor-pointer"
                 onClick={navigateToUser}
               >
                 <Avatar
