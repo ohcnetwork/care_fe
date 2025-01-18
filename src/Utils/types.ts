@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { UserBareMinimum } from "@/components/Users/models";
 
 export interface BaseModel {

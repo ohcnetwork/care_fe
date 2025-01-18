@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import careConfig from "@careConfig";
 import { Redirect, useRedirect, useRoutes } from "raviger";
 
