@@ -33,7 +33,7 @@ import { FacilityModel } from "@/components/Facility/models";
 
 import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
-import { FACILITY_TYPES } from "@/common/constants";
+import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import {
   validateLatitude,
   validateLongitude,
@@ -298,18 +298,11 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormLabel>Features</FormLabel>
                   <FormControl>
                     <MultiSelect
-                      options={[
-                        { value: "1", label: "CT Scan" },
-                        { value: "2", label: "Maternity Care" },
-                        { value: "3", label: "X-Ray" },
-                        { value: "4", label: "Neonatal Care" },
-                        { value: "5", label: "Operation Theater" },
-                        { value: "6", label: "Blood Bank" },
-                        { value: "7", label: "Emergency Services" },
-                        { value: "8", label: "Inpatient Services" },
-                        { value: "9", label: "Outpatient Services" },
-                        { value: "10", label: "Intensive Care Units" },
-                      ]}
+                      options={FACILITY_FEATURE_TYPES.map((obj) => ({
+                        value: obj.id.toString(),
+                        label: obj.name,
+                        icon: obj.icon
+                      }))}
                       onValueChange={handleFeatureChange}
                       defaultValue={field.value.map((val) => val.toString())}
                       placeholder="Select facility features"

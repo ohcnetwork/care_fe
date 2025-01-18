@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ interface MultiSelectProps
   options: {
     label: string;
     value: string;
-    icon?: React.ComponentType<{ className?: string }>;
+    icon?: IconName;
   }[];
   onValueChange: (value: string[]) => void;
   defaultValue?: string[];
@@ -110,15 +110,12 @@ export const MultiSelect = React.forwardRef<
                   <div className="flex flex-wrap items-center">
                     {selectedValues.map((value) => {
                       const option = options.find((o) => o.value === value);
-                      const IconComponent = option?.icon;
                       return (
                         <Badge
                           key={value}
                           className="m-1 border-foreground/10 bg-secondary text-black hover:bg-secondary/80"
                         >
-                          {IconComponent && (
-                            <IconComponent className="h-4 w-4 mr-2" />
-                          )}
+                          {option?.icon && <CareIcon icon={option.icon} className="h-4 w-4 mr-2" />}
                           {option?.label}
                           <XCircle
                             className="ml-2 h-4 w-4 cursor-pointer"
@@ -187,9 +184,7 @@ export const MultiSelect = React.forwardRef<
                         className="cursor-pointer"
                       >
                         <Checkbox checked={isSelected} />
-                        {option.icon && (
-                          <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                        )}
+                        {option?.icon && <CareIcon icon={option.icon} className="mr-2 h-4 w-4" />}
                         <span>{option.label}</span>
                       </CommandItem>
                     );
