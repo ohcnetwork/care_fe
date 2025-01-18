@@ -1854,6 +1854,7 @@
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_facility": "Select Facility",
   "select_facility_description": "Select the healthcare facility that will provide the requested resource.",
+  "select_facility_feature": "Select Facility Features",
   "select_facility_for_discharged_patients_warning": "Facility needs to be selected to view discharged patients.",
   "select_facility_type": "Select Facility Type",
   "select_for_administration": "Select for Administration",

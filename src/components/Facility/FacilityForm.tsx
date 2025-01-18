@@ -295,7 +295,7 @@ export default function FacilityForm(props: FacilityProps) {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>Features</FormLabel>
+                  <FormLabel>{t("features")}</FormLabel>
                   <FormControl>
                     <MultiSelect
                       options={FACILITY_FEATURE_TYPES.map((obj) => ({
@@ -305,7 +305,7 @@ export default function FacilityForm(props: FacilityProps) {
                       }))}
                       onValueChange={handleFeatureChange}
                       value={field.value.map((val) => val.toString())}
-                      placeholder="Select facility features"
+                      placeholder={t("select_facility_feature")}
                       id="facility-features"
                     />
                   </FormControl>
