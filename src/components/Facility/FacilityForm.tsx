@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,7 +28,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FacilityModel } from "@/components/Facility/models";
 import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
+
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import {
@@ -39,48 +42,49 @@ import {
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
 import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
+import { Organization } from "@/types/organization/organization";
 
-const facilityFormSchema = z.object({
-  facility_type: z.string().min(1, "Facility type is required"),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  features: z.array(z.number()).default([]),
-  pincode: z.string().refine(validatePincode, "Invalid pincode"),
-  address: z.string().min(1, "Address is required"),
-  phone_number: z
-    .string()
-    .regex(
-      /^\+91[0-9]{10}$/,
-      "Phone number must start with +91 followed by 10 digits",
-    ),
-  latitude: z
-    .string()
-    .optional()
-    .refine((val) => !val || validateLatitude(val), "Invalid latitude"),
-  longitude: z
-    .string()
-    .optional()
-    .refine((val) => !val || validateLongitude(val), "Invalid longitude"),
-  is_public: z.boolean().default(false),
-});
-
-type FacilityFormValues = z.infer<typeof facilityFormSchema>;
-
-interface Props {
-  organizationId: string;
+interface FacilityProps {
+  organizationId?: string;
+  facilityId?: string;
   onSubmitSuccess?: () => void;
 }
 
-export default function CreateFacilityForm({
-  organizationId,
-  onSubmitSuccess,
-}: Props) {
+export default function FacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const { facilityId, onSubmitSuccess } = props;
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+
+  const facilityFormSchema = z.object({
+    facility_type: z.string().min(1, t("facility_type_required")),
+    name: z.string().min(1, t("name_is_required")),
+    description: z.string().optional(),
+    features: z.array(z.number()).default([]),
+    pincode: z.string().refine(validatePincode, t("invalid_pincode")),
+    geo_organization: z.string().min(1, t("organization_required")),
+    address: z.string().min(1, t("address_is_required")),
+    phone_number: z
+      .string()
+      .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
+    latitude: z
+      .string()
+      .optional()
+      .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
+    longitude: z
+      .string()
+      .optional()
+      .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
+    is_public: z.boolean().default(false),
+  });
+
+  type FacilityFormValues = z.infer<typeof facilityFormSchema>;
 
   const form = useForm<FacilityFormValues>({
     resolver: zodResolver(facilityFormSchema),
@@ -90,6 +94,7 @@ export default function CreateFacilityForm({
       description: "",
       features: [],
       pincode: "",
+      geo_organization: "",
       address: "",
       phone_number: "+91",
       latitude: "",
@@ -106,24 +111,41 @@ export default function CreateFacilityForm({
       form.reset();
       onSubmitSuccess?.();
     },
-    onError: (error: Error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      if (errorData?.errors?.msg) {
-        errorData.errors.msg.forEach((msg) => {
-          toast.error(msg);
-        });
-      } else {
-        toast.error(t("facility_add_error"));
-      }
+  });
+
+  const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
+    mutationFn: mutate(routes.updateFacility, {
+      pathParams: { id: facilityId || "" },
+    }),
+    onSuccess: (_data: FacilityModel) => {
+      toast.success(t("facility_updated_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
+      form.reset();
+      onSubmitSuccess?.();
     },
   });
 
-  const onSubmit = (data: FacilityFormValues) => {
-    createFacility({
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId || "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const onSubmit: (data: FacilityFormValues) => void = (
+    data: FacilityFormValues,
+  ) => {
+    const requestData = {
       ...data,
       phone_number: parsePhoneNumber(data.phone_number),
-      geo_organization: organizationId,
-    });
+    };
+
+    if (facilityId) {
+      updateFacility(requestData);
+    } else {
+      createFacility(requestData);
+    }
   };
 
   const handleFeatureChange = (value: any) => {
@@ -145,19 +167,64 @@ export default function CreateFacilityForm({
           setIsGettingLocation(false);
           toast.error(t("unable_to_get_location") + error.message);
         },
-        { timeout: 10000 }, // 10 second timeout
+        { timeout: 10000 },
       );
     } else {
       toast.error(t("geolocation_is_not_supported_by_this_browser"));
     }
   };
 
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
+  });
+
+  useEffect(() => {
+    if (facilityId) return;
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+    setSelectedLevels(levels);
+
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg, facilityId]);
+
+  // Update form when facility data is loaded
+  useEffect(() => {
+    if (facilityData) {
+      setSelectedLevels([
+        facilityData.geo_organization as unknown as Organization,
+      ]);
+      form.reset({
+        facility_type: facilityData.facility_type,
+        name: facilityData.name,
+        description: facilityData.description || "",
+        features: facilityData.features || [],
+        pincode: facilityData.pincode?.toString() || "",
+        geo_organization: (
+          facilityData.geo_organization as unknown as Organization
+        )?.id,
+        address: facilityData.address,
+        phone_number: facilityData.phone_number,
+        latitude: facilityData.latitude?.toString() || "",
+        longitude: facilityData.longitude?.toString() || "",
+        is_public: facilityData.is_public,
+      });
+    }
+  }, [facilityData]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Basic Information</h3>
+          <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -218,7 +285,6 @@ export default function CreateFacilityForm({
                     {...field}
                     data-cy="facility-description"
                     placeholder="Describe your facility (Markdown supported)"
-                    className="h-24"
                   />
                 </FormControl>
                 <FormMessage />
@@ -253,7 +319,7 @@ export default function CreateFacilityForm({
 
         {/* Contact Information */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Contact Information</h3>
+          <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -285,7 +351,44 @@ export default function CreateFacilityForm({
                     <Input
                       data-cy="facility-pincode"
                       placeholder="Enter pincode"
+                      maxLength={6}
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  {showAutoFilledPincode && (
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="flex items-center"
+                    >
+                      <CareIcon
+                        icon="l-check-circle"
+                        className="mr-2 text-sm text-green-500"
+                        aria-hidden="true"
+                      />
+                      <span className="text-sm text-primary-500">
+                        {t("pincode_autofill")}
+                      </span>
+                    </div>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="geo_organization"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
+                  <FormControl>
+                    <OrganizationSelector
+                      {...field}
+                      value={form.watch("geo_organization")}
+                      selected={selectedLevels}
+                      onChange={(value) =>
+                        form.setValue("geo_organization", value)
+                      }
+                      required
                     />
                   </FormControl>
                   <FormMessage />
@@ -305,7 +408,6 @@ export default function CreateFacilityForm({
                     {...field}
                     data-cy="facility-address"
                     placeholder="Enter complete address"
-                    className="h-20"
                   />
                 </FormControl>
                 <FormMessage />
@@ -317,7 +419,7 @@ export default function CreateFacilityForm({
         {/* Location Information */}
         <div className="space-y-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Location Details</h3>
+            <h3 className="text-lg font-medium">{t("location_details")}</h3>
             <Button
               type="button"
               variant="outline"
@@ -330,12 +432,12 @@ export default function CreateFacilityForm({
               {isGettingLocation ? (
                 <>
                   <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                  Getting Location...
+                  {t("getting_location")}
                 </>
               ) : (
                 <>
                   <CareIcon icon="l-location-point" className="h-4 w-4" />
-                  Get Current Location
+                  {t("get_current_location")}
                 </>
               )}
             </Button>
@@ -386,7 +488,7 @@ export default function CreateFacilityForm({
 
         {/* Visibility Settings */}
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Visibility Settings</h3>
+          <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
@@ -412,43 +514,36 @@ export default function CreateFacilityForm({
               </FormItem>
             )}
           />
-
-          {!organizationId && (
-            <FormField
-              name="geo_organization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization</FormLabel>
-                  <FormControl>
-                    <OrganizationSelector
-                      value={field.value}
-                      onChange={field.onChange}
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
         </div>
 
         <Button
           type="submit"
           className="w-full"
-          disabled={isPending}
-          data-cy="submit-facility"
+          disabled={facilityId ? isUpdatePending : isPending}
+          data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
-          {isPending ? (
+          {facilityId ? (
+            isUpdatePending ? (
+              <>
+                <CareIcon
+                  icon="l-spinner"
+                  className="mr-2 h-4 w-4 animate-spin"
+                />
+                {t("updating_facility")}
+              </>
+            ) : (
+              t("update_facility")
+            )
+          ) : isPending ? (
             <>
               <CareIcon
                 icon="l-spinner"
                 className="mr-2 h-4 w-4 animate-spin"
               />
-              Creating Facility...
+              {t("creating_facility")}
             </>
           ) : (
-            "Create Facility"
+            t("create_facility")
           )}
         </Button>
       </form>

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import {
   BLOOD_GROUP_CHOICES, // DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
@@ -79,7 +81,8 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [debouncedNumber, setDebouncedNumber] = useState<string>();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -192,6 +195,28 @@ export default function PatientRegistration(
     },
   });
 
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
+  });
+
+  useEffect(() => {
+    // Fill by pincode for patient registration
+    if (patientId) return;
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+    setSelectedLevels(levels);
+
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg, patientId]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
       updatePatient({ ...values, ward_old: undefined });
@@ -226,13 +251,13 @@ export default function PatientRegistration(
   };
 
   const patientPhoneSearch = useQuery({
-    queryKey: ["patients", "phone-number", debouncedNumber],
-    queryFn: query(routes.searchPatient, {
+    queryKey: ["patients", "phone-number", form.watch("phone_number")],
+    queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(debouncedNumber || "") || "",
+        phone_number: parsePhoneNumber(form.watch("phone_number") || "") || "",
       },
     }),
-    enabled: !!parsePhoneNumber(debouncedNumber || ""),
+    enabled: !!parsePhoneNumber(form.watch("phone_number") || ""),
   });
 
   const duplicatePatients = useMemo(() => {
@@ -249,6 +274,9 @@ export default function PatientRegistration(
 
   useEffect(() => {
     if (patientQuery.data) {
+      setSelectedLevels([
+        patientQuery.data.geo_organization as unknown as Organization,
+      ]);
       form.reset({
         ...patientQuery.data,
         same_phone_number:
@@ -257,26 +285,18 @@ export default function PatientRegistration(
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        age: !patientQuery.data.date_of_birth
+          ? patientQuery.data.age
+          : undefined,
+        date_of_birth: patientQuery.data.date_of_birth
+          ? patientQuery.data.date_of_birth
+          : undefined,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const phoneNumber = form.getValues("phone_number");
-      if (!patientId || patientQuery.data?.phone_number !== phoneNumber) {
-        setSuppressDuplicateWarning(false);
-      }
-      setDebouncedNumber(phoneNumber);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [form.watch("phone_number")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
@@ -503,12 +523,22 @@ export default function PatientRegistration(
                                 value={
                                   form.watch("date_of_birth")?.split("-")[2]
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
-                                  )
-                                }
+                                  );
+                                  const day = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    day >= 1 &&
+                                    day <= 31
+                                  ) {
+                                    document
+                                      .getElementById("dob-month-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-day-input"
                               />
                             </div>
@@ -518,17 +548,28 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-month-input"
                                 placeholder="MM"
                                 {...field}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[1]
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
-                                  )
-                                }
+                                  );
+                                  const month = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    month >= 1 &&
+                                    month <= 12
+                                  ) {
+                                    document
+                                      .getElementById("dob-year-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-month-input"
                               />
                             </div>
@@ -538,6 +579,7 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-year-input"
                                 placeholder="YYYY"
                                 {...field}
                                 value={
@@ -685,6 +727,22 @@ export default function PatientRegistration(
                       />
                     </FormControl>
                     <FormMessage />
+                    {showAutoFilledPincode && (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="flex items-center"
+                      >
+                        <CareIcon
+                          icon="l-check-circle"
+                          className="mr-2 text-sm text-green-500"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-primary-500">
+                          {t("pincode_autofill")}
+                        </span>
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -724,6 +782,7 @@ export default function PatientRegistration(
                           <OrganizationSelector
                             {...field}
                             required={true}
+                            selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value)
@@ -759,7 +818,7 @@ export default function PatientRegistration(
       </div>
       {!patientPhoneSearch.isLoading &&
         !!duplicatePatients?.length &&
-        !!parsePhoneNumber(debouncedNumber || "") &&
+        !!parsePhoneNumber(form.watch("phone_number") || "") &&
         !suppressDuplicateWarning && (
           <DuplicatePatientDialog
             patientList={duplicatePatients}

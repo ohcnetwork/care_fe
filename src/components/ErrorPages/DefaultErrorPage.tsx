@@ -1,7 +1,10 @@
-import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { Button } from "../ui/button";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
@@ -17,6 +20,7 @@ export default function ErrorPage({
   ...props
 }: ErrorPageProps) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   useEffect(() => {
     toast.dismiss();
@@ -54,12 +58,16 @@ export default function ErrorPage({
           {message}
           <br />
           <br />
-          <Link
-            href="/"
+          <Button
+            onClick={() => {
+              // Refresh the Page
+              goBack("/");
+              window.location.reload();
+            }}
             className="inline-block rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700 hover:text-white"
           >
             {t("return_to_care")}
-          </Link>
+          </Button>
         </p>
       </div>
     </div>

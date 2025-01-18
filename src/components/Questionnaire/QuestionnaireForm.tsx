@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import Loading from "@/components/Common/Loading";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -74,11 +74,14 @@ export function QuestionnaireForm({
 
   const {
     data: questionnaireData,
-    loading: isQuestionnaireLoading,
+    isLoading: isQuestionnaireLoading,
     error: questionnaireError,
-  } = useQuery(questionnaireApi.detail, {
-    pathParams: { id: questionnaireSlug ?? "" },
-    prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
+  } = useQuery({
+    queryKey: ["questionnaireDetail", questionnaireSlug],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id: questionnaireSlug ?? "" },
+    }),
+    enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
@@ -298,11 +301,6 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
-      <PLUGIN_Component
-        __name="Scribe"
-        formState={questionnaireForms}
-        setFormState={setQuestionnaireForms}
-      />
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
@@ -441,6 +439,12 @@ export function QuestionnaireForm({
             </Button>
           </div>
         )}
+
+        <PLUGIN_Component
+          __name="Scribe"
+          formState={questionnaireForms}
+          setFormState={setQuestionnaireForms}
+        />
 
         {/* Add a Preview of the QuestionnaireForm */}
         {import.meta.env.DEV && (

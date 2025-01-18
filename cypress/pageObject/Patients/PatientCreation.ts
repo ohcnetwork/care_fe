@@ -6,8 +6,6 @@ interface PatientFormData {
   bloodGroup: string;
   address: string;
   pincode: string;
-  state: string;
-  district: string;
   localBody: string;
   ward: string;
 }
@@ -46,11 +44,6 @@ export class PatientCreation {
     // Convert object values to an array of strings
     const detailsArray = Object.values(patientDetails);
     cy.verifyContentPresence(this.selectors.patientDetails, detailsArray);
-  }
-
-  selectFacility(facilityName: string) {
-    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
-    return this;
   }
 
   clickSearchPatients() {
@@ -111,20 +104,8 @@ export class PatientCreation {
       .enterDateOfBirth(patient.dateOfBirth)
       .enterAddress(patient.address)
       .enterPincode(patient.pincode)
-      .selectState(patient.state)
-      .selectDistrict(patient.district)
       .selectLocalBody(patient.localBody)
       .selectWard(patient.ward);
-  }
-
-  selectState(state: string) {
-    cy.typeAndSelectOption('[data-cy="select-state"]', state);
-    return this;
-  }
-
-  selectDistrict(district: string) {
-    cy.typeAndSelectOption('[data-cy="select-district"]', district);
-    return this;
   }
 
   selectLocalBody(localBody: string) {
