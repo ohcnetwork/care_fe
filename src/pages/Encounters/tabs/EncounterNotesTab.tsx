@@ -160,10 +160,7 @@ const MessageItem = ({ message }: { message: Message }) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div
-                className="flex cursor-pointer"
-                onClick={navigateToUser}
-              >
+              <div className="flex cursor-pointer" onClick={navigateToUser}>
                 <Avatar
                   name={message.created_by.username}
                   imageUrl={message.created_by.profile_picture_url}
@@ -183,10 +180,7 @@ const MessageItem = ({ message }: { message: Message }) => {
             isCurrentUser ? "items-end" : "items-start",
           )}
         >
-          <span
-            className="text-xs text-gray-500 mb-1 cursor-pointer"
-            onClick={navigateToUser}
-          >
+         <span className="text-xs text-gray-500 mb-1 cursor-pointer" onClick={navigateToUser}>
             {message.created_by.username}
           </span>
           <div
