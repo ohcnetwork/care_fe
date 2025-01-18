@@ -213,6 +213,9 @@ export default defineConfig(({ mode }) => {
         typescript: true,
         eslint: {
           lintCommand: "eslint ./src",
+          dev: {
+            logLevel: ["error"],
+          },
         },
       }),
       treeShakeCareIcons({
