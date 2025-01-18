@@ -1,7 +1,6 @@
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -14,9 +13,8 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
-import { UserBase } from "@/types/user/user";
 
 export interface UserHomeProps {
   username?: string;
@@ -31,7 +29,6 @@ export interface TabChildProp {
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
   let { username } = props;
-  const [userData, setUserData] = useState<UserBase>();
   const { t } = useTranslation();
   const authUser = useAuthUser();
   if (!username) {
@@ -39,27 +36,19 @@ export default function UserHome(props: UserHomeProps) {
   }
   const loggedInUser = username === authUser.username;
 
-  const { loading, refetch: refetchUserDetails } = useTanStackQueryInstead(
-    routes.getUserDetails,
-    {
-      pathParams: {
-        username: username,
-      },
-      onResponse: ({ res, data, error }) => {
-        if (res?.status === 200 && data) {
-          setUserData(data);
-        } else if (res?.status === 400) {
-          navigate("/users");
-        } else if (error) {
-          toast.error(
-            t("error_fetching_user_details") + (error?.message || ""),
-          );
-        }
-      },
-    },
-  );
+  const {
+    data: userData,
+    isLoading,
+    refetch: refetchUserDetails,
+  } = useQuery({
+    queryKey: ["getUserDetails", username],
+    queryFn: query(routes.getUserDetails, {
+      pathParams: { username },
+    }),
+    enabled: Boolean(username),
+  });
 
-  if (loading || !userData) {
+  if (isLoading || !userData) {
     return <Loading />;
   }
 
