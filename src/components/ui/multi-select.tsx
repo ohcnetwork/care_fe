@@ -115,7 +115,12 @@ export const MultiSelect = React.forwardRef<
                           key={value}
                           className="m-1 border-foreground/10 bg-secondary text-black hover:bg-secondary/80"
                         >
-                          {option?.icon && <CareIcon icon={option.icon} className="h-4 w-4 mr-2" />}
+                          {option?.icon && (
+                            <CareIcon
+                              icon={option.icon}
+                              className="h-4 w-4 mr-2"
+                            />
+                          )}
                           {option?.label}
                           <XCircle
                             className="ml-2 h-4 w-4 cursor-pointer"
@@ -184,7 +189,12 @@ export const MultiSelect = React.forwardRef<
                         className="cursor-pointer"
                       >
                         <Checkbox checked={isSelected} />
-                        {option?.icon && <CareIcon icon={option.icon} className="mr-2 h-4 w-4" />}
+                        {option?.icon && (
+                          <CareIcon
+                            icon={option.icon}
+                            className="mr-2 h-4 w-4"
+                          />
+                        )}
                         <span>{option.label}</span>
                       </CommandItem>
                     );

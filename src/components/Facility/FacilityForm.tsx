@@ -301,7 +301,7 @@ export default function FacilityForm(props: FacilityProps) {
                       options={FACILITY_FEATURE_TYPES.map((obj) => ({
                         value: obj.id.toString(),
                         label: obj.name,
-                        icon: obj.icon
+                        icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
                       defaultValue={field.value.map((val) => val.toString())}
