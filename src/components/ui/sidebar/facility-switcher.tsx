@@ -3,6 +3,8 @@ import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +53,7 @@ export function FacilitySwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
@@ -72,7 +74,11 @@ export function FacilitySwitcher({
                     setOpenMobile(false);
                   }
                 }}
-                className="gap-2 p-2"
+                className={cn(
+                  "gap-2 p-2",
+                  facility.name === selectedFacility?.name &&
+                    "bg-primary-500 text-white",
+                )}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Hospital className="size-4 shrink-0" />

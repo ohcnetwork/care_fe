@@ -11,6 +11,8 @@ import {
 } from "@/components/Common/Charts/ObservationChart";
 import Loading from "@/components/Common/Loading";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
+
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 type QueryParams = {
@@ -20,6 +22,8 @@ type QueryParams = {
 export const EncounterPlotsTab = (props: EncounterTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
+
+  const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
     queryKey: ["plots-config"],
@@ -43,13 +47,15 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
         value={currentTabId}
         onValueChange={(value) => setQParams({ plot: value })}
       >
-        <TabsList>
-          {data.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id}>
-              {tab.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-scroll w-full">
+          <TabsList>
+            {data.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         {data.map((tab) => (
           <TabsContent key={tab.id} value={tab.id}>
@@ -57,7 +63,7 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
               patientId={props.patient.id}
               encounterId={props.encounter.id}
               codeGroups={tab.groups}
-              gridCols={2}
+              gridCols={plotColumns}
             />
           </TabsContent>
         ))}

@@ -17,7 +17,6 @@ import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
-import { FeatureFlagsProvider } from "@/Utils/featureFlags";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
@@ -48,9 +47,7 @@ const App = () => {
                 unauthorized={<Routers.PublicRouter />}
                 otpAuthorized={<Routers.PatientRouter />}
               >
-                <FeatureFlagsProvider>
-                  <Routers.AppRouter />
-                </FeatureFlagsProvider>
+                <Routers.AppRouter />
               </AuthUserProvider>
 
               {/* Integrations */}

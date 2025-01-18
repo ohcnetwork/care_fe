@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -15,13 +16,16 @@ import {
 import Loading from "@/components/Common/Loading";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { PlugConfig } from "@/types/plugConfig";
 
 export function PlugConfigList() {
-  const { data, loading } = useQuery(routes.plugConfig.listPlugConfigs);
+  const { data, isLoading } = useQuery({
+    queryKey: ["list-configs"],
+    queryFn: query(routes.plugConfig.listPlugConfigs),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
