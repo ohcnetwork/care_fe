@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
@@ -33,7 +32,7 @@ interface MultiSelectProps
   }[];
   onValueChange: (value: string[]) => void;
   value: string[];
-  placeholder?: string;
+  placeholder: string;
   modalPopover?: boolean;
   asChild?: boolean;
   className?: string;
@@ -48,7 +47,7 @@ export const MultiSelect = React.forwardRef<
       options,
       onValueChange,
       value = [],
-      placeholder = "Select options",
+      placeholder,
       modalPopover = false,
       className,
       ...props
@@ -168,7 +167,6 @@ export const MultiSelect = React.forwardRef<
           >
             <Command>
               <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   <CommandItem
                     key="all"
