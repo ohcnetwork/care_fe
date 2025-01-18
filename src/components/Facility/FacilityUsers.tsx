@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,6 +16,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { useView } from "@/Utils/useView";
 
 const UserCardSkeleton = () => (
   <div>
@@ -121,7 +121,9 @@ export default function FacilityUsers(props: { facilityId: string }) {
     limit: 15,
     cacheBlacklist: ["username"],
   });
-  const [activeTab, setActiveTab] = useState<"card" | "list">("card");
+  const [activeTab, setActiveTab] = useView("users", "card");
+
+  console.log("activeTab", activeTab);
   const { facilityId } = props;
 
   let usersList: JSX.Element = <></>;
@@ -147,7 +149,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
       <div>
         <UserListAndCardView
           users={userListData?.results ?? []}
-          activeTab={activeTab}
+          activeTab={activeTab === "card" ? "card" : "list"}
         />
         <Pagination totalCount={userListData.count} />
       </div>
