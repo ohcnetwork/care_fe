@@ -179,7 +179,7 @@ export const MultiSelect = React.forwardRef<
                     <Checkbox
                       checked={selectedValues.length === options.length}
                     />
-                    <span>Select All</span>
+                    <span>{t("select_all")}</span>
                   </CommandItem>
                   {options.map((option) => {
                     const isSelected = selectedValues.includes(option.value);
