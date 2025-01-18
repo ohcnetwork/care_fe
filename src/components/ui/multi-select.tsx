@@ -32,7 +32,7 @@ interface MultiSelectProps
     icon?: IconName;
   }[];
   onValueChange: (value: string[]) => void;
-  defaultValue?: string[];
+  value: string[];
   placeholder?: string;
   modalPopover?: boolean;
   asChild?: boolean;
@@ -47,7 +47,7 @@ export const MultiSelect = React.forwardRef<
     {
       options,
       onValueChange,
-      defaultValue = [],
+      value = [],
       placeholder = "Select options",
       modalPopover = false,
       className,
@@ -55,12 +55,11 @@ export const MultiSelect = React.forwardRef<
     },
     ref,
   ) => {
-    const [selectedValues, setSelectedValues] =
-      React.useState<string[]>(defaultValue);
+    const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     React.useEffect(() => {
-      setSelectedValues(defaultValue);
-    }, [defaultValue]);
+      setSelectedValues(value);
+    }, [value]);
 
     const { t } = useTranslation();
 

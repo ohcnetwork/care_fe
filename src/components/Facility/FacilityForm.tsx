@@ -304,7 +304,7 @@ export default function FacilityForm(props: FacilityProps) {
                         icon: obj.icon,
                       }))}
                       onValueChange={handleFeatureChange}
-                      defaultValue={field.value.map((val) => val.toString())}
+                      value={field.value.map((val) => val.toString())}
                       placeholder="Select facility features"
                       id="facility-features"
                     />
