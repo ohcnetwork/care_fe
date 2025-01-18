@@ -1,5 +1,6 @@
-import { XCircle, XIcon } from "lucide-react";
+import { ChevronDown, XCircle, XIcon } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -60,6 +61,8 @@ export const MultiSelect = React.forwardRef<
     React.useEffect(() => {
       setSelectedValues(defaultValue);
     }, [defaultValue]);
+
+    const { t } = useTranslation();
 
     const toggleOption = (option: string) => {
       const newSelectedValues = selectedValues.includes(option)
@@ -141,20 +144,18 @@ export const MultiSelect = React.forwardRef<
                         handleClear();
                       }}
                     />
-                    <CareIcon
+                    <ChevronDown
                       id="dropdown-toggle"
-                      icon="l-angle-down"
-                      className="text-black text-3xl"
+                      className="h-4 mx-2 cursor-pointer text-black"
                     />
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between w-full mx-auto">
                   <span className="text-sm text-black mx-3">{placeholder}</span>
-                  <CareIcon
+                  <ChevronDown
                     id="dropdown-toggle"
-                    icon="l-angle-down"
-                    className="text-black"
+                    className="h-4 mx-2 cursor-pointer text-black"
                   />
                 </div>
               )}
@@ -209,7 +210,7 @@ export const MultiSelect = React.forwardRef<
                           onSelect={handleClear}
                           className="flex-1 justify-center cursor-pointer"
                         >
-                          Clear
+                          {t("clear")}
                         </CommandItem>
                         <Separator
                           orientation="vertical"
@@ -221,7 +222,7 @@ export const MultiSelect = React.forwardRef<
                       onSelect={() => setIsPopoverOpen(false)}
                       className="flex-1 justify-center cursor-pointer max-w-full"
                     >
-                      Close
+                      {t("close")}
                     </CommandItem>
                   </div>
                 </CommandGroup>
