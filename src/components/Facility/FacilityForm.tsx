@@ -313,6 +313,7 @@ export default function FacilityForm(props: FacilityProps) {
                       onValueChange={handleFeatureChange}
                       defaultValue={field.value.map((val) => val.toString())}
                       placeholder="Select facility features"
+                      id="facility-features"
                     />
                   </FormControl>
                   <FormMessage />
