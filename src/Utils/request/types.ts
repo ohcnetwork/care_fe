@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 type QueryParamValue =
   | string
   | number
@@ -43,6 +42,7 @@ type ExtractRouteParams<T extends string> =
     : never;
 
 type PathParams<T extends string> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   [K in ExtractRouteParams<T>]: string;
 };
 
