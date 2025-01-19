@@ -13,6 +13,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { z } from "zod";
 
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
 const pdfWorkerPath = path.join(
