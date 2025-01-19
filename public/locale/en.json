@@ -1393,7 +1393,6 @@
   "no_observations": "No Observations",
   "no_ongoing_medications": "No Ongoing Medications",
   "no_organizations_found": "No Organizations Found",
-  "no_organizations_found_matching": "No organizations found matching {{searchQuery}}",
   "no_organizations_selected": "No organizations selected",
   "no_patient_record_found": "No Patient Records Found",
   "no_patient_record_text": "No existing records found with this phone number. Would you like to register a new patient?",
