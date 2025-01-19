@@ -134,7 +134,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 ))
               ) : (
                 <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+                  <CardContent className="p-6 text-center text-gray-500 max-w-full break-words">
                     {searchQuery
                       ? t("no_organizations_found_matching", { searchQuery })
                       : t("no_sub_organizations_found")}
