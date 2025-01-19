@@ -276,7 +276,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                     successMessage={t("username_success_message")}
                     validations={[
                       {
-                        description: "password_length_validation",
+                        description: "username_min_length_validation",
                         fulfilled: field.value.length >= 4,
                       },
                       {
