@@ -35,38 +35,12 @@ export class UserCreation {
   }
 
   fillUsername(username: string) {
-    cy.get('[data-cy="username-input"]', { timeout: 20000 })
-      .should("exist")
-      .should("be.visible")
-      .click();
-    cy.get('[data-cy="username-input"]', { timeout: 20000 })
-      .should("exist")
-      .should("be.visible")
-      .clear()
-      .type(username, { delay: 50 });
-    cy.wait(500);
-    cy.get('[data-cy="username-input"]', { timeout: 20000 }).should(
-      "have.value",
-      username,
-    );
+    cy.typeIntoField('[data-cy="username-input"]', username);
     return this;
   }
 
   fillPassword(password: string) {
-    cy.get('[data-cy="password-input"]', { timeout: 20000 })
-      .should("exist") // Ensure the input exists in the DOM
-      .should("be.visible") // Ensure it's visible
-      .click(); // Focus on the input
-    cy.get('[data-cy="password-input"]', { timeout: 20000 })
-      .should("exist")
-      .should("be.visible")
-      .clear()
-      .type(password, { delay: 50 });
-    cy.wait(500);
-    cy.get('[data-cy="password-input"]', { timeout: 20000 }).should(
-      "have.value",
-      password,
-    );
+    cy.typeIntoField('[data-cy="password-input"]', password);
     return this;
   }
 
