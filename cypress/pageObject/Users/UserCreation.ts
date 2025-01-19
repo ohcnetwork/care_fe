@@ -35,12 +35,17 @@ export class UserCreation {
   }
 
   fillUsername(username: string) {
-    cy.typeIntoField('[data-cy="username-input"]', username);
+    cy.get('[data-cy="username-input"]')
+      .should("be.visible")
+      .type(username, { force: true });
     return this;
   }
 
   fillPassword(password: string) {
-    cy.typeIntoField('[data-cy="password-input"]', password);
+    cy.get('[data-cy="password-input"]')
+      .should("be.visible")
+      .type(password, { force: true });
+
     return this;
   }
 
