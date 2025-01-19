@@ -36,12 +36,31 @@ export class UserCreation {
 
   fillUsername(username: string) {
     // cy.typeIntoField('[data-cy="username-input"]', username);
-    cy.get('[data-cy="username-input"]').click().type(username);
-    return this;
+    cy.get('[data-cy="username-input"]')
+      .should("exist") // Ensure the input exists
+      .should("be.visible") // Ensure it's visible
+      .click() // Focus on the input
+      .clear() // Clear any existing value
+      .type(username, { delay: 50 }); // Type the username with a slight delay
+
+    // Optional: Wait for validation to settle
+    cy.wait(500);
+
+    // Verify the input has the correct value
+    cy.get('[data-cy="username-input"]').should("have.value", username);
   }
 
   fillPassword(password: string) {
-    cy.get('[data-cy="password-input"]').click().type(password);
+    cy.get('[data-cy="password-input"]')
+      .should("exist") // Ensure the input exists in the DOM
+      .should("be.visible") // Ensure it's visible
+      .click() // Focus on the input
+      .clear() // Clear any pre-existing value
+      .type(password, { delay: 50 }); // Type the password with a slight delay
+
+    // Optional: Validate that the password field contains the correct value
+    cy.get('[data-cy="password-input"]').should("have.value", password);
+
     return this;
   }
 
