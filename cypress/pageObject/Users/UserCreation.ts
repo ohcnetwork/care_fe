@@ -42,7 +42,7 @@ export class UserCreation {
   }
 
   fillPassword(password: string) {
-    cy.get('[data-cy="password-input"]')
+    cy.get('[data-cy="password-input"]', { timeout: 15000 })
       .should("be.visible")
       .type(password, { force: true });
 
