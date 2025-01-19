@@ -192,7 +192,7 @@ export default function FacilityForm(props: FacilityProps) {
     const levels: Organization[] = [];
     if (stateOrg) levels.push(stateOrg);
     if (districtOrg) levels.push(districtOrg);
-    if (organizationId && org) levels.push(org);
+    if (!stateOrg && !districtOrg && org) levels.push(org);
 
     setSelectedLevels(levels);
 
