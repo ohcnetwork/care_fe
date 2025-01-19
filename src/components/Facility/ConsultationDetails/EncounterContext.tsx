@@ -1,6 +1,5 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
@@ -65,7 +64,6 @@ export const EncounterProvider = <T extends object = object>({
         } as EncounterContextType<T>
       }
     >
-      <PLUGIN_Component __name="EncounterContextEnabler" />
       {children}
     </EncounterContext.Provider>
   );

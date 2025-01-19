@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -32,13 +33,15 @@ export function QuestionnaireSearch({
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
+  const { t } = useTranslation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const { data: questionnaires, isLoading } =
     useQuery<QuestionnaireListResponse>({
       queryKey: ["questionnaires", "list", search, subjectType],
-      queryFn: query(questionnaireApi.list, {
+      queryFn: query.debounced(questionnaireApi.list, {
         queryParams: {
           title: search,
           ...conditionalAttribute(!!subjectType, {
@@ -70,7 +73,7 @@ export function QuestionnaireSearch({
               Loading...
             </>
           ) : (
-            <span>Add Questionnaire</span>
+            <span>{t("add_questionnaire")}</span>
           )}
           <CareIcon icon="l-arrow-down" className="ml-2 h-4 w-4" />
         </Button>
@@ -97,7 +100,7 @@ export function QuestionnaireSearch({
             </div>
           ) : filteredQuestionnaires.length === 0 ? (
             <div className="p-4 text-sm text-muted-foreground">
-              No questionnaires found
+              {t("no_questionnaires_found")}
             </div>
           ) : (
             <div className="grid gap-1 p-2">

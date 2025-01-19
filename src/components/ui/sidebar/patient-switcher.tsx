@@ -10,22 +10,25 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { PatientUserContextType } from "@/Providers/PatientUserProvider";
+import { usePatientContext } from "@/hooks/usePatientUser";
+
 import { classNames } from "@/Utils/utils";
 
 import { useSidebar } from "../sidebar";
 
 interface PatientSwitcherProps {
-  patientUserContext: PatientUserContextType;
   className?: string;
 }
 
-export function PatientSwitcher({
-  patientUserContext,
-  className,
-}: PatientSwitcherProps) {
+export function PatientSwitcher({ className }: PatientSwitcherProps) {
   const { t } = useTranslation();
   const { open } = useSidebar();
+
+  const patientUserContext = usePatientContext();
+
+  if (!patientUserContext || !patientUserContext.selectedPatient) {
+    return null;
+  }
 
   return (
     <div
@@ -64,7 +67,7 @@ export function PatientSwitcher({
               {open && (
                 <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
                   <Avatar
-                    name={patientUserContext.selectedPatient?.name}
+                    name={patientUserContext.selectedPatient?.name || "User"}
                     className="h-4 w-4"
                   />
                   <div className="flex flex-row items-center justify-between w-full gap-2">
@@ -80,7 +83,7 @@ export function PatientSwitcher({
               {!open && (
                 <div className="flex flex-row items-center -ml-1.5">
                   <Avatar
-                    name={patientUserContext.selectedPatient?.name}
+                    name={patientUserContext.selectedPatient?.name || "User"}
                     className="h-4 w-4"
                   />
                 </div>

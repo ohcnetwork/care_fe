@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { useMemo } from "react";
 
@@ -10,10 +11,9 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/Common/Avatar";
 import { UserAssignedModel } from "@/components/Users/models";
 
-import { CarePatientTokenKey } from "@/common/constants";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { formatName } from "@/Utils/utils";
-import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
   user: UserAssignedModel;
@@ -27,12 +27,11 @@ export function UserCard({ user, className, facilityId }: Props) {
     last_name: user.last_name || "",
   });
 
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
+  const { patientToken: tokenData } = useAuthContext();
 
   const returnLink = useMemo(() => {
     if (
+      tokenData &&
       Object.keys(tokenData).length > 0 &&
       dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
     ) {
@@ -58,7 +57,7 @@ export function UserCard({ user, className, facilityId }: Props) {
 
               {user.qualification && (
                 <>
-                  <p className="text-xs mt-3">Education: </p>
+                  <p className="text-xs mt-3">{t("education")}: </p>
                   <p className="text-sm text-muted-foreground">
                     {user.qualification}
                   </p>
@@ -77,7 +76,7 @@ export function UserCard({ user, className, facilityId }: Props) {
                 navigate(returnLink);
               }}
             >
-              Book Appointment
+              {t("book_appointment")}
             </Button>
           </div>
         </div>

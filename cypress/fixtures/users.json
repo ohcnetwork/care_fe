@@ -1,10 +1,18 @@
 {
   "admin": {
-    "username": "admin",
-    "password": "admin"
+    "username": "devsuperadmin",
+    "password": "Test@123"
   },
   "nurse": {
     "username": "nihal-nurse",
+    "password": "Test@123"
+  },
+  "doctor": {
+    "username": "arjun-doctor",
+    "password": "Test@123"
+  },
+  "staff": {
+    "username": "nihalstaff",
     "password": "Test@123"
   }
 }

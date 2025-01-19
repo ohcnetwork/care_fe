@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import * as Notify from "@/Utils/Notifications";
+import { toast } from "sonner";
 
 const useSegmentedRecording = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -32,9 +31,7 @@ const useSegmentedRecording = () => {
             }
           },
           () => {
-            Notify.Error({
-              msg: t("audio__permission_message"),
-            });
+            toast.error(t("audio__permission_message"));
             setIsRecording(false);
             setMicrophoneAccess(false); // Set access to false on failure
           },

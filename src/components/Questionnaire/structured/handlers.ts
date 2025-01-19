@@ -27,27 +27,21 @@ const handlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
-    getRequests: (allergies, { patientId, encounterId }) =>
-      allergies.map((allergy) => {
-        // Ensure all required fields have default values
-        const body: RequestTypeFor<"allergy_intolerance"> = {
-          clinical_status: allergy.clinical_status ?? "active",
-          verification_status: allergy.verification_status ?? "unconfirmed",
-          category: allergy.category ?? "medication",
-          criticality: allergy.criticality ?? "low",
-          code: allergy.code,
-          last_occurrence: allergy.last_occurrence,
-          note: allergy.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/allergy_intolerance/`,
+    getRequests: (allergies, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: allergies.map((allergy) => ({
+              ...allergy,
+              encounter: encounterId,
+            })),
+          },
           reference_id: "allergy_intolerance",
-        };
-      }),
+        },
+      ];
+    },
   },
   medication_request: {
     getRequests: (medications, { patientId, encounterId }) => {
@@ -153,9 +147,9 @@ const handlers: {
       });
     },
   },
-  follow_up_appointment: {
-    getRequests: (followUpAppointment, { facilityId, patientId }) => {
-      const { reason_for_visit, slot_id } = followUpAppointment[0];
+  appointment: {
+    getRequests: (appointment, { facilityId, patientId }) => {
+      const { reason_for_visit, slot_id } = appointment[0];
       return [
         {
           url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
@@ -164,7 +158,7 @@ const handlers: {
             reason_for_visit,
             patient: patientId,
           },
-          reference_id: "follow_up_appointment",
+          reference_id: "appointment",
         },
       ];
     },

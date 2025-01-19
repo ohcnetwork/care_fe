@@ -12,6 +12,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+import { Avatar } from "@/components/Common/Avatar";
+
 export function NavMain({
   links,
 }: {
@@ -45,8 +47,16 @@ export function NavMain({
                 activeClass="bg-white text-green-700 shadow"
                 exactActiveClass="bg-white text-green-700 shadow"
               >
-                {link.icon && <CareIcon icon={link.icon as IconName} />}
-                <span className="group-data-[collapsible=icon]:hidden">
+                {link.icon ? (
+                  <CareIcon icon={link.icon as IconName} />
+                ) : (
+                  <Avatar
+                    name={link.name}
+                    className="w-6 h-6 -m-1 rounded-sm"
+                  />
+                )}
+
+                <span className="group-data-[collapsible=icon]:hidden ml-1">
                   {link.name}
                 </span>
               </ActiveLink>

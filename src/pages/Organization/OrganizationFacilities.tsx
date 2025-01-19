@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -16,6 +17,7 @@ import query from "@/Utils/request/query";
 import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
+import EditFacilitySheet from "./components/EditFacilitySheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -27,12 +29,14 @@ export default function OrganizationFacilities({
   id,
   navOrganizationId,
 }: Props) {
+  const { t } = useTranslation();
+
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 14, cacheBlacklist: ["facility"] });
+    useFilters({ limit: 15, cacheBlacklist: ["facility"] });
 
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
-    queryFn: query(routes.facility.list, {
+    queryFn: query.debounced(routes.facility.list, {
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
@@ -53,7 +57,7 @@ export default function OrganizationFacilities({
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Facilities</h2>
+          <h2 className="text-lg font-semibold">{t("facilities")}</h2>
           <AddFacilitySheet organizationId={id} />
         </div>
 
@@ -69,10 +73,14 @@ export default function OrganizationFacilities({
               })
             }
             className="max-w-sm"
+            data-cy="search-facility"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="facility-cards"
+        >
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
@@ -102,67 +110,77 @@ export default function OrganizationFacilities({
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
-                No facilities found.
+                {t("no_facilities_found")}
               </CardContent>
             </Card>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
-              <Link
+              <Card
                 key={facility.id}
-                href={`/facility/${facility.id}`}
-                className="block"
+                className="h-full hover:border-primary/50 transition-colors overflow-hidden"
               >
-                <Card className="h-full hover:border-primary/50 transition-colors overflow-hidden">
-                  <div className="relative h-48 bg-gray-100">
-                    {facility.read_cover_image_url ? (
-                      <img
-                        src={facility.read_cover_image_url}
-                        alt={facility.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                        <Avatar name={facility.name} />
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-md font-medium text-gray-900">
-                            {facility.name}
-                          </h3>
-                          <div className="font-medium">
-                            {facility.facility_type}
-                          </div>
+                <div className="relative h-48 bg-gray-100">
+                  {facility.read_cover_image_url ? (
+                    <img
+                      src={facility.read_cover_image_url}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                      <Avatar name={facility.name} />
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-md font-medium text-gray-900">
+                          {facility.name}
+                        </h3>
+                        <div className="font-medium">
+                          {facility.facility_type}
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end">
-                    <Link
-                      href={`/facility/${facility.id}`}
-                      className="text-sm text-primary hover:underline"
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <div className="flex items-center pl-7">
+                    <EditFacilitySheet
+                      organizationId={id}
+                      facilityId={facility.id}
+                      trigger={
+                        <Button
+                          variant="link"
+                          size="icon"
+                          className="text-primary"
+                        >
+                          <CareIcon icon="l-edit" className="h-4 w-4" />
+                          <span className="">{t("edit_facility")}</span>
+                        </Button>
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      variant="link"
+                      size="icon"
+                      className="text-primary"
+                      asChild
                     >
-                      View Facility
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        asChild
+                      <Link
+                        href={`/facility/${facility.id}`}
+                        className="text-sm w-full hover:underline"
                       >
-                        <div>
-                          <CareIcon
-                            icon="l-arrow-up-right"
-                            className="h-4 w-4"
-                          />
-                        </div>
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              </Link>
+                        {t("view_facility")}
+                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
             ))
           )}
         </div>

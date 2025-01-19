@@ -1,6 +1,9 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -26,7 +29,8 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <SidebarMenu>
@@ -42,30 +46,39 @@ export function FacilitySwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {selectedFacility?.name || "Select Facility"}
+                  {selectedFacility?.name || t("select_facility")}
                 </span>
               </div>
               <CaretSortIcon className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
             <DropdownMenuItem onClick={() => navigate("/")}>
               <DashboardIcon className="size-4" />
-              View Dashboard
+              {t("view_dashboard")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Facilities</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {facilities.map((facility, index) => (
               <DropdownMenuItem
                 key={index}
-                onClick={() => navigate(`/facility/${facility.id}`)}
-                className="gap-2 p-2"
+                onClick={() => {
+                  navigate(`/facility/${facility.id}`);
+                  if (isMobile) {
+                    setOpenMobile(false);
+                  }
+                }}
+                className={cn(
+                  "gap-2 p-2",
+                  facility.name === selectedFacility?.name &&
+                    "bg-primary-500 text-white",
+                )}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <Hospital className="size-4 shrink-0" />

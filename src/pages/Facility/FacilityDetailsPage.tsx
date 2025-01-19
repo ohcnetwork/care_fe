@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -10,19 +9,16 @@ import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { LoginHeader } from "@/components/Common/LoginHeader";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
-import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 
-import { CarePatientTokenKey } from "@/common/constants";
-
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -33,41 +29,35 @@ interface Props {
 
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
-  const { data: facilityResponse, isLoading } = useQuery<
-    RequestResult<FacilityModel>
-  >({
+  const { goBack } = useAppHistory();
+  const { data: facilityResponse, isLoading } = useQuery<FacilityModel>({
     queryKey: ["facility", id],
-    queryFn: () =>
-      request(routes.getAnyFacility, {
-        pathParams: { id },
-      }),
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id },
+    }),
   });
 
   const { Pagination } = useFilters({
     limit: 18,
   });
 
-  const { data: docResponse } = useQuery<
-    RequestResult<PaginatedResponse<UserAssignedModel>>
+  const { data: docResponse, error: docError } = useQuery<
+    PaginatedResponse<UserAssignedModel>
   >({
     queryKey: [routes.getScheduleAbleFacilityUsers, id],
-    queryFn: async () => {
-      const response = await request(routes.getScheduleAbleFacilityUsers, {
-        pathParams: { facility_id: id },
-        silent: true,
-      });
-      if (response.res?.status !== 200) {
-        Notification.Error({ msg: "Error while fetching users data" });
-      }
-      return response;
-    },
+    queryFn: query(routes.getScheduleAbleFacilityUsers, {
+      pathParams: { facility_id: id },
+      silent: true,
+    }),
   });
 
-  const users = docResponse?.data?.results ?? [];
+  if (docError) {
+    toast.error(t("error_fetching_users_data"));
+  }
 
-  const facility = facilityResponse?.data;
+  const users = docResponse?.results ?? [];
 
-  const signOut = usePatientSignOut();
+  const facility = facilityResponse;
 
   if (isLoading) {
     return (
@@ -79,10 +69,6 @@ export function FacilityDetailsPage({ id }: Props) {
     );
   }
 
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(CarePatientTokenKey) || "{}",
-  );
-
   if (!facility) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -93,7 +79,7 @@ export function FacilityDetailsPage({ id }: Props) {
           <Button
             variant="outline"
             className="border border-secondary-400"
-            onClick={() => navigate("/facilities")}
+            onClick={() => goBack("/facilities")}
           >
             {t("back_to_facilities")}
           </Button>
@@ -102,58 +88,18 @@ export function FacilityDetailsPage({ id }: Props) {
     );
   }
 
-  const GetLoginHeader = () => {
-    if (
-      tokenData &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-    ) {
-      return (
-        <header className="w-full">
-          <div className="flex justify-end items-center">
-            <div className="text-sm text-primary-500">
-              Logged in as{"  "}
-              <span className="font-bold">{tokenData.phoneNumber}</span>
-            </div>
-            <Button
-              variant="ghost"
-              className="text-sm font-medium hover:bg-transparent hover:text-red-800 underline px-2 self-center text-red-500"
-              onClick={signOut}
-            >
-              Sign out
-            </Button>
-          </div>
-        </header>
-      );
-    }
-    return (
-      <header className="w-full">
-        <div className="flex justify-end items-center">
-          <Button
-            variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-            onClick={() => navigate("/login")}
-          >
-            Sign in
-          </Button>
-        </div>
-      </header>
-    );
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex px-2 pb-4 justify-start">
+      <div className="flex justify-between items-center pb-4">
         <Button
           variant="outline"
-          asChild
           className="border border-secondary-400"
+          onClick={() => goBack("/facilities")}
         >
-          <Link href="/facilities">
-            <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-            <span className="text-sm underline">{t("back")}</span>
-          </Link>
+          <CareIcon icon="l-arrow-left" className="h-4 w-4 mr-1" />
+          <span className="text-sm underline">{t("back")}</span>
         </Button>
-        <GetLoginHeader />
+        <LoginHeader />
       </div>
       <Card className="overflow-hidden bg-white">
         <div className="flex flex-col sm:flex-row  m-6">

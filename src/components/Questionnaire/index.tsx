@@ -1,9 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -11,9 +12,12 @@ import Loading from "../Common/Loading";
 
 export function QuestionnaireList() {
   const navigate = useNavigate();
-  const { data: response, loading } = useQuery(questionnaireApi.list);
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["questionnaires"],
+    queryFn: query(questionnaireApi.list),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -45,7 +49,7 @@ export function QuestionnaireList() {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Version
+                Slug
               </th>
             </tr>
           </thead>
@@ -78,7 +82,7 @@ export function QuestionnaireList() {
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {questionnaire.version}
+                  {questionnaire.slug}
                 </td>
               </tr>
             ))}

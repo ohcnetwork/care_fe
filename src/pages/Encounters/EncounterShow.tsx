@@ -247,43 +247,9 @@ export const EncounterShow = (props: Props) => {
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}
-              fetchPatientData={() => {
-                // consultationQuery.refetch();
-                // patientDataQuery.refetch();
-              }}
+              fetchPatientData={() => {}}
             />
 
-            {/* <div className="flex flex-col justify-between px-4 md:flex-row">
-              {consultationData.admitted_to && (
-                <div className="mt-2 rounded-lg border bg-secondary-100 p-2 md:mt-0">
-                  <div className="border-b-2 py-1">
-                    Patient
-                    {consultationData.discharge_date
-                      ? " Discharged from"
-                      : " Admitted to"}
-                    <span className="badge badge-pill badge-warning ml-2 font-bold">
-                      {consultationData.admitted_to}
-                    </span>
-                  </div>
-                  {(consultationData.discharge_date ??
-                    consultationData.encounter_date) && (
-                    <div className="text-3xl font-bold">
-                      {relativeTime(
-                        consultationData.discharge_date
-                          ? consultationData.discharge_date
-                          : consultationData.encounter_date,
-                      )}
-                    </div>
-                  )}
-                  <div className="-mt-2 text-xs">
-                    {consultationData.encounter_date &&
-                      formatDateTime(consultationData.encounter_date)}
-                    {consultationData.discharge_date &&
-                      ` - ${formatDateTime(consultationData.discharge_date)}`}
-                  </div>
-                </div>
-              )}
-            </div> */}
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
               <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
                 <div className="flex items-center">
@@ -292,12 +258,6 @@ export const EncounterShow = (props: Props) => {
                   </span>
                   &nbsp;
                   {formatDateTime(encounterData.modified_date)}
-                  {/* <RelativeDateUserMention
-                    actionDate={consultationData.modified_date}
-                    user={consultationData.last_edited_by}
-                    tooltipPosition="left"
-                    withoutSuffix={true}
-                  /> */}
                 </div>
               </div>
             </div>
@@ -329,20 +289,5 @@ export const EncounterShow = (props: Props) => {
         </div>
       </div>
     </EncounterProvider>
-
-    // <DoctorVideoSlideover
-    //   facilityId={facilityId}
-    //   show={showDoctors}
-    //   setShow={setShowDoctors}
-    // />
-
-    // {showPatientNotesPopup && (
-    //   <PatientNotesSlideover
-    //     patientId={patientId}
-    //     facilityId={facilityId}
-    //     consultationId={consultationId}
-    //     setShowPatientNotesPopup={setShowPatientNotesPopup}
-    //   />
-    // )}
   );
 };

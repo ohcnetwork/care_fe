@@ -1,7 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { UserBase } from "./user";
+import { UserBase } from "@/types/user/user";
 
 export default {
   list: {
@@ -20,5 +19,10 @@ export default {
     method: HttpMethod.GET,
 
     TRes: Type<UserBase>(),
+  },
+  checkUsername: {
+    path: "/api/v1/users/{username}/check_availability/",
+    method: HttpMethod.GET,
+    TRes: Type<void>,
   },
 };

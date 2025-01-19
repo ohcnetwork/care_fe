@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import InputWithError from "@/components/ui/input-with-error";
-
-import useDebouncedState from "@/hooks/useDebouncedState";
+import { Label } from "@/components/ui/label";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
@@ -19,6 +17,8 @@ interface OrganizationSelectorProps {
   onChange: (value: string) => void;
   required?: boolean;
   authToken?: string;
+  selected?: Organization[];
+  errorMessage?: string;
 }
 
 interface AutoCompleteOption {
@@ -28,9 +28,9 @@ interface AutoCompleteOption {
 
 // TODO: Rename to GovtOrganizationSelector
 export default function OrganizationSelector(props: OrganizationSelectorProps) {
-  const { onChange, required } = props;
+  const { onChange, required, selected } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [searchQuery, setSearchQuery] = useDebouncedState("", 500);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const headers = props.authToken
     ? {
@@ -40,9 +40,25 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       }
     : {};
 
+  useEffect(() => {
+    if (selected && selected.length > 0) {
+      let currentOrg = selected[0];
+      if (currentOrg.level_cache === 0) {
+        setSelectedLevels(selected);
+      } else {
+        const levels: Organization[] = [];
+        while (currentOrg && currentOrg.level_cache >= 0) {
+          levels.unshift(currentOrg);
+          currentOrg = currentOrg.parent as unknown as Organization;
+        }
+        setSelectedLevels(levels);
+      }
+    }
+  }, [selected]);
+
   const { data: getAllOrganizations } = useQuery({
     queryKey: ["organizations-root", searchQuery],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         org_type: "govt",
         parent: "",
@@ -60,7 +76,7 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       selectedLevels[selectedLevels.length - 1]?.id,
       searchQuery,
     ],
-    queryFn: query(organizationApi.list, {
+    queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: selectedLevels[selectedLevels.length - 1]?.id,
         org_type: "govt",
@@ -88,6 +104,8 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     if (!selectedOrg.has_children) {
       onChange(selectedOrg.id);
     }
+
+    setSearchQuery("");
   };
 
   const getOrganizationOptions = (
@@ -101,7 +119,19 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
   };
 
   const handleEdit = (level: number) => {
-    setSelectedLevels((prev) => prev.slice(0, level));
+    const newLevels = selectedLevels.slice(0, level);
+    setSelectedLevels(newLevels);
+
+    if (!newLevels.length) {
+      onChange("");
+    } else {
+      const lastOrg = newLevels[newLevels.length - 1];
+      if (!lastOrg.has_children) {
+        onChange(lastOrg.id);
+      } else {
+        onChange("");
+      }
+    }
   };
 
   const lastLevel = selectedLevels[selectedLevels.length - 1];
@@ -110,28 +140,30 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
     <>
       {/* Selected Levels */}
       {selectedLevels.map((level, index) => (
-        <div>
-          <InputWithError
-            key={level.id}
-            label={t(`SYSTEM__govt_org_type__${level.metadata?.govt_org_type}`)}
-            required={required}
-          >
-            <div className="flex">
-              <div className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300">
-                <div className="w-full text-nowrap overflow-x-auto">
-                  {level.name}
-                </div>
+        <div key={index}>
+          <Label className="mb-2">
+            {t(`SYSTEM__govt_org_type__${level.metadata?.govt_org_type}`)}
+            {required && <span className="text-red-500">*</span>}
+          </Label>
+          <div className="flex">
+            <div
+              className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300"
+              data-cy={`select-${level.metadata?.govt_org_type?.toLowerCase()}`}
+            >
+              <div className="w-full text-nowrap overflow-x-auto">
+                {level.name}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleEdit(index)}
-                type="button"
-              >
-                <CareIcon icon="l-trash" className="h-4 w-4" />
-              </Button>
             </div>
-          </InputWithError>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEdit(index)}
+              type="button"
+              data-cy={`edit-${level.metadata?.govt_org_type?.toLowerCase()}`}
+            >
+              <CareIcon icon="l-trash" className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ))}
 
@@ -139,26 +171,30 @@ export default function OrganizationSelector(props: OrganizationSelectorProps) {
       {(!selectedLevels.length ||
         selectedLevels[selectedLevels.length - 1]?.has_children) && (
         <div>
-          <InputWithError
-            label={t(
+          <Label className="mb-2">
+            {t(
               lastLevel
                 ? `SYSTEM__govt_org_type__${lastLevel.metadata?.govt_org_children_type || "default"}`
                 : "SYSTEM__govt_org_type__default",
             )}
-          >
-            <Autocomplete
-              value=""
-              options={getOrganizationOptions(
-                selectedLevels.length === 0
-                  ? getAllOrganizations?.results
-                  : currentLevelOrganizations?.results,
-              )}
-              onChange={(value: string) =>
-                handleLevelChange(value, selectedLevels.length)
-              }
-              onSearch={setSearchQuery}
-            />
-          </InputWithError>
+          </Label>
+          <Autocomplete
+            value=""
+            options={getOrganizationOptions(
+              selectedLevels.length === 0
+                ? getAllOrganizations?.results
+                : currentLevelOrganizations?.results,
+            )}
+            onChange={(value: string) =>
+              handleLevelChange(value, selectedLevels.length)
+            }
+            onSearch={setSearchQuery}
+            data-cy={`select-${
+              lastLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
+              lastLevel?.metadata?.govt_org_type?.toLowerCase() ||
+              "state"
+            }`}
+          />
         </div>
       )}
     </>

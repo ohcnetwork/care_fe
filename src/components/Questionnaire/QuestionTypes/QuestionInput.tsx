@@ -1,15 +1,18 @@
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { FollowUpAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/FollowUpAppointmentQuestion";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { EnableWhen, Question } from "@/types/questionnaire/question";
+import type { Question } from "@/types/questionnaire/question";
 
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
@@ -35,6 +38,7 @@ interface QuestionInputProps {
   clearError: () => void;
   disabled?: boolean;
   facilityId: string;
+  patientId: string;
 }
 
 export function QuestionInput({
@@ -46,6 +50,7 @@ export function QuestionInput({
   clearError,
   disabled,
   facilityId,
+  patientId,
 }: QuestionInputProps) {
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
@@ -54,54 +59,6 @@ export function QuestionInput({
   if (!questionnaireResponse) {
     return null;
   }
-
-  const isQuestionEnabled = () => {
-    if (!question.enable_when?.length) return true;
-
-    const checkCondition = (enableWhen: EnableWhen) => {
-      const dependentValue = questionnaireResponses.find(
-        (v) => v.link_id === enableWhen.question,
-      )?.values[0];
-
-      // Early return if no dependent value exists
-      if (!dependentValue?.value) return false;
-
-      switch (enableWhen.operator) {
-        case "exists":
-          return dependentValue !== undefined && dependentValue !== null;
-        case "equals":
-          return dependentValue.value === enableWhen.answer;
-        case "not_equals":
-          return dependentValue.value !== enableWhen.answer;
-        case "greater":
-          return (
-            typeof dependentValue.value === "number" &&
-            dependentValue.value > enableWhen.answer
-          );
-        case "less":
-          return (
-            typeof dependentValue.value === "number" &&
-            dependentValue.value < enableWhen.answer
-          );
-        case "greater_or_equals":
-          return (
-            typeof dependentValue.value === "number" &&
-            dependentValue.value >= enableWhen.answer
-          );
-        case "less_or_equals":
-          return (
-            typeof dependentValue.value === "number" &&
-            dependentValue.value <= enableWhen.answer
-          );
-        default:
-          return true;
-      }
-    };
-
-    return question.enable_behavior === "any"
-      ? question.enable_when.some(checkCondition)
-      : question.enable_when.every(checkCondition);
-  };
 
   const handleAddValue = () => {
     updateQuestionnaireResponseCB({
@@ -121,16 +78,17 @@ export function QuestionInput({
   };
 
   const renderSingleInput = (index: number = 0) => {
-    const isEnabled = isQuestionEnabled();
-
     const commonProps = {
       classes: question.styling_metadata?.classes,
+      disableRightBorder: true,
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
-      disabled: !isEnabled || disabled,
+      disabled,
+      withLabel: false,
       clearError,
       index,
+      patientId,
     };
 
     switch (question.type) {
@@ -163,8 +121,8 @@ export function QuestionInput({
             return <SymptomQuestion {...commonProps} />;
           case "diagnosis":
             return <DiagnosisQuestion {...commonProps} />;
-          case "follow_up_appointment":
-            return <FollowUpAppointmentQuestion {...commonProps} />;
+          case "appointment":
+            return <AppointmentQuestion {...commonProps} />;
           case "encounter":
             if (encounterId) {
               return (
@@ -193,7 +151,7 @@ export function QuestionInput({
       : questionnaireResponse.values;
 
     return (
-      <div className="space-y-2">
+      <div className="">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 && (
@@ -209,32 +167,66 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index} className="mt-2 gap-2">
-              <div>{renderSingleInput(index)}</div>
+            <div
+              key={index}
+              className={cn("mt-2", removeButton && "gap-2 flex items-end")}
+            >
+              <div
+                className={cn("space-y-1", { "flex-1": removeButton })}
+                data-question-id={question.id}
+              >
+                {index === 0 && <QuestionLabel question={question} />}
+                <div
+                  className={cn({
+                    "flex w-full": !question.structured_type,
+                    "flex-col": question.repeats || question.type === "text",
+                  })}
+                >
+                  <div className="flex-1">{renderSingleInput(index)}</div>
+                  {/* Notes are not available for structured questions */}
+                  {!question.structured_type && !question.repeats && (
+                    <NotesInput
+                      className={cn({
+                        "bg-white border rounded-l-none -ml-2": !(
+                          question.type === "text"
+                        ),
+                        "mt-2": question.type === "text",
+                      })}
+                      questionnaireResponse={questionnaireResponse}
+                      updateQuestionnaireResponseCB={
+                        updateQuestionnaireResponseCB
+                      }
+                      disabled={disabled}
+                    />
+                  )}
+                </div>
+              </div>
               {removeButton}
             </div>
           );
         })}
         {question.repeats && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddValue}
-            className="mt-2"
-            disabled={!isQuestionEnabled() || disabled}
-          >
-            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-            Add Another
-          </Button>
+          <div className="mt-2 flex items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddValue}
+              className=""
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+              Add Another
+            </Button>
+            <NotesInput
+              questionnaireResponse={questionnaireResponse}
+              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              disabled={disabled}
+            />
+          </div>
         )}
       </div>
     );
   };
-
-  const isEnabled = isQuestionEnabled();
-  if (!isEnabled && question.disabled_display === "hidden") {
-    return null;
-  }
 
   const error = errors.find((e) => e.question_id === question.id)?.error;
 
@@ -242,14 +234,6 @@ export function QuestionInput({
     <div className="space-y-2">
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
-      {/* Notes are not available for structured questions */}
-      {!question.structured_type && (
-        <NotesInput
-          questionnaireResponse={questionnaireResponse}
-          updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-          disabled={!isEnabled}
-        />
-      )}
     </div>
   );
 }

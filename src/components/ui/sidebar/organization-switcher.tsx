@@ -1,6 +1,9 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
 import { Globe } from "lucide-react";
 import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -28,7 +31,8 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -45,8 +49,8 @@ export function OrganizationSwitcher({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
                   {selectedOrganization
-                    ? "My Organizations"
-                    : "Select Organization"}
+                    ? t("my_organizations")
+                    : t("select_organization")}
                 </span>
               </div>
               <CaretSortIcon className="ml-auto" />
@@ -55,21 +59,31 @@ export function OrganizationSwitcher({
         </SidebarMenu>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg max-h-screen overflow-y-auto"
         align="start"
         side={isMobile ? "bottom" : "right"}
         sideOffset={4}
       >
         <DropdownMenuItem onClick={() => navigate("/")}>
           <DashboardIcon className="size-4" />
-          View Dashboard
+          {t("view_dashboard")}
         </DropdownMenuItem>
-        <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            onClick={() => navigate(`/organization/${org.id}`)}
+            onClick={() => {
+              navigate(`/organization/${org.id}`);
+              if (isMobile) {
+                setOpenMobile(false);
+              }
+            }}
+            className={cn(
+              "gap-2 p-2",
+              org?.name === selectedOrganization?.name &&
+                "bg-primary-500 text-white",
+            )}
           >
             {org.name}
           </DropdownMenuItem>
