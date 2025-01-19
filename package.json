@@ -27,7 +27,7 @@
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
-    "dev": "npm run supported-browsers && vite --host",
+    "dev": "npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
     "build:meta": "node ./scripts/generate-build-version.js",

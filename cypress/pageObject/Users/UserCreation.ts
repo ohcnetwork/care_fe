@@ -35,12 +35,13 @@ export class UserCreation {
   }
 
   fillUsername(username: string) {
-    cy.typeIntoField('[data-cy="username-input"]', username);
+    // cy.typeIntoField('[data-cy="username-input"]', username);
+    cy.get('[data-cy="username-input"]').click().type(username);
     return this;
   }
 
   fillPassword(password: string) {
-    cy.typeIntoField('[data-cy="password-input"]', password);
+    cy.get('[data-cy="password-input"]').click().type(password);
     return this;
   }
 
