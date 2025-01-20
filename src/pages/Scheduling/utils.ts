@@ -70,47 +70,36 @@ export function computeAppointmentSlots(
   let time = startTime;
   while (time < endTime) {
     const slotEndTime = addMinutes(time, slotSizeInMinutes);
-    if (slotEndTime > endTime) {
-      break;
-    }
-    slots.push({
-      start_time: format(time, "HH:mm") as Time,
-      end_time: format(slotEndTime, "HH:mm") as Time,
-      isAvailable: true,
-      exceptions: [],
-    });
-    time = slotEndTime;
-  }
 
-  for (const exception of exceptions) {
-    const exceptionTime = parse(
-      exception.start_time,
-      "HH:mm:ss",
-      referenceDate,
-    );
-    const exceptionEndTime = parse(
-      exception.end_time,
-      "HH:mm:ss",
-      referenceDate,
-    );
+    let conflicting = false;
+    for (const exception of exceptions) {
+      const exceptionStartTime = parse(
+        exception.start_time,
+        "HH:mm:ss",
+        referenceDate,
+      );
+      const exceptionEndTime = parse(
+        exception.end_time,
+        "HH:mm:ss",
+        referenceDate,
+      );
 
-    slots.forEach((slot) => {
-      const slotStart = parse(slot.start_time, "HH:mm", referenceDate);
-      const slotEnd = parse(slot.end_time, "HH:mm", referenceDate);
-      if (
-        isWithinInterval(slotStart, {
-          start: exceptionTime,
-          end: exceptionEndTime,
-        }) ||
-        isWithinInterval(slotEnd, {
-          start: exceptionTime,
-          end: exceptionEndTime,
-        })
-      ) {
-        slot.isAvailable = false;
-        slot.exceptions.push(exception);
+      if (exceptionStartTime < slotEndTime && exceptionEndTime > time) {
+        conflicting = true;
+        break;
       }
-    });
+    }
+
+    if (!conflicting) {
+      slots.push({
+        start_time: format(time, "HH:mm") as Time,
+        end_time: format(slotEndTime, "HH:mm") as Time,
+        isAvailable: true,
+        exceptions: [],
+      });
+    }
+
+    time = slotEndTime;
   }
 
   return slots;
