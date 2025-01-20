@@ -12,7 +12,7 @@ import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-interface OrganizationSelectorProps {
+interface GovtOrganizationSelectorProps {
   value?: string;
   onChange: (value: string) => void;
   required?: boolean;
@@ -26,8 +26,9 @@ interface AutoCompleteOption {
   value: string;
 }
 
-// TODO: Rename to GovtOrganizationSelector
-export default function OrganizationSelector(props: OrganizationSelectorProps) {
+export default function GovtOrganizationSelector(
+  props: GovtOrganizationSelectorProps,
+) {
   const { onChange, required, selected } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
