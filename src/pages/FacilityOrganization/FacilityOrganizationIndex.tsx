@@ -13,12 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
+import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import FacilityOrganizationSkeleton from "@/pages/FacilityOrganization/components/FacilityOrganizationSkeleton";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
@@ -38,7 +39,15 @@ export default function FacilityOrganizationIndex({
   });
 
   if (isLoading) {
-    return <FacilityOrganizationSkeleton />;
+    return (
+      <div className="px-6 py-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-8 w-8/12 self-end" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <SkeletonLoading count={6} element="CardGridSkeleton" />
+        </div>
+      </div>
+    );
   }
 
   if (!data?.results?.length) {
