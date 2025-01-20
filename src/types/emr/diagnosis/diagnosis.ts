@@ -33,6 +33,7 @@ export type Onset = {
 };
 
 export interface Diagnosis {
+  id: string;
   code: Code;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
@@ -44,6 +45,7 @@ export interface Diagnosis {
 }
 
 export interface DiagnosisRequest {
+  id?: string;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
   code: Code;
