@@ -86,7 +86,8 @@ const plugins = readAppsConfig();
 
 // Generate pluginMap.ts
 const pluginMapPath = path.join(__dirname, "..", "src", "pluginMap.ts");
-const pluginMapContent = `// Use type assertion for the static import\n${plugins
+const pluginMapContent = `/* eslint-disable */
+// Use type assertion for the static import\n${plugins
   .map(
     (plugin) =>
       `// @ts-expect-error Remote module will be available at runtime\nimport ${plugin.camelCaseName}Manifest from "${plugin.repo}/manifest";`,

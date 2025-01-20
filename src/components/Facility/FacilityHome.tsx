@@ -25,6 +25,7 @@ import Loading from "@/components/Common/Loading";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -267,6 +268,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("delete_facility")}
                           </DropdownMenuItem>
                         )} */}
+                        <PLUGIN_Component
+                          __name="FacilityHomeActions"
+                          facility={facilityData}
+                        />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
