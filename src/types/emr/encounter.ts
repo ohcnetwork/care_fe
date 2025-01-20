@@ -1,7 +1,6 @@
 import { Patient } from "@/types/emr/newPatient";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { UserBase } from "@/types/user/user";
-
-import { FacilityOrganization } from "../facilityOrganization/facilityOrganization";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
   "hosp_trans",

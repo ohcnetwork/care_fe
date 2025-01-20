@@ -42,7 +42,7 @@ type ExtractRouteParams<T extends string> =
     : never;
 
 type PathParams<T extends string> = {
-  [K in ExtractRouteParams<T>]: string;
+  [_ in ExtractRouteParams<T>]: string;
 };
 
 export interface ApiCallOptions<Route extends ApiRoute<unknown, unknown>> {

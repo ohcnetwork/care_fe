@@ -1,9 +1,9 @@
+import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
+import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
 import { PatientProps } from ".";
-import { MedicationStatementList } from "../MedicationStatementList";
-import { AllergyList } from "../allergy/list";
 
 export const HealthProfileSummary = (props: PatientProps) => {
   const { id } = props;
