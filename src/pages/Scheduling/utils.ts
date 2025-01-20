@@ -68,7 +68,7 @@ export function computeAppointmentSlots(
   const slots: VirtualSlot[] = [];
 
   let time = startTime;
-  while (time < endTime) {
+  while (time <= endTime) {
     const slotEndTime = addMinutes(time, slotSizeInMinutes);
     if (slotEndTime > endTime) {
       break;
@@ -98,14 +98,9 @@ export function computeAppointmentSlots(
       const slotStart = parse(slot.start_time, "HH:mm", referenceDate);
       const slotEnd = parse(slot.end_time, "HH:mm", referenceDate);
       if (
-        isWithinInterval(slotStart, {
-          start: exceptionTime,
-          end: exceptionEndTime,
-        }) ||
-        isWithinInterval(slotEnd, {
-          start: exceptionTime,
-          end: exceptionEndTime,
-        })
+        (slotStart >= exceptionTime && slotStart < exceptionEndTime) ||
+        (slotEnd > exceptionTime && slotEnd <= exceptionEndTime) ||
+        (slotStart <= exceptionTime && slotEnd >= exceptionEndTime)
       ) {
         slot.isAvailable = false;
         slot.exceptions.push(exception);
