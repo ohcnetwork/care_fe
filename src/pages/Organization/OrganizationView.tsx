@@ -68,7 +68,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SkeletonLoading count={12} element="OrganizationCard" />
+            <SkeletonLoading count={6} element="CardGridSkeleton" />
           </div>
         ) : (
           <div className="space-y-6">

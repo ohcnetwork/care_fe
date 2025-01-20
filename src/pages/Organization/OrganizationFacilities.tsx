@@ -83,7 +83,7 @@ export default function OrganizationFacilities({
           data-cy="facility-cards"
         >
           {isLoading ? (
-            <SkeletonLoading count={6} element="FacilityCard" />
+            <SkeletonLoading count={6} element="CardGridSkeleton" />
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">

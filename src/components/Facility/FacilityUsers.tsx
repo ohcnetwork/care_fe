@@ -46,16 +46,10 @@ export default function FacilityUsers(props: { facilityId: string }) {
     usersList =
       activeTab === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SkeletonLoading count={6} element="UserCard" />
+          <SkeletonLoading count={6} element="CardGridSkeleton" />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="relative min-w-full divide-y divide-gray-200">
-            <tbody className="divide-y divide-gray-200 bg-white">
-              <SkeletonLoading count={7} element="UserList" />
-            </tbody>
-          </table>
-        </div>
+        <SkeletonLoading element="TableSkeleton" count={7} />
       );
   } else {
     usersList = (

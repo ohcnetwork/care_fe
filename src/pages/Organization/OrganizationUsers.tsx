@@ -94,7 +94,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
         </div>
         {isLoadingUsers ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SkeletonLoading count={6} element="UserCard" />
+            <SkeletonLoading count={6} element="CardGridSkeleton" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
