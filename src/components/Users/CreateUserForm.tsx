@@ -34,7 +34,7 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 import userApi from "@/types/user/userApi";
@@ -506,7 +506,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <OrganizationSelector
+                <GovtOrganizationSelector
                   data-cy="organization-selector"
                   value={field.value}
                   onChange={field.onChange}

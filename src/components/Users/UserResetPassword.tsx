@@ -225,9 +225,15 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty}
+                disabled={!form.formState.isDirty || isPending}
                 variant="primary"
               >
+                {isPending && (
+                  <CareIcon
+                    icon="l-spinner"
+                    className="mr-2 h-4 w-4 animate-spin"
+                  />
+                )}
                 {isPending ? t("updating") : t("update_password")}
               </Button>
             </div>
