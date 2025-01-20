@@ -24,6 +24,7 @@ interface Props {
   handleUpload: (file: File, onError: () => void) => Promise<void>;
   handleDelete: (onError: () => void) => Promise<void>;
   onClose?: () => void;
+  hint?: React.ReactNode;
 }
 
 const VideoConstraints = {
@@ -51,6 +52,7 @@ const AvatarEditModal = ({
   handleUpload,
   handleDelete,
   onClose,
+  hint,
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -165,14 +167,16 @@ const AvatarEditModal = ({
     setIsDragging(false);
   };
 
-  const commonHint = (
+  const defaultHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be")} 1mb.
+      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
       <br />
-      {t("allowed_formats_are")} jpg,png,jpeg.{" "}
-      {t("recommended_aspect_ratio_for")} the image is 1:1
+      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
+      {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}
     </>
   );
+
+  const hintMessage = hint || defaultHint;
 
   return (
     <DialogModal
@@ -195,7 +199,7 @@ const AvatarEditModal = ({
                     />
                   </div>
                   <p className="text-center font-medium text-secondary-700">
-                    {commonHint}
+                    {hintMessage}
                   </p>
                 </>
               ) : (
@@ -246,7 +250,7 @@ const AvatarEditModal = ({
                       : `${t("drag_drop_image_to_upload")}`}
                   </p>
                   <p className="mt-4 text-center font-medium text-secondary-700">
-                    {t("no_image_found")}. {commonHint}
+                    {t("no_image_found")}. {hintMessage}
                   </p>
                 </div>
               )}
