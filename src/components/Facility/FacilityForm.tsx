@@ -179,7 +179,7 @@ export default function FacilityForm(props: FacilityProps) {
     pincode: form.watch("pincode")?.toString() || "",
   });
 
-  const { data: org } = useQuery<Organization>({
+  const { data: org } = useQuery({
     queryKey: ["organization", organizationId],
     queryFn: query(organizationApi.get, {
       pathParams: { id: organizationId },
