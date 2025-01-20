@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -68,7 +68,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SkeletonLoading count={6} element="CardGridSkeleton" />
+            <CardGridSkeleton count={6} />
           </div>
         ) : (
           <div className="space-y-6">

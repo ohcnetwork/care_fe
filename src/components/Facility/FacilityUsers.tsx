@@ -9,7 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -45,10 +48,10 @@ export default function FacilityUsers(props: { facilityId: string }) {
     usersList =
       activeTab === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SkeletonLoading count={6} element="CardGridSkeleton" />
+          <CardGridSkeleton count={6} />
         </div>
       ) : (
-        <SkeletonLoading element="TableSkeleton" count={7} />
+        <TableSkeleton count={7} />
       );
   } else {
     usersList = (

@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -113,7 +113,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
-            <SkeletonLoading count={6} element="CardGridSkeleton" />
+            <CardGridSkeleton count={6} />
           ) : patients?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">

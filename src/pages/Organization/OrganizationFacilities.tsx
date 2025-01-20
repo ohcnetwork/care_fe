@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -83,7 +83,7 @@ export default function OrganizationFacilities({
           data-cy="facility-cards"
         >
           {isLoading ? (
-            <SkeletonLoading count={6} element="CardGridSkeleton" />
+            <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">

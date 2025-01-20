@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -94,7 +94,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
         </div>
         {isLoadingUsers ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SkeletonLoading count={6} element="CardGridSkeleton" />
+            <CardGridSkeleton count={6} />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

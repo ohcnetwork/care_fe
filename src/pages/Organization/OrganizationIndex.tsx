@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import {
@@ -35,7 +35,7 @@ export default function OrganizationIndex() {
     return (
       <Page title={t("organizations")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
-          <SkeletonLoading count={6} element="CardGridSkeleton" />
+          <CardGridSkeleton count={6} />
         </div>
       </Page>
     );

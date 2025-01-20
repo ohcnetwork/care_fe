@@ -44,7 +44,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
+import { NoteSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -552,7 +552,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               {messagesLoading ? (
                 <div className="flex-1 p-4">
                   <div className="space-y-4">
-                    <SkeletonLoading element="NoteSkeleton" count={3} />
+                    <NoteSkeleton count={3} />
                   </div>
                 </div>
               ) : (
@@ -579,7 +579,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       {isFetchingNextPage && (
                         <div className="py-2">
                           <div className="space-y-4">
-                            <SkeletonLoading element="NoteSkeleton" count={3} />
+                            <NoteSkeleton count={3} />
                           </div>
                         </div>
                       )}
