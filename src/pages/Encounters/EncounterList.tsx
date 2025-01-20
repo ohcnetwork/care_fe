@@ -34,13 +34,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import EncounterListSkeleton from "@/pages/Encounters/components/EncounterListSkeleton";
 import { Encounter, EncounterPriority } from "@/types/emr/encounter";
 
 interface EncounterListProps {
@@ -660,7 +660,7 @@ export function EncounterList({
 
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
-            <EncounterListSkeleton />
+            <SkeletonLoading count={6} element="EncounterCard" />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">
               <EmptyState />

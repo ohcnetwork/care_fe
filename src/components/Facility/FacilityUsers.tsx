@@ -9,16 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import {
-  UserCardSkeleton,
-  UserListSkeleton,
-} from "@/components/Facility/FacilityUsersSkeletons";
 import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+
+import { SkeletonLoading } from "../Common/SkeletonLoading";
 
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
@@ -46,7 +44,19 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   if (userListLoading || !userListData) {
     usersList =
-      activeTab === "card" ? <UserCardSkeleton /> : <UserListSkeleton />;
+      activeTab === "card" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <SkeletonLoading count={6} element="UserCard" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="relative min-w-full divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 bg-white">
+              <SkeletonLoading count={7} element="UserList" />
+            </tbody>
+          </table>
+        </div>
+      );
   } else {
     usersList = (
       <div>
