@@ -6,6 +6,7 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Button } from "@/components/ui/button";
 
+import { Avatar } from "@/components/Common/Avatar";
 import CircularProgress from "@/components/Common/CircularProgress";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 
@@ -13,8 +14,6 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
-
-import { Avatar } from "../Common/Avatar";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");

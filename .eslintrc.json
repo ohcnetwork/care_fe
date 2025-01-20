@@ -19,13 +19,8 @@
   ],
   "overrides": [
     {
-      "files": [
-        "**/*.mdx"
-      ],
-      "extends": [
-        "plugin:react/recommended",
-        "plugin:mdx/recommended"
-      ],
+      "files": ["**/*.mdx"],
+      "extends": ["plugin:react/recommended", "plugin:mdx/recommended"],
       "rules": {
         "react/jsx-no-target-blank": "off",
         "i18next/no-literal-string": "off"
@@ -40,10 +35,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "i18next"
-  ],
+  "plugins": ["@typescript-eslint", "i18next", "no-relative-import-paths"],
   "rules": {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
@@ -61,21 +53,19 @@
       {
         "mode": "jsx-only",
         "jsx-attributes": {
-          "include": [
-            "label",
-            "placeholder",
-            "error",
-            "title"
-          ],
-          "exclude": [
-            ".*"
-          ]
+          "include": ["label", "placeholder", "error", "title"],
+          "exclude": [".*"]
         },
         "callees": {
-          "exclude": [
-            ".*"
-          ]
+          "exclude": [".*"]
         }
+      }
+    ],
+    "no-relative-import-paths/no-relative-import-paths": [
+      "error",
+      {
+        "allowSameFolder": true,
+        "prefix": "@"
       }
     ]
   },
