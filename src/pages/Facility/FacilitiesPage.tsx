@@ -16,10 +16,10 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import OrganizationFilter from "@/pages/Organization/components/OrganizationFilter";
 import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
-import OrganizationFilter from "../Organization/components/OrganizationFilter";
 import { FacilityCard } from "./components/FacilityCard";
 
 export function FacilitiesPage() {

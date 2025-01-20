@@ -1,6 +1,5 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { UserBase } from "../user/user";
+import { UserBase } from "@/types/user/user";
 
 type org_type = "root" | "dept" | "team";
 
