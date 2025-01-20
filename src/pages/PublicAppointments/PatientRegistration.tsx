@@ -44,6 +44,7 @@ import {
   AppointmentCreateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import GovtOrganizationSelector from "../Organization/components/GovtOrganizationSelector";
 
 const initialForm: AppointmentPatientRegister & {
   ageInputType: "age" | "date_of_birth";
@@ -405,7 +406,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormControl>
-                      <OrganizationSelector
+                      <GovtOrganizationSelector
                         required
                         authToken={tokenData.token}
                         onChange={(value) => {

@@ -24,10 +24,9 @@ import { FacilityCard } from "./components/FacilityCard";
 
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
-  const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
-    useFilters({
-      limit: RESULTS_PER_PAGE_LIMIT,
-    });
+  const { qParams, updateQuery, advancedFilter, Pagination } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
+  });
 
   const { t } = useTranslation();
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
@@ -102,12 +101,11 @@ export function FacilitiesPage() {
               type: "text" as const,
               placeholder: t("facility_search_placeholder_text"),
               value: qParams.name || "",
-              shortcutKey: "f",
             },
           ]}
+          initialOptionIndex={0}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
-          clearSearch={clearSearch}
           enableOptionButtons={false}
         />
       </div>
