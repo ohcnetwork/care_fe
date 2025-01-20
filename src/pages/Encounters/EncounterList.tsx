@@ -148,11 +148,10 @@ export function EncounterList({
   encounters: propEncounters,
   facilityId,
 }: EncounterListProps) {
-  const { qParams, updateQuery, Pagination, clearSearch, resultsPerPage } =
-    useFilters({
-      limit: 15,
-      cacheBlacklist: ["name", "encounter_id", "external_identifier"],
-    });
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+    cacheBlacklist: ["name", "encounter_id", "external_identifier"],
+  });
   const {
     status,
     encounter_class: encounterClass,
@@ -161,6 +160,16 @@ export function EncounterList({
     encounter_id,
     external_identifier,
   } = qParams;
+  const handleFieldChange = () => {
+    updateQuery({
+      status,
+      encounter_class: encounterClass,
+      priority,
+      name: undefined,
+      encounter_id: undefined,
+      external_identifier: undefined,
+    });
+  };
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
@@ -202,7 +211,6 @@ export function EncounterList({
     }),
     enabled: !!encounter_id,
   });
-
   const searchOptions = [
     {
       key: "name",
@@ -210,7 +218,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by patient name",
       value: name || "",
-      shortcutKey: "n",
     },
     {
       key: "encounter_id",
@@ -218,7 +225,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by encounter ID",
       value: encounter_id || "",
-      shortcutKey: "i",
     },
     {
       key: "external_identifier",
@@ -226,7 +232,6 @@ export function EncounterList({
       type: "text" as const,
       placeholder: "Search by external ID",
       value: external_identifier || "",
-      shortcutKey: "e",
     },
   ];
 
@@ -265,7 +270,11 @@ export function EncounterList({
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-3" align="start">
+                  <PopoverContent
+                    className="w-[20rem] p-3"
+                    align="start"
+                    onEscapeKeyDown={(event) => event.preventDefault()}
+                  >
                     <div className="space-y-4">
                       <h4 className="font-medium leading-none">
                         {t("search_encounters")}
@@ -273,31 +282,16 @@ export function EncounterList({
                       <SearchByMultipleFields
                         id="encounter-search"
                         options={searchOptions}
+                        initialOptionIndex={Math.max(
+                          searchOptions.findIndex(
+                            (option) => option.value !== "",
+                          ),
+                          0,
+                        )}
+                        onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
-                        clearSearch={clearSearch}
                         className="w-full border-none shadow-none"
                       />
-                      {(name || encounter_id || external_identifier) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-muted-foreground"
-                          onClick={() => {
-                            updateQuery({
-                              status,
-                              encounter_class: encounterClass,
-                              priority,
-                              name: undefined,
-                              encounter_id: undefined,
-                              external_identifier: undefined,
-                            });
-                            clearSearch.value = true;
-                          }}
-                        >
-                          <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
-                          {t("clear_search")}
-                        </Button>
-                      )}
                     </div>
                   </PopoverContent>
                 </Popover>

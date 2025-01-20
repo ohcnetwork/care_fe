@@ -53,7 +53,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
@@ -782,7 +782,6 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -790,7 +789,7 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem className="contents">
                         <FormControl>
-                          <OrganizationSelector
+                          <GovtOrganizationSelector
                             {...field}
                             required={true}
                             selected={selectedLevels}
