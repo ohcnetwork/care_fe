@@ -47,11 +47,10 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PhoneInput } from "@/src/components/ui/input-phone";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
-
-import { PhoneInput } from "../ui/input-phone";
 
 interface FacilityProps {
   organizationId?: string;
@@ -376,7 +375,7 @@ export default function FacilityForm(props: FacilityProps) {
               render={({ field }) => (
                 <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
                   <FormControl>
-                    <OrganizationSelector
+                    <GovtOrganizationSelector
                       {...field}
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
