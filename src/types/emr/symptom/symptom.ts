@@ -1,5 +1,5 @@
-import { Code } from "../../questionnaire/code";
-import { UserBase } from "../../user/user";
+import { Code } from "@/types/questionnaire/code";
+import { UserBase } from "@/types/user/user";
 
 export const SYMPTOM_CLINICAL_STATUS = [
   "active",

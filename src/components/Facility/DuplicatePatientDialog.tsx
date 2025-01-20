@@ -3,11 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import DialogModal from "@/components/Common/Dialog";
-
-import { PartialPatientModel } from "@/types/emr/newPatient";
-
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -15,7 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
+
+import DialogModal from "@/components/Common/Dialog";
+
+import { PartialPatientModel } from "@/types/emr/newPatient";
 
 interface Props {
   patientList: Array<PartialPatientModel>;
