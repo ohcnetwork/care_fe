@@ -9,14 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
 import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-
-import { SkeletonLoading } from "../Common/SkeletonLoading";
 
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
