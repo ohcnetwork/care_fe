@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,9 +15,9 @@ import {
 } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
+import { SkeletonLoading } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import OrganizationIndexSkeleton from "@/pages/Organization/components/OrganizationIndexSkeleton";
 import {
   type Organization,
   getOrgLabel,
@@ -29,13 +30,20 @@ export default function OrganizationIndex() {
     queryFn: query(organizationApi.listMine),
   });
 
+  const { t } = useTranslation();
   if (isLoading) {
-    return <OrganizationIndexSkeleton />;
+    return (
+      <Page title={t("organizations")}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+          <SkeletonLoading count={6} element="CardGridSkeleton" />
+        </div>
+      </Page>
+    );
   }
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organizations">
+      <Page title={t("organizations")}>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -60,7 +68,7 @@ export default function OrganizationIndex() {
   }
 
   return (
-    <Page title="Organizations">
+    <Page title={t("organizations")}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 mt-4">
         {data.results.map((org: Organization) => (
           <Card key={org.id} className="relative group">
