@@ -167,16 +167,12 @@ const AvatarEditModal = ({
     setIsDragging(false);
   };
 
-  const maxSize = "1MB";
-  const formats = "jpg, png, jpeg";
-  const aspectRatio = "1:1";
-
   const defaultHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize })}
+      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
       <br />
-      {t("allowed_formats_are", { formats })}{" "}
-      {t("recommended_aspect_ratio_for", { aspectRatio })}
+      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
+      {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}
     </>
   );
 

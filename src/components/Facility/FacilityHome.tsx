@@ -165,16 +165,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const hasPermissionToEditCoverImage = true;
 
-  const maxSize = "1MB";
-  const formats = "jpg, png, jpeg";
-  const aspectRatio = "16:9";
-
   const coverImageHint = (
     <>
-      {t("max_size_for_image_uploaded_should_be", { maxSize })}
+      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
       <br />
-      {t("allowed_formats_are", { formats })}{" "}
-      {t("recommended_aspect_ratio_for", { aspectRatio })}
+      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
+      {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
     </>
   );
 
