@@ -1,7 +1,6 @@
 import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-
-import { MedicationRequestRead } from "../medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 
 const medicationRequestApi = {
   // Medication
