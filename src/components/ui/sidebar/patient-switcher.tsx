@@ -7,14 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { classNames } from "@/Utils/utils";
-
-import { useSidebar } from "../sidebar";
 
 interface PatientSwitcherProps {
   className?: string;

@@ -1,70 +1,95 @@
 import { Patient } from "@/types/emr/newPatient";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { UserBase } from "@/types/user/user";
 
-import { FacilityOrganization } from "../facilityOrganization/facilityOrganization";
+export const ENCOUNTER_ADMIT_SOURCE = [
+  "hosp_trans",
+  "emd",
+  "outp",
+  "born",
+  "gp",
+  "mp",
+  "nursing",
+  "psych",
+  "rehab",
+  "other",
+] as const;
 
-export type EncounterStatus =
-  | "planned"
-  | "in_progress"
-  | "on_hold"
-  | "discharged"
-  | "completed"
-  | "cancelled"
-  | "discontinued"
-  | "entered_in_error"
-  | "unknown";
+export const ENCOUNTER_CLASS = [
+  "imp",
+  "amb",
+  "obsenc",
+  "emer",
+  "vr",
+  "hh",
+] as const;
 
-export type EncounterClass = "imp" | "amb" | "obsenc" | "emer" | "vr" | "hh";
+export const ENCOUNTER_DIET_PREFERENCE = [
+  "vegetarian",
+  "diary_free",
+  "nut_free",
+  "gluten_free",
+  "vegan",
+  "halal",
+  "kosher",
+  "none",
+] as const;
 
-export type EncounterAdmitSources =
-  | "hosp_trans"
-  | "emd"
-  | "outp"
-  | "born"
-  | "gp"
-  | "mp"
-  | "nursing"
-  | "psych"
-  | "rehab"
-  | "other";
+export const ENCOUNTER_DISCHARGE_DISPOSITION = [
+  "home",
+  "alt_home",
+  "other_hcf",
+  "hosp",
+  "long",
+  "aadvice",
+  "exp",
+  "psy",
+  "rehab",
+  "snf",
+  "oth",
+] as const;
 
-export type EncounterDischargeDisposition =
-  | "home"
-  | "alt_home"
-  | "other_hcf"
-  | "hosp"
-  | "long"
-  | "aadvice"
-  | "exp"
-  | "psy"
-  | "rehab"
-  | "snf"
-  | "oth";
+export const ENCOUNTER_PRIORITY = [
+  "ASAP",
+  "callback_results",
+  "callback_for_scheduling",
+  "elective",
+  "emergency",
+  "preop",
+  "as_needed",
+  "routine",
+  "rush_reporting",
+  "stat",
+  "timing_critical",
+  "use_as_directed",
+  "urgent",
+] as const;
+
+export const ENCOUNTER_STATUS = [
+  "planned",
+  "in_progress",
+  "on_hold",
+  "discharged",
+  "completed",
+  "cancelled",
+  "discontinued",
+  "entered_in_error",
+  "unknown",
+] as const;
+
+export type EncounterAdmitSources = (typeof ENCOUNTER_ADMIT_SOURCE)[number];
+
+export type EncounterClass = (typeof ENCOUNTER_CLASS)[number];
 
 export type EncounterDietPreference =
-  | "vegetarian"
-  | "diary_free"
-  | "nut_free"
-  | "gluten_free"
-  | "vegan"
-  | "halal"
-  | "kosher"
-  | "none";
+  (typeof ENCOUNTER_DIET_PREFERENCE)[number];
 
-export type EncounterPriority =
-  | "ASAP"
-  | "callback_results"
-  | "callback_for_scheduling"
-  | "elective"
-  | "emergency"
-  | "preop"
-  | "as_needed"
-  | "routine"
-  | "rush_reporting"
-  | "stat"
-  | "timing_critical"
-  | "use_as_directed"
-  | "urgent";
+export type EncounterDischargeDisposition =
+  (typeof ENCOUNTER_DISCHARGE_DISPOSITION)[number];
+
+export type EncounterPriority = (typeof ENCOUNTER_PRIORITY)[number];
+
+export type EncounterStatus = (typeof ENCOUNTER_STATUS)[number];
 
 export type Period = {
   start?: string;

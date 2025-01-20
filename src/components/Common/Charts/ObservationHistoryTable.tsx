@@ -12,12 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { ObservationWithUser } from "@/types/emr/observation";
 import { Code } from "@/types/questionnaire/code";
-
-import { Avatar } from "../Avatar";
 
 interface PaginatedResponse<T> {
   count: number;

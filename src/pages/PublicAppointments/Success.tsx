@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -42,16 +41,13 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
     (appointment) => appointment.id === appointmentId,
   );
 
-  if (isLoading) {
+  if (isLoading || !appointmentData) {
     return <Loading />;
   }
 
-  const appointmentTime = dayjs(appointmentData?.token_slot.start_datetime)
-    .add(-5, "hours")
-    .add(-30, "minutes")
-    .toISOString();
-  const appointmentDate = format(new Date(appointmentTime), "do MMMM");
-  const appointmentTimeSlot = format(new Date(appointmentTime), "hh:mm a");
+  const appointmentTime = appointmentData.token_slot.start_datetime;
+  const appointmentDate = format(appointmentTime, "do MMMM");
+  const appointmentTimeSlot = format(appointmentTime, "hh:mm a");
 
   return (
     <div className="mx-auto p-2 max-w-3xl">

@@ -209,7 +209,15 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       react(),
-      checker({ typescript: true }),
+      checker({
+        typescript: true,
+        eslint: {
+          lintCommand: "eslint ./src",
+          dev: {
+            logLevel: ["error"],
+          },
+        },
+      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
