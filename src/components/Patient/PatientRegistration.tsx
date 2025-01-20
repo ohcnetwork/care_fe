@@ -48,11 +48,12 @@ import {
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
@@ -104,6 +105,10 @@ export default function PatientRegistration(
           date_of_birth: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
+            .refine((date) => {
+              const parsedDate = dayjs(date);
+              return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
+            }, t("enter_valid_dob"))
             .optional(),
           age: z
             .number()
@@ -520,6 +525,8 @@ export default function PatientRegistration(
                                 type="number"
                                 placeholder="DD"
                                 {...field}
+                                min={1}
+                                max={31}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[2]
                                 }
@@ -554,6 +561,8 @@ export default function PatientRegistration(
                                 value={
                                   form.watch("date_of_birth")?.split("-")[1]
                                 }
+                                min={1}
+                                max={12}
                                 onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
@@ -585,6 +594,8 @@ export default function PatientRegistration(
                                 value={
                                   form.watch("date_of_birth")?.split("-")[0]
                                 }
+                                min={1900}
+                                max={new Date().getFullYear()}
                                 onChange={(e) =>
                                   form.setValue(
                                     "date_of_birth",
@@ -771,7 +782,6 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -779,7 +789,7 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem className="contents">
                         <FormControl>
-                          <OrganizationSelector
+                          <GovtOrganizationSelector
                             {...field}
                             required={true}
                             selected={selectedLevels}
