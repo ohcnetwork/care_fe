@@ -19,7 +19,7 @@ export const DIAGNOSIS_VERIFICATION_STATUS = [
   "differential",
   "confirmed",
   "refuted",
-  "entered-in-error",
+  "entered_in_error",
 ] as const;
 
 export type DiagnosisVerificationStatus =

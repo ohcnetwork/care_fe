@@ -143,7 +143,7 @@ export function MedicationRequestQuestion({
 
     const medication = medications[medicationToDelete];
     if (medication.id) {
-      // For existing records, update status to entered-in-error
+      // For existing records, update status to entered_in_error
       const newMedications = medications.map((med, i) =>
         i === medicationToDelete
           ? { ...med, status: "entered_in_error" as const }

@@ -339,7 +339,7 @@ export function AllergyQuestion({
                       <SelectContent>
                         <SelectItem value="low">Low</SelectItem>
                         <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="unable-to-assess">
+                        <SelectItem value="unable_to_assess">
                           Unable to Assess
                         </SelectItem>
                       </SelectContent>
@@ -500,7 +500,7 @@ const AllergyTableRow = ({
             <SelectContent>
               <SelectItem value="low">Low</SelectItem>
               <SelectItem value="high">High</SelectItem>
-              <SelectItem value="unable-to-assess">Unable to Assess</SelectItem>
+              <SelectItem value="unable_to_assess">Unable to Assess</SelectItem>
             </SelectContent>
           </Select>
         </TableCell>

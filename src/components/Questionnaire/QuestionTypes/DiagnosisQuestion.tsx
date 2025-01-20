@@ -136,7 +136,7 @@ export function DiagnosisQuestion({
       // For existing records, update verification status to entered_in_error
       const newDiagnoses = diagnoses.map((d, i) =>
         i === index
-          ? { ...d, verification_status: "entered-in-error" as const }
+          ? { ...d, verification_status: "entered_in_error" as const }
           : d,
       ) as DiagnosisRequest[];
       updateQuestionnaireResponseCB({

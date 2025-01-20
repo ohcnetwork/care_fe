@@ -6,7 +6,7 @@ export type AllergyVerificationStatus =
   | "confirmed"
   | "refuted"
   | "presumed"
-  | "entered-in-error";
+  | "entered_in_error";
 
 export type AllergyClinicalStatus = "active" | "inactive" | "resolved";
 // Base type for allergy data
@@ -43,5 +43,5 @@ export const ALLERGY_VERIFICATION_STATUS = {
   confirmed: "Confirmed",
   refuted: "Refuted",
   presumed: "Presumed",
-  "entered-in-error": "Entered in Error",
+  entered_in_error: "Entered in Error",
 };
