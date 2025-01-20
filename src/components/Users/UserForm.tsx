@@ -35,7 +35,7 @@ import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
@@ -556,7 +556,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <OrganizationSelector
+                  <GovtOrganizationSelector
                     value={field.value}
                     onChange={field.onChange}
                     required={!isEditMode}
