@@ -24,7 +24,12 @@ import {
   AppointmentFinalStatuses,
 } from "@/types/scheduling/schedule";
 
-function AppointmentDialog(props: {
+function AppointmentDialog({
+  appointment,
+  open,
+  onOpenChange,
+  setAppointmentDialogOpen,
+}: {
   appointment: Appointment | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -44,11 +49,10 @@ function AppointmentDialog(props: {
       queryClient.invalidateQueries({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
-      props.setAppointmentDialogOpen(false);
       toast.success(t("appointment_cancelled"));
+      setAppointmentDialogOpen(false);
     },
   });
-  const { appointment, open, onOpenChange } = props;
 
   if (!appointment) return <></>;
 
