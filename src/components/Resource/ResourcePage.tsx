@@ -23,6 +23,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
@@ -39,21 +48,10 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import { ApiRoute } from "@/Utils/request/types";
 import { QueryOptions } from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
-
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
@@ -402,15 +400,12 @@ function ResourceCard<T extends { id: string }>(
               variant="secondary"
               className=" bg-transparent shadow-none text-black rounded-full"
               action={async () => {
-                const { data } = await request(
-                  routes.downloadResourceRequests,
-                  {
-                    query: {
-                      ...formatFilter({ ...qParams, status: section.id }),
-                      csv: true,
-                    },
+                const data = query(routes.downloadResourceRequests, {
+                  queryParams: {
+                    ...formatFilter({ ...qParams, status: section.id }),
+                    csv: true,
                   },
-                );
+                })({ signal: new AbortController().signal });
                 return data ?? null;
               }}
               filenamePrefix={`resource_requests_${section.id}`}
