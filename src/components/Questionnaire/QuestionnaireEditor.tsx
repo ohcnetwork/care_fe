@@ -29,7 +29,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
-import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -46,6 +45,8 @@ import {
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+
+import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
   id: string;

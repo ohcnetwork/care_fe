@@ -1,6 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+
+import { AllergyIntolerance } from "./allergyIntolerance";
 
 export default {
   getAllergy: {

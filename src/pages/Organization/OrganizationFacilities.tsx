@@ -14,10 +14,11 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import AddFacilitySheet from "@/pages/Organization/components/AddFacilitySheet";
-import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
-import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { BaseFacility } from "@/types/facility/facility";
+
+import AddFacilitySheet from "./components/AddFacilitySheet";
+import EditFacilitySheet from "./components/EditFacilitySheet";
+import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
   id: string;

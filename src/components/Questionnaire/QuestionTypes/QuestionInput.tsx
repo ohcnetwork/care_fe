@@ -5,19 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
-import { AllergyQuestion } from "@/components/Questionnaire/QuestionTypes/AllergyQuestion";
 import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
-import { BooleanQuestion } from "@/components/Questionnaire/QuestionTypes/BooleanQuestion";
-import { ChoiceQuestion } from "@/components/Questionnaire/QuestionTypes/ChoiceQuestion";
-import { DateTimeQuestion } from "@/components/Questionnaire/QuestionTypes/DateTimeQuestion";
-import { DiagnosisQuestion } from "@/components/Questionnaire/QuestionTypes/DiagnosisQuestion";
-import { EncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
-import { MedicationRequestQuestion } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
-import { MedicationStatementQuestion } from "@/components/Questionnaire/QuestionTypes/MedicationStatementQuestion";
-import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
-import { NumberQuestion } from "@/components/Questionnaire/QuestionTypes/NumberQuestion";
-import { SymptomQuestion } from "@/components/Questionnaire/QuestionTypes/SymptomQuestion";
-import { TextQuestion } from "@/components/Questionnaire/QuestionTypes/TextQuestion";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
@@ -25,6 +13,19 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+
+import { AllergyQuestion } from "./AllergyQuestion";
+import { BooleanQuestion } from "./BooleanQuestion";
+import { ChoiceQuestion } from "./ChoiceQuestion";
+import { DateTimeQuestion } from "./DateTimeQuestion";
+import { DiagnosisQuestion } from "./DiagnosisQuestion";
+import { EncounterQuestion } from "./EncounterQuestion";
+import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
+import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
+import { NotesInput } from "./NotesInput";
+import { NumberQuestion } from "./NumberQuestion";
+import { SymptomQuestion } from "./SymptomQuestion";
+import { TextQuestion } from "./TextQuestion";
 
 interface QuestionInputProps {
   question: Question;

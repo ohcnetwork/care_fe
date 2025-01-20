@@ -1,7 +1,8 @@
-import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
-import { StructuredQuestionType } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import { UserBase } from "@/types/user/user";
+
+import { QuestionnaireResponse as Response } from "./form";
+import { StructuredQuestionType } from "./question";
+import { QuestionnaireDetail } from "./questionnaire";
 
 export type StructuredResponseValue = {
   id: string;

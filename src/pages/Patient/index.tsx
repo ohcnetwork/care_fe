@@ -15,9 +15,10 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import AppointmentDialog from "@/pages/Patient/components/AppointmentDialog";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
+
+import AppointmentDialog from "./components/AppointmentDialog";
 
 function PatientIndex() {
   const { t } = useTranslation();

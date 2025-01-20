@@ -12,10 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-import { QuestionRenderer } from "@/components/Questionnaire/QuestionRenderer";
-import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
-import { getStructuredRequests } from "@/components/Questionnaire/structured/handlers";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -30,6 +26,11 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+
+import { QuestionRenderer } from "./QuestionRenderer";
+import { QuestionnaireSearch } from "./QuestionnaireSearch";
+import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
+import { getStructuredRequests } from "./structured/handlers";
 
 export interface QuestionnaireFormState {
   questionnaire: QuestionnaireDetail;
