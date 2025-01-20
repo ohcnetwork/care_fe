@@ -7,9 +7,8 @@ import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { FeatureBadge } from "@/pages/Facility/Utils";
 import { FacilityData } from "@/types/facility/facility";
-
-import { FeatureBadge } from "../Utils";
 
 interface Props {
   facility: FacilityData;

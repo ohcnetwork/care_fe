@@ -16,15 +16,15 @@ export interface BaseModel {
 export type Writable<T> = T extends object
   ? {
       [P in keyof T as IfEquals<
-        { [Q in P]: T[P] },
-        { -readonly [Q in P]: T[P] },
+        { [_ in P]: T[P] },
+        { -readonly [_ in P]: T[P] },
         never,
         P
       >]?: undefined;
     } & {
       [P in keyof T as IfEquals<
-        { [Q in P]: T[P] },
-        { -readonly [Q in P]: T[P] },
+        { [_ in P]: T[P] },
+        { -readonly [_ in P]: T[P] },
         P,
         never
       >]: T[P] extends object ? Writable<T[P]> : T[P];
@@ -38,8 +38,8 @@ export type Writable<T> = T extends object
 export type WritableOnly<T> = T extends object
   ? {
       [P in keyof T as IfEquals<
-        { [Q in P]: T[P] },
-        { -readonly [Q in P]: T[P] },
+        { [_ in P]: T[P] },
+        { -readonly [_ in P]: T[P] },
         P
       >]: T[P] extends object ? WritableOnly<T[P]> : T[P];
     }

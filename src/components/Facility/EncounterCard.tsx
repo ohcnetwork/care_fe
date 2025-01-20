@@ -7,11 +7,10 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 
 import { formatDateTime } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
-
-import { buttonVariants } from "../ui/button";
 
 interface EncounterCardProps {
   encounter: Encounter;
