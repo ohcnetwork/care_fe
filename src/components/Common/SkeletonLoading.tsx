@@ -56,6 +56,17 @@ const TableSkeleton = ({ count }: { count: number }) => (
   </div>
 );
 
+const NoteSkeleton = () => (
+  <div className="p-4 rounded-lg bg-gray-100 animate-pulse">
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-full bg-gray-200" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-3/4" />
+      </div>
+    </div>
+  </div>
+);
 const CardGridSkeleton = () => (
   <Card className="h-full">
     <CardContent className="p-4 sm:p-6">
@@ -93,8 +104,9 @@ const CardGridSkeleton = () => (
 );
 interface SkeletonLoadingProps {
   count: number;
-  element: "TableSkeleton" | "CardGridSkeleton";
+  element: "CardGridSkeleton" | "TableSkeleton" | "NoteSkeleton";
 }
+
 export const SkeletonLoading = ({ count, element }: SkeletonLoadingProps) => {
   return (
     <>
@@ -102,6 +114,12 @@ export const SkeletonLoading = ({ count, element }: SkeletonLoadingProps) => {
         Array.from({ length: count }, (_, index) => (
           <div key={index} className="skeleton-item">
             <CardGridSkeleton />
+          </div>
+        ))
+      ) : element === "NoteSkeleton" ? (
+        Array.from({ length: count }, (_, index) => (
+          <div key={index} className="skeleton-item">
+            <NoteSkeleton />
           </div>
         ))
       ) : (
