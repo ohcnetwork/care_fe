@@ -123,7 +123,6 @@ export default function FacilityUsers(props: { facilityId: string }) {
   });
   const [activeTab, setActiveTab] = useView("users", "card");
 
-  console.log("activeTab", activeTab);
   const { facilityId } = props;
 
   let usersList: JSX.Element = <></>;
