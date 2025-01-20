@@ -134,7 +134,7 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const { data: activeFilesQuery, isLoading: activeFilesLoading } = useQuery({
+  const { data: activeFiles, isLoading: activeFilesLoading } = useQuery({
     queryKey: ["viewUpload", "active", type, associatedId, offset],
     queryFn: query(routes.viewUpload, {
       queryParams: {
@@ -147,21 +147,20 @@ export const FileUpload = (props: FileUploadProps) => {
     }),
   });
 
-  const { data: archivedFilesQuery, isLoading: archivedFilesLoading } =
-    useQuery({
-      queryKey: ["viewUpload", "archived", type, associatedId, offset],
-      queryFn: query(routes.viewUpload, {
-        queryParams: {
-          file_type: type,
-          associating_id: associatedId,
-          is_archived: true,
-          limit: RESULTS_PER_PAGE_LIMIT,
-          offset: offset,
-        },
-      }),
-    });
+  const { data: archivedFiles, isLoading: archivedFilesLoading } = useQuery({
+    queryKey: ["viewUpload", "archived", type, associatedId, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: type,
+        associating_id: associatedId,
+        is_archived: true,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: offset,
+      },
+    }),
+  });
 
-  const { data: dischargeSummaryQuery, isLoading: dischargeSummaryLoading } =
+  const { data: dischargeSummary, isLoading: dischargeSummaryLoading } =
     useQuery({
       queryKey: ["viewUpload", "discharge_summary", associatedId, offset],
       queryFn: query(routes.viewUpload, {
@@ -178,10 +177,10 @@ export const FileUpload = (props: FileUploadProps) => {
     });
 
   const queries = {
-    UNARCHIVED: { data: activeFilesQuery, isLoading: activeFilesLoading },
-    ARCHIVED: { data: archivedFilesQuery, isLoading: archivedFilesLoading },
+    UNARCHIVED: { data: activeFiles, isLoading: activeFilesLoading },
+    ARCHIVED: { data: archivedFiles, isLoading: archivedFilesLoading },
     DISCHARGE_SUMMARY: {
-      data: dischargeSummaryQuery,
+      data: dischargeSummary,
       isLoading: dischargeSummaryLoading,
     },
   };
@@ -192,7 +191,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const tabs = [
     { text: "Active Files", value: "UNARCHIVED" },
     { text: "Archived Files", value: "ARCHIVED" },
-    ...(dischargeSummaryQuery?.results?.length
+    ...(dischargeSummary?.results?.length
       ? [
           {
             text: "Discharge Summary",

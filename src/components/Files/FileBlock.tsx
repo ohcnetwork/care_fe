@@ -35,12 +35,7 @@ export default function FileBlock(props: FileBlockProps) {
   const filetype = fileManager.getFileType(file);
 
   const { data: fileData } = useQuery({
-    queryKey: [
-      routes.retrieveUpload.path,
-      file.id,
-      fileManager.type,
-      associating_id,
-    ],
+    queryKey: ["file", { id: file.id, type: fileManager.type, associating_id }],
     queryFn: query(routes.retrieveUpload, {
       queryParams: { file_type: fileManager.type, associating_id },
       pathParams: { id: file.id || "" },
