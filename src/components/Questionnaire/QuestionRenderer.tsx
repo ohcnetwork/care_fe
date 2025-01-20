@@ -2,14 +2,14 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { QuestionGroup } from "@/components/Questionnaire/QuestionTypes/QuestionGroup";
-
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import {
   Question,
   StructuredQuestionType,
 } from "@/types/questionnaire/question";
+
+import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
 // Questions that should be rendered full width
 const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
