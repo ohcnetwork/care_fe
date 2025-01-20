@@ -96,7 +96,7 @@ export class FacilityCreation {
         label: "Phone Number",
         message: "Phone number must start with +91 followed by 10 digits",
       },
-      { label: "Pincode", message: "Invalid pincode" },
+      { label: "Pincode", message: "Invalid Pincode" },
     ]);
   }
 
@@ -106,8 +106,7 @@ export class FacilityCreation {
     // Split string into array of characters using spread in Array.from
     Array.from(facilityName).forEach((char, index) => {
       cy.get('[data-cy="search-facility"]').type(char, {
-        delay: 500,
-        force: true,
+        delay: 200,
       });
 
       // Wait for the last character's API call
@@ -125,5 +124,11 @@ export class FacilityCreation {
     cy.get('[data-cy="facility-cards"]', { timeout })
       .should("be.visible")
       .should("not.be.empty");
+  }
+
+  fillLocationHierarchy(location: { localBody: string; ward: string }) {
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', location.localBody);
+    cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward);
+    return this;
   }
 }
