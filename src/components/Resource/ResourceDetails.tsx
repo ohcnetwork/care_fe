@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { FacilityModel } from "@/components/Facility/models";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -20,8 +21,6 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { PatientModel } from "@/types/emr/patient";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
-
-import { FacilityModel } from "../Facility/models";
 
 function PatientCard({ patient }: { patient: PatientModel }) {
   const { t } = useTranslation();

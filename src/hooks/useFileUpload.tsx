@@ -141,11 +141,11 @@ export default function useFileUpload(
         setError(t("file_error__file_size"));
         return false;
       }
-      const extension = file.name.split(".").pop();
+      const extension = file.name.split(".").pop()?.toLowerCase();
       if (
         "allowedExtensions" in options &&
         !options.allowedExtensions
-          ?.map((extension) => extension.replace(".", ""))
+          ?.map((extension) => extension.replace(".", "").toLowerCase())
           ?.includes(extension || "")
       ) {
         setError(

@@ -4,11 +4,11 @@ import { useNavigate } from "raviger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import Loading from "@/components/Common/Loading";
+
 import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-
-import Loading from "../Common/Loading";
 
 export function QuestionnaireList() {
   const navigate = useNavigate();
