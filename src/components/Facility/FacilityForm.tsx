@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/input-phone";
 import {
   Select,
   SelectContent,
@@ -48,7 +49,6 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PhoneInput } from "@/src/components/ui/input-phone";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 
