@@ -46,7 +46,6 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { FacilityModel } from "@/components/Facility/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -61,6 +60,7 @@ import {
   formatAppointmentSlotTime,
   printAppointment,
 } from "@/pages/Appointments/utils";
+import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentStatuses,
@@ -207,7 +207,7 @@ const AppointmentDetails = ({
   facility,
 }: {
   appointment: Appointment;
-  facility: FacilityModel;
+  facility: FacilityData;
 }) => {
   const { patient, user } = appointment;
   const { t } = useTranslation();
@@ -289,16 +289,16 @@ const AppointmentDetails = ({
             <div>
               <p className="font-medium">{appointment.patient.name}</p>
               <p className="text-gray-600">
-                {appointment.patient.date_of_birth && (
+                {appointment.patient.date_of_birth ? (
                   <>
                     {format(appointment.patient.date_of_birth, "MMMM d, yyyy")}{" "}
+                    |{" "}
                     {differenceInYears(
                       new Date(),
                       appointment.patient.date_of_birth!,
                     )}
                   </>
-                )}
-                {appointment.patient.year_of_birth && (
+                ) : (
                   <>
                     {differenceInYears(
                       new Date(),

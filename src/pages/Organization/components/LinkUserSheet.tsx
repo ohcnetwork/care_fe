@@ -170,7 +170,10 @@ export default function LinkUserSheet({
               <div className="space-y-2">
                 <label className="text-sm font-medium">Select Role</label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger
+                    className="h-12"
+                    data-cy="select-role-dropdown"
+                  >
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -194,6 +197,7 @@ export default function LinkUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
+                data-cy="link-user-button"
               >
                 Link to Organization
               </Button>

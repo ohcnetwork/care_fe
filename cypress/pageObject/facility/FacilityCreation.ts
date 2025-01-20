@@ -5,10 +5,12 @@ export class FacilityCreation {
   }
 
   navigateToFacilitiesList() {
-    cy.verifyAndClickElement(
-      '[data-testid="org-nav-facilities"]',
-      "Facilities",
-    );
+    cy.verifyAndClickElement('[data-cy="org-nav-facilities"]', "Facilities");
+  }
+
+  selectFacility(facilityName: string) {
+    cy.verifyAndClickElement("[data-cy='facility-list']", facilityName);
+    return this;
   }
 
   clickAddFacility() {
@@ -87,18 +89,46 @@ export class FacilityCreation {
 
   verifyValidationErrors() {
     cy.verifyErrorMessages([
-      "Name is required",
-      "Facility type is required",
-      "Address is required",
-      "Phone number must start with +91 followed by 10 digits",
+      { label: "Facility Name", message: "Name is required" },
+      { label: "Facility Type", message: "Facility type is required" },
+      { label: "Address", message: "Address is required" },
+      {
+        label: "Phone Number",
+        message: "Phone number must start with +91 followed by 10 digits",
+      },
+      { label: "Pincode", message: "Invalid Pincode" },
     ]);
   }
 
   searchFacility(facilityName: string) {
-    cy.typeIntoField('[data-cy="search-facility"]', facilityName);
+    cy.intercept("GET", `**/api/v1/facility/?**`).as("searchFacility");
+
+    // Split string into array of characters using spread in Array.from
+    Array.from(facilityName).forEach((char, index) => {
+      cy.get('[data-cy="search-facility"]').type(char, {
+        delay: 200,
+      });
+
+      // Wait for the last character's API call
+      if (index === facilityName.length - 1) {
+        cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+      }
+    });
   }
 
   verifyFacilityNameInCard(facilityName: string) {
     cy.get('[data-cy="facility-cards"]').should("contain", facilityName);
+  }
+
+  waitForFacilityCardsToLoad(timeout = 10000) {
+    cy.get('[data-cy="facility-cards"]', { timeout })
+      .should("be.visible")
+      .should("not.be.empty");
+  }
+
+  fillLocationHierarchy(location: { localBody: string; ward: string }) {
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', location.localBody);
+    cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward);
+    return this;
   }
 }

@@ -1,4 +1,5 @@
 import careConfig from "@careConfig";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,16 +21,11 @@ import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
-export default function UserAvatar({
-  username,
-  refetchUserData,
-}: {
-  username: string;
-  refetchUserData?: () => void;
-}) {
+export default function UserAvatar({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
+  const queryClient = useQueryClient();
 
   const { data: userData, loading: isLoading } = useTanStackQueryInstead(
     routes.getUserDetails,
@@ -57,7 +53,7 @@ export default function UserAvatar({
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          refetchUserData?.();
+          queryClient.invalidateQueries({ queryKey: ["currentUser"] });
           toast.success(t("avatar_updated_success"));
           setEditAvatar(false);
         }
@@ -74,8 +70,8 @@ export default function UserAvatar({
       pathParams: { username },
     });
     if (res?.ok) {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       toast.success(t("profile_picture_deleted"));
-      refetchUserData?.();
       setEditAvatar(false);
     } else {
       onError();
