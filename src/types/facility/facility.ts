@@ -30,6 +30,4 @@ export interface FacilityData {
   longitude: number;
   pincode: number;
   is_public: boolean;
-  latitude: string;
-  longitude: string;
 }
