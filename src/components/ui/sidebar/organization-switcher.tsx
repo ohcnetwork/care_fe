@@ -64,7 +64,10 @@ export function OrganizationSwitcher({
         side={isMobile ? "bottom" : "right"}
         sideOffset={4}
       >
-        <DropdownMenuItem onClick={() => navigate("/")}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <DashboardIcon className="size-4" />
           {t("view_dashboard")}
         </DropdownMenuItem>
@@ -80,9 +83,9 @@ export function OrganizationSwitcher({
               }
             }}
             className={cn(
-              "gap-2 p-2",
+              "gap-2 p-2 cursor-pointer",
               org?.name === selectedOrganization?.name &&
-                "bg-primary-500 text-white",
+                "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
             )}
           >
             {org.name}

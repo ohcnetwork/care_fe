@@ -108,6 +108,7 @@ export const AppointmentNonCancelledStatuses = [
   "checked_in",
   "waitlist",
   "in_consultation",
+  "cancelled",
 ] as const;
 
 export const AppointmentCancelledStatuses = [

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -36,17 +38,18 @@ export function SymptomTable({
   symptoms,
   showHeader = true,
 }: SymptomTableProps) {
+  const { t } = useTranslation();
   return (
     <Table>
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Symptom</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>By</TableHead>
+            <TableHead>{t("symptoms")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("severity")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
@@ -83,9 +86,7 @@ export function SymptomTable({
                 className="w-4 h-4"
                 imageUrl={symptom.created_by?.profile_picture_url}
               />
-              <span className="text-sm">
-                {symptom.created_by?.first_name} {symptom.created_by?.last_name}
-              </span>
+              <span className="text-sm">{symptom.created_by?.username}</span>
             </TableCell>
           </TableRow>
         ))}

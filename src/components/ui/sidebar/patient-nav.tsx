@@ -40,7 +40,7 @@ function generatePatientLinks(
     {
       name: t("nearby_facilities"),
       url: `/nearby_facilities/?${queryParams.toString()}`,
-      icon: "d-patient",
+      icon: "d-hospital",
     },
   ];
 }
