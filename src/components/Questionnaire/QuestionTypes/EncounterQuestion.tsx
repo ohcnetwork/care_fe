@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
+  ENCOUNTER_ADMIT_SOURCE,
+  ENCOUNTER_CLASS,
+  ENCOUNTER_DIET_PREFERENCE,
+  ENCOUNTER_DISCHARGE_DISPOSITION,
+  ENCOUNTER_PRIORITY,
+  ENCOUNTER_STATUS,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -27,8 +35,6 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
-
-import { Switch } from "../../../components/ui/switch";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -61,6 +67,7 @@ export function EncounterQuestion({
     }),
     enabled: !!encounterId,
   });
+  const { t } = useTranslation();
 
   const [encounter, setEncounter] = useState<EncounterEditRequest>({
     status: "unknown" as EncounterStatus,
@@ -124,7 +131,7 @@ export function EncounterQuestion({
   };
 
   if (isLoading) {
-    return <div>Loading encounter...</div>;
+    return <div>{t("loading_encounter")}</div>;
   }
 
   return (
@@ -132,7 +139,7 @@ export function EncounterQuestion({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">
-          <Label>Encounter Status</Label>
+          <Label>{t("encounter_status")}</Label>
           <Select
             value={encounter.status}
             onValueChange={(value) =>
@@ -143,24 +150,20 @@ export function EncounterQuestion({
             disabled={disabled}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="planned">Planned</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="on_hold">On Hold</SelectItem>
-              <SelectItem value="discharged">Discharged</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="discontinued">Discontinued</SelectItem>
-              <SelectItem value="entered_in_error">Entered in Error</SelectItem>
-              <SelectItem value="unknown">Unknown</SelectItem>
+              {ENCOUNTER_STATUS.map((encounterStatus) => (
+                <SelectItem key={encounterStatus} value={encounterStatus}>
+                  {t(`encounter_status__${encounterStatus}`)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Encounter Class</Label>
+          <Label>{t("encounter_class")}</Label>
           <Select
             value={encounter.encounter_class}
             onValueChange={(value) =>
@@ -171,21 +174,20 @@ export function EncounterQuestion({
             disabled={disabled}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select class" />
+              <SelectValue placeholder={t("select_class")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="imp">Inpatient (IP)</SelectItem>
-              <SelectItem value="amb">Ambulatory (OP)</SelectItem>
-              <SelectItem value="obsenc">Observation Room</SelectItem>
-              <SelectItem value="emer">Emergency</SelectItem>
-              <SelectItem value="vr">Virtual</SelectItem>
-              <SelectItem value="hh">Home Health</SelectItem>
+              {ENCOUNTER_CLASS.map((encounterClass) => (
+                <SelectItem key={encounterClass} value={encounterClass}>
+                  {t(`encounter_class__${encounterClass}`)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Priority</Label>
+          <Label>{t("priority")}</Label>
           <Select
             value={encounter.priority}
             onValueChange={(value) =>
@@ -196,37 +198,27 @@ export function EncounterQuestion({
             disabled={disabled}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select priority" />
+              <SelectValue placeholder={t("select_priority")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ASAP">ASAP</SelectItem>
-              <SelectItem value="callback_results">Callback Results</SelectItem>
-              <SelectItem value="callback_for_scheduling">
-                Callback for Scheduling
-              </SelectItem>
-              <SelectItem value="elective">Elective</SelectItem>
-              <SelectItem value="emergency">Emergency</SelectItem>
-              <SelectItem value="preop">Pre-op</SelectItem>
-              <SelectItem value="as_needed">As Needed</SelectItem>
-              <SelectItem value="routine">Routine</SelectItem>
-              <SelectItem value="rush_reporting">Rush Reporting</SelectItem>
-              <SelectItem value="stat">Stat</SelectItem>
-              <SelectItem value="timing_critical">Timing Critical</SelectItem>
-              <SelectItem value="use_as_directed">Use as Directed</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
+              {ENCOUNTER_PRIORITY.map((priority) => (
+                <SelectItem key={priority} value={priority}>
+                  {t(`encounter_priority__${priority}`)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Hospital Identifier</Label>
+          <Label>{t("hospital_identifier")}</Label>
           <Input
             value={encounter.external_identifier || ""}
             onChange={(e) =>
               handleUpdateEncounter({ external_identifier: e.target.value })
             }
             disabled={disabled}
-            placeholder="Ip/op/obs/emr number"
+            placeholder={t("ip_op_obs_emr_number")}
           />
         </div>
       </div>
@@ -236,7 +228,7 @@ export function EncounterQuestion({
         encounter.encounter_class === "emer") && (
         <div className="col-span-2 border rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
-            Hospitalization Details
+            {t("hospitalization_details")}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -260,11 +252,11 @@ export function EncounterQuestion({
                 }
                 disabled={disabled}
               />
-              <Label>Re-admission</Label>
+              <Label>{t("readmission")}</Label>
             </div>
 
             <div className="space-y-2">
-              <Label>Admit Source</Label>
+              <Label>{t("admit_source")}</Label>
               <Select
                 value={encounter.hospitalization?.admit_source}
                 onValueChange={(value) =>
@@ -285,19 +277,14 @@ export function EncounterQuestion({
                 disabled={disabled}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select admit source" />
+                  <SelectValue placeholder={t("select_admit_source")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hosp_trans">Hospital Transfer</SelectItem>
-                  <SelectItem value="emd">Emergency Department</SelectItem>
-                  <SelectItem value="outp">Outpatient Department</SelectItem>
-                  <SelectItem value="born">Born</SelectItem>
-                  <SelectItem value="gp">General Practitioner</SelectItem>
-                  <SelectItem value="mp">Medical Practitioner</SelectItem>
-                  <SelectItem value="nursing">Nursing Home</SelectItem>
-                  <SelectItem value="psych">Psychiatric Hospital</SelectItem>
-                  <SelectItem value="rehab">Rehabilitation Facility</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  {ENCOUNTER_ADMIT_SOURCE.map((admitSource) => (
+                    <SelectItem key={admitSource} value={admitSource}>
+                      {t(`encounter_admit_sources__${admitSource}`)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -305,7 +292,7 @@ export function EncounterQuestion({
             {/* Show discharge disposition only when status is completed */}
             {encounter.status === "completed" && (
               <div className="space-y-2">
-                <Label>Discharge Disposition</Label>
+                <Label>{t("Discharge Disposition")}</Label>
                 <Select
                   value={encounter.hospitalization?.discharge_disposition}
                   onValueChange={(value) =>
@@ -326,31 +313,30 @@ export function EncounterQuestion({
                   disabled={disabled}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select discharge disposition" />
+                    <SelectValue
+                      placeholder={t("select_discharge_disposition")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="home">Home</SelectItem>
-                    <SelectItem value="alt_home">Alternate Home</SelectItem>
-                    <SelectItem value="other_hcf">
-                      Other Healthcare Facility
-                    </SelectItem>
-                    <SelectItem value="hosp">Hospice</SelectItem>
-                    <SelectItem value="long">Long Term Care</SelectItem>
-                    <SelectItem value="aadvice">Left Against Advice</SelectItem>
-                    <SelectItem value="exp">Expired</SelectItem>
-                    <SelectItem value="psy">Psychiatric Hospital</SelectItem>
-                    <SelectItem value="rehab">Rehabilitation</SelectItem>
-                    <SelectItem value="snf">
-                      Skilled Nursing Facility
-                    </SelectItem>
-                    <SelectItem value="oth">Other</SelectItem>
+                    {ENCOUNTER_DISCHARGE_DISPOSITION.map(
+                      (dischargeDisposition) => (
+                        <SelectItem
+                          key={dischargeDisposition}
+                          value={dischargeDisposition}
+                        >
+                          {t(
+                            `encounter_discharge_disposition__${dischargeDisposition}`,
+                          )}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label>Diet Preference</Label>
+              <Label>{t("diet_preference")}</Label>
               <Select
                 value={encounter.hospitalization?.diet_preference}
                 onValueChange={(value) =>
@@ -371,17 +357,14 @@ export function EncounterQuestion({
                 disabled={disabled}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select diet preference" />
+                  <SelectValue placeholder={t("select_diet_preference")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="diary_free">Dairy Free</SelectItem>
-                  <SelectItem value="nut_free">Nut Free</SelectItem>
-                  <SelectItem value="gluten_free">Gluten Free</SelectItem>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="halal">Halal</SelectItem>
-                  <SelectItem value="kosher">Kosher</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
+                  {ENCOUNTER_DIET_PREFERENCE.map((dietPreference) => (
+                    <SelectItem key={dietPreference} value={dietPreference}>
+                      {t(`encounter_diet_preference__${dietPreference}`)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

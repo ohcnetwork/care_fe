@@ -43,6 +43,7 @@ describe("User Creation", () => {
     userCreation
       .navigateToUsersTab()
       .clickAddUserButton()
+      .fillEmail(testUserData.email)
       .submitUserForm()
       .verifyValidationErrors()
       .fillUserDetails(testUserData)

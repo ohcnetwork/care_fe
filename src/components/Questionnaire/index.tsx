@@ -1,19 +1,23 @@
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import useQuery from "@/Utils/request/useQuery";
+import Loading from "@/components/Common/Loading";
+
+import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
-import Loading from "../Common/Loading";
-
 export function QuestionnaireList() {
   const navigate = useNavigate();
-  const { data: response, loading } = useQuery(questionnaireApi.list);
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["questionnaires"],
+    queryFn: query(questionnaireApi.list),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
