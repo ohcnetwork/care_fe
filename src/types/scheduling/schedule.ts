@@ -108,7 +108,6 @@ export const AppointmentNonCancelledStatuses = [
   "checked_in",
   "waitlist",
   "in_consultation",
-  "cancelled",
 ] as const;
 
 export const AppointmentCancelledStatuses = [
@@ -134,7 +133,7 @@ export interface Appointment {
   token_slot: TokenSlot;
   patient: AppointmentPatient;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   reason_for_visit: string;
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
