@@ -9,9 +9,8 @@ import organizationApi from "@/types/organization/organizationApi";
 
 interface UseGovtOrganizationLevelProps {
   index: number;
-  _selectedLevels: Organization[];
   onChange: (filter: FilterState, index: number) => void;
-  getParentId: (index: number) => string;
+  parentId: string;
   authToken?: string;
 }
 
@@ -22,9 +21,8 @@ interface AutoCompleteOption {
 
 export function useGovtOrganizationLevel({
   index,
-  _selectedLevels,
   onChange,
-  getParentId,
+  parentId,
   authToken,
 }: UseGovtOrganizationLevelProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,11 +36,11 @@ export function useGovtOrganizationLevel({
     : {};
 
   const { data: organizations } = useQuery({
-    queryKey: ["organizations-level", getParentId(index), searchQuery],
+    queryKey: ["organizations-level", parentId, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         org_type: "govt",
-        parent: getParentId(index),
+        parent: parentId,
         name: searchQuery || undefined,
         limit: 200,
       },

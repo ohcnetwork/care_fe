@@ -15,20 +15,17 @@ interface GovtOrganizationSelectorProps {
   required?: boolean;
   authToken?: string;
   selected?: Organization[];
-  errorMessage?: string;
 }
 
 interface OrganizationLevelProps {
   index: number;
   currentLevel?: Organization;
   previousLevel?: Organization;
-  selectedLevels: Organization[];
   onChange: (
     filter: FilterState,
     index: number,
     organization: Organization,
   ) => void;
-  getParentId: (index: number) => string;
   required?: boolean;
   authToken?: string;
 }
@@ -37,16 +34,15 @@ function OrganizationLevelSelect({
   index,
   currentLevel,
   previousLevel,
-  selectedLevels,
   onChange,
-  getParentId,
   required,
   authToken,
 }: OrganizationLevelProps) {
+  const parentId = index === 0 ? "" : previousLevel?.id || "";
+
   const { options, handleChange, handleSearch, organizations } =
     useGovtOrganizationLevel({
       index,
-      _selectedLevels: selectedLevels,
       onChange: (filter: FilterState, index: number) => {
         const selectedOrg = organizations?.find(
           (org) => org.id === filter.organization,
@@ -55,7 +51,7 @@ function OrganizationLevelSelect({
           onChange(filter, index, selectedOrg);
         }
       },
-      getParentId,
+      parentId,
       authToken,
     });
 
@@ -114,23 +110,22 @@ export default function GovtOrganizationSelector(
     organization: Organization,
   ) => {
     if (filter.organization) {
-      onChange(filter.organization as string);
-      // Update selectedLevels by keeping previous levels up to current index and adding the new selection
       setSelectedLevels((prev) => {
         const newLevels = prev.slice(0, index);
         newLevels.push(organization);
         return newLevels;
       });
+      if (!organization.has_children) {
+        onChange(organization.id);
+        // Else condition is necessary to reset the form value for pre-filled forms
+      } else {
+        onChange("");
+      }
     } else {
       onChange("");
       // Reset subsequent levels when clearing a selection
       setSelectedLevels((prev) => prev.slice(0, index));
     }
-  };
-
-  const getParentId = (index: number) => {
-    if (index === 0) return "";
-    return selectedLevels[index - 1]?.id || "";
   };
 
   // Calculate the number of levels to show based on selectedLevels and has_children
@@ -149,9 +144,7 @@ export default function GovtOrganizationSelector(
           index={index}
           currentLevel={selectedLevels[index]}
           previousLevel={selectedLevels[index - 1]}
-          selectedLevels={selectedLevels}
           onChange={handleFilterChange}
-          getParentId={getParentId}
           required={required}
           authToken={authToken}
         />
