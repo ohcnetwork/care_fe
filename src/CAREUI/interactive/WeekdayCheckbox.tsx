@@ -57,7 +57,7 @@ export default function WeekdayCheckbox({
           <Button
             key={dow}
             type="button"
-            variant={isSelected ? "outline_primary" : "outline"}
+            variant={isSelected ? "primary" : "outline"}
             onClick={() => handleDayToggle(dow)}
             size={format === "alphabet" ? "icon" : "default"}
             aria-pressed={isSelected}

@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Necessary to fetch all tags
+          fetch-depth: 0 # Necessary to fetch all tags
 
       - name: Calculate next tag
         id: calc_tag

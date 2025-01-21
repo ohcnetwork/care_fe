@@ -1,6 +1,5 @@
 import { Redirect } from "raviger";
 
-import { FacilityCreate } from "@/components/Facility/FacilityCreate";
 import { FacilityHome } from "@/components/Facility/FacilityHome";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
@@ -12,10 +11,7 @@ import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrgan
 
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
-  "/facility/create": () => <FacilityCreate />,
-  "/facility/:facilityId/update": ({ facilityId }) => (
-    <FacilityCreate facilityId={facilityId} />
-  ),
+
   "/facility/:facilityId": ({ facilityId }) => (
     <FacilityHome facilityId={facilityId} />
   ),

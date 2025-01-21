@@ -1,7 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Organization } from "@/types/organization/organization";
 
-import { Organization } from "../organization/organization";
 import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
 import { QuestionnaireTagModel, QuestionnaireTagSet } from "./tags";
 

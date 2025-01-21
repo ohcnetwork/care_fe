@@ -2,6 +2,7 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 
 import { Time } from "@/Utils/types";
 import { AppointmentPatient } from "@/pages/Patient/Utils";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { UserBase } from "@/types/user/user";
 
 export type ScheduleSlotType = "appointment" | "open" | "closed";
@@ -113,12 +114,20 @@ export const AppointmentNonCancelledStatuses = [
 export const AppointmentCancelledStatuses = [
   "cancelled",
   "entered_in_error",
+  "rescheduled",
 ] as const;
 
 export const AppointmentStatuses = [
   ...AppointmentNonCancelledStatuses,
   ...AppointmentCancelledStatuses,
 ] as const;
+
+export const AppointmentFinalStatuses: AppointmentStatus[] = [
+  "fulfilled",
+  "cancelled",
+  "entered_in_error",
+  "rescheduled",
+];
 
 export type AppointmentNonCancelledStatus =
   (typeof AppointmentNonCancelledStatuses)[number];
@@ -137,6 +146,7 @@ export interface Appointment {
   reason_for_visit: string;
   user: UserBase;
   booked_by: UserBase | null; // This is null if the appointment was booked by the patient itself.
+  facility: FacilityBareMinimum;
 }
 
 export interface AppointmentCreateRequest {
