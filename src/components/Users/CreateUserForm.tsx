@@ -98,6 +98,12 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "staff",
+      username: "",
+      password: "",
+      c_password: "",
+      first_name: "",
+      last_name: "",
+      email: "",
       phone_number: "+91",
       alt_phone_number: "+91",
       phone_number_is_whatsapp: true,
