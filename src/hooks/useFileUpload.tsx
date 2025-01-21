@@ -29,7 +29,6 @@ export type FileUploadOptions = {
   multiple?: boolean;
   type: string;
   category?: FileCategory;
-  CombineToPDF?: boolean;
   onUpload?: (file: FileUploadModel) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
@@ -54,7 +53,10 @@ export type FileUploadReturn = {
   validateFiles: () => boolean;
   handleCameraCapture: () => void;
   handleAudioCapture: () => void;
-  handleFileUpload: (associating_id: string) => Promise<void>;
+  handleFileUpload: (
+    associating_id: string,
+    CombineToPDF?: boolean,
+  ) => Promise<void>;
   Dialogues: JSX.Element;
   Input: (_: FileInputProps) => JSX.Element;
   fileNames: string[];
@@ -87,7 +89,6 @@ export default function useFileUpload(
     category = "unspecified",
     multiple,
     allowNameFallback = true,
-    CombineToPDF,
   } = options;
 
   const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
@@ -104,6 +105,11 @@ export default function useFileUpload(
     try {
       const pdf = new jsPDF();
       for (const [index, file] of files.entries()) {
+        if (!file.type.startsWith("image/")) {
+          console.error(`Unsupported file type: ${file.name}`);
+          toast.error(t("file_error__file_type"));
+          return null;
+        }
         const imgData = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -279,7 +285,10 @@ export default function useFileUpload(
       })(body),
   });
 
-  const handleUpload = async (associating_id: string) => {
+  const handleUpload = async (
+    associating_id: string,
+    CombineToPDF?: boolean,
+  ) => {
     if (!validateFileUpload()) return;
 
     setProgress(0);

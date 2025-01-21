@@ -66,7 +66,6 @@ export const FilesTab = (props: FilesTabProps) => {
   });
   const { t } = useTranslation();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [isPdf, setIsPdf] = useState(false);
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
@@ -127,37 +126,34 @@ export const FilesTab = (props: FilesTabProps) => {
   const fileUpload = useFileUpload({
     type: type,
     multiple: true,
-    CombineToPDF: isPdf,
-    allowedExtensions: isPdf
-      ? ["jpg", "jpeg", "png"]
-      : [
-          "jpg",
-          "jpeg",
-          "png",
-          "gif",
-          "bmp",
-          "tiff",
-          "mp4",
-          "mov",
-          "avi",
-          "wmv",
-          "mp3",
-          "wav",
-          "ogg",
-          "txt",
-          "csv",
-          "rtf",
-          "doc",
-          "odt",
-          "pdf",
-          "xls",
-          "xlsx",
-          "ods",
-        ],
+    allowedExtensions: [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "bmp",
+      "tiff",
+      "mp4",
+      "mov",
+      "avi",
+      "wmv",
+      "mp3",
+      "wav",
+      "ogg",
+      "txt",
+      "csv",
+      "rtf",
+      "doc",
+      "odt",
+      "pdf",
+      "xls",
+      "xlsx",
+      "ods",
+      "pdf",
+    ],
     allowNameFallback: false,
     onUpload: () => {
       refetch();
-      setIsPdf(false);
     },
   });
 
@@ -166,14 +162,12 @@ export const FilesTab = (props: FilesTabProps) => {
       setOpenUploadDialog(true);
     } else {
       setOpenUploadDialog(false);
-      setIsPdf(false);
     }
   }, [fileUpload.files]);
 
   useEffect(() => {
     if (!openUploadDialog) {
       fileUpload.clearFiles();
-      setIsPdf(false);
     }
   }, [openUploadDialog]);
 
@@ -356,7 +350,6 @@ export const FilesTab = (props: FilesTabProps) => {
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
-              setIsPdf(false);
               e.preventDefault();
             }}
           >
@@ -366,22 +359,6 @@ export const FilesTab = (props: FilesTabProps) => {
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
-            </label>
-            {fileUpload.Input({ className: "hidden" })}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="flex flex-row items-center"
-            onSelect={(e) => {
-              e.preventDefault();
-              setIsPdf(true);
-            }}
-          >
-            <label
-              htmlFor="file_upload_patient"
-              className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
-            >
-              <CareIcon icon="l-file-upload-alt" className="mr-1" />
-              <span>{t("combine_files_pdf")}</span>
             </label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
@@ -594,6 +571,7 @@ const FileUploadDialog = ({
   associatingId: string;
 }) => {
   const { t } = useTranslation();
+  const [isPdf, setIsPdf] = useState(false);
   return (
     <Dialog
       open={open}
@@ -642,10 +620,26 @@ const FileUploadDialog = ({
             </div>
           ))}
         </div>
+        {fileUpload.files.length > 1 && (
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="combine_as_pdf"
+              checked={isPdf}
+              onChange={(e) => setIsPdf(e.target.checked)}
+              disabled={fileUpload.uploading}
+              className="cursor-pointer"
+            />
+            <label htmlFor="file_upload_patient">
+              {t("combine_files_pdf")}
+            </label>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 mt-4">
           <Button
             variant="outline_primary"
-            onClick={() => fileUpload.handleFileUpload(associatingId)}
+            onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
             disabled={fileUpload.uploading}
             className="w-full"
             id="upload_file_button"
