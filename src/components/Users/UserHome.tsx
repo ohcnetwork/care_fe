@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +31,6 @@ export default function UserHome(props: UserHomeProps) {
   let { username } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const queryClient = useQueryClient();
 
   if (!username) {
     username = authUser.username;
@@ -45,12 +44,6 @@ export default function UserHome(props: UserHomeProps) {
     }),
     enabled: Boolean(username),
   });
-
-  const invalidateUserDetails = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["getUserDetails", username],
-    });
-  };
 
   if (isLoading || !userData) {
     return <Loading />;
@@ -135,12 +128,7 @@ export default function UserHome(props: UserHomeProps) {
                 </div>
               </div>
             </div>
-            <SelectedTab
-              userData={userData}
-              username={username}
-              {...props}
-              refetchUserData={invalidateUserDetails}
-            />
+            <SelectedTab userData={userData} username={username} {...props} />
           </>
         }
       </Page>
