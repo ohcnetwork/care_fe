@@ -143,6 +143,12 @@ export default {
       TBody: Type<{ reason: "cancelled" | "entered_in_error" }>(),
       TRes: Type<Appointment>(),
     },
+    reschedule: {
+      path: "/api/v1/facility/{facility_id}/appointments/{id}/reschedule/",
+      method: HttpMethod.POST,
+      TBody: Type<{ new_slot: string }>(),
+      TRes: Type<Appointment>(),
+    },
     /**
      * Lists schedulable users for a facility
      */
