@@ -117,7 +117,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       phone_number: "+91",
       alt_phone_number: "+91",
       phone_number_is_whatsapp: true,
-      gender: "male",
     },
   });
 
@@ -131,14 +130,13 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
 
   useEffect(() => {
     if (userData && isEditMode) {
-      console.log(userData);
       const formData: Partial<UserFormValues> = {
         user_type: userData.user_type,
         first_name: userData.first_name,
         last_name: userData.last_name,
         email: userData.email,
         phone_number: userData.phone_number || "",
-        gender: userData.gender || "male",
+        gender: userData.gender,
         phone_number_is_whatsapp: true,
       };
       form.reset(formData);
@@ -203,7 +201,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     }
   };
 
-  const { mutate: createUser } = useMutation({
+  const { mutate: createUser, isPending: createPending } = useMutation({
     mutationKey: ["create_user"],
     mutationFn: mutate(userApi.create),
     onSuccess: (resp: UserBase) => {
@@ -215,7 +213,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     },
   });
 
-  const { mutate: updateUser } = useMutation({
+  const { mutate: updateUser, isPending: updatePending } = useMutation({
     mutationKey: ["update_user"],
     mutationFn: mutate(userApi.update, {
       pathParams: { username: existingUsername! },
@@ -243,8 +241,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     }
   };
 
-  console.log(form.formState.errors);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -254,7 +250,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("user_type")}</FormLabel>
+                <FormLabel required>{t("user_type")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -283,7 +279,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("first_name")}</FormLabel>
+                <FormLabel required>{t("first_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="first-name-input"
@@ -301,7 +297,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             name="last_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("last_name")}</FormLabel>
+                <FormLabel required>{t("last_name")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="last-name-input"
@@ -322,7 +318,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("username")}</FormLabel>
+                  <FormLabel required>{t("username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -343,7 +339,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("password")}</FormLabel>
+                    <FormLabel required>{t("password")}</FormLabel>
                     <FormControl>
                       <PasswordInput
                         data-cy="password-input"
@@ -361,7 +357,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                 name="c_password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("confirm_password")}</FormLabel>
+                    <FormLabel required>{t("confirm_password")}</FormLabel>
                     <FormControl>
                       <PasswordInput
                         data-cy="confirm-password-input"
@@ -382,7 +378,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("email")}</FormLabel>
+              <FormLabel required>{t("email")}</FormLabel>
               <FormControl>
                 <Input
                   data-cy="email-input"
@@ -402,7 +398,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("phone_number")}</FormLabel>
+                <FormLabel required>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <Input
                     data-cy="phone-number-input"
@@ -466,8 +462,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("gender")}</FormLabel>
+                <FormLabel required>{t("gender")}</FormLabel>
                 <Select
+                  {...field}
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
@@ -580,8 +577,13 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
         <Button
           type="submit"
           className="w-full"
-          disabled={isLoadingUser}
           data-cy="submit-user-form"
+          disabled={
+            isLoadingUser ||
+            !form.formState.isDirty ||
+            updatePending ||
+            createPending
+          }
         >
           {isEditMode ? t("update_user") : t("create_user")}
         </Button>
