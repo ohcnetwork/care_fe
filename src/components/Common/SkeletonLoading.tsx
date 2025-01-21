@@ -75,40 +75,49 @@ export const NoteSkeleton = ({ count }: { count: number }) => (
 );
 
 export const CardGridSkeleton = ({ count }: { count: number }) =>
-  Array.from({ length: count }, (_, index) => (
-    <div key={index} className="skeleton-item animate-pulse">
-      <Card className="h-full">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col h-full gap-4">
-            <div className="flex gap-4">
-              <Skeleton className="h-12 w-12 sm:h-16 sm:w-16 rounded-full flex-shrink-0" />
-              <div className="flex flex-col min-w-0 flex-1">
-                <div className="flex flex-col gap-1">
-                  <Skeleton className="h-5 w-32 mb-1" />
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-16" />
+  <div 
+    className="grid gap-4"
+    role="status"
+    aria-label="Loading cards"
+  >
+    {Array.from({ length: count }, (_, index) => (
+      <div key={index} className="skeleton-item animate-pulse">
+        <Card 
+          className="h-full"
+          aria-label={`Loading card ${index + 1} of ${count}`}
+        >
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col h-full gap-4">
+              <div className="flex gap-4">
+                <Skeleton className="h-12 w-12 sm:h-16 sm:w-16 rounded-full flex-shrink-0" />
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-5 w-32 mb-1" />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <Skeleton className="h-4 w-16 mb-1" />
-                <Skeleton className="h-4 w-24" />
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <Skeleton className="h-4 w-16 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
               </div>
-              <div>
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            </div>
 
-            <div className="mt-auto pt-2">
-              <Skeleton className="h-8 w-full rounded-md" />
+              <div className="mt-auto pt-2">
+                <Skeleton className="h-8 w-full rounded-md" />
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  ));
+          </CardContent>
+        </Card>
+      </div>
+    ))}
+  </div>
