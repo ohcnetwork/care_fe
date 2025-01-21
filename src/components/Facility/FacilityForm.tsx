@@ -119,7 +119,12 @@ export default function FacilityForm(props: FacilityProps) {
     }),
     onSuccess: (_data: FacilityModel) => {
       toast.success(t("facility_updated_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organizationFacilities"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facility"],
+      });
       form.reset();
       onSubmitSuccess?.();
     },
