@@ -35,7 +35,7 @@ export function useGovtOrganizationLevel({
       }
     : {};
 
-  const { data: organizations } = useQuery({
+  const { data: organizations, isLoading } = useQuery({
     queryKey: ["organizations-level", parentId, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
@@ -74,5 +74,6 @@ export function useGovtOrganizationLevel({
     handleChange,
     handleSearch,
     organizations: organizations?.results,
+    isLoading,
   };
 }

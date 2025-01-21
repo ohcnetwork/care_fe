@@ -1,4 +1,5 @@
 import { t } from "i18next";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -40,7 +41,7 @@ function OrganizationLevelSelect({
 }: OrganizationLevelProps) {
   const parentId = index === 0 ? "" : previousLevel?.id || "";
 
-  const { options, handleChange, handleSearch, organizations } =
+  const { options, handleChange, handleSearch, organizations, isLoading } =
     useGovtOrganizationLevel({
       index,
       onChange: (filter: FilterState, index: number) => {
@@ -56,7 +57,7 @@ function OrganizationLevelSelect({
     });
 
   return (
-    <div>
+    <div className="mt-2">
       <Label className="mb-2">
         {t(
           currentLevel
@@ -67,17 +68,21 @@ function OrganizationLevelSelect({
         )}
         {required && <span className="text-red-500">*</span>}
       </Label>
-      <Autocomplete
-        value={currentLevel?.id || ""}
-        options={options}
-        onChange={handleChange}
-        onSearch={handleSearch}
-        data-cy={`select-${
-          currentLevel?.metadata?.govt_org_type?.toLowerCase() ||
-          previousLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
-          "state"
-        }`}
-      />
+      {isLoading ? (
+        <Loader2 className="h-6 w-6 animate-spin" />
+      ) : (
+        <Autocomplete
+          value={currentLevel?.id || ""}
+          options={options}
+          onChange={handleChange}
+          onSearch={handleSearch}
+          data-cy={`select-${
+            currentLevel?.metadata?.govt_org_type?.toLowerCase() ||
+            previousLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
+            "state"
+          }`}
+        />
+      )}
     </div>
   );
 }
