@@ -268,7 +268,7 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
               </FormControl>
               {isUsernameFieldFocused && (
                 <div
-                  className="text-small mt-2 text-secondary-500"
+                  className="text-small mt-2 pl-2 text-secondary-500"
                   aria-live="polite"
                 >
                   <ValidationHelper
@@ -299,7 +299,9 @@ export default function CreateUserForm({ onSubmitSuccess }: Props) {
                   />
                 </div>
               )}
-              {renderUsernameFeedback(usernameInput)}
+              <div className="pl-2">
+                {renderUsernameFeedback(usernameInput)}
+              </div>
             </FormItem>
           )}
         />
