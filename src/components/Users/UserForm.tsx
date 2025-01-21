@@ -260,7 +260,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-cy="user-type-select">
                       <SelectValue placeholder={t("select_user_type")} />
                     </SelectTrigger>
                   </FormControl>
@@ -325,7 +325,11 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                   <FormLabel>{t("username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input placeholder={t("username")} {...field} />
+                      <Input
+                        data-cy="username-input"
+                        placeholder={t("username")}
+                        {...field}
+                      />
                     </div>
                   </FormControl>
                   {renderUsernameFeedback(usernameInput ?? "")}
@@ -341,7 +345,11 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                   <FormItem>
                     <FormLabel>{t("password")}</FormLabel>
                     <FormControl>
-                      <PasswordInput placeholder={t("password")} {...field} />
+                      <PasswordInput
+                        data-cy="password-input"
+                        placeholder={t("password")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -356,6 +364,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                     <FormLabel>{t("confirm_password")}</FormLabel>
                     <FormControl>
                       <PasswordInput
+                        data-cy="confirm-password-input"
                         placeholder={t("confirm_password")}
                         {...field}
                       />
@@ -568,7 +577,12 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
           />
         )}
 
-        <Button type="submit" className="w-full" disabled={isLoadingUser}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoadingUser}
+          data-cy="submit-user-form"
+        >
           {isEditMode ? t("update_user") : t("create_user")}
         </Button>
       </form>
