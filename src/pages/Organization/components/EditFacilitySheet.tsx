@@ -37,7 +37,7 @@ export default function EditFacilitySheet({ facilityId, trigger }: Props) {
             onSubmitSuccess={() => {
               setOpen(false);
               queryClient.invalidateQueries({
-                queryKey: [["facility", facilityId], "organizationFacilities"],
+                queryKey: ["facility", facilityId],
               });
             }}
           />
