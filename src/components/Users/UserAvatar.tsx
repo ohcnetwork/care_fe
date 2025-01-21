@@ -15,6 +15,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
+import { handleStructuredErrors } from "@/Utils/request/errorHandler";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
@@ -56,6 +57,13 @@ export default function UserAvatar({ username }: { username: string }) {
           queryClient.invalidateQueries({ queryKey: ["currentUser"] });
           toast.success(t("avatar_updated_success"));
           setEditAvatar(false);
+        } else {
+          const response = JSON.parse(xhr.responseText);
+          response.errors.forEach((error: any) => {
+            if (error?.msg?.profile_picture) {
+              handleStructuredErrors(error?.msg?.profile_picture);
+            }
+          });
         }
       },
       null,
