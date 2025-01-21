@@ -481,7 +481,7 @@ const AppointmentActions = ({
             {t("reschedule")}
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-full sm:max-w-xl">
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
           </SheetHeader>

@@ -13,9 +13,11 @@ import { Separator } from "@/components/ui/separator";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/pages/Appointments/utils";
 import scheduleApis from "@/types/scheduling/scheduleApis";
-
-import { groupSlotsByAvailability, useAvailabilityHeatmap } from "../utils";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
