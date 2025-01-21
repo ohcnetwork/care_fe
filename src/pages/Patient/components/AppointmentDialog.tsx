@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,10 @@ import mutate from "@/Utils/request/mutate";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentFinalStatuses,
+} from "@/types/scheduling/schedule";
 
 function AppointmentDialog({
   appointment,
@@ -45,6 +49,7 @@ function AppointmentDialog({
       queryClient.invalidateQueries({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
+      toast.success(t("appointment_cancelled"));
       setAppointmentDialogOpen(false);
     },
   });
@@ -84,24 +89,25 @@ function AppointmentDialog({
           <span className="text-sm font-semibold text-blue-700">
             {t(appointment.status)}
           </span>
-          <span className="flex flex-row gap-2">
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => {
-                cancelAppointment({
-                  appointment: appointment.id,
-                  patient: appointment.patient.id,
-                });
-              }}
-            >
-              <span>{t("cancel")}</span>
-            </Button>
-            {/* TODO: wire this */}
-            {/* <Button variant="secondary">
-              <span>{t("reschedule")}</span>
-            </Button> */}
-          </span>
+          {!AppointmentFinalStatuses.includes(appointment.status) && (
+            <span className="flex flex-row gap-2">
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() => {
+                  cancelAppointment({
+                    appointment: appointment.id,
+                    patient: appointment.patient.id,
+                  });
+                }}
+              >
+                <span>{t("cancel")}</span>
+              </Button>
+              <Button variant="secondary">
+                <span>{t("reschedule")}</span>
+              </Button>
+            </span>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
