@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
@@ -28,8 +30,6 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
-
-import { Button } from "../ui/button";
 
 export default function UserSummaryTab({
   userData,
