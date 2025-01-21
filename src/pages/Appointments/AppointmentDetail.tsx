@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
 import { BanIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -43,6 +44,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -63,10 +71,13 @@ import {
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
+  AppointmentFinalStatuses,
   AppointmentStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
+
+import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
 interface Props {
   facilityId: string;
@@ -230,6 +241,7 @@ const AppointmentDetails = ({
                     fulfilled: "primary",
                     entered_in_error: "destructive",
                     cancelled: "destructive",
+                    rescheduled: "secondary",
                     noshow: "destructive",
                   } as Partial<
                     Record<Appointment["status"], BadgeProps["variant"]>
@@ -388,6 +400,8 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
@@ -400,13 +414,35 @@ const AppointmentActions = ({
       },
     }),
     onSuccess: () => {
+      toast.success(t("appointment_cancelled"));
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
     },
   });
 
-  if (["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)) {
+  const { mutate: rescheduleAppointment, isPending: isRescheduling } =
+    useMutation({
+      mutationFn: mutate(scheduleApis.appointments.reschedule, {
+        pathParams: {
+          facility_id: facilityId,
+          id: appointment.id,
+        },
+      }),
+      onSuccess: (newAppointment: Appointment) => {
+        toast.success(t("appointment_rescheduled"));
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", appointment.id],
+        });
+        setIsRescheduleOpen(false);
+        setSelectedSlotId(undefined);
+        navigate(
+          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+        );
+      },
+    });
+
+  if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
   }
 
@@ -437,6 +473,53 @@ const AppointmentActions = ({
         <PersonIcon className="size-4 mr-2" />
         {t("view_patient")}
       </Button>
+
+      <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="lg">
+            <CalendarIcon className="size-4 mr-2" />
+            {t("reschedule")}
+          </Button>
+        </SheetTrigger>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+          </SheetHeader>
+
+          <div className="mt-6">
+            <AppointmentSlotPicker
+              facilityId={facilityId}
+              resourceId={appointment.user?.id}
+              selectedSlotId={selectedSlotId}
+              onSlotSelect={setSelectedSlotId}
+            />
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsRescheduleOpen(false);
+                  setSelectedSlotId(undefined);
+                }}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="default"
+                disabled={!selectedSlotId || isRescheduling}
+                onClick={() => {
+                  if (selectedSlotId) {
+                    rescheduleAppointment({ new_slot: selectedSlotId });
+                  }
+                }}
+              >
+                {isRescheduling ? t("rescheduling") : t("reschedule")}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {currentStatus === "booked" && (
         <>
           <Button
