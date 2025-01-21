@@ -1,6 +1,6 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
-import { Organization } from "../organization/organization";
+import { Organization } from "@/types/organization/organization";
 
 export type BloodGroupChoices =
   | "A_negative"

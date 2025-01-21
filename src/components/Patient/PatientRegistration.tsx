@@ -7,8 +7,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -37,6 +39,7 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import {
   BLOOD_GROUP_CHOICES, // DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
@@ -46,15 +49,14 @@ import {
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
-
-import Autocomplete from "../ui/autocomplete";
 
 interface PatientRegistrationPageProps {
   facilityId: string;
@@ -79,7 +81,8 @@ export default function PatientRegistration(
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
-  const [debouncedNumber, setDebouncedNumber] = useState<string>();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -101,6 +104,10 @@ export default function PatientRegistration(
           date_of_birth: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
+            .refine((date) => {
+              const parsedDate = dayjs(date);
+              return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
+            }, t("enter_valid_dob"))
             .optional(),
           age: z
             .number()
@@ -192,6 +199,28 @@ export default function PatientRegistration(
     },
   });
 
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
+  });
+
+  useEffect(() => {
+    // Fill by pincode for patient registration
+    if (patientId) return;
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+    setSelectedLevels(levels);
+
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg, patientId]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
       updatePatient({ ...values, ward_old: undefined });
@@ -226,13 +255,13 @@ export default function PatientRegistration(
   };
 
   const patientPhoneSearch = useQuery({
-    queryKey: ["patients", "phone-number", debouncedNumber],
-    queryFn: query(routes.searchPatient, {
+    queryKey: ["patients", "phone-number", form.watch("phone_number")],
+    queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(debouncedNumber || "") || "",
+        phone_number: parsePhoneNumber(form.watch("phone_number") || "") || "",
       },
     }),
-    enabled: !!parsePhoneNumber(debouncedNumber || ""),
+    enabled: !!parsePhoneNumber(form.watch("phone_number") || ""),
   });
 
   const duplicatePatients = useMemo(() => {
@@ -249,6 +278,9 @@ export default function PatientRegistration(
 
   useEffect(() => {
     if (patientQuery.data) {
+      setSelectedLevels([
+        patientQuery.data.geo_organization as unknown as Organization,
+      ]);
       form.reset({
         ...patientQuery.data,
         same_phone_number:
@@ -257,26 +289,18 @@ export default function PatientRegistration(
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        age: !patientQuery.data.date_of_birth
+          ? patientQuery.data.age
+          : undefined,
+        date_of_birth: patientQuery.data.date_of_birth
+          ? patientQuery.data.date_of_birth
+          : undefined,
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const phoneNumber = form.getValues("phone_number");
-      if (!patientId || patientQuery.data?.phone_number !== phoneNumber) {
-        setSuppressDuplicateWarning(false);
-      }
-      setDebouncedNumber(phoneNumber);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [form.watch("phone_number")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
@@ -500,15 +524,27 @@ export default function PatientRegistration(
                                 type="number"
                                 placeholder="DD"
                                 {...field}
+                                min={1}
+                                max={31}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[2]
                                 }
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
-                                  )
-                                }
+                                  );
+                                  const day = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    day >= 1 &&
+                                    day <= 31
+                                  ) {
+                                    document
+                                      .getElementById("dob-month-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-day-input"
                               />
                             </div>
@@ -518,17 +554,30 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-month-input"
                                 placeholder="MM"
                                 {...field}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[1]
                                 }
-                                onChange={(e) =>
+                                min={1}
+                                max={12}
+                                onChange={(e) => {
                                   form.setValue(
                                     "date_of_birth",
                                     `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
-                                  )
-                                }
+                                  );
+                                  const month = parseInt(e.target.value);
+                                  if (
+                                    e.target.value.length === 2 &&
+                                    month >= 1 &&
+                                    month <= 12
+                                  ) {
+                                    document
+                                      .getElementById("dob-year-input")
+                                      ?.focus();
+                                  }
+                                }}
                                 data-cy="dob-month-input"
                               />
                             </div>
@@ -538,11 +587,14 @@ export default function PatientRegistration(
 
                               <Input
                                 type="number"
+                                id="dob-year-input"
                                 placeholder="YYYY"
                                 {...field}
                                 value={
                                   form.watch("date_of_birth")?.split("-")[0]
                                 }
+                                min={1900}
+                                max={new Date().getFullYear()}
                                 onChange={(e) =>
                                   form.setValue(
                                     "date_of_birth",
@@ -685,6 +737,22 @@ export default function PatientRegistration(
                       />
                     </FormControl>
                     <FormMessage />
+                    {showAutoFilledPincode && (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="flex items-center"
+                      >
+                        <CareIcon
+                          icon="l-check-circle"
+                          className="mr-2 text-sm text-green-500"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-primary-500">
+                          {t("pincode_autofill")}
+                        </span>
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -713,7 +781,6 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -721,9 +788,10 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem className="contents">
                         <FormControl>
-                          <OrganizationSelector
+                          <GovtOrganizationSelector
                             {...field}
                             required={true}
+                            selected={selectedLevels}
                             value={form.watch("geo_organization")}
                             onChange={(value) =>
                               form.setValue("geo_organization", value)
@@ -759,7 +827,7 @@ export default function PatientRegistration(
       </div>
       {!patientPhoneSearch.isLoading &&
         !!duplicatePatients?.length &&
-        !!parsePhoneNumber(debouncedNumber || "") &&
+        !!parsePhoneNumber(form.watch("phone_number") || "") &&
         !suppressDuplicateWarning && (
           <DuplicatePatientDialog
             patientList={duplicatePatients}

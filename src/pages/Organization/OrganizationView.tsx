@@ -89,8 +89,8 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                   <Card key={orgChild.id}>
                     <CardContent className="p-6">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
+                        <div className="flex items-center justify-between flex-wrap">
+                          <div className="space-y-1 mb-2">
                             <h3 className="text-lg font-semibold">
                               {orgChild.name}
                             </h3>
@@ -110,7 +110,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                           </div>
                           <Button variant="link" asChild>
                             <Link href={`${baseUrl}/children/${orgChild.id}`}>
-                              View Details
+                              {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
                                 className="h-4 w-4"
@@ -131,7 +131,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {searchQuery
-                      ? t("no_organizations_found_matching", { searchQuery })
+                      ? t("no_organizations_found")
                       : t("no_sub_organizations_found")}
                   </CardContent>
                 </Card>

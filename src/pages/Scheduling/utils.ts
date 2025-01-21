@@ -1,7 +1,17 @@
-import { isSameDay, isWithinInterval } from "date-fns";
+import {
+  addMinutes,
+  format,
+  isSameDay,
+  isWithinInterval,
+  parse,
+} from "date-fns";
 
 import { Time } from "@/Utils/types";
-import { Appointment, ScheduleAvailability } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  ScheduleAvailability,
+  ScheduleException,
+} from "@/types/scheduling/schedule";
 
 export const isDateInRange = (
   date: Date,
@@ -32,6 +42,69 @@ export function getDurationInMinutes(startTime: Time, endTime: Time) {
   return (end.getTime() - start.getTime()) / (1000 * 60);
 }
 
+type VirtualSlot = {
+  start_time: Time;
+  end_time: Time;
+  isAvailable: boolean;
+  exceptions: ScheduleException[];
+};
+
+export function computeAppointmentSlots(
+  availability: ScheduleAvailability & { slot_type: "appointment" },
+  exceptions: ScheduleException[],
+  referenceDate: Date = new Date(),
+) {
+  const startTime = parse(
+    availability.availability[0].start_time,
+    "HH:mm:ss",
+    referenceDate,
+  );
+  const endTime = parse(
+    availability.availability[0].end_time,
+    "HH:mm:ss",
+    referenceDate,
+  );
+  const slotSizeInMinutes = availability.slot_size_in_minutes;
+  const slots: VirtualSlot[] = [];
+
+  let time = startTime;
+  while (time < endTime) {
+    const slotEndTime = addMinutes(time, slotSizeInMinutes);
+
+    let conflicting = false;
+    for (const exception of exceptions) {
+      const exceptionStartTime = parse(
+        exception.start_time,
+        "HH:mm:ss",
+        referenceDate,
+      );
+      const exceptionEndTime = parse(
+        exception.end_time,
+        "HH:mm:ss",
+        referenceDate,
+      );
+
+      if (exceptionStartTime < slotEndTime && exceptionEndTime > time) {
+        conflicting = true;
+        break;
+      }
+    }
+
+    if (!conflicting) {
+      slots.push({
+        start_time: format(time, "HH:mm") as Time,
+        end_time: format(slotEndTime, "HH:mm") as Time,
+        isAvailable: true,
+        exceptions: [],
+      });
+    }
+
+    time = slotEndTime;
+  }
+
+  return slots;
+}
+
 export function getSlotsPerSession(
   startTime: Time,
   endTime: Time,
@@ -39,7 +112,7 @@ export function getSlotsPerSession(
 ) {
   const duration = getDurationInMinutes(startTime, endTime);
   if (!duration) return null;
-  return duration / slotSizeInMinutes;
+  return Math.floor(duration / slotSizeInMinutes);
 }
 
 export function getTokenDuration(

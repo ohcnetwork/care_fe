@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -28,8 +28,10 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import Loading from "@/components/Common/Loading";
+
 import mutate from "@/Utils/request/mutate";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   AnswerOption,
   EnableWhen,
@@ -44,7 +46,6 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
-import Loading from "../Common/Loading";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
@@ -60,10 +61,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const {
     data: initialQuestionnaire,
-    loading,
+    isLoading,
     error,
-  } = useQuery(questionnaireApi.detail, {
-    pathParams: { id },
+  } = useQuery({
+    queryKey: ["questionnaireDetail", id],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id },
+    }),
   });
 
   const { mutate: updateQuestionnaire, isPending } = useMutation({
@@ -87,7 +91,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
   }, [initialQuestionnaire]);
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
   if (error) {
     return (
       <Alert variant="destructive">
