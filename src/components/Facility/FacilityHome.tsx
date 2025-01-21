@@ -93,11 +93,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
 
-  const {
-    data: facilityData,
-    isLoading,
-    // refetch: facilityFetch,
-  } = useQuery<FacilityData>({
+  const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
