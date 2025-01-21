@@ -91,7 +91,7 @@ export function DiagnosisQuestion({
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results && !diagnoses.length) {
+    if (patientDiagnoses?.results) {
       updateQuestionnaireResponseCB({
         ...questionnaireResponse,
         values: [
@@ -107,12 +107,7 @@ export function DiagnosisQuestion({
         );
       }
     }
-  }, [
-    patientDiagnoses,
-    questionnaireResponse,
-    diagnoses.length,
-    updateQuestionnaireResponseCB,
-  ]);
+  }, [patientDiagnoses]);
 
   const handleAddDiagnosis = (code: Code) => {
     const newDiagnoses = [

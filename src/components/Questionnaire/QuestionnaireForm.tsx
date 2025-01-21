@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
@@ -64,6 +64,7 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const queryClient = useQueryClient();
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
@@ -87,6 +88,7 @@ export function QuestionnaireForm({
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allergies", patientId] });
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },

@@ -123,7 +123,7 @@ export function AllergyQuestion({
   });
 
   useEffect(() => {
-    if (patientAllergies?.results && !allergies.length) {
+    if (patientAllergies?.results) {
       updateQuestionnaireResponseCB({
         ...questionnaireResponse,
         values: [

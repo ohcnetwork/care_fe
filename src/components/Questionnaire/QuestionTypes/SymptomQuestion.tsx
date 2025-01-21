@@ -280,7 +280,7 @@ export function SymptomQuestion({
   });
 
   useEffect(() => {
-    if (patientSymptoms?.results && !symptoms.length) {
+    if (patientSymptoms?.results) {
       updateQuestionnaireResponseCB({
         ...questionnaireResponse,
         values: [
@@ -296,12 +296,7 @@ export function SymptomQuestion({
         );
       }
     }
-  }, [
-    patientSymptoms,
-    questionnaireResponse,
-    symptoms.length,
-    updateQuestionnaireResponseCB,
-  ]);
+  }, [patientSymptoms]);
 
   const handleAddSymptom = (code: Code) => {
     const newSymptoms = [

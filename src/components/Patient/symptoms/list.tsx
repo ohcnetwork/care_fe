@@ -83,7 +83,7 @@ const SymptomListLayout = ({
         <CardTitle>{t("symptoms")}</CardTitle>
         {facilityId && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptoms`}
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
             className="flex items-center gap-1 text-sm hover:text-gray-500"
           >
             <PencilIcon size={12} />

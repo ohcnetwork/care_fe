@@ -88,7 +88,7 @@ export function MedicationRequestQuestion({
   });
 
   useEffect(() => {
-    if (patientMedications?.results && !medications.length) {
+    if (patientMedications?.results) {
       updateQuestionnaireResponseCB({
         ...questionnaireResponse,
         values: [
