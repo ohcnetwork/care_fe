@@ -1,5 +1,5 @@
 import { differenceInMinutes, format } from "date-fns";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { toast } from "sonner";
 
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
@@ -393,12 +393,18 @@ export const saveElementAsImage = async (id: string, filename: string) => {
   const element = document.getElementById(id);
   if (!element) return;
 
-  const canvas = await html2canvas(element);
+  try {
+    const dataUrl = await toPng(element, {
+      quality: 1.0,
+    });
 
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = canvas.toDataURL("image/png", 1);
-  link.click();
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+  } catch (error) {
+    console.error("Failed to save element as image:", error);
+  }
 };
 
 export const conditionalAttribute = <T>(

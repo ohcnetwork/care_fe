@@ -10,6 +10,7 @@ import { z } from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -53,11 +54,9 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
-
-import Autocomplete from "../ui/autocomplete";
 
 interface PatientRegistrationPageProps {
   facilityId: string;
@@ -782,7 +781,6 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -790,7 +788,7 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem className="contents">
                         <FormControl>
-                          <OrganizationSelector
+                          <GovtOrganizationSelector
                             {...field}
                             required={true}
                             selected={selectedLevels}
