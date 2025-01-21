@@ -25,7 +25,7 @@ export const TableSkeleton = ({ count }: { count: number }) => (
         </tr>
       </thead>
       {/* Body Skeleton */}
-      <tbody className="divide-y divide-gray-200 bg-white">
+      <tbody className="divide-y divide-gray-200 bg-white animate-pulse">
         {Array.from({ length: count }).map((_, i) => (
           <tr key={i} className="hover:bg-gray-50">
             <td className="sticky left-0 z-10 bg-white px-4 py-4 lg:pr-20">
@@ -73,7 +73,7 @@ export const NoteSkeleton = ({ count }: { count: number }) =>
 
 export const CardGridSkeleton = ({ count }: { count: number }) =>
   Array.from({ length: count }, (_, index) => (
-    <div key={index} className="skeleton-item">
+    <div key={index} className="skeleton-item animate-pulse">
       <Card className="h-full">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col h-full gap-4">
