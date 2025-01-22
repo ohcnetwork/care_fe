@@ -7,6 +7,7 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -622,15 +623,14 @@ const FileUploadDialog = ({
         </div>
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
-            <input
-              type="checkbox"
-              id="combine_as_pdf"
+            <Checkbox
+              id="file_upload_patient"
               checked={isPdf}
-              onChange={(e) => setIsPdf(e.target.checked)}
+              onCheckedChange={(checked) => setIsPdf(!!checked)}
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
-            <label htmlFor="file_upload_patient">
+            <label htmlFor="file_upload_patient" className="cursor-pointer">
               {t("combine_files_pdf")}
             </label>
           </div>

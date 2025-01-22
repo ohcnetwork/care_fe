@@ -103,35 +103,34 @@ export default function useFileUpload(
 
   const generatePDF = async (files: File[]): Promise<File | null> => {
     try {
+      toast.info(t("file_conversion_in_progress"));
       const pdf = new jsPDF();
+      const totalFiles = files.length;
+
       for (const [index, file] of files.entries()) {
         if (!file.type.startsWith("image/")) {
-          console.error(`Unsupported file type: ${file.name}`);
           toast.error(t("file_error__file_type"));
+          setProgress(0);
           return null;
         }
-        const imgData = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => reject("Error reading file");
-          reader.readAsDataURL(file);
-        });
-
+        const imgData = URL.createObjectURL(file);
         pdf.addImage(imgData, "JPEG", 10, 10, 190, 0);
+        URL.revokeObjectURL(imgData);
         if (index < files.length - 1) pdf.addPage();
+        const progress = Math.round(((index + 1) / totalFiles) * 100);
+        setProgress(progress);
       }
-
       const pdfBlob = pdf.output("blob");
       const pdfFile = new File([pdfBlob], "combined.pdf", {
         type: "application/pdf",
       });
-
-      console.log("Generated PDF file:", pdfFile); // Log the generated file
+      setProgress(0);
+      toast.success(t("file_conversion_success"));
       return pdfFile;
     } catch (error) {
-      console.error("Error generating PDF:", error);
       toast.error(t("file_error__generate_pdf"));
       setError(t("file_error__generate_pdf"));
+      setProgress(0);
       return null;
     }
   };

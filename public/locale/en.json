@@ -1017,6 +1017,8 @@
   "fetching": "Fetching",
   "field_required": "This field is required",
   "file_archived_successfully": "File archived successfully",
+  "file_conversion_in_progress": "File conversion in progress",
+  "file_conversion_success": "File conversion successful",
   "file_download_completed": "File download completed",
   "file_download_failed": "Failed to download file",
   "file_download_started": "Downloading file...",
