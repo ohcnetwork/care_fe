@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Link, navigate } from "raviger";
+import { format, isBefore, isSameDay } from "date-fns";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import routes from "@/Utils/request/api";
@@ -41,6 +42,7 @@ interface AppointmentsProps {
 
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
   const { facilityId, staffId, appointmentId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -158,32 +160,29 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     },
   });
 
-  const { mutate: cancelAppointment, isSuccess: cancelledAppointment } =
-    useMutation({
-      mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      }),
-      onSuccess: () => {
-        toast.success(t("appointment_cancelled"));
-        queryClient.invalidateQueries({
-          queryKey: ["appointment", tokenData.phoneNumber],
-        });
+  const { mutate: cancelAppointment } = useMutation({
+    mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
       },
-    });
+    }),
+    onSuccess: (appointment: Appointment) => {
+      toast.success(t("appointment_cancelled"));
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", tokenData.phoneNumber],
+      });
+      createAppointment({
+        reason_for_visit: reason,
+        patient: appointment.patient.id,
+      });
+    },
+  });
 
   const handleRescheduleAppointment = (appointment: Appointment) => {
     cancelAppointment({
       appointment: appointment.id,
       patient: appointment.patient.id,
     });
-    if (cancelledAppointment) {
-      createAppointment({
-        reason_for_visit: reason,
-        patient: appointment.patient.id,
-      });
-    }
   };
 
   useEffect(() => {
@@ -216,12 +215,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         <div className="flex px-2 pb-4 justify-start">
           <Button
             variant="outline"
-            asChild
             className="border border-secondary-400"
+            onClick={() => goBack()}
           >
-            <Link href={`/facility/${facilityId}`}>
-              <span className="text-sm underline">{t("back")}</span>
-            </Link>
+            <span className="text-sm underline">{t("back")}</span>
           </Button>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -292,11 +289,16 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   groupSlotsByAvailability(slotsQuery.data.results).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
-                        <h4 className="mb-3">{availability.name}</h4>
+                        <h4 className="text-lg font-semibold mb-3">
+                          {availability.name}
+                        </h4>
                         <div className="flex flex-wrap gap-2">
                           {slots.map((slot) => {
                             const percentage =
                               slot.allocated / availability.tokens_per_slot;
+                            const isPastSlot =
+                              isSameDay(selectedDate, new Date()) &&
+                              isBefore(slot.start_datetime, new Date());
 
                             return (
                               <Button
@@ -319,9 +321,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 }}
                                 disabled={
                                   slot.allocated ===
-                                  availability.tokens_per_slot
+                                    availability.tokens_per_slot || isPastSlot
                                 }
-                                className="flex flex-col items-center group py-6 gap-1"
+                                className="flex flex-col items-center group gap-0"
                               >
                                 <span className="font-semibold">
                                   {format(slot.start_datetime, "HH:mm")}
