@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -20,7 +19,6 @@ interface Props {
 }
 
 export default function EditFacilitySheet({ facilityId, trigger }: Props) {
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,9 +34,6 @@ export default function EditFacilitySheet({ facilityId, trigger }: Props) {
             facilityId={facilityId}
             onSubmitSuccess={() => {
               setOpen(false);
-              queryClient.invalidateQueries({
-                queryKey: [["facility", facilityId], "organizationFacilities"],
-              });
             }}
           />
         </div>

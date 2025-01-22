@@ -225,7 +225,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 size="lg"
                                 variant={
                                   selectedSlot?.id === slot.id
-                                    ? "outline_primary"
+                                    ? "primary"
                                     : "outline"
                                 }
                                 onClick={() => {
