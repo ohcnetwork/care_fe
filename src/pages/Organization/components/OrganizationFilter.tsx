@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,8 +21,8 @@ import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationFilterProps {
-  selected: string[];
-  onChange: (Filter: FilterState, index?: number) => void;
+  selected: string | undefined;
+  onChange: (Filter: FilterState) => void;
   skipLevels?: number[];
   required?: boolean;
   className?: string;
@@ -40,39 +40,28 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     OptionsType | undefined
   >(undefined);
 
-  const orgDetailQuery = (id: string) =>
-    query(organizationApi.getPublicOrganization, {
-      pathParams: { id },
-    });
-
-  const orgDetailQueries = useQueries({
-    queries: selected.map((id) => ({
-      queryKey: ["organization-detail", id],
-      queryFn: orgDetailQuery(id),
-      enabled: selected.length > 0,
-    })),
+  const { data: orgDetail, isLoading: isOrgDetailLoading } = useQuery({
+    queryKey: ["organization-detail", selected],
+    queryFn: query(organizationApi.getPublicOrganization, {
+      pathParams: { id: selected },
+    }),
+    enabled: !!selected,
   });
 
   const { data: rootOrgs } = useQuery<{ results: Organization[] }>({
-    queryKey: ["root-organization", selected.length],
+    queryKey: ["root-organization", selected],
     queryFn: query(organizationApi.getPublicOrganizations, {
       queryParams: { level_cache: 1 },
     }),
-    enabled: selected.length === 0,
+    enabled: !!selected,
   });
 
-  const isQueriesLoading = orgDetailQueries.some((query) => query.isLoading);
-
   useEffect(() => {
-    if (!isQueriesLoading && selected.length > 0) {
-      const validOrgs = orgDetailQueries
-        .map((query) => query.data)
-        .filter((org): org is Organization => org !== undefined);
-
-      if (validOrgs.length > 0) {
-        const validOrg = validOrgs[0];
+    if (!isOrgDetailLoading && selected) {
+      const validOrg = orgDetail;
+      if (validOrg) {
         if (validOrg.level_cache === 1) {
-          setSelectedLevels(validOrgs);
+          setSelectedLevels([validOrg]);
           if (
             validOrg &&
             validOrg.metadata?.govt_org_type &&
@@ -96,7 +85,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         setSelectedLevels([]);
       }
     }
-  }, [isQueriesLoading, selected]);
+  }, [isOrgDetailLoading, selected]);
 
   useEffect(() => {
     if (rootOrgs) {
@@ -120,7 +109,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       return [prevTypes[0], prevTypes[1]];
     });
     setSelectedLevels([]);
-    onChange({ organization: undefined, facility_type: undefined }, 0);
+    onChange({ organization: undefined, facility_type: undefined });
   };
 
   return (
@@ -136,14 +125,12 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               ?.id,
           });
         }}
-        disabled={selected.length === 0}
+        disabled={!selected}
       >
         <SelectTrigger className="sm:max-w-56 h-[38px]">
           <SelectValue
             placeholder={
-              selected.length === 0
-                ? t("select_location_first")
-                : t("select_facility_type")
+              !selected ? t("select_location_first") : t("select_facility_type")
             }
           />
         </SelectTrigger>

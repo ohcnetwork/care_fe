@@ -36,6 +36,7 @@ export function useOrganizationLevel({
         ...(index > 0 && { parent: getParentId(index) }),
         ...(index === 0 && { level_cache: 1 }),
         name: levelSearch || undefined,
+        limit: 200,
       },
     }),
     enabled:
