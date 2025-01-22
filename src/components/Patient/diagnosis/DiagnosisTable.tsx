@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -11,7 +13,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatName } from "@/Utils/utils";
-// import { formatName } from "@/Utils/utils";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -43,12 +44,12 @@ export function DiagnosisTable({
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Diagnosis</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Verification</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>Created By</TableHead>
+            <TableHead>{t("diagnosis")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}

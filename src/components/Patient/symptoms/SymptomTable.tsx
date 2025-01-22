@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -42,12 +44,12 @@ export function SymptomTable({
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Symptom</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>Created By</TableHead>
+            <TableHead>{t("symptom")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("severity")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
