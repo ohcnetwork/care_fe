@@ -71,6 +71,7 @@ import {
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
+  AppointmentFinalStatuses,
   AppointmentStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
