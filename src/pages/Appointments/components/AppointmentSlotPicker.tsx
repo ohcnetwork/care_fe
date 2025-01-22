@@ -191,9 +191,7 @@ export function AppointmentSlotPicker({
                             key={slot.id}
                             size="lg"
                             variant={
-                              selectedSlotId === slot.id
-                                ? "outline_primary"
-                                : "outline"
+                              selectedSlotId === slot.id ? "primary" : "outline"
                             }
                             onClick={() => {
                               onSlotSelect(

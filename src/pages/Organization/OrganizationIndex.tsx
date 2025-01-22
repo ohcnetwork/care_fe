@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -12,9 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import {
@@ -29,25 +30,12 @@ export default function OrganizationIndex() {
     queryFn: query(organizationApi.listMine),
   });
 
+  const { t } = useTranslation();
   if (isLoading) {
     return (
-      <Page title="Organizations">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="relative">
-              <CardHeader>
-                <Skeleton className="h-6 w-2/3" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-3/4" />
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-8 w-24" />
-              </CardFooter>
-            </Card>
-          ))}
+      <Page title={t("organizations")}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+          <CardGridSkeleton count={6} />
         </div>
       </Page>
     );
@@ -55,7 +43,7 @@ export default function OrganizationIndex() {
 
   if (!data?.results?.length) {
     return (
-      <Page title="Organizations">
+      <Page title={t("organizations")}>
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -80,7 +68,7 @@ export default function OrganizationIndex() {
   }
 
   return (
-    <Page title="Organizations">
+    <Page title={t("organizations")}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 mt-4">
         {data.results.map((org: Organization) => (
           <Card key={org.id} className="relative group">
