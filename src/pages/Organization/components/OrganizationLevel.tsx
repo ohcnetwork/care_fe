@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import Autocomplete from "@/components/ui/autocomplete";
 
 import { FilterState } from "@/hooks/useFilters";
 import { useOrganizationLevel } from "@/hooks/useOrganizationLevel";
 
-import { classNames } from "@/Utils/utils";
 import { Organization } from "@/types/organization/organization";
 
 interface OrganizationLevelProps {
@@ -15,7 +16,6 @@ interface OrganizationLevelProps {
   orgTypes: string[];
   setOrgTypes: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (Filter: FilterState, index?: number) => void;
-  getParentId: (index: number) => string;
 }
 
 export function OrganizationLevel({
@@ -25,7 +25,6 @@ export function OrganizationLevel({
   orgTypes,
   setOrgTypes,
   onChange,
-  getParentId,
 }: OrganizationLevelProps) {
   const { t } = useTranslation();
   const { options, handleChange, handleSearch } = useOrganizationLevel({
@@ -34,7 +33,6 @@ export function OrganizationLevel({
     selectedLevels,
     setOrgTypes,
     onChange,
-    getParentId,
   });
 
   if (skip) return null;
@@ -42,8 +40,8 @@ export function OrganizationLevel({
 
   return (
     <Autocomplete
-      popoverClassName={classNames(
-        "lg:border-0 lg:border-0 lg:shadow-none lg:rounded-none lg:max-w-72",
+      popoverClassName={cn(
+        "lg:border-0 lg:border-0 lg:shadow-none lg:rounded-none min-w-56 lg:max-w-72",
         index !== 0 && "lg:border-l lg:border-secondary-500",
       )}
       key={`dropdown-${index}`}
