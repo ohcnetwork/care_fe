@@ -68,9 +68,8 @@ function OrganizationLevelSelect({
         )}
         {required && <span className="text-red-500">*</span>}
       </Label>
-      {isLoading ? (
-        <Loader2 className="h-6 w-6 animate-spin" />
-      ) : (
+      <div className="flex items-center gap-2">
+        {isLoading && <Loader2 className="h-6 w-6 animate-spin" />}
         <Autocomplete
           value={currentLevel?.id || ""}
           options={options}
@@ -82,7 +81,7 @@ function OrganizationLevelSelect({
             "state"
           }`}
         />
-      )}
+      </div>
     </div>
   );
 }
