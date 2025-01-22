@@ -65,9 +65,11 @@ export default function OrganizationFacilities({
               className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
               variant="outline"
             >
-              {t("facility_count", {
-                count: facilities?.count || "...",
-              })}
+              {facilities
+                ? t("facility_count", {
+                    count: facilities.count,
+                  })
+                : "Loading..."}
             </Badge>
           </div>
           <AddFacilitySheet organizationId={id} />

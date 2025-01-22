@@ -104,10 +104,12 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
               variant="outline"
             >
-              {t("entity_count", {
-                count: patients?.count || "...",
-                entity: "Patient",
-              })}
+              {patients
+                ? t("entity_count", {
+                    count: patients.count,
+                    entity: "Patient",
+                  })
+                : "Loading..."}
             </Badge>
           </div>
         </div>

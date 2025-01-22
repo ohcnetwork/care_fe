@@ -64,10 +64,12 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
               variant="outline"
             >
-              {t("entity_count", {
-                count: users?.count || "...",
-                entity: "User",
-              })}
+              {users
+                ? t("entity_count", {
+                    count: users.count || 0,
+                    entity: "User",
+                  })
+                : "Loading..."}
             </Badge>
           </div>
           <div className="flex gap-2">

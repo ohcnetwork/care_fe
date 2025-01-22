@@ -58,10 +58,12 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
               variant="outline"
             >
-              {t("entity_count", {
-                count: children?.count || "...",
-                entity: "Organization",
-              })}
+              {children
+                ? t("entity_count", {
+                    count: children.count || 0,
+                    entity: "Organization",
+                  })
+                : "Loading..."}
             </Badge>
           </div>
           <div className="w-72">
