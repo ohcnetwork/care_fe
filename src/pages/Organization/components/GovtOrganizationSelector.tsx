@@ -41,7 +41,7 @@ function OrganizationLevelSelect({
 }: OrganizationLevelProps) {
   const parentId = index === 0 ? "" : previousLevel?.id || "";
 
-  const { options, handleChange, handleSearch, organizations, isLoading } =
+  const { options, handleChange, handleSearch, organizations, isFetching } =
     useGovtOrganizationLevel({
       index,
       onChange: (filter: FilterState, index: number) => {
@@ -69,7 +69,7 @@ function OrganizationLevelSelect({
         {required && <span className="text-red-500">*</span>}
       </Label>
       <div className="flex items-center gap-2">
-        {isLoading && <Loader2 className="h-6 w-6 animate-spin" />}
+        {isFetching && <Loader2 className="h-6 w-6 animate-spin" />}
         <Autocomplete
           value={currentLevel?.id || ""}
           options={options}
