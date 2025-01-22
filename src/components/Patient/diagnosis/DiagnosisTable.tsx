@@ -46,7 +46,7 @@ export function DiagnosisTable({
             <TableHead>Verification</TableHead>
             <TableHead>Onset</TableHead>
             <TableHead>Notes</TableHead>
-            <TableHead>By</TableHead>
+            <TableHead>Created By</TableHead>
           </TableRow>
         </TableHeader>
       )}
