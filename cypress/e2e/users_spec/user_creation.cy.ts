@@ -31,6 +31,7 @@ describe("User Creation", () => {
       email: `${generateUsername(firstName)}@test.com`,
       phoneNumber: generatePhoneNumber(),
       userType: "Doctor",
+      gender: "Male",
       state: "Kerala",
       district: "Ernakulam",
       localBody: "Aluva",
