@@ -1,6 +1,6 @@
-import { FacilityCreation } from "../../pageObject/facility/FacilityCreation";
-import { generatePhoneNumber } from "../../utils/commonUtils";
-import { generateFacilityData } from "../../utils/facilityData";
+import { FacilityCreation } from "@/cypress/pageObject/facility/FacilityCreation";
+import { generatePhoneNumber } from "@/cypress/utils/commonUtils";
+import { generateFacilityData } from "@/cypress/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
   localBody: "Aluva",
