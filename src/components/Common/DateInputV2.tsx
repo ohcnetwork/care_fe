@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { t } from "i18next";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
