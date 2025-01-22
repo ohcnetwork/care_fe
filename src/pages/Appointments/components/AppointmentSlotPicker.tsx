@@ -115,7 +115,7 @@ export function AppointmentSlotPicker({
                     : "text-primary-500",
               )}
             >
-              {tokensLeft} left
+              {tokensLeft} {t("left")}
             </span>
           )}
         </div>
@@ -204,7 +204,7 @@ export function AppointmentSlotPicker({
                               slot.allocated === availability.tokens_per_slot ||
                               isPastSlot
                             }
-                            className="flex flex-col items-center group gap-0"
+                            className="flex flex-col items-center group gap-0 w-24 shrink-0"
                           >
                             <span className="font-semibold">
                               {format(slot.start_datetime, "HH:mm")}
@@ -222,7 +222,7 @@ export function AppointmentSlotPicker({
                               )}
                             >
                               {availability.tokens_per_slot - slot.allocated}{" "}
-                              left
+                              {t("left")}
                             </span>
                           </Button>
                         );
