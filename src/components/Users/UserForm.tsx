@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -47,6 +47,7 @@ interface Props {
 export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
+  const queryClient = useQueryClient();
 
   const userFormSchema = z
     .object({
@@ -206,6 +207,15 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     mutationFn: mutate(userApi.create),
     onSuccess: (resp: UserBase) => {
       toast.success(t("user_added_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["facilityUsers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organizationUsers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganizationUsers"],
+      });
       onSubmitSuccess?.(resp);
     },
     onError: (error) => {
@@ -220,6 +230,18 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     }),
     onSuccess: (resp: UserBase) => {
       toast.success(t("user_updated_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["facilityUsers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organizationUsers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganizationUsers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getUserDetails", resp.username],
+      });
       onSubmitSuccess?.(resp);
     },
     onError: (error) => {

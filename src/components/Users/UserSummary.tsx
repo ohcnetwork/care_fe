@@ -104,7 +104,6 @@ export default function UserSummaryTab({
         existingUsername={userData.username}
         open={showEditUserSheet}
         setOpen={setShowEditUserSheet}
-        onUserUpdated={refetchUserData}
       />
       <div className="mt-10 flex flex-col gap-y-6">
         {editPermissions && (
