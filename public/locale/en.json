@@ -455,6 +455,7 @@
   "audit_log": "Audit Log",
   "auth_login_title": "Authorized Login",
   "auth_method_unsupported": "This authentication method is not supported, please try a different method",
+  "authored_on": "Authored On",
   "authorize_shift_delete": "Authorize shift delete",
   "auto_generated_for_care": "Auto Generated for Care",
   "autofilled_fields": "Autofilled Fields",
