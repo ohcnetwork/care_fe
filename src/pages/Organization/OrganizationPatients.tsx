@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -96,7 +97,18 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("patients")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <h2 className="text-lg font-semibold">{t("patients")}</h2>
+            <Badge
+              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
+              variant="outline"
+            >
+              {t("entity_count", {
+                count: patients?.count || 0,
+                entity: "Patient",
+              })}
+            </Badge>
+          </div>
         </div>
 
         <SearchByMultipleFields

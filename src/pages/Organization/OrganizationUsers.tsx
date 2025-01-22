@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,18 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("users")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <h2 className="text-lg font-semibold">{t("organizations")}</h2>
+            <Badge
+              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
+              variant="outline"
+            >
+              {t("entity_count", {
+                count: users?.count || 0,
+                entity: "User",
+              })}
+            </Badge>
+          </div>
           <div className="flex gap-2">
             <AddUserSheet
               open={openAddUserSheet}
