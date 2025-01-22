@@ -10,6 +10,7 @@ export interface UserData {
   district?: string;
   localBody?: string;
   ward?: string;
+  gender?: string;
 }
 
 export class UserCreation {
@@ -107,6 +108,11 @@ export class UserCreation {
     return this;
   }
 
+  selectGender(gender: string) {
+    cy.clickAndSelectOption('[data-cy="gender-select"]', gender);
+    return this;
+  }
+
   fillUserDetails(userData: UserData & { confirmPassword?: string }) {
     if (userData.userType) this.selectUserType(userData.userType);
     if (userData.firstName) this.fillFirstName(userData.firstName);
@@ -118,6 +124,7 @@ export class UserCreation {
     }
     if (userData.email) this.fillEmail(userData.email);
     if (userData.phoneNumber) this.fillPhoneNumber(userData.phoneNumber);
+    if (userData.gender) this.selectGender(userData.gender);
     if (userData.state) this.selectState(userData.state);
     if (userData.district) this.selectDistrict(userData.district);
     if (userData.localBody) this.selectLocalBody(userData.localBody);
