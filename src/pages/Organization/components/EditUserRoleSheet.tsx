@@ -35,11 +35,16 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+
+import EditUserSheet from "./EditUserSheet";
 
 interface Props {
   organizationId: string;
@@ -55,6 +60,7 @@ export default function EditUserRoleSheet({
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
+  const [showEditUserSheet, setShowEditUserSheet] = useState(false);
   const { t } = useTranslation();
 
   const { data: roles } = useQuery({
@@ -115,123 +121,145 @@ export default function EditUserRoleSheet({
       role: selectedRole,
     });
   };
+  const authUser = useAuthUser();
+  const editPermissions = editUserPermissions(authUser, userRole.user);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {trigger || <Button variant="outline">{t("edit_role")}</Button>}
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{t("edit_user_role")}</SheetTitle>
-          <SheetDescription>
-            {t("update_user_role_organization")}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-6 py-4">
-          <div className="rounded-lg border p-4 space-y-4">
-            <div className="flex items-start gap-4">
-              <Avatar
-                name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                className="h-12 w-12"
-                imageUrl={userRole.user.profile_picture_url}
-              />
-              <div className="flex flex-col flex-1">
-                <span className="font-medium text-lg">
-                  {userRole.user.first_name} {userRole.user.last_name}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {userRole.user.email}
-                </span>
+    <>
+      <EditUserSheet
+        existingUsername={userRole.user.username}
+        open={showEditUserSheet}
+        setOpen={setShowEditUserSheet}
+      />
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          {trigger || <Button variant="outline">{t("edit_role")}</Button>}
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{t("edit_user_role")}</SheetTitle>
+            <SheetDescription>
+              {t("update_user_role_organization")}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-6 py-4">
+            <div className="rounded-lg border p-4 space-y-4">
+              <div className="flex items-start gap-4">
+                <Avatar
+                  name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                  className="h-12 w-12"
+                  imageUrl={userRole.user.profile_picture_url}
+                />
+                <div className="flex flex-col flex-1">
+                  <span className="font-medium text-lg">
+                    {userRole.user.first_name} {userRole.user.last_name}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {userRole.user.email}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                <div>
+                  <span className="text-sm text-gray-500">{t("username")}</span>
+                  <p className="text-sm font-medium">
+                    {userRole.user.username}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">
+                    {t("current_role")}
+                  </span>
+                  <p className="text-sm font-medium">{userRole.role.name}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-sm text-gray-500">
+                    {t("last_login")}{" "}
+                  </span>
+                  <UserStatusIndicator user={userRole.user} />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-              <div>
-                <span className="text-sm text-gray-500">{t("username")}</span>
-                <p className="text-sm font-medium">{userRole.user.username}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">
-                  {t("current_role")}
-                </span>
-                <p className="text-sm font-medium">{userRole.role.name}</p>
-              </div>
-              <div className="col-span-2">
-                <span className="text-sm text-gray-500">
-                  {t("last_login")}{" "}
-                </span>
-                <UserStatusIndicator user={userRole.user} />
-              </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {t("select_new_role")}
+              </Label>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder={t("select_role")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles?.results?.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      <div className="flex flex-col text-left">
+                        <span>{role.name}</span>
+                        {role.description && (
+                          <span className="text-xs text-gray-500">
+                            {role.description}
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              {t("select_new_role")}
-            </Label>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder={t("select_role")} />
-              </SelectTrigger>
-              <SelectContent>
-                {roles?.results?.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
-                    <div className="flex flex-col text-left">
-                      <span>{role.name}</span>
-                      {role.description && (
-                        <span className="text-xs text-gray-500">
-                          {role.description}
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                className="w-full"
+                onClick={handleUpdateRole}
+                disabled={selectedRole === userRole.role.id}
+              >
+                {t("update_role")}
+              </Button>
 
-          <div className="flex flex-col gap-2">
-            <Button
-              className="w-full"
-              onClick={handleUpdateRole}
-              disabled={selectedRole === userRole.role.id}
-            >
-              {t("update_role")}
-            </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full">
+                    {t("remove_user")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("remove_user_organization")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("remove_user_warn", {
+                        firstName: userRole.user.first_name,
+                        lastName: userRole.user.last_name,
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => removeRole()}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t("remove")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  {t("remove_user")}
+              {editPermissions && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  data-cy="edit-user-button"
+                  onClick={() => setShowEditUserSheet(true)}
+                >
+                  {t("edit_user")}
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("remove_user_organization")}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("remove_user_warn", {
-                      firstName: userRole.user.first_name,
-                      lastName: userRole.user.last_name,
-                    })}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => removeRole()}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {t("remove")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              )}
+            </div>
           </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
