@@ -66,7 +66,7 @@ export default function OrganizationFacilities({
               variant="outline"
             >
               {t("facility_count", {
-                count: facilities?.count || 0,
+                count: facilities?.count || "...",
               })}
             </Badge>
           </div>

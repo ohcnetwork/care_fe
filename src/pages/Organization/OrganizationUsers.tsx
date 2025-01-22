@@ -65,7 +65,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               variant="outline"
             >
               {t("entity_count", {
-                count: users?.count || 0,
+                count: users?.count || "...",
                 entity: "User",
               })}
             </Badge>

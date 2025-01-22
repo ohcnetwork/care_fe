@@ -105,7 +105,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
               variant="outline"
             >
               {t("entity_count", {
-                count: patients?.count || 0,
+                count: patients?.count || "...",
                 entity: "Patient",
               })}
             </Badge>

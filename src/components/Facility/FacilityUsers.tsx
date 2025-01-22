@@ -74,7 +74,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           variant="outline"
         >
           {t("entity_count", {
-            count: userListData?.count || 0,
+            count: userListData?.count || "...",
             entity: "User",
           })}
         </Badge>
