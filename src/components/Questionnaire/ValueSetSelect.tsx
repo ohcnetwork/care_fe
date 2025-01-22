@@ -32,6 +32,8 @@ interface Props {
   count?: number;
   searchPostFix?: string;
   wrapTextForSmallScreen?: boolean;
+  hideTrigger?: boolean;
+  controlledOpen?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -43,9 +45,11 @@ export default function ValueSetSelect({
   count = 10,
   searchPostFix = "",
   wrapTextForSmallScreen = false,
+  hideTrigger = false,
+  controlledOpen = false,
 }: Props) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const searchQuery = useQuery({
@@ -57,65 +61,78 @@ export default function ValueSetSelect({
   });
 
   useEffect(() => {
-    if (open) {
+    if (controlledOpen || internalOpen) {
       setSearch("");
     }
-  }, [open]);
+  }, [controlledOpen, internalOpen]);
 
+  const content = (
+    <Command filter={() => 1}>
+      <CommandInput
+        placeholder={placeholder}
+        className="outline-none border-none ring-0 shadow-none"
+        onValueChange={setSearch}
+      />
+      <CommandList>
+        <CommandEmpty>
+          {search.length < 3
+            ? t("min_char_length_error", { min_length: 3 })
+            : searchQuery.isFetching
+              ? t("searching")
+              : t("no_results_found")}
+        </CommandEmpty>
+
+        <CommandGroup>
+          {searchQuery.data?.results.map((option) => (
+            <CommandItem
+              key={option.code}
+              value={option.code}
+              onSelect={() => {
+                onSelect({
+                  code: option.code,
+                  display: option.display || "",
+                  system: option.system || "",
+                });
+                setInternalOpen(false);
+              }}
+            >
+              <span>{option.display}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild disabled={disabled}>
-        <Button
-          variant="outline"
-          role="combobox"
-          className={cn(
-            "w-full justify-between",
-            wrapTextForSmallScreen
-              ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
-              : "truncate",
-            !value?.display && "text-gray-400",
-          )}
-        >
-          {value?.display || placeholder}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
-        <Command filter={() => 1}>
-          <CommandInput
-            placeholder={placeholder}
-            className="outline-none border-none ring-0 shadow-none"
-            onValueChange={setSearch}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {search.length < 3
-                ? t("min_char_length_error", { min_length: 3 })
-                : searchQuery.isFetching
-                  ? t("searching")
-                  : t("no_results_found")}
-            </CommandEmpty>
+    <Popover
+      open={controlledOpen || internalOpen}
+      onOpenChange={setInternalOpen}
+    >
+      {!hideTrigger && (
+        <PopoverTrigger asChild disabled={disabled}>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "w-full justify-between",
+              wrapTextForSmallScreen
+                ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+                : "truncate",
+              !value?.display && "text-gray-400",
+            )}
+          >
+            {value?.display || placeholder}
+          </Button>
+        </PopoverTrigger>
+      )}
 
-            <CommandGroup>
-              {searchQuery.data?.results.map((option) => (
-                <CommandItem
-                  key={option.code}
-                  value={option.code}
-                  onSelect={() => {
-                    onSelect({
-                      code: option.code,
-                      display: option.display || "",
-                      system: option.system || "",
-                    });
-                    setOpen(false);
-                  }}
-                >
-                  <span>{option.display}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
+      {hideTrigger ? (
+        content
+      ) : (
+        <PopoverContent className="w-[300px] p-0" align="start">
+          {content}
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

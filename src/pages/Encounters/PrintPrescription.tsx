@@ -5,76 +5,13 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
+import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
-import {
-  MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequestDosageInstruction,
-  MedicationRequestRead,
-} from "@/types/emr/medicationRequest";
-
-function getFrequencyDisplay(
-  timing?: MedicationRequestDosageInstruction["timing"],
-) {
-  if (!timing) return undefined;
-  const code = reverseFrequencyOption(timing);
-  if (!code) return undefined;
-  return {
-    code,
-    meaning: MEDICATION_REQUEST_TIMING_OPTIONS[code].display,
-  };
-}
-
-// Helper function to format dosage in Rx style
-function formatDosage(instruction: MedicationRequestDosageInstruction) {
-  if (!instruction.dose_and_rate) return "";
-
-  if (instruction.dose_and_rate.type === "calculated") {
-    const { dose_range } = instruction.dose_and_rate;
-    if (!dose_range) return "";
-    return `${dose_range.low.value}${dose_range.low.unit.display} - ${dose_range.high.value}${dose_range.high.unit.display}`;
-  }
-
-  const { dose_quantity } = instruction.dose_and_rate;
-  if (!dose_quantity?.value || !dose_quantity.unit) return "";
-
-  return `${dose_quantity.value} ${dose_quantity.unit.display}`;
-}
-
-// Helper function to format dosage instructions in Rx style
-function formatSig(instruction: MedicationRequestDosageInstruction) {
-  const parts: string[] = [];
-
-  // Add route if present
-  if (instruction.route?.display) {
-    parts.push(`Via ${instruction.route.display}`);
-  }
-
-  // Add method if present
-  if (instruction.method?.display) {
-    parts.push(`by ${instruction.method.display}`);
-  }
-
-  // Add site if present
-  if (instruction.site?.display) {
-    parts.push(`to ${instruction.site.display}`);
-  }
-
-  return parts.join(" ");
-}
+import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 
 export const PrintPrescription = (props: {
   facilityId: string;
@@ -187,56 +124,7 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <div className="border rounded-lg overflow-hidden">
-            <Table className="">
-              <TableHeader>
-                <TableRow className="divide-x bg-gray-100">
-                  <TableHead>{t("medicine")}</TableHead>
-                  <TableHead>{t("dosage")}</TableHead>
-                  <TableHead>{t("frequency")}</TableHead>
-                  <TableHead>{t("duration")}</TableHead>
-                  <TableHead>{t("instructions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {medications.results.map((medication) => {
-                  const instruction = medication.dosage_instruction[0];
-                  const frequency = getFrequencyDisplay(instruction?.timing);
-                  const dosage = formatDosage(instruction);
-                  const duration = instruction?.timing?.repeat?.bounds_duration;
-                  const remarks = formatSig(instruction);
-
-                  return (
-                    <TableRow
-                      key={medication.id}
-                      className="divide-x font-medium"
-                    >
-                      <TableCell className="py-2 px-3">
-                        {medication.medication?.display}
-                      </TableCell>
-                      <TableCell className="py-2 px-3">{dosage}</TableCell>
-                      <TableCell className="py-2 px-3">
-                        {instruction?.as_needed_boolean
-                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display})`
-                          : frequency?.meaning}
-                        {instruction?.additional_instruction?.[0]?.display && (
-                          <div className="text-sm text-gray-600">
-                            {instruction.additional_instruction[0].display}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="py-2 px-3">
-                        {duration ? `${duration.value} ${duration.unit}` : "-"}
-                      </TableCell>
-                      <TableCell className="py-2 px-3">
-                        {remarks || "-"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          <MedicationsTable medications={medications.results} />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">
