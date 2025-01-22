@@ -6,15 +6,14 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Button } from "@/components/ui/button";
 
+import { Avatar } from "@/components/Common/Avatar";
 import CircularProgress from "@/components/Common/CircularProgress";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { formatName } from "@/Utils/utils";
+import { formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
-
-import { Avatar } from "../Common/Avatar";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
@@ -85,19 +84,28 @@ const CommentSection = (props: { id: string }) => {
 
 export default CommentSection;
 
-export const Comment = ({ comment, created_by }: CommentModel) => (
+export const Comment = ({
+  comment,
+  created_by,
+  created_date,
+}: CommentModel) => (
   <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
     <div className="w-full">
-      <p className="break-words">{comment}</p>
+      <p className="break-words whitespace-pre-wrap">
+        {comment.replace(/\n+/g, "\n")}
+      </p>
     </div>
-    <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
-      <Avatar
-        name={`${created_by.first_name} ${created_by.first_name}`}
-        className="h-8 w-8 "
-      />
-      <span className="pl-2 text-sm text-secondary-700">
-        {formatName(created_by)}
-      </span>
+    <div className="flex w-full items-center">
+      <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
+        <Avatar
+          name={`${created_by.first_name} ${created_by.last_name}`}
+          className="h-8 w-8 "
+        />
+        <span className="pl-2 text-sm text-secondary-700">
+          {formatName(created_by)}
+        </span>
+      </div>
+      <div className="text-xs">{relativeTime(created_date)}</div>
     </div>
   </div>
 );

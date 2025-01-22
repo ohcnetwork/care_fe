@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { useTimer } from "@/hooks/useTimer";
 
-import useVoiceRecorder from "../../Utils/useVoiceRecorder";
+import useVoiceRecorder from "@/Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;

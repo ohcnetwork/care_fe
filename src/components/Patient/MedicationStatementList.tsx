@@ -14,12 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface MedicationStatementListProps {
   patientId: string;

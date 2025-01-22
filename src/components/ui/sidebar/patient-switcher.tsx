@@ -7,14 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { classNames } from "@/Utils/utils";
-
-import { useSidebar } from "../sidebar";
 
 interface PatientSwitcherProps {
   className?: string;
@@ -26,7 +25,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
 
   const patientUserContext = usePatientContext();
 
-  if (!patientUserContext) {
+  if (!patientUserContext || !patientUserContext.selectedPatient) {
     return null;
   }
 
@@ -67,7 +66,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
               {open && (
                 <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
                   <Avatar
-                    name={patientUserContext.selectedPatient?.name}
+                    name={patientUserContext.selectedPatient?.name || "User"}
                     className="h-4 w-4"
                   />
                   <div className="flex flex-row items-center justify-between w-full gap-2">
@@ -83,7 +82,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
               {!open && (
                 <div className="flex flex-row items-center -ml-1.5">
                   <Avatar
-                    name={patientUserContext.selectedPatient?.name}
+                    name={patientUserContext.selectedPatient?.name || "User"}
                     className="h-4 w-4"
                   />
                 </div>

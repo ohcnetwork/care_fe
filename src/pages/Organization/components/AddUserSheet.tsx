@@ -28,12 +28,15 @@ export default function AddUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" data-cy="add-user-button">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           Add User
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent
+        className="w-full sm:max-w-2xl overflow-y-auto"
+        data-cy="add-user-form"
+      >
         <SheetHeader>
           <SheetTitle>Add New User</SheetTitle>
           <SheetDescription>

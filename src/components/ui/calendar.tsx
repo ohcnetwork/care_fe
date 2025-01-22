@@ -50,7 +50,7 @@ function Calendar({
         day_selected:
           "bg-gray-900 text-gray-50 hover:bg-gray-900 hover:text-gray-50 focus:bg-gray-900 focus:text-gray-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50 dark:hover:text-gray-900 dark:focus:bg-gray-50 dark:focus:text-gray-900",
         day_today:
-          "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50",
+          "dark:bg-gray-800 dark:text-gray-50 border-2 border-green-500",
         day_outside:
           "day-outside text-gray-500 aria-selected:bg-gray-100/50 aria-selected:text-gray-500 dark:text-gray-400 dark:aria-selected:bg-gray-800/50 dark:aria-selected:text-gray-400",
         day_disabled: "text-gray-500 opacity-50 dark:text-gray-400",

@@ -122,7 +122,7 @@ export const AppointmentStatuses = [
   ...AppointmentCancelledStatuses,
 ] as const;
 
-export const ApppointmentCompletedStatuses: AppointmentStatus[] = [
+export const AppointmentFinalStatuses: AppointmentStatus[] = [
   "fulfilled",
   "cancelled",
   "entered_in_error",

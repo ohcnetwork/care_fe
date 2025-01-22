@@ -54,7 +54,6 @@ import {
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { FacilityModel } from "@/components/Facility/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
@@ -69,11 +68,11 @@ import {
   formatAppointmentSlotTime,
   printAppointment,
 } from "@/pages/Appointments/utils";
+import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentStatuses,
   AppointmentUpdateRequest,
-  ApppointmentCompletedStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
@@ -218,7 +217,7 @@ const AppointmentDetails = ({
   facility,
 }: {
   appointment: Appointment;
-  facility: FacilityModel;
+  facility: FacilityData;
 }) => {
   const { patient, user } = appointment;
   const { t } = useTranslation();
@@ -442,7 +441,7 @@ const AppointmentActions = ({
       },
     });
 
-  if (ApppointmentCompletedStatuses.includes(currentStatus)) {
+  if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
   }
 
@@ -481,7 +480,7 @@ const AppointmentActions = ({
             {t("reschedule")}
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-full sm:max-w-xl">
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
           </SheetHeader>
