@@ -2,7 +2,7 @@ import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allerg
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
-import { MedicationStatement } from "@/types/emr/medicationStatement";
+import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 import {
@@ -14,9 +14,9 @@ import {
 export interface StructuredDataMap {
   allergy_intolerance: AllergyIntoleranceRequest;
   medication_request: MedicationRequest;
-  medication_statement: MedicationStatement;
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
+  medication_statement: MedicationStatementRequest;
   encounter: Encounter;
   appointment: CreateAppointmentQuestion;
 }
@@ -25,9 +25,9 @@ export interface StructuredDataMap {
 export interface StructuredRequestMap {
   allergy_intolerance: { datapoints: AllergyIntoleranceRequest[] };
   medication_request: { datapoints: MedicationRequest[] };
-  medication_statement: { datapoints: MedicationStatement[] };
   symptom: { datapoints: SymptomRequest[] };
   diagnosis: { datapoints: DiagnosisRequest[] };
+  medication_statement: { datapoints: MedicationStatementRequest[] };
   encounter: EncounterEditRequest;
   appointment: AppointmentCreateRequest;
 }

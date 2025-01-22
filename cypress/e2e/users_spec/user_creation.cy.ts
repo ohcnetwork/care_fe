@@ -1,10 +1,10 @@
-import { UserCreation } from "../../pageObject/Users/UserCreation";
-import { FacilityCreation } from "../../pageObject/facility/FacilityCreation";
+import { UserCreation } from "pageObject/Users/UserCreation";
+import { FacilityCreation } from "pageObject/facility/FacilityCreation";
 import {
   generateName,
   generatePhoneNumber,
   generateUsername,
-} from "../../utils/commonUtils";
+} from "utils/commonUtils";
 
 describe("User Creation", () => {
   const facilityCreation = new FacilityCreation();
@@ -30,7 +30,6 @@ describe("User Creation", () => {
       confirmPassword: defaultPassword,
       email: `${generateUsername(firstName)}@test.com`,
       phoneNumber: generatePhoneNumber(),
-      dateOfBirth: "1990-01-01",
       userType: "Doctor",
       state: "Kerala",
       district: "Ernakulam",

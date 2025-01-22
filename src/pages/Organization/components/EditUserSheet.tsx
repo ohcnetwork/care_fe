@@ -1,55 +1,48 @@
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import UserForm from "@/components/Users/UserForm";
 
 import { UserBase } from "@/types/user/user";
 
-interface AddUserSheetProps {
+interface EditUserSheetProps {
+  existingUsername: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserCreated?: (user: UserBase) => void;
+  onUserUpdated?: (user: UserBase) => void;
 }
 
-export default function AddUserSheet({
+export default function EditUserSheet({
+  existingUsername,
   open,
   setOpen,
-  onUserCreated,
-}: AddUserSheetProps) {
+  onUserUpdated,
+}: EditUserSheetProps) {
   const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" data-cy="add-user-button">
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("add_user")}
-        </Button>
-      </SheetTrigger>
       <SheetContent
         className="w-full sm:max-w-2xl overflow-y-auto"
         data-cy="add-user-form"
       >
         <SheetHeader>
-          <SheetTitle>{t("add_new_user")}</SheetTitle>
-          <SheetDescription>{t("create_user_and_add_to_org")}</SheetDescription>
+          <SheetTitle>{t("edit_user")}</SheetTitle>
+          <SheetDescription>{t("update_user")}</SheetDescription>
         </SheetHeader>
         <div className="mt-6">
           <UserForm
             onSubmitSuccess={(user) => {
               setOpen(false);
-              onUserCreated?.(user);
+              onUserUpdated?.(user);
             }}
+            existingUsername={existingUsername}
           />
         </div>
       </SheetContent>

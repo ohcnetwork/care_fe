@@ -15,7 +15,6 @@ import {
   LeafIcon,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -119,6 +118,9 @@ export function AllergyQuestion({
     queryKey: ["allergies", patientId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
     }),
   });
 
@@ -133,11 +135,6 @@ export function AllergyQuestion({
           },
         ],
       });
-      if (patientAllergies.count > patientAllergies.results.length) {
-        toast.info(
-          `Showing first ${patientAllergies.results.length} of ${patientAllergies.count} allergies`,
-        );
-      }
     }
   }, [patientAllergies]);
 

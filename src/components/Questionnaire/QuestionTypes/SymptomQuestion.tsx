@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -276,6 +275,9 @@ export function SymptomQuestion({
     queryKey: ["symptoms", patientId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
     }),
   });
 
@@ -290,11 +292,6 @@ export function SymptomQuestion({
           },
         ],
       });
-      if (patientSymptoms.count > patientSymptoms.results.length) {
-        toast.info(
-          `Showing first ${patientSymptoms.results.length} of ${patientSymptoms.count} symptoms`,
-        );
-      }
     }
   }, [patientSymptoms]);
 
