@@ -101,7 +101,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
             <h2 className="text-lg font-semibold">{t("patients")}</h2>
             <Badge
-              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
+              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
               variant="outline"
             >
               {patients
