@@ -326,11 +326,6 @@ const AvatarEditModal = ({
             </>
           ) : (
             <>
-              <div className="mb-1 mt-2 flex flex-col">
-                <span className="text-xl font-medium">
-                  {t("capture_cover_photo")}
-                </span>
-              </div>
               <div className="flex flex-1 items-center justify-center">
                 {!previewImage ? (
                   <>

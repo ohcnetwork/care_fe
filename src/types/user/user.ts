@@ -14,3 +14,22 @@ export type UserBase = {
   phone_number: string;
   gender: (typeof GENDER_TYPES)[number]["id"];
 };
+
+export type CreateUserModel = {
+  user_type: UserType;
+  username: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  phone_number_is_whatsapp: boolean;
+  alt_phone_number?: string;
+  gender: (typeof GENDER_TYPES)[number]["id"];
+  qualification?: string;
+  doctor_experience_commenced_on?: string;
+  doctor_medical_council_registration?: string;
+  geo_organization: string;
+};
+
+export type UpdateUserModel = Omit<CreateUserModel, "username" | "password">;

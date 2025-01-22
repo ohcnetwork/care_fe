@@ -14,6 +14,7 @@ import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 // Questions that should be rendered full width
 const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
   "medication_request",
+  "medication_statement",
 ];
 
 interface QuestionRendererProps {

@@ -97,12 +97,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
+  const queryClient = useQueryClient();
 
-  const {
-    data: facilityData,
-    isLoading,
-    refetch: facilityFetch,
-  } = useQuery<FacilityData>({
+  const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
@@ -138,7 +135,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          facilityFetch();
+          queryClient.invalidateQueries({
+            queryKey: ["facility", facilityId],
+          });
           toast.success(t("cover_image_updated"));
           setEditCoverImage(false);
         } else {
@@ -158,7 +157,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
     });
     if (res?.ok) {
       toast.success(t("cover_image_deleted"));
-      facilityFetch();
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
       setEditCoverImage(false);
     } else {
       onError();
