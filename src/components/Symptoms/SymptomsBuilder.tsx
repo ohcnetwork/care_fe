@@ -113,7 +113,6 @@ export const EncounterSymptomsBuilder = (props: {
       >
         {items.map((symptom) => {
           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
-            setIsProcessing(true);
             const { res } = await request(SymptomsApi.partialUpdate, {
               pathParams: { consultationId, external_id: symptom.id },
               body: { [event.name]: event.value },
@@ -122,7 +121,6 @@ export const EncounterSymptomsBuilder = (props: {
               props.onChange?.();
               await refetch();
             }
-            setIsProcessing(false);
           };
 
           const handleMarkAsEnteredInError = async () => {
