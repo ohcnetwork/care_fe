@@ -32,7 +32,7 @@ export default function OrganizationFacilities({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, cacheBlacklist: ["facility"] });
+    useFilters({ limit: 15, cacheBlacklist: ["name"] });
 
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
