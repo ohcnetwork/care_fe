@@ -1,17 +1,16 @@
 import { Link } from "raviger";
+import React from "react";
 import { useState } from "react";
 
 import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import Loading from "@/components/Common/Loading";
 import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
-import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { AdministrationTab } from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTab";
+import { PrescriptionsTab } from "@/components/Medicine/MedicineAdministrationSheet/PrescriptionsTab";
 
 import useSlug from "@/hooks/useSlug";
 
@@ -28,6 +27,9 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<
+    "prescriptions" | "administration"
+  >("prescriptions");
 
   const { data: medications, loading } = useTanStackQueryInstead(
     routes.medicationRequest.list,
@@ -39,6 +41,15 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
       },
     },
   );
+
+  const { data: administrations, loading: loadingAdministrations } =
+    useTanStackQueryInstead(routes.medicationAdministration.list, {
+      pathParams: { patientId: patient!.id },
+      query: {
+        encounter: encounterId,
+        limit: 100,
+      },
+    });
 
   const filteredMedications = medications?.results?.filter(
     (med: MedicationRequestRead) => {
@@ -58,106 +69,81 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
       !["active", "on_hold"].includes(med.status || ""),
   );
 
-  const EmptyState = ({ searching }: { searching?: boolean }) => (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
-      <div className="rounded-full bg-secondary/10 p-3">
-        <CareIcon icon="l-tablets" className="text-3xl text-muted-foreground" />
-      </div>
-      <div className="max-w-[200px] space-y-1">
-        <h3 className="font-medium">
-          {searching ? "No matches found" : "No Prescriptions"}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {searching
-            ? `No medications match "${searchQuery}"`
-            : "No medications have been prescribed yet"}
-        </p>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-2">
       <SubHeading
-        title="Prescriptions"
+        title={
+          activeTab === "prescriptions"
+            ? "Prescriptions"
+            : "Medicine Administration"
+        }
         options={
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
-              >
-                <CareIcon icon="l-print" className="mr-2" />
-                Print
-              </Link>
-            </Button>
+            {activeTab === "prescriptions" && (
+              <Button asChild variant="outline" size="sm">
+                <Link
+                  href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+                >
+                  <CareIcon icon="l-print" className="mr-2" />
+                  Print
+                </Link>
+              </Button>
+            )}
+            {activeTab === "administration" && (
+              <Button variant="outline" size="sm">
+                <CareIcon icon="l-plus" className="mr-2" />
+                Administer Medicine
+              </Button>
+            )}
           </div>
         }
       />
 
       <div className="rounded-lg border">
-        <div className="flex items-center gap-2 border-b p-2">
-          <CareIcon icon="l-search" className="text-lg text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search medications..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-muted-foreground hover:text-foreground"
-              onClick={() => setSearchQuery("")}
-            >
-              <CareIcon icon="l-times" className="text-lg" />
-            </Button>
-          )}
-        </div>
-
-        {loading ? (
-          <div className="min-h-[200px] flex items-center justify-center">
-            <Loading />
+        <Tabs
+          defaultValue="prescriptions"
+          className="w-full"
+          onValueChange={(value) =>
+            setActiveTab(value as "prescriptions" | "administration")
+          }
+        >
+          <div className="border-b">
+            <TabsList className="h-9 w-full justify-start rounded-none border-b bg-transparent p-0">
+              <TabsTrigger
+                value="prescriptions"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+              >
+                Prescriptions
+              </TabsTrigger>
+              <TabsTrigger
+                value="administration"
+                className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+              >
+                Medicine Administration
+              </TabsTrigger>
+            </TabsList>
           </div>
-        ) : !medications?.results?.length ? (
-          <EmptyState />
-        ) : !filteredMedications?.length ? (
-          <EmptyState searching />
-        ) : (
-          <ScrollArea className="h-[calc(100vh-16rem)]">
-            <Tabs defaultValue="active" className="w-full">
-              <div className="border-b px-2">
-                <TabsList className="h-9">
-                  <TabsTrigger value="active" className="text-xs">
-                    Active{" "}
-                    <Badge variant="secondary" className="ml-2">
-                      {activeMedications?.length || 0}
-                    </Badge>
-                  </TabsTrigger>
-                  <TabsTrigger value="discontinued" className="text-xs">
-                    Discontinued{" "}
-                    <Badge variant="secondary" className="ml-2">
-                      {discontinuedMedications?.length || 0}
-                    </Badge>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
 
-              <div className="min-w-[800px]">
-                <TabsContent value="active" className="p-2">
-                  <MedicationsTable medications={activeMedications || []} />
-                </TabsContent>
-                <TabsContent value="discontinued" className="p-2">
-                  <MedicationsTable
-                    medications={discontinuedMedications || []}
-                  />
-                </TabsContent>
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </Tabs>
-          </ScrollArea>
-        )}
+          <TabsContent value="prescriptions">
+            <PrescriptionsTab
+              loading={loading}
+              medications={medications}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              filteredMedications={filteredMedications}
+              activeMedications={activeMedications}
+              discontinuedMedications={discontinuedMedications}
+            />
+          </TabsContent>
+
+          <TabsContent value="administration">
+            <AdministrationTab
+              loadingAdministrations={loadingAdministrations}
+              activeMedications={activeMedications}
+              administrations={administrations}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
