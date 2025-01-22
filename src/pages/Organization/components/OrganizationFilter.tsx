@@ -70,17 +70,27 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         .filter((org): org is Organization => org !== undefined);
 
       if (validOrgs.length > 0) {
-        setSelectedLevels(validOrgs);
         const validOrg = validOrgs[0];
-        if (
-          validOrg &&
-          validOrg.metadata?.govt_org_type &&
-          validOrg.metadata?.govt_org_children_type
-        ) {
-          setOrgTypes([
-            validOrg.metadata?.govt_org_type,
-            validOrg.metadata?.govt_org_children_type,
-          ]);
+        if (validOrg.level_cache === 1) {
+          setSelectedLevels(validOrgs);
+          if (
+            validOrg &&
+            validOrg.metadata?.govt_org_type &&
+            validOrg.metadata?.govt_org_children_type
+          ) {
+            setOrgTypes([
+              validOrg.metadata?.govt_org_type,
+              validOrg.metadata?.govt_org_children_type,
+            ]);
+          }
+        } else {
+          const newOrgs = [];
+          let currentOrg = validOrg;
+          while (currentOrg.parent && currentOrg.level_cache >= 1) {
+            newOrgs.unshift(currentOrg);
+            currentOrg = currentOrg.parent as unknown as Organization;
+          }
+          setSelectedLevels(newOrgs);
         }
       } else {
         setSelectedLevels([]);
@@ -103,12 +113,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
       }
     }
   }, [rootOrgs]);
-
-  // Get parent ID for the current level
-  const getParentId = (index: number) => {
-    if (index === 0) return "0";
-    return selectedLevels[index - 1]?.id;
-  };
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
@@ -162,7 +166,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               orgTypes={orgTypes}
               setOrgTypes={setOrgTypes}
               onChange={onChange}
-              getParentId={getParentId}
             />
           ),
         )}

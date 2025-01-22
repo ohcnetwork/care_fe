@@ -13,7 +13,6 @@ interface UseOrganizationLevelProps {
   selectedLevels: Organization[];
   setOrgTypes: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (Filter: FilterState, index?: number) => void;
-  getParentId: (index: number) => string;
 }
 
 export function useOrganizationLevel({
@@ -22,11 +21,15 @@ export function useOrganizationLevel({
   selectedLevels,
   setOrgTypes,
   onChange,
-  getParentId,
 }: UseOrganizationLevelProps) {
   const [levelSearch, setLevelSearch] = useState("");
 
-  const { data: availableOrgs } = useQuery<{ results: Organization[] }>({
+  const getParentId = (index: number) => {
+    if (index === 0) return "0";
+    return selectedLevels[index - 1]?.id;
+  };
+
+  const { data: availableOrgs } = useQuery({
     queryKey: ["organizations-available", getParentId(index), levelSearch],
     queryFn: query.debounced(organizationApi.getPublicOrganizations, {
       queryParams: {
