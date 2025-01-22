@@ -58,7 +58,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               variant="outline"
             >
               {t("entity_count", {
-                count: children?.results.length || 0,
+                count: children?.count || 0,
                 entity: "Organization",
               })}
             </Badge>
