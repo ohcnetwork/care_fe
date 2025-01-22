@@ -37,24 +37,27 @@ export function DateTimePicker({
 
   const handleTimeChange = (
     type: "hour" | "minute" | "ampm",
-    value: string,
+    selectedValue: string,
   ) => {
-    if (value) {
-      const newDate = new Date(value);
-      if (type === "hour") {
-        newDate.setHours(
-          (parseInt(value) % 12) + (newDate.getHours() >= 12 ? 12 : 0),
-        );
-      } else if (type === "minute") {
-        newDate.setMinutes(parseInt(value));
-      } else if (type === "ampm") {
-        const currentHours = newDate.getHours();
-        newDate.setHours(
-          value === "PM" ? currentHours + 12 : currentHours - 12,
-        );
+    if (!value) return;
+    const newDate = new Date(value);
+
+    if (type === "hour") {
+      newDate.setHours(
+        (parseInt(selectedValue) % 12) + (newDate.getHours() >= 12 ? 12 : 0),
+      );
+    } else if (type === "minute") {
+      newDate.setMinutes(parseInt(selectedValue));
+    } else if (type === "ampm") {
+      const currentHours = newDate.getHours();
+      const isPM = selectedValue === "PM";
+      if (isPM && currentHours < 12) {
+        newDate.setHours(currentHours + 12);
+      } else if (!isPM && currentHours >= 12) {
+        newDate.setHours(currentHours - 12);
       }
-      onChange?.(newDate);
     }
+    onChange?.(newDate);
   };
 
   return (

@@ -161,6 +161,7 @@ export interface MedicationRequest {
   encounter?: string; // UUID
   dosage_instruction: MedicationRequestDosageInstruction[];
   note?: string;
+  authored_on: string;
 }
 
 export interface MedicationRequestRead {
@@ -179,6 +180,7 @@ export interface MedicationRequestRead {
   modified_date: string;
   created_by: UserBareMinimum;
   updated_by: UserBareMinimum;
+  authored_on: string;
 }
 
 export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
@@ -519,6 +521,7 @@ export function parseMedicationStringToRequest(
     intent: "order",
     category: "inpatient",
     priority: "routine",
+    authored_on: new Date().toISOString(),
   };
 
   return medicationRequest;
