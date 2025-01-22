@@ -94,6 +94,16 @@ function _isAppleDevice() {
 export const isAppleDevice = _isAppleDevice();
 
 /**
+ * Referred from: https://stackoverflow.com/questions/6031412/detect-android-phone-via-javascript-jquery
+ * @returns `true` if device is Android, else `false`
+ */
+function _isAndroidDevice(): boolean {
+  return /android/i.test(navigator.userAgent);
+}
+
+export const isAndroidDevice = _isAndroidDevice();
+
+/**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
  *
  * **Example Usage:**

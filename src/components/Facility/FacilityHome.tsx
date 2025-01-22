@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Hospital,
   MapPin,
@@ -38,6 +38,7 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { isAndroidDevice } from "@/Utils/utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -94,6 +95,7 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
+  console.log(navigator.platform);
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
@@ -120,6 +122,29 @@ export const FacilityHome = ({ facilityId }: Props) => {
         navigate("/facility");
       },
     });
+  };
+  const getMapsLink = (latitude: number, longitude: number) => {
+    return isAndroidDevice ? (
+      <a
+        className="text-sm text-primary flex items-center gap-1 w-max"
+        href={`geo:0,0?q=${latitude},${longitude}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {t("show_on_maps")}
+        <SquareArrowOutUpRight className="h-3 w-3" />
+      </a>
+    ) : (
+      <a
+        className="text-sm text-primary flex items-center gap-1 w-max"
+        href={`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {t("show_on_maps")}
+        <SquareArrowOutUpRight className="h-3 w-3" />
+      </a>
+    );
   };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
@@ -308,17 +333,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             )}
                           </div>
                         )}
-                        {facilityData?.latitude && facilityData?.longitude && (
-                          <a
-                            className="text-sm text-primary flex items-center gap-1 w-max"
-                            href={`https://www.google.com/maps/search/?api=1&query=${facilityData.latitude},${facilityData.longitude}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {t("google_maps")}
-                            <SquareArrowOutUpRight className="h-3 w-3" />
-                          </a>
-                        )}
+                        {facilityData.latitude &&
+                          facilityData.longitude &&
+                          getMapsLink(
+                            facilityData.latitude,
+                            facilityData.longitude,
+                          )}
                       </div>
                     </div>
 
