@@ -23,7 +23,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 w-[30rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out"
+      className="p-6 lg:w-[30rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out"
     >
       <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:60%_auto]" />
 
