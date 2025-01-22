@@ -138,4 +138,3 @@ jobs:
       - name: Notify release
         run: |
           echo "Release ${{ github.sha }} is ready to be deployed to production"
-

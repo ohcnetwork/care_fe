@@ -96,7 +96,7 @@
     "echarts-for-react": "^3.0.2",
     "events": "^3.3.0",
     "hi-profiles": "^1.1.0",
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.11",
     "i18next": "^24.2.1",
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^3.0.1",
