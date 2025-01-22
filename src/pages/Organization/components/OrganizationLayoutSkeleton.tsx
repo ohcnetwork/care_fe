@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   CardGridSkeleton,
-  NoteSkeleton,
+  CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
 export default function OrganizationLayoutSkeleton() {
@@ -11,7 +11,7 @@ export default function OrganizationLayoutSkeleton() {
       <Skeleton className="h-8 w-48 mb-4" />
       <Skeleton className="h-4 w-24 mb-4" />
       <div className="flex space-x-4 mb-4">
-        <NoteSkeleton count={3} />
+        <CardListSkeleton count={3} />
       </div>
       <Skeleton className="h-6 w-40 mb-4" />
       <Skeleton className="h-8 w-1/4 mb-4" />

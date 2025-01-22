@@ -56,7 +56,7 @@ export const TableSkeleton = ({ count }: { count: number }) => (
   </div>
 );
 
-export const NoteSkeleton = ({ count }: { count: number }) =>
+export const CardListSkeleton = ({ count }: { count: number }) =>
   Array.from({ length: count }, (_, index) => (
     <div key={index}>
       <div className="p-4 rounded-lg bg-gray-100 animate-pulse">
