@@ -29,18 +29,17 @@ export function FacilitiesPage() {
   });
 
   const { t } = useTranslation();
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
-    return qParams.organization ? [qParams.organization] : [];
-  });
+  const [selectedOrg, setSelectedOrg] = useState<string | undefined>(
+    qParams.organization,
+  );
 
   useEffect(() => {
-    if (selectedOrgs.length > 0) {
-      const lastSelected = selectedOrgs[selectedOrgs.length - 1];
-      updateQuery({ organization: lastSelected });
+    if (selectedOrg) {
+      updateQuery({ organization: selectedOrg });
     } else {
       updateQuery({ organization: undefined });
     }
-  }, [selectedOrgs]);
+  }, [selectedOrg]);
 
   const { data: facilitiesResponse, isLoading } = useQuery<
     PaginatedResponse<FacilityData>
@@ -73,18 +72,13 @@ export function FacilitiesPage() {
       <div className="flex flex-col items-start justify-between gap-5 mt-4 xl:flex-row">
         <OrganizationFilter
           skipLevels={[]}
-          selected={selectedOrgs}
-          onChange={(filter, level) => {
+          selected={qParams.organization}
+          onChange={(filter) => {
             if ("organization" in filter) {
               if (filter.organization) {
-                setSelectedOrgs((prev) => {
-                  const newOrgId = filter.organization as string;
-                  const newOrgs = prev.slice(0, level);
-                  newOrgs.push(newOrgId);
-                  return newOrgs;
-                });
+                setSelectedOrg(filter.organization as string);
               } else {
-                setSelectedOrgs([]);
+                setSelectedOrg(undefined);
               }
             }
             if ("facility_type" in filter) {
