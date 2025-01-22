@@ -11,8 +11,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -61,7 +63,16 @@ export default function FacilityOrganizationLayout({
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="px-6 py-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-8 w-8/12 self-end" />
+        <Skeleton className="h-8 w-full self-end" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CardGridSkeleton count={6} />
+        </div>
+      </div>
+    );
   }
   // add loading state
   if (!org) {

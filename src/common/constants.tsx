@@ -104,6 +104,10 @@ export const GENDER_TYPES = [
   { id: "non_binary", text: "Non Binary", icon: "TRANS" },
 ] as const;
 
+export const GENDERS = GENDER_TYPES.map((gender) => gender.id) as [
+  (typeof GENDER_TYPES)[number]["id"],
+];
+
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },

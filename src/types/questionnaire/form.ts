@@ -2,7 +2,7 @@ import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allerg
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
-import { MedicationStatement } from "@/types/emr/medicationStatement";
+import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
@@ -30,7 +30,7 @@ export type ResponseValue = {
     | Date
     | AllergyIntoleranceRequest[]
     | MedicationRequest[]
-    | MedicationStatement[]
+    | MedicationStatementRequest[]
     | Symptom[]
     | Diagnosis[]
     | Encounter
