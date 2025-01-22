@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isBefore, isSameDay } from "date-fns";
+import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -134,49 +135,48 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }
   }
 
-  const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreateRequest) =>
-      mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id || "" },
-        body,
+  const { mutate: createAppointment, isPending: isCreatingAppointment } =
+    useMutation({
+      mutationFn: (body: AppointmentCreateRequest) =>
+        mutate(PublicAppointmentApi.createAppointment, {
+          pathParams: { id: selectedSlot?.id || "" },
+          body,
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        })(body),
+      onSuccess: (data: Appointment) => {
+        toast.success(t("appointment_created_success"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            ["patients", tokenData.phoneNumber],
+            ["appointment", tokenData.phoneNumber],
+          ],
+        });
+        navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+          replace: true,
+        });
+      },
+    });
+
+  const { mutate: cancelAppointment, isPending: isCancellingAppointment } =
+    useMutation({
+      mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },
-      })(body),
-    onSuccess: (data: Appointment) => {
-      toast.success(t("appointment_created_success"));
-      queryClient.invalidateQueries({
-        queryKey: [
-          ["patients", tokenData.phoneNumber],
-          ["appointment", tokenData.phoneNumber],
-        ],
-      });
-      navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
-        replace: true,
-      });
-    },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_appointment"));
-    },
-  });
-
-  const { mutate: cancelAppointment } = useMutation({
-    mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
-      headers: {
-        Authorization: `Bearer ${tokenData.token}`,
+      }),
+      onSuccess: (appointment: Appointment) => {
+        toast.success(t("appointment_cancelled"));
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", tokenData.phoneNumber],
+        });
+        createAppointment({
+          reason_for_visit: reason,
+          patient: appointment.patient.id,
+        });
       },
-    }),
-    onSuccess: (appointment: Appointment) => {
-      toast.success(t("appointment_cancelled"));
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", tokenData.phoneNumber],
-      });
-      createAppointment({
-        reason_for_visit: reason,
-        patient: appointment.patient.id,
-      });
-    },
-  });
+    });
 
   const handleRescheduleAppointment = (appointment: Appointment) => {
     cancelAppointment({
@@ -362,8 +362,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       <div className="bg-secondary-200 h-20">
         {selectedSlot?.id && (
           <div className="container mx-auto flex flex-row justify-end mt-6">
+            {(isCreatingAppointment || isCancellingAppointment) && (
+              <Loader2 className="h-4 w-4 animate-spin self-center mr-2" />
+            )}
             <Button
               variant="primary_gradient"
+              disabled={isCreatingAppointment || isCancellingAppointment}
               onClick={() => {
                 if (appointmentId && appointment) {
                   handleRescheduleAppointment(appointment);
