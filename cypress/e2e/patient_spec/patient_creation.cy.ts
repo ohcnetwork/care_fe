@@ -7,7 +7,7 @@ import {
   generateAddress,
   generateName,
   generatePhoneNumber,
-} from "../../utils/commonUtils";
+} from "@/cypress/utils/commonUtils";
 
 const facilityCreation = new FacilityCreation();
 const ENCOUNTER_TYPE = "Observation";
