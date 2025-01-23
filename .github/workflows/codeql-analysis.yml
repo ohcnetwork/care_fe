@@ -8,7 +8,7 @@ on:
     - cron: "0 22 * * 0"
 jobs:
   CodeQL-Build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     if: github.repository == 'ohcnetwork/care_fe'
     permissions:
       security-events: write
