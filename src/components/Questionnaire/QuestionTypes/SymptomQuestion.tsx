@@ -59,6 +59,13 @@ export function SymptomQuestion({
     (questionnaireResponse.values?.[0]?.value as Symptom[]) || [];
 
   const handleAddSymptom = (code: Code) => {
+    const isDuplicateSymptom = symptoms.some(
+      (symptom) => symptom.code.code === code.code,
+    );
+    if (isDuplicateSymptom) {
+      alert("This symptom has already been added.");
+      return;
+    }
     const newSymptoms = [
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },

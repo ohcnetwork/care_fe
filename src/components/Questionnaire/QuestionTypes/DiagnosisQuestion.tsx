@@ -55,6 +55,13 @@ export function DiagnosisQuestion({
     (questionnaireResponse.values?.[0]?.value as Diagnosis[]) || [];
 
   const handleAddDiagnosis = (code: Code) => {
+    const isDuplicateDiagnosis = diagnoses.some(
+      (diagnosis) => diagnosis.code.code === code.code,
+    );
+    if (isDuplicateDiagnosis) {
+      alert("This diagnosis has already been added.");
+      return;
+    }
     const newDiagnoses = [
       ...diagnoses,
       { ...DIAGNOSIS_INITIAL_VALUE, code },

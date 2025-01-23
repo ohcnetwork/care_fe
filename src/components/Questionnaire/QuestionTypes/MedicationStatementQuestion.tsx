@@ -88,6 +88,13 @@ export function MedicationStatementQuestion({
       ?.value as MedicationStatementRequest[]) || [];
 
   const handleAddMedication = (medication: Code) => {
+    const isDuplicateMedication = medications.some(
+      (med) => med.medication?.code === medication.code,
+    );
+    if (isDuplicateMedication) {
+      alert("This medication has already been added.");
+      return;
+    }
     const newMedications: MedicationStatementRequest[] = [
       ...medications,
       { ...MEDICATION_STATEMENT_INITIAL_VALUE, medication },

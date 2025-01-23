@@ -140,6 +140,13 @@ export function AllergyQuestion({
   }, [patientAllergies]);
 
   const handleAddAllergy = (code: Code) => {
+    const isDuplicateAllergy = allergies.some(
+      (allergy) => allergy.code.code === code.code,
+    );
+    if (isDuplicateAllergy) {
+      alert("This allergy has already been added");
+      return;
+    }
     const newAllergies = [
       ...allergies,
       { ...ALLERGY_INITIAL_VALUE, code },

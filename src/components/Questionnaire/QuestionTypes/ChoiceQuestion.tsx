@@ -37,6 +37,13 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 
   const handleValueChange = (newValue: string) => {
     clearError();
+    const isDuplicateResponse = questionnaireResponse.values.some(
+      (response, i) => i !== index && response.value === newValue,
+    );
+    if (isDuplicateResponse) {
+      alert("This option has already been selected. Please choose another.");
+      return;
+    }
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
       type: "string",

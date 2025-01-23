@@ -81,6 +81,13 @@ export function MedicationRequestQuestion({
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const handleAddMedication = (medication: Code) => {
+    const isDuplicateMedication = medications.some(
+      (med) => med.medication?.code === medication.code,
+    );
+    if (isDuplicateMedication) {
+      alert("This medication has already been added.");
+      return;
+    }
     const newMedications: MedicationRequest[] = [
       ...medications,
       {
