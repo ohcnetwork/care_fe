@@ -2,12 +2,11 @@ import { patientCreation } from "pageObject/Patients/PatientCreation";
 import { patientDashboard } from "pageObject/Patients/PatientDashboard";
 import { patientVerify } from "pageObject/Patients/PatientVerify";
 import { FacilityCreation } from "pageObject/facility/FacilityCreation";
-
 import {
   generateAddress,
   generateName,
   generatePhoneNumber,
-} from "@/cypress/utils/commonUtils";
+} from "utils/commonUtils";
 
 const facilityCreation = new FacilityCreation();
 const ENCOUNTER_TYPE = "Observation";
