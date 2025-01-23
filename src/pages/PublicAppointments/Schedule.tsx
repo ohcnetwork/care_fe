@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, isBefore, isSameDay } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -9,7 +8,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import Calendar from "@/CAREUI/interactive/Calendar";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,14 +24,14 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+
+import { PublicAppointmentSlotPicker } from "./components/PublicAppointmentSlotPicker";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -45,8 +43,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facilityId, staffId, appointmentId } = props;
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
@@ -107,34 +103,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     toast.error(t("error_fetching_user_data"));
   }
 
-  const slotsQuery = useQuery<{ results: TokenSlot[] }>({
-    queryKey: ["slots", facilityId, staffId, selectedDate],
-    queryFn: query(PublicAppointmentApi.getSlotsForDay, {
-      body: {
-        facility: facilityId,
-        user: staffId,
-        day: dateQueryString(selectedDate),
-      },
-      headers: {
-        Authorization: `Bearer ${tokenData.token}`,
-      },
-      silent: true,
-    }),
-    enabled: !!selectedDate && !!tokenData.token,
-  });
-
-  if (slotsQuery.error) {
-    if (
-      slotsQuery.error.cause?.errors &&
-      Array.isArray(slotsQuery.error.cause.errors) &&
-      slotsQuery.error.cause.errors[0][0] === "Resource is not schedulable"
-    ) {
-      toast.error(t("user_not_available_for_appointments"));
-    } else {
-      toast.error(t("error_fetching_slots_data"));
-    }
-  }
-
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
       mutationFn: (body: AppointmentCreateRequest) =>
@@ -183,26 +151,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       appointment: appointment.id,
       patient: appointment.patient.id,
     });
-  };
-
-  useEffect(() => {
-    setSelectedSlot(undefined);
-  }, [selectedDate]);
-
-  const renderDay = (date: Date) => {
-    const isSelected = date.toDateString() === selectedDate?.toDateString();
-
-    return (
-      <button
-        onClick={() => setSelectedDate(date)}
-        className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
-          isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
-        )}
-      >
-        <span>{date.getDate()}</span>
-      </button>
-    );
   };
 
   if (!userData) {
@@ -277,85 +225,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   onChange={(e) => setReason(e.target.value)}
                 />
               </div>
-              <Calendar
-                month={selectedMonth}
-                onMonthChange={setSelectedMonth}
-                renderDay={renderDay}
-                highlightToday={false}
-              />
-              <div className="space-y-6">
-                {slotsQuery.data?.results &&
-                slotsQuery.data.results.length > 0 ? (
-                  groupSlotsByAvailability(slotsQuery.data.results).map(
-                    ({ availability, slots }) => (
-                      <div key={availability.name}>
-                        <h4 className="text-lg font-semibold mb-3">
-                          {availability.name}
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {slots.map((slot) => {
-                            const percentage =
-                              slot.allocated / availability.tokens_per_slot;
-                            const isPastSlot =
-                              isSameDay(selectedDate, new Date()) &&
-                              isBefore(slot.start_datetime, new Date());
-
-                            return (
-                              <Button
-                                key={slot.id}
-                                size="lg"
-                                variant={
-                                  selectedSlot?.id === slot.id
-                                    ? "primary"
-                                    : "outline"
-                                }
-                                onClick={() => {
-                                  if (selectedSlot?.id === slot.id) {
-                                    setSelectedSlot(undefined);
-                                  } else {
-                                    setSelectedSlot({
-                                      ...slot,
-                                      availability: availability,
-                                    });
-                                  }
-                                }}
-                                disabled={
-                                  slot.allocated ===
-                                    availability.tokens_per_slot || isPastSlot
-                                }
-                                className="flex flex-col items-center group gap-0"
-                              >
-                                <span className="font-semibold">
-                                  {format(slot.start_datetime, "HH:mm")}
-                                </span>
-                                <span
-                                  className={cn(
-                                    "text-xs group-hover:text-inherit",
-                                    percentage >= 1
-                                      ? "text-gray-400"
-                                      : percentage >= 0.8
-                                        ? "text-red-600"
-                                        : percentage >= 0.6
-                                          ? "text-yellow-600"
-                                          : "text-green-600",
-                                    selectedSlot?.id === slot.id &&
-                                      "text-white",
-                                  )}
-                                >
-                                  {availability.tokens_per_slot -
-                                    slot.allocated}{" "}
-                                  left
-                                </span>
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ),
-                  )
-                ) : (
-                  <div>{t("no_slots_available")}</div>
-                )}
+              <div>
+                <PublicAppointmentSlotPicker
+                  facilityId={facilityId}
+                  staffId={staffId}
+                  selectedSlot={selectedSlot}
+                  onSlotSelect={setSelectedSlot}
+                />
               </div>
             </div>
           </div>
