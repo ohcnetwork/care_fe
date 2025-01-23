@@ -156,12 +156,45 @@ export function AllergyQuestion({
     );
   };
 
+  // const handleRemoveAllergy = (index: number) => {
+  //   const newAllergies = allergies.filter((_, i) => i !== index);
+  //   updateQuestionnaireResponseCB(
+  //     [{ type: "allergy_intolerance", value: newAllergies }],
+  //     questionnaireResponse.question_id,
+  //   );
+  // };
+
   const handleRemoveAllergy = (index: number) => {
-    const newAllergies = allergies.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB(
-      [{ type: "allergy_intolerance", value: newAllergies }],
-      questionnaireResponse.question_id,
-    );
+    const allergy = allergies[index];
+    if (allergy.id) {
+      // For existing records, update verification status to entered_in_error
+      const newAllergies = allergies.map((a, i) =>
+        i === index
+          ? { ...a, verification_status: "entered_in_error" as const }
+          : a,
+      ) as AllergyIntoleranceRequest[];
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    } else {
+      // For new records, remove them completely
+      const newAllergies = allergies.filter((_, i) => i !== index);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    }
   };
 
   const handleUpdateAllergy = (
@@ -218,11 +251,13 @@ export function AllergyQuestion({
               <div
                 key={index}
                 className={`p-3 space-y-3 ${
-                  allergy.clinical_status === "inactive"
-                    ? "opacity-60"
-                    : allergy.clinical_status === "resolved"
-                      ? "line-through"
-                      : ""
+                  allergy.verification_status === "entered_in_error"
+                    ? "opacity-40 pointer-events-none"
+                    : allergy.clinical_status === "inactive"
+                      ? "opacity-60"
+                      : allergy.clinical_status === "resolved"
+                        ? "line-through"
+                        : ""
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -437,11 +472,13 @@ const AllergyTableRow = ({
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
   const rowClassName = `group ${
-    allergy.clinical_status === "inactive"
-      ? "opacity-60"
-      : allergy.clinical_status === "resolved"
-        ? "line-through"
-        : ""
+    allergy.verification_status === "entered_in_error"
+      ? "opacity-40 pointer-events-none"
+      : allergy.clinical_status === "inactive"
+        ? "opacity-60"
+        : allergy.clinical_status === "resolved"
+          ? "line-through"
+          : ""
   }`;
 
   const handleNotesToggle = () => {

@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -230,7 +232,12 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
   return (
-    <div className="group hover:bg-gray-50">
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          diagnosis.verification_status === "entered_in_error",
+      })}
+    >
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
           <div

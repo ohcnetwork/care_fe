@@ -1,3 +1,7 @@
+import { t } from "i18next";
+
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -41,18 +45,24 @@ export function DiagnosisTable({
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Diagnosis</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Verification</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>By</TableHead>
+            <TableHead>{t("diagnosis")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
       <TableBody>
         {diagnoses.map((diagnosis: Diagnosis) => (
-          <TableRow>
+          <TableRow
+            key={diagnosis.id}
+            className={cn(
+              diagnosis.verification_status === "entered_in_error" &&
+                "opacity-50 bg-gray-50/50",
+            )}
+          >
             <TableCell className="font-medium">
               {diagnosis.code.display}
             </TableCell>
@@ -61,12 +71,12 @@ export function DiagnosisTable({
                 variant="outline"
                 className={`whitespace-nowrap ${getStatusBadgeStyle(diagnosis.clinical_status)}`}
               >
-                {diagnosis.clinical_status}
+                {t(diagnosis.clinical_status)}
               </Badge>
             </TableCell>
             <TableCell>
               <Badge variant="secondary" className="whitespace-nowrap">
-                {diagnosis.verification_status}
+                {t(diagnosis.verification_status)}
               </Badge>
             </TableCell>
             <TableCell className="whitespace-nowrap">

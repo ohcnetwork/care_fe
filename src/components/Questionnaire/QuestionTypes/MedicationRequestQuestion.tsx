@@ -503,7 +503,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] border-b hover:bg-gray-50/50",
         {
-          "opacity-50": medication.status === "entered_in_error",
+          "opacity-40 pointer-events-none":
+            medication.status === "entered_in_error",
         },
       )}
     >

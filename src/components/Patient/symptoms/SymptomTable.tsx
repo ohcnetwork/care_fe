@@ -1,3 +1,7 @@
+import { t } from "i18next";
+
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -52,7 +56,13 @@ export function SymptomTable({
       )}
       <TableBody>
         {symptoms.map((symptom: Symptom) => (
-          <TableRow>
+          <TableRow
+            key={symptom.id}
+            className={cn(
+              symptom.verification_status === "entered_in_error" &&
+                "opacity-50 bg-gray-50/50",
+            )}
+          >
             <TableCell className="font-medium">
               {symptom.code.display}
             </TableCell>
@@ -61,12 +71,12 @@ export function SymptomTable({
                 variant="outline"
                 className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
               >
-                {symptom.clinical_status}
+                {t(symptom.clinical_status)}
               </Badge>
             </TableCell>
             <TableCell>
               <Badge variant="secondary" className="whitespace-nowrap">
-                {symptom.severity}
+                {t(symptom.severity)}
               </Badge>
             </TableCell>
             <TableCell className="whitespace-nowrap">

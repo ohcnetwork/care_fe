@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -180,7 +182,12 @@ const SymptomRow = React.memo(function SymptomRow({
   const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
   return (
-    <div className="group hover:bg-gray-50">
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          symptom.verification_status === "entered_in_error",
+      })}
+    >
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
           <div

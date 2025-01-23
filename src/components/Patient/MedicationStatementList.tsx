@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -32,6 +34,7 @@ export function MedicationStatementList({
   patientId,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
     queryKey: ["medication_statement", patientId],
@@ -53,7 +56,16 @@ export function MedicationStatementList({
     );
   }
 
-  if (!medications?.results?.length) {
+  const filteredMedications = medications?.results?.filter(
+    (medication) =>
+      showEnteredInError || medication.status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = medications?.results?.some(
+    (medication) => medication.status === "entered_in_error",
+  );
+
+  if (!filteredMedications?.length) {
     return (
       <Card>
         <CardHeader>
@@ -81,7 +93,7 @@ export function MedicationStatementList({
     <Card className="p-0">
       <CardHeader className="px-4 py-0 pt-4">
         <CardTitle>
-          {t("ongoing_medications")} ({medications.count})
+          {t("ongoing_medications")} ({filteredMedications.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-2">
@@ -97,8 +109,14 @@ export function MedicationStatementList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {medications.results.map((statement) => (
-              <TableRow>
+            {filteredMedications.map((statement) => (
+              <TableRow
+                key={statement.id}
+                className={cn(
+                  statement.status === "entered_in_error" &&
+                    "opacity-50 bg-gray-50/50",
+                )}
+              >
                 <TableCell className="font-medium">
                   <Tooltip>
                     <TooltipTrigger asChild className="max-w-60 truncate">
@@ -168,6 +186,18 @@ export function MedicationStatementList({
             ))}
           </TableBody>
         </Table>
+        {hasEnteredInErrorRecords && !showEnteredInError && (
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowEnteredInError(true)}
+              className="text-xs underline text-gray-500"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

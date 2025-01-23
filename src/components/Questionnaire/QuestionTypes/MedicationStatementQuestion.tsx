@@ -382,7 +382,15 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50 gap-2 lg:gap-0">
+    <div
+      className={cn(
+        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        {
+          "opacity-40 pointer-events-none":
+            medication.status === "entered_in_error",
+        },
+      )}
+    >
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <h4 className="text-base font-semibold break-words line-clamp-2 hidden lg:block">
           {index + 1}. {medication.medication?.display}
