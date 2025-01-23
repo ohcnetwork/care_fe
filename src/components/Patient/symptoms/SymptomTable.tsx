@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { Symptom } from "@/types/emr/symptom/symptom";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -38,18 +39,17 @@ export function SymptomTable({
   symptoms,
   showHeader = true,
 }: SymptomTableProps) {
-  const { t } = useTranslation();
   return (
     <Table>
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>{t("symptoms")}</TableHead>
+            <TableHead>{t("symptom")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("severity")}</TableHead>
             <TableHead>{t("onset")}</TableHead>
             <TableHead>{t("notes")}</TableHead>
-            <TableHead>{t("by")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
@@ -80,15 +80,17 @@ export function SymptomTable({
             <TableCell className="max-w-[200px] truncate">
               {symptom.note || "-"}
             </TableCell>
-            <TableCell className="whitespace-nowrap flex items-center gap-2">
-              <Avatar
-                name={`${symptom.created_by?.first_name} ${symptom.created_by?.last_name}`}
-                className="w-4 h-4"
-                imageUrl={symptom.created_by?.profile_picture_url}
-              />
-              <span className="text-sm">
-                {symptom.created_by?.first_name} {symptom.created_by?.last_name}
-              </span>
+            <TableCell className="whitespace-nowrap">
+              <div className="flex items-center gap-2">
+                <Avatar
+                  name={formatName(symptom.created_by)}
+                  className="w-4 h-4"
+                  imageUrl={symptom.created_by?.profile_picture_url}
+                />
+                <span className="text-sm">
+                  {formatName(symptom.created_by)}
+                </span>
+              </div>
             </TableCell>
           </TableRow>
         ))}

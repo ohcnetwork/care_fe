@@ -65,6 +65,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDisplayName,
@@ -246,7 +247,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
-  const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],
@@ -336,8 +337,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       breadcrumbs={false}
       options={
         <Tabs
-          value={viewMode}
-          onValueChange={(value) => setViewMode(value as "board" | "list")}
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "board" | "list")}
         >
           <TabsList>
             <TabsTrigger value="board">
@@ -600,7 +601,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         </div>
       </div>
 
-      {viewMode === "board" ? (
+      {activeTab === "board" ? (
         <ScrollArea>
           <div className="flex w-max space-x-4">
             {(

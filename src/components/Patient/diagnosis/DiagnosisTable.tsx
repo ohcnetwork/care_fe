@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -38,7 +39,6 @@ export function DiagnosisTable({
   diagnoses,
   showHeader = true,
 }: DiagnosisTableProps) {
-  const { t } = useTranslation();
   return (
     <Table>
       {showHeader && (
@@ -49,7 +49,7 @@ export function DiagnosisTable({
             <TableHead>{t("verification")}</TableHead>
             <TableHead>{t("onset")}</TableHead>
             <TableHead>{t("notes")}</TableHead>
-            <TableHead>{t("by")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
@@ -80,16 +80,17 @@ export function DiagnosisTable({
             <TableCell className="max-w-[200px] truncate">
               {diagnosis.note || "-"}
             </TableCell>
-            <TableCell className="whitespace-nowrap flex items-center gap-2">
-              <Avatar
-                name={`${diagnosis.created_by?.first_name} ${diagnosis.created_by?.last_name}`}
-                className="w-4 h-4"
-                imageUrl={diagnosis.created_by?.profile_picture_url}
-              />
-              <span className="text-sm">
-                {diagnosis.created_by?.first_name}{" "}
-                {diagnosis.created_by?.last_name}
-              </span>
+            <TableCell className="whitespace-nowrap ">
+              <div className="flex items-center gap-2">
+                <Avatar
+                  name={formatName(diagnosis.created_by)}
+                  className="w-4 h-4"
+                  imageUrl={diagnosis.created_by?.profile_picture_url}
+                />
+                <span className="text-sm">
+                  {formatName(diagnosis.created_by)}
+                </span>
+              </div>
             </TableCell>
           </TableRow>
         ))}

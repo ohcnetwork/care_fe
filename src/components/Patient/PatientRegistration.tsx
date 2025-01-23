@@ -46,6 +46,7 @@ import {
   GENDER_TYPES, // OCCUPATION_TYPES,
   //RATION_CARD_CATEGORY, // SOCIOECONOMIC_STATUS_CHOICES ,
 } from "@/common/constants";
+import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -62,10 +63,6 @@ interface PatientRegistrationPageProps {
   facilityId: string;
   patientId?: string;
 }
-
-export const GENDERS = GENDER_TYPES.map((gender) => gender.id) as [
-  (typeof GENDER_TYPES)[number]["id"],
-];
 
 export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],

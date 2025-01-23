@@ -30,11 +30,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -99,36 +99,6 @@ const buildQueryParams = (
   }
   return params;
 };
-
-function EncounterCardSkeleton() {
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="space-y-1">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-5 w-16" />
-        </div>
-        <Skeleton className="h-4 w-24" />
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-5 w-20" />
-          </div>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-24" />
-          </div>
-          <Separator className="my-2" />
-          <div className="flex justify-end">
-            <Skeleton className="h-4 w-24" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 function EmptyState() {
   return (
@@ -690,14 +660,7 @@ export function EncounterList({
 
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
-            <>
-              <EncounterCardSkeleton />
-              <EncounterCardSkeleton />
-              <EncounterCardSkeleton />
-              <EncounterCardSkeleton />
-              <EncounterCardSkeleton />
-              <EncounterCardSkeleton />
-            </>
+            <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
             <div className="col-span-full">
               <EmptyState />
