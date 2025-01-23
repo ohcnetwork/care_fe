@@ -110,17 +110,22 @@ Cypress.Commands.add(
   "typeAndSelectOption",
   (selector: string, value: string) => {
     // Click to open the dropdown
-    cy.get(selector).click();
-
-    // Type in the command input
-    cy.get("[cmdk-input]").should("be.visible").clear().type(value);
-
-    // Select the filtered option from command menu
-    cy.get("[cmdk-list]")
-      .find("[cmdk-item]")
-      .contains(value)
-      .should("be.visible")
-      .click();
+    cy.get(selector)
+      .click()
+      .then(() => {
+        // Type in the command input
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            // Select the filtered option from command menu
+            cy.get("[cmdk-list]")
+              .find("[cmdk-item]")
+              .contains(value)
+              .should("be.visible")
+              .click();
+          });
+      });
   },
 );
 
