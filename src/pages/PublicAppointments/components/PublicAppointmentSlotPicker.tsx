@@ -141,7 +141,8 @@ export function PublicAppointmentSlotPicker({
                             selectedSlot?.id === slot.id && "text-white",
                           )}
                         >
-                          {availability.tokens_per_slot - slot.allocated} left
+                          {availability.tokens_per_slot - slot.allocated}
+                          {t("left")}
                         </span>
                       </Button>
                     );
