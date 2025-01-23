@@ -109,7 +109,7 @@ export class PatientCreation {
   }
 
   selectLocalBody(localBody: string) {
-    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody);
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
     return this;
   }
 
