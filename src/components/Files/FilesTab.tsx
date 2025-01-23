@@ -19,6 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -38,7 +40,6 @@ import {
 
 import AudioPlayer from "@/components/Common/AudioPlayer";
 import Loading from "@/components/Common/Loading";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
@@ -576,7 +577,7 @@ const FileUploadDialog = ({
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-5"
+        className="mb-8 rounded-lg p-5 max-w-fit"
         aria-describedby="file-upload"
       >
         <DialogHeader>
@@ -590,7 +591,9 @@ const FileUploadDialog = ({
               <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
                 <span className="flex items-center truncate">
                   <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                  <span className="truncate">{file.name}</span>
+                  <span className="truncate max-w-xs" title={file.name}>
+                    {file.name}
+                  </span>
                 </span>
                 <Button
                   variant="ghost"
@@ -601,19 +604,35 @@ const FileUploadDialog = ({
                   <CareIcon icon="l-times" />
                 </Button>
               </div>
-              <TextFormField
-                name={`file_name_${index}`}
-                type="text"
-                label={t("enter_file_name")}
-                id={`upload-file-name-${index}`}
-                required
-                value={fileUpload.fileNames[index] || ""}
-                disabled={fileUpload.uploading}
-                onChange={(e) => fileUpload.setFileName(e.value, index)}
-                error={
-                  index === 0 && fileUpload.error ? fileUpload.error : undefined
-                }
-              />
+              <div className="space-y-2">
+                <Label
+                  htmlFor={`upload-file-name-${index}`}
+                  className="text-sm font-medium text-gray-700"
+                >
+                  {t("enter_file_name")}
+                </Label>
+                <Input
+                  name={`file_name_${index}`}
+                  type="text"
+                  id={`upload-file-name-${index}`}
+                  required
+                  className={
+                    index === 0 && fileUpload.error
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-primary"
+                  }
+                  value={fileUpload.fileNames[index] || ""}
+                  disabled={fileUpload.uploading}
+                  onChange={(e) =>
+                    fileUpload.setFileName(e.target.value, index)
+                  }
+                />
+                {index === 0 && fileUpload.error && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {fileUpload.error}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>

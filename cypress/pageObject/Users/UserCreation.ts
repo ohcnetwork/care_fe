@@ -10,6 +10,7 @@ export interface UserData {
   district?: string;
   localBody?: string;
   ward?: string;
+  gender?: string;
 }
 
 export class UserCreation {
@@ -98,12 +99,17 @@ export class UserCreation {
   }
 
   selectLocalBody(localBody: string) {
-    cy.clickAndSelectOption('[data-cy="select-local_body"]', localBody);
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
     return this;
   }
 
   selectWard(ward: string) {
     cy.clickAndSelectOption('[data-cy="select-ward"]', ward);
+    return this;
+  }
+
+  selectGender(gender: string) {
+    cy.clickAndSelectOption('[data-cy="gender-select"]', gender);
     return this;
   }
 
@@ -118,6 +124,7 @@ export class UserCreation {
     }
     if (userData.email) this.fillEmail(userData.email);
     if (userData.phoneNumber) this.fillPhoneNumber(userData.phoneNumber);
+    if (userData.gender) this.selectGender(userData.gender);
     if (userData.state) this.selectState(userData.state);
     if (userData.district) this.selectDistrict(userData.district);
     if (userData.localBody) this.selectLocalBody(userData.localBody);
