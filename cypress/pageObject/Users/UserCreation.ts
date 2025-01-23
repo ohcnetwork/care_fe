@@ -99,7 +99,7 @@ export class UserCreation {
   }
 
   selectLocalBody(localBody: string) {
-    cy.clickAndSelectOption('[data-cy="select-local_body"]', localBody);
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
     return this;
   }
 
