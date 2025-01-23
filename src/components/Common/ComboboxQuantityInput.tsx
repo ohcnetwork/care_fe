@@ -92,6 +92,14 @@ export function ComboboxQuantityInput({
     }
   };
 
+  React.useEffect(() => {
+    setInputValue(quantity?.value.toString() || "");
+  }, [quantity?.value]);
+
+  React.useEffect(() => {
+    setSelectedUnit(quantity?.unit);
+  }, [quantity?.unit]);
+
   return (
     <div className="relative flex w-full lg:max-w-[200px] flex-col gap-1">
       <Popover open={open && showDropdown} onOpenChange={setOpen}>

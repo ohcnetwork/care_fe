@@ -5,12 +5,12 @@ export interface UserData {
   password?: string;
   email?: string;
   phoneNumber?: string;
-  dateOfBirth?: string;
   userType?: string;
   state?: string;
   district?: string;
   localBody?: string;
   ward?: string;
+  gender?: string;
 }
 
 export class UserCreation {
@@ -78,14 +78,8 @@ export class UserCreation {
         label: "Alternate Phone Number",
         message: "Phone number must start with +91 followed by 10 digits",
       },
-      { label: "Date of Birth", message: "Required" },
       { label: "State", message: "Required" },
     ]);
-    return this;
-  }
-
-  fillDateOfBirth(dateOfBirth: string) {
-    cy.typeIntoField('[data-cy="dob-input"]', dateOfBirth);
     return this;
   }
 
@@ -105,12 +99,17 @@ export class UserCreation {
   }
 
   selectLocalBody(localBody: string) {
-    cy.clickAndSelectOption('[data-cy="select-local_body"]', localBody);
+    cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
     return this;
   }
 
   selectWard(ward: string) {
     cy.clickAndSelectOption('[data-cy="select-ward"]', ward);
+    return this;
+  }
+
+  selectGender(gender: string) {
+    cy.clickAndSelectOption('[data-cy="gender-select"]', gender);
     return this;
   }
 
@@ -125,7 +124,7 @@ export class UserCreation {
     }
     if (userData.email) this.fillEmail(userData.email);
     if (userData.phoneNumber) this.fillPhoneNumber(userData.phoneNumber);
-    if (userData.dateOfBirth) this.fillDateOfBirth(userData.dateOfBirth);
+    if (userData.gender) this.selectGender(userData.gender);
     if (userData.state) this.selectState(userData.state);
     if (userData.district) this.selectDistrict(userData.district);
     if (userData.localBody) this.selectLocalBody(userData.localBody);

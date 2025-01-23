@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { MultiSelectFormField } from "@/components/Form/FormFields/SelectFormField";
 
 import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
@@ -44,9 +44,10 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
@@ -58,7 +59,7 @@ export default function FacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const { facilityId, onSubmitSuccess } = props;
+  const { facilityId, organizationId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
@@ -112,14 +113,18 @@ export default function FacilityForm(props: FacilityProps) {
       onSubmitSuccess?.();
     },
   });
-
   const { mutate: updateFacility, isPending: isUpdatePending } = useMutation({
     mutationFn: mutate(routes.updateFacility, {
       pathParams: { id: facilityId || "" },
     }),
     onSuccess: (_data: FacilityModel) => {
       toast.success(t("facility_updated_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["organizationFacilities"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organizationFacilities"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facility"],
+      });
       form.reset();
       onSubmitSuccess?.();
     },
@@ -148,8 +153,8 @@ export default function FacilityForm(props: FacilityProps) {
     }
   };
 
-  const handleFeatureChange = (value: any) => {
-    const { value: features }: { value: Array<number> } = value;
+  const handleFeatureChange = (value: string[]) => {
+    const features = value.map((val) => Number(val));
     form.setValue("features", features);
   };
 
@@ -178,11 +183,21 @@ export default function FacilityForm(props: FacilityProps) {
     pincode: form.watch("pincode")?.toString() || "",
   });
 
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId && !facilityId,
+  });
+
   useEffect(() => {
     if (facilityId) return;
     const levels: Organization[] = [];
     if (stateOrg) levels.push(stateOrg);
     if (districtOrg) levels.push(districtOrg);
+    if (!stateOrg && !districtOrg && org) levels.push(org);
+
     setSelectedLevels(levels);
 
     if (levels.length == 2) {
@@ -193,7 +208,7 @@ export default function FacilityForm(props: FacilityProps) {
       return () => clearTimeout(timer);
     }
     return () => setShowAutoFilledPincode(false);
-  }, [stateOrg, districtOrg, facilityId]);
+  }, [stateOrg, districtOrg, organizationId, facilityId]);
 
   // Update form when facility data is loaded
   useEffect(() => {
@@ -273,7 +288,6 @@ export default function FacilityForm(props: FacilityProps) {
               )}
             />
           </div>
-
           <FormField
             control={form.control}
             name="description"
@@ -291,29 +305,30 @@ export default function FacilityForm(props: FacilityProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="features"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Features</FormLabel>
-                <FormControl>
-                  <MultiSelectFormField
-                    name={field.name}
-                    value={field.value}
-                    placeholder="Select facility features"
-                    options={FACILITY_FEATURE_TYPES}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={handleFeatureChange}
-                    error={form.formState.errors.features?.message}
-                    id="facility-features"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>{t("features")}</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={FACILITY_FEATURE_TYPES.map((obj) => ({
+                        value: obj.id.toString(),
+                        label: obj.name,
+                        icon: obj.icon,
+                      }))}
+                      onValueChange={handleFeatureChange}
+                      value={field.value.map((val) => val.toString())}
+                      placeholder={t("select_facility_feature")}
+                      id="facility-features"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 
@@ -381,7 +396,7 @@ export default function FacilityForm(props: FacilityProps) {
               render={({ field }) => (
                 <FormItem className="md:col-span-2 grid-cols-1 grid md:grid-cols-2 gap-5">
                   <FormControl>
-                    <OrganizationSelector
+                    <GovtOrganizationSelector
                       {...field}
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
@@ -519,6 +534,7 @@ export default function FacilityForm(props: FacilityProps) {
         <Button
           type="submit"
           className="w-full"
+          variant="primary"
           disabled={facilityId ? isUpdatePending : isPending}
           data-cy={facilityId ? "update-facility" : "submit-facility"}
         >

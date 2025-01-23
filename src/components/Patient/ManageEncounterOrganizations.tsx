@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Building, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -81,22 +82,21 @@ export default function ManageEncounterOrganizations({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 h-4 w-4" />
-            Manage Organizations
+            {t("manage_organizations")}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Manage Organizations</SheetTitle>
+          <SheetTitle>{t("manage_organizations")}</SheetTitle>
           <SheetDescription>
-            Add or remove organizations from this encounter
+            {t("encounter_manage_organization_description")}
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Add Organization</h3>
               <FacilityOrganizationSelector
                 facilityId={facilityId}
                 value={selectedOrg}
@@ -109,12 +109,14 @@ export default function ManageEncounterOrganizations({
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Organization
+                {t("add_organizations")}
               </Button>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Current Organizations</h3>
+              <h3 className="text-sm font-medium">
+                {t("current_organizations")}
+              </h3>
               <div className="space-y-2">
                 {encounter.organizations.map((org) => (
                   <div
@@ -148,7 +150,7 @@ export default function ManageEncounterOrganizations({
                 ))}
                 {encounter.organizations.length === 0 && (
                   <p className="text-sm text-muted-foreground">
-                    No organizations added yet
+                    {t("no_organizations_added_yet")}
                   </p>
                 )}
               </div>

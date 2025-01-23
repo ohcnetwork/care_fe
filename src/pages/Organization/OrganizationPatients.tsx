@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import RecordMeta from "@/CAREUI/display/RecordMeta";
@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -28,9 +29,46 @@ interface Props {
 
 export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
+
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, cacheBlacklist: ["patient"] });
+    useFilters({ limit: 15, cacheBlacklist: ["name", "phone_number"] });
+
   const [organization, setOrganization] = useState<Organization | null>(null);
+
+  const searchOptions = [
+    {
+      key: "name",
+      type: "text" as const,
+      placeholder: "Search by name",
+      value: qParams.name || "",
+    },
+    {
+      key: "phone_number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+    },
+  ];
+
+  const handleSearch = useCallback((key: string, value: string) => {
+    const searchParams = {
+      name: key === "name" ? value : "",
+      phone_number:
+        key === "phone_number"
+          ? value.length >= 13 || value === ""
+            ? value
+            : undefined
+          : undefined,
+    };
+    updateQuery(searchParams);
+  }, []);
+
+  const handleFieldChange = () => {
+    updateQuery({
+      name: undefined,
+      phone_number: undefined,
+    });
+  };
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
@@ -64,73 +102,18 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
 
         <SearchByMultipleFields
           id="patient-search"
-          options={[
-            {
-              key: "name",
-              type: "text",
-              placeholder: "Search by name",
-              value: qParams.name || "",
-              shortcutKey: "n",
-            },
-            {
-              key: "phone_number",
-              type: "phone",
-              placeholder: "Search by phone number",
-              value: qParams.phone_number || "",
-              shortcutKey: "p",
-            },
-          ]}
-          onSearch={(key, value) => {
-            const searchParams = {
-              name: key === "name" ? value : "",
-              phone_number: key === "phone_number" ? value : "",
-              page: 1,
-            };
-            updateQuery(searchParams);
-          }}
-          clearSearch={{ value: !qParams.name && !qParams.phone_number }}
-          onFieldChange={(option) => {
-            const clearParams = {
-              name: option.key === "name" ? qParams.name || "" : "",
-              phone_number:
-                option.key === "phone_number" ? qParams.phone_number || "" : "",
-              page: 1,
-            };
-            updateQuery(clearParams);
-          }}
+          options={searchOptions}
+          initialOptionIndex={Math.max(
+            searchOptions.findIndex((option) => option.value !== ""),
+            0,
+          )}
+          onSearch={handleSearch}
+          onFieldChange={handleFieldChange}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3" />
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+            <CardGridSkeleton count={6} />
           ) : patients?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">

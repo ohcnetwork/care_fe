@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -25,6 +25,7 @@ import Loading from "@/components/Common/Loading";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
@@ -90,12 +91,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
+  const queryClient = useQueryClient();
 
-  const {
-    data: facilityData,
-    isLoading,
-    refetch: facilityFetch,
-  } = useQuery<FacilityData>({
+  const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
@@ -133,7 +131,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          facilityFetch();
+          queryClient.invalidateQueries({
+            queryKey: ["facility", facilityId],
+          });
           toast.success(t("cover_image_updated"));
           setEditCoverImage(false);
         } else {
@@ -153,7 +153,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
     });
     if (res?.ok) {
       toast.success(t("cover_image_deleted"));
-      facilityFetch();
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
       setEditCoverImage(false);
     } else {
       onError();
@@ -165,6 +167,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
   }
 
   const hasPermissionToEditCoverImage = true;
+
+  const coverImageHint = (
+    <>
+      {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
+      <br />
+      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
+      {t("recommended_aspect_ratio_for", { aspectRatio: "16:9" })}
+    </>
+  );
 
   return (
     <div>
@@ -188,6 +199,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         handleUpload={handleCoverImageUpload}
         handleDelete={handleCoverImageDelete}
         onClose={() => setEditCoverImage(false)}
+        hint={coverImageHint}
       />
       <div className="container mx-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
@@ -195,12 +207,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                   <img
                     src={facilityData.read_cover_image_url}
                     alt={facilityData?.name}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
                 <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
@@ -227,7 +239,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <Button
                           variant="secondary"
                           size="icon"
-                          className="bg-white/10 hover:bg-white/20"
+                          className="bg-white/20 hover:bg-white/40"
                         >
                           <MoreVertical className="h-4 w-4 text-white" />
                         </Button>
@@ -267,6 +279,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("delete_facility")}
                           </DropdownMenuItem>
                         )} */}
+                        <PLUGIN_Component
+                          __name="FacilityHomeActions"
+                          facility={facilityData}
+                        />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -279,7 +295,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <CardContent>
                   <div className="flex flex-col gap-4 items-start mt-4">
                     <div className="flex items-start gap-3">
-                      <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                      <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>
                         {facilityData?.geo_organization && (
                           <div className="mt-2 text-sm">

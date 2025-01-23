@@ -17,7 +17,7 @@ const DEFAULT_OPTIONS: EditQuestionnaireOption[] = [
 
 export default function useQuestionnaireOptions(slug: string) {
   const { data } = useQuery({
-    queryKey: ["questionnaire", slug] as const,
+    queryKey: ["questionnaires", slug] as const,
     queryFn: query(questionnaireApi.list, {
       queryParams: {
         tag_slug: slug,

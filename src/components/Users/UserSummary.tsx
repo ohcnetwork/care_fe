@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
@@ -26,9 +28,8 @@ import {
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
-
-import { Button } from "../ui/button";
 
 export default function UserSummaryTab({
   userData,
@@ -41,7 +42,7 @@ export default function UserSummaryTab({
   const [showDeleteDialog, setshowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const authUser = useAuthUser();
-
+  const [showEditUserSheet, setShowEditUserSheet] = useState(false);
   if (!userData) {
     return <></>;
   }
@@ -99,7 +100,23 @@ export default function UserSummaryTab({
           }}
         />
       )}
+      <EditUserSheet
+        existingUsername={userData.username}
+        open={showEditUserSheet}
+        setOpen={setShowEditUserSheet}
+      />
       <div className="mt-10 flex flex-col gap-y-6">
+        {editPermissions && (
+          <Button
+            variant="outline"
+            className="w-fit self-end"
+            data-cy="edit-user-button"
+            onClick={() => setShowEditUserSheet(true)}
+          >
+            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
+            {t("edit_user")}
+          </Button>
+        )}
         {avatarPermitted && (
           <UserColumns
             heading={t("edit_avatar")}
