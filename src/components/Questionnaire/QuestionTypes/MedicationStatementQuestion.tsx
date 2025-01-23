@@ -56,13 +56,18 @@ import {
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -111,15 +116,10 @@ export function MedicationStatementQuestion({
 
   useEffect(() => {
     if (patientMedications?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
-          {
-            type: "medication_statement",
-            value: patientMedications.results,
-          },
-        ],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: patientMedications.results }],
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientMedications]);
 
@@ -128,15 +128,10 @@ export function MedicationStatementQuestion({
       ...medications,
       { ...MEDICATION_STATEMENT_INITIAL_VALUE, medication },
     ];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_statement",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_statement", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
@@ -155,19 +150,19 @@ export function MedicationStatementQuestion({
           ? { ...med, status: "entered_in_error" as const }
           : med,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "medication_statement", value: newMedications }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newMedications = medications.filter(
         (_, i) => i !== medicationToDelete,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "medication_statement", value: newMedications }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
     }
     setMedicationToDelete(null);
   };
@@ -180,15 +175,10 @@ export function MedicationStatementQuestion({
       i === index ? { ...medication, ...updates } : medication,
     );
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_statement",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_statement", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -547,8 +537,8 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               values: [],
               note: medication.note,
             }}
-            updateQuestionnaireResponseCB={(response) => {
-              onUpdate?.({ note: response.note });
+            handleUpdateNote={(note) => {
+              onUpdate?.({ note: note });
             }}
             disabled={disabled}
           />

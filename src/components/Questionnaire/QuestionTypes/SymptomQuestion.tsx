@@ -38,12 +38,19 @@ import {
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface SymptomQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -283,15 +290,15 @@ export function SymptomQuestion({
 
   useEffect(() => {
     if (patientSymptoms?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "symptom",
             value: patientSymptoms.results.map(convertToSymptomRequest),
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientSymptoms]);
 
@@ -300,10 +307,10 @@ export function SymptomQuestion({
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },
     ] as SymptomRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "symptom", value: newSymptoms }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveSymptom = (index: number) => {
@@ -315,17 +322,17 @@ export function SymptomQuestion({
           ? { ...s, verification_status: "entered_in_error" as const }
           : s,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "symptom", value: newSymptoms }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "symptom", value: newSymptoms }],
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newSymptoms = symptoms.filter((_, i) => i !== index);
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "symptom", value: newSymptoms }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "symptom", value: newSymptoms }],
+        questionnaireResponse.question_id,
+      );
     }
   };
 
@@ -336,10 +343,10 @@ export function SymptomQuestion({
     const newSymptoms = symptoms.map((symptom, i) =>
       i === index ? { ...symptom, ...updates } : symptom,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "symptom", value: newSymptoms }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (

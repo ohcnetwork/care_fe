@@ -64,12 +64,19 @@ import {
 } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface MedicationRequestQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -83,7 +90,7 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medications", patientId],
+    queryKey: ["medication_requests", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -94,15 +101,10 @@ export function MedicationRequestQuestion({
 
   useEffect(() => {
     if (patientMedications?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
-          {
-            type: "medication_request",
-            value: patientMedications.results,
-          },
-        ],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: patientMedications.results }],
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientMedications]);
 
@@ -123,15 +125,10 @@ export function MedicationRequestQuestion({
         authored_on: new Date().toISOString(),
       },
     ];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_request",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
@@ -150,19 +147,19 @@ export function MedicationRequestQuestion({
           ? { ...med, status: "entered_in_error" as const }
           : med,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "medication_request", value: newMedications }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newMedications = medications.filter(
         (_, i) => i !== medicationToDelete,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "medication_request", value: newMedications }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
     }
     setMedicationToDelete(null);
   };
@@ -175,15 +172,10 @@ export function MedicationRequestQuestion({
       i === index ? { ...medication, ...updates } : medication,
     );
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_request",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -862,8 +854,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               values: [],
               note: medication.note,
             }}
-            updateQuestionnaireResponseCB={(response) => {
-              onUpdate?.({ note: response.note });
+            handleUpdateNote={(note) => {
+              onUpdate?.({ note: note });
             }}
             disabled={disabled}
           />

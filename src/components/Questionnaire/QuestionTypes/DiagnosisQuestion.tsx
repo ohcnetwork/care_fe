@@ -37,12 +37,19 @@ import {
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface DiagnosisQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -94,15 +101,15 @@ export function DiagnosisQuestion({
 
   useEffect(() => {
     if (patientDiagnoses?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: patientDiagnoses.results.map(convertToDiagnosisRequest),
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientDiagnoses]);
 
@@ -111,15 +118,15 @@ export function DiagnosisQuestion({
       ...diagnoses,
       { ...DIAGNOSIS_INITIAL_VALUE, code },
     ] as DiagnosisRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "diagnosis",
           value: newDiagnoses,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveDiagnosis = (index: number) => {
@@ -131,27 +138,27 @@ export function DiagnosisQuestion({
           ? { ...d, verification_status: "entered_in_error" as const }
           : d,
       ) as DiagnosisRequest[];
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: newDiagnoses,
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newDiagnoses = diagnoses.filter((_, i) => i !== index);
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: newDiagnoses,
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   };
 
@@ -162,15 +169,15 @@ export function DiagnosisQuestion({
     const newDiagnoses = diagnoses.map((diagnosis, i) =>
       i === index ? { ...diagnosis, ...updates } : diagnosis,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "diagnosis",
           value: newDiagnoses,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+    );
   };
 
   return (

@@ -32,7 +32,9 @@ interface QuestionInputProps {
   questionnaireResponses: QuestionnaireResponse[];
   encounterId?: string;
   updateQuestionnaireResponseCB: (
-    questionnaireResponse: QuestionnaireResponse,
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
   ) => void;
   errors: QuestionValidationError[];
   clearError: () => void;
@@ -61,20 +63,21 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [...questionnaireResponse.values, { type: "string", value: "" }],
-    });
+    updateQuestionnaireResponseCB(
+      [...questionnaireResponse.values, { type: "string", value: "" }],
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const removeValue = (index: number) => {
     const updatedValues = questionnaireResponse.values.filter(
       (_, i) => i !== index,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: updatedValues,
-    });
+    updateQuestionnaireResponseCB(
+      updatedValues,
+      questionnaireResponse.question_id,
+    );
   };
 
   const renderSingleInput = (index: number = 0) => {
@@ -193,9 +196,13 @@ export function QuestionInput({
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}
-                      updateQuestionnaireResponseCB={
-                        updateQuestionnaireResponseCB
-                      }
+                      handleUpdateNote={(note) => {
+                        updateQuestionnaireResponseCB(
+                          [...questionnaireResponse.values],
+                          questionnaireResponse.question_id,
+                          note,
+                        );
+                      }}
                       disabled={disabled}
                     />
                   )}
@@ -219,7 +226,13 @@ export function QuestionInput({
             </Button>
             <NotesInput
               questionnaireResponse={questionnaireResponse}
-              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
               disabled={disabled}
             />
           </div>

@@ -53,14 +53,21 @@ import {
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface AllergyQuestionProps {
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -126,15 +133,15 @@ export function AllergyQuestion({
 
   useEffect(() => {
     if (patientAllergies?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "allergy_intolerance",
             value: patientAllergies.results.map(convertToAllergyRequest),
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientAllergies]);
 
@@ -143,18 +150,18 @@ export function AllergyQuestion({
       ...allergies,
       { ...ALLERGY_INITIAL_VALUE, code },
     ] as AllergyIntoleranceRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveAllergy = (index: number) => {
     const newAllergies = allergies.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleUpdateAllergy = (
@@ -164,10 +171,10 @@ export function AllergyQuestion({
     const newAllergies = allergies.map((allergy, i) =>
       i === index ? { ...allergy, ...updates } : allergy,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
