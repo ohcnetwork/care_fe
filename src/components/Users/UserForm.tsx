@@ -61,22 +61,22 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
         ? z.string().optional()
         : z
             .string()
-            .min(4, t("username_min_length_validation"))
-            .max(16, t("username_max_length_validation"))
-            .regex(/^[a-z0-9._-]*$/, t("username_characters_validation"))
-            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_start_end_validation"))
+            .min(4, t("field_required"))
+            .max(16, t("username_not_valid"))
+            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
               (val) => !val.match(/(?:[._-]{2,})/),
-              t("username_consecutive_validation"),
+              t("username_not_valid"),
             ),
       password: isEditMode
         ? z.string().optional()
         : z
             .string()
-            .min(8, t("password_length_validation"))
-            .regex(/[a-z]/, t("password_lowercase_validation"))
-            .regex(/[A-Z]/, t("password_uppercase_validation"))
-            .regex(/[0-9]/, t("password_number_validation")),
+            .min(8, t("field_required"))
+            .regex(/[a-z]/, t("new_password_validation"))
+            .regex(/[A-Z]/, t("new_password_validation"))
+            .regex(/[0-9]/, t("new_password_validation")),
       c_password: isEditMode ? z.string().optional() : z.string(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
@@ -358,7 +358,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                       />
                     </div>
                   </FormControl>
-                  {isUsernameFieldFocused && (
+                  {isUsernameFieldFocused ? (
                     <>
                       <div
                         className="text-small mt-2 pl-2 text-secondary-500"
@@ -401,6 +401,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                         {renderUsernameFeedback(usernameInput || "")}
                       </div>
                     </>
+                  ) : (
+                    <FormMessage />
                   )}
                 </FormItem>
               )}
@@ -422,7 +424,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                         onBlur={() => setIsPasswordFieldFocused(false)}
                       />
                     </FormControl>
-                    {isPasswordFieldFocused && (
+                    {isPasswordFieldFocused ? (
                       <div
                         className="text-small mt-2 pl-2 text-secondary-500"
                         aria-live="polite"
@@ -450,8 +452,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                           ]}
                         />
                       </div>
+                    ) : (
+                      <FormMessage />
                     )}
-                    <FormMessage />
                   </FormItem>
                 )}
               />
