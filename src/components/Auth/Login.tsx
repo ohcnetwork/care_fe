@@ -30,6 +30,7 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import FiltersCache from "@/Utils/FiltersCache";
+import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
@@ -242,6 +243,7 @@ const Login = (props: LoginProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    ViewCache.invalidateAll();
     const validated = validateData();
     if (!validated) return;
 

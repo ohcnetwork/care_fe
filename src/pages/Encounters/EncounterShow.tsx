@@ -241,8 +241,8 @@ export const EncounterShow = (props: Props) => {
           </Link>
         </div>
       </nav>
-      <div className="mt-4 w-full border-b-2 border-secondary-200">
-        <div className="mt-2 flex w-full flex-col md:flex-row">
+      <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
+        <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={encounterData.patient}
