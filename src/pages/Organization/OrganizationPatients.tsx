@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -21,6 +20,7 @@ import { Patient } from "@/types/emr/newPatient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -99,18 +99,12 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-            <h2 className="text-lg font-semibold">{t("patients")}</h2>
-            <Badge
-              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-              variant="outline"
-            >
-              {patients
-                ? t("entity_count", {
-                    count: patients.count,
-                    entity: "Patient",
-                  })
-                : "Loading..."}
-            </Badge>
+            <EntityBadge
+              title={t("patients")}
+              count={patients?.count}
+              isLoading={isLoading}
+              translationParams={{ entity: "Patient" }}
+            />
           </div>
         </div>
 

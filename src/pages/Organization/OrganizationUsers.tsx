@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,7 @@ import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
+import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
@@ -59,18 +59,12 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-            <h2 className="text-lg font-semibold">{t("users")}</h2>
-            <Badge
-              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-              variant="outline"
-            >
-              {users
-                ? t("entity_count", {
-                    count: users.count || 0,
-                    entity: "User",
-                  })
-                : "Loading..."}
-            </Badge>
+            <EntityBadge
+              title={t("users")}
+              count={users?.count}
+              isLoading={isLoadingUsers}
+              translationParams={{ entity: "User" }}
+            />
           </div>
           <div className="flex gap-2">
             <AddUserSheet

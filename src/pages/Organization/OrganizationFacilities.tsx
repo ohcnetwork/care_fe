@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +19,7 @@ import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EditFacilitySheet from "./components/EditFacilitySheet";
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -60,17 +60,12 @@ export default function OrganizationFacilities({
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-            <h2 className="text-lg font-semibold">{t("facilities")}</h2>
-            <Badge
-              className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
-              variant="outline"
-            >
-              {facilities
-                ? t("facility_count", {
-                    count: facilities.count,
-                  })
-                : "Loading..."}
-            </Badge>
+            <EntityBadge
+              title={t("facilities")}
+              count={facilities?.count}
+              isLoading={isLoading}
+              customTranslation="facility_count"
+            />
           </div>
           <AddFacilitySheet organizationId={id} />
         </div>
