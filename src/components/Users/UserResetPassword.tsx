@@ -147,7 +147,7 @@ export default function UserResetPassword({
                           onBlur={() => setIsPasswordFieldFocused(false)}
                         />
                       </FormControl>
-                      {isPasswordFieldFocused && (
+                      {isPasswordFieldFocused ? (
                         <div
                           className="text-small mt-2 pl-2 text-secondary-500"
                           aria-live="polite"
@@ -180,6 +180,8 @@ export default function UserResetPassword({
                             ]}
                           />
                         </div>
+                      ) : (
+                        <FormMessage />
                       )}
                     </FormItem>
                   )}
