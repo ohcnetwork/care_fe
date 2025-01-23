@@ -1,6 +1,6 @@
-import { FacilityCreation } from "@/cypress/pageObject/facility/FacilityCreation";
-import { generatePhoneNumber } from "@/cypress/utils/commonUtils";
-import { generateFacilityData } from "@/cypress/utils/facilityData";
+import { FacilityCreation } from "pageObject/facility/FacilityCreation";
+import { generatePhoneNumber } from "utils/commonUtils";
+import { generateFacilityData } from "utils/facilityData";
 
 const LOCATION_HIERARCHY = {
   localBody: "Aluva",
@@ -12,6 +12,8 @@ describe("Facility Management", () => {
   const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
+    // Set larger viewport to ensure all elements are visible
+    cy.viewport(1920, 1080);
     cy.visit("/login");
     cy.loginByApi("nurse");
   });
