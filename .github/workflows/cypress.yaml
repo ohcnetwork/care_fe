@@ -77,14 +77,14 @@ jobs:
           SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Upload cypress screenshots on failure 📸
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
 
       - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
