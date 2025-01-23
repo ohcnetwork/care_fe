@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Link, navigate } from "raviger";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format, isBefore, isSameDay } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,29 +20,36 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { FacilityModel } from "@/components/Facility/models";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { TokenSlot } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+  TokenSlot,
+} from "@/types/scheduling/schedule";
 
 interface AppointmentsProps {
   facilityId: string;
   staffId: string;
+  appointmentId?: string;
 }
 
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
-  const { facilityId, staffId } = props;
+  const { goBack } = useAppHistory();
+  const { facilityId, staffId, appointmentId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
+  const queryClient = useQueryClient();
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
@@ -54,16 +62,34 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
   }
 
-  const { data: facilityResponse, error: facilityError } = useQuery<
-    RequestResult<FacilityModel>
-  >({
-    queryKey: ["facility", facilityId],
-    queryFn: () =>
-      request(routes.getAnyFacility, {
+  const { data: appointmentData } = useQuery<{ results: Appointment[] }>({
+    queryKey: ["appointment", tokenData?.phoneNumber],
+    queryFn: query(PublicAppointmentApi.getAppointments, {
+      headers: {
+        Authorization: `Bearer ${tokenData?.token}`,
+      },
+    }),
+    enabled: !!appointmentId && !!tokenData?.token,
+  });
+
+  const appointment = appointmentData?.results.find(
+    (appointment) => appointment.id === appointmentId,
+  );
+
+  useEffect(() => {
+    if (appointment) {
+      setReason(appointment.reason_for_visit);
+    }
+  }, [appointment]);
+
+  const { data: facilityResponse, error: facilityError } =
+    useQuery<FacilityModel>({
+      queryKey: ["facility", facilityId],
+      queryFn: query(routes.getAnyFacility, {
         pathParams: { id: facilityId },
         silent: true,
       }),
-  });
+    });
 
   if (facilityError) {
     toast.error(t("error_fetching_facility_data"));
@@ -109,6 +135,56 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     }
   }
 
+  const { mutate: createAppointment, isPending: isCreatingAppointment } =
+    useMutation({
+      mutationFn: (body: AppointmentCreateRequest) =>
+        mutate(PublicAppointmentApi.createAppointment, {
+          pathParams: { id: selectedSlot?.id || "" },
+          body,
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        })(body),
+      onSuccess: (data: Appointment) => {
+        toast.success(t("appointment_created_success"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            ["patients", tokenData.phoneNumber],
+            ["appointment", tokenData.phoneNumber],
+          ],
+        });
+        navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
+          replace: true,
+        });
+      },
+    });
+
+  const { mutate: cancelAppointment, isPending: isCancellingAppointment } =
+    useMutation({
+      mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+      }),
+      onSuccess: (appointment: Appointment) => {
+        toast.success(t("appointment_cancelled"));
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", tokenData.phoneNumber],
+        });
+        createAppointment({
+          reason_for_visit: reason,
+          patient: appointment.patient.id,
+        });
+      },
+    });
+
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    cancelAppointment({
+      appointment: appointment.id,
+      patient: appointment.patient.id,
+    });
+  };
+
   useEffect(() => {
     setSelectedSlot(undefined);
   }, [selectedDate]);
@@ -139,12 +215,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         <div className="flex px-2 pb-4 justify-start">
           <Button
             variant="outline"
-            asChild
             className="border border-secondary-400"
+            onClick={() => goBack()}
           >
-            <Link href={`/facility/${facilityId}`}>
-              <span className="text-sm underline">{t("back")}</span>
-            </Link>
+            <span className="text-sm underline">{t("back")}</span>
           </Button>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -178,7 +252,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-muted-foreground">
-                      {facilityResponse?.data?.name}
+                      {facilityResponse?.name}
                     </div>
                   </div>
                 </div>
@@ -188,7 +262,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <div className="flex-1 mx-2">
             <div className="flex flex-col gap-6">
               <span className="text-base font-semibold">
-                {t("book_an_appointment_with")}{" "}
+                {appointmentId
+                  ? t("reschedule_appointment_with")
+                  : t("book_an_appointment_with")}{" "}
                 {userData.user_type === "doctor"
                   ? `Dr. ${userData.first_name} ${userData.last_name}`
                   : `${userData.first_name} ${userData.last_name}`}
@@ -213,11 +289,16 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   groupSlotsByAvailability(slotsQuery.data.results).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
-                        <h4 className="mb-3">{availability.name}</h4>
+                        <h4 className="text-lg font-semibold mb-3">
+                          {availability.name}
+                        </h4>
                         <div className="flex flex-wrap gap-2">
                           {slots.map((slot) => {
                             const percentage =
                               slot.allocated / availability.tokens_per_slot;
+                            const isPastSlot =
+                              isSameDay(selectedDate, new Date()) &&
+                              isBefore(slot.start_datetime, new Date());
 
                             return (
                               <Button
@@ -240,9 +321,9 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                                 }}
                                 disabled={
                                   slot.allocated ===
-                                  availability.tokens_per_slot
+                                    availability.tokens_per_slot || isPastSlot
                                 }
-                                className="flex flex-col items-center group py-6 gap-1"
+                                className="flex flex-col items-center group gap-0"
                               >
                                 <span className="font-semibold">
                                   {format(slot.start_datetime, "HH:mm")}
@@ -281,21 +362,29 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       <div className="bg-secondary-200 h-20">
         {selectedSlot?.id && (
           <div className="container mx-auto flex flex-row justify-end mt-6">
+            {(isCreatingAppointment || isCancellingAppointment) && (
+              <Loader2 className="h-4 w-4 animate-spin self-center mr-2" />
+            )}
             <Button
               variant="primary_gradient"
+              disabled={isCreatingAppointment || isCancellingAppointment}
               onClick={() => {
-                localStorage.setItem(
-                  "selectedSlot",
-                  JSON.stringify(selectedSlot),
-                );
-                localStorage.setItem("reason", reason);
-                navigate(
-                  `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                );
+                if (appointmentId && appointment) {
+                  handleRescheduleAppointment(appointment);
+                } else {
+                  localStorage.setItem(
+                    "selectedSlot",
+                    JSON.stringify(selectedSlot),
+                  );
+                  localStorage.setItem("reason", reason);
+                  navigate(
+                    `/facility/${facilityId}/appointments/${staffId}/patient-select`,
+                  );
+                }
               }}
             >
               <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-              {t("continue")}
+              {appointmentId ? t("reschedule_appointment") : t("continue")}
               <CareIcon icon="l-arrow-right" className="h-4 w-4" />
             </Button>
           </div>

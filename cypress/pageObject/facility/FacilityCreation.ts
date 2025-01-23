@@ -127,7 +127,13 @@ export class FacilityCreation {
   }
 
   fillLocationHierarchy(location: { localBody: string; ward: string }) {
-    cy.typeAndSelectOption('[data-cy="select-local_body"]', location.localBody);
+    // Don't verify selection for local body (false parameter)
+    cy.typeAndSelectOption(
+      '[data-cy="select-local_body"]',
+      location.localBody,
+      false,
+    );
+    // Verify selection for ward (default behavior)
     cy.typeAndSelectOption('[data-cy="select-ward"]', location.ward);
     return this;
   }

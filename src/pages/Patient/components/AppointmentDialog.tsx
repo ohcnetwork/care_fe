@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -39,6 +40,11 @@ function AppointmentDialog({
   const queryClient = useQueryClient();
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    navigate(
+      `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
+    );
+  };
   const { mutate: cancelAppointment, isPending } = useMutation({
     mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
       headers: {
@@ -103,7 +109,10 @@ function AppointmentDialog({
               >
                 <span>{t("cancel")}</span>
               </Button>
-              <Button variant="secondary">
+              <Button
+                variant="secondary"
+                onClick={() => handleRescheduleAppointment(appointment)}
+              >
                 <span>{t("reschedule")}</span>
               </Button>
             </span>
