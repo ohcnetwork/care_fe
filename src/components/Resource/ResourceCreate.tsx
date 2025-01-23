@@ -356,7 +356,7 @@ export default function ResourceCreate(props: ResourceProps) {
               <Separator />
 
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col lg:flex-row gap-2 lg:items-center justify-between">
                   <div>
                     <h3 className="text-lg font-medium">
                       {t("contact_information")}
