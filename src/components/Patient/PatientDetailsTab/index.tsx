@@ -16,14 +16,10 @@ export interface PatientProps {
   patientData: Patient;
 }
 
-export const patientTabs = [
+const commonTabs = [
   {
     route: "demography",
     component: Demography,
-  },
-  {
-    route: "appointments",
-    component: Appointments,
   },
   {
     route: "encounters",
@@ -50,3 +46,14 @@ export const patientTabs = [
     component: PatientFilesTab,
   },
 ];
+
+export const facilityPatientTabs = [
+  commonTabs[0],
+  {
+    route: "appointments",
+    component: Appointments,
+  },
+  ...commonTabs.slice(1),
+];
+
+export const patientTabs = [...commonTabs];
