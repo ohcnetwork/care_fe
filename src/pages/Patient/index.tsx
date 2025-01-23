@@ -7,9 +7,10 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import Loading from "@/components/Common/Loading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -63,7 +64,18 @@ function PatientIndex() {
   };
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div>
+        <div className="flex justify-between w-full mb-8">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 mt-4">
+          <CardListSkeleton count={6} />
+        </div>
+      </div>
+    );
   }
 
   const appointments = appointmentsData?.results

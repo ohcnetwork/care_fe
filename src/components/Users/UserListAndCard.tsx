@@ -89,7 +89,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
               imageUrl={
                 "profile_picture_url" in user ? user.profile_picture_url : ""
               }
-              className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
+              className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0 rounded-md"
             />
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex flex-col gap-1">
@@ -170,7 +170,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
             name={user.username ?? ""}
-            className="h-10 w-10 text-lg"
+            className="h-10 w-10 text-lg rounded-md"
           />
           <div className="flex flex-col">
             <h1 id={`name-${user.username}`} className="text-sm font-medium">

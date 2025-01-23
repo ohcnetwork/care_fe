@@ -24,7 +24,7 @@ export default function UserDashboard() {
           <Avatar
             name={user.first_name}
             imageUrl={user.read_profile_picture_url}
-            className="h-14 w-14 md:h-16 md:w-16"
+            className="h-14 w-14 md:h-16 md:w-16 rounded-md"
           />
           <div className="space-y-1">
             <h1 className="text-xl md:text-2xl font-bold">
@@ -94,7 +94,7 @@ export default function UserDashboard() {
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
                       name={facility.name}
-                      className="h-12 w-12 md:h-14 md:w-14"
+                      className="h-12 w-12 md:h-14 md:w-14 rounded-md"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium truncate text-sm md:text-base">
@@ -127,7 +127,7 @@ export default function UserDashboard() {
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
                       name={org.name}
-                      className="h-12 w-12 md:h-14 md:w-14"
+                      className="h-12 w-12 md:h-14 md:w-14 rounded-md"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium truncate text-sm md:text-base">
