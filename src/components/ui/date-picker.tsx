@@ -16,9 +16,10 @@ import {
 interface DatePickerProps {
   date?: Date;
   onChange?: (date?: Date) => void;
+  disabled?: (date: Date) => boolean;
 }
 
-export function DatePicker({ date, onChange }: DatePickerProps) {
+export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -44,6 +45,7 @@ export function DatePicker({ date, onChange }: DatePickerProps) {
             setOpen(false);
           }}
           initialFocus
+          disabled={disabled}
         />
       </PopoverContent>
     </Popover>
