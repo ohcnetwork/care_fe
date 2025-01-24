@@ -93,6 +93,7 @@ export default [
       ...reactHooksPlugin.configs.recommended.rules,
       "react/prop-types": "off",
       "react/no-children-prop": "off",
+      "react/no-unescaped-entities": "off",
     },
   },
   // No Relative import paths rule
