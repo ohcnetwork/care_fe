@@ -79,7 +79,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         ...(organization?.org_type === "govt" && { organization: id }),
         page: qParams.page,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         ...advancedFilter.filter,
       },
     }),

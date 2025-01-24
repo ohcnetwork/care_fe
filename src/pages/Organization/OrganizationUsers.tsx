@@ -44,7 +44,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       queryParams: {
         username: qParams.search,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!id,
