@@ -19,6 +19,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 
@@ -153,7 +154,9 @@ export function AllergyList({
                     className="w-4 h-4"
                     imageUrl={allergy.created_by.profile_picture_url}
                   />
-                  <span className="text-sm">{allergy.created_by.username}</span>
+                  <span className="text-sm">
+                    {formatName(allergy.created_by)}
+                  </span>
                 </TableCell>
               </TableRow>
             ))}

@@ -82,7 +82,7 @@ export function OrganizationSwitcher({
             className={cn(
               "gap-2 p-2",
               org?.name === selectedOrganization?.name &&
-                "bg-primary-500 text-white",
+                "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
             )}
           >
             {org.name}
