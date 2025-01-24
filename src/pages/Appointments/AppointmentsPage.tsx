@@ -353,8 +353,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         </Tabs>
       }
     >
-      <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start">
+      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
           <div className="mt-1">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
