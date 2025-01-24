@@ -355,13 +355,13 @@ export const FilesTab = (props: FilesTabProps) => {
               e.preventDefault();
             }}
           >
-            <label
+            <Label
               htmlFor="file_upload_patient"
               className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
-            </label>
+            </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
           <DropdownMenuItem className="flex flex-row items-center text-primary-900">
@@ -609,12 +609,12 @@ const FileUploadDialog = ({
                 </ul>
               </div>
               <div>
-                <label
+                <Label
                   htmlFor="upload-file-name-0"
                   className="block text-sm font-medium text-gray-700"
                 >
                   {t("enter_combined_file_name")}
-                </label>
+                </Label>
                 <Input
                   name="combined_file_name"
                   type="text"
@@ -649,12 +649,12 @@ const FileUploadDialog = ({
                   </Button>
                 </div>
                 <div>
-                  <label
+                  <Label
                     htmlFor={`upload-file-name-${index}`}
                     className="block text-sm font-medium text-gray-700"
                   >
                     {t("enter_file_name")}
-                  </label>
+                  </Label>
 
                   <Input
                     name={`file_name_${index}`}
@@ -686,9 +686,9 @@ const FileUploadDialog = ({
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
-            <label htmlFor="file_upload_patient" className="cursor-pointer">
+            <Label htmlFor="file_upload_patient" className="cursor-pointer">
               {t("combine_files_pdf")}
-            </label>
+            </Label>
           </div>
         )}
 
