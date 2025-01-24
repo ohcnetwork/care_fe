@@ -24,7 +24,7 @@ export default function UserDashboard() {
           <Avatar
             name={user.first_name}
             imageUrl={user.read_profile_picture_url}
-            className="h-14 w-14 md:h-16 md:w-16 rounded-md"
+            className="h-14 w-14 md:h-16 md:w-16"
           />
           <div className="space-y-1">
             <h1 className="text-xl md:text-2xl font-bold">
