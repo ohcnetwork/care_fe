@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -39,7 +40,6 @@ import {
 
 import AudioPlayer from "@/components/Common/AudioPlayer";
 import Loading from "@/components/Common/Loading";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
@@ -571,12 +571,19 @@ const FileUploadDialog = ({
   fileUpload: FileUploadReturn;
   associatingId: string;
 }) => {
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setIsPdf(false);
+      fileUpload.clearFiles();
+    }
+    onOpenChange(open);
+  };
   const { t } = useTranslation();
   const [isPdf, setIsPdf] = useState(false);
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleDialogClose}
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
@@ -589,44 +596,92 @@ const FileUploadDialog = ({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {fileUpload.files.map((file, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                <span className="flex items-center truncate">
-                  <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                  <span className="truncate">{file.name}</span>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => fileUpload.removeFile(index)}
-                  disabled={fileUpload.uploading}
-                >
-                  <CareIcon icon="l-times" />
-                </Button>
+          {isPdf ? (
+            <>
+              <div className="space-y-2">
+                <ul className="list-disc list-inside space-y-1">
+                  {fileUpload.files.map((file, index) => (
+                    <li key={index} className="truncate">
+                      {file.name}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <TextFormField
-                name={`file_name_${index}`}
-                type="text"
-                label={t("enter_file_name")}
-                id={`upload-file-name-${index}`}
-                required
-                value={fileUpload.fileNames[index] || ""}
-                disabled={fileUpload.uploading}
-                onChange={(e) => fileUpload.setFileName(e.value, index)}
-                error={
-                  index === 0 && fileUpload.error ? fileUpload.error : undefined
-                }
-              />
-            </div>
-          ))}
+              <div>
+                <label
+                  htmlFor="upload-file-name-0"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  {t("enter_combined_file_name")}
+                </label>
+                <Input
+                  name="combined_file_name"
+                  type="text"
+                  id="combined-file-name"
+                  required
+                  value={fileUpload.fileNames[0] || ""}
+                  disabled={fileUpload.uploading}
+                  onChange={(e) => fileUpload.setFileName(e.target.value)}
+                />
+                {fileUpload.error && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {fileUpload.error}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            fileUpload.files.map((file, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                  <span className="flex items-center truncate">
+                    <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
+                    <span className="truncate">{file.name}</span>
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => fileUpload.removeFile(index)}
+                    disabled={fileUpload.uploading}
+                  >
+                    <CareIcon icon="l-times" />
+                  </Button>
+                </div>
+                <div>
+                  <label
+                    htmlFor={`upload-file-name-${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    {t("enter_file_name")}
+                  </label>
+
+                  <Input
+                    name={`file_name_${index}`}
+                    type="text"
+                    id={`upload-file-name-${index}`}
+                    required
+                    value={fileUpload.fileNames[index] || ""}
+                    disabled={fileUpload.uploading}
+                    onChange={(e) =>
+                      fileUpload.setFileName(e.target.value, index)
+                    }
+                  />
+                  {index === 0 && fileUpload.error && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {fileUpload.error}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
             <Checkbox
               id="file_upload_patient"
               checked={isPdf}
-              onCheckedChange={(checked) => setIsPdf(!!checked)}
+              onCheckedChange={(checked: boolean) => setIsPdf(checked)}
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
