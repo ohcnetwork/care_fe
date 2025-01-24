@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   combine-prs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Combine dependencies

@@ -1,4 +1,4 @@
-import "./commands";
+import { ErrorMessageItem } from "./commands";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -16,23 +16,16 @@ declare global {
       clickCancelButton(buttonText?: string): Chainable<Element>;
       typeAndSelectOption(
         element: string,
-        referance: string,
+        reference: string,
+        skipVerification?: boolean,
       ): Chainable<Element>;
       clickAndMultiSelectOption(
         selector: string,
         symptoms: string | string[],
       ): Chainable<Element>;
-      selectRadioOption(name: string, value: string): Chainable<Element>;
-      typeAndMultiSelectOption(
-        selector: string,
-        input: string,
-        symptoms: string | string[],
-      ): Chainable<Element>;
-      clickAndTypeDate(date: string, selector: string): Chainable<Element>;
       clickAndSelectOption(
         element: string,
         reference: string,
-        skipVerification?: boolean,
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,
@@ -44,7 +37,7 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
-      verifyErrorMessages(errorMessages: string[]): Chainable<Subject>;
+      verifyErrorMessages(errors: ErrorMessageItem[]): Chainable<void>;
       typeIntoField(
         selector: string,
         value: string,

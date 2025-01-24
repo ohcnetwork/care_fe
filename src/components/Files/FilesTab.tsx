@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -388,7 +389,7 @@ export const FilesTab = (props: FilesTabProps) => {
 
   const RenderTable = () => {
     return (
-      <Table className="border-separate border-spacing-y-3 mx-2 min-w-[800px] lg:max-w-[calc(100%-16px)]">
+      <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
             <TableHead className="w-[30%] bg-white rounded-l">
@@ -587,7 +588,7 @@ const FileUploadDialog = ({
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-5"
+        className="mb-8 rounded-lg p-5 max-w-fit"
         aria-describedby="file-upload"
       >
         <DialogHeader>

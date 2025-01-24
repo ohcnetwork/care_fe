@@ -130,7 +130,7 @@ export const PatientHome = (props: {
           </div>
           <div className="sticky top-20 mt-8 h-full lg:basis-1/6">
             <section className="mb-4 space-y-2 md:flex">
-              <div className="mx-3 w-full lg:mx-0">
+              <div className="w-full lg:mx-0">
                 <div className="font-semibold text-secondary-900">
                   {t("actions")}
                 </div>

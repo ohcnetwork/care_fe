@@ -86,7 +86,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       type: "phone" as const,
       placeholder: t("search_by_phone_number"),
       value: phoneNumber,
-      shortcutKey: "p",
     },
   ];
 
@@ -146,6 +145,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchByMultipleFields
+                initialOptionIndex={0}
                 id="patient-search"
                 options={searchOptions}
                 onSearch={handleSearch}
@@ -243,7 +243,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             >
               {t("cancel")}
             </Button>
-            <Button onClick={handleVerify}>{t("verify")}</Button>
+            <Button className="mb-2" onClick={handleVerify}>
+              {t("verify")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

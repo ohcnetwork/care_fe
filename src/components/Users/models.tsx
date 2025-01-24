@@ -2,7 +2,6 @@ import { Gender, UserType } from "@/components/Users/UserFormValidations";
 
 import { GENDER_TYPES } from "@/common/constants";
 
-import { FeatureFlag } from "@/Utils/featureFlags";
 import { Organization } from "@/types/organization/organization";
 
 export type UpdatePasswordForm = {
@@ -46,7 +45,6 @@ export type UserModel = UserBareMinimum & {
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
-  user_flags?: FeatureFlag[];
   facilities?: UserFacilityModel[];
   organizations?: Organization[];
   permissions: string[];

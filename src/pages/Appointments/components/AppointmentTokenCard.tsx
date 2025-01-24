@@ -4,17 +4,16 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import { FacilityModel } from "@/components/Facility/models";
-
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { getFakeTokenNumber } from "@/pages/Scheduling/utils";
+import { FacilityData } from "@/types/facility/facility";
 import { Appointment } from "@/types/scheduling/schedule";
 
 interface Props {
   id?: string;
   appointment: Appointment;
-  facility: FacilityModel;
+  facility: FacilityData;
 }
 
 const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
@@ -24,9 +23,9 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 w-[30rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out"
+      className="p-6 lg:w-[25rem] border border-gray-300 relative hover:scale-105 hover:rotate-1 hover:shadow-xl transition-all duration-300 ease-in-out"
     >
-      <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:60%_auto]" />
+      <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
 
       <div className="relative">
         <div className="flex items-start justify-between">
@@ -34,7 +33,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
             <h3 className="text-lg font-bold tracking-tight">
               {facility.name}
             </h3>
-            <div className="text-sm text-gray-600">
+            <div className="flex flex-col lg:flex-row text-sm text-gray-600">
               <span>{facility.pincode}, </span>
               <span>{`Ph.: ${facility.phone_number}`}</span>
             </div>

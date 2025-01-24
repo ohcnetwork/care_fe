@@ -1,19 +1,27 @@
-import { FacilityCreation } from "../../pageObject/facility/FacilityCreation";
-import { generatePhoneNumber } from "../../utils/commonUtils";
-import { generateFacilityData } from "../../utils/facilityData";
+import { FacilityCreation } from "pageObject/facility/FacilityCreation";
+import { generatePhoneNumber } from "utils/commonUtils";
+import { generateFacilityData } from "utils/facilityData";
+
+const LOCATION_HIERARCHY = {
+  localBody: "Aluva",
+  ward: "4",
+};
 
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
-  const testFacility = generateFacilityData();
-  const phoneNumber = generatePhoneNumber();
 
   beforeEach(() => {
+    // Set larger viewport to ensure all elements are visible
+    cy.viewport(1920, 1080);
     cy.visit("/login");
     cy.loginByApi("nurse");
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {
+    const testFacility = generateFacilityData();
+    const phoneNumber = generatePhoneNumber();
+
     facilityPage.navigateToOrganization("Kerala");
     facilityPage.navigateToFacilitiesList();
     facilityPage.clickAddFacility();
@@ -34,6 +42,8 @@ describe("Facility Management", () => {
       testFacility.pincode,
       testFacility.address,
     );
+
+    facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 
     facilityPage.fillLocationDetails(
       testFacility.coordinates.latitude,

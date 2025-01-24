@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -17,6 +18,7 @@ import query from "@/Utils/request/query";
 import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
+import EditFacilitySheet from "./components/EditFacilitySheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -31,7 +33,7 @@ export default function OrganizationFacilities({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 14, cacheBlacklist: ["facility"] });
+    useFilters({ limit: 15, cacheBlacklist: ["name"] });
 
   const { data: facilities, isLoading } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
@@ -81,31 +83,7 @@ export default function OrganizationFacilities({
           data-cy="facility-cards"
         >
           {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="h-48 bg-gray-200 animate-pulse" />
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3" />
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+            <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
@@ -114,62 +92,72 @@ export default function OrganizationFacilities({
             </Card>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
-              <Link
+              <Card
                 key={facility.id}
-                href={`/facility/${facility.id}`}
-                className="block"
+                className="h-full hover:border-primary/50 transition-colors overflow-hidden"
               >
-                <Card className="h-full hover:border-primary/50 transition-colors overflow-hidden">
-                  <div className="relative h-48 bg-gray-100">
-                    {facility.read_cover_image_url ? (
-                      <img
-                        src={facility.read_cover_image_url}
-                        alt={facility.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                        <Avatar name={facility.name} />
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-md font-medium text-gray-900">
-                            {facility.name}
-                          </h3>
-                          <div className="font-medium">
-                            {facility.facility_type}
-                          </div>
+                <div className="relative h-48 bg-gray-100">
+                  {facility.read_cover_image_url ? (
+                    <img
+                      src={facility.read_cover_image_url}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                      <Avatar name={facility.name} />
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-md font-medium text-gray-900">
+                          {facility.name}
+                        </h3>
+                        <div className="font-medium">
+                          {facility.facility_type}
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end">
-                    <Link
-                      href={`/facility/${facility.id}`}
-                      className="text-sm text-primary hover:underline"
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <div className="flex items-center pl-7">
+                    <EditFacilitySheet
+                      organizationId={id}
+                      facilityId={facility.id}
+                      trigger={
+                        <Button
+                          variant="link"
+                          size="icon"
+                          className="text-primary"
+                        >
+                          <CareIcon icon="l-edit" className="h-4 w-4" />
+                          <span className="">{t("edit_facility")}</span>
+                        </Button>
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      variant="link"
+                      size="icon"
+                      className="text-primary"
+                      asChild
                     >
-                      View Facility
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        asChild
+                      <Link
+                        href={`/facility/${facility.id}`}
+                        className="text-sm w-full hover:underline"
                       >
-                        <div>
-                          <CareIcon
-                            icon="l-arrow-up-right"
-                            className="h-4 w-4"
-                          />
-                        </div>
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              </Link>
+                        {t("view_facility")}
+                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
             ))
           )}
         </div>

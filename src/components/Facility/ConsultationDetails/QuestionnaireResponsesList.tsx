@@ -5,6 +5,8 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Card } from "@/components/ui/card";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import routes from "@/Utils/request/api";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
@@ -147,22 +149,8 @@ export default function QuestionnaireResponsesList({ encounter }: Props) {
             </PaginatedList.WhenEmpty>
 
             <PaginatedList.WhenLoading>
-              <div className="grid gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Card
-                    key={i}
-                    className="flex items-center justify-between p-4"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />
-                      <div className="space-y-2">
-                        <div className="h-4 w-48 animate-pulse rounded bg-muted" />
-                        <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-                        <div className="h-3 w-40 animate-pulse rounded bg-muted" />
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+              <div className="grid gap-5">
+                <CardListSkeleton count={3} />
               </div>
             </PaginatedList.WhenLoading>
 

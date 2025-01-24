@@ -1,5 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,7 +16,7 @@ import Loading from "@/components/Common/Loading";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -63,6 +64,7 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
@@ -72,11 +74,14 @@ export function QuestionnaireForm({
 
   const {
     data: questionnaireData,
-    loading: isQuestionnaireLoading,
+    isLoading: isQuestionnaireLoading,
     error: questionnaireError,
-  } = useQuery(questionnaireApi.detail, {
-    pathParams: { id: questionnaireSlug ?? "" },
-    prefetch: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
+  } = useQuery({
+    queryKey: ["questionnaireDetail", questionnaireSlug],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id: questionnaireSlug ?? "" },
+    }),
+    enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
@@ -93,6 +98,10 @@ export function QuestionnaireForm({
       toast.error(t("questionnaire_submission_failed"));
     },
   });
+
+  // TODO: Use useBlocker hook after switching to tanstack router
+  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  useNavigationPrompt(isDirty, t("unsaved_changes"));
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -148,6 +157,7 @@ export function QuestionnaireForm({
   };
 
   const handleSubmissionError = (results: ValidationErrorResponse[]) => {
+    toast.error("Form Errr");
     const updatedForms = [...questionnaireForms];
     const errorMessages: string[] = [];
 
@@ -186,6 +196,7 @@ export function QuestionnaireForm({
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
   const handleSubmit = async () => {
+    setIsDirty(false);
     if (hasErrors) return;
 
     const requests: BatchRequest[] = [];
@@ -291,11 +302,6 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
-      <PLUGIN_Component
-        __name="Scribe"
-        formState={questionnaireForms}
-        setFormState={setQuestionnaireForms}
-      />
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
         {questionnaireForms.map((form, index) => (
@@ -348,6 +354,9 @@ export function QuestionnaireForm({
                       : formItem,
                   ),
                 );
+                if (!isDirty) {
+                  setIsDirty(true);
+                }
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}
@@ -431,6 +440,12 @@ export function QuestionnaireForm({
             </Button>
           </div>
         )}
+
+        <PLUGIN_Component
+          __name="Scribe"
+          formState={questionnaireForms}
+          setFormState={setQuestionnaireForms}
+        />
 
         {/* Add a Preview of the QuestionnaireForm */}
         {import.meta.env.DEV && (

@@ -2,7 +2,7 @@ import { QuestionnaireList } from "@/components/Questionnaire";
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireShow } from "@/components/Questionnaire/show";
 
-import { AppRoutes } from "../AppRouter";
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const QuestionnaireRoutes: AppRoutes = {
   "/questionnaire": () => <QuestionnaireList />,
