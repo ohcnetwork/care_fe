@@ -386,6 +386,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const [showDosageDialog, setShowDosageDialog] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0];
+  const isReadOnly = !!medication.id;
 
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
@@ -424,7 +425,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               }));
             }}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         </div>
         <div>
@@ -441,7 +442,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               }));
             }}
-            disabled={disabled || !localDoseRange.low.value}
+            disabled={disabled || !localDoseRange.low.value || isReadOnly}
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -470,7 +471,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               !localDoseRange.low.value ||
               !localDoseRange.high.value ||
               !localDoseRange.low.unit ||
-              !localDoseRange.high.unit
+              !localDoseRange.high.unit ||
+              isReadOnly
             }
           >
             {t("save")}
@@ -544,7 +546,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     },
                   });
                 }}
-                disabled={disabled}
+                disabled={disabled || isReadOnly}
               />
               <div className="flex justify-end">
                 <Button
@@ -552,6 +554,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   size="icon"
                   className="h-3 w-3 rounded-full hover:bg-transparent"
                   onClick={handleDoseRangeClick}
+                  disabled={disabled || isReadOnly}
                 >
                   +
                 </Button>
@@ -611,7 +614,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               });
             }
           }}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder={t("select_frequency")} />
@@ -659,7 +662,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               disabled={
                 disabled ||
                 !dosageInstruction?.timing?.repeat ||
-                dosageInstruction?.as_needed_boolean
+                dosageInstruction?.as_needed_boolean ||
+                isReadOnly
               }
               className="h-9 text-sm"
             />
@@ -688,7 +692,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             disabled={
               disabled ||
               !dosageInstruction?.timing?.repeat ||
-              dosageInstruction?.as_needed_boolean
+              dosageInstruction?.as_needed_boolean ||
+              isReadOnly
             }
           >
             <SelectTrigger className="h-9 text-sm w-24">
@@ -735,7 +740,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               },
             ]}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         ) : (
           <ValueSetSelect
@@ -747,7 +752,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               })
             }
             placeholder={t("select_additional_instructions")}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         )}
       </div>
@@ -759,7 +764,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.route}
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         />
       </div>
       {/* Site */}
@@ -770,7 +775,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.site}
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
         />
       </div>
@@ -782,7 +787,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.method}
           onSelect={(method) => handleUpdateDosageInstruction({ method })}
           placeholder={t("select_method")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           count={20}
         />
       </div>
@@ -794,7 +799,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onValueChange={(value: MedicationRequestIntent) =>
             onUpdate?.({ intent: value })
           }
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
             <SelectValue
@@ -826,7 +831,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             if (!date) return;
             onUpdate?.({ authored_on: date.toISOString() });
           }}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         />
       </div>
       {/* Notes */}

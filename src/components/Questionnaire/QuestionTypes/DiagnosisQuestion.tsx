@@ -288,7 +288,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   onset: { onset_datetime: e.target.value },
                 })
               }
-              disabled={disabled}
+              disabled={disabled || !!diagnosis.id}
               className="h-8 md:h-9"
             />
           </div>

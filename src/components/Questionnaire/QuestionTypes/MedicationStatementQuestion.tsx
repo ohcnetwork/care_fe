@@ -380,6 +380,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
+  const isReadOnly = !!medication.id;
 
   return (
     <div
@@ -405,7 +406,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           onValueChange={(value: MedicationStatementInformationSourceType) =>
             onUpdate?.({ information_source: value })
           }
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
             <SelectValue />
@@ -476,7 +477,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           value={medication.dosage_text || ""}
           onChange={(e) => onUpdate?.({ dosage_text: e.target.value })}
           placeholder={t("enter_dosage_instructions")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           className="h-9 text-sm"
         />
       </div>
@@ -514,7 +515,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           placeholder={t("reason_for_medication")}
           value={medication.reason || ""}
           onChange={(e) => onUpdate?.({ reason: e.target.value })}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           className="h-9 text-sm"
         />
       </div>

@@ -205,7 +205,7 @@ const SymptomRow = React.memo(function SymptomRow({
             type="date"
             value={symptom.onset?.onset_datetime || ""}
             onChange={handleDateChange}
-            disabled={disabled}
+            disabled={disabled || !!symptom.id}
             className="h-8 md:h-9"
           />
         </div>

@@ -156,14 +156,6 @@ export function AllergyQuestion({
     );
   };
 
-  // const handleRemoveAllergy = (index: number) => {
-  //   const newAllergies = allergies.filter((_, i) => i !== index);
-  //   updateQuestionnaireResponseCB(
-  //     [{ type: "allergy_intolerance", value: newAllergies }],
-  //     questionnaireResponse.question_id,
-  //   );
-  // };
-
   const handleRemoveAllergy = (index: number) => {
     const allergy = allergies[index];
     if (allergy.id) {
@@ -267,7 +259,7 @@ export function AllergyQuestion({
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, { category: value })
                       }
-                      disabled={disabled}
+                      disabled={disabled || !!allergy.id}
                     >
                       <SelectTrigger className="h-8 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
@@ -498,7 +490,7 @@ const AllergyTableRow = ({
           <Select
             value={allergy.category}
             onValueChange={(value) => onUpdate?.({ category: value })}
-            disabled={disabled}
+            disabled={disabled || !!allergy.id}
           >
             <SelectTrigger className="h-7 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
               <SelectValue
