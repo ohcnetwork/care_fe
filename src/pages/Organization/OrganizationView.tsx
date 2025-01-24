@@ -32,7 +32,11 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 12; // 3x4 grid
 
-  const { data: children, isLoading } = useQuery({
+  const {
+    data: children,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["organization", id, "children", page, limit, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
@@ -57,7 +61,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
             <EntityBadge
               title={t("organizations")}
               count={children?.count}
-              isLoading={isLoading}
+              isFetching={isFetching}
               translationParams={{ entity: "Organization" }}
             />
           </div>

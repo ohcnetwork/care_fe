@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 interface EntityBadgeProps {
   title: string;
   count?: number | null | undefined;
-  isLoading: boolean;
+  isFetching: boolean;
   translationParams?: Record<string, string>;
   customTranslation?: string;
 }
@@ -14,7 +14,7 @@ interface EntityBadgeProps {
 const EntityBadge: React.FC<EntityBadgeProps> = ({
   title,
   count,
-  isLoading,
+  isFetching,
   translationParams,
   customTranslation,
 }) => {
@@ -27,7 +27,7 @@ const EntityBadge: React.FC<EntityBadgeProps> = ({
         className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
         variant="outline"
       >
-        {isLoading
+        {isFetching
           ? "Loading..."
           : t(customTranslation || "entity_count", {
               count: count ?? 0,

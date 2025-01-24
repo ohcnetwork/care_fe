@@ -71,7 +71,11 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     });
   };
 
-  const { data: patients, isLoading } = useQuery({
+  const {
+    data: patients,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
     queryFn: query.debounced(organizationApi.listPatients, {
       pathParams: { id },
@@ -102,7 +106,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
             <EntityBadge
               title={t("patients")}
               count={patients?.count}
-              isLoading={isLoading}
+              isFetching={isFetching}
               translationParams={{ entity: "Patient" }}
             />
           </div>

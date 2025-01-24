@@ -36,7 +36,11 @@ export default function OrganizationFacilities({
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, cacheBlacklist: ["name"] });
 
-  const { data: facilities, isLoading } = useQuery({
+  const {
+    data: facilities,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
     queryFn: query.debounced(routes.facility.list, {
       queryParams: {
@@ -63,7 +67,7 @@ export default function OrganizationFacilities({
             <EntityBadge
               title={t("facilities")}
               count={facilities?.count}
-              isLoading={isLoading}
+              isFetching={isFetching}
               customTranslation="facility_count"
             />
           </div>

@@ -37,7 +37,11 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
 
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
+  const {
+    data: users,
+    isLoading: isLoadingUsers,
+    isFetching,
+  } = useQuery({
     queryKey: ["organizationUsers", id, qParams.search, qParams.page],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
@@ -62,7 +66,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             <EntityBadge
               title={t("users")}
               count={users?.count}
-              isLoading={isLoadingUsers}
+              isFetching={isFetching}
               translationParams={{ entity: "User" }}
             />
           </div>

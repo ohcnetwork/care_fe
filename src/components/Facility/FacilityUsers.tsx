@@ -32,7 +32,11 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   let usersList: JSX.Element = <></>;
 
-  const { data: userListData, isLoading: userListLoading } = useQuery({
+  const {
+    data: userListData,
+    isLoading: userListLoading,
+    isFetching: userListFetching,
+  } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams],
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
@@ -74,7 +78,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {userListLoading
+          {userListFetching
             ? "Loading..."
             : t("entity_count", {
                 count: userListData?.count ?? 0,
