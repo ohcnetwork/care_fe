@@ -55,7 +55,7 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
+import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
@@ -519,7 +519,7 @@ export default function PatientRegistration(
                               field.value ? new Date(field.value) : undefined
                             }
                             onChange={(date) =>
-                              field.onChange(date?.toISOString())
+                              field.onChange(dateQueryString(date))
                             }
                             id="dob"
                           />
