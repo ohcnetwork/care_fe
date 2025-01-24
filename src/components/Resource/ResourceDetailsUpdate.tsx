@@ -279,7 +279,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             </div>
 
             <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
-              <Button type="button" variant="outline" onClick={() => goBack()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => goBack(`/resource/${props.id}`)}
+              >
                 {t("cancel")}
               </Button>
               <Button type="submit" variant="primary" onClick={handleSubmit}>

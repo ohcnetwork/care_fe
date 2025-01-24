@@ -37,6 +37,7 @@ interface Props extends FormFieldBaseProps<string> {
   placeholder?: string;
   autoComplete?: string;
   disableValidation?: boolean;
+  autoFocus?: boolean;
 }
 
 const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
@@ -151,6 +152,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
                     disabled={field.disabled}
                     onBlur={() => setError(validate(field.value, "blur"))}
                     ref={ref}
+                    autoFocus={props.autoFocus}
                   />
                   <PopoverPanel className="w-full">
                     {({ close }) => (

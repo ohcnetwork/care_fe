@@ -46,7 +46,9 @@ export default function EncounterQuestionnaire({
                 navigate(`/patient/${patientId}/updates`);
               }
             }}
-            onCancel={() => goBack()}
+            onCancel={() =>
+              goBack(`/facility/${facilityId}/encounter/${encounterId}/updates`)
+            }
           />
         </CardContent>
       </Card>

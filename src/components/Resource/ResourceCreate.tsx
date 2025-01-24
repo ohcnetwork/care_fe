@@ -439,7 +439,11 @@ export default function ResourceCreate(props: ResourceProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => goBack()}
+                  onClick={() =>
+                    goBack(
+                      `/facility/${facilityId}/patient/${related_patient}/resource_requests`,
+                    )
+                  }
                 >
                   {t("cancel")}
                 </Button>

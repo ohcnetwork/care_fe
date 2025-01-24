@@ -176,6 +176,7 @@ export default function PatientLogin({
               onChange={(e) => setPhoneNumber(e.value)}
               value={phoneNumber}
               error={error}
+              autoFocus={true}
             />
           </div>
           <Button
@@ -220,7 +221,12 @@ export default function PatientLogin({
                     {t("enter_the_verification_code")}
                   </FormLabel>
                   <FormControl>
-                    <InputOTP maxLength={5} {...field} className="focus:ring-0">
+                    <InputOTP
+                      maxLength={5}
+                      {...field}
+                      className="focus:ring-0"
+                      autoFocus
+                    >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
                       </InputOTPGroup>
@@ -274,7 +280,7 @@ export default function PatientLogin({
         className="border border-secondary-400"
         onClick={() =>
           page === "send"
-            ? goBack()
+            ? goBack(`/facility/${facilityId}`)
             : navigate(
                 `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )

@@ -646,6 +646,7 @@ const Login = (props: LoginProps) => {
                             disabled={isOtpSent}
                             className="pl-12"
                             placeholder="Enter 10 digit number"
+                            autoFocus
                           />
                         </div>
                         {otpError && (
@@ -667,6 +668,7 @@ const Login = (props: LoginProps) => {
                             }}
                             maxLength={5}
                             placeholder="Enter 5-digit OTP"
+                            autoFocus
                           />
                           {otpValidationError && (
                             <p className="text-sm text-red-500">
