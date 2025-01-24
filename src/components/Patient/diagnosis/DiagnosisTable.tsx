@@ -12,6 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -48,7 +49,7 @@ export function DiagnosisTable({
             <TableHead>{t("verification")}</TableHead>
             <TableHead>{t("onset")}</TableHead>
             <TableHead>{t("notes")}</TableHead>
-            <TableHead>{t("by")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
@@ -96,13 +97,12 @@ export function DiagnosisTable({
                 </TableCell>
                 <TableCell className="whitespace-nowrap flex items-center gap-2">
                   <Avatar
-                    name={`${diagnosis.created_by?.first_name} ${diagnosis.created_by?.last_name}`}
+                    name={formatName(diagnosis.created_by)}
                     className="w-4 h-4"
                     imageUrl={diagnosis.created_by?.profile_picture_url}
                   />
                   <span className="text-sm">
-                    {diagnosis.created_by?.first_name}{" "}
-                    {diagnosis.created_by?.last_name}
+                    {formatName(diagnosis.created_by)}
                   </span>
                 </TableCell>
               </TableRow>

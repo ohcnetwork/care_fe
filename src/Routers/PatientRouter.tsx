@@ -47,6 +47,21 @@ const AppointmentRoutes = {
     facilityId: string;
     staffId: string;
   }) => <ScheduleAppointment facilityId={facilityId} staffId={staffId} />,
+  "/facility/:facilityId/appointments/:staffId/reschedule/:appointmentId": ({
+    facilityId,
+    staffId,
+    appointmentId,
+  }: {
+    facilityId: string;
+    staffId: string;
+    appointmentId: string;
+  }) => (
+    <ScheduleAppointment
+      facilityId={facilityId}
+      staffId={staffId}
+      appointmentId={appointmentId}
+    />
+  ),
   "/facility/:facilityId/appointments/:staffId/patient-select": ({
     facilityId,
     staffId,

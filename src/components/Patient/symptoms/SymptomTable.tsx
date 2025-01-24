@@ -12,6 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { Symptom } from "@/types/emr/symptom/symptom";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -43,13 +44,13 @@ export function SymptomTable({
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Symptom</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Verification</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>By</TableHead>
+            <TableHead>{t("symptom")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("severity")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
@@ -102,13 +103,12 @@ export function SymptomTable({
                 </TableCell>
                 <TableCell className="whitespace-nowrap flex items-center gap-2">
                   <Avatar
-                    name={`${symptom.created_by?.first_name} ${symptom.created_by?.last_name}`}
+                    name={formatName(symptom.created_by)}
                     className="w-4 h-4"
                     imageUrl={symptom.created_by?.profile_picture_url}
                   />
                   <span className="text-sm">
-                    {symptom.created_by?.first_name}{" "}
-                    {symptom.created_by?.last_name}
+                    {formatName(symptom.created_by)}
                   </span>
                 </TableCell>
               </TableRow>
