@@ -584,7 +584,12 @@ export default function CreateScheduleTemplateSheet({
 
               <SheetFooter className="absolute inset-x-0 bottom-0 border-t bg-white p-6">
                 <SheetClose asChild>
-                  <Button variant="outline" type="button" disabled={isPending}>
+                  <Button
+                    className="mt-2 md:mt-0"
+                    variant="outline"
+                    type="button"
+                    disabled={isPending}
+                  >
                     {t("cancel")}
                   </Button>
                 </SheetClose>
