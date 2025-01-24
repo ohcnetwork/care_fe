@@ -74,10 +74,6 @@ export function QuestionnaireForm({
   >([]);
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
 
-  useEffect(() => {
-    console.log("State actually updated - Current forms:", questionnaireForms);
-  }, [questionnaireForms]);
-
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
