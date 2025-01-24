@@ -1,4 +1,10 @@
 import careConfig from "@careConfig";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
@@ -227,9 +233,20 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
                       <div className="min-w-0">
-                        <h1 className="text-sm md:text-3xl text-white truncate md:font-bold">
-                          {facilityData?.name}
-                        </h1>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <h1 className="text-sm md:text-3xl text-white md:font-bold">
+                                {facilityData?.name}
+                              </h1>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-sm text-white bg-black rounded-md p-2">
+                                {facilityData?.name}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   </div>
@@ -239,6 +256,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <Button
                           variant="secondary"
                           size="icon"
+                          aria-label={t("facility_actions_menu")}
                           className="bg-white/20 hover:bg-white/40 w-8 h-8"
                         >
                           <MoreVertical className="h-4 w-4 text-white" />
