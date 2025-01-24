@@ -90,7 +90,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         >
           <div className="flex justify-items-start gap-5 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>

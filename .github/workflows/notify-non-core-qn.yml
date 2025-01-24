@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   notify_core_team:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     env:
       ALLOWED_USERNAMES: ${{ vars.ALLOWED_USERNAMES || '' }}
       QUESTION_KEYWORDS: ${{ vars.QUESTION_KEYWORDS || '' }}
