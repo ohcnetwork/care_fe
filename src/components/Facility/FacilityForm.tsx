@@ -468,6 +468,10 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormControl>
                     <Input
                       {...field}
+                      type="number"
+                      onChange={(e) => {
+                        form.setValue("latitude", Number(e.target.value));
+                      }}
                       data-cy="facility-latitude"
                       placeholder="Enter latitude"
                       disabled={isGettingLocation}
@@ -488,6 +492,10 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormControl>
                     <Input
                       {...field}
+                      type="number"
+                      onChange={(e) => {
+                        form.setValue("longitude", Number(e.target.value));
+                      }}
                       data-cy="facility-longitude"
                       placeholder="Enter longitude"
                       disabled={isGettingLocation}
