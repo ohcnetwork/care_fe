@@ -10,7 +10,7 @@ on:
 
 jobs:
   auto_label:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Check PR Conditions and Add Label
