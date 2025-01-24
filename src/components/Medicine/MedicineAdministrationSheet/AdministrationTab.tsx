@@ -1,16 +1,10 @@
-import { format, formatDistanceToNow, isBefore } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import React, { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -83,7 +77,26 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     setEndSlotDate(newEndSlotDate);
   };
 
+  const isTimeInSlot = (date: Date, slot: (typeof visibleSlots)[0]) => {
+    const slotStartDate = new Date(slot.date);
+    const slotEndDate = new Date(slot.date);
+
+    const [startHour] = slot.start.split(":").map(Number);
+    const [endHour] = slot.end.split(":").map(Number);
+
+    slotStartDate.setHours(startHour, 0, 0, 0);
+    slotEndDate.setHours(endHour, 0, 0, 0);
+
+    return date >= slotStartDate && date < slotEndDate;
+  };
+
   const handleNextSlot = () => {
+    // Check if we're already at the current time slot
+    const lastSlot = visibleSlots[3];
+    if (isTimeInSlot(currentDate, lastSlot)) {
+      return;
+    }
+
     const newEndSlotIndex = endSlotIndex + 1;
     const newEndSlotDate = new Date(endSlotDate);
 
@@ -96,17 +109,19 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
 
     // Check if we're trying to move beyond current time
-    const slotStartDate = new Date(newEndSlotDate);
-    const startHour = parseInt(
-      timeSlots[newEndSlotIndex].start.split(":")[0],
-      10,
-    );
-    slotStartDate.setHours(startHour, 0, 0, 0);
+    const nextSlot = {
+      ...timeSlots[newEndSlotIndex > 3 ? 0 : newEndSlotIndex],
+      date: newEndSlotDate,
+    };
 
-    if (isBefore(slotStartDate, currentDate)) {
-      setEndSlotDate(newEndSlotDate);
-      setEndSlotIndex(newEndSlotIndex > 3 ? 0 : newEndSlotIndex);
+    if (
+      !isTimeInSlot(currentDate, nextSlot) &&
+      currentDate < new Date(nextSlot.date)
+    ) {
+      return;
     }
+
+    setEndSlotDate(newEndSlotDate);
   };
 
   const getAdministrationsForTimeSlot = (
@@ -141,138 +156,207 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       <Loading />
     </div>
   ) : (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="text-sm text-muted-foreground">
-          Last modified {formatDistanceToNow(currentDate)} ago
-        </div>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handlePreviousSlot}
-          >
-            <CareIcon icon="l-angle-left" />
-          </Button>
-          <div className="flex flex-col items-center">
-            <div className="font-medium">
-              {format(visibleSlots[0].date, "dd MMM").toUpperCase()} -{" "}
-              {format(visibleSlots[3].date, "dd MMM").toUpperCase()}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {format(visibleSlots[0].date, "EEE")} -{" "}
-              {format(visibleSlots[3].date, "EEE")}
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleNextSlot}
-            disabled={isBefore(currentDate, endSlotDate)}
-          >
-            <CareIcon icon="l-angle-right" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-[2fr,1fr,1fr,repeat(4,minmax(200px,1fr)),40px] gap-4 px-4">
-        <div className="font-medium">Medicine</div>
-        <div className="font-medium">Dosage & Frequency</div>
-        <div className="font-medium">Action</div>
-        {visibleSlots.map((slot) => (
-          <div
-            key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className="font-medium text-center"
-          >
-            {slot.label}
-          </div>
-        ))}
-        <div /> {/* For overflow menu */}
-        {activeMedications?.map((medication) => (
-          <React.Fragment key={medication.id}>
-            <div className="space-y-1 py-2">
-              <div>{medication.medication?.display}</div>
-              <Badge variant="secondary" className="text-blue-600 bg-blue-50">
-                {medication.dosage_instruction[0]?.route?.display || "Oral"}
-              </Badge>
-              <div className="text-xs text-muted-foreground">
-                Added on:{" "}
-                {format(
-                  new Date(medication.created_date),
-                  "MMM dd, yyyy, hh:mm a",
-                )}
+    <div className="flex flex-col gap-2 m-2">
+      <Card className="w-full">
+        <div className="grid grid-cols-[2fr,1fr,auto,repeat(4,1fr),40px]">
+          {/* Top row without vertical borders */}
+          <div className="col-span-full grid grid-cols-subgrid">
+            <div className="p-4 ">
+              <div className="text-xs text-[#6b7280]">
+                Last modified {formatDistanceToNow(currentDate)} ago
               </div>
             </div>
-            <div className="py-2 text-sm flex flex-col gap-1">
-              <div>{formatDosage(medication.dosage_instruction[0])}</div>
-              <div>
-                {
-                  getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
-                    ?.meaning
-                }
-              </div>
-            </div>
-            <div className="py-2">
-              <Button variant="outline" size="sm">
-                Administer
+            <div />
+            <div className="flex justify-end items-center mr-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 text-gray-400"
+                onClick={handlePreviousSlot}
+              >
+                <CareIcon icon="l-angle-left" className="h-4 w-4" />
               </Button>
             </div>
             {visibleSlots.map((slot) => {
-              const administrationRecords = getAdministrationsForTimeSlot(
-                medication.id,
-                slot.date,
-                slot.start,
-                slot.end,
-              );
+              const isFirstSlotOfDay = slot.start === "00:00";
+              const isLastSlotOfDay = slot.start === "18:00";
               return (
                 <div
                   key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                  className="flex flex-col gap-2 items-center justify-center py-2"
+                  className="relative h-14"
                 >
-                  {administrationRecords?.map((admin) => (
-                    <div
-                      key={admin.id}
-                      className="flex items-center gap-1 bg-emerald-50 text-emerald-700 text-sm rounded px-2 py-1"
-                    >
-                      {new Date(
-                        admin.occurrence_period_start,
-                      ).toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 hover:bg-emerald-100"
-                      >
-                        <CareIcon icon="l-copy" className="text-xs" />
-                      </Button>
+                  {isFirstSlotOfDay && (
+                    <div className="flex items-center h-full ml-2">
+                      <div className="flex flex-col items-center">
+                        <div className="text-sm font-medium">
+                          {format(slot.date, "dd MMM").toUpperCase()}
+                        </div>
+                        <div className="text-sm text-[#6b7280]">
+                          {format(slot.date, "EEE")}
+                        </div>
+                      </div>
+                      <div className="flex-1 border-t border-dotted border-gray-300 ml-2" />
                     </div>
-                  ))}
+                  )}
+                  {!isFirstSlotOfDay && !isLastSlotOfDay && (
+                    <div className="flex items-center h-full">
+                      <div className="w-full border-t border-dotted border-gray-300" />
+                    </div>
+                  )}
+                  {isLastSlotOfDay && (
+                    <div className="flex items-center h-full mr-2">
+                      <div className="flex-1 border-t border-dotted border-gray-300 mr-2" />
+                      <div className="flex flex-col items-center">
+                        <div className="text-sm font-medium">
+                          {format(slot.date, "dd MMM").toUpperCase()}
+                        </div>
+                        <div className="text-sm text-[#6b7280]">
+                          {format(slot.date, "EEE")}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
-            <div className="py-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <CareIcon icon="l-ellipsis-v" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="gap-2">
-                    <CareIcon icon="l-ban" />
-                    Discontinue
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex justify-start items-center px-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 text-gray-400"
+                onClick={handleNextSlot}
+                disabled={isTimeInSlot(currentDate, visibleSlots[3])}
+              >
+                <CareIcon icon="l-angle-right" className="h-4 w-4" />
+              </Button>
             </div>
-          </React.Fragment>
-        ))}
-      </div>
+          </div>
+
+          {/* Main content with borders */}
+          <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb]">
+            {/* Headers */}
+            <div className="p-4 font-medium text-sm border-t">Medicine:</div>
+            <div className="p-4 font-medium text-sm border-t">
+              Dosage & Frequency:
+            </div>
+            <div className="p-4 font-medium text-sm border-t">Action</div>
+            {visibleSlots.map((slot, i) => (
+              <div
+                key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                className="p-4 font-semibold text-xs text-center border-t relative"
+              >
+                {i === endSlotIndex &&
+                  slot.date.getTime() === currentDate.getTime() && (
+                    <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
+                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                    </div>
+                  )}
+                {slot.label}
+              </div>
+            ))}
+            <div className="border-t" />
+
+            {/* Medication rows */}
+            {activeMedications?.map((medication) => (
+              <React.Fragment key={medication.id}>
+                <div className="p-4 border-t">
+                  <div className="font-medium">
+                    {medication.medication?.display}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <span className="text-sm text-[#059669]">
+                      {medication.dosage_instruction[0]?.route?.display ||
+                        "Oral"}
+                    </span>
+                    {medication.dosage_instruction[0]?.as_needed_boolean && (
+                      <span className="text-sm text-[#b91c1c]">
+                        As Needed / PRN
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-[#6b7280] mt-1">
+                    Added on:{" "}
+                    {format(
+                      new Date(medication.created_date),
+                      "MMM dd, yyyy, hh:mm a",
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 border-t">
+                  <div>{formatDosage(medication.dosage_instruction[0])}</div>
+                  <div className="text-sm text-[#6b7280]">
+                    {
+                      getFrequencyDisplay(
+                        medication.dosage_instruction[0]?.timing,
+                      )?.meaning
+                    }
+                  </div>
+                </div>
+                <div className="p-4 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                  >
+                    Administer
+                  </Button>
+                </div>
+                {visibleSlots.map((slot) => {
+                  const administrationRecords = getAdministrationsForTimeSlot(
+                    medication.id,
+                    slot.date,
+                    slot.start,
+                    slot.end,
+                  );
+                  return (
+                    <div
+                      key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                      className="p-4 border-t relative"
+                    >
+                      {administrationRecords?.map((admin) => (
+                        <div
+                          key={admin.id}
+                          className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] rounded-md p-2 mb-2"
+                        >
+                          <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-[#059669]" />
+                            {new Date(
+                              admin.occurrence_period_start,
+                            ).toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 hover:bg-emerald-100 p-0"
+                          >
+                            <CareIcon icon="l-copy" className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+                <div className="p-4 border-t flex justify-center">
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                  </Button>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-[#e5e7eb] flex items-center gap-2">
+          <CareIcon icon="l-eye" className="h-4 w-4" />
+          <span className="text-sm">Hide </span>
+          <span className="text-sm font-medium">1 Stopped</span>
+          <span className="text-sm"> prescription(s)</span>
+        </div>
+      </Card>
     </div>
   );
 };
