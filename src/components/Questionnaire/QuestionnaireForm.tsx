@@ -172,6 +172,7 @@ export function QuestionnaireForm({
   };
 
   const handleSubmissionError = (results: ValidationErrorResponse[]) => {
+    toast.error("Form Errr");
     const updatedForms = [...questionnaireForms];
     const errorMessages: string[] = [];
 
