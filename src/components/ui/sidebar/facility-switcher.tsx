@@ -58,10 +58,7 @@ export function FacilitySwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => navigate("/")}
-            >
+            <DropdownMenuItem onClick={() => navigate("/")}>
               <DashboardIcon className="size-4" />
               {t("view_dashboard")}
             </DropdownMenuItem>
@@ -78,7 +75,7 @@ export function FacilitySwitcher({
                   }
                 }}
                 className={cn(
-                  "gap-2 p-2 cursor-pointer",
+                  "gap-2 p-2",
                   facility.name === selectedFacility?.name &&
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
