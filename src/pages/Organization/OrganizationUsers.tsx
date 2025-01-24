@@ -37,11 +37,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
 
-  const {
-    data: users,
-    isLoading: isLoadingUsers,
-    isFetching,
-  } = useQuery({
+  const { data: users, isFetching: isFetchingUsers } = useQuery({
     queryKey: ["organizationUsers", id, qParams.search, qParams.page],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
@@ -66,7 +62,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             <EntityBadge
               title={t("users")}
               count={users?.count}
-              isFetching={isFetching}
+              isFetching={isFetchingUsers}
               translationParams={{ entity: "User" }}
             />
           </div>
@@ -104,7 +100,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             data-cy="search-user"
           />
         </div>
-        {isLoadingUsers ? (
+        {isFetchingUsers ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <CardGridSkeleton count={6} />
           </div>

@@ -71,11 +71,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     });
   };
 
-  const {
-    data: patients,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data: patients, isFetching } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
     queryFn: query.debounced(organizationApi.listPatients, {
       pathParams: { id },
@@ -124,7 +120,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading ? (
+          {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : patients?.results?.length === 0 ? (
             <Card className="col-span-full">

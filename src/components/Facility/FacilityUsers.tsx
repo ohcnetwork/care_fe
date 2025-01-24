@@ -32,11 +32,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   let usersList: JSX.Element = <></>;
 
-  const {
-    data: userListData,
-    isLoading: userListLoading,
-    isFetching: userListFetching,
-  } = useQuery({
+  const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams],
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
@@ -49,7 +45,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
     enabled: !!facilityId,
   });
 
-  if (userListLoading || !userListData) {
+  if (userListFetching || !userListData) {
     usersList =
       activeTab === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

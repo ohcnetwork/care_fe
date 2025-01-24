@@ -32,11 +32,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 12; // 3x4 grid
 
-  const {
-    data: children,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data: children, isFetching } = useQuery({
     queryKey: ["organization", id, "children", page, limit, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
@@ -78,7 +74,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
           </div>
         </div>
 
-        {isLoading ? (
+        {isFetching ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <CardGridSkeleton count={6} />
           </div>
