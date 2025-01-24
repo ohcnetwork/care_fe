@@ -36,11 +36,11 @@ function generatePatientLinks(
   }
 
   return [
-    { name: t("appointments"), url: "/patient/home", icon: "d-patient" },
+    { name: t("appointments"), url: "/patient/home", icon: "d-calendar" },
     {
       name: t("nearby_facilities"),
       url: `/nearby_facilities/?${queryParams.toString()}`,
-      icon: "d-patient",
+      icon: "d-hospital",
     },
   ];
 }
