@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Popover, Transition } from "@headlessui/react";
 import { ReactNode, useEffect, useState } from "react";
 
