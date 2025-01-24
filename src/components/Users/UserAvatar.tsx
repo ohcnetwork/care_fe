@@ -94,7 +94,7 @@ export default function UserAvatar({ username }: { username: string }) {
             <Avatar
               imageUrl={userData?.profile_picture_url}
               name={formatDisplayName(userData)}
-              className="h-20 w-20 rounded-md"
+              className="h-20 w-20"
             />
             <div className="my-4 ml-4 flex flex-col gap-2">
               {!showAvatarEdit(authUser, userData) ? (

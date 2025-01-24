@@ -84,7 +84,7 @@ export function SymptomTable({
               <div className="flex items-center gap-2">
                 <Avatar
                   name={formatName(symptom.created_by)}
-                  className="w-4 h-4 rounded"
+                  className="w-4 h-4"
                   imageUrl={symptom.created_by?.profile_picture_url}
                 />
                 <span className="text-sm">

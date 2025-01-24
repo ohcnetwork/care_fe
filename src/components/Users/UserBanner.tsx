@@ -17,7 +17,7 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
           <Avatar
             imageUrl={userData?.profile_picture_url}
             name={formatDisplayName(userData)}
-            className="h-20 w-20 md:mr-2 lg:mr-3 lg:h-16 lg:w-16 rounded-md"
+            className="h-20 w-20 md:mr-2 lg:mr-3 lg:h-16 lg:w-16"
           />
           <div className="flex flex-col self-center">
             <div className="flex flex-row items-center gap-3">

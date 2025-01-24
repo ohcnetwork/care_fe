@@ -94,7 +94,7 @@ export default function UserDashboard() {
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
                       name={facility.name}
-                      className="h-12 w-12 md:h-14 md:w-14 rounded-md"
+                      className="h-12 w-12 md:h-14 md:w-14"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium truncate text-sm md:text-base">
@@ -127,7 +127,7 @@ export default function UserDashboard() {
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
                       name={org.name}
-                      className="h-12 w-12 md:h-14 md:w-14 rounded-md"
+                      className="h-12 w-12 md:h-14 md:w-14"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium truncate text-sm md:text-base">
