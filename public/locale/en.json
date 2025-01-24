@@ -1015,6 +1015,7 @@
   "external_identifier": "External Identifier",
   "facilities": "Facilities",
   "facility": "Facility",
+  "facility_actions_menu": "Facility action menu",
   "facility_added_successfully": "Facility created successfully",
   "facility_consent_requests_page_title": "Patient Consent List",
   "facility_district_name": "Facility/District Name",
