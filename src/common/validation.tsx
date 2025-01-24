@@ -6,11 +6,11 @@ export const phonePreg = (phone: string) => {
 const valueIsBetween = (val: number, a: number, b: number) =>
   a <= val && val <= b;
 
-export const validateLatitude = (latitude: string) => {
+export const validateLatitude = (latitude: number) => {
   return valueIsBetween(Number(latitude), -90, 90);
 };
 
-export const validateLongitude = (longitude: string) => {
+export const validateLongitude = (longitude: number) => {
   return valueIsBetween(Number(longitude), -180, 180);
 };
 
