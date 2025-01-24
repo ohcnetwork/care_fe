@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import CreateUserForm from "@/components/Users/CreateUserForm";
+import UserForm from "@/components/Users/UserForm";
 
 import { UserBase } from "@/types/user/user";
 
@@ -25,12 +27,13 @@ export default function AddUserSheet({
   setOpen,
   onUserCreated,
 }: AddUserSheetProps) {
+  const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" data-cy="add-user-button">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Add User
+          {t("add_user")}
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -38,13 +41,11 @@ export default function AddUserSheet({
         data-cy="add-user-form"
       >
         <SheetHeader>
-          <SheetTitle>Add New User</SheetTitle>
-          <SheetDescription>
-            Create a new user and add them to the organization.
-          </SheetDescription>
+          <SheetTitle>{t("add_new_user")}</SheetTitle>
+          <SheetDescription>{t("create_user_and_add_to_org")}</SheetDescription>
         </SheetHeader>
         <div className="mt-6">
-          <CreateUserForm
+          <UserForm
             onSubmitSuccess={(user) => {
               setOpen(false);
               onUserCreated?.(user);

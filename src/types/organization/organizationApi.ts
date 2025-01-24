@@ -1,7 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Patient } from "@/types/emr/newPatient";
 
-import { Patient } from "../emr/newPatient";
 import { Organization, OrganizationUserRole } from "./organization";
 
 export default {

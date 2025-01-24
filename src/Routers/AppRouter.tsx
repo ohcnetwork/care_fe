@@ -32,9 +32,9 @@ const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
-    ? { [K in Param | keyof RouteParams<Rest>]: string }
+    ? { [_ in Param | keyof RouteParams<Rest>]: string }
     : T extends `${string}:${infer Param}`
-      ? { [K in Param]: string }
+      ? { [_ in Param]: string }
       : Record<string, never>;
 
 export type RouteFunction<T extends string> = (
