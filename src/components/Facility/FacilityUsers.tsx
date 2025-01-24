@@ -86,7 +86,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           onChange={(e) => updateQuery({ username: e.target.value })}
           value={qParams.username}
           placeholder={t("search_by_username")}
-          className="w-full max-w-sm"
+          className="w-full max-w-sm p px-2 py-1 placeholder:text-xs max-[350px]:placeholder:text-[8px] "
         />
         <Tabs
           value={activeTab}
