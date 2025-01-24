@@ -323,7 +323,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                               field.value ? new Date(field.value) : undefined
                             }
                             onChange={(date) =>
-                              field.onChange(date?.toISOString())
+                              field.onChange(dateQueryString(date))
                             }
                             id="dob"
                           />
