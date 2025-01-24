@@ -60,7 +60,7 @@ function getAllJSONFiles(folderName) {
   dir.forEach((file) => {
     try {
       files[file] = JSON.parse(readFile(`./${folderName}/${file}`));
-    } catch (_e) {
+    } catch {
       throw new Error(`Cannot parse ${file} file!`);
     }
   });

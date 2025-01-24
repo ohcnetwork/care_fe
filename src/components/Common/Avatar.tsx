@@ -96,5 +96,7 @@ const Avatar = React.forwardRef<
   );
 });
 
+Avatar.displayName = "Avatar";
+
 export { Avatar };
 export type { AvatarProps };
