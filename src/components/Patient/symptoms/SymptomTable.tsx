@@ -1,7 +1,5 @@
 import { t } from "i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -49,56 +47,74 @@ export function SymptomTable({
             <TableHead>Status</TableHead>
             <TableHead>Severity</TableHead>
             <TableHead>Onset</TableHead>
+            <TableHead>Verification</TableHead>
             <TableHead>Notes</TableHead>
             <TableHead>By</TableHead>
           </TableRow>
         </TableHeader>
       )}
       <TableBody>
-        {symptoms.map((symptom: Symptom) => (
-          <TableRow
-            key={symptom.id}
-            className={cn(
-              symptom.verification_status === "entered_in_error" &&
-                "opacity-50 bg-gray-50/50",
-            )}
-          >
-            <TableCell className="font-medium">
-              {symptom.code.display}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
+        {symptoms.map((symptom: Symptom) => {
+          const isEnteredInError =
+            symptom.verification_status === "entered_in_error";
+
+          return (
+            <>
+              <TableRow
+                key={symptom.id}
+                className={
+                  isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
+                }
               >
-                {t(symptom.clinical_status)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="whitespace-nowrap">
-                {t(symptom.severity)}
-              </Badge>
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {symptom.onset?.onset_datetime
-                ? new Date(symptom.onset.onset_datetime).toLocaleDateString()
-                : "-"}
-            </TableCell>
-            <TableCell className="max-w-[200px] truncate">
-              {symptom.note || "-"}
-            </TableCell>
-            <TableCell className="whitespace-nowrap flex items-center gap-2">
-              <Avatar
-                name={`${symptom.created_by?.first_name} ${symptom.created_by?.last_name}`}
-                className="w-4 h-4"
-                imageUrl={symptom.created_by?.profile_picture_url}
-              />
-              <span className="text-sm">
-                {symptom.created_by?.first_name} {symptom.created_by?.last_name}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
+                <TableCell className="font-medium">
+                  {symptom.code.display}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
+                  >
+                    {t(symptom.clinical_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={"secondary"} className="whitespace-nowrap">
+                    {t(symptom.severity)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {symptom.onset?.onset_datetime
+                    ? new Date(
+                        symptom.onset.onset_datetime,
+                      ).toLocaleDateString()
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={isEnteredInError ? "destructive" : "outline"}
+                    className="whitespace-nowrap capitalize"
+                  >
+                    {t(symptom.verification_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="max-w-[200px] truncate">
+                  {symptom.note || "-"}
+                </TableCell>
+                <TableCell className="whitespace-nowrap flex items-center gap-2">
+                  <Avatar
+                    name={`${symptom.created_by?.first_name} ${symptom.created_by?.last_name}`}
+                    className="w-4 h-4"
+                    imageUrl={symptom.created_by?.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {symptom.created_by?.first_name}{" "}
+                    {symptom.created_by?.last_name}
+                  </span>
+                </TableCell>
+              </TableRow>
+            </>
+          );
+        })}
       </TableBody>
     </Table>
   );

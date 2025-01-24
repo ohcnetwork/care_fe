@@ -73,7 +73,19 @@ export function SymptomsList({
       patientId={patientId}
       encounterId={encounterId}
     >
-      <SymptomTable symptoms={filteredSymptoms} />
+      <SymptomTable
+        symptoms={[
+          ...filteredSymptoms.filter(
+            (symptom) => symptom.verification_status !== "entered_in_error",
+          ),
+          ...(showEnteredInError
+            ? filteredSymptoms.filter(
+                (symptom) => symptom.verification_status === "entered_in_error",
+              )
+            : []),
+        ]}
+      />
+
       {hasEnteredInErrorRecords && !showEnteredInError && (
         <div className="flex justify-start">
           <Button
