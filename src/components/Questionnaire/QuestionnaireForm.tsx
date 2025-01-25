@@ -162,6 +162,9 @@ export function QuestionnaireForm({
 
     results.forEach((result, index) => {
       const form = updatedForms[index];
+      if (!result.data?.errors) {
+        return;
+      }
 
       result.data.errors.forEach(
         (error: QuestionValidationError | DetailedValidationError) => {
@@ -196,13 +199,68 @@ export function QuestionnaireForm({
 
   const handleSubmit = async () => {
     setIsDirty(false);
-    if (hasErrors) return;
 
+    // Clear existing errors first
+    const formsWithClearedErrors = questionnaireForms.map((form) => ({
+      ...form,
+      errors: [],
+    }));
+    let firstErrorId: string | undefined = undefined;
+
+    // Validate all required fields
+    const formsWithValidation = formsWithClearedErrors.map((form) => {
+      const errors: QuestionValidationError[] = [];
+
+      const validateQuestion = (q: Question) => {
+        // Handle nested questions in groups
+        if (q.type === "group" && q.questions) {
+          q.questions.forEach(validateQuestion);
+          return;
+        }
+
+        if (q.required) {
+          const response = form.responses.find((r) => r.question_id === q.id);
+          const hasValue = response?.values?.some(
+            (v) => v.value !== undefined && v.value !== null && v.value !== "",
+          );
+
+          if (!hasValue) {
+            errors.push({
+              question_id: q.id,
+              error: t("field_required"),
+              type: "validation_error",
+              msg: t("field_required"),
+            });
+            firstErrorId = firstErrorId ? firstErrorId : q.id;
+          }
+        }
+      };
+
+      form.questionnaire.questions.forEach(validateQuestion);
+      return { ...form, errors };
+    });
+
+    setQuestionnaireForms(formsWithValidation);
+
+    if (firstErrorId) {
+      const element = document.querySelector(
+        `[data-question-id="${firstErrorId}"]`,
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    if (formsWithValidation.some((form) => form.errors.length > 0)) {
+      return;
+    }
+
+    // Continue with existing submission logic...
     const requests: BatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { patientId, encounterId };
       // First, collect all structured data requests if encounterId is provided
-      questionnaireForms.forEach((form) => {
+      formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
             const structuredData = response.values?.[0]?.value;
@@ -220,7 +278,7 @@ export function QuestionnaireForm({
     }
 
     // Then, add questionnaire submission requests
-    questionnaireForms.forEach((form) => {
+    formsWithValidation.forEach((form) => {
       const nonStructuredResponses = form.responses.filter(
         (response) => !response.structured_type,
       );
