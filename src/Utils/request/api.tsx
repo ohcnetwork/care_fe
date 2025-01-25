@@ -551,7 +551,7 @@ const routes = {
     },
     removeOrganization: {
       path: "/api/v1/encounter/{encounterId}/organizations_remove/",
-      method: "POST",
+      method: "DELETE",
       TRes: Type<Encounter>(),
       TBody: Type<{ organization: string }>(),
     },
