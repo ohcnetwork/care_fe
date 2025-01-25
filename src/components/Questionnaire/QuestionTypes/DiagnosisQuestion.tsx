@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -37,12 +39,19 @@ import {
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface DiagnosisQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -94,15 +103,15 @@ export function DiagnosisQuestion({
 
   useEffect(() => {
     if (patientDiagnoses?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: patientDiagnoses.results.map(convertToDiagnosisRequest),
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientDiagnoses]);
 
@@ -111,15 +120,15 @@ export function DiagnosisQuestion({
       ...diagnoses,
       { ...DIAGNOSIS_INITIAL_VALUE, code },
     ] as DiagnosisRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "diagnosis",
           value: newDiagnoses,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveDiagnosis = (index: number) => {
@@ -131,27 +140,27 @@ export function DiagnosisQuestion({
           ? { ...d, verification_status: "entered_in_error" as const }
           : d,
       ) as DiagnosisRequest[];
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: newDiagnoses,
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newDiagnoses = diagnoses.filter((_, i) => i !== index);
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "diagnosis",
             value: newDiagnoses,
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   };
 
@@ -162,15 +171,15 @@ export function DiagnosisQuestion({
     const newDiagnoses = diagnoses.map((diagnosis, i) =>
       i === index ? { ...diagnosis, ...updates } : diagnosis,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "diagnosis",
           value: newDiagnoses,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -223,7 +232,12 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
 
   return (
-    <div className="group hover:bg-gray-50">
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          diagnosis.verification_status === "entered_in_error",
+      })}
+    >
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
           <div
@@ -274,7 +288,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   onset: { onset_datetime: e.target.value },
                 })
               }
-              disabled={disabled}
+              disabled={disabled || !!diagnosis.id}
               className="h-8 md:h-9"
             />
           </div>

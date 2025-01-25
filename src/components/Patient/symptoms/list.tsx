@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,6 +24,8 @@ export function SymptomsList({
   encounterId,
   facilityId,
 }: SymptomsListProps) {
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
+
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -43,14 +46,23 @@ export function SymptomsList({
     );
   }
 
-  if (!symptoms?.results?.length) {
+  const filteredSymptoms = symptoms?.results?.filter(
+    (symptom) =>
+      showEnteredInError || symptom.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = symptoms?.results?.some(
+    (symptom) => symptom.verification_status === "entered_in_error",
+  );
+
+  if (!filteredSymptoms?.length) {
     return (
       <SymptomListLayout
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
       >
-        <p className="text-muted-foreground">No symptoms recorded</p>
+        <p className="text-muted-foreground">{t("no_symptoms_recorded")}</p>
       </SymptomListLayout>
     );
   }
@@ -61,7 +73,31 @@ export function SymptomsList({
       patientId={patientId}
       encounterId={encounterId}
     >
-      <SymptomTable symptoms={symptoms.results} />
+      <SymptomTable
+        symptoms={[
+          ...filteredSymptoms.filter(
+            (symptom) => symptom.verification_status !== "entered_in_error",
+          ),
+          ...(showEnteredInError
+            ? filteredSymptoms.filter(
+                (symptom) => symptom.verification_status === "entered_in_error",
+              )
+            : []),
+        ]}
+      />
+
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <div className="flex justify-start">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowEnteredInError(true)}
+            className="text-xs underline text-gray-500"
+          >
+            {t("view_all")}
+          </Button>
+        </div>
+      )}
     </SymptomListLayout>
   );
 }
@@ -91,7 +127,7 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

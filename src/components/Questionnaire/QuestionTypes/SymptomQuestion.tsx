@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,12 +40,19 @@ import {
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface SymptomQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -173,7 +182,12 @@ const SymptomRow = React.memo(function SymptomRow({
   const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
   return (
-    <div className="group hover:bg-gray-50">
+    <div
+      className={cn("group hover:bg-gray-50", {
+        "opacity-40 pointer-events-none":
+          symptom.verification_status === "entered_in_error",
+      })}
+    >
       <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
         <div className="flex items-center justify-between md:col-span-5">
           <div
@@ -191,7 +205,7 @@ const SymptomRow = React.memo(function SymptomRow({
             type="date"
             value={symptom.onset?.onset_datetime || ""}
             onChange={handleDateChange}
-            disabled={disabled}
+            disabled={disabled || !!symptom.id}
             className="h-8 md:h-9"
           />
         </div>
@@ -283,15 +297,15 @@ export function SymptomQuestion({
 
   useEffect(() => {
     if (patientSymptoms?.results) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "symptom",
             value: patientSymptoms.results.map(convertToSymptomRequest),
           },
         ],
-      });
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientSymptoms]);
 
@@ -300,10 +314,10 @@ export function SymptomQuestion({
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },
     ] as SymptomRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "symptom", value: newSymptoms }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveSymptom = (index: number) => {
@@ -315,17 +329,17 @@ export function SymptomQuestion({
           ? { ...s, verification_status: "entered_in_error" as const }
           : s,
       );
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "symptom", value: newSymptoms }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "symptom", value: newSymptoms }],
+        questionnaireResponse.question_id,
+      );
     } else {
       // For new records, remove them completely
       const newSymptoms = symptoms.filter((_, i) => i !== index);
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [{ type: "symptom", value: newSymptoms }],
-      });
+      updateQuestionnaireResponseCB(
+        [{ type: "symptom", value: newSymptoms }],
+        questionnaireResponse.question_id,
+      );
     }
   };
 
@@ -336,10 +350,10 @@ export function SymptomQuestion({
     const newSymptoms = symptoms.map((symptom, i) =>
       i === index ? { ...symptom, ...updates } : symptom,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "symptom", value: newSymptoms }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "symptom", value: newSymptoms }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (

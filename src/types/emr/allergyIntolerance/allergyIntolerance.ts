@@ -9,14 +9,21 @@ export type AllergyVerificationStatus =
   | "entered_in_error";
 
 export type AllergyClinicalStatus = "active" | "inactive" | "resolved";
+export type AllergyCategory =
+  | "food"
+  | "medication"
+  | "environment"
+  | "biologic";
+export type AllergyCriticality = "low" | "high" | "unable_to_assess";
+
 // Base type for allergy data
 export interface AllergyIntolerance {
   id: string;
   code: Code;
   clinical_status: AllergyClinicalStatus;
   verification_status: AllergyVerificationStatus;
-  category: string;
-  criticality: string;
+  category: AllergyCategory;
+  criticality: AllergyCriticality;
   last_occurrence?: string;
   note?: string;
   created_by: UserBase;

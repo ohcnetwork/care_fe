@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,6 +24,8 @@ export function DiagnosisList({
   encounterId,
   facilityId,
 }: DiagnosisListProps) {
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
+
   const { data: diagnoses, isLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
@@ -43,14 +46,24 @@ export function DiagnosisList({
     );
   }
 
-  if (!diagnoses?.results?.length) {
+  const filteredDiagnoses = diagnoses?.results?.filter(
+    (diagnosis) =>
+      showEnteredInError ||
+      diagnosis.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = diagnoses?.results?.some(
+    (diagnosis) => diagnosis.verification_status === "entered_in_error",
+  );
+
+  if (!filteredDiagnoses?.length) {
     return (
       <DiagnosisListLayout
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
       >
-        <p className="text-muted-foreground">No diagnoses recorded</p>
+        <p className="text-muted-foreground">{t("no_diagnoses_recorded")}</p>
       </DiagnosisListLayout>
     );
   }
@@ -61,7 +74,32 @@ export function DiagnosisList({
       patientId={patientId}
       encounterId={encounterId}
     >
-      <DiagnosisTable diagnoses={diagnoses.results} />
+      <DiagnosisTable
+        diagnoses={[
+          ...filteredDiagnoses.filter(
+            (diagnosis) => diagnosis.verification_status !== "entered_in_error",
+          ),
+          ...(showEnteredInError
+            ? filteredDiagnoses.filter(
+                (diagnosis) =>
+                  diagnosis.verification_status === "entered_in_error",
+              )
+            : []),
+        ]}
+      />
+
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <div className="flex justify-start">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowEnteredInError(true)}
+            className="text-xs underline text-gray-500"
+          >
+            {t("view_all")}
+          </Button>
+        </div>
+      )}
     </DiagnosisListLayout>
   );
 }
@@ -91,7 +129,7 @@ const DiagnosisListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

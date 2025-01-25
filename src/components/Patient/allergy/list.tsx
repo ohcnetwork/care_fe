@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -19,7 +20,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 
@@ -34,6 +34,8 @@ export function AllergyList({
   patientId,
   encounterId,
 }: AllergyListProps) {
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
+
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
@@ -49,21 +51,30 @@ export function AllergyList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <CardContent>
+        <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
       </AllergyListLayout>
     );
   }
 
-  if (!allergies?.results?.length) {
+  const filteredAllergies = allergies?.results?.filter(
+    (allergy) =>
+      showEnteredInError || allergy.verification_status !== "entered_in_error",
+  );
+
+  const hasEnteredInErrorRecords = allergies?.results?.some(
+    (allergy) => allergy.verification_status === "entered_in_error",
+  );
+
+  if (!filteredAllergies?.length) {
     return (
       <AllergyListLayout
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
       >
-        <CardContent>
+        <CardContent className="px-2 pb-2">
           <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
         </CardContent>
       </AllergyListLayout>
@@ -94,6 +105,62 @@ export function AllergyList({
     }
   };
 
+  interface AllergyRowProps {
+    allergy: AllergyIntolerance;
+    isEnteredInError?: boolean;
+  }
+
+  function AllergyRow({ allergy, isEnteredInError }: AllergyRowProps) {
+    return (
+      <TableRow
+        className={isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined}
+      >
+        <TableCell className="font-medium">{allergy.code.display}</TableCell>
+        <TableCell>
+          <Badge
+            variant="outline"
+            className={`whitespace-nowrap ${getCategoryBadgeStyle(
+              allergy.category ?? "",
+            )}`}
+          >
+            {t(allergy.category)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <Badge
+            variant="outline"
+            className={`whitespace-nowrap ${getStatusBadgeStyle(
+              allergy.clinical_status,
+            )}`}
+          >
+            {t(allergy.clinical_status)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <Badge variant="secondary" className="whitespace-nowrap">
+            {t(allergy.criticality)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <Badge
+            variant={isEnteredInError ? "destructive" : "outline"}
+            className="whitespace-nowrap capitalize"
+          >
+            {t(allergy.verification_status)}
+          </Badge>
+        </TableCell>
+        <TableCell className="whitespace-nowrap flex items-center gap-2">
+          <Avatar
+            name={allergy.created_by.username}
+            className="w-4 h-4"
+            imageUrl={allergy.created_by.profile_picture_url}
+          />
+          <span className="text-sm">{allergy.created_by.username}</span>
+        </TableCell>
+      </TableRow>
+    );
+  }
+
   return (
     <AllergyListLayout
       facilityId={facilityId}
@@ -107,61 +174,47 @@ export function AllergyList({
             <TableHead>{t("category")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("criticality")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
             <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allergies.results
-            .sort((a, _b) => {
-              if (a.clinical_status === "inactive") {
-                return 1;
-              }
-              return -1;
-            })
-            .map((allergy: AllergyIntolerance) => (
-              <TableRow key={allergy.id}>
-                <TableCell className="font-medium">
-                  {allergy.code.display}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap ${getCategoryBadgeStyle(
-                      allergy.category ?? "",
-                    )}`}
-                  >
-                    {allergy.category}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap ${getStatusBadgeStyle(
-                      allergy.clinical_status,
-                    )}`}
-                  >
-                    {allergy.clinical_status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="whitespace-nowrap">
-                    {allergy.criticality}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap flex items-center gap-2">
-                  <Avatar
-                    name={allergy.created_by.username}
-                    className="w-4 h-4"
-                    imageUrl={allergy.created_by.profile_picture_url}
-                  />
-                  <span className="text-sm">
-                    {formatName(allergy.created_by)}
-                  </span>
-                </TableCell>
-              </TableRow>
+          {/* Valid entries */}
+          {filteredAllergies
+            .filter(
+              (allergy) => allergy.verification_status !== "entered_in_error",
+            )
+            .map((allergy) => (
+              <AllergyRow key={allergy.id} allergy={allergy} />
             ))}
+
+          {/* Entered in error entries */}
+          {showEnteredInError &&
+            filteredAllergies
+              .filter(
+                (allergy) => allergy.verification_status === "entered_in_error",
+              )
+              .map((allergy) => (
+                <AllergyRow
+                  key={allergy.id}
+                  allergy={allergy}
+                  isEnteredInError
+                />
+              ))}
         </TableBody>
       </Table>
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <div className="flex justify-start">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowEnteredInError(true)}
+            className="text-xs underline text-gray-500"
+          >
+            {t("view_all")}
+          </Button>
+        </div>
+      )}
     </AllergyListLayout>
   );
 }
@@ -191,7 +244,7 @@ const AllergyListLayout = ({
           </Link>
         )}
       </CardHeader>
-      {children}
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

@@ -40,7 +40,7 @@ export interface Symptom {
   code: Code;
   clinical_status: SymptomClinicalStatus;
   verification_status: SymptomVerificationStatus;
-  severity?: SymptomSeverity;
+  severity: SymptomSeverity;
   onset?: Onset;
   recorded_date?: string;
   note?: string;
@@ -53,7 +53,7 @@ export interface SymptomRequest {
   clinical_status: SymptomClinicalStatus;
   verification_status: SymptomVerificationStatus;
   code: Code;
-  severity?: SymptomSeverity;
+  severity: SymptomSeverity;
   onset?: Onset;
   recorded_date?: string;
   note?: string;
