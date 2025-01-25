@@ -171,7 +171,7 @@ export default function useFileManager(
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
-    onArchive && onArchive();
+    onArchive?.();
   };
 
   const archiveFile = (
@@ -221,7 +221,7 @@ export default function useFileManager(
     onSuccess: (_, { associating_id }) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
-      onEdit && onEdit();
+      onEdit?.();
       queryClient.invalidateQueries({
         queryKey: ["files", fileType, associating_id],
       });
@@ -518,7 +518,7 @@ export default function useFileManager(
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
       toast.success(t("file_download_completed"));
-    } catch (err) {
+    } catch {
       toast.error(t("file_download_failed"));
     }
   };
