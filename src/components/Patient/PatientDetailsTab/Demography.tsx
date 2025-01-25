@@ -179,6 +179,7 @@ export const Demography = (props: PatientProps) => {
           value: patientGender,
         },
         <EmergencyContact
+          key="emergency-contact"
           number={patientData.emergency_phone_number}
           name={patientData.name}
         />,
