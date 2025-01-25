@@ -407,7 +407,7 @@ export function QuestionnaireForm({
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
                     formItem.questionnaire.id === form.questionnaire.id
-                      ? { ...formItem, responses }
+                      ? { ...formItem, responses, errors: [] }
                       : formItem,
                   ),
                 );
