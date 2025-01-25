@@ -116,7 +116,7 @@ export default function SlideOver({
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-2xl hover:bg-black/20"
                     onClick={() => {
                       setOpen(false);
-                      if (onCloseClick) onCloseClick();
+                      onCloseClick?.();
                     }}
                   >
                     <CareIcon icon="l-arrow-left" />

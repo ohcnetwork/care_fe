@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 
 export type Handler = (message: unknown) => Promise<void>;
-export type _PubSubContext = {
+type PubSubContextType = {
   subscribe: (topic: string, handler: Handler) => void;
   unsubscribe: (topic: string, handler: Handler) => void;
   publish: (topic: string, message: unknown) => void;
@@ -11,7 +11,7 @@ export type _PubSubContext = {
   >;
 };
 
-const PubSubContext = createContext<_PubSubContext | null>(null);
+const PubSubContext = createContext<PubSubContextType | null>(null);
 
 export const PubSubProvider = ({ children }: { children: React.ReactNode }) => {
   const [subscribers, setSubscribers] = useState<Record<string, Set<Handler>>>(

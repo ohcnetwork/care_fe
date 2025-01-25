@@ -175,9 +175,7 @@ export default function useFileUpload(
         });
         toast.success(t("file_uploaded"));
         setError(null);
-        if (onUpload) {
-          onUpload(data);
-        }
+        onUpload?.(data);
       },
     });
 
@@ -278,7 +276,7 @@ export default function useFileUpload(
         if (data) {
           await uploadfile(data, file, associating_id);
         }
-      } catch (_error) {
+      } catch {
         errors.push(file);
       }
     }

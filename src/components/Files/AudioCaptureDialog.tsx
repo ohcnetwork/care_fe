@@ -88,7 +88,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             ? "PERMISSION_DENIED"
             : "WAITING_TO_RECORD",
         );
-      } catch (_error) {
+      } catch {
         setStatus(null);
       }
     };
