@@ -24,6 +24,7 @@ export function NumberQuestion({
   disabled,
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
+    const emptyValue = value === "";
     const numericValue =
       question.type === "decimal" ? parseFloat(value) : parseInt(value);
 
@@ -31,7 +32,7 @@ export function NumberQuestion({
       [
         {
           type: "number",
-          value: numericValue,
+          value: emptyValue ? undefined : numericValue,
         },
       ],
       questionnaireResponse.question_id,
