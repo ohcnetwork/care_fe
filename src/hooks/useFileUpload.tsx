@@ -41,11 +41,10 @@ export type FileUploadOptions = {
     }
 );
 
-export interface FileInputProps
-  extends Omit<
-    DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-    "id" | "title" | "type" | "accept" | "onChange"
-  > {}
+export type FileInputProps = Omit<
+  DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
+  "id" | "title" | "type" | "accept" | "onChange"
+> & {};
 
 export type FileUploadReturn = {
   progress: null | number;
@@ -213,7 +212,7 @@ export default function useFileUpload(
         });
         toast.success(t("file_uploaded"));
         setError(null);
-        onUpload && onUpload(data);
+        onUpload?.(data);
       },
     });
 
@@ -327,7 +326,7 @@ export default function useFileUpload(
         if (data) {
           await uploadfile(data, file, associating_id);
         }
-      } catch (error) {
+      } catch {
         errors.push(file);
       }
     }
