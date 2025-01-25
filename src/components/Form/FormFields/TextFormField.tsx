@@ -191,5 +191,6 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
     </FormField>
   );
 });
+TextFormField.displayName = "TextFormField";
 
 export default TextFormField;

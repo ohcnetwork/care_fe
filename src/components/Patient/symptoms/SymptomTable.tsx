@@ -55,14 +55,14 @@ export function SymptomTable({
         </TableHeader>
       )}
       <TableBody>
-        {symptoms.map((symptom: Symptom) => {
+        {symptoms.map((symptom: Symptom, index: number) => {
           const isEnteredInError =
             symptom.verification_status === "entered_in_error";
 
           return (
             <>
               <TableRow
-                key={symptom.id}
+                key={index}
                 className={
                   isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
                 }

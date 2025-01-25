@@ -85,7 +85,7 @@ export default function ResourceCreate(props: ResourceProps) {
           const phoneNumber = parsePhoneNumber(val);
           if (
             !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            PhoneNumberValidator()(phoneNumber) !== undefined ||
             !phonePreg(String(phoneNumber))
           ) {
             return false;

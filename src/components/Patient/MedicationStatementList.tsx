@@ -31,11 +31,17 @@ interface MedicationStatementListProps {
 interface MedicationRowProps {
   statement: any;
   isEnteredInError?: boolean;
+  index: number;
 }
 
-function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
+function MedicationRow({
+  statement,
+  isEnteredInError,
+  index,
+}: MedicationRowProps) {
   return (
     <TableRow
+      key={index}
       className={isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined}
     >
       <TableCell className="font-medium">
@@ -163,7 +169,7 @@ export function MedicationStatementList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredMedications.map((statement) => {
+            {filteredMedications.map((statement, index) => {
               const isEnteredInError = statement.status === "entered_in_error";
 
               return (
@@ -172,6 +178,7 @@ export function MedicationStatementList({
                     key={statement.id}
                     statement={statement}
                     isEnteredInError={isEnteredInError}
+                    index={index}
                   />
                 </>
               );
