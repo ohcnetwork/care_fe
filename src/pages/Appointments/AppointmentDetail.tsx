@@ -160,7 +160,7 @@ export default function AppointmentDetail(props: Props) {
       <div className="container mx-auto p-6 max-w-7xl">
         <div
           className={cn(
-            "flex flex-col md:flex-row",
+            "flex flex-col md:flex-col lg:flex-row",
             isPending && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
@@ -458,8 +458,10 @@ const AppointmentActions = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {AppointmentStatuses.map((status) => (
-              <SelectItem value={status}>{t(status)}</SelectItem>
+            {AppointmentStatuses.map((status, index) => (
+              <SelectItem key={index} value={status}>
+                {t(status)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

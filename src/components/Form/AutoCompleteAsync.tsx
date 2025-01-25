@@ -197,8 +197,9 @@ const AutoCompleteAsync = (props: Props) => {
           </DropdownTransition>
           {multiple && selected?.length > 0 && (
             <div className="flex flex-wrap gap-2 p-2">
-              {selected?.map((option: any) => (
+              {selected?.map((option: any, index: number) => (
                 <MultiSelectOptionChip
+                  key={index}
                   label={optionLabel(option)}
                   onRemove={() =>
                     onChange(

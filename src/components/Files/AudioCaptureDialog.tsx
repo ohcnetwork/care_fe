@@ -88,12 +88,12 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             ? "PERMISSION_DENIED"
             : "WAITING_TO_RECORD",
         );
-      } catch (error) {
+      } catch {
         setStatus(null);
       }
     };
 
-    show && checkMicPermission();
+    if (show) checkMicPermission();
 
     return () => {
       setStatus(null);

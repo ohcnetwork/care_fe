@@ -262,6 +262,7 @@ const ScheduleTemplateEditor = ({
               variant="outline"
               onClick={() => deleteTemplate()}
               disabled={isProcessing}
+              size="sm"
             >
               <Trash2Icon />
               {isDeleting ? t("deleting") : t("delete")}

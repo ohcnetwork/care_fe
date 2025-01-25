@@ -36,7 +36,7 @@ export default function ScheduleExceptions({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-64">
+      <div className="flex flex-col items-center text-center text-gray-500 py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
         <p>{t("no_scheduled_exceptions_found")}</p>
       </div>

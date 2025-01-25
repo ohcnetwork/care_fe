@@ -243,7 +243,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             >
               {t("cancel")}
             </Button>
-            <Button onClick={handleVerify}>{t("verify")}</Button>
+            <Button className="mb-2" onClick={handleVerify}>
+              {t("verify")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
