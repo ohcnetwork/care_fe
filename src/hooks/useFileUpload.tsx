@@ -126,9 +126,9 @@ export default function useFileUpload(
       setProgress(0);
       toast.success(t("file_conversion_success"));
       return pdfFile;
-    } catch (error_) {
+    } catch (error) {
       toast.error(t("file_error__generate_pdf"));
-      setError(t("file_error__generate_pdf"));
+      setError(t("file_error__generate_pdf", { error: String(error) }));
       setProgress(0);
       return null;
     }
