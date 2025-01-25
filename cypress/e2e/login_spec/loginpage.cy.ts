@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { LoginPage } from "../../pageObject/auth/LoginPage";
 
 describe("Login Page", () => {
