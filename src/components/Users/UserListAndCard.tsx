@@ -110,7 +110,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div>
               <div className="text-gray-500">{t("role")}</div>
               <div className="font-medium truncate">
-                {user.user_type ?? "-"}
+              {user.user_type ? user.user_type : "-"}
               </div>
             </div>
             <div>
