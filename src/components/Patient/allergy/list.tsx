@@ -51,7 +51,7 @@ export function AllergyList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <CardContent>
+        <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
       </AllergyListLayout>
@@ -74,7 +74,7 @@ export function AllergyList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <CardContent>
+        <CardContent className="px-2 pb-2">
           <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
         </CardContent>
       </AllergyListLayout>
@@ -204,7 +204,7 @@ export function AllergyList({
         </TableBody>
       </Table>
       {hasEnteredInErrorRecords && !showEnteredInError && (
-        <div className="ml-1 flex justify-start">
+        <div className="flex justify-start">
           <Button
             variant="ghost"
             size="xs"
@@ -244,7 +244,7 @@ const AllergyListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

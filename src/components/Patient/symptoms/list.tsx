@@ -127,7 +127,7 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };
