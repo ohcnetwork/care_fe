@@ -11,7 +11,7 @@ jobs:
   cypress-run:
     permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     strategy:
       fail-fast: false
       matrix:
@@ -77,14 +77,14 @@ jobs:
           SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Upload cypress screenshots on failure 📸
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
 
       - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos

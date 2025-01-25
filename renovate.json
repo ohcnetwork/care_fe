@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "reviewers": [
+    "@ohcnetwork/care-fe-code-reviewers"
+  ],
+  "automergeStrategy": "squash",
+  "automergeType": "pr",
+  "bumpVersion": "minor",
+  "packageRules": [
+    {
+      "groupName": "all dependencies (minor, patch)",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
+  ]
+}
