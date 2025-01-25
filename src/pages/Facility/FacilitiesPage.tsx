@@ -6,9 +6,9 @@ import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
 
-import Loading from "@/components/Common/Loading";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -106,7 +106,9 @@ export function FacilitiesPage() {
 
       <div className="flex flex-col w-full gap-4 mt-4">
         {isLoading ? (
-          <Loading />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <CardGridSkeleton count={6} />
+          </div>
         ) : !qParams.organization ? (
           <Card className="p-6">
             <div className="text-lg font-medium text-muted-foreground">

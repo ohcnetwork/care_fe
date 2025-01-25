@@ -97,8 +97,8 @@ export function MedicationStatementList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {medications.results.map((statement) => (
-              <TableRow>
+            {medications.results.map((statement, index) => (
+              <TableRow key={index}>
                 <TableCell className="font-medium">
                   <Tooltip>
                     <TooltipTrigger asChild className="max-w-60 truncate">
