@@ -13,7 +13,7 @@ jobs:
       issues: write
     steps:
       - name: Add comment
-        uses: actions/github-script@v6.3.3
+        uses: actions/github-script@v6.4.1
         with:
           script: |
             const body = ':warning: **Refrain from assigning this issue to yourself if you have another `P1` issue assigned that is not yet closed.**'
