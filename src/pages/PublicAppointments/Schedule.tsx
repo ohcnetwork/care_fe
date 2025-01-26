@@ -230,6 +230,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   staffId={staffId}
                   selectedSlot={selectedSlot}
                   onSlotSelect={setSelectedSlot}
+                  tokenData={tokenData}
                 />
               </div>
             </div>

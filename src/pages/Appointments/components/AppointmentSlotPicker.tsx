@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useQuery } from "@tanstack/react-query";
 import { format, isBefore, isSameDay, startOfToday } from "date-fns";
 import React, { useState } from "react";
@@ -13,14 +12,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
-import { usePatientContext } from "@/hooks/usePatientUser";
-
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import {
   groupSlotsByAvailability,
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
+import { TokenData } from "@/types/auth/otpToken";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { TokenSlot } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
@@ -31,6 +29,7 @@ interface AppointmentSlotPickerProps {
   resourceId?: string;
   onSlotSelect: (slot: TokenSlot | undefined) => void;
   selectedSlot?: TokenSlot;
+  tokenData?: TokenData;
 }
 
 export function AppointmentSlotPicker({
@@ -39,6 +38,7 @@ export function AppointmentSlotPicker({
   resourceId,
   onSlotSelect,
   selectedSlot,
+  tokenData,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -74,14 +74,13 @@ export function AppointmentSlotPicker({
               day: dateQueryString(selectedDate),
             },
             headers: {
-              Authorization: `Bearer ${usePatientContext()?.tokenData.token}`,
+              Authorization: `Bearer ${tokenData?.token}`,
             },
             silent: true,
           })
         : async () => ({ results: [] }),
     enabled:
-      !!selectedDate &&
-      (!!resourceId || (!!staffId && !!usePatientContext()?.tokenData.token)),
+      !!selectedDate && (!!resourceId || (!!staffId && !!tokenData?.token)),
   });
 
   if (slotsQuery.error) {
