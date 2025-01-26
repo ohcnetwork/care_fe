@@ -25,6 +25,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDisplayName, formatName } from "@/Utils/utils";
+import { TokenSlot } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
@@ -39,7 +40,7 @@ export default function BookAppointment(props: Props) {
   const { goBack } = useAppHistory();
 
   const [resourceId, setResourceId] = useState<string>();
-  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
 
   const [reason, setReason] = useState("");
 
@@ -57,7 +58,7 @@ export default function BookAppointment(props: Props) {
     mutationFn: mutate(scheduleApis.slots.createAppointment, {
       pathParams: {
         facility_id: props.facilityId,
-        slot_id: selectedSlotId ?? "",
+        slot_id: selectedSlot?.id || "",
       },
     }),
   });
@@ -67,7 +68,7 @@ export default function BookAppointment(props: Props) {
       toast.error("Please select a practitioner");
       return;
     }
-    if (!selectedSlotId) {
+    if (!selectedSlot) {
       toast.error("Please select a slot");
       return;
     }
@@ -154,8 +155,8 @@ export default function BookAppointment(props: Props) {
             <AppointmentSlotPicker
               facilityId={props.facilityId}
               resourceId={resourceId}
-              selectedSlotId={selectedSlotId}
-              onSlotSelect={setSelectedSlotId}
+              selectedSlot={selectedSlot}
+              onSlotSelect={setSelectedSlot}
             />
           </div>
 
@@ -166,7 +167,7 @@ export default function BookAppointment(props: Props) {
             <Button
               variant="primary"
               type="submit"
-              disabled={!selectedSlotId}
+              disabled={!selectedSlot}
               onClick={handleSubmit}
             >
               {t("schedule_appointment")}

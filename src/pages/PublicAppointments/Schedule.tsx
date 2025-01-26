@@ -24,14 +24,13 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { AppointmentSlotPicker } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
   AppointmentCreateRequest,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-
-import { PublicAppointmentSlotPicker } from "./components/PublicAppointmentSlotPicker";
 
 interface AppointmentsProps {
   facilityId: string;
@@ -226,7 +225,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 />
               </div>
               <div>
-                <PublicAppointmentSlotPicker
+                <AppointmentSlotPicker
                   facilityId={facilityId}
                   staffId={staffId}
                   selectedSlot={selectedSlot}

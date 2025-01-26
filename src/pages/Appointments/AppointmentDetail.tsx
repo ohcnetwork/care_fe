@@ -74,6 +74,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentStatuses,
   AppointmentUpdateRequest,
+  TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
@@ -401,7 +402,7 @@ const AppointmentActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
-  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
@@ -435,7 +436,7 @@ const AppointmentActions = ({
           queryKey: ["appointment", appointment.id],
         });
         setIsRescheduleOpen(false);
-        setSelectedSlotId(undefined);
+        setSelectedSlot(undefined);
         navigate(
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
         );
@@ -492,8 +493,8 @@ const AppointmentActions = ({
             <AppointmentSlotPicker
               facilityId={facilityId}
               resourceId={appointment.user?.id}
-              selectedSlotId={selectedSlotId}
-              onSlotSelect={setSelectedSlotId}
+              selectedSlot={selectedSlot}
+              onSlotSelect={setSelectedSlot}
             />
 
             <div className="flex justify-end gap-2 mt-6">
@@ -501,17 +502,17 @@ const AppointmentActions = ({
                 variant="outline"
                 onClick={() => {
                   setIsRescheduleOpen(false);
-                  setSelectedSlotId(undefined);
+                  setSelectedSlot(undefined);
                 }}
               >
                 {t("cancel")}
               </Button>
               <Button
                 variant="default"
-                disabled={!selectedSlotId || isRescheduling}
+                disabled={!selectedSlot || isRescheduling}
                 onClick={() => {
-                  if (selectedSlotId) {
-                    rescheduleAppointment({ new_slot: selectedSlotId });
+                  if (selectedSlot) {
+                    rescheduleAppointment({ new_slot: selectedSlot?.id });
                   }
                 }}
               >
