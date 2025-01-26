@@ -53,8 +53,8 @@ export function AllergyTable({
         </TableHeader>
       )}
       <TableBody>
-        {allergies.map((allergy) => (
-          <TableRow>
+        {allergies.map((allergy, index) => (
+          <TableRow key={index}>
             <TableCell className="w-[40px]">
               {allergy.category &&
                 CATEGORY_ICONS[allergy.category as AllergyCategory]}

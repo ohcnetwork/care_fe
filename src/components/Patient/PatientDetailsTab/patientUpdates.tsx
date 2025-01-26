@@ -7,6 +7,8 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
 import routes from "@/Utils/request/api";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -41,28 +43,14 @@ export const Updates = (props: PatientProps) => {
               <PaginatedList.WhenEmpty>
                 <Card className="p-6">
                   <div className="text-lg font-medium text-muted-foreground">
-                    {t("no_updates_found")}
+                    {t("no_update_available")}
                   </div>
                 </Card>
               </PaginatedList.WhenEmpty>
 
               <PaginatedList.WhenLoading>
                 <div className="grid gap-4">
-                  {[1, 2, 3].map((i) => (
-                    <Card
-                      key={i}
-                      className="flex items-center justify-between p-4"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />
-                        <div className="space-y-2">
-                          <div className="h-4 w-48 animate-pulse rounded bg-muted" />
-                          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-                          <div className="h-3 w-40 animate-pulse rounded bg-muted" />
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                  <CardListSkeleton count={4} />
                 </div>
               </PaginatedList.WhenLoading>
 

@@ -6,9 +6,9 @@ import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
 
-import Loading from "@/components/Common/Loading";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -16,32 +16,30 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import OrganizationFilter from "@/pages/Organization/components/OrganizationFilter";
 import { FacilityData } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
-import OrganizationFilter from "../Organization/components/OrganizationFilter";
 import { FacilityCard } from "./components/FacilityCard";
 
 export function FacilitiesPage() {
   const { mainLogo } = careConfig;
-  const { qParams, updateQuery, advancedFilter, clearSearch, Pagination } =
-    useFilters({
-      limit: RESULTS_PER_PAGE_LIMIT,
-    });
-
-  const { t } = useTranslation();
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>(() => {
-    return qParams.organization ? [qParams.organization] : [];
+  const { qParams, updateQuery, advancedFilter, Pagination } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
   });
 
+  const { t } = useTranslation();
+  const [selectedOrg, setSelectedOrg] = useState<string | undefined>(
+    qParams.organization,
+  );
+
   useEffect(() => {
-    if (selectedOrgs.length > 0) {
-      const lastSelected = selectedOrgs[selectedOrgs.length - 1];
-      updateQuery({ organization: lastSelected });
+    if (selectedOrg) {
+      updateQuery({ organization: selectedOrg });
     } else {
       updateQuery({ organization: undefined });
     }
-  }, [selectedOrgs]);
+  }, [selectedOrg]);
 
   const { data: facilitiesResponse, isLoading } = useQuery<
     PaginatedResponse<FacilityData>
@@ -74,18 +72,13 @@ export function FacilitiesPage() {
       <div className="flex flex-col items-start justify-between gap-5 mt-4 xl:flex-row">
         <OrganizationFilter
           skipLevels={[]}
-          selected={selectedOrgs}
-          onChange={(filter, level) => {
+          selected={qParams.organization}
+          onChange={(filter) => {
             if ("organization" in filter) {
               if (filter.organization) {
-                setSelectedOrgs((prev) => {
-                  const newOrgId = filter.organization as string;
-                  const newOrgs = prev.slice(0, level);
-                  newOrgs.push(newOrgId);
-                  return newOrgs;
-                });
+                setSelectedOrg(filter.organization as string);
               } else {
-                setSelectedOrgs([]);
+                setSelectedOrg(undefined);
               }
             }
             if ("facility_type" in filter) {
@@ -102,19 +95,20 @@ export function FacilitiesPage() {
               type: "text" as const,
               placeholder: t("facility_search_placeholder_text"),
               value: qParams.name || "",
-              shortcutKey: "f",
             },
           ]}
+          initialOptionIndex={0}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
-          clearSearch={clearSearch}
           enableOptionButtons={false}
         />
       </div>
 
       <div className="flex flex-col w-full gap-4 mt-4">
         {isLoading ? (
-          <Loading />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <CardGridSkeleton count={6} />
+          </div>
         ) : !qParams.organization ? (
           <Card className="p-6">
             <div className="text-lg font-medium text-muted-foreground">

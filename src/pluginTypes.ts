@@ -10,6 +10,7 @@ import { Patient } from "@/types/emr/newPatient";
 import { AppRoutes } from "./Routers/AppRouter";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
+import { FacilityData } from "./types/facility/facility";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
@@ -30,6 +31,11 @@ export type PatientInfoCardActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type FacilityHomeActionsComponentType = React.FC<{
+  facility: FacilityData;
+  className?: string;
+}>;
+
 export type PatientRegistrationFormComponentType = React.FC<{
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   patientId?: string;
@@ -41,6 +47,7 @@ export type SupportedPluginComponents = {
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
 };
 

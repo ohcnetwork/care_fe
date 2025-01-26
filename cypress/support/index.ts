@@ -16,7 +16,8 @@ declare global {
       clickCancelButton(buttonText?: string): Chainable<Element>;
       typeAndSelectOption(
         element: string,
-        referance: string,
+        reference: string,
+        skipVerification?: boolean,
       ): Chainable<Element>;
       clickAndMultiSelectOption(
         selector: string,

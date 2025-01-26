@@ -14,12 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface MedicationStatementListProps {
   patientId: string;
@@ -94,8 +97,8 @@ export function MedicationStatementList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {medications.results.map((statement) => (
-              <TableRow>
+            {medications.results.map((statement, index) => (
+              <TableRow key={index}>
                 <TableCell className="font-medium">
                   <Tooltip>
                     <TooltipTrigger asChild className="max-w-60 truncate">

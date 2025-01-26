@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +20,17 @@ import mutate from "@/Utils/request/mutate";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentFinalStatuses,
+} from "@/types/scheduling/schedule";
 
-function AppointmentDialog(props: {
+function AppointmentDialog({
+  appointment,
+  open,
+  onOpenChange,
+  setAppointmentDialogOpen,
+}: {
   appointment: Appointment | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +40,11 @@ function AppointmentDialog(props: {
   const queryClient = useQueryClient();
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    navigate(
+      `/facility/${appointment.facility.id}/appointments/${appointment.user.id}/reschedule/${appointment.id}`,
+    );
+  };
   const { mutate: cancelAppointment, isPending } = useMutation({
     mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
       headers: {
@@ -40,10 +55,10 @@ function AppointmentDialog(props: {
       queryClient.invalidateQueries({
         queryKey: ["appointment", tokenData?.phoneNumber],
       });
-      props.setAppointmentDialogOpen(false);
+      toast.success(t("appointment_cancelled"));
+      setAppointmentDialogOpen(false);
     },
   });
-  const { appointment, open, onOpenChange } = props;
 
   if (!appointment) return <></>;
 
@@ -80,23 +95,28 @@ function AppointmentDialog(props: {
           <span className="text-sm font-semibold text-blue-700">
             {t(appointment.status)}
           </span>
-          <span className="flex flex-row gap-2">
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => {
-                cancelAppointment({
-                  appointment: appointment.id,
-                  patient: appointment.patient.id,
-                });
-              }}
-            >
-              <span>{t("Cancel")}</span>
-            </Button>
-            <Button variant="secondary">
-              <span>{t("reschedule")}</span>
-            </Button>
-          </span>
+          {!AppointmentFinalStatuses.includes(appointment.status) && (
+            <span className="flex flex-row gap-2">
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() => {
+                  cancelAppointment({
+                    appointment: appointment.id,
+                    patient: appointment.patient.id,
+                  });
+                }}
+              >
+                <span>{t("cancel")}</span>
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => handleRescheduleAppointment(appointment)}
+              >
+                <span>{t("reschedule")}</span>
+              </Button>
+            </span>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

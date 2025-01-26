@@ -35,7 +35,6 @@ import { Input } from "@/components/ui/input";
 import { Markdown } from "@/components/ui/markdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -46,6 +45,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
@@ -70,23 +70,6 @@ const threadTemplates = [
   "Referral Notes",
   "Lab Results Discussion",
 ] as const;
-
-// Component to display loading skeleton for messages
-const MessageSkeleton = () => (
-  <div className="space-y-4">
-    {[1, 2, 3].map((i) => (
-      <div key={i} className="p-4 rounded-lg bg-gray-100 animate-pulse">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-200" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -180,7 +163,10 @@ const MessageItem = ({ message }: { message: Message }) => {
             isCurrentUser ? "items-end" : "items-start",
           )}
         >
-         <span className="text-xs text-gray-500 mb-1 cursor-pointer" onClick={navigateToUser}>
+          <span
+            className="text-xs text-gray-500 mb-1 cursor-pointer"
+            onClick={navigateToUser}
+          >
             {message.created_by.username}
           </span>
           <div
@@ -583,7 +569,9 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
             <>
               {messagesLoading ? (
                 <div className="flex-1 p-4">
-                  <MessageSkeleton />
+                  <div className="space-y-4">
+                    <CardListSkeleton count={3} />
+                  </div>
                 </div>
               ) : (
                 <>

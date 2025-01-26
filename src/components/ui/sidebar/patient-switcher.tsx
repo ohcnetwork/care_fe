@@ -7,14 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { classNames } from "@/Utils/utils";
-
-import { useSidebar } from "../sidebar";
 
 interface PatientSwitcherProps {
   className?: string;
@@ -68,7 +67,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                 <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
                   <Avatar
                     name={patientUserContext.selectedPatient?.name || "User"}
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   />
                   <div className="flex flex-row items-center justify-between w-full gap-2">
                     <span className="font-semibold truncate max-w-32">
@@ -95,7 +94,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           {patientUserContext.patients?.map((patient) => (
             <SelectItem key={patient.id} value={patient.id}>
               <div className="flex flex-row items-center gap-2">
-                <Avatar name={patient.name} className="h-4 w-4" />
+                <Avatar name={patient.name} className="h-5 w-5" />
                 {patient.name}
               </div>
             </SelectItem>

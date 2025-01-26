@@ -10,8 +10,10 @@ import { z } from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -45,27 +47,23 @@ import {
   GENDER_TYPES, // OCCUPATION_TYPES,
   //RATION_CARD_CATEGORY, // SOCIOECONOMIC_STATUS_CHOICES ,
 } from "@/common/constants";
+import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
-import OrganizationSelector from "@/pages/Organization/components/OrganizationSelector";
+import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
-
-import Autocomplete from "../ui/autocomplete";
 
 interface PatientRegistrationPageProps {
   facilityId: string;
   patientId?: string;
 }
-
-export const GENDERS = GENDER_TYPES.map((gender) => gender.id) as [
-  (typeof GENDER_TYPES)[number]["id"],
-];
 
 export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],
@@ -104,6 +102,10 @@ export default function PatientRegistration(
           date_of_birth: z
             .string()
             .regex(/^\d{4}-\d{2}-\d{2}$/, t("date_of_birth_format"))
+            .refine((date) => {
+              const parsedDate = dayjs(date);
+              return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
+            }, t("enter_valid_dob"))
             .optional(),
           age: z
             .number()
@@ -512,89 +514,15 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <div className="flex items-center gap-2">
-                            <div className="flex flex-col gap-1">
-                              <FormLabel required>{t("day")}</FormLabel>
-
-                              <Input
-                                type="number"
-                                placeholder="DD"
-                                {...field}
-                                value={
-                                  form.watch("date_of_birth")?.split("-")[2]
-                                }
-                                onChange={(e) => {
-                                  form.setValue(
-                                    "date_of_birth",
-                                    `${form.watch("date_of_birth")?.split("-")[0]}-${form.watch("date_of_birth")?.split("-")[1]}-${e.target.value}`,
-                                  );
-                                  const day = parseInt(e.target.value);
-                                  if (
-                                    e.target.value.length === 2 &&
-                                    day >= 1 &&
-                                    day <= 31
-                                  ) {
-                                    document
-                                      .getElementById("dob-month-input")
-                                      ?.focus();
-                                  }
-                                }}
-                                data-cy="dob-day-input"
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-1">
-                              <FormLabel required>{t("month")}</FormLabel>
-
-                              <Input
-                                type="number"
-                                id="dob-month-input"
-                                placeholder="MM"
-                                {...field}
-                                value={
-                                  form.watch("date_of_birth")?.split("-")[1]
-                                }
-                                onChange={(e) => {
-                                  form.setValue(
-                                    "date_of_birth",
-                                    `${form.watch("date_of_birth")?.split("-")[0]}-${e.target.value}-${form.watch("date_of_birth")?.split("-")[2]}`,
-                                  );
-                                  const month = parseInt(e.target.value);
-                                  if (
-                                    e.target.value.length === 2 &&
-                                    month >= 1 &&
-                                    month <= 12
-                                  ) {
-                                    document
-                                      .getElementById("dob-year-input")
-                                      ?.focus();
-                                  }
-                                }}
-                                data-cy="dob-month-input"
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-1">
-                              <FormLabel required>{t("year")}</FormLabel>
-
-                              <Input
-                                type="number"
-                                id="dob-year-input"
-                                placeholder="YYYY"
-                                {...field}
-                                value={
-                                  form.watch("date_of_birth")?.split("-")[0]
-                                }
-                                onChange={(e) =>
-                                  form.setValue(
-                                    "date_of_birth",
-                                    `${e.target.value}-${form.watch("date_of_birth")?.split("-")[1]}-${form.watch("date_of_birth")?.split("-")[2]}`,
-                                  )
-                                }
-                                data-cy="dob-year-input"
-                              />
-                            </div>
-                          </div>
+                          <DateField
+                            date={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onChange={(date) =>
+                              field.onChange(dateQueryString(date))
+                            }
+                            id="dob"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -771,7 +699,6 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
-
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -779,7 +706,7 @@ export default function PatientRegistration(
                     render={({ field }) => (
                       <FormItem className="contents">
                         <FormControl>
-                          <OrganizationSelector
+                          <GovtOrganizationSelector
                             {...field}
                             required={true}
                             selected={selectedLevels}

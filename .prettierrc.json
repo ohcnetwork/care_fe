@@ -3,11 +3,25 @@
   "useTabs": false,
   "tabWidth": 2,
   "semi": true,
+  "endOfLine": "lf",
   "jsxSingleQuote": false,
   "arrowParens": "always",
   "tailwindFunctions": ["classNames"],
-  "importOrder": ["<THIRD_PARTY_MODULES>", "^@/lib/(.*)$", "^@/CAREUI/(.*)$", "^@/components/ui/(.*)$", "^@/components/(.*)$", "^@/hooks/(.*)$", "^@/common/(.*)$", "^@/(.*)$", "^[./]"],
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "^@/lib/(.*)$",
+    "^@/CAREUI/(.*)$",
+    "^@/components/ui/(.*)$",
+    "^@/components/(.*)$",
+    "^@/hooks/(.*)$",
+    "^@/common/(.*)$",
+    "^@/(.*)$",
+    "^[./]"
+  ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "plugins": ["prettier-plugin-tailwindcss", "@trivago/prettier-plugin-sort-imports"]
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+    "@trivago/prettier-plugin-sort-imports"
+  ]
 }
