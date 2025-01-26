@@ -74,7 +74,6 @@ export const UserStatusIndicator = ({
 };
 const UserCard = ({ user }: { user: UserBase }) => {
   const { t } = useTranslation();
-
   return (
     <Card key={user.id} className="h-full">
       <CardContent className="p-4 sm:p-6">
@@ -112,9 +111,15 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div>
               <div className="text-gray-500">{t("phone_number")}</div>
               <div className="font-medium truncate">
-                {parsePhoneNumberWithError(
-                  user.phone_number,
-                ).formatInternational() ?? "-"}
+                {(() => {
+                  try {
+                    return parsePhoneNumberWithError(
+                      user.phone_number,
+                    ).formatInternational();
+                  } catch {
+                    return "-";
+                  }
+                })()}
               </div>
             </div>
           </div>
