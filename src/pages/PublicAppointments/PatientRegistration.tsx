@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import DateField from "@/components/ui/date-field";
@@ -23,6 +25,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
+import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import { GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
@@ -37,6 +40,7 @@ import {
   AppointmentPatient,
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
+import { Organization } from "@/types/organization/organization";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -78,6 +82,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
+
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   const patientSchema = z
     .object({
@@ -211,7 +218,27 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     createPatient(formattedData);
   });
 
-  // const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
+    pincode: form.watch("pincode")?.toString() || "",
+    authToken: tokenData.token,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (stateOrg) levels.push(stateOrg);
+    if (districtOrg) levels.push(districtOrg);
+
+    setSelectedLevels(levels);
+
+    if (levels.length == 2) {
+      setShowAutoFilledPincode(true);
+      const timer = setTimeout(() => {
+        setShowAutoFilledPincode(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    return () => setShowAutoFilledPincode(false);
+  }, [stateOrg, districtOrg]);
 
   return (
     <>
@@ -383,6 +410,22 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                    {showAutoFilledPincode && (
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className="flex items-center"
+                      >
+                        <CareIcon
+                          icon="l-check-circle"
+                          className="mr-2 text-sm text-green-500"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-primary-500">
+                          {t("pincode_autofill")}
+                        </span>
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -395,11 +438,14 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormControl>
                       <GovtOrganizationSelector
+                        {...field}
+                        value={form.watch("geo_organization")}
+                        selected={selectedLevels}
                         required
                         authToken={tokenData.token}
-                        onChange={(value) => {
-                          field.onChange(value);
-                        }}
+                        onChange={(value) =>
+                          form.setValue("geo_organization", value)
+                        }
                       />
                     </FormControl>
                     <FormMessage />

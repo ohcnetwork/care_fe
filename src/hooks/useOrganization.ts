@@ -11,6 +11,7 @@ interface UseOrganizationParams {
   parentId?: string;
   name?: string;
   enabled?: boolean;
+  authToken?: string;
 }
 
 export function useOrganization({
@@ -18,7 +19,15 @@ export function useOrganization({
   parentId = "",
   name = "",
   enabled = true,
+  authToken,
 }: UseOrganizationParams) {
+  const headers = authToken
+    ? {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    : {};
   const { data, isLoading, isError } = useQuery({
     queryKey: ["organization", orgType, name, parentId],
     queryFn: query(organizationApi.list, {
@@ -27,6 +36,7 @@ export function useOrganization({
         parent: parentId,
         name,
       },
+      ...headers,
     }),
     enabled: enabled && !!name,
   });

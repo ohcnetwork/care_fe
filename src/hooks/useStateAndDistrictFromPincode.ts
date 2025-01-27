@@ -12,6 +12,7 @@ import { getPincodeDetails } from "@/Utils/utils";
 
 interface UseStateAndDistrictProps {
   pincode: string;
+  authToken?: string;
 }
 
 interface PincodeResponse {
@@ -21,6 +22,7 @@ interface PincodeResponse {
 
 export function useStateAndDistrictFromPincode({
   pincode,
+  authToken,
 }: UseStateAndDistrictProps) {
   const {
     data: pincodeDetails,
@@ -43,6 +45,7 @@ export function useStateAndDistrictFromPincode({
     orgType: "govt",
     parentId: "",
     name: stateName,
+    authToken,
     enabled: !!stateName,
   });
 
@@ -56,6 +59,7 @@ export function useStateAndDistrictFromPincode({
     orgType: "govt",
     parentId: stateOrg?.id,
     name: districtName,
+    authToken,
     enabled: !!stateOrg?.id && !!districtName,
   });
 
