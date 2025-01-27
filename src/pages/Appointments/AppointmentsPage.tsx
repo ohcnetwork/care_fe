@@ -262,12 +262,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   );
 
   useEffect(() => {
+    // trigger this effect only when there are no query params already applied, and once the query is loaded
+    if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
+      return;
+    }
+
     const updates: Partial<QueryParams> = {};
 
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
-      !schedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
@@ -301,7 +305,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading]);
+  }, [schedulableUsersQuery.isLoading, qParams]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
