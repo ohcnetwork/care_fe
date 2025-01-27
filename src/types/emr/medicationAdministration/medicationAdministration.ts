@@ -1,5 +1,6 @@
 import { UserBareMinimum } from "@/components/Users/models";
 
+import { DosageQuantity } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
 
@@ -42,7 +43,7 @@ export interface MedicationAdministration {
     site?: Code;
     route?: Code;
     method?: Code;
-    dose?: Quantity;
+    dose?: DosageQuantity;
     rate?: Quantity;
   };
 
@@ -50,4 +51,46 @@ export interface MedicationAdministration {
 
   created_by?: UserBareMinimum;
   updated_by?: UserBareMinimum;
+}
+
+export interface MedicationAdministrationRequest {
+  id?: string;
+  encounter: string;
+  request: string;
+  status: MedicationAdministrationStatus;
+  status_reason?: Code;
+  medication: Code;
+  occurrence_period_start: string;
+  occurrence_period_end?: string;
+  recorded?: string;
+  note?: string;
+  dosage?: {
+    text?: string;
+    site?: Code;
+    route?: Code;
+    method?: Code;
+    dose?: DosageQuantity;
+    rate?: Quantity;
+  };
+}
+
+export interface MedicationAdministrationRead {
+  id: string;
+  status: MedicationAdministrationStatus;
+  status_reason?: Code;
+  medication: Code;
+  occurrence_period_start: string;
+  occurrence_period_end?: string;
+  recorded?: string;
+  encounter: string;
+  request: string;
+  note?: string;
+  dosage?: {
+    text?: string;
+    site?: Code;
+    route?: Code;
+    method?: Code;
+    dose?: DosageQuantity;
+    rate?: Quantity;
+  };
 }

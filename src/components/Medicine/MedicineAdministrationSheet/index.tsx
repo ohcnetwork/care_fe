@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "raviger";
 import React from "react";
 import { useState } from "react";
@@ -9,14 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
-import { AdministrationTab } from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTab";
-import { PrescriptionsTab } from "@/components/Medicine/MedicineAdministrationSheet/PrescriptionsTab";
 
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import useQuery from "@/Utils/request/useQuery";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+
+import { AdministrationTab } from "./AdministrationTab";
+import { MedicineAdminSheet } from "./MedicineAdminSheet";
+import { PrescriptionsTab } from "./PrescriptionsTab";
 
 interface Props {
   readonly?: boolean;
@@ -27,11 +32,9 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "prescriptions" | "administration"
-  >("prescriptions");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const { data: medications, loading } = useTanStackQueryInstead(
+  const { data: medications, loading } = useQuery(
     routes.medicationRequest.list,
     {
       pathParams: { patientId: patient!.id },
@@ -42,87 +45,89 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
     },
   );
 
-  const { data: administrations, loading: loadingAdministrations } =
-    useTanStackQueryInstead(routes.medicationAdministration.list, {
+  const { data: administrations } = useQuery(
+    routes.medicationAdministration.list,
+    {
       pathParams: { patientId: patient!.id },
       query: {
         encounter: encounterId,
         limit: 100,
       },
-    });
-
-  const filteredMedications = medications?.results?.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
     },
   );
 
-  const activeMedications = filteredMedications?.filter(
-    (med: MedicationRequestRead) =>
-      ["active", "on_hold"].includes(med.status || ""),
+  const filteredMedications = medications?.results?.filter(
+    (medication: MedicationRequestRead) =>
+      medication.medication?.display
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
+
+  const activeMedications = filteredMedications?.filter(
+    (medication: MedicationRequestRead) => medication.status === "active",
+  );
+
   const discontinuedMedications = filteredMedications?.filter(
-    (med: MedicationRequestRead) =>
-      !["active", "on_hold"].includes(med.status || ""),
+    (medication: MedicationRequestRead) => medication.status === "stopped",
+  );
+
+  // Get last administered date for each medication
+  const lastAdministeredDates = administrations?.results?.reduce(
+    (acc: Record<string, string>, admin: MedicationAdministration) => {
+      const existingDate = acc[admin.request];
+      const adminDate = new Date(admin.occurrence_period_start);
+
+      if (!existingDate || adminDate > new Date(existingDate)) {
+        acc[admin.request] = admin.occurrence_period_start;
+      }
+
+      return acc;
+    },
+    {},
   );
 
   return (
     <div className="space-y-2">
       <SubHeading
-        title={
-          activeTab === "prescriptions"
-            ? "Prescriptions"
-            : "Medicine Administration"
-        }
+        title="Prescriptions"
         options={
           <div className="flex items-center gap-2">
-            {activeTab === "prescriptions" && (
-              <Button asChild variant="outline" size="sm">
-                <Link
-                  href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
-                >
-                  <CareIcon icon="l-print" className="mr-2" />
-                  Print
-                </Link>
-              </Button>
-            )}
-            {activeTab === "administration" && (
-              <Button variant="outline" size="sm">
-                <CareIcon icon="l-plus" className="mr-2" />
-                Administer Medicine
-              </Button>
-            )}
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+              >
+                <CareIcon icon="l-print" className="mr-2" />
+                Print
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSheetOpen(true)}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              Administer Medicine
+            </Button>
           </div>
         }
       />
 
       <div className="rounded-lg border">
-        <Tabs
-          defaultValue="prescriptions"
-          className="w-full"
-          onValueChange={(value) =>
-            setActiveTab(value as "prescriptions" | "administration")
-          }
-        >
-          <div className="border-b">
-            <TabsList className="h-9 w-full justify-start rounded-none border-b bg-transparent p-0">
-              <TabsTrigger
-                value="prescriptions"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
-              >
-                Prescriptions
-              </TabsTrigger>
-              <TabsTrigger
-                value="administration"
-                className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
-              >
-                Medicine Administration
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        <Tabs defaultValue="prescriptions">
+          <TabsList className="h-9 w-full justify-start rounded-none border-b bg-transparent p-0">
+            <TabsTrigger
+              value="prescriptions"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+            >
+              Prescriptions
+            </TabsTrigger>
+            <TabsTrigger
+              value="administration"
+              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+            >
+              Medicine Administration
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="prescriptions">
             <PrescriptionsTab
@@ -138,13 +143,23 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
 
           <TabsContent value="administration">
             <AdministrationTab
-              loadingAdministrations={loadingAdministrations}
+              loadingAdministrations={loading}
               activeMedications={activeMedications}
               administrations={administrations}
+              lastAdministeredDates={lastAdministeredDates}
             />
           </TabsContent>
         </Tabs>
       </div>
+
+      <MedicineAdminSheet
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+        medications={activeMedications || []}
+        lastAdministeredDates={lastAdministeredDates}
+        patientId={patient!.id}
+        encounterId={encounterId}
+      />
     </div>
   );
 };

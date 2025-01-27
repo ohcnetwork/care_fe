@@ -1,3 +1,5 @@
+"use client";
+
 import { format, formatDistanceToNow } from "date-fns";
 import React, { useMemo, useState } from "react";
 
@@ -7,16 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
+import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import { MedicationAdministration } from "@/types/emr/medicationAdministration";
+import {
+  MedicationAdministration,
+  MedicationAdministrationRequest,
+} from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+
+import { MedicineAdminDialog } from "./MedicineAdminDialog";
+import { MedicineAdminSheet } from "./MedicineAdminSheet";
 
 interface AdministrationTabProps {
   loadingAdministrations: boolean;
   activeMedications: MedicationRequestRead[] | undefined;
   administrations: { results: MedicationAdministration[] } | undefined;
+  lastAdministeredDates?: Record<string, string>;
 }
 
 const timeSlots = [
@@ -30,7 +40,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   loadingAdministrations,
   activeMedications,
   administrations,
+  lastAdministeredDates,
 }) => {
+  const { patient, encounter } = useEncounter();
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [endSlotIndex, setEndSlotIndex] = useState(() => {
@@ -40,6 +52,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     if (hour < 18) return 2;
     return 3;
   });
+
+  // Dialog state for single medicine administration
+  const [selectedMedication, setSelectedMedication] =
+    useState<MedicationRequestRead | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Sheet state for multiple medicine administration
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Calculate visible slots based on end slot
   const visibleSlots = useMemo(() => {
@@ -149,6 +169,59 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         );
       },
     );
+  };
+
+  const [administrationRequest, setAdministrationRequest] =
+    useState<MedicationAdministrationRequest | null>(null);
+
+  const handleAdminister = (medication: MedicationRequestRead) => {
+    // Create new administration request
+    setAdministrationRequest({
+      request: medication.id,
+      encounter: encounter!.id,
+      note: "",
+      occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      status: "completed",
+      medication: medication.medication,
+      dosage: {
+        text: medication.dosage_instruction[0]?.text,
+        site: medication.dosage_instruction[0]?.site,
+        route: medication.dosage_instruction[0]?.route,
+        method: medication.dosage_instruction[0]?.method,
+        ...(medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity && {
+          dose: {
+            value:
+              medication.dosage_instruction[0].dose_and_rate.dose_quantity
+                .value,
+            unit: medication.dosage_instruction[0].dose_and_rate.dose_quantity
+              .unit,
+          },
+        }),
+      },
+    });
+    setSelectedMedication(medication);
+    setDialogOpen(true);
+  };
+
+  const handleEditAdministration = (
+    medication: MedicationRequestRead,
+    admin: MedicationAdministration,
+  ) => {
+    // Convert existing administration to request
+    setAdministrationRequest({
+      id: admin.id,
+      request: admin.request,
+      encounter: admin.encounter,
+      note: admin.note || "",
+      occurrence_period_start: admin.occurrence_period_start,
+      occurrence_period_end: admin.occurrence_period_end,
+      status: admin.status,
+      medication: admin.medication,
+      dosage: admin.dosage,
+    });
+    setSelectedMedication(medication);
+    setDialogOpen(true);
   };
 
   return loadingAdministrations ? (
@@ -297,6 +370,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     variant="outline"
                     size="sm"
                     className="h-8 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                    onClick={() => handleAdminister(medication)}
                   >
                     Administer
                   </Button>
@@ -316,7 +390,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                       {administrationRecords?.map((admin) => (
                         <div
                           key={admin.id}
-                          className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] rounded-md p-2 mb-2"
+                          className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] rounded-md p-2 mb-2 cursor-pointer"
+                          onClick={() =>
+                            handleEditAdministration(medication, admin)
+                          }
                         >
                           <div className="flex items-center gap-1">
                             <div className="h-2 w-2 rounded-full bg-[#059669]" />
@@ -332,6 +409,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                             variant="ghost"
                             size="icon"
                             className="h-4 w-4 hover:bg-emerald-100 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Handle copy functionality
+                            }}
                           >
                             <CareIcon icon="l-copy" className="h-3 w-3" />
                           </Button>
@@ -357,6 +438,31 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           <span className="text-sm"> prescription(s)</span>
         </div>
       </Card>
+
+      {selectedMedication && administrationRequest && (
+        <MedicineAdminDialog
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setAdministrationRequest(null);
+              setSelectedMedication(null);
+            }
+          }}
+          medication={selectedMedication}
+          lastAdministeredDate={lastAdministeredDates?.[selectedMedication.id]}
+          administrationRequest={administrationRequest}
+        />
+      )}
+
+      <MedicineAdminSheet
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+        medications={activeMedications || []}
+        lastAdministeredDates={lastAdministeredDates}
+        patientId={patient!.id}
+        encounterId={encounter!.id}
+      />
     </div>
   );
 };

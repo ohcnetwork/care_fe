@@ -20,7 +20,7 @@ import {
   AppointmentPatientRegister,
 } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
