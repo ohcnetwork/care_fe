@@ -65,11 +65,15 @@ export function FacilitiesPage() {
     <div className="container px-4 py-8 mx-auto">
       <div className="flex items-start justify-between w-full">
         <Link href="/" className="">
-          <img src={mainLogo?.dark} alt="Care Logo" className="w-auto h-12" />
+          <img
+            src={mainLogo?.dark}
+            alt="Care Logo"
+            className="w-auto h-12 hidden md:block"
+          />
         </Link>
         <LoginHeader />
       </div>
-      <div className="flex flex-col items-start justify-between gap-5 mt-4 xl:flex-row">
+      <div className="flex flex-col items-center justify-between gap-5 mt-4 xl:flex-row">
         <OrganizationFilter
           skipLevels={[]}
           selected={qParams.organization}
@@ -117,7 +121,7 @@ export function FacilitiesPage() {
           </Card>
         ) : !facilitiesResponse?.results.length ? (
           <Card className="p-6">
-            <div className="text-lg font-medium text-muted-foreground">
+            <div className="text-lg font-medium text-muted-foreground text-center">
               {t("no_facilities_found")}
             </div>
           </Card>

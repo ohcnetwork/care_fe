@@ -36,10 +36,10 @@ export const LoginHeader = () => {
   if (isLoggedIn) {
     return (
       <header className="w-full">
-        <div className="flex justify-end items-center gap-2">
+        <div className="flex justify-end items-center gap-1">
           <Button
             variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 px-6"
+            className="text-sm font-medium hover:bg-gray-100 px-4"
             onClick={() => navigate("/patient/home")}
           >
             {t("dashboard")}
