@@ -40,6 +40,9 @@ const PHONE_NUMBER_REGEX_MAP = {
 
 export type PhoneNumberType = keyof typeof PHONE_NUMBER_REGEX_MAP;
 
+/**
+ * @deprecated use isValidPhoneNumber from react-phone-number-input instead
+ */
 export const PhoneNumberValidator = (
   type: PhoneNumberType[] = ["mobile", "landline"],
   message = "Invalid phone number",

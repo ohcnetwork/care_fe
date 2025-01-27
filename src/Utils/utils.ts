@@ -126,12 +126,18 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
     : false;
 };
 
+/**
+ * @deprecated use `react-phone-number-input` instead
+ */
 export interface CountryData {
   flag: string;
   name: string;
   code: string;
 }
 
+/**
+ * @deprecated use `react-phone-number-input` instead
+ */
 export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   if (!phoneNumber) return "";
   if (phoneNumber === "+91") return "";
@@ -147,6 +153,9 @@ export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   return parsedNumber;
 };
 
+/**
+ * @deprecated use `react-phone-number-input` instead
+ */
 export const formatPhoneNumber = (phoneNumber: string) => {
   if (phoneNumber.startsWith("+91")) {
     phoneNumber = phoneNumber.startsWith("+910")
@@ -186,6 +195,9 @@ export const formatPhoneNumber = (phoneNumber: string) => {
   return phoneNumber;
 };
 
+/**
+ * @deprecated use `react-phone-number-input` instead
+ */
 export const getCountryCode = (phoneNumber: string) => {
   if (phoneNumber.startsWith("+")) {
     const phoneCodes: Record<string, CountryData> = phoneCodesJson;
