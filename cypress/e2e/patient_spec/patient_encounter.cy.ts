@@ -10,7 +10,7 @@ describe("Patient Encounter Questionnaire", () => {
     cy.visit("/login");
   });
 
-  it("should load the encounter questionnaire page", () => {
+  it("Create a new ABG questionnaire and verify the values", () => {
     const abgValues = {
       pco2: "120",
       po2: "80",
