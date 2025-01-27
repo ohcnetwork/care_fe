@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useState } from "react";
@@ -22,7 +22,10 @@ import {
   QuestionValidationError,
   ValidationErrorResponse,
 } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -64,11 +67,13 @@ export function QuestionnaireForm({
   onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
+  const queryClient = useQueryClient();
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
+
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -87,6 +92,15 @@ export function QuestionnaireForm({
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allergies", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["symptoms", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["diagnoses", patientId] });
+      queryClient.invalidateQueries({
+        queryKey: ["medication_statements", patientId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests", patientId],
+      });
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },
@@ -101,7 +115,7 @@ export function QuestionnaireForm({
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
-  useNavigationPrompt(isDirty, t("unsaved_changes"));
+  useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -403,11 +417,23 @@ export function QuestionnaireForm({
               encounterId={encounterId}
               questions={form.questionnaire.questions}
               responses={form.responses}
-              onResponseChange={(responses) => {
+              onResponseChange={(
+                values: ResponseValue[],
+                questionId: string,
+                note?: string,
+              ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
                     formItem.questionnaire.id === form.questionnaire.id
-                      ? { ...formItem, responses, errors: [] }
+                      ? {
+                          ...formItem,
+                          responses: formItem.responses.map((r) =>
+                            r.question_id === questionId
+                              ? { ...r, values, note: note }
+                              : r,
+                          ),
+                          errors: [],
+                        }
                       : formItem,
                   ),
                 );
