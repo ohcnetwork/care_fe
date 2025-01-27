@@ -1,6 +1,7 @@
 import { MinusCircledIcon, Pencil2Icon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import { MultiValueSetSelect } from "@/components/Medicine/MultiValueSetSelect";
@@ -44,6 +51,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import query from "@/Utils/request/query";
 import {
   DoseRange,
   MEDICATION_REQUEST_INTENT,
@@ -54,12 +62,21 @@ import {
   UCUM_TIME_UNITS,
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface MedicationRequestQuestionProps {
+  patientId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -67,9 +84,29 @@ export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  patientId,
 }: MedicationRequestQuestionProps) {
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
+
+  const { data: patientMedications } = useQuery({
+    queryKey: ["medication_requests", patientId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
+    }),
+  });
+
+  useEffect(() => {
+    if (patientMedications?.results) {
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: patientMedications.results }],
+        questionnaireResponse.question_id,
+      );
+    }
+  }, [patientMedications]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null
@@ -88,15 +125,10 @@ export function MedicationRequestQuestion({
         authored_on: new Date().toISOString(),
       },
     ];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_request",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
@@ -107,13 +139,28 @@ export function MedicationRequestQuestion({
   const confirmRemoveMedication = () => {
     if (medicationToDelete === null) return;
 
-    const newMedications = medications.filter(
-      (_, i) => i !== medicationToDelete,
-    );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "medication_request", value: newMedications }],
-    });
+    const medication = medications[medicationToDelete];
+    if (medication.id) {
+      // For existing records, update status to entered_in_error
+      const newMedications = medications.map((med, i) =>
+        i === medicationToDelete
+          ? { ...med, status: "entered_in_error" as const }
+          : med,
+      );
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
+    } else {
+      // For new records, remove them completely
+      const newMedications = medications.filter(
+        (_, i) => i !== medicationToDelete,
+      );
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_request", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
+    }
     setMedicationToDelete(null);
   };
 
@@ -125,15 +172,10 @@ export function MedicationRequestQuestion({
       i === index ? { ...medication, ...updates } : medication,
     );
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_request",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -257,18 +299,32 @@ export function MedicationRequestQuestion({
                                 <Pencil2Icon className="h-4 w-4" />
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveMedication(index);
-                              }}
-                              disabled={disabled}
-                              className="h-8 w-8"
-                            >
-                              <MinusCircledIcon className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveMedication(index);
+                                    }}
+                                    disabled={
+                                      disabled ||
+                                      medication.status === "entered_in_error"
+                                    }
+                                    className="h-8 w-8"
+                                  >
+                                    <MinusCircledIcon className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {medication.status === "entered_in_error"
+                                    ? t("medication_already_marked_as_error")
+                                    : t("remove_medication")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <CollapsibleContent>
@@ -330,6 +386,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   const [showDosageDialog, setShowDosageDialog] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0];
+  const isReadOnly = !!medication.id;
 
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
@@ -368,7 +425,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               }));
             }}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         </div>
         <div>
@@ -385,7 +442,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               }));
             }}
-            disabled={disabled || !localDoseRange.low.value}
+            disabled={disabled || !localDoseRange.low.value || isReadOnly}
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -414,7 +471,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               !localDoseRange.low.value ||
               !localDoseRange.high.value ||
               !localDoseRange.low.unit ||
-              !localDoseRange.high.unit
+              !localDoseRange.high.unit ||
+              isReadOnly
             }
           >
             {t("save")}
@@ -443,7 +501,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] border-b hover:bg-gray-50/50">
+    <div
+      className={cn(
+        "grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] border-b hover:bg-gray-50/50",
+        {
+          "opacity-40 pointer-events-none":
+            medication.status === "entered_in_error",
+        },
+      )}
+    >
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
         <span className="break-words line-clamp-2 hidden lg:block">
@@ -480,7 +546,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     },
                   });
                 }}
-                disabled={disabled}
+                disabled={disabled || isReadOnly}
               />
               <div className="flex justify-end">
                 <Button
@@ -488,6 +554,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   size="icon"
                   className="h-3 w-3 rounded-full hover:bg-transparent"
                   onClick={handleDoseRangeClick}
+                  disabled={disabled || isReadOnly}
                 >
                   +
                 </Button>
@@ -547,7 +614,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               });
             }
           }}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder={t("select_frequency")} />
@@ -595,7 +662,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               disabled={
                 disabled ||
                 !dosageInstruction?.timing?.repeat ||
-                dosageInstruction?.as_needed_boolean
+                dosageInstruction?.as_needed_boolean ||
+                isReadOnly
               }
               className="h-9 text-sm"
             />
@@ -624,7 +692,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             disabled={
               disabled ||
               !dosageInstruction?.timing?.repeat ||
-              dosageInstruction?.as_needed_boolean
+              dosageInstruction?.as_needed_boolean ||
+              isReadOnly
             }
           >
             <SelectTrigger className="h-9 text-sm w-24">
@@ -671,7 +740,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 },
               },
             ]}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         ) : (
           <ValueSetSelect
@@ -683,7 +752,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               })
             }
             placeholder={t("select_additional_instructions")}
-            disabled={disabled}
+            disabled={disabled || isReadOnly}
           />
         )}
       </div>
@@ -695,7 +764,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.route}
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         />
       </div>
       {/* Site */}
@@ -706,7 +775,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.site}
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           wrapTextForSmallScreen={true}
         />
       </div>
@@ -718,7 +787,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           value={dosageInstruction?.method}
           onSelect={(method) => handleUpdateDosageInstruction({ method })}
           placeholder={t("select_method")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           count={20}
         />
       </div>
@@ -730,7 +799,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onValueChange={(value: MedicationRequestIntent) =>
             onUpdate?.({ intent: value })
           }
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
             <SelectValue
@@ -762,7 +831,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             if (!date) return;
             onUpdate?.({ authored_on: date.toISOString() });
           }}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         />
       </div>
       {/* Notes */}
@@ -791,8 +860,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               values: [],
               note: medication.note,
             }}
-            updateQuestionnaireResponseCB={(response) => {
-              onUpdate?.({ note: response.note });
+            handleUpdateNote={(note) => {
+              onUpdate?.({ note: note });
             }}
             disabled={disabled}
           />
