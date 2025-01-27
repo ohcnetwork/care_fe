@@ -16,11 +16,8 @@ import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 
-import { AdministrationTab } from "./AdministrationTab";
-import { MedicineAdminSheet } from "./MedicineAdminSheet";
 import { PrescriptionsTab } from "./PrescriptionsTab";
 
 interface Props {
@@ -32,21 +29,9 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
   const encounterId = useSlug("encounter");
   const { patient } = useEncounter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const { data: medications, loading } = useQuery(
     routes.medicationRequest.list,
-    {
-      pathParams: { patientId: patient!.id },
-      query: {
-        encounter: encounterId,
-        limit: 100,
-      },
-    },
-  );
-
-  const { data: administrations } = useQuery(
-    routes.medicationAdministration.list,
     {
       pathParams: { patientId: patient!.id },
       query: {
@@ -71,21 +56,6 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
     (medication: MedicationRequestRead) => medication.status === "stopped",
   );
 
-  // Get last administered date for each medication
-  const lastAdministeredDates = administrations?.results?.reduce(
-    (acc: Record<string, string>, admin: MedicationAdministration) => {
-      const existingDate = acc[admin.request];
-      const adminDate = new Date(admin.occurrence_period_start);
-
-      if (!existingDate || adminDate > new Date(existingDate)) {
-        acc[admin.request] = admin.occurrence_period_start;
-      }
-
-      return acc;
-    },
-    {},
-  );
-
   return (
     <div className="space-y-2">
       <SubHeading
@@ -100,14 +70,6 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
                 Print
               </Link>
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsSheetOpen(true)}
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              Administer Medicine
-            </Button>
           </div>
         }
       />
@@ -120,12 +82,6 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
               className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
             >
               Prescriptions
-            </TabsTrigger>
-            <TabsTrigger
-              value="administration"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
-            >
-              Medicine Administration
             </TabsTrigger>
           </TabsList>
 
@@ -140,26 +96,8 @@ const MedicineAdministrationSheet = ({ facilityId }: Props) => {
               discontinuedMedications={discontinuedMedications}
             />
           </TabsContent>
-
-          <TabsContent value="administration">
-            <AdministrationTab
-              loadingAdministrations={loading}
-              activeMedications={activeMedications}
-              administrations={administrations}
-              lastAdministeredDates={lastAdministeredDates}
-            />
-          </TabsContent>
         </Tabs>
       </div>
-
-      <MedicineAdminSheet
-        open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        medications={activeMedications || []}
-        lastAdministeredDates={lastAdministeredDates}
-        patientId={patient!.id}
-        encounterId={encounterId}
-      />
     </div>
   );
 };

@@ -85,63 +85,41 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const handlePreviousSlot = () => {
     const newEndSlotIndex = endSlotIndex - 1;
-    const newEndSlotDate = new Date(endSlotDate);
-
     if (newEndSlotIndex < 0) {
-      // Moving to previous day's last slot
-      newEndSlotDate.setDate(newEndSlotDate.getDate() - 1);
       setEndSlotIndex(3);
+      const newDate = new Date(endSlotDate);
+      newDate.setDate(newDate.getDate() - 1);
+      setEndSlotDate(newDate);
     } else {
       setEndSlotIndex(newEndSlotIndex);
     }
-    setEndSlotDate(newEndSlotDate);
   };
 
-  const isTimeInSlot = (date: Date, slot: (typeof visibleSlots)[0]) => {
-    const slotStartDate = new Date(slot.date);
-    const slotEndDate = new Date(slot.date);
+  const handleNextSlot = () => {
+    const newEndSlotIndex = endSlotIndex + 1;
+    if (newEndSlotIndex > 3) {
+      setEndSlotIndex(0);
+      const newDate = new Date(endSlotDate);
+      newDate.setDate(newDate.getDate() + 1);
+      setEndSlotDate(newDate);
+    } else {
+      setEndSlotIndex(newEndSlotIndex);
+    }
+  };
 
+  const isTimeInSlot = (
+    date: Date,
+    slot: { date: Date; start: string; end: string },
+  ) => {
+    const slotStartDate = new Date(slot.date);
     const [startHour] = slot.start.split(":").map(Number);
     const [endHour] = slot.end.split(":").map(Number);
 
     slotStartDate.setHours(startHour, 0, 0, 0);
+    const slotEndDate = new Date(slotStartDate);
     slotEndDate.setHours(endHour, 0, 0, 0);
 
     return date >= slotStartDate && date < slotEndDate;
-  };
-
-  const handleNextSlot = () => {
-    // Check if we're already at the current time slot
-    const lastSlot = visibleSlots[3];
-    if (isTimeInSlot(currentDate, lastSlot)) {
-      return;
-    }
-
-    const newEndSlotIndex = endSlotIndex + 1;
-    const newEndSlotDate = new Date(endSlotDate);
-
-    if (newEndSlotIndex > 3) {
-      // Moving to next day's first slot
-      newEndSlotDate.setDate(newEndSlotDate.getDate() + 1);
-      setEndSlotIndex(0);
-    } else {
-      setEndSlotIndex(newEndSlotIndex);
-    }
-
-    // Check if we're trying to move beyond current time
-    const nextSlot = {
-      ...timeSlots[newEndSlotIndex > 3 ? 0 : newEndSlotIndex],
-      date: newEndSlotDate,
-    };
-
-    if (
-      !isTimeInSlot(currentDate, nextSlot) &&
-      currentDate < new Date(nextSlot.date)
-    ) {
-      return;
-    }
-
-    setEndSlotDate(newEndSlotDate);
   };
 
   const getAdministrationsForTimeSlot = (
@@ -230,6 +208,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     </div>
   ) : (
     <div className="flex flex-col gap-2 m-2">
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+          onClick={() => setIsSheetOpen(true)}
+        >
+          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          Administer Medicine
+        </Button>
+      </div>
+
       <Card className="w-full">
         <div className="grid grid-cols-[2fr,1fr,auto,repeat(4,1fr),40px]">
           {/* Top row without vertical borders */}
