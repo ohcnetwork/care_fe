@@ -169,6 +169,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
     );
   },
 );
+PhoneNumberFormField.displayName = "PhoneNumberFormField";
 const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
   const { t } = useTranslation();
 

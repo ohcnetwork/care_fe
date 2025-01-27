@@ -54,8 +54,8 @@ export function DiagnosisTable({
         </TableHeader>
       )}
       <TableBody>
-        {diagnoses.map((diagnosis: Diagnosis) => (
-          <TableRow>
+        {diagnoses.map((diagnosis: Diagnosis, index) => (
+          <TableRow key={index}>
             <TableCell className="font-medium">
               {diagnosis.code.display}
             </TableCell>

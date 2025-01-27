@@ -54,8 +54,8 @@ export function SymptomTable({
         </TableHeader>
       )}
       <TableBody>
-        {symptoms.map((symptom: Symptom) => (
-          <TableRow>
+        {symptoms.map((symptom: Symptom, index: number) => (
+          <TableRow key={index}>
             <TableCell className="font-medium">
               {symptom.code.display}
             </TableCell>
