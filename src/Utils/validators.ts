@@ -2,8 +2,6 @@ import { t } from "i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { z } from "zod";
 
-import { validateLatitude, validateLongitude } from "@/common/validation";
-
 export default {
   phoneNumber: {
     optional: z
@@ -21,27 +19,13 @@ export default {
   },
 
   coordinates: {
-    latitude: {
-      required: z.string().refine((val) => validateLatitude(val), {
-        message: t("invalid_latitude"),
-      }),
-      optional: z
-        .string()
-        .optional()
-        .refine((val) => !val || validateLatitude(val), {
-          message: t("invalid_latitude"),
-        }),
-    },
-    longitude: {
-      required: z.string().refine((val) => validateLongitude(val), {
-        message: t("invalid_longitude"),
-      }),
-      optional: z
-        .string()
-        .optional()
-        .refine((val) => !val || validateLongitude(val), {
-          message: t("invalid_longitude"),
-        }),
-    },
+    latitude: z
+      .number()
+      .min(-90, t("invalid_latitude"))
+      .max(90, t("invalid_latitude")),
+    longitude: z
+      .number()
+      .min(-180, t("invalid_longitude"))
+      .max(180, t("invalid_longitude")),
   },
 };
