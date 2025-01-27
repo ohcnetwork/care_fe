@@ -458,8 +458,10 @@ const AppointmentActions = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {AppointmentStatuses.map((status) => (
-              <SelectItem value={status}>{t(status)}</SelectItem>
+            {AppointmentStatuses.map((status, index) => (
+              <SelectItem key={index} value={status}>
+                {t(status)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

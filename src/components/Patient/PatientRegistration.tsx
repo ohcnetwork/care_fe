@@ -171,10 +171,7 @@ export default function PatientRegistration(
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
           phone_number: resp.phone_number,
-          year_of_birth:
-            form.getValues("age_or_dob") === "dob"
-              ? new Date(resp.date_of_birth!).getFullYear()
-              : new Date().getFullYear() - Number(resp.age!),
+          year_of_birth: resp.year_of_birth,
           partial_id: resp?.id?.slice(0, 5),
         },
       });

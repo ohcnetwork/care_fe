@@ -68,7 +68,6 @@ export default function SlideOver({
       <Dialog
         as="div"
         className="relative z-30"
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClose={closeOnBackdropClick ? setOpen : () => {}}
       >
         <TransitionChild
@@ -117,7 +116,7 @@ export default function SlideOver({
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-2xl hover:bg-black/20"
                     onClick={() => {
                       setOpen(false);
-                      onCloseClick && onCloseClick();
+                      onCloseClick?.();
                     }}
                   >
                     <CareIcon icon="l-arrow-left" />

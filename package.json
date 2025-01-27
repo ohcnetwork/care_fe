@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "2.5.4",
+  "version": "2.6.0",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
@@ -100,6 +100,7 @@
     "i18next": "^24.2.1",
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^3.0.1",
+    "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.4.2",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.473.0",
@@ -128,6 +129,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
     "@julr/vite-plugin-validate-env": "^1.1.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
@@ -138,28 +141,29 @@
     "@types/google.maps": "^3.58.1",
     "@types/jsdom": "^21.1.7",
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "^22.9.0",
+    "@types/node": "^22.10.10",
     "@types/react": "^18.3.12",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "^18.3.1",
     "@types/react-google-recaptcha": "^2.1.9",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
     "autoprefixer": "^10.4.20",
     "cypress-localstorage-commands": "^2.2.6",
     "cypress-split": "^1.24.5",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
-    "eslint": "^8.57.1",
+    "eslint": "^9.18.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-i18next": "^6.1.0",
-    "eslint-plugin-mdx": "^3.1.5",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "glob": "^11.0.0",
+    "globals": "^15.14.0",
     "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "lint-staged": "^15.2.10",
@@ -183,7 +187,7 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.31.0",
+    "@rollup/rollup-linux-arm64-gnu": "4.32.0",
     "@rollup/rollup-linux-x64-gnu": "4.32.0"
   },
   "browserslist": {
@@ -211,5 +215,5 @@
   "engines": {
     "node": ">=22.8.0"
   },
-  "packageManager": "npm@10.9.0"
+  "packageManager": "npm@10.9.2"
 }
