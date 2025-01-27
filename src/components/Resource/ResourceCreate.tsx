@@ -4,7 +4,6 @@ import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -47,7 +46,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { parsePhoneNumber } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
@@ -76,12 +75,7 @@ export default function ResourceCreate(props: ResourceProps) {
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
-    referring_facility_contact_number: z
-      .string()
-      .min(1, { message: t("field_required") })
-      .refine((val) => isValidPhoneNumber(val), {
-        message: t("phone_number_validation_error"),
-      }),
+    referring_facility_contact_number: validators.phoneNumber.required,
     priority: z.number().default(1),
   });
 
@@ -125,7 +119,7 @@ export default function ResourceCreate(props: ResourceProps) {
         reason: data.reason,
         referring_facility_contact_name: data.referring_facility_contact_name,
         referring_facility_contact_number:
-          parsePhoneNumber(data.referring_facility_contact_number) ?? "",
+          data.referring_facility_contact_number,
         related_patient: related_patient,
         priority: data.priority,
       };

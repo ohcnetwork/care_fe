@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
@@ -35,7 +36,6 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -91,7 +91,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
-      setPhoneNumber(value.length >= 13 || value === "" ? value : "");
+      setPhoneNumber(isValidPhoneNumber(value) || value === "" ? value : "");
     }
   }, []);
 
@@ -99,10 +99,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     queryKey: ["patient-search", facilityId, phoneNumber],
     queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(phoneNumber) || "",
+        phone_number: phoneNumber,
       },
     }),
-    enabled: !!phoneNumber,
+    enabled: !!isValidPhoneNumber(phoneNumber),
   });
 
   const handlePatientSelect = (patient: PartialPatientModel) => {
