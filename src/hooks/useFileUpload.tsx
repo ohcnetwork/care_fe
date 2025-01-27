@@ -54,7 +54,7 @@ export type FileUploadReturn = {
   handleAudioCapture: () => void;
   handleFileUpload: (
     associating_id: string,
-    CombineToPDF?: boolean,
+    combineToPDF?: boolean,
   ) => Promise<void>;
   Dialogues: JSX.Element;
   Input: (_: FileInputProps) => JSX.Element;
@@ -107,11 +107,6 @@ export default function useFileUpload(
       const totalFiles = files.length;
 
       for (const [index, file] of files.entries()) {
-        if (!file.type.startsWith("image/")) {
-          toast.error(t("file_error__file_type"));
-          setProgress(0);
-          return null;
-        }
         const imgData = URL.createObjectURL(file);
         pdf.addImage(imgData, "JPEG", 10, 10, 190, 0);
         URL.revokeObjectURL(imgData);
@@ -285,14 +280,17 @@ export default function useFileUpload(
 
   const handleUpload = async (
     associating_id: string,
-    CombineToPDF?: boolean,
+    combineToPDF?: boolean,
   ) => {
+    if (combineToPDF && "allowedExtensions" in options) {
+      options.allowedExtensions = ["jpg", "png", "jpeg"];
+    }
     if (!validateFileUpload()) return;
 
     setProgress(0);
     const errors: File[] = [];
 
-    if (CombineToPDF && files.length > 1) {
+    if (combineToPDF && files.length > 1) {
       const pdfFile = await generatePDF(files);
       if (pdfFile) {
         files.splice(0, files.length, pdfFile);

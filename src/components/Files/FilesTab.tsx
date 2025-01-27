@@ -602,7 +602,7 @@ const FileUploadDialog = ({
               <div className="space-y-2">
                 <ul className="list-disc list-inside space-y-1">
                   {fileUpload.files.map((file, index) => (
-                    <li key={index} className="truncate">
+                    <li key={index} className="truncate" title={file.name}>
                       {file.name}
                     </li>
                   ))}
@@ -613,12 +613,12 @@ const FileUploadDialog = ({
                   htmlFor="upload-file-name-0"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  {t("enter_combined_file_name")}
+                  {t("enter_file_name")}
                 </Label>
                 <Input
-                  name="combined_file_name"
+                  name="file_name_0"
                   type="text"
-                  id="combined-file-name"
+                  id="upload-file-name-0"
                   required
                   value={fileUpload.fileNames[0] || ""}
                   disabled={fileUpload.uploading}
