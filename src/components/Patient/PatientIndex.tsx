@@ -39,8 +39,8 @@ import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const [{ phone_number }] = useQueryParams();
-  const [phoneNumber, setPhoneNumber] = useState(phone_number || "");
+  const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
+    useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] =
     useState<PartialPatientModel | null>(null);
@@ -92,7 +92,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
-      setPhoneNumber(value.length >= 13 || value === "" ? value : "");
+      setPhoneNumberQuery({
+        phone_number: value.length >= 13 || value === "" ? value : "",
+      });
     }
   }, []);
 
