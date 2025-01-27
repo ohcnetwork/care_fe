@@ -1,12 +1,19 @@
 import { Input } from "@/components/ui/input";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 interface NumberQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -21,15 +28,16 @@ export function NumberQuestion({
     const numericValue =
       question.type === "decimal" ? parseFloat(value) : parseInt(value);
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "number",
           value: emptyValue ? undefined : numericValue,
         },
       ],
-    });
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   return (
