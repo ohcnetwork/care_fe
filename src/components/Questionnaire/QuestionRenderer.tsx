@@ -56,13 +56,6 @@ export function QuestionRenderer({
     }
   }, [activeGroupId]);
 
-  // const handleResponseChange = (
-  //   updatedResponse: ResponseValue[],
-  //   questionId: string,
-  // ) => {
-  //   onResponseChange(newResponses, questionId);
-  // };
-
   const shouldBeFullWidth = (question: Question): boolean =>
     question.type === "structured" &&
     !!question.structured_type &&
