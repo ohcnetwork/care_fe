@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -30,14 +31,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -103,11 +103,18 @@ export default function ResourceCreate(props: ResourceProps) {
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: () =>
-      query(routes.getAnyFacility, {
-        pathParams: { id: String(facilityId) },
-      }),
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: String(facilityId) },
+    }),
     enabled: !!facilityId,
+  });
+
+  const { data: patientData } = useQuery({
+    queryKey: ["patient", related_patient],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: { id: String(related_patient) },
+    }),
+    enabled: !!related_patient,
   });
 
   const form = useForm<ResourceFormValues>({
@@ -192,16 +199,23 @@ export default function ResourceCreate(props: ResourceProps) {
         <Card className="mt-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {related_patient && (
-                <Alert>
-                  <div className="flex items-center gap-2">
-                    <CareIcon icon="l-user" className="h-5 w-5 text-blue-700" />
-                    <AlertDescription className="text-sm text-blue-700">
-                      {t("linked_patient")}:{" "}
-                      <span className="font-medium">{related_patient}</span>
-                    </AlertDescription>
-                  </div>
-                </Alert>
+              {patientData && (
+                <Link
+                  href={`/facility/${facilityId}/patient/${related_patient}/demography`}
+                >
+                  <Alert>
+                    <div className="flex items-center gap-2">
+                      <CareIcon
+                        icon="l-user"
+                        className="h-5 w-5 text-blue-700"
+                      />
+                      <AlertDescription className="text-sm text-blue-700">
+                        {t("linked_patient")}:{" "}
+                        <span className="font-medium">{patientData.name}</span>
+                      </AlertDescription>
+                    </div>
+                  </Alert>
+                </Link>
               )}
 
               <div className="space-y-6">
@@ -329,10 +343,9 @@ export default function ResourceCreate(props: ResourceProps) {
                     <FormItem>
                       <FormLabel>{t("request_title")}</FormLabel>
                       <FormControl>
-                        <TextFormField
+                        <Input
                           {...field}
                           placeholder={t("request_title_placeholder")}
-                          onChange={(value) => field.onChange(value.value)}
                         />
                       </FormControl>
                       <FormDescription>
@@ -350,11 +363,10 @@ export default function ResourceCreate(props: ResourceProps) {
                     <FormItem>
                       <FormLabel>{t("request_reason")}</FormLabel>
                       <FormControl>
-                        <TextAreaFormField
+                        <Textarea
                           {...field}
                           rows={5}
                           placeholder={t("request_reason_placeholder")}
-                          onChange={(value) => field.onChange(value.value)}
                         />
                       </FormControl>
                       <FormDescription>
@@ -397,10 +409,7 @@ export default function ResourceCreate(props: ResourceProps) {
                       <FormItem>
                         <FormLabel>{t("contact_person")}</FormLabel>
                         <FormControl>
-                          <TextFormField
-                            {...field}
-                            onChange={(value) => field.onChange(value.value)}
-                          />
+                          <Input {...field} />
                         </FormControl>
                         <FormDescription>
                           {t("contact_person_description")}
