@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import Cropper from "react-easy-crop";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
@@ -16,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import DialogModal from "@/components/Common/Dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
+
+import { getCroppedImg } from "@/Utils/getCroppedImg";
 
 interface Props {
   title: string;
@@ -29,12 +32,12 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1280,
+    width: 720,
     height: 720,
     facingMode: "user",
   },
   environment: {
-    width: 1280,
+    width: 720,
     height: 720,
     facingMode: { exact: "environment" },
   },
@@ -59,7 +62,7 @@ const AvatarEditModal = ({
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -67,6 +70,11 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -74,7 +82,14 @@ const AvatarEditModal = ({
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
-  }, []);
+  }, [constraint]);
+
+  const onCropComplete = useCallback(
+    (croppedArea: any, croppedAreaPixels: any) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    [],
+  );
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -87,12 +102,56 @@ const AvatarEditModal = ({
     });
   };
 
+  const handleCropImage = async () => {
+    if (!previewImage && !preview) return;
+    setIsCropping(true);
+    const imageSrc = previewImage || preview;
+    try {
+      const croppedImage = await getCroppedImg(
+        imageSrc as string,
+        croppedAreaPixels,
+      );
+      setCroppedImage(croppedImage);
+    } catch (_e) {
+      toast.error("Unable to crop the image at the moment");
+      setCroppedImage(null);
+    } finally {
+      setIsCropping(false);
+      setPreview(undefined);
+      setPreviewImage(null);
+    }
+  };
+
+  useEffect(() => {
+    if (croppedImage) {
+      fetch(croppedImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const myFile = new File([blob], "cropped_image.png", {
+            type: blob.type,
+          });
+          setSelectedFile(myFile);
+          setCroppedImage(null);
+        });
+    }
+  }, [croppedImage]);
+
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setPreviewImage(null);
+    setCroppedImage(null);
     onClose?.();
   };
+
+  useEffect(() => {
+    if (previewImage || preview) {
+      setIsCropping(true);
+    } else {
+      setIsCropping(false);
+    }
+  }, [preview, previewImage]);
 
   useEffect(() => {
     if (!isImageFile(selectedFile)) {
@@ -178,6 +237,110 @@ const AvatarEditModal = ({
 
   const hintMessage = hint || defaultHint;
 
+  const renderImagePreview = () => {
+    if (!preview && !imageUrl && !previewImage)
+      return (
+        <div
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
+            isDragging
+              ? "border-primary-800 bg-primary-100"
+              : dragProps.dragOver
+                ? "border-primary-500"
+                : "border-secondary-500"
+          } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
+        >
+          <svg
+            stroke="currentColor"
+            fill="none"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+            className={`h-12 w-12 stroke-[2px] ${
+              isDragging
+                ? "text-green-500"
+                : dragProps.dragOver
+                  ? "text-primary-500"
+                  : "text-secondary-600"
+            } ${
+              dragProps.fileDropError !== ""
+                ? "text-red-500"
+                : "text-secondary-600"
+            }`}
+          >
+            <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
+          </svg>
+          <p
+            className={`text-sm ${
+              dragProps.dragOver ? "text-primary-500" : "text-secondary-700"
+            } ${
+              dragProps.fileDropError !== ""
+                ? "text-red-500"
+                : "text-secondary-700"
+            } text-center`}
+          >
+            {dragProps.fileDropError !== ""
+              ? dragProps.fileDropError
+              : `${t("drag_drop_image_to_upload")}`}
+          </p>
+          <p className="mt-4 text-center font-medium text-secondary-700">
+            {t("no_image_found")}. {hintMessage}
+          </p>
+        </div>
+      );
+
+    return (
+      <div className="flex flex-1 items-center justify-center rounded-lg relative">
+        <div
+          className="w-full"
+          style={{
+            overflow: "hidden",
+            maxWidth: "100%",
+            maxHeight: "calc(100vh - 200px)",
+          }}
+        >
+          {isCropping ? (
+            <Cropper
+              image={preview || imageUrl || undefined}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+            />
+          ) : (
+            <img
+              src={preview || imageUrl || previewImage || undefined}
+              alt="cover-photo"
+              className="h-auto w-full object-contain"
+            />
+          )}
+        </div>
+        {isCropping && (
+          <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPreview(undefined);
+                setPreviewImage(null);
+                setIsCropping(false);
+                setCrop({ x: 0, y: 0 });
+                setZoom(1);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleCropImage} variant="primary">
+              {t("crop")}
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <DialogModal
       show={open}
@@ -189,71 +352,10 @@ const AvatarEditModal = ({
         <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
           {!isCameraOpen ? (
             <>
-              {preview || imageUrl ? (
-                <>
-                  <div className="flex flex-1 items-center justify-center rounded-lg">
-                    <img
-                      src={preview || imageUrl}
-                      alt="cover-photo"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <p className="text-center font-medium text-secondary-700">
-                    {hintMessage}
-                  </p>
-                </>
-              ) : (
-                <div
-                  onDragOver={onDragOver}
-                  onDragLeave={onDragLeave}
-                  onDrop={onDrop}
-                  className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
-                    isDragging
-                      ? "border-primary-800 bg-primary-100"
-                      : dragProps.dragOver
-                        ? "border-primary-500"
-                        : "border-secondary-500"
-                  } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
-                >
-                  <svg
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                    className={`h-12 w-12 stroke-[2px] ${
-                      isDragging
-                        ? "text-green-500"
-                        : dragProps.dragOver
-                          ? "text-primary-500"
-                          : "text-secondary-600"
-                    } ${
-                      dragProps.fileDropError !== ""
-                        ? "text-red-500"
-                        : "text-secondary-600"
-                    }`}
-                  >
-                    <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
-                  </svg>
-                  <p
-                    className={`text-sm ${
-                      dragProps.dragOver
-                        ? "text-primary-500"
-                        : "text-secondary-700"
-                    } ${
-                      dragProps.fileDropError !== ""
-                        ? "text-red-500"
-                        : "text-secondary-700"
-                    } text-center`}
-                  >
-                    {dragProps.fileDropError !== ""
-                      ? dragProps.fileDropError
-                      : `${t("drag_drop_image_to_upload")}`}
-                  </p>
-                  <p className="mt-4 text-center font-medium text-secondary-700">
-                    {t("no_image_found")}. {hintMessage}
-                  </p>
-                </div>
-              )}
+              {renderImagePreview()}
+              <p className="text-center font-medium text-secondary-700">
+                {hintMessage}
+              </p>
 
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <div>
@@ -331,11 +433,16 @@ const AvatarEditModal = ({
                   <>
                     <Webcam
                       audio={false}
-                      height={720}
+                      height={400}
                       screenshotFormat="image/jpeg"
-                      width={1280}
+                      width={400}
                       ref={webRef}
                       videoConstraints={constraint}
+                      style={{
+                        objectFit: "cover",
+                        width: "min(100%, 720px)",
+                        height: "min(100%, 720px)",
+                      }}
                       onUserMediaError={(_e) => {
                         setIsCameraOpen(false);
                         toast.warning(t("camera_permission_denied"));
@@ -344,7 +451,9 @@ const AvatarEditModal = ({
                   </>
                 ) : (
                   <>
-                    <img src={previewImage} />
+                    <div className="flex flex-1 items-center justify-center rounded-lg">
+                      <img src={previewImage} alt="camera preview" />
+                    </div>
                   </>
                 )}
               </div>
@@ -375,6 +484,9 @@ const AvatarEditModal = ({
                       }}
                     >
                       {t("retake")}
+                    </Button>
+                    <Button variant="primary" onClick={handleCropImage}>
+                      {t("crop")}
                     </Button>
                     <Button
                       variant="primary"
