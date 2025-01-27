@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "2.5.4",
+  "version": "2.6.0",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
@@ -129,7 +129,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.2.5",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@julr/vite-plugin-validate-env": "^1.1.1",
@@ -188,7 +187,7 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.31.0",
+    "@rollup/rollup-linux-arm64-gnu": "4.32.0",
     "@rollup/rollup-linux-x64-gnu": "4.32.0"
   },
   "browserslist": {
@@ -216,5 +215,5 @@
   "engines": {
     "node": ">=22.8.0"
   },
-  "packageManager": "npm@10.9.0"
+  "packageManager": "npm@10.9.2"
 }
