@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,12 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
-import { AdministrationTab } from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTab";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+
+import { AdministrationTab } from "./AdministrationTab";
 
 interface Props {
   readonly?: boolean;
@@ -36,9 +38,9 @@ export default function MedicationRequestTable({
 
   const { data: medications, isLoading: loading } = useQuery({
     queryKey: ["medication_requests", patientId],
-    queryFn: query(routes.medicationRequest.list, {
+    queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: { encounter: encounterId, limit: 100 },
     }),
     enabled: !!patientId,
   });
@@ -221,6 +223,8 @@ export default function MedicationRequestTable({
               activeMedications={activeMedications}
               administrations={administrations}
               lastAdministeredDates={lastAdministeredDates}
+              patientId={patientId}
+              encounterId={encounterId}
             />
           </TabsContent>
         </Tabs>

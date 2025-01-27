@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
-import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
@@ -27,6 +26,8 @@ interface AdministrationTabProps {
   activeMedications: MedicationRequestRead[] | undefined;
   administrations: { results: MedicationAdministration[] } | undefined;
   lastAdministeredDates?: Record<string, string>;
+  patientId: string;
+  encounterId: string;
 }
 
 const timeSlots = [
@@ -41,8 +42,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   activeMedications,
   administrations,
   lastAdministeredDates,
+  patientId,
+  encounterId,
 }) => {
-  const { patient, encounter } = useEncounter();
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [endSlotIndex, setEndSlotIndex] = useState(() => {
@@ -156,7 +158,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     // Create new administration request
     setAdministrationRequest({
       request: medication.id,
-      encounter: encounter!.id,
+      encounter: encounterId,
       note: "",
       occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
@@ -441,6 +443,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           medication={selectedMedication}
           lastAdministeredDate={lastAdministeredDates?.[selectedMedication.id]}
           administrationRequest={administrationRequest}
+          patientId={patientId}
         />
       )}
 
@@ -449,8 +452,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         onOpenChange={setIsSheetOpen}
         medications={activeMedications || []}
         lastAdministeredDates={lastAdministeredDates}
-        patientId={patient!.id}
-        encounterId={encounter!.id}
+        patientId={patientId}
+        encounterId={encounterId}
       />
     </div>
   );

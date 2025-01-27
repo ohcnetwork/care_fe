@@ -13,8 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { useEncounter } from "@/components/Facility/ConsultationDetails/EncounterContext";
-
 import mutate from "@/Utils/request/mutate";
 import { MedicationAdministrationRequest } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
@@ -28,6 +26,7 @@ interface Props {
   medication: MedicationRequestRead;
   lastAdministeredDate?: string;
   administrationRequest: MedicationAdministrationRequest;
+  patientId: string;
 }
 
 export const MedicineAdminDialog = ({
@@ -36,8 +35,8 @@ export const MedicineAdminDialog = ({
   medication,
   lastAdministeredDate,
   administrationRequest: initialRequest,
+  patientId,
 }: Props) => {
-  const { patient } = useEncounter();
   const [administrationRequest, setAdministrationRequest] =
     React.useState<MedicationAdministrationRequest>(initialRequest);
 
@@ -57,7 +56,7 @@ export const MedicineAdminDialog = ({
 
   const handleSubmit = () => {
     upsertAdministration({
-      pathParams: { patientId: patient!.id },
+      pathParams: { patientId: patientId },
       data: [administrationRequest], // Send as single-item array for upsert
     });
   };

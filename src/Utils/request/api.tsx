@@ -21,7 +21,6 @@ import {
 } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -644,15 +643,6 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
-    },
-  },
-
-  // Medication
-  medicationRequest: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/request/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationRequestRead>>(),
     },
   },
 
