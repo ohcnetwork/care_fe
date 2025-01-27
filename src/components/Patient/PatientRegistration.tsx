@@ -151,8 +151,8 @@ export default function PatientRegistration(
     resolver: zodResolver(formSchema),
     defaultValues: {
       nationality: "India",
-      phone_number: phone_number || "+91",
-      emergency_phone_number: "+91",
+      phone_number: phone_number || "",
+      emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,

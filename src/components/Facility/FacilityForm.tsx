@@ -86,7 +86,7 @@ export default function FacilityForm(props: FacilityProps) {
       pincode: "",
       geo_organization: "",
       address: "",
-      phone_number: "+91",
+      phone_number: "",
       latitude: undefined,
       longitude: undefined,
       is_public: false,

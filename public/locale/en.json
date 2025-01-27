@@ -1517,7 +1517,6 @@
   "phone_number_min_error": "Phone number must be at least 10 characters long",
   "phone_number_must_be_10_digits": "Phone number must be a 10-digit mobile number",
   "phone_number_not_found": "Phone number not found",
-  "phone_number_validation": "Phone number must start with +91 followed by 10 digits",
   "phone_number_validation_error": "Entered phone number is not valid",
   "phone_number_verified": "Phone Number Verified",
   "pincode": "Pincode",

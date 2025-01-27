@@ -72,11 +72,11 @@ export class UserCreation {
       { label: "Confirm Password", message: "Required" },
       {
         label: "Phone Number",
-        message: "Phone number must start with +91 followed by 10 digits",
+        message: "Entered phone number is not valid",
       },
       {
         label: "Alternate Phone Number",
-        message: "Phone number must start with +91 followed by 10 digits",
+        message: "Entered phone number is not valid",
       },
       { label: "State", message: "Required" },
     ]);

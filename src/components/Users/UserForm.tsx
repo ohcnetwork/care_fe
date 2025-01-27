@@ -112,8 +112,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "staff",
-      phone_number: "+91",
-      alt_phone_number: "+91",
+      phone_number: "",
+      alt_phone_number: "",
       phone_number_is_whatsapp: true,
     },
   });
