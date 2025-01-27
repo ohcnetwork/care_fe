@@ -505,7 +505,7 @@ export function QuestionnaireForm({
               {t("cancel")}
             </Button>
             <Button
-              type="button"
+              type="submit"
               onClick={handleSubmit}
               disabled={isPending || hasErrors}
               className="relative"
