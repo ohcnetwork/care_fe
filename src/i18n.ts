@@ -14,26 +14,8 @@ export const LANGUAGES = {
   hi: "हिन्दी",
 } as const;
 
-function toURL(input: string) {
-  input = input.trim();
-  if (!input.startsWith("http://") && !input.startsWith("https://")) {
-    if (input.startsWith("localhost")) {
-      return `http://${input}`;
-    } else {
-      return `https://${input}`;
-    }
-  }
-  return input;
-}
-
 const namespaceToUrl = (namespace: string) => {
-  const careApp = careConfig.careApps.find((app) => app.name === namespace);
-
-  if (!careApp) {
-    return "";
-  }
-
-  return toURL(careApp.branch);
+  return careConfig.careApps.find((app) => app.name === namespace)?.url ?? "";
 };
 
 i18n
