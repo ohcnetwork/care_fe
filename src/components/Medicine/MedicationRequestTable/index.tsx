@@ -13,10 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { AdministrationTab } from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTab";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { AdministrationTab } from "@/src/components/Medicine/MedicineAdministrationSheet/AdministrationTab";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 
