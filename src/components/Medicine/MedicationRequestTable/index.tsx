@@ -33,7 +33,7 @@ export default function MedicationRequestTable({
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: medications, isLoading: loading } = useQuery({
-    queryKey: ["medications", patientId],
+    queryKey: ["medication_requests", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: { encounter: encounterId },

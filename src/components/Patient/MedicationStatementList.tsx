@@ -108,7 +108,7 @@ export function MedicationStatementList({
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
-    queryKey: ["medication_statement", patientId],
+    queryKey: ["medication_statements", patientId],
     queryFn: query(routes.medicationStatement.list, {
       pathParams: { patientId },
     }),

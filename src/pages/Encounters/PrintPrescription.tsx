@@ -30,7 +30,7 @@ export const PrintPrescription = (props: {
   });
 
   const { data: medications } = useQuery({
-    queryKey: ["medications", encounter?.patient?.id],
+    queryKey: ["medication_requests", encounter?.patient?.id],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: encounter?.patient?.id || "" },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
