@@ -5,6 +5,12 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
@@ -137,21 +143,6 @@ export const PatientHome = (props: {
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                     <div className="space-y-2">
-                      <Button
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        id="upload-patient-files"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${id}/files`,
-                          )
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-file-upload" className="text-xl" />
-                          {t("view_update_patient_files")}
-                        </span>
-                      </Button>
-
                       <PLUGIN_Component
                         __name="PatientHomeActions"
                         patient={patientData}
@@ -177,16 +168,22 @@ export const PatientHome = (props: {
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <div className="tooltip">
-                      <span className={`tooltip-text tooltip`}>
-                        {patientData.modified_date
-                          ? formatDateTime(patientData.modified_date)
-                          : "--:--"}
-                      </span>
-                      {patientData.modified_date
-                        ? relativeDate(patientData.modified_date)
-                        : "--:--"}
-                    </div>
+                    <TooltipProvider delayDuration={1}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            {patientData.modified_date
+                              ? relativeDate(patientData.modified_date)
+                              : "--:--"}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {patientData.modified_date
+                            ? formatDateTime(patientData.modified_date)
+                            : "--:--"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
 
@@ -199,16 +196,22 @@ export const PatientHome = (props: {
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <div className="tooltip">
-                      <span className={`tooltip-text tooltip`}>
-                        {patientData.created_date
-                          ? formatDateTime(patientData.created_date)
-                          : "--:--"}
-                      </span>
-                      {patientData.created_date
-                        ? relativeDate(patientData.created_date)
-                        : "--:--"}
-                    </div>
+                    <TooltipProvider delayDuration={1}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            {patientData.created_date
+                              ? relativeDate(patientData.created_date)
+                              : "--:--"}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {patientData.created_date
+                            ? formatDateTime(patientData.created_date)
+                            : "--:--"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
