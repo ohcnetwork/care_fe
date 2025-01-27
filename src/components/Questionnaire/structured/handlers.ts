@@ -80,47 +80,38 @@ const handlers: {
     },
   },
   symptom: {
-    getRequests: (symptoms, { patientId, encounterId }) =>
-      symptoms.map((symptom) => {
-        const body: RequestTypeFor<"symptom"> = {
-          clinical_status: symptom.clinical_status,
-          verification_status: symptom.verification_status,
-          code: symptom.code,
-          severity: symptom.severity,
-          onset: symptom.onset,
-          recorded_date: symptom.recorded_date,
-          note: symptom.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/symptom/`,
+    getRequests: (symptoms, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/symptom/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: symptoms.map((symptom) => ({
+              ...symptom,
+              encounter: encounterId,
+            })),
+          },
           reference_id: "symptom",
-        };
-      }),
+        },
+      ];
+    },
   },
   diagnosis: {
-    getRequests: (diagnoses, { patientId, encounterId }) =>
-      diagnoses.map((diagnosis) => {
-        const body: RequestTypeFor<"diagnosis"> = {
-          clinical_status: diagnosis.clinical_status,
-          verification_status: diagnosis.verification_status,
-          code: diagnosis.code,
-          onset: diagnosis.onset,
-          recorded_date: diagnosis.recorded_date,
-          note: diagnosis.note,
-          encounter: encounterId,
-        };
-
-        return {
-          url: `/api/v1/patient/${patientId}/diagnosis/`,
+    getRequests: (diagnoses, { patientId, encounterId }) => {
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
           method: "POST",
-          body,
+          body: {
+            datapoints: diagnoses.map((diagnosis) => ({
+              ...diagnosis,
+              encounter: encounterId,
+            })),
+          },
           reference_id: "diagnosis",
-        };
-      }),
+        },
+      ];
+    },
   },
   encounter: {
     getRequests: (encounters, { patientId, encounterId }) => {

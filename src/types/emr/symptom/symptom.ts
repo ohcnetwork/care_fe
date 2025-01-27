@@ -18,7 +18,7 @@ export const SYMPTOM_VERIFICATION_STATUS = [
   "differential",
   "confirmed",
   "refuted",
-  "entered-in-error",
+  "entered_in_error",
 ] as const;
 
 export type SymptomVerificationStatus =
@@ -36,10 +36,11 @@ type Onset = {
 };
 
 export interface Symptom {
+  id: string;
   code: Code;
   clinical_status: SymptomClinicalStatus;
   verification_status: SymptomVerificationStatus;
-  severity?: SymptomSeverity;
+  severity: SymptomSeverity;
   onset?: Onset;
   recorded_date?: string;
   note?: string;
@@ -48,10 +49,11 @@ export interface Symptom {
 }
 
 export interface SymptomRequest {
+  id?: string;
   clinical_status: SymptomClinicalStatus;
   verification_status: SymptomVerificationStatus;
   code: Code;
-  severity?: SymptomSeverity;
+  severity: SymptomSeverity;
   onset?: Onset;
   recorded_date?: string;
   note?: string;
