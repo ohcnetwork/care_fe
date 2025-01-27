@@ -54,46 +54,61 @@ export function DiagnosisTable({
         </TableHeader>
       )}
       <TableBody>
-        {diagnoses.map((diagnosis: Diagnosis, index) => (
-          <TableRow key={index}>
-            <TableCell className="font-medium">
-              {diagnosis.code.display}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${getStatusBadgeStyle(diagnosis.clinical_status)}`}
+        {diagnoses.map((diagnosis: Diagnosis, index) => {
+          const isEnteredInError =
+            diagnosis.verification_status === "entered_in_error";
+
+          return (
+            <>
+              <TableRow
+                key={index}
+                className={
+                  isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
+                }
               >
-                {diagnosis.clinical_status}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="whitespace-nowrap">
-                {diagnosis.verification_status}
-              </Badge>
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {diagnosis.onset?.onset_datetime
-                ? new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
-                : "-"}
-            </TableCell>
-            <TableCell className="max-w-[200px] truncate">
-              {diagnosis.note || "-"}
-            </TableCell>
-            <TableCell className="whitespace-nowrap ">
-              <div className="flex items-center gap-2">
-                <Avatar
-                  name={formatName(diagnosis.created_by)}
-                  className="w-4 h-4"
-                  imageUrl={diagnosis.created_by?.profile_picture_url}
-                />
-                <span className="text-sm">
-                  {formatName(diagnosis.created_by)}
-                </span>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
+                <TableCell className="font-medium">
+                  {diagnosis.code.display}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap ${getStatusBadgeStyle(diagnosis.clinical_status)}`}
+                  >
+                    {t(diagnosis.clinical_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={isEnteredInError ? "destructive" : "outline"}
+                    className="whitespace-nowrap capitalize"
+                  >
+                    {t(diagnosis.verification_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {diagnosis.onset?.onset_datetime
+                    ? new Date(
+                        diagnosis.onset.onset_datetime,
+                      ).toLocaleDateString()
+                    : "-"}
+                </TableCell>
+                <TableCell className="max-w-[200px] truncate">
+                  {diagnosis.note || "-"}
+                </TableCell>
+                <TableCell className="whitespace-nowrap flex items-center gap-2">
+                  <Avatar
+                    name={formatName(diagnosis.created_by)}
+                    className="w-4 h-4"
+                    imageUrl={diagnosis.created_by?.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(diagnosis.created_by)}
+                  </span>
+                </TableCell>
+              </TableRow>
+            </>
+          );
+        })}
       </TableBody>
     </Table>
   );

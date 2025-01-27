@@ -13,7 +13,7 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe' && github.event_name == 'issues' && github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: 'Move issue to "Triage"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.3.0
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: ohcnetwork
@@ -26,7 +26,7 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe' &&  github.event_name == 'issues' && github.event.action == 'closed'
     steps:
       - name: 'Moved issue to "Done"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.3.0
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: ohcnetwork
@@ -39,7 +39,7 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe' &&  github.event_name == 'issues' && github.event.action == 'assigned'
     steps:
       - name: 'Move issue to "In Progress"'
-        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.3.0
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: ohcnetwork

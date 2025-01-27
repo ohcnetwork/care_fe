@@ -75,11 +75,11 @@ export default function FacilityForm(props: FacilityProps) {
       .string()
       .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
     latitude: z
-      .string()
+      .number()
       .optional()
       .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
     longitude: z
-      .string()
+      .number()
       .optional()
       .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
     is_public: z.boolean().default(false),
@@ -98,8 +98,8 @@ export default function FacilityForm(props: FacilityProps) {
       geo_organization: "",
       address: "",
       phone_number: "+91",
-      latitude: "",
-      longitude: "",
+      latitude: undefined,
+      longitude: undefined,
       is_public: false,
     },
   });
@@ -163,8 +163,8 @@ export default function FacilityForm(props: FacilityProps) {
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          form.setValue("latitude", position.coords.latitude.toString());
-          form.setValue("longitude", position.coords.longitude.toString());
+          form.setValue("latitude", position.coords.latitude);
+          form.setValue("longitude", position.coords.longitude);
           setIsGettingLocation(false);
           toast.success(t("location_updated_successfully"));
         },
@@ -227,8 +227,8 @@ export default function FacilityForm(props: FacilityProps) {
         )?.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude?.toString() || "",
-        longitude: facilityData.longitude?.toString() || "",
+        latitude: facilityData.latitude,
+        longitude: facilityData.longitude,
         is_public: facilityData.is_public,
       });
     }
@@ -468,6 +468,10 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormControl>
                     <Input
                       {...field}
+                      type="number"
+                      onChange={(e) => {
+                        form.setValue("latitude", Number(e.target.value));
+                      }}
                       data-cy="facility-latitude"
                       placeholder="Enter latitude"
                       disabled={isGettingLocation}
@@ -488,6 +492,10 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormControl>
                     <Input
                       {...field}
+                      type="number"
+                      onChange={(e) => {
+                        form.setValue("longitude", Number(e.target.value));
+                      }}
                       data-cy="facility-longitude"
                       placeholder="Enter longitude"
                       disabled={isGettingLocation}

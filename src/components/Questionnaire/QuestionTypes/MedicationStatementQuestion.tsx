@@ -1,5 +1,7 @@
 import { MinusCircledIcon, Pencil2Icon } from "@radix-ui/react-icons";
-import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -32,26 +34,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import query from "@/Utils/request/query";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
   MedicationStatementRequest,
   MedicationStatementStatus,
 } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { Code } from "@/types/questionnaire/code";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
+  patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -73,6 +89,7 @@ export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  patientId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
@@ -87,20 +104,34 @@ export function MedicationStatementQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as MedicationStatementRequest[]) || [];
 
+  const { data: patientMedications } = useQuery({
+    queryKey: ["medication_statements", patientId],
+    queryFn: query(medicationStatementApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
+    }),
+  });
+
+  useEffect(() => {
+    if (patientMedications?.results) {
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: patientMedications.results }],
+        questionnaireResponse.question_id,
+      );
+    }
+  }, [patientMedications]);
+
   const handleAddMedication = (medication: Code) => {
     const newMedications: MedicationStatementRequest[] = [
       ...medications,
       { ...MEDICATION_STATEMENT_INITIAL_VALUE, medication },
     ];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_statement",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_statement", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
     setExpandedMedicationIndex(newMedications.length - 1);
   };
 
@@ -111,13 +142,28 @@ export function MedicationStatementQuestion({
   const confirmRemoveMedication = () => {
     if (medicationToDelete === null) return;
 
-    const newMedications = medications.filter(
-      (_, i) => i !== medicationToDelete,
-    );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "medication_statement", value: newMedications }],
-    });
+    const medication = medications[medicationToDelete];
+    if (medication.id) {
+      // For existing records, update status to entered_in_error
+      const newMedications = medications.map((med, i) =>
+        i === medicationToDelete
+          ? { ...med, status: "entered_in_error" as const }
+          : med,
+      );
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
+    } else {
+      // For new records, remove them completely
+      const newMedications = medications.filter(
+        (_, i) => i !== medicationToDelete,
+      );
+      updateQuestionnaireResponseCB(
+        [{ type: "medication_statement", value: newMedications }],
+        questionnaireResponse.question_id,
+      );
+    }
     setMedicationToDelete(null);
   };
 
@@ -129,15 +175,10 @@ export function MedicationStatementQuestion({
       i === index ? { ...medication, ...updates } : medication,
     );
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "medication_statement",
-          value: newMedications,
-        },
-      ],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_statement", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -249,18 +290,32 @@ export function MedicationStatementQuestion({
                                 <Pencil2Icon className="h-4 w-4" />
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveMedication(index);
-                              }}
-                              disabled={disabled}
-                              className="h-8 w-8"
-                            >
-                              <MinusCircledIcon className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveMedication(index);
+                                    }}
+                                    disabled={
+                                      disabled ||
+                                      medication.status === "entered_in_error"
+                                    }
+                                    className="h-8 w-8"
+                                  >
+                                    <MinusCircledIcon className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {medication.status === "entered_in_error"
+                                    ? t("medication_already_marked_as_error")
+                                    : t("remove_medication")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <CollapsibleContent>
@@ -272,6 +327,7 @@ export function MedicationStatementQuestion({
                                 handleUpdateMedication(index, updates)
                               }
                               onRemove={() => handleRemoveMedication(index)}
+                              index={index}
                             />
                           </div>
                         </CollapsibleContent>
@@ -284,6 +340,7 @@ export function MedicationStatementQuestion({
                           handleUpdateMedication(index, updates)
                         }
                         onRemove={() => handleRemoveMedication(index)}
+                        index={index}
                       />
                     )}
                   </React.Fragment>
@@ -311,6 +368,7 @@ interface MedicationStatementGridRowProps {
   disabled?: boolean;
   onUpdate?: (medication: Partial<MedicationStatementRequest>) => void;
   onRemove?: () => void;
+  index: number;
 }
 
 const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
@@ -318,17 +376,26 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   disabled,
   onUpdate,
   onRemove,
+  index,
 }) => {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
+  const isReadOnly = !!medication.id;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50 gap-2 lg:gap-0">
-      {/* Medicine Name */}
-      <div className="lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
-        <span className="break-words line-clamp-2 hidden lg:block">
-          {medication.medication?.display}
-        </span>
+    <div
+      className={cn(
+        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        {
+          "opacity-40 pointer-events-none":
+            medication.status === "entered_in_error",
+        },
+      )}
+    >
+      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
+        <h4 className="text-base font-semibold break-words line-clamp-2 hidden lg:block">
+          {index + 1}. {medication.medication?.display}
+        </h4>
       </div>
 
       {/* Source */}
@@ -339,7 +406,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           onValueChange={(value: MedicationStatementInformationSourceType) =>
             onUpdate?.({ information_source: value })
           }
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
         >
           <SelectTrigger className="h-9 text-sm capitalize">
             <SelectValue />
@@ -410,7 +477,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           value={medication.dosage_text || ""}
           onChange={(e) => onUpdate?.({ dosage_text: e.target.value })}
           placeholder={t("enter_dosage_instructions")}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           className="h-9 text-sm"
         />
       </div>
@@ -448,7 +515,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           placeholder={t("reason_for_medication")}
           value={medication.reason || ""}
           onChange={(e) => onUpdate?.({ reason: e.target.value })}
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           className="h-9 text-sm"
         />
       </div>
@@ -479,8 +546,8 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
               values: [],
               note: medication.note,
             }}
-            updateQuestionnaireResponseCB={(response) => {
-              onUpdate?.({ note: response.note });
+            handleUpdateNote={(note) => {
+              onUpdate?.({ note: note });
             }}
             disabled={disabled}
           />
