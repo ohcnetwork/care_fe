@@ -40,7 +40,11 @@ interface EncounterQuestionProps {
   question: Question;
   encounterId: string;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -124,10 +128,10 @@ export function EncounterQuestion({
       value: [encounterRequest] as unknown as typeof responseValue.value,
     };
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [responseValue],
-    });
+    updateQuestionnaireResponseCB(
+      [responseValue],
+      questionnaireResponse.question_id,
+    );
   };
 
   if (isLoading) {

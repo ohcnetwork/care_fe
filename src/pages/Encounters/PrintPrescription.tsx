@@ -12,6 +12,7 @@ import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 export const PrintPrescription = (props: {
   facilityId: string;
@@ -29,8 +30,8 @@ export const PrintPrescription = (props: {
   });
 
   const { data: medications } = useQuery({
-    queryKey: ["medications", encounter?.patient?.id],
-    queryFn: query(api.medicationRequest.list, {
+    queryKey: ["medication_requests", encounter?.patient?.id],
+    queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: encounter?.patient?.id || "" },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
     }),

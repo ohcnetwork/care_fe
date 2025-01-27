@@ -1,9 +1,9 @@
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
+import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { Symptom } from "@/types/emr/symptom/symptom";
+import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
@@ -31,8 +31,8 @@ export type ResponseValue = {
     | AllergyIntoleranceRequest[]
     | MedicationRequest[]
     | MedicationStatementRequest[]
-    | Symptom[]
-    | Diagnosis[]
+    | SymptomRequest[]
+    | DiagnosisRequest[]
     | Encounter
     | CreateAppointmentQuestion;
   value_code?: Code;
