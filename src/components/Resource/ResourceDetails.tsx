@@ -1,3 +1,4 @@
+import { TFunction } from "i18next";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -103,7 +104,7 @@ function FacilityCard({
   );
 }
 
-const RequestLetter = (data: ResourceRequest, t: (arg0: string) => string) => {
+const RequestLetter = (data: ResourceRequest, t: TFunction) => {
   return (
     <div id="section-to-print" className="print bg-white">
       <div className="mx-4 p-4 lg:mx-20">
