@@ -65,6 +65,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDisplayName,
@@ -246,7 +247,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
-  const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],
@@ -261,12 +262,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   );
 
   useEffect(() => {
+    // trigger this effect only when there are no query params already applied, and once the query is loaded
+    if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
+      return;
+    }
+
     const updates: Partial<QueryParams> = {};
 
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
-      !schedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
@@ -300,7 +305,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading]);
+  }, [schedulableUsersQuery.isLoading, qParams]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -336,8 +341,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       breadcrumbs={false}
       options={
         <Tabs
-          value={viewMode}
-          onValueChange={(value) => setViewMode(value as "board" | "list")}
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "board" | "list")}
         >
           <TabsList>
             <TabsTrigger value="board">
@@ -352,8 +357,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         </Tabs>
       }
     >
-      <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start">
+      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
           <div className="mt-1">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
@@ -600,7 +605,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         </div>
       </div>
 
-      {viewMode === "board" ? (
+      {activeTab === "board" ? (
         <ScrollArea>
           <div className="flex w-max space-x-4">
             {(

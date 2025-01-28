@@ -62,6 +62,7 @@ Cypress.Commands.add("getAttached", (selector: string) => {
       $el = getElement(Cypress.$($d));
       // Ensure $el is an HTMLElement before checking if it is detached
       if ($el.length && $el[0] instanceof HTMLElement) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         expect(Cypress.dom.isDetached($el[0])).to.be.false; // Access the first HTMLElement
       } else {
         throw new Error("Element is not an HTMLElement or is detached.");
@@ -108,19 +109,30 @@ Cypress.Commands.add("clickCancelButton", (buttonText = "Cancel") => {
 
 Cypress.Commands.add(
   "typeAndSelectOption",
-  (selector: string, value: string) => {
+  (selector: string, value: string, verify: boolean = true) => {
     // Click to open the dropdown
-    cy.get(selector).click();
-
-    // Type in the command input
-    cy.get("[cmdk-input]").should("be.visible").clear().type(value);
-
-    // Select the filtered option from command menu
-    cy.get("[cmdk-list]")
-      .find("[cmdk-item]")
-      .contains(value)
-      .should("be.visible")
-      .click();
+    cy.get(selector)
+      .click()
+      .then(() => {
+        // Type in the command input
+        cy.get("[cmdk-input]")
+          .should("be.visible")
+          .type(value)
+          .then(() => {
+            // Select the filtered option from command menu
+            cy.get("[cmdk-list]")
+              .find("[cmdk-item]")
+              .contains(value)
+              .should("be.visible")
+              .click()
+              .then(() => {
+                // Verify the selected value is present in the selector (if verify is true)
+                if (verify) {
+                  cy.get(selector).should("contain", value);
+                }
+              });
+          });
+      });
   },
 );
 

@@ -33,7 +33,11 @@ import { UserBase } from "@/types/user/user";
 interface FollowUpVisitQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -54,15 +58,16 @@ export function AppointmentQuestion({
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const appointment = { ...value, ...updates };
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "appointment",
           value: [appointment] as unknown as ResponseValue["value"],
         },
       ],
-    });
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const facilityId = useSlug("facility");

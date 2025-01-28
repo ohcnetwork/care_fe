@@ -257,7 +257,12 @@ const AvatarEditModal = ({
 
               <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <div>
-                  <Button id="upload-cover-image" variant="primary" asChild>
+                  <Button
+                    id="upload-cover-image"
+                    variant="primary"
+                    className="w-full"
+                    asChild
+                  >
                     <label className="cursor-pointer">
                       <CareIcon
                         icon="l-cloud-upload"

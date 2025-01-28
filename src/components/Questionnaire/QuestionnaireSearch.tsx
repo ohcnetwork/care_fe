@@ -60,6 +60,7 @@ export function QuestionnaireSearch({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-cy="add-questionnaire-button"
           variant="outline"
           className="w-full justify-between"
           disabled={disabled || isLoading}

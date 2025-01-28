@@ -43,7 +43,7 @@ export const Updates = (props: PatientProps) => {
               <PaginatedList.WhenEmpty>
                 <Card className="p-6">
                   <div className="text-lg font-medium text-muted-foreground">
-                    {t("no_updates_found")}
+                    {t("no_update_available")}
                   </div>
                 </Card>
               </PaginatedList.WhenEmpty>

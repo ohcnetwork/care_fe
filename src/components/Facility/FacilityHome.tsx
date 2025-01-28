@@ -250,7 +250,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0 mt-2 md:mt-0">
+                  <div className="flex-shrink-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
