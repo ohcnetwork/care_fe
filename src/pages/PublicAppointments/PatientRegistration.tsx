@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt } from "raviger";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -136,36 +136,37 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: initialForm,
   });
 
-  const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreateRequest) =>
-      mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id },
-        body,
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      })(body),
-    onSuccess: (data: Appointment) => {
-      toast.success(t("appointment_created_success"));
-      queryClient.invalidateQueries({
-        queryKey: [
-          ["patients", tokenData.phoneNumber],
-          ["appointment", tokenData.phoneNumber],
-        ],
-      });
-      navigate(
-        `/facility/${props.facilityId}/appointments/${data.id}/success`,
-        {
-          replace: true,
-        },
-      );
-    },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_appointment"));
-    },
-  });
+  const { mutate: createAppointment, isPending: isCreatingAppointment } =
+    useMutation({
+      mutationFn: (body: AppointmentCreateRequest) =>
+        mutate(PublicAppointmentApi.createAppointment, {
+          pathParams: { id: selectedSlot?.id },
+          body,
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        })(body),
+      onSuccess: (data: Appointment) => {
+        toast.success(t("appointment_created_success"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            ["patients", tokenData.phoneNumber],
+            ["appointment", tokenData.phoneNumber],
+          ],
+        });
+        navigate(
+          `/facility/${props.facilityId}/appointments/${data.id}/success`,
+          {
+            replace: true,
+          },
+        );
+      },
+      onError: (error) => {
+        toast.error(error?.message || t("failed_to_create_appointment"));
+      },
+    });
 
-  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+  const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(routes.otp.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
@@ -180,7 +181,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         patient: data.id,
         reason_for_visit: reason ?? "",
       });
-      setIsSubmitting(false);
     },
     onError: (error: HTTPError) => {
       const errorData = error.cause;
@@ -191,10 +191,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       } else {
         toast.error(error.message);
       }
-      setIsSubmitting(false);
     },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = form.handleSubmit((data) => {
     const formattedData = {
@@ -211,14 +209,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       geo_organization: data.geo_organization,
       is_active: true,
     };
-    setIsSubmitting(true);
     createPatient(formattedData);
   });
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
-    form.formState.isDirty && !isCreatingPatient && !isSubmitting,
+    form.formState.isDirty && !isCreatingAppointment,
     t("unsaved_changes"),
   );
 
