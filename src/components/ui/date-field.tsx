@@ -42,7 +42,7 @@ export default function DateField({
   }, [date]);
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDay = e.target.value;
+    const newDay = e.target.value.slice(0, 2);
     setDay(newDay);
 
     if (
@@ -63,7 +63,7 @@ export default function DateField({
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMonth = e.target.value;
+    const newMonth = e.target.value.slice(0, 2);
     setMonth(newMonth);
 
     if (
@@ -85,7 +85,7 @@ export default function DateField({
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newYear = e.target.value;
+    const newYear = e.target.value.slice(0, 4);
     setYear(newYear);
 
     if (newYear.length === 4 && parseInt(newYear) >= 1900) {
@@ -101,7 +101,7 @@ export default function DateField({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-4 md:gap-2 ">
       <div className="flex flex-col gap-1">
         <Label>{t("day")}</Label>
         <Input
