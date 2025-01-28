@@ -35,14 +35,6 @@ import {
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -72,7 +64,6 @@ import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentFinalStatuses,
-  AppointmentStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
@@ -444,29 +435,6 @@ const AppointmentActions = ({
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
-  }
-
-  if (!["booked", "checked_in", "in_consultation"].includes(currentStatus)) {
-    return (
-      <div className="w-48">
-        <Label className="mb-2">{t("change_status")}</Label>
-        <Select
-          value={currentStatus}
-          onValueChange={(value) => onChange(value as Appointment["status"])}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {AppointmentStatuses.map((status, index) => (
-              <SelectItem key={index} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    );
   }
 
   return (
