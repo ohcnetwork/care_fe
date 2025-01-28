@@ -17,6 +17,7 @@ import {
   groupSlotsByAvailability,
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
+import { TokenSlot } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 interface AppointmentSlotPickerProps {
@@ -179,55 +180,20 @@ export function AppointmentSlotPicker({
                       {availability.name}
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {slots.map((slot) => {
-                        const percentage =
-                          slot.allocated / availability.tokens_per_slot;
-                        const isPastSlot =
-                          isSameDay(selectedDate, new Date()) &&
-                          isBefore(slot.start_datetime, new Date());
-
-                        return (
-                          <Button
-                            key={slot.id}
-                            size="lg"
-                            variant={
-                              selectedSlotId === slot.id ? "primary" : "outline"
-                            }
-                            onClick={() => {
-                              onSlotSelect(
-                                selectedSlotId === slot.id
-                                  ? undefined
-                                  : slot.id,
-                              );
-                            }}
-                            disabled={
-                              slot.allocated === availability.tokens_per_slot ||
-                              isPastSlot
-                            }
-                            className="flex flex-col items-center group gap-0"
-                          >
-                            <span className="font-semibold">
-                              {format(slot.start_datetime, "HH:mm")}
-                            </span>
-                            <span
-                              className={cn(
-                                "text-xs group-hover:text-inherit",
-                                percentage >= 1
-                                  ? "text-gray-400"
-                                  : percentage >= 0.8
-                                    ? "text-red-600"
-                                    : percentage >= 0.6
-                                      ? "text-yellow-600"
-                                      : "text-green-600",
-                                selectedSlotId === slot.id && "text-white",
-                              )}
-                            >
-                              {availability.tokens_per_slot - slot.allocated}{" "}
-                              left
-                            </span>
-                          </Button>
-                        );
-                      })}
+                      {slots.map((slot) => (
+                        <TokenSlotButton
+                          key={slot.id}
+                          slot={slot}
+                          availability={availability}
+                          selectedSlotId={selectedSlotId}
+                          onClick={() => {
+                            onSlotSelect(
+                              selectedSlotId === slot.id ? undefined : slot.id,
+                            );
+                          }}
+                          selectedDate={selectedDate}
+                        />
+                      ))}
                     </div>
                     <Separator className="my-6" />
                   </div>
@@ -239,3 +205,52 @@ export function AppointmentSlotPicker({
     </>
   );
 }
+
+export const TokenSlotButton = ({
+  slot,
+  availability,
+  selectedSlotId,
+  onClick,
+  selectedDate,
+}: {
+  slot: Omit<TokenSlot, "availability">;
+  availability: TokenSlot["availability"];
+  selectedSlotId: string | undefined;
+  onClick: () => void;
+  selectedDate: Date;
+}) => {
+  const percentage = slot.allocated / availability.tokens_per_slot;
+  const isPastSlot =
+    isSameDay(selectedDate, new Date()) &&
+    isBefore(slot.start_datetime, new Date());
+
+  return (
+    <Button
+      key={slot.id}
+      size="lg"
+      variant={selectedSlotId === slot.id ? "primary" : "outline"}
+      onClick={onClick}
+      disabled={slot.allocated === availability.tokens_per_slot || isPastSlot}
+      className="flex flex-col items-center group gap-0 w-24"
+    >
+      <span className="font-semibold">
+        {format(slot.start_datetime, "HH:mm")}
+      </span>
+      <span
+        className={cn(
+          "text-xs group-hover:text-inherit",
+          percentage >= 1
+            ? "text-gray-400"
+            : percentage >= 0.8
+              ? "text-red-600"
+              : percentage >= 0.6
+                ? "text-yellow-600"
+                : "text-green-600",
+          selectedSlotId === slot.id && "text-white",
+        )}
+      >
+        {availability.tokens_per_slot - slot.allocated} left
+      </span>
+    </Button>
+  );
+};
