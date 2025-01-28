@@ -1,23 +1,24 @@
 version: 2
 updates:
-  - package-ecosystem: "yarn"
+  - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 0
     allow:
       - dependency-name: "*"
         dependency-type: "production"
     assignees:
       - "tomahawk_pilot"
     labels:
-      - "yarn"
       - "dependencies"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-        assignees:
+    open-pull-requests-limit: 0
+    assignees:
       - "tomahawk_pilot"
     labels:
       - "ci"

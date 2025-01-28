@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useNavigationPrompt } from "raviger";
 import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -165,7 +165,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     },
   });
 
-  const { mutate: createPatient } = useMutation({
+  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(routes.otp.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
@@ -210,6 +210,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     };
     createPatient(formattedData);
   });
+
+  // TODO: Use useBlocker hook after switching to tanstack router
+  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  useNavigationPrompt(
+    form.formState.isDirty && !isCreatingPatient,
+    t("unsaved_changes"),
+  );
 
   // const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
