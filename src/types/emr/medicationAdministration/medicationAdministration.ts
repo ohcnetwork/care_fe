@@ -22,7 +22,7 @@ export interface MedicationAdministration {
   readonly id?: string;
   status: MedicationAdministrationStatus;
   status_reason?: Code;
-  category?: "inpatient" | "outpatient" | "community" | "discharge";
+  category?: "inpatient" | "outpatient" | "community";
 
   medication: Code;
 

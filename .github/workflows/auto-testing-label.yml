@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Check PR Conditions and Add Label
         id: check_conditions
-        uses: actions/github-script@v5
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
