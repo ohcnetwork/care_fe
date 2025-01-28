@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
@@ -78,13 +80,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
-      phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
-      alt_phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
-        .optional(),
+      phone_number: validators.phoneNumber.required,
+      alt_phone_number: validators.phoneNumber.optional,
       phone_number_is_whatsapp: z.boolean().default(true),
       gender: z.enum(GENDERS),
       /* TODO: Userbase doesn't currently support these, neither does BE
@@ -115,8 +112,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "staff",
-      phone_number: "+91",
-      alt_phone_number: "+91",
+      phone_number: "",
+      alt_phone_number: "",
       phone_number_is_whatsapp: true,
     },
   });
@@ -243,9 +240,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
         queryKey: ["getUserDetails", resp.username],
       });
       onSubmitSuccess?.(resp);
-    },
-    onError: (error) => {
-      toast.error(error?.message ?? t("user_update_error"));
     },
   });
 
@@ -422,11 +416,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormLabel required>{t("phone_number")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <PhoneInput
                     data-cy="phone-number-input"
-                    type="tel"
-                    placeholder="+91XXXXXXXXXX"
-                    maxLength={13}
+                    placeholder={t("enter_phone_number")}
                     {...field}
                   />
                 </FormControl>
@@ -442,11 +434,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormLabel>{t("alternate_phone_number")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <PhoneInput
                     data-cy="alt-phone-number-input"
-                    placeholder="+91XXXXXXXXXX"
-                    type="tel"
-                    maxLength={13}
+                    placeholder={t("enter_phone_number")}
                     {...field}
                     disabled={isWhatsApp}
                   />
