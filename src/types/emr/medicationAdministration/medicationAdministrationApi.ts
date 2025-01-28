@@ -8,13 +8,13 @@ import {
 
 export default {
   listMedicationAdministrations: {
-    path: "/api/v1/patient/{patientId}/medicine_administration/",
+    path: "/api/v1/patient/{patientId}/medication/administration/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<MedicationAdministrationRead>>(),
   },
   upsertMedicationAdministration: {
-    path: "/api/v1/patient/{patientId}/medicine_administration/upsert/",
+    path: "/api/v1/patient/{patientId}/medication/administration/upsert/",
     method: HttpMethod.POST,
-    TRes: Type<MedicationAdministrationRequest>(),
+    TRes: Type<MedicationAdministrationRequest[]>,
   },
 };

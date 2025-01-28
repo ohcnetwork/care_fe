@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import React, { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import SubHeading from "@/CAREUI/display/SubHeading";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -29,12 +29,75 @@ interface Props {
   encounterId: string;
 }
 
+const timeSlots = [
+  { label: "12:00 AM - 06:00 AM", start: "00:00", end: "06:00" },
+  { label: "06:00 AM - 12:00 PM", start: "06:00", end: "12:00" },
+  { label: "12:00 PM - 06:00 PM", start: "12:00", end: "18:00" },
+  { label: "06:00 PM - 12:00 AM", start: "18:00", end: "24:00" },
+];
+
 export default function MedicationRequestTable({
-  facilityId,
   patientId,
   encounterId,
+  facilityId,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
+  const currentDate = new Date();
+
+  const [endSlotDate, setEndSlotDate] = useState(currentDate);
+  const [endSlotIndex, setEndSlotIndex] = useState(() => {
+    const hour = currentDate.getHours();
+    if (hour < 6) return 0;
+    if (hour < 12) return 1;
+    if (hour < 18) return 2;
+    return 3;
+  });
+
+  // Calculate visible slots based on end slot
+  const visibleSlots = useMemo(() => {
+    const slots = [];
+    let currentIndex = endSlotIndex;
+    let currentDate = new Date(endSlotDate);
+
+    // Add slots from right to left
+    for (let i = 0; i < 4; i++) {
+      if (currentIndex < 0) {
+        currentIndex = 3;
+        currentDate = new Date(currentDate);
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      slots.unshift({
+        ...timeSlots[currentIndex],
+        date: new Date(currentDate),
+      });
+      currentIndex--;
+    }
+    return slots;
+  }, [endSlotDate, endSlotIndex]);
+
+  const handlePreviousSlot = useCallback(() => {
+    const newEndSlotIndex = endSlotIndex - 1;
+    if (newEndSlotIndex < 0) {
+      setEndSlotIndex(3);
+      const newDate = new Date(endSlotDate);
+      newDate.setDate(newDate.getDate() - 1);
+      setEndSlotDate(newDate);
+    } else {
+      setEndSlotIndex(newEndSlotIndex);
+    }
+  }, [endSlotDate, endSlotIndex]);
+
+  const handleNextSlot = useCallback(() => {
+    const newEndSlotIndex = endSlotIndex + 1;
+    if (newEndSlotIndex > 3) {
+      setEndSlotIndex(0);
+      const newDate = new Date(endSlotDate);
+      newDate.setDate(newDate.getDate() + 1);
+      setEndSlotDate(newDate);
+    } else {
+      setEndSlotIndex(newEndSlotIndex);
+    }
+  }, [endSlotDate, endSlotIndex]);
 
   const { data: medications, isLoading: loading } = useQuery({
     queryKey: ["medication_requests", patientId],
@@ -45,13 +108,28 @@ export default function MedicationRequestTable({
     enabled: !!patientId,
   });
 
-  const { data: administrations } = useQuery({
-    queryKey: ["medication_administrations", patientId],
+  const { data: administrations, refetch: refetchAdministrations } = useQuery({
+    queryKey: ["medication_administrations", patientId, visibleSlots],
     queryFn: query(routes.medicationAdministration.list, {
       pathParams: { patientId: patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: {
+        encounter: encounterId,
+        ...(visibleSlots.length > 0 && {
+          occurrence_period_start_after: format(
+            visibleSlots[0].date,
+            "yyyy-MM-dd'T'HH:mm:ss",
+          ),
+          occurrence_period_start_before: format(
+            new Date(
+              visibleSlots[visibleSlots.length - 1].date.getTime() +
+                24 * 60 * 60 * 1000,
+            ),
+            "yyyy-MM-dd'T'HH:mm:ss",
+          ),
+        }),
+      },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && !!visibleSlots?.length,
   });
 
   // Get last administered date for each medication
@@ -68,6 +146,10 @@ export default function MedicationRequestTable({
     },
     {},
   );
+
+  const handleAdministrationComplete = useCallback(() => {
+    refetchAdministrations();
+  }, [refetchAdministrations]);
 
   const filteredMedications = medications?.results?.filter(
     (med: MedicationRequestRead) => {
@@ -107,124 +189,128 @@ export default function MedicationRequestTable({
 
   return (
     <div className="space-y-2">
-      <SubHeading
-        title="Prescriptions"
-        options={
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
-              >
-                <PencilIcon className="mr-2" />
-                Edit
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
-              >
-                <CareIcon icon="l-print" className="mr-2" />
-                Print
-              </Link>
-            </Button>
-          </div>
-        }
-      />
-
-      <div className="rounded-lg border">
+      <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="h-9 w-full justify-start rounded-none border-b bg-transparent p-0">
+          <TabsList className="bg-gray-200 py-0 w-fit ">
             <TabsTrigger
               value="prescriptions"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
               Prescriptions
             </TabsTrigger>
             <TabsTrigger
               value="administration"
-              className="rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold data-[state=active]:border-primary"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
               Medicine Administration
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="prescriptions">
-            <div className="flex items-center gap-2 border-b p-2">
-              <CareIcon
-                icon="l-search"
-                className="text-lg text-muted-foreground"
-              />
-              <input
-                type="text"
-                placeholder="Search medications..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <CareIcon icon="l-times" className="text-lg" />
-                </Button>
+            <div className="flex flex-col gap-2 ">
+              <div className="flex items-center gap-2 p-2">
+                <CareIcon
+                  icon="l-search"
+                  className="text-lg text-muted-foreground"
+                />
+                <input
+                  type="text"
+                  placeholder="Search medications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <CareIcon icon="l-times" className="text-lg" />
+                  </Button>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="min-h-[200px] flex items-center justify-center">
+                  <Loading />
+                </div>
+              ) : !medications?.results?.length ? (
+                <EmptyState />
+              ) : !filteredMedications?.length ? (
+                <EmptyState searching />
+              ) : (
+                <ScrollArea className="h-[calc(100vh-16rem)]">
+                  <Tabs defaultValue="active" className="w-full">
+                    <div className=" px-2 flex justify-between">
+                      <TabsList className="h-9">
+                        <TabsTrigger value="active" className="text-xs">
+                          Active{" "}
+                          <Badge variant="secondary" className="ml-2">
+                            {activeMedications?.length || 0}
+                          </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="discontinued" className="text-xs">
+                          Discontinued{" "}
+                          <Badge variant="secondary" className="ml-2">
+                            {discontinuedMedications?.length || 0}
+                          </Badge>
+                        </TabsTrigger>
+                      </TabsList>
+                      <div className="flex items-center gap-2">
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
+                          >
+                            <PencilIcon className="mr-2" />
+                            Edit
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+                          >
+                            <CareIcon icon="l-print" className="mr-2" />
+                            Print
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="min-w-[800px]">
+                      <TabsContent value="active" className="p-2">
+                        <MedicationsTable
+                          medications={activeMedications || []}
+                        />
+                      </TabsContent>
+                      <TabsContent value="discontinued" className="p-2">
+                        <MedicationsTable
+                          medications={discontinuedMedications || []}
+                        />
+                      </TabsContent>
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </Tabs>
+                </ScrollArea>
               )}
             </div>
-
-            {loading ? (
-              <div className="min-h-[200px] flex items-center justify-center">
-                <Loading />
-              </div>
-            ) : !medications?.results?.length ? (
-              <EmptyState />
-            ) : !filteredMedications?.length ? (
-              <EmptyState searching />
-            ) : (
-              <ScrollArea className="h-[calc(100vh-16rem)]">
-                <Tabs defaultValue="active" className="w-full">
-                  <div className="border-b px-2">
-                    <TabsList className="h-9">
-                      <TabsTrigger value="active" className="text-xs">
-                        Active{" "}
-                        <Badge variant="secondary" className="ml-2">
-                          {activeMedications?.length || 0}
-                        </Badge>
-                      </TabsTrigger>
-                      <TabsTrigger value="discontinued" className="text-xs">
-                        Discontinued{" "}
-                        <Badge variant="secondary" className="ml-2">
-                          {discontinuedMedications?.length || 0}
-                        </Badge>
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-
-                  <div className="min-w-[800px]">
-                    <TabsContent value="active" className="p-2">
-                      <MedicationsTable medications={activeMedications || []} />
-                    </TabsContent>
-                    <TabsContent value="discontinued" className="p-2">
-                      <MedicationsTable
-                        medications={discontinuedMedications || []}
-                      />
-                    </TabsContent>
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </Tabs>
-              </ScrollArea>
-            )}
           </TabsContent>
 
           <TabsContent value="administration">
             <AdministrationTab
               loadingAdministrations={loading}
-              activeMedications={activeMedications}
+              activeMedications={medications?.results}
               administrations={administrations}
               lastAdministeredDates={lastAdministeredDates}
               patientId={patientId}
               encounterId={encounterId}
+              visibleSlots={visibleSlots}
+              onPreviousSlot={handlePreviousSlot}
+              onNextSlot={handleNextSlot}
+              currentDate={currentDate}
+              endSlotIndex={endSlotIndex}
+              onAdministrationComplete={handleAdministrationComplete}
             />
           </TabsContent>
         </Tabs>

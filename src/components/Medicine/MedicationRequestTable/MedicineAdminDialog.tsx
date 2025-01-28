@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +47,9 @@ export const MedicineAdminDialog = ({
   const { mutate: upsertAdministration, isPending } = useMutation({
     mutationFn: mutate(
       medicationAdministrationApi.upsertMedicationAdministration,
+      {
+        pathParams: { patientId: patientId },
+      },
     ),
     onSuccess: () => {
       onOpenChange(false);
@@ -56,14 +58,15 @@ export const MedicineAdminDialog = ({
 
   const handleSubmit = () => {
     upsertAdministration({
-      pathParams: { patientId: patientId },
-      data: [administrationRequest], // Send as single-item array for upsert
+      datapoints: [administrationRequest], // Send as single-item array for upsert
     });
   };
 
+  console.log("patientId", patientId);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
@@ -71,14 +74,6 @@ export const MedicineAdminDialog = ({
                 ? "Edit Administration"
                 : "Administer Medicine"}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 

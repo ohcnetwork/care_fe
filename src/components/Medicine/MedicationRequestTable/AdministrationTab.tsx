@@ -1,7 +1,7 @@
 "use client";
 
 import { format, formatDistanceToNow } from "date-fns";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -28,14 +28,13 @@ interface AdministrationTabProps {
   lastAdministeredDates?: Record<string, string>;
   patientId: string;
   encounterId: string;
+  visibleSlots: { date: Date; start: string; end: string; label: string }[];
+  onPreviousSlot: () => void;
+  onNextSlot: () => void;
+  currentDate: Date;
+  endSlotIndex: number;
+  onAdministrationComplete: () => void;
 }
-
-const timeSlots = [
-  { label: "12:00 AM - 06:00 AM", start: "00:00", end: "06:00" },
-  { label: "06:00 AM - 12:00 PM", start: "06:00", end: "12:00" },
-  { label: "12:00 PM - 06:00 PM", start: "12:00", end: "18:00" },
-  { label: "06:00 PM - 12:00 AM", start: "18:00", end: "24:00" },
-];
 
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   loadingAdministrations,
@@ -44,17 +43,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   lastAdministeredDates,
   patientId,
   encounterId,
+  visibleSlots,
+  onPreviousSlot,
+  onNextSlot,
+  currentDate,
+  endSlotIndex,
+  onAdministrationComplete,
 }) => {
-  const currentDate = new Date();
-  const [endSlotDate, setEndSlotDate] = useState(currentDate);
-  const [endSlotIndex, setEndSlotIndex] = useState(() => {
-    const hour = currentDate.getHours();
-    if (hour < 6) return 0;
-    if (hour < 12) return 1;
-    if (hour < 18) return 2;
-    return 3;
-  });
-
   // Dialog state for single medicine administration
   const [selectedMedication, setSelectedMedication] =
     useState<MedicationRequestRead | null>(null);
@@ -62,52 +57,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Sheet state for multiple medicine administration
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  // Calculate visible slots based on end slot
-  const visibleSlots = useMemo(() => {
-    const slots = [];
-    let currentIndex = endSlotIndex;
-    let currentDate = new Date(endSlotDate);
-
-    // Add slots from right to left
-    for (let i = 0; i < 4; i++) {
-      if (currentIndex < 0) {
-        currentIndex = 3;
-        currentDate = new Date(currentDate);
-        currentDate.setDate(currentDate.getDate() - 1);
-      }
-      slots.unshift({
-        ...timeSlots[currentIndex],
-        date: new Date(currentDate),
-      });
-      currentIndex--;
-    }
-    return slots;
-  }, [endSlotDate, endSlotIndex]);
-
-  const handlePreviousSlot = () => {
-    const newEndSlotIndex = endSlotIndex - 1;
-    if (newEndSlotIndex < 0) {
-      setEndSlotIndex(3);
-      const newDate = new Date(endSlotDate);
-      newDate.setDate(newDate.getDate() - 1);
-      setEndSlotDate(newDate);
-    } else {
-      setEndSlotIndex(newEndSlotIndex);
-    }
-  };
-
-  const handleNextSlot = () => {
-    const newEndSlotIndex = endSlotIndex + 1;
-    if (newEndSlotIndex > 3) {
-      setEndSlotIndex(0);
-      const newDate = new Date(endSlotDate);
-      newDate.setDate(newDate.getDate() + 1);
-      setEndSlotDate(newDate);
-    } else {
-      setEndSlotIndex(newEndSlotIndex);
-    }
-  };
 
   const isTimeInSlot = (
     date: Date,
@@ -164,21 +113,22 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       status: "completed",
       medication: medication.medication,
-      dosage: {
-        text: medication.dosage_instruction[0]?.text,
-        site: medication.dosage_instruction[0]?.site,
-        route: medication.dosage_instruction[0]?.route,
-        method: medication.dosage_instruction[0]?.method,
-        ...(medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity && {
-          dose: {
-            value:
-              medication.dosage_instruction[0].dose_and_rate.dose_quantity
-                .value,
-            unit: medication.dosage_instruction[0].dose_and_rate.dose_quantity
-              .unit,
-          },
-        }),
-      },
+      // TODO: Undo comment after FE dosage type is fixed
+      // dosage: {
+      //   text: medication.dosage_instruction[0]?.text,
+      //   site: medication.dosage_instruction[0]?.site,
+      //   route: medication.dosage_instruction[0]?.route,
+      //   method: medication.dosage_instruction[0]?.method,
+      //   ...(medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity && {
+      //     dose: {
+      //       value:
+      //         medication.dosage_instruction[0].dose_and_rate.dose_quantity
+      //           .value,
+      //       unit: medication.dosage_instruction[0].dose_and_rate.dose_quantity
+      //         .unit,
+      //     },
+      //   }),
+      // },
     });
     setSelectedMedication(medication);
     setDialogOpen(true);
@@ -209,7 +159,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       <Loading />
     </div>
   ) : (
-    <div className="flex flex-col gap-2 m-2">
+    <div className="flex flex-col gap-2 m-2 ">
       <div className="flex justify-end">
         <Button
           variant="outline"
@@ -221,22 +171,22 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         </Button>
       </div>
 
-      <Card className="w-full">
+      <Card className="w-full border-none shadow-none">
         <div className="grid grid-cols-[2fr,1fr,auto,repeat(4,1fr),40px]">
           {/* Top row without vertical borders */}
           <div className="col-span-full grid grid-cols-subgrid">
-            <div className="p-4 ">
+            <div className="p-4  bg-gray-50 border-t border-gray-50">
               <div className="text-xs text-[#6b7280]">
                 Last modified {formatDistanceToNow(currentDate)} ago
               </div>
             </div>
-            <div />
-            <div className="flex justify-end items-center mr-2">
+            <div className="bg-gray-50" />
+            <div className="flex justify-end items-center bg-gray-50 rounded">
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 text-gray-400"
-                onClick={handlePreviousSlot}
+                className="h-8 w-8 text-gray-400 mr-2"
+                onClick={onPreviousSlot}
               >
                 <CareIcon icon="l-angle-left" className="h-4 w-4" />
               </Button>
@@ -247,7 +197,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               return (
                 <div
                   key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                  className="relative h-14"
+                  className=" h-14"
                 >
                   {isFirstSlotOfDay && (
                     <div className="flex items-center h-full ml-2">
@@ -283,12 +233,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 </div>
               );
             })}
-            <div className="flex justify-start items-center px-1">
+            <div className="flex justify-start items-center px-1 bg-gray-50 ">
               <Button
                 variant="outline"
                 size="icon"
                 className="h-8 w-8 text-gray-400"
-                onClick={handleNextSlot}
+                onClick={onNextSlot}
                 disabled={isTimeInSlot(currentDate, visibleSlots[3])}
               >
                 <CareIcon icon="l-angle-right" className="h-4 w-4" />
@@ -297,17 +247,21 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           </div>
 
           {/* Main content with borders */}
-          <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb]">
+          <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r ">
             {/* Headers */}
-            <div className="p-4 font-medium text-sm border-t">Medicine:</div>
-            <div className="p-4 font-medium text-sm border-t">
+            <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
+              Medicine:
+            </div>
+            <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
               Dosage & Frequency:
             </div>
-            <div className="p-4 font-medium text-sm border-t">Action</div>
+            <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
+              Action
+            </div>
             {visibleSlots.map((slot, i) => (
               <div
                 key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                className="p-4 font-semibold text-xs text-center border-t relative"
+                className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
               >
                 {i === endSlotIndex &&
                   slot.date.getTime() === currentDate.getTime() && (
@@ -318,7 +272,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 {slot.label}
               </div>
             ))}
-            <div className="border-t" />
+            <div className="border-t bg-[#F3F4F6]" />
 
             {/* Medication rows */}
             {activeMedications?.map((medication) => (
@@ -360,7 +314,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                    className="h-8 text-primary-800 border-primary-600 hover:bg-primary-100 font-semibold"
                     onClick={() => handleAdminister(medication)}
                   >
                     Administer
@@ -376,18 +330,21 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   return (
                     <div
                       key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                      className="p-4 border-t relative"
+                      className="p-4 border-t relative text-sm"
                     >
                       {administrationRecords?.map((admin) => (
                         <div
                           key={admin.id}
-                          className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] rounded-md p-2 mb-2 cursor-pointer"
+                          className="flex font-medium items-center gap-2 bg-[#ecfdf5] text-[#059669] rounded-md p-2 mb-2 cursor-pointer justify-between border border-primary-400"
                           onClick={() =>
                             handleEditAdministration(medication, admin)
                           }
                         >
                           <div className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-[#059669]" />
+                            <CareIcon
+                              icon="l-check-circle"
+                              className="h-3 w-3"
+                            />
                             {new Date(
                               admin.occurrence_period_start,
                             ).toLocaleTimeString("en-US", {
@@ -396,17 +353,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                               hour12: true,
                             })}
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 hover:bg-emerald-100 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Handle copy functionality
-                            }}
-                          >
-                            <CareIcon icon="l-copy" className="h-3 w-3" />
-                          </Button>
+                          {admin.note && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 hover:bg-emerald-100 p-0"
+                            >
+                              <CareIcon icon="l-notes" className="h-3 w-3" />
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -438,6 +393,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             if (!open) {
               setAdministrationRequest(null);
               setSelectedMedication(null);
+              onAdministrationComplete();
             }
           }}
           medication={selectedMedication}
@@ -449,7 +405,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
       <MedicineAdminSheet
         open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
+        onOpenChange={(open) => {
+          setIsSheetOpen(open);
+          if (!open) {
+            onAdministrationComplete();
+          }
+        }}
         medications={activeMedications || []}
         lastAdministeredDates={lastAdministeredDates}
         patientId={patientId}

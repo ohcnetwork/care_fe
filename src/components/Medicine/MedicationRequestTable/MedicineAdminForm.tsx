@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
 import React, { useState } from "react";
 
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -43,7 +44,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   // Initialize isPastTime based on whether the times are different
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
-      administrationRequest.occurrence_period_end,
+      administrationRequest.occurrence_period_end || !!administrationRequest.id,
   );
 
   const handleStartTimeChange = (newStartTime: string) => {
@@ -73,7 +74,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <Label className="text-xs text-muted-foreground">Dosage</Label>
           <p className="font-medium">
@@ -111,6 +112,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           onValueChange={(value: MedicationAdministrationStatus) =>
             onChange({ ...administrationRequest, status: value })
           }
+          disabled={
+            !!administrationRequest.id &&
+            administrationRequest.status !== "in_progress"
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -136,63 +141,76 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Is this administration for a past time?</Label>
-        <RadioGroup
-          name={`${formId}isPastTime`}
-          value={isPastTime ? "yes" : "no"}
-          onValueChange={(newValue) => {
-            setIsPastTime(newValue === "yes");
-            if (newValue === "no") {
-              // Set both times to current time
-              const now = new Date().toISOString().slice(0, 16);
-              onChange({
-                ...administrationRequest,
-                occurrence_period_start: now,
-                occurrence_period_end: now,
-              });
-            }
-          }}
-          className="flex gap-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id={`yes-${formId}`} />
-            <Label htmlFor={`yes-${formId}`}>Yes</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="no" id={`no-${formId}`} />
-            <Label htmlFor={`no-${formId}`}>No</Label>
-          </div>
-        </RadioGroup>
-      </div>
+      {!administrationRequest.id && (
+        <div className="space-y-2">
+          <Label>Is this administration for a past time?</Label>
+          <RadioGroup
+            name={`${formId}isPastTime`}
+            value={isPastTime ? "yes" : "no"}
+            onValueChange={(newValue) => {
+              setIsPastTime(newValue === "yes");
+              if (newValue === "no") {
+                // Set both times to current time
+                const now = new Date().toISOString().slice(0, 16);
+                onChange({
+                  ...administrationRequest,
+                  occurrence_period_start: now,
+                  occurrence_period_end: now,
+                });
+              }
+            }}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id={`yes-${formId}`} />
+              <Label htmlFor={`yes-${formId}`}>Yes</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id={`no-${formId}`} />
+              <Label htmlFor={`no-${formId}`}>No</Label>
+            </div>
+          </RadioGroup>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label>Start Time</Label>
-        <Input
-          type="datetime-local"
-          name={`${formId}startDateTime`}
-          value={administrationRequest.occurrence_period_start}
-          onChange={(e) => handleStartTimeChange(e.target.value)}
-          disabled={!isPastTime}
+        <DateTimePicker
+          value={
+            administrationRequest.occurrence_period_start
+              ? new Date(administrationRequest.occurrence_period_start)
+              : undefined
+          }
+          onChange={(date) => {
+            if (!date) return;
+            handleStartTimeChange(date.toISOString());
+          }}
+          disabled={!isPastTime || !!administrationRequest.id}
         />
       </div>
 
       <div className="space-y-2">
         <Label>End Time</Label>
-        <Input
-          type="datetime-local"
-          name={`${formId}endDateTime`}
+        <DateTimePicker
           value={
-            administrationRequest.occurrence_period_end ||
-            administrationRequest.occurrence_period_start
+            administrationRequest.occurrence_period_end
+              ? new Date(administrationRequest.occurrence_period_end)
+              : administrationRequest.occurrence_period_start
+                ? new Date(administrationRequest.occurrence_period_start)
+                : undefined
           }
-          onChange={(e) =>
+          onChange={(date) => {
+            if (!date) return;
             onChange({
               ...administrationRequest,
-              occurrence_period_end: e.target.value,
-            })
+              occurrence_period_end: date.toISOString(),
+            });
+          }}
+          disabled={
+            !isPastTime ||
+            (!!administrationRequest.id &&
+              administrationRequest.status !== "in_progress")
           }
-          disabled={!isPastTime}
         />
       </div>
     </div>
