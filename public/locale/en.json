@@ -1901,6 +1901,7 @@
   "show_patient_presets": "Show Patient Presets",
   "show_unread_notifications": "Show Unread",
   "showing_all_appointments": "Showing all appointments",
+  "showing_x_of_y": "Showing <strong>{{x}}</strong> of <strong>{{y}}</strong>",
   "sign_in": "Sign in",
   "sign_out": "Sign out",
   "site": "Site",
