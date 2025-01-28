@@ -75,7 +75,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           variant="outline"
         >
           {userListFetching
-            ? "Loading..."
+            ? t("loading")
             : t("entity_count", {
                 count: userListData?.count ?? 0,
                 entity: "User",

@@ -71,7 +71,7 @@ export function QuestionnaireSearch({
                 icon="l-spinner"
                 className="mr-2 h-4 w-4 animate-spin"
               />
-              Loading...
+              {t("loading")}
             </>
           ) : (
             <span>{t("add_questionnaire")}</span>

@@ -28,7 +28,7 @@ const EntityBadge: React.FC<EntityBadgeProps> = ({
         variant="outline"
       >
         {isFetching
-          ? "Loading..."
+          ? t("loading")
           : t(customTranslation || "entity_count", {
               count: count ?? 0,
               ...translationParams,
