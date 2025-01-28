@@ -94,7 +94,7 @@ export class FacilityCreation {
       { label: "Address", message: "Address is required" },
       {
         label: "Phone Number",
-        message: "Entered phone number is not validter(s)",
+        message: "Invalid input",
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);

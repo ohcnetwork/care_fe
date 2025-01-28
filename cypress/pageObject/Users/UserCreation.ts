@@ -72,11 +72,11 @@ export class UserCreation {
       { label: "Confirm Password", message: "Required" },
       {
         label: "Phone Number",
-        message: "Entered phone number is not validter(s)",
+        message: "Invalid input",
       },
       {
         label: "Alternate Phone Number",
-        message: "Entered phone number is not validter(s)",
+        message: "Invalid input",
       },
       { label: "State", message: "Required" },
     ]);
