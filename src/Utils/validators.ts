@@ -10,12 +10,9 @@ export default {
       .refine((val) => !val || isValidPhoneNumber(val), {
         message: t("phone_number_validation_error"),
       }),
-    required: z
-      .string()
-      .min(1, t("field_required"))
-      .refine((val) => isValidPhoneNumber(val), {
-        message: t("phone_number_validation_error"),
-      }),
+    required: z.string().refine((val) => isValidPhoneNumber(val), {
+      message: t("phone_number_validation_error"),
+    }),
   },
 
   coordinates: {

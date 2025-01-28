@@ -72,11 +72,11 @@ export class UserCreation {
       { label: "Confirm Password", message: "Required" },
       {
         label: "Phone Number",
-        message: "String must contain at least 1 character(s)",
+        message: "Entered phone number is not validter(s)",
       },
       {
         label: "Alternate Phone Number",
-        message: "String must contain at least 1 character(s)",
+        message: "Entered phone number is not validter(s)",
       },
       { label: "State", message: "Required" },
     ]);
