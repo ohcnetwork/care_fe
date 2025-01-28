@@ -103,8 +103,7 @@ function FacilityCard({
   );
 }
 
-const RequestLetter = (data: ResourceRequest) => {
-  const { t } = useTranslation();
+const RequestLetter = (data: ResourceRequest, t: (arg0: string) => string) => {
   return (
     <div id="section-to-print" className="print bg-white">
       <div className="mx-4 p-4 lg:mx-20">
@@ -382,7 +381,7 @@ export default function ResourceDetails(props: { id: string }) {
                 {t("close")}
               </Button>
             </div>
-            {RequestLetter(data)}
+            {RequestLetter(data, t)}
           </div>
         </div>
       )}
