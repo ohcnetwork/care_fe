@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt } from "raviger";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -180,6 +180,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         patient: data.id,
         reason_for_visit: reason ?? "",
       });
+      setIsSubmitting(false);
     },
     onError: (error: HTTPError) => {
       const errorData = error.cause;
@@ -190,8 +191,10 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       } else {
         toast.error(error.message);
       }
+      setIsSubmitting(false);
     },
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = form.handleSubmit((data) => {
     const formattedData = {
@@ -208,13 +211,14 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       geo_organization: data.geo_organization,
       is_active: true,
     };
+    setIsSubmitting(true);
     createPatient(formattedData);
   });
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
-    form.formState.isDirty && !isCreatingPatient,
+    form.formState.isDirty && !isCreatingPatient && !isSubmitting,
     t("unsaved_changes"),
   );
 
