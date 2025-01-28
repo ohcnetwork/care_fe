@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -39,7 +39,8 @@ import query from "@/Utils/request/query";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
+    useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] =
     useState<PartialPatientModel | null>(null);
@@ -91,7 +92,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
-      setPhoneNumber(isValidPhoneNumber(value) || value === "" ? value : "");
+      setPhoneNumberQuery({
+        phone_number: isValidPhoneNumber(value) || value === "" ? value : null,
+      });
     }
   }, []);
 

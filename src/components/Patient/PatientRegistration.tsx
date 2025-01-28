@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -295,6 +295,22 @@ export default function PatientRegistration(
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const showDuplicate =
+    !patientPhoneSearch.isLoading &&
+    !!duplicatePatients?.length &&
+    !!isValidPhoneNumber(phoneNumber) &&
+    !suppressDuplicateWarning;
+
+  // TODO: Use useBlocker hook after switching to tanstack router
+  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  useNavigationPrompt(
+    form.formState.isDirty &&
+      !isCreatingPatient &&
+      !isUpdatingPatient &&
+      !showDuplicate,
+    t("unsaved_changes"),
+  );
 
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
@@ -665,7 +681,7 @@ export default function PatientRegistration(
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="nationality"
@@ -689,6 +705,9 @@ export default function PatientRegistration(
                     </FormItem>
                   )}
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
@@ -733,18 +752,15 @@ export default function PatientRegistration(
           </form>
         </Form>
       </div>
-      {!patientPhoneSearch.isLoading &&
-        !!duplicatePatients?.length &&
-        !!isValidPhoneNumber(phoneNumber) &&
-        !suppressDuplicateWarning && (
-          <DuplicatePatientDialog
-            patientList={duplicatePatients}
-            handleOk={handleDialogClose}
-            handleCancel={() => {
-              handleDialogClose("close");
-            }}
-          />
-        )}
+      {showDuplicate && (
+        <DuplicatePatientDialog
+          patientList={duplicatePatients}
+          handleOk={handleDialogClose}
+          handleCancel={() => {
+            handleDialogClose("close");
+          }}
+        />
+      )}
     </Page>
   );
 }
