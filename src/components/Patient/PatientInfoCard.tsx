@@ -307,8 +307,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           id="consultation-buttons"
         >
           {!completedEncounterStatus.includes(encounter.status) && (
-            <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-              <DropdownMenu>
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
                     {t("update")}
@@ -321,6 +324,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       <Link
                         href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
                         className="cursor-pointer text-gray-800"
+                        data-cy="update-encounter-option"
                       >
                         {t(option.title)}
                       </Link>

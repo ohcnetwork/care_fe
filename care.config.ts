@@ -1,3 +1,5 @@
+import { CountryCode } from "libphonenumber-js/types.cjs";
+
 import { EncounterClass } from "@/types/emr/encounter";
 
 const env = import.meta.env;
@@ -119,14 +121,37 @@ const careConfig = {
   },
 
   careApps: env.REACT_ENABLED_APPS
-    ? env.REACT_ENABLED_APPS.split(",").map((app) => ({
-        branch: app.split("@")[1],
-        package: app.split("@")[0],
-      }))
+    ? env.REACT_ENABLED_APPS.split(",").map((app) => {
+        const [module, cdn] = app.split("@");
+        const [org, repo] = module.split("/");
+
+        if (!org || !repo) {
+          throw new Error(
+            `Invalid plug configuration: ${module}. Expected 'org/repo@url'.`,
+          );
+        }
+
+        let url = "";
+        if (!cdn) {
+          url = `https://${org}.github.io/${repo}`;
+        }
+
+        if (!url.startsWith("http")) {
+          url = `${cdn.includes("localhost") ? "http" : "https"}://${cdn}`;
+        }
+
+        return {
+          url: new URL(url).toString(),
+          name: repo,
+          package: module,
+        };
+      })
     : [],
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
+
+  defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
 } as const;
 
 export default careConfig;

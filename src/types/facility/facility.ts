@@ -5,11 +5,6 @@ export interface FacilityBareMinimum {
   name: string;
 }
 
-export interface FacilityBareMinimum {
-  id: string;
-  name: string;
-}
-
 export interface BaseFacility {
   id: string;
   name: string;
