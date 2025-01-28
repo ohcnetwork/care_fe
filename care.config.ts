@@ -1,3 +1,5 @@
+import { CountryCode } from "libphonenumber-js/types.cjs";
+
 import { EncounterClass } from "@/types/emr/encounter";
 
 const env = import.meta.env;
@@ -148,6 +150,8 @@ const careConfig = {
 
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
+
+  defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
 } as const;
 
 export default careConfig;

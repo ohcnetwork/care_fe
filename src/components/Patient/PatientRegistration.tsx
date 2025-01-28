@@ -4,6 +4,7 @@ import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -24,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -55,7 +57,8 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
@@ -87,13 +90,9 @@ export default function PatientRegistration(
       z
         .object({
           name: z.string().nonempty(t("name_is_required")),
-          phone_number: z
-            .string()
-            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+          phone_number: validators.phoneNumber.required,
           same_phone_number: z.boolean(),
-          emergency_phone_number: z
-            .string()
-            .regex(/^\+\d{12}$/, t("phone_number_must_be_10_digits")),
+          emergency_phone_number: validators.phoneNumber.required,
           gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
           blood_group: z.enum(BLOOD_GROUPS, {
             required_error: t("blood_group_is_required"),
@@ -116,9 +115,7 @@ export default function PatientRegistration(
             .optional(),
           address: z.string().nonempty(t("address_is_required")),
           same_address: z.boolean(),
-          permanent_address: z
-            .string()
-            .nonempty(t("permanent_address_is_required")),
+          permanent_address: z.string().nonempty(t("field_required")),
           pincode: z
             .number()
             .int()
@@ -154,8 +151,8 @@ export default function PatientRegistration(
     resolver: zodResolver(formSchema),
     defaultValues: {
       nationality: "India",
-      phone_number: phone_number || "+91",
-      emergency_phone_number: "+91",
+      phone_number: phone_number || "",
+      emergency_phone_number: "",
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
@@ -249,14 +246,16 @@ export default function PatientRegistration(
     }
   };
 
+  const phoneNumber = form.watch("phone_number");
+
   const patientPhoneSearch = useQuery({
-    queryKey: ["patients", "phone-number", form.watch("phone_number")],
+    queryKey: ["patients", "phone-number", phoneNumber],
     queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(form.watch("phone_number") || "") || "",
+        phone_number: phoneNumber,
       },
     }),
-    enabled: !!parsePhoneNumber(form.watch("phone_number") || ""),
+    enabled: isValidPhoneNumber(phoneNumber),
   });
 
   const duplicatePatients = useMemo(() => {
@@ -300,7 +299,7 @@ export default function PatientRegistration(
   const showDuplicate =
     !patientPhoneSearch.isLoading &&
     !!duplicatePatients?.length &&
-    !!parsePhoneNumber(form.watch("phone_number") || "") &&
+    !!isValidPhoneNumber(phoneNumber) &&
     !suppressDuplicateWarning;
 
   // TODO: Use useBlocker hook after switching to tanstack router
@@ -367,17 +366,12 @@ export default function PatientRegistration(
                   <FormItem>
                     <FormLabel required>{t("phone_number")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="tel"
+                      <PhoneInput
                         {...field}
-                        maxLength={13}
-                        onChange={(e) => {
-                          form.setValue("phone_number", e.target.value);
+                        onChange={(value) => {
+                          form.setValue("phone_number", value);
                           if (form.watch("same_phone_number")) {
-                            form.setValue(
-                              "emergency_phone_number",
-                              e.target.value,
-                            );
+                            form.setValue("emergency_phone_number", value);
                           }
                         }}
                         data-cy="patient-phone-input"
@@ -402,6 +396,7 @@ export default function PatientRegistration(
                                   }
                                 }}
                                 data-cy="same-phone-number-checkbox"
+                                className="mt-2"
                               />
                             </FormControl>
                             <FormLabel>
@@ -426,10 +421,8 @@ export default function PatientRegistration(
                       {t("emergency_phone_number")}
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="tel"
+                      <PhoneInput
                         {...field}
-                        maxLength={13}
                         data-cy="patient-emergency-phone-input"
                       />
                     </FormControl>
