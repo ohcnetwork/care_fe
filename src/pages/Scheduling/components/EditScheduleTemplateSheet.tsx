@@ -27,13 +27,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -627,7 +620,7 @@ const NewAvailabilityCard = ({
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="slot_type"
             render={({ field }) => (
@@ -658,7 +651,7 @@ const NewAvailabilityCard = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <div className="flex items-center gap-4">
             <FormField
