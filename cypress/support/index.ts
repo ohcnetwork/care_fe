@@ -1,4 +1,4 @@
-import { ErrorMessageItem } from "./commands";
+import { ErrorMessageItem } from "@/support/commands";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
