@@ -61,7 +61,7 @@ export function treeShakeCareIcons(
   // Generates a map of used icon names to their paths from UniconPaths.json, including any whitelisted icons.
   function getTreeShakenUniconPaths() {
     const usedIcons = [...getAllUsedIconNames(), ...options.iconWhitelist];
-    const treeshakenCareIconPaths = {};
+    const treeshakenCareIconPaths: { [key: string]: string } = {};
 
     for (const iconName of usedIcons) {
       const path = allUniconPaths[iconName];
