@@ -198,7 +198,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               placeholder={selectedOption.placeholder}
               value={searchValue}
               onChange={(value) => setSearchValue(value)}
-              className={cn("-m-[1px]", inputClassName)}
+              className={inputClassName}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
