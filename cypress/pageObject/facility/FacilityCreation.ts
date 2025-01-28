@@ -94,7 +94,7 @@ export class FacilityCreation {
       { label: "Address", message: "Address is required" },
       {
         label: "Phone Number",
-        message: "Phone number must start with +91 followed by 10 digits",
+        message: "Invalid input",
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
