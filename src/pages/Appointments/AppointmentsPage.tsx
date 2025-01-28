@@ -15,7 +15,7 @@ import {
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -694,12 +694,27 @@ function AppointmentColumn(props: {
         !data && "animate-pulse",
       )}
     >
-      <div className="flex px-3 items-center gap-3 mb-4">
+      <div className="flex px-3 items-center gap-2 mb-4">
         <h2 className="font-semibold capitalize text-base px-1">
           {t(props.status)}
         </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-sm">
-          {data?.count ?? "..."}
+        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+          {data?.count == null ? (
+            "..."
+          ) : data.count === appointments.length ? (
+            data.count
+          ) : (
+            <Trans
+              i18nKey="showing_x_of_y"
+              values={{
+                x: appointments.length,
+                y: data.count,
+              }}
+              components={{
+                strong: <span className="font-bold" />,
+              }}
+            />
+          )}
         </span>
       </div>
       {appointments.length === 0 ? (
