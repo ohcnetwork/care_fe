@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -34,16 +35,12 @@ import { FacilityModel } from "@/components/Facility/models";
 import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
-import {
-  validateLatitude,
-  validateLongitude,
-  validatePincode,
-} from "@/common/validation";
+import { validatePincode } from "@/common/validation";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -69,19 +66,11 @@ export default function FacilityForm(props: FacilityProps) {
     description: z.string().optional(),
     features: z.array(z.number()).default([]),
     pincode: z.string().refine(validatePincode, t("invalid_pincode")),
-    geo_organization: z.string().min(1, t("organization_required")),
+    geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
-    phone_number: z
-      .string()
-      .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
-    latitude: z
-      .number()
-      .optional()
-      .refine((val) => !val || validateLatitude(val), t("invalid_latitude")),
-    longitude: z
-      .number()
-      .optional()
-      .refine((val) => !val || validateLongitude(val), t("invalid_longitude")),
+    phone_number: validators.phoneNumber.required,
+    latitude: validators.coordinates.latitude.optional(),
+    longitude: validators.coordinates.longitude.optional(),
     is_public: z.boolean().default(false),
   });
 
@@ -97,7 +86,7 @@ export default function FacilityForm(props: FacilityProps) {
       pincode: "",
       geo_organization: "",
       address: "",
-      phone_number: "+91",
+      phone_number: "",
       latitude: undefined,
       longitude: undefined,
       is_public: false,
@@ -141,15 +130,10 @@ export default function FacilityForm(props: FacilityProps) {
   const onSubmit: (data: FacilityFormValues) => void = (
     data: FacilityFormValues,
   ) => {
-    const requestData = {
-      ...data,
-      phone_number: parsePhoneNumber(data.phone_number),
-    };
-
     if (facilityId) {
-      updateFacility(requestData);
+      updateFacility(data);
     } else {
-      createFacility(requestData);
+      createFacility(data);
     }
   };
 
@@ -170,7 +154,7 @@ export default function FacilityForm(props: FacilityProps) {
         },
         (error) => {
           setIsGettingLocation(false);
-          toast.error(t("unable_to_get_location") + error.message);
+          toast.error(t("unable_to_get_current_location") + error.message);
         },
         { timeout: 10000 },
       );
@@ -246,7 +230,7 @@ export default function FacilityForm(props: FacilityProps) {
               name="facility_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Facility Type</FormLabel>
+                  <FormLabel required>{t("facility_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
@@ -275,7 +259,7 @@ export default function FacilityForm(props: FacilityProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Facility Name</FormLabel>
+                  <FormLabel required>{t("facility_name")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-name"
@@ -293,7 +277,7 @@ export default function FacilityForm(props: FacilityProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -341,12 +325,11 @@ export default function FacilityForm(props: FacilityProps) {
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Phone Number</FormLabel>
+                  <FormLabel required>{t("phone_number")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="tel"
+                    <PhoneInput
                       data-cy="facility-phone"
-                      placeholder="+91XXXXXXXXXX"
+                      placeholder={t("enter_phone_number")}
                       maxLength={13}
                       {...field}
                     />
@@ -417,7 +400,7 @@ export default function FacilityForm(props: FacilityProps) {
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>Address</FormLabel>
+                <FormLabel required>{t("address")}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
@@ -464,7 +447,7 @@ export default function FacilityForm(props: FacilityProps) {
               name="latitude"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Latitude</FormLabel>
+                  <FormLabel>{t("latitude")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -488,7 +471,7 @@ export default function FacilityForm(props: FacilityProps) {
               name="longitude"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Longitude</FormLabel>
+                  <FormLabel>{t("longitude")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -526,11 +509,10 @@ export default function FacilityForm(props: FacilityProps) {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-base">
-                    Make this facility public
+                    {t("make_facility_public")}
                   </FormLabel>
                   <p className="text-sm text-muted-foreground">
-                    When enabled, this facility will be visible to the public
-                    and can be discovered by anyone using the platform
+                    {t("make_facility_public_description")}
                   </p>
                 </div>
                 <FormMessage />

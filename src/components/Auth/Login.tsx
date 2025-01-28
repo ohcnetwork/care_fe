@@ -4,6 +4,7 @@ import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -110,7 +112,7 @@ const Login = (props: LoginProps) => {
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: async (phone: string) => {
       const response = await request(routes.otp.sendOtp, {
-        body: { phone_number: `+91${phone}` },
+        body: { phone_number: phone },
         silent: true,
       });
       return response;
@@ -148,7 +150,7 @@ const Login = (props: LoginProps) => {
         setOtpValidationError("");
         const tokenData: TokenData = {
           token: access,
-          phoneNumber: `+91${phone}`,
+          phoneNumber: phone,
           createdAt: new Date().toISOString(),
         };
         patientLogin(tokenData, `/patient/home`);
@@ -182,22 +184,6 @@ const Login = (props: LoginProps) => {
       toast.success(t("password_sent"));
     },
   });
-
-  // Format phone number to include +91
-  const formatPhoneNumber = (value: string) => {
-    // Remove any non-digit characters
-    const digits = value.replace(/\D/g, "");
-    // Limit to 10 digits
-    const truncated = digits.slice(0, 10);
-    return truncated;
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedNumber = formatPhoneNumber(e.target.value);
-    setPhone(formattedNumber);
-    setOtpError(""); // Clear error when input changes
-    setOtpValidationError("");
-  };
 
   // Login form validation
   const handleChange = (e: any) => {
@@ -297,7 +283,7 @@ const Login = (props: LoginProps) => {
         await sendOtp(phone);
         setIsOtpSent(true);
       } else {
-        await verifyOtp({ phone_number: `+91${phone}`, otp });
+        await verifyOtp({ phone_number: phone, otp });
       }
     } catch (error: any) {
       if (!isOtpSent) {
@@ -633,21 +619,18 @@ const Login = (props: LoginProps) => {
                     <form onSubmit={handlePatientLogin} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">{t("phone_number")}</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                            +91
-                          </span>
-                          <Input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            disabled={isOtpSent}
-                            className="pl-12"
-                            placeholder="Enter 10 digit number"
-                          />
-                        </div>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          value={phone}
+                          onChange={(value) => {
+                            setPhone(value);
+                            setOtpError("");
+                            setOtpValidationError("");
+                          }}
+                          disabled={isOtpSent}
+                          placeholder={t("enter_phone_number")}
+                        />
                         {otpError && (
                           <p className="text-sm text-red-500">{otpError}</p>
                         )}
@@ -694,8 +677,7 @@ const Login = (props: LoginProps) => {
                         variant="primary"
                         disabled={
                           isLoading ||
-                          !phone ||
-                          phone.length !== 10 ||
+                          !isValidPhoneNumber(phone) ||
                           (isOtpSent && otp.length !== 5)
                         }
                       >
