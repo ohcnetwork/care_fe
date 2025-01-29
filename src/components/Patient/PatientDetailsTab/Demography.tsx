@@ -37,9 +37,13 @@ export const Demography = (props: PatientProps) => {
   };
 
   const handleEditClick = (sectionId: string) => {
-    navigate(
-      `/facility/${facilityId}/patient/${id}/update?section=${sectionId}`,
-    );
+    if (facilityId) {
+      navigate(
+        `/facility/${facilityId}/patient/${id}/update?section=${sectionId}`,
+      );
+    } else {
+      navigate(`/patient/${id}/update?section=${sectionId}`);
+    }
   };
 
   const hasEditPermission = () => {

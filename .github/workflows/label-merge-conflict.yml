@@ -16,7 +16,7 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: prince-chrismc/label-merge-conflicts-action@v2
+      - uses: prince-chrismc/label-merge-conflicts-action@v3
         with:
           conflict_label_name: "merge conflict"
           github_token: ${{ secrets.GITHUB_TOKEN }}
