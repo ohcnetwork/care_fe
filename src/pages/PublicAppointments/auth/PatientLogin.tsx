@@ -5,6 +5,7 @@ import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -22,10 +23,10 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
@@ -34,7 +35,6 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import request from "@/Utils/request/request";
 import { HTTPError } from "@/Utils/request/types";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { TokenData } from "@/types/auth/otpToken";
 
 const FormSchema = z.object({
@@ -54,7 +54,7 @@ export default function PatientLogin({
 }) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
-  const [phoneNumber, setPhoneNumber] = useState("+91");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
   const OTPForm = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -74,18 +74,6 @@ export default function PatientLogin({
       `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
     );
   }
-  const validate = (phoneNumber: string) => {
-    let errors = "";
-
-    const parsedPhoneNumber = parsePhoneNumber(phoneNumber);
-    if (
-      !parsedPhoneNumber ||
-      !(PhoneNumberValidator(["mobile"])(parsedPhoneNumber ?? "") === undefined)
-    ) {
-      errors = t("invalid_phone");
-    }
-    return errors;
-  };
 
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
     mutationFn: (phoneNumber: string) =>
@@ -107,9 +95,8 @@ export default function PatientLogin({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors = validate(phoneNumber);
-    if (errors !== "") {
-      setError(errors);
+    if (!isValidPhoneNumber(phoneNumber)) {
+      setError(t("phone_number_validation_error"));
       return;
     }
     sendOTP(phoneNumber);
@@ -167,21 +154,22 @@ export default function PatientLogin({
           onSubmit={handleSubmit}
           className="flex mt-2 flex-col gap-4 shadow border p-8 rounded-lg"
         >
-          <div className="space-y-4">
-            <PhoneNumberFormField
-              name="phone_number"
-              label={t("phone_number")}
-              required
-              types={["mobile"]}
-              onChange={(e) => setPhoneNumber(e.value)}
+          <div className="space-y-2">
+            <Label>{t("phone_number")}</Label>
+            <PhoneInput
               value={phoneNumber}
-              error={error}
+              onChange={(value) => {
+                setPhoneNumber(value || "");
+                setError("");
+              }}
+              placeholder={t("enter_phone_number")}
+              disabled={isSendOTPLoading}
             />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
           <Button
-            variant="primary"
+            variant="primary_gradient"
             type="submit"
-            className="w-full h-12 text-lg"
             disabled={isSendOTPLoading}
           >
             <span className="bg-gradient-to-b from-white/15 to-transparent"></span>

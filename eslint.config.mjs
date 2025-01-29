@@ -34,6 +34,7 @@ export default [
         ...globals.node,
         React: true,
       },
+      parser: tsParser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,

@@ -1,5 +1,6 @@
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -11,12 +12,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 
-import {
-  formatName,
-  formatPhoneNumber,
-  isUserOnline,
-  relativeTime,
-} from "@/Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 const GetDetailsButton = (username: string) => {
@@ -116,7 +112,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div>
               <div className="text-gray-500">{t("phone_number")}</div>
               <div className="font-medium truncate">
-                {formatPhoneNumber(user.phone_number) ?? "-"}
+                {formatPhoneNumberIntl(user.phone_number)}
               </div>
             </div>
           </div>
@@ -192,7 +188,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.user_type}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
-        {formatPhoneNumber(user.phone_number)}
+        {formatPhoneNumberIntl(user.phone_number)}
       </td>
       <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>

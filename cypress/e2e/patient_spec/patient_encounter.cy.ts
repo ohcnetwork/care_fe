@@ -1,5 +1,5 @@
-import { PatientEncounter } from "pageObject/Patients/PatientEncounter";
-import { FacilityCreation } from "pageObject/facility/FacilityCreation";
+import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
+import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();

@@ -37,6 +37,7 @@ interface ImportMetaEnv {
   readonly REACT_ENABLE_HCX?: string;
   readonly REACT_ENABLE_ABDM?: string;
   readonly REACT_ENABLE_SCRIBE?: string;
+  readonly REACT_DEFAULT_COUNTRY?: string;
 }
 
 interface ImportMeta {
