@@ -112,7 +112,8 @@ export function getSlotsPerSession(
 ) {
   const duration = getDurationInMinutes(startTime, endTime);
   if (!duration) return null;
-  return Math.floor(duration / slotSizeInMinutes);
+  const result = Math.floor(duration / slotSizeInMinutes);
+  return result < 0 ? null : result;
 }
 
 export function getTokenDuration(

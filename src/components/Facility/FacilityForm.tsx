@@ -52,6 +52,15 @@ interface FacilityProps {
   onSubmitSuccess?: () => void;
 }
 
+function extractHierarchyLevels(org: Organization | undefined): Organization[] {
+  const levels: Organization[] = [];
+  while (org && org.level_cache >= 0) {
+    levels.unshift(org as Organization);
+    org = org.parent as Organization | undefined;
+  }
+  return levels;
+}
+
 export default function FacilityForm(props: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -177,7 +186,11 @@ export default function FacilityForm(props: FacilityProps) {
 
   useEffect(() => {
     if (facilityId) return;
+    const orgLevels = extractHierarchyLevels(org);
+    const districtMatch =
+      districtOrg && orgLevels.some((level) => level.name === districtOrg.name);
     const levels: Organization[] = [];
+    if (districtMatch) return;
     if (stateOrg) levels.push(stateOrg);
     if (districtOrg) levels.push(districtOrg);
     if (!stateOrg && !districtOrg && org) levels.push(org);
@@ -211,8 +224,8 @@ export default function FacilityForm(props: FacilityProps) {
         )?.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude,
-        longitude: facilityData.longitude,
+        latitude: Number(facilityData.latitude),
+        longitude: Number(facilityData.longitude),
         is_public: facilityData.is_public,
       });
     }

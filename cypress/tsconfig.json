@@ -13,7 +13,10 @@
       "es2020"
     ],
     "typeRoots": ["./support"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["./*"],
+    }
   },
   "include": ["**/*.cy.ts", "support/commands.ts", "**/*.ts"]
 }

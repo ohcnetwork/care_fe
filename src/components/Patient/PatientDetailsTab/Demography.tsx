@@ -265,22 +265,6 @@ export const Demography = (props: PatientProps) => {
         </div>
 
         <div className="lg:basis-4/5">
-          <div className="mb-2 flex flex-row justify-between">
-            <div>
-              <Button
-                id="update-patient-details"
-                variant="outline"
-                className="mt-4"
-                disabled={!!patientData.death_datetime}
-                onClick={withPermissionCheck(() =>
-                  navigate(`/facility/${id}/patient/${id}/update`),
-                )}
-              >
-                <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
-                {t("edit_profile")}
-              </Button>
-            </div>
-          </div>
           {/* <div className="mt-4 rounded-md border border-blue-400 bg-blue-50 p-5 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
             {[
               { label: t("abha_number"), value: "-" },
