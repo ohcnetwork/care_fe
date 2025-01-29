@@ -22,6 +22,37 @@ export const patientTabs = [
     component: Demography,
   },
   {
+    route: "encounters",
+    component: EncounterHistory,
+  },
+  {
+    route: "health-profile",
+    component: HealthProfileSummary,
+  },
+  {
+    route: "updates",
+    component: Updates,
+  },
+  {
+    route: "resource_requests",
+    component: ResourceRequests,
+  },
+  {
+    route: "users",
+    component: PatientUsers,
+  },
+  {
+    route: "files",
+    component: PatientFilesTab,
+  },
+];
+
+export const facilityPatientTabs = [
+  {
+    route: "demography",
+    component: Demography,
+  },
+  {
     route: "appointments",
     component: Appointments,
   },

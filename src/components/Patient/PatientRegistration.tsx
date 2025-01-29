@@ -64,7 +64,7 @@ import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
-  facilityId: string;
+  facilityId?: string;
   patientId?: string;
 }
 
@@ -219,11 +219,13 @@ export default function PatientRegistration(
       return;
     }
 
-    createPatient({
-      ...values,
-      facility: facilityId,
-      ward_old: undefined,
-    });
+    if (facilityId) {
+      createPatient({
+        ...values,
+        facility: facilityId,
+        ward_old: undefined,
+      });
+    }
   }
 
   const sidebarItems = [
@@ -283,9 +285,10 @@ export default function PatientRegistration(
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
-        age: !patientQuery.data.date_of_birth
-          ? patientQuery.data.age
-          : undefined,
+        age:
+          !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
+            ? new Date().getFullYear() - patientQuery.data.year_of_birth
+            : undefined,
         date_of_birth: patientQuery.data.date_of_birth
           ? patientQuery.data.date_of_birth
           : undefined,

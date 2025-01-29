@@ -20,12 +20,14 @@ interface AddUserSheetProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onUserCreated?: (user: UserBase) => void;
+  organizationId?: string;
 }
 
 export default function AddUserSheet({
   open,
   setOpen,
   onUserCreated,
+  organizationId,
 }: AddUserSheetProps) {
   const { t } = useTranslation();
   return (
@@ -50,6 +52,7 @@ export default function AddUserSheet({
               setOpen(false);
               onUserCreated?.(user);
             }}
+            organizationId={organizationId}
           />
         </div>
       </SheetContent>

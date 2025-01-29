@@ -438,7 +438,7 @@ const AppointmentActions = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 w-64 mx-auto">
+    <div className="flex flex-col gap-2 w-full md:w-64 mx-auto">
       <Button variant="outline" onClick={onViewPatient} size="lg">
         <PersonIcon className="size-4 mr-2" />
         {t("view_patient")}

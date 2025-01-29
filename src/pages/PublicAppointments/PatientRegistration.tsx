@@ -136,36 +136,37 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: initialForm,
   });
 
-  const { mutate: createAppointment } = useMutation({
-    mutationFn: (body: AppointmentCreateRequest) =>
-      mutate(PublicAppointmentApi.createAppointment, {
-        pathParams: { id: selectedSlot?.id },
-        body,
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      })(body),
-    onSuccess: (data: Appointment) => {
-      toast.success(t("appointment_created_success"));
-      queryClient.invalidateQueries({
-        queryKey: [
-          ["patients", tokenData.phoneNumber],
-          ["appointment", tokenData.phoneNumber],
-        ],
-      });
-      navigate(
-        `/facility/${props.facilityId}/appointments/${data.id}/success`,
-        {
-          replace: true,
-        },
-      );
-    },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_appointment"));
-    },
-  });
+  const { mutate: createAppointment, isPending: isCreatingAppointment } =
+    useMutation({
+      mutationFn: (body: AppointmentCreateRequest) =>
+        mutate(PublicAppointmentApi.createAppointment, {
+          pathParams: { id: selectedSlot?.id },
+          body,
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        })(body),
+      onSuccess: (data: Appointment) => {
+        toast.success(t("appointment_created_success"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            ["patients", tokenData.phoneNumber],
+            ["appointment", tokenData.phoneNumber],
+          ],
+        });
+        navigate(
+          `/facility/${props.facilityId}/appointments/${data.id}/success`,
+          {
+            replace: true,
+          },
+        );
+      },
+      onError: (error) => {
+        toast.error(error?.message || t("failed_to_create_appointment"));
+      },
+    });
 
-  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+  const { mutate: createPatient } = useMutation({
     mutationFn: (body: Partial<AppointmentPatientRegister>) =>
       mutate(routes.otp.createPatient, {
         body: { ...body, phone_number: tokenData.phoneNumber },
@@ -214,7 +215,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(
-    form.formState.isDirty && !isCreatingPatient,
+    form.formState.isDirty && !isCreatingAppointment,
     t("unsaved_changes"),
   );
 

@@ -815,6 +815,7 @@ function AppointmentRow(props: {
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
           value={status}
+          className="w-full overflow-scroll"
           onValueChange={(value) => setStatus(value as Appointment["status"])}
         >
           <TabsList>
