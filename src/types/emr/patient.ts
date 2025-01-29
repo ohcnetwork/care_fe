@@ -87,7 +87,6 @@ export interface PatientModel {
   assigned_to?: number | null;
   assigned_to_object?: AssignedToObjectModel;
   meta_info?: PatientMeta;
-  age?: string;
 }
 
 export const validatePatient = (patient: PatientModel, useDob: boolean) => {
