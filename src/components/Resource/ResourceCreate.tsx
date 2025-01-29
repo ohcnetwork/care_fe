@@ -166,7 +166,10 @@ export default function ResourceCreate(props: ResourceProps) {
       title={t("create_resource_request")}
       crumbsReplacements={{
         [facilityId]: { name: facilityData?.name || "" },
-        resource: { style: "pointer-events-none" },
+        resource: {
+          uri: `/resource`,
+          style: "pointer-events-none",
+        },
       }}
       backUrl={`/facility/${facilityId}`}
     >
@@ -179,6 +182,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/facility/${facilityId}/patient/${related_patient}/demography`}
+                      className="flex items-center gap-2"
                     >
                       <CareIcon
                         icon="l-user"
