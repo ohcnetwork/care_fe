@@ -26,7 +26,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
   }
   return (
     <PrintPreview title={t("request_letter")}>
-      <div id="section-to-print" className="print bg-white">
+      <div className="min-h-screen bg-white">
         <div className="mx-4 p-4 lg:mx-20">
           {/* Header */}
           <div className="mb-8 text-center">
