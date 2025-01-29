@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,18 +38,26 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
   existingUsername?: string;
+  organizationId?: string;
 }
 
-export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
+export default function UserForm({
+  onSubmitSuccess,
+  existingUsername,
+  organizationId,
+}: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   const userFormSchema = z
     .object({
@@ -256,6 +264,20 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       } as CreateUserModel);
     }
   };
+
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org) levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
 
   return (
     <Form {...form}>
@@ -575,8 +597,12 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormControl>
                   <GovtOrganizationSelector
-                    value={field.value}
-                    onChange={field.onChange}
+                    {...field}
+                    value={form.watch("geo_organization")}
+                    selected={selectedLevels}
+                    onChange={(value) =>
+                      form.setValue("geo_organization", value)
+                    }
                     required={!isEditMode}
                   />
                 </FormControl>
