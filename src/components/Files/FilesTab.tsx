@@ -575,7 +575,6 @@ const FileUploadDialog = ({
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       setIsPdf(false);
-      fileUpload.clearFiles();
     }
     onOpenChange(open);
   };
@@ -599,15 +598,31 @@ const FileUploadDialog = ({
         <div className="space-y-4">
           {isPdf ? (
             <>
-              <div className="space-y-2">
-                <ul className="list-disc list-inside space-y-1">
-                  {fileUpload.files.map((file, index) => (
-                    <li key={index} className="truncate" title={file.name}>
-                      {file.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {fileUpload.files.map((file, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                    <span
+                      className="flex items-center truncate"
+                      title={file.name}
+                    >
+                      <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
+                      <span className="truncate">
+                        {file.name.length > 30
+                          ? `${file.name.substring(0, 20)}...`
+                          : file.name}
+                      </span>
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => fileUpload.removeFile(index)}
+                      disabled={fileUpload.uploading}
+                    >
+                      <CareIcon icon="l-times" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
               <div>
                 <Label
                   htmlFor="upload-file-name-0"
@@ -635,9 +650,16 @@ const FileUploadDialog = ({
             fileUpload.files.map((file, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                  <span className="flex items-center truncate">
+                  <span
+                    className="flex items-center truncate"
+                    title={file.name}
+                  >
                     <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                    <span className="truncate">{file.name}</span>
+                    <span className="truncate">
+                      {file.name.length > 30
+                        ? `${file.name.substring(0, 20)}...`
+                        : file.name}
+                    </span>
                   </span>
                   <Button
                     variant="ghost"
