@@ -9,14 +9,19 @@ import {
 } from "@/components/ui/select";
 
 import { properCase } from "@/Utils/utils";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { AnswerOption, Question } from "@/types/questionnaire/question";
 
 interface ChoiceQuestionProps {
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
-    questionnaireResponse: QuestionnaireResponse,
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
   ) => void;
   disabled?: boolean;
   withLabel?: boolean;
@@ -43,10 +48,11 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
       value: newValue,
     };
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: newValues,
-    });
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   return (

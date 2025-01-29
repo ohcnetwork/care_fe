@@ -1,6 +1,6 @@
-import { FacilityCreation } from "pageObject/facility/FacilityCreation";
-import { generatePhoneNumber } from "utils/commonUtils";
-import { generateFacilityData } from "utils/facilityData";
+import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { generatePhoneNumber } from "@/utils/commonUtils";
+import { generateFacilityData } from "@/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
   localBody: "Aluva",

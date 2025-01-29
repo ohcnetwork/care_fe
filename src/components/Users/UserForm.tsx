@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -35,19 +36,28 @@ import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
   existingUsername?: string;
+  organizationId?: string;
 }
 
-export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
+export default function UserForm({
+  onSubmitSuccess,
+  existingUsername,
+  organizationId,
+}: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   const userFormSchema = z
     .object({
@@ -78,13 +88,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
-      phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
-      alt_phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
-        .optional(),
+      phone_number: validators.phoneNumber.required,
+      alt_phone_number: validators.phoneNumber.optional,
       phone_number_is_whatsapp: z.boolean().default(true),
       gender: z.enum(GENDERS),
       /* TODO: Userbase doesn't currently support these, neither does BE
@@ -115,8 +120,8 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "staff",
-      phone_number: "+91",
-      alt_phone_number: "+91",
+      phone_number: "",
+      alt_phone_number: "",
       phone_number_is_whatsapp: true,
     },
   });
@@ -244,9 +249,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       });
       onSubmitSuccess?.(resp);
     },
-    onError: (error) => {
-      toast.error(error?.message ?? t("user_update_error"));
-    },
   });
 
   const onSubmit = async (data: UserFormValues) => {
@@ -262,6 +264,20 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       } as CreateUserModel);
     }
   };
+
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org) levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
 
   return (
     <Form {...form}>
@@ -422,11 +438,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormLabel required>{t("phone_number")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <PhoneInput
                     data-cy="phone-number-input"
-                    type="tel"
-                    placeholder="+91XXXXXXXXXX"
-                    maxLength={13}
+                    placeholder={t("enter_phone_number")}
                     {...field}
                   />
                 </FormControl>
@@ -442,11 +456,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormLabel>{t("alternate_phone_number")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <PhoneInput
                     data-cy="alt-phone-number-input"
-                    placeholder="+91XXXXXXXXXX"
-                    type="tel"
-                    maxLength={13}
+                    placeholder={t("enter_phone_number")}
                     {...field}
                     disabled={isWhatsApp}
                   />
@@ -585,8 +597,12 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormControl>
                   <GovtOrganizationSelector
-                    value={field.value}
-                    onChange={field.onChange}
+                    {...field}
+                    value={form.watch("geo_organization")}
+                    selected={selectedLevels}
+                    onChange={(value) =>
+                      form.setValue("geo_organization", value)
+                    }
                     required={!isEditMode}
                   />
                 </FormControl>

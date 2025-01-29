@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Combine dependencies
         id: combine-dependencies
-        uses: github/combine-prs@v5.0.0
+        uses: github/combine-prs@v5.2.0
         with:
           pr_title: Combined dependencies # The title of the pull request to create
           select_label: dependencies # The label which marks PRs that should be combined.

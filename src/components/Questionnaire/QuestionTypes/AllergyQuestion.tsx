@@ -15,7 +15,6 @@ import {
   LeafIcon,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,19 +46,28 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
 import {
+  ALLERGY_VERIFICATION_STATUS,
   AllergyIntolerance,
   AllergyIntoleranceRequest,
+  AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { Code } from "@/types/questionnaire/code";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface AllergyQuestionProps {
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -117,25 +125,23 @@ export function AllergyQuestion({
     queryKey: ["allergies", patientId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+      },
     }),
   });
 
   useEffect(() => {
-    if (patientAllergies?.results && !allergies.length) {
-      updateQuestionnaireResponseCB({
-        ...questionnaireResponse,
-        values: [
+    if (patientAllergies?.results) {
+      updateQuestionnaireResponseCB(
+        [
           {
             type: "allergy_intolerance",
             value: patientAllergies.results.map(convertToAllergyRequest),
           },
         ],
-      });
-      if (patientAllergies.count > patientAllergies.results.length) {
-        toast.info(
-          `Showing first ${patientAllergies.results.length} of ${patientAllergies.count} allergies`,
-        );
-      }
+        questionnaireResponse.question_id,
+      );
     }
   }, [patientAllergies]);
 
@@ -144,18 +150,43 @@ export function AllergyQuestion({
       ...allergies,
       { ...ALLERGY_INITIAL_VALUE, code },
     ] as AllergyIntoleranceRequest[];
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   const handleRemoveAllergy = (index: number) => {
-    const newAllergies = allergies.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    const allergy = allergies[index];
+    if (allergy.id) {
+      // For existing records, update verification status to entered_in_error
+      const newAllergies = allergies.map((a, i) =>
+        i === index
+          ? { ...a, verification_status: "entered_in_error" as const }
+          : a,
+      ) as AllergyIntoleranceRequest[];
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    } else {
+      // For new records, remove them completely
+      const newAllergies = allergies.filter((_, i) => i !== index);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "allergy_intolerance",
+            value: newAllergies,
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
+    }
   };
 
   const handleUpdateAllergy = (
@@ -165,10 +196,10 @@ export function AllergyQuestion({
     const newAllergies = allergies.map((allergy, i) =>
       i === index ? { ...allergy, ...updates } : allergy,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [{ type: "allergy_intolerance", value: newAllergies }],
-    });
+    updateQuestionnaireResponseCB(
+      [{ type: "allergy_intolerance", value: newAllergies }],
+      questionnaireResponse.question_id,
+    );
   };
 
   return (
@@ -212,11 +243,13 @@ export function AllergyQuestion({
               <div
                 key={index}
                 className={`p-3 space-y-3 ${
-                  allergy.clinical_status === "inactive"
-                    ? "opacity-60"
-                    : allergy.clinical_status === "resolved"
-                      ? "line-through"
-                      : ""
+                  allergy.verification_status === "entered_in_error"
+                    ? "opacity-40 pointer-events-none"
+                    : allergy.clinical_status === "inactive"
+                      ? "opacity-60"
+                      : allergy.clinical_status === "resolved"
+                        ? "line-through"
+                        : ""
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -226,7 +259,7 @@ export function AllergyQuestion({
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, { category: value })
                       }
-                      disabled={disabled}
+                      disabled={disabled || !!allergy.id}
                     >
                       <SelectTrigger className="h-8 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
                         <SelectValue>
@@ -337,7 +370,7 @@ export function AllergyQuestion({
                       <SelectContent>
                         <SelectItem value="low">Low</SelectItem>
                         <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="unable-to-assess">
+                        <SelectItem value="unable_to_assess">
                           Unable to Assess
                         </SelectItem>
                       </SelectContent>
@@ -350,7 +383,8 @@ export function AllergyQuestion({
                       value={allergy.verification_status}
                       onValueChange={(value) =>
                         handleUpdateAllergy(index, {
-                          verification_status: value,
+                          verification_status:
+                            value as AllergyVerificationStatus,
                         })
                       }
                       disabled={disabled}
@@ -359,9 +393,13 @@ export function AllergyQuestion({
                         <SelectValue placeholder="Verify" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-                        <SelectItem value="refuted">Refuted</SelectItem>
+                        {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                          ([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ),
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -426,11 +464,13 @@ const AllergyTableRow = ({
   const [showNotes, setShowNotes] = useState(allergy.note !== undefined);
 
   const rowClassName = `group ${
-    allergy.clinical_status === "inactive"
-      ? "opacity-60"
-      : allergy.clinical_status === "resolved"
-        ? "line-through"
-        : ""
+    allergy.verification_status === "entered_in_error"
+      ? "opacity-40 pointer-events-none"
+      : allergy.clinical_status === "inactive"
+        ? "opacity-60"
+        : allergy.clinical_status === "resolved"
+          ? "line-through"
+          : ""
   }`;
 
   const handleNotesToggle = () => {
@@ -450,7 +490,7 @@ const AllergyTableRow = ({
           <Select
             value={allergy.category}
             onValueChange={(value) => onUpdate?.({ category: value })}
-            disabled={disabled}
+            disabled={disabled || !!allergy.id}
           >
             <SelectTrigger className="h-7 w-[32px] px-0 [&>svg]:hidden flex items-center justify-center">
               <SelectValue
@@ -493,25 +533,33 @@ const AllergyTableRow = ({
             <SelectContent>
               <SelectItem value="low">Low</SelectItem>
               <SelectItem value="high">High</SelectItem>
-              <SelectItem value="unable-to-assess">Unable to Assess</SelectItem>
+              <SelectItem value="unable_to_assess">Unable to Assess</SelectItem>
             </SelectContent>
           </Select>
         </TableCell>
         <TableCell className="min-w-[85px] py-1 px-0.5">
           <Select
             value={allergy.verification_status}
-            onValueChange={(value) =>
-              onUpdate?.({ verification_status: value })
-            }
+            onValueChange={(value) => {
+              if (value in ALLERGY_VERIFICATION_STATUS) {
+                onUpdate?.({
+                  verification_status: value as AllergyVerificationStatus,
+                });
+              }
+            }}
             disabled={disabled}
           >
             <SelectTrigger className="h-7 w-[85px] px-1">
               <SelectValue placeholder="Verify" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="unconfirmed">Unconfirmed</SelectItem>
-              <SelectItem value="refuted">Refuted</SelectItem>
+              {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </TableCell>

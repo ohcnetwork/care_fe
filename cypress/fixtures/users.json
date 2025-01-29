@@ -14,5 +14,9 @@
   "staff": {
     "username": "nihalstaff",
     "password": "Test@123"
+  },
+  "devnurse": {
+    "username": "dev-nurse",
+    "password": "Test@123"
   }
 }
