@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-buildx-test-
 
       - name: Test build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
@@ -113,7 +113,7 @@ jobs:
             ${{ runner.os }}-buildx-build-
 
       - name: Build and push image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
