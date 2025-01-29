@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,9 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -29,75 +26,12 @@ interface Props {
   encounterId: string;
 }
 
-const timeSlots = [
-  { label: "12:00 AM - 06:00 AM", start: "00:00", end: "06:00" },
-  { label: "06:00 AM - 12:00 PM", start: "06:00", end: "12:00" },
-  { label: "12:00 PM - 06:00 PM", start: "12:00", end: "18:00" },
-  { label: "06:00 PM - 12:00 AM", start: "18:00", end: "24:00" },
-];
-
 export default function MedicationRequestTable({
   patientId,
   encounterId,
   facilityId,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
-  const currentDate = new Date();
-
-  const [endSlotDate, setEndSlotDate] = useState(currentDate);
-  const [endSlotIndex, setEndSlotIndex] = useState(() => {
-    const hour = currentDate.getHours();
-    if (hour < 6) return 0;
-    if (hour < 12) return 1;
-    if (hour < 18) return 2;
-    return 3;
-  });
-
-  // Calculate visible slots based on end slot
-  const visibleSlots = useMemo(() => {
-    const slots = [];
-    let currentIndex = endSlotIndex;
-    let currentDate = new Date(endSlotDate);
-
-    // Add slots from right to left
-    for (let i = 0; i < 4; i++) {
-      if (currentIndex < 0) {
-        currentIndex = 3;
-        currentDate = new Date(currentDate);
-        currentDate.setDate(currentDate.getDate() - 1);
-      }
-      slots.unshift({
-        ...timeSlots[currentIndex],
-        date: new Date(currentDate),
-      });
-      currentIndex--;
-    }
-    return slots;
-  }, [endSlotDate, endSlotIndex]);
-
-  const handlePreviousSlot = useCallback(() => {
-    const newEndSlotIndex = endSlotIndex - 1;
-    if (newEndSlotIndex < 0) {
-      setEndSlotIndex(3);
-      const newDate = new Date(endSlotDate);
-      newDate.setDate(newDate.getDate() - 1);
-      setEndSlotDate(newDate);
-    } else {
-      setEndSlotIndex(newEndSlotIndex);
-    }
-  }, [endSlotDate, endSlotIndex]);
-
-  const handleNextSlot = useCallback(() => {
-    const newEndSlotIndex = endSlotIndex + 1;
-    if (newEndSlotIndex > 3) {
-      setEndSlotIndex(0);
-      const newDate = new Date(endSlotDate);
-      newDate.setDate(newDate.getDate() + 1);
-      setEndSlotDate(newDate);
-    } else {
-      setEndSlotIndex(newEndSlotIndex);
-    }
-  }, [endSlotDate, endSlotIndex]);
 
   const { data: medications, isLoading: loading } = useQuery({
     queryKey: ["medication_requests", patientId],
@@ -107,49 +41,6 @@ export default function MedicationRequestTable({
     }),
     enabled: !!patientId,
   });
-
-  const { data: administrations, refetch: refetchAdministrations } = useQuery({
-    queryKey: ["medication_administrations", patientId, visibleSlots],
-    queryFn: query(routes.medicationAdministration.list, {
-      pathParams: { patientId: patientId },
-      queryParams: {
-        encounter: encounterId,
-        ...(visibleSlots.length > 0 && {
-          occurrence_period_start_after: format(
-            visibleSlots[0].date,
-            "yyyy-MM-dd'T'HH:mm:ss",
-          ),
-          occurrence_period_start_before: format(
-            new Date(
-              visibleSlots[visibleSlots.length - 1].date.getTime() +
-                24 * 60 * 60 * 1000,
-            ),
-            "yyyy-MM-dd'T'HH:mm:ss",
-          ),
-        }),
-      },
-    }),
-    enabled: !!patientId && !!visibleSlots?.length,
-  });
-
-  // Get last administered date for each medication
-  const lastAdministeredDates = administrations?.results?.reduce(
-    (acc: Record<string, string>, admin: MedicationAdministration) => {
-      const existingDate = acc[admin.request];
-      const adminDate = new Date(admin.occurrence_period_start);
-
-      if (!existingDate || adminDate > new Date(existingDate)) {
-        acc[admin.request] = admin.occurrence_period_start;
-      }
-
-      return acc;
-    },
-    {},
-  );
-
-  const handleAdministrationComplete = useCallback(() => {
-    refetchAdministrations();
-  }, [refetchAdministrations]);
 
   const filteredMedications = medications?.results?.filter(
     (med: MedicationRequestRead) => {
@@ -301,16 +192,8 @@ export default function MedicationRequestTable({
             <AdministrationTab
               loadingAdministrations={loading}
               activeMedications={medications?.results}
-              administrations={administrations}
-              lastAdministeredDates={lastAdministeredDates}
               patientId={patientId}
               encounterId={encounterId}
-              visibleSlots={visibleSlots}
-              onPreviousSlot={handlePreviousSlot}
-              onNextSlot={handleNextSlot}
-              currentDate={currentDate}
-              endSlotIndex={endSlotIndex}
-              onAdministrationComplete={handleAdministrationComplete}
             />
           </TabsContent>
         </Tabs>
