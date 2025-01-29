@@ -175,11 +175,11 @@ export default function ResourceCreate(props: ResourceProps) {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {patientData && (
-                <Link
-                  href={`/facility/${facilityId}/patient/${related_patient}/demography`}
-                >
-                  <Alert>
-                    <div className="flex items-center gap-2">
+                <Alert>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/facility/${facilityId}/patient/${related_patient}/demography`}
+                    >
                       <CareIcon
                         icon="l-user"
                         className="h-5 w-5 text-blue-700"
@@ -188,9 +188,9 @@ export default function ResourceCreate(props: ResourceProps) {
                         {t("linked_patient")}:{" "}
                         <span className="font-medium">{patientData.name}</span>
                       </AlertDescription>
-                    </div>
-                  </Alert>
-                </Link>
+                    </Link>
+                  </div>
+                </Alert>
               )}
 
               <div className="space-y-6">
