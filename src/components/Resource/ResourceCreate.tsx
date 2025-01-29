@@ -21,6 +21,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -30,25 +32,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-import { phonePreg } from "@/common/validation";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { parsePhoneNumber } from "@/Utils/utils";
+import validators from "@/Utils/validators";
 import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
@@ -64,7 +62,7 @@ export default function ResourceCreate(props: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    category: z.string().min(1, { message: t("required") }),
+    category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z
       .object({
         id: z.string(),
@@ -72,30 +70,12 @@ export default function ResourceCreate(props: ResourceProps) {
       })
       .nullable(),
     emergency: z.enum(["true", "false"]),
-    title: z.string().min(1, { message: t("required") }),
-    reason: z.string().min(1, { message: t("required") }),
+    title: z.string().min(1, { message: t("field_required") }),
+    reason: z.string().min(1, { message: t("field_required") }),
     referring_facility_contact_name: z
       .string()
-      .min(1, { message: t("required") }),
-    referring_facility_contact_number: z
-      .string()
-      .min(1, { message: t("required") })
-      .refine(
-        (val: string) => {
-          const phoneNumber = parsePhoneNumber(val);
-          if (
-            !phoneNumber ||
-            PhoneNumberValidator()(phoneNumber) !== undefined ||
-            !phonePreg(String(phoneNumber))
-          ) {
-            return false;
-          }
-          return true;
-        },
-        {
-          message: t("invalid_phone_number"),
-        },
-      ),
+      .min(1, { message: t("field_required") }),
+    referring_facility_contact_number: validators.phoneNumber.required,
     priority: z.number().default(1),
   });
 
@@ -119,7 +99,7 @@ export default function ResourceCreate(props: ResourceProps) {
       title: "",
       reason: "",
       referring_facility_contact_name: "",
-      referring_facility_contact_number: "+91",
+      referring_facility_contact_number: "",
       priority: 1,
     },
   });
@@ -139,7 +119,7 @@ export default function ResourceCreate(props: ResourceProps) {
         reason: data.reason,
         referring_facility_contact_name: data.referring_facility_contact_name,
         referring_facility_contact_number:
-          parsePhoneNumber(data.referring_facility_contact_number) ?? "",
+          data.referring_facility_contact_number,
         related_patient: related_patient,
         priority: data.priority,
       };
@@ -166,12 +146,7 @@ export default function ResourceCreate(props: ResourceProps) {
       `${authUser.first_name} ${authUser.last_name}`.trim(),
     );
     if (authUser.phone_number) {
-      form.setValue(
-        "referring_facility_contact_number",
-        authUser.phone_number.startsWith("+91")
-          ? authUser.phone_number
-          : `+91${authUser.phone_number}`,
-      );
+      form.setValue("referring_facility_contact_number", authUser.phone_number);
     }
   };
 
@@ -329,10 +304,10 @@ export default function ResourceCreate(props: ResourceProps) {
                     <FormItem>
                       <FormLabel>{t("request_title")}</FormLabel>
                       <FormControl>
-                        <TextFormField
+                        <Input
                           {...field}
                           placeholder={t("request_title_placeholder")}
-                          onChange={(value) => field.onChange(value.value)}
+                          onChange={(value) => field.onChange(value)}
                         />
                       </FormControl>
                       <FormDescription>
@@ -350,11 +325,10 @@ export default function ResourceCreate(props: ResourceProps) {
                     <FormItem>
                       <FormLabel>{t("request_reason")}</FormLabel>
                       <FormControl>
-                        <TextAreaFormField
+                        <Textarea
                           {...field}
-                          rows={5}
                           placeholder={t("request_reason_placeholder")}
-                          onChange={(value) => field.onChange(value.value)}
+                          onChange={(value) => field.onChange(value)}
                         />
                       </FormControl>
                       <FormDescription>
@@ -397,9 +371,9 @@ export default function ResourceCreate(props: ResourceProps) {
                       <FormItem>
                         <FormLabel>{t("contact_person")}</FormLabel>
                         <FormControl>
-                          <TextFormField
+                          <Input
                             {...field}
-                            onChange={(value) => field.onChange(value.value)}
+                            onChange={(value) => field.onChange(value)}
                           />
                         </FormControl>
                         <FormDescription>
@@ -417,12 +391,9 @@ export default function ResourceCreate(props: ResourceProps) {
                       <FormItem>
                         <FormLabel>{t("contact_phone")}</FormLabel>
                         <FormControl>
-                          <PhoneNumberFormField
-                            className="mt-2"
+                          <PhoneInput
                             {...field}
-                            hideHelp={true}
-                            types={["mobile", "landline"]}
-                            onChange={(value) => field.onChange(value.value)}
+                            onChange={(value) => field.onChange(value)}
                           />
                         </FormControl>
                         <FormDescription>

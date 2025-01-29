@@ -97,7 +97,9 @@ export default function ObservationsList(props: Props) {
                 </div>
               )}
               {item.value.value && (
-                <div className="mt-1 font-medium">{item.value.value}</div>
+                <div className="mt-1 font-medium whitespace-pre-wrap">
+                  {item.value.value}
+                </div>
               )}
               {item.note && (
                 <div className="mt-1 text-sm text-muted-foreground">

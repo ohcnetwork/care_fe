@@ -27,13 +27,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -380,7 +373,7 @@ export default function CreateScheduleTemplateSheet({
                         control={form.control}
                         name={`availabilities.${index}.name`}
                         render={({ field }) => (
-                          <FormItem className="col-span-2 md:col-span-1">
+                          <FormItem className="col-span-2">
                             <FormLabel required>{t("session_title")}</FormLabel>
                             <FormControl>
                               <Input
@@ -393,7 +386,7 @@ export default function CreateScheduleTemplateSheet({
                         )}
                       />
 
-                      <FormField
+                      {/* <FormField
                         control={form.control}
                         name={`availabilities.${index}.slot_type`}
                         render={({ field }) => (
@@ -436,7 +429,7 @@ export default function CreateScheduleTemplateSheet({
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
+                      /> */}
 
                       <div className="flex items-center gap-4 col-span-2 md:col-span-1">
                         <FormField

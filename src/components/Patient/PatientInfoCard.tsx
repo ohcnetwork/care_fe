@@ -311,7 +311,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
               data-cy="update-encounter-button"
             >
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
                     {t("update")}
