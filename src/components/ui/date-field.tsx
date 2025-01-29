@@ -42,7 +42,7 @@ export default function DateField({
   }, [date]);
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDay = e.target.value.slice(0, 2);
+    const newDay = e.target.value;
     setDay(newDay);
 
     if (
@@ -63,7 +63,7 @@ export default function DateField({
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMonth = e.target.value.slice(0, 2);
+    const newMonth = e.target.value;
     setMonth(newMonth);
 
     if (
@@ -85,7 +85,7 @@ export default function DateField({
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newYear = e.target.value.slice(0, 4);
+    const newYear = e.target.value;
     setYear(newYear);
 
     if (newYear.length === 4 && parseInt(newYear) >= 1900) {
@@ -101,8 +101,8 @@ export default function DateField({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 md:gap-2 ">
-      <div className="flex flex-col gap-1">
+    <div className="flex items-center gap-2 ">
+      <div className="flex flex-col gap-1 w-1/3">
         <Label>{t("day")}</Label>
         <Input
           type="number"
@@ -113,12 +113,11 @@ export default function DateField({
           max={31}
           id={`${id}-day-input`}
           data-cy={`${id}-day-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-1/3">
         <Label>{t("month")}</Label>
         <Input
           type="number"
@@ -129,12 +128,11 @@ export default function DateField({
           max={12}
           id={`${id}-month-input`}
           data-cy={`${id}-month-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-1/3">
         <Label>{t("year")}</Label>
         <Input
           type="number"
@@ -144,7 +142,6 @@ export default function DateField({
           min={1900}
           id={`${id}-year-input`}
           data-cy={`${id}-year-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>
