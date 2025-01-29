@@ -211,8 +211,8 @@ export default function FacilityForm(props: FacilityProps) {
         )?.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: facilityData.latitude,
-        longitude: facilityData.longitude,
+        latitude: Number(facilityData.latitude),
+        longitude: Number(facilityData.longitude),
         is_public: facilityData.is_public,
       });
     }

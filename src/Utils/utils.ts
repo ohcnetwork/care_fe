@@ -135,7 +135,6 @@ export const formatPatientAge = (
   obj: PatientModel | Patient,
   abbreviated = false,
 ) => {
-  if (obj.age != null) return `${obj.age} Y`;
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
