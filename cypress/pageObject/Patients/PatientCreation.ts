@@ -7,6 +7,7 @@ interface PatientFormData {
   address: string;
   pincode: string;
   localBody: string;
+  gramaPanchayat: string;
   ward: string;
 }
 
@@ -30,7 +31,6 @@ export class PatientCreation {
 
   searchPatient(searchQuery: string) {
     cy.get(this.selectors.searchInput).type(searchQuery);
-
     // Wait for results to load
     cy.get(this.selectors.patientCard).should("be.visible");
     return this;
@@ -105,11 +105,21 @@ export class PatientCreation {
       .enterAddress(patient.address)
       .enterPincode(patient.pincode)
       .selectLocalBody(patient.localBody)
+      .selectGramaPanchayat(patient.gramaPanchayat)
       .selectWard(patient.ward);
   }
 
   selectLocalBody(localBody: string) {
     cy.typeAndSelectOption('[data-cy="select-local_body"]', localBody, false);
+    return this;
+  }
+
+  selectGramaPanchayat(gramaPanchayat: string) {
+    cy.typeAndSelectOption(
+      '[data-cy="select-grama_panchayat"]',
+      gramaPanchayat,
+      false,
+    );
     return this;
   }
 

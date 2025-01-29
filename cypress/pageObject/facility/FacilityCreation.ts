@@ -126,11 +126,20 @@ export class FacilityCreation {
       .should("not.be.empty");
   }
 
-  fillLocationHierarchy(location: { localBody: string; ward: string }) {
-    // Don't verify selection for local body (false parameter)
+  fillLocationHierarchy(location: {
+    localBody: string;
+    gramaPanchayat: string;
+    ward: string;
+  }) {
     cy.typeAndSelectOption(
       '[data-cy="select-local_body"]',
       location.localBody,
+      false,
+    );
+
+    cy.typeAndSelectOption(
+      '[data-cy="select-grama_panchayat"]',
+      location.gramaPanchayat,
       false,
     );
     // Verify selection for ward (default behavior)

@@ -9,6 +9,7 @@ export interface UserData {
   state?: string;
   district?: string;
   localBody?: string;
+  gramaPanchayat?: string;
   ward?: string;
   gender?: string;
 }
@@ -103,6 +104,15 @@ export class UserCreation {
     return this;
   }
 
+  selectGramaPanchayat(gramaPanchayat: string) {
+    cy.typeAndSelectOption(
+      '[data-cy="select-grama_panchayat"]',
+      gramaPanchayat,
+      false,
+    );
+    return this;
+  }
+
   selectWard(ward: string) {
     cy.clickAndSelectOption('[data-cy="select-ward"]', ward);
     return this;
@@ -128,6 +138,8 @@ export class UserCreation {
     if (userData.state) this.selectState(userData.state);
     if (userData.district) this.selectDistrict(userData.district);
     if (userData.localBody) this.selectLocalBody(userData.localBody);
+    if (userData.gramaPanchayat)
+      this.selectGramaPanchayat(userData.gramaPanchayat);
     if (userData.ward) this.selectWard(userData.ward);
     return this;
   }

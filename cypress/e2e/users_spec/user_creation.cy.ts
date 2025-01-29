@@ -34,7 +34,8 @@ describe("User Creation", () => {
       gender: "Male",
       state: "Kerala",
       district: "Ernakulam",
-      localBody: "Aluva",
+      localBody: "Koovappady",
+      gramaPanchayat: "Asamannoor",
       ward: "4",
     };
 

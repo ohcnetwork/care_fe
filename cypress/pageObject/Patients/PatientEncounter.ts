@@ -22,6 +22,13 @@ export class PatientEncounter {
     return this;
   }
 
+  searchEncounterName(patientName: string) {
+    cy.get('[data-cy="encounter-search-box"]').click();
+    cy.typeIntoField("#encounter-search", patientName);
+    cy.get('[data-cy="encounter-search-box"]').click();
+    return this;
+  }
+
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
     cy.get('[data-cy="add-questionnaire-button"]').click();

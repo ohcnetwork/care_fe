@@ -3,19 +3,19 @@ import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
-  localBody: "Aluva",
+  localBody: "Koovappady",
+  gramaPanchayat: "Asamannoor",
   ward: "4",
 };
 
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
+  const pincode = "682001";
 
   beforeEach(() => {
-    // Set larger viewport to ensure all elements are visible
-    cy.viewport(1920, 1080);
     cy.visit("/login");
-    cy.loginByApi("nurse");
+    cy.loginByApi("admin");
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {
@@ -37,11 +37,7 @@ describe("Facility Management", () => {
 
     facilityPage.selectFeatures(testFacility.features);
 
-    facilityPage.fillContactDetails(
-      phoneNumber,
-      testFacility.pincode,
-      testFacility.address,
-    );
+    facilityPage.fillContactDetails(phoneNumber, pincode, testFacility.address);
 
     facilityPage.fillLocationHierarchy(LOCATION_HIERARCHY);
 

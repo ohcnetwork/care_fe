@@ -30,7 +30,8 @@ describe("Patient Management", () => {
     dateOfBirth: "01-01-1990",
     address: generateAddress(),
     pincode: "682001",
-    localBody: "Aluva",
+    localBody: "Koovappady",
+    gramaPanchayat: "Asamannoor",
     ward: "4",
   };
 
@@ -40,7 +41,7 @@ describe("Patient Management", () => {
 
   it("create a new patient and verify details", () => {
     cy.loginByApi("doctor");
-    facilityCreation.selectFacility("GHC Trikaripur");
+    facilityCreation.selectFacility("CHC Aluva");
     patientCreation
       .clickSearchPatients()
       .clickCreateNewPatient()
@@ -64,8 +65,8 @@ describe("Patient Management", () => {
   });
 
   it("search patient with phone number and verifies details", () => {
-    cy.loginByApi("staff");
-    facilityCreation.selectFacility("GHC Trikaripur");
+    cy.loginByApi("doctor");
+    facilityCreation.selectFacility("CHC Aluva");
     patientCreation
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)

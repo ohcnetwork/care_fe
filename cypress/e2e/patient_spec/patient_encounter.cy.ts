@@ -15,12 +15,14 @@ describe("Patient Encounter Questionnaire", () => {
       pco2: "120",
       po2: "80",
     };
-    cy.loginByApi("devnurse");
-    facilityCreation.selectFacility("GHC Trikaripur");
+    const patientName = "Sarah Brown";
+    cy.loginByApi("nurse");
+    facilityCreation.selectFacility("CHC Aluva");
 
     // Chain the methods instead of multiple separate calls
     patientEncounter
       .navigateToEncounters()
+      .searchEncounterName(patientName)
       .openFirstEncounterDetails()
       .clickUpdateEncounter()
       .addQuestionnaire("Arterial Blood Gas")
