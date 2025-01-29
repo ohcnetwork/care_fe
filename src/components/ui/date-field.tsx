@@ -139,6 +139,7 @@ export default function DateField({
           placeholder="YYYY"
           value={year}
           onChange={handleYearChange}
+          max={new Date().getFullYear()}
           min={1900}
           id={`${id}-year-input`}
           data-cy={`${id}-year-input`}
