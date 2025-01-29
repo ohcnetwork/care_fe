@@ -50,7 +50,7 @@ function QuestionResponseValue({
           </span>
         )}
       </div>
-      <div className="text-sm">
+      <div className="text-sm whitespace-pre-wrap">
         {formatValue(String(value), question.type)}
         {response.note && (
           <span className="ml-2 text-xs text-muted-foreground">
