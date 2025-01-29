@@ -67,6 +67,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               onUserCreated={(user) => {
                 updateQuery({ sheet: "link", username: user.username });
               }}
+              organizationId={id}
             />
             <LinkUserSheet
               organizationId={id}
