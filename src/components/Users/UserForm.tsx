@@ -701,6 +701,7 @@ export default function UserForm({
           type="submit"
           className="w-full"
           data-cy="submit-user-form"
+          variant="primary_gradient"
           disabled={
             isLoadingUser ||
             !form.formState.isDirty ||
