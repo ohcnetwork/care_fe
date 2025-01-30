@@ -33,10 +33,8 @@ import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import {
-  AppointmentPatient,
-  AppointmentPatientRegister,
-} from "@/pages/Patient/Utils";
+import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
+import { Patient } from "@/types/emr/newPatient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -174,7 +172,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       })(body),
-    onSuccess: (data: AppointmentPatient) => {
+    onSuccess: (data: Patient) => {
       toast.success(t("patient_created_successfully"));
       publish("patient:upsert", data);
       createAppointment({

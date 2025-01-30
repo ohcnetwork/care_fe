@@ -196,52 +196,8 @@ export const Demography = (props: PatientProps) => {
           value: patientData.permanent_address,
         },
         ...getGeoOrgDetails(patientData.geo_organization),
-
-        // TODO: Replace with Geo_Org
-        // {
-        //   label: t("nationality"),
-        //   value: patientData.nationality,
-        // },
-        // {
-        //   label: t("state"),
-        //   value: patientData.state,
-        // },
-        // {
-        //   label: t("district"),
-        //   value: patientData.district_object?.name,
-        // },
-        // {
-        //   label: t("local_body"),
-        //   value: patientData.local_body_object?.name,
-        // },
-        // {
-        //   label: t("ward"),
-        //   value: (
-        //     <>
-        //       {(patientData.ward_object &&
-        //         patientData.ward_object.number +
-        //           ", " +
-        //           patientData.ward_object.name) ||
-        //         "-"}
-        //     </>
-        //   ),
-        // },
       ],
     },
-    // {
-    //   id: "volunteer-contact",
-    //   hidden: !patientData.assigned_to_object,
-    //   details: [
-    //     <EmergencyContact
-    //       number={patientData.assigned_to_object?.alt_phone_number}
-    //       name={
-    //         patientData.assigned_to_object
-    //           ? formatName(patientData.assigned_to_object)
-    //           : undefined
-    //       }
-    //     />,
-    //   ],
-    // },
   ];
 
   return (
