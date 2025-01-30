@@ -5,6 +5,7 @@ import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { SettingsLayout } from "@/pages/Facility/settings/layout";
 import FacilityOrganizationIndex from "@/pages/FacilityOrganization/FacilityOrganizationIndex";
 import FacilityOrganizationUsers from "@/pages/FacilityOrganization/FacilityOrganizationUsers";
 import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrganizationView";
@@ -29,6 +30,9 @@ const FacilityRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/organization/:id/users": ({ facilityId, id }) => (
     <FacilityOrganizationUsers facilityId={facilityId} id={id} />
+  ),
+  "/facility/:facilityId/settings/*": ({ facilityId }) => (
+    <SettingsLayout facilityId={facilityId} />
   ),
 };
 

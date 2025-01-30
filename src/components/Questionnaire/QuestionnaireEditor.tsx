@@ -518,8 +518,9 @@ function QuestionEditor({
   const updateField = <K extends keyof Question>(
     field: K,
     value: Question[K],
+    additionalFields?: Partial<Question>,
   ) => {
-    onChange({ ...question, [field]: value });
+    onChange({ ...question, [field]: value, ...additionalFields });
   };
 
   const toggleSubQuestionExpanded = (questionId: string) => {
@@ -620,10 +621,11 @@ function QuestionEditor({
               <Select
                 value={type}
                 onValueChange={(val: QuestionType) => {
-                  updateField("type", val);
                   // Reset questions array when changing from group to another type
                   if (val !== "group") {
-                    updateField("questions", []);
+                    updateField("type", val, { questions: [] });
+                  } else {
+                    updateField("type", val);
                   }
                 }}
               >

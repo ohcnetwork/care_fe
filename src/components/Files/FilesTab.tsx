@@ -585,7 +585,7 @@ const FileUploadDialog = ({
             {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
           {fileUpload.files.map((file, index) => (
             <div key={index} className="space-y-2">
               <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">

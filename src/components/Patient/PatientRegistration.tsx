@@ -64,7 +64,7 @@ import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
-  facilityId: string;
+  facilityId?: string;
   patientId?: string;
 }
 
@@ -219,11 +219,13 @@ export default function PatientRegistration(
       return;
     }
 
-    createPatient({
-      ...values,
-      facility: facilityId,
-      ward_old: undefined,
-    });
+    if (facilityId) {
+      createPatient({
+        ...values,
+        facility: facilityId,
+        ward_old: undefined,
+      });
+    }
   }
 
   const sidebarItems = [
