@@ -231,6 +231,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
+              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -243,10 +244,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <Button
               variant="outline"
               onClick={() => setVerificationOpen(false)}
+              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button className="mb-2" onClick={handleVerify}>
+            <Button
+              className="mb-2"
+              onClick={handleVerify}
+              data-cy="confirm-verification-button"
+            >
               {t("verify")}
             </Button>
           </DialogFooter>

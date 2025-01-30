@@ -54,6 +54,8 @@ export class PatientCreation {
     samePhoneNumberCheckbox: '[data-cy="same-phone-number-checkbox"]',
     stateSelect: '[data-cy="select-state"]',
     districtSelect: '[data-cy="select-district"]',
+    yearOfBirthInput: '[data-cy="year-of-birth-input"]',
+    verifyButton: '[data-cy="confirm-verification-button"]',
   };
 
   // Actions
@@ -79,6 +81,7 @@ export class PatientCreation {
     // Convert object values to an array of strings
     const detailsArray = Object.values(patientDetails);
     cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
+    return this;
   }
 
   clickSearchPatients() {
@@ -226,6 +229,21 @@ export class PatientCreation {
         cy.typeAndSelectOption(this.selectors.districtSelect, district);
       }
     });
+    return this;
+  }
+
+  selectPatientFromResults(patientName: string) {
+    cy.verifyAndClickElement(this.selectors.patientCard, patientName);
+    return this;
+  }
+
+  enterYearOfBirth(year: string) {
+    cy.typeIntoField(this.selectors.yearOfBirthInput, year);
+    return this;
+  }
+
+  clickVerifyButton() {
+    cy.verifyAndClickElement(this.selectors.verifyButton, "Verify");
     return this;
   }
 }
