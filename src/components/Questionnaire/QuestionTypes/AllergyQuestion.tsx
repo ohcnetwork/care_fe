@@ -146,6 +146,7 @@ export function AllergyQuestion({
   }, [patientAllergies]);
 
   const handleAddAllergy = (code: Code) => {
+    if (allergies.some((a) => a.code.code === code.code)) return;
     const newAllergies = [
       ...allergies,
       { ...ALLERGY_INITIAL_VALUE, code },
