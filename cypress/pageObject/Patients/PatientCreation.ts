@@ -31,8 +31,8 @@ export class PatientCreation {
   // Selectors
   private selectors = {
     patientsButton: '[data-cy="patients-button"]',
-    searchInput: '[data-cy="patient-search"]',
-    patientCard: '[data-cy="patient-search-results"]',
+    searchInput: "#patient-search",
+    patientCard: "#patient-search-results",
     createNewPatientButton: '[data-cy="create-new-patient-button"]',
     nameInput: '[data-cy="patient-name-input"]',
     phoneInput: '[data-cy="patient-phone-input"]',
