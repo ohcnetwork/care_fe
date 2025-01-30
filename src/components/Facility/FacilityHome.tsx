@@ -1,4 +1,10 @@
 import careConfig from "@careConfig";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
@@ -219,32 +225,44 @@ export const FacilityHome = ({ facilityId }: Props) => {
               )}
 
               <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                <div className="flex items-center gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 md:gap-4">
                       <Avatar
                         name={facilityData.name}
-                        className="h-12 w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
+                        className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
-                      <div>
-                        <h1 className="text-3xl font-bold text-white">
-                          {facilityData?.name}
-                        </h1>
+                      <div className="min-w-0">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <h1 className="text-sm md:text-3xl text-white md:font-bold">
+                                {facilityData?.name}
+                              </h1>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-sm text-white bg-black rounded-md p-2">
+                                {facilityData?.name}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <DropdownMenu modal={false}>
+                    <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="secondary"
                           size="icon"
-                          className="bg-white/20 hover:bg-white/40"
+                          aria-label={t("facility_actions_menu")}
+                          className="bg-white/20 hover:bg-white/40 w-8 h-8"
                         >
                           <MoreVertical className="h-4 w-4 text-white" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuContent align="end" className="w-48 md:w-56">
                         {hasPermissionToEditCoverImage && (
                           <DropdownMenuItem
                             className="cursor-pointer"
@@ -293,7 +311,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="mt-2 space-y-2">
               <Card>
                 <CardContent>
-                  <div className="flex flex-col gap-4 items-start mt-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
                     <div className="flex items-start gap-3">
                       <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                       <div>

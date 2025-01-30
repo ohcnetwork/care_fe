@@ -595,7 +595,7 @@ const FileUploadDialog = ({
             {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
           {isPdf ? (
             <>
               {fileUpload.files.map((file, index) => (
