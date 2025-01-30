@@ -666,7 +666,7 @@ function AppointmentColumn(props: {
       props.date_from,
       props.date_to,
     ],
-    queryFn: query.debounced(scheduleApis.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
         status: props.status,
@@ -677,6 +677,7 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
+    enabled: !!props.date_from && !!props.date_to,
   });
 
   let appointments = data?.results ?? [];
@@ -790,7 +791,7 @@ function AppointmentRow(props: {
       props.date_from,
       props.date_to,
     ],
-    queryFn: query.debounced(scheduleApis.appointments.list, {
+    queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
         status: status,
@@ -801,6 +802,7 @@ function AppointmentRow(props: {
         date_before: props.date_to,
       },
     }),
+    enabled: !!props.date_from && !!props.date_to,
   });
 
   let appointments = data?.results ?? [];
