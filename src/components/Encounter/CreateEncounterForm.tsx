@@ -42,7 +42,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import FacilityOrganizationSelector from "@/pages/FacilityOrganization/components/FacilityOrganizationSelector";
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   Encounter,
   EncounterClass,
