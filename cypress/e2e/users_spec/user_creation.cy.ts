@@ -11,9 +11,13 @@ describe("User Creation", () => {
   const userCreation = new UserCreation();
   const userRole = "Doctor";
 
-  beforeEach(() => {
-    cy.visit("/login");
+  before(() => {
     cy.loginByApi("admin");
+  });
+
+  beforeEach(() => {
+    cy.loginByApi("admin");
+    cy.visit("/");
   });
 
   it("should create a new user successfully", () => {

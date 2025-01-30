@@ -513,8 +513,12 @@ export default function PatientRegistration(
                 }}
               >
                 <TabsList className="mb-2" defaultValue="dob">
-                  <TabsTrigger value="dob">{t("date_of_birth")}</TabsTrigger>
-                  <TabsTrigger value="age">{t("age")}</TabsTrigger>
+                  <TabsTrigger value="dob" data-cy="dob-tab">
+                    {t("date_of_birth")}
+                  </TabsTrigger>
+                  <TabsTrigger value="age" data-cy="age-tab">
+                    {t("age")}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="dob">
                   <FormField

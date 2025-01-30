@@ -17,7 +17,7 @@ import query from "@/Utils/request/query";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
-import LocationSheet from "./components/LocationSheet";
+import LocationSheet from "./LocationSheet";
 
 interface Props {
   facilityId: string;

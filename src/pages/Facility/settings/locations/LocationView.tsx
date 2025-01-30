@@ -18,7 +18,7 @@ import query from "@/Utils/request/query";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
-import LocationSheet from "./components/LocationSheet";
+import LocationSheet from "./LocationSheet";
 
 interface Props {
   id: string;
