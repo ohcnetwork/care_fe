@@ -48,52 +48,73 @@ export function SymptomTable({
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("severity")}</TableHead>
             <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
             <TableHead>{t("notes")}</TableHead>
             <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
       <TableBody>
-        {symptoms.map((symptom: Symptom) => (
-          <TableRow>
-            <TableCell className="font-medium">
-              {symptom.code.display}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
+        {symptoms.map((symptom: Symptom, index: number) => {
+          const isEnteredInError =
+            symptom.verification_status === "entered_in_error";
+
+          return (
+            <>
+              <TableRow
+                key={index}
+                className={
+                  isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
+                }
               >
-                {symptom.clinical_status}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="whitespace-nowrap">
-                {symptom.severity}
-              </Badge>
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {symptom.onset?.onset_datetime
-                ? new Date(symptom.onset.onset_datetime).toLocaleDateString()
-                : "-"}
-            </TableCell>
-            <TableCell className="max-w-[200px] truncate">
-              {symptom.note || "-"}
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              <div className="flex items-center gap-2">
-                <Avatar
-                  name={formatName(symptom.created_by)}
-                  className="w-4 h-4"
-                  imageUrl={symptom.created_by?.profile_picture_url}
-                />
-                <span className="text-sm">
-                  {formatName(symptom.created_by)}
-                </span>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
+                <TableCell className="font-medium">
+                  {symptom.code.display}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
+                  >
+                    {t(symptom.clinical_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={"secondary"} className="whitespace-nowrap">
+                    {t(symptom.severity)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {symptom.onset?.onset_datetime
+                    ? new Date(
+                        symptom.onset.onset_datetime,
+                      ).toLocaleDateString()
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={isEnteredInError ? "destructive" : "outline"}
+                    className="whitespace-nowrap capitalize"
+                  >
+                    {t(symptom.verification_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="max-w-[200px] truncate">
+                  {symptom.note || "-"}
+                </TableCell>
+                <TableCell className="whitespace-nowrap flex items-center gap-2">
+                  <Avatar
+                    name={formatName(symptom.created_by)}
+                    className="w-4 h-4"
+                    imageUrl={symptom.created_by?.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(symptom.created_by)}
+                  </span>
+                </TableCell>
+              </TableRow>
+            </>
+          );
+        })}
       </TableBody>
     </Table>
   );

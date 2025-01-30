@@ -50,6 +50,7 @@ export function ComboboxQuantityInput({
   const showDropdown = /^\d+$/.test(inputValue);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const value = e.target.value;
     if (value === "" || /^\d+$/.test(value)) {
       setInputValue(value);
@@ -65,7 +66,7 @@ export function ComboboxQuantityInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showDropdown) return;
+    if (disabled || !showDropdown) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -102,7 +103,7 @@ export function ComboboxQuantityInput({
 
   return (
     <div className="relative flex w-full lg:max-w-[200px] flex-col gap-1">
-      <Popover open={open && showDropdown} onOpenChange={setOpen}>
+      <Popover open={!disabled && open && showDropdown} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
             <Input

@@ -60,6 +60,7 @@ export function QuestionnaireSearch({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-cy="add-questionnaire-button"
           variant="outline"
           className="w-full justify-between"
           disabled={disabled || isLoading}
@@ -70,7 +71,7 @@ export function QuestionnaireSearch({
                 icon="l-spinner"
                 className="mr-2 h-4 w-4 animate-spin"
               />
-              Loading...
+              {t("loading")}
             </>
           ) : (
             <span>{t("add_questionnaire")}</span>

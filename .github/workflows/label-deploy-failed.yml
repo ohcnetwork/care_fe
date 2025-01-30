@@ -21,6 +21,7 @@ jobs:
 
       - name: Check deploy status
         id: check-status
+
         uses: actions/github-script@v7
         with:
           script: |
@@ -36,8 +37,10 @@ jobs:
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
 
+
       - name: Remove Deploy-Failed label if deploy is successful
         if: steps.check-status.outputs.isDeploySuccessful == 'true'
+
         uses: actions/github-script@v7
         with:
           script: |

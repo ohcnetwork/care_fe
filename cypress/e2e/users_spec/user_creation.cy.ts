@@ -1,10 +1,10 @@
-import { UserCreation } from "pageObject/Users/UserCreation";
-import { FacilityCreation } from "pageObject/facility/FacilityCreation";
+import { UserCreation } from "@/pageObject/Users/UserCreation";
+import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 import {
   generateName,
   generatePhoneNumber,
   generateUsername,
-} from "utils/commonUtils";
+} from "@/utils/commonUtils";
 
 describe("User Creation", () => {
   const facilityCreation = new FacilityCreation();
