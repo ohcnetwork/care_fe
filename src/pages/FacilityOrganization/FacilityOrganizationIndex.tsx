@@ -79,7 +79,12 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page title={t("facility_organizations")} hideBack={true}>
+    <Page
+      title={t("departments")}
+      hideBack={true}
+      hideTitleOnPage={true}
+      breadcrumbs={false}
+    >
       <div className="flex justify-center md:justify-end mt-2 mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
@@ -98,7 +103,7 @@ export default function FacilityOrganizationIndex({
             <CardFooter>
               <Button variant="outline" asChild className="w-full">
                 <Link
-                  href={`/facility/${facilityId}/organization/${org.id}`}
+                  href={`/departments/${org.id}`}
                   className="flex items-center justify-center gap-2"
                 >
                   {t("view_details")}

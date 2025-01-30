@@ -56,7 +56,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
         <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-          <h2 className="text-lg font-semibold">{t("organizations")}</h2>
+          <h2 className="text-lg font-semibold">{t("departments")}</h2>
           <div className="flex flex-col items-center md:flex-row sm:items-center gap-4 w-full lg:justify-end">
             <div className="w-full lg:w-1/3">
               <Input
@@ -101,9 +101,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                             </div>
                           </div>
                           <Button variant="link" asChild>
-                            <Link
-                              href={`/facility/${facilityId}/organization/${org.id}`}
-                            >
+                            <Link href={`/departments/${org.id}`}>
                               {t("view_details")}
                               <CareIcon
                                 icon="l-arrow-right"
@@ -124,9 +122,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
               ) : (
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
-                    {searchQuery
-                      ? t("no_organizations_found")
-                      : t("no_sub_organizations_found")}
+                    {t("no_departments_teams_found")}
                   </CardContent>
                 </Card>
               )}

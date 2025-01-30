@@ -44,12 +44,12 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/facility/${facilityId}/organization/${id}`,
+      path: `/organization/${id}`,
       title: "Organizations",
       icon: "d-hospital",
     },
     {
-      path: `/facility/${facilityId}/organization/${id}/users`,
+      path: `/organization/${id}/users`,
       title: "Users",
       icon: "d-people",
     },
