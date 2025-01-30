@@ -92,8 +92,6 @@ export type MedicationRequestIntent =
 export interface DosageQuantity {
   value: number;
   unit: Code;
-  // TODO: Remove this once BE Administration Dosage is changed from Quantity to DosageQuantity
-  code?: Code;
 }
 
 export interface BoundsDuration {

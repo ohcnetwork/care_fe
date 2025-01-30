@@ -28,8 +28,6 @@ export function createMedicationAdministrationRequest(
           medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity?.value,
         unit: medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
           ?.unit,
-        code: medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
-          ?.unit,
       },
     },
   };
