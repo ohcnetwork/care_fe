@@ -18,6 +18,14 @@ import WeekdayCheckbox, {
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -126,6 +134,7 @@ const ScheduleTemplateEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   const templateFormSchema = z
     .object({
@@ -250,16 +259,44 @@ const ScheduleTemplateEditor = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => deleteTemplate()}
-              disabled={isProcessing}
-              size="sm"
-            >
-              <Trash2Icon />
-              {isDeleting ? t("deleting") : t("delete")}
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isProcessing}
+                  size="sm"
+                >
+                  <Trash2Icon />
+                  {isDeleting ? t("deleting") : t("delete")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("are_you_sure")}</DialogTitle>
+                  <DialogDescription>
+                    {t("this_will_permanently_remove_the_template")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      deleteTemplate();
+                      setDialogOpen(false);
+                    }}
+                  >
+                    {t("delete")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button
               variant="primary"
               type="submit"
