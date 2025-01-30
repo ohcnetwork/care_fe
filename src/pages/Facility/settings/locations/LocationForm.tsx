@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -25,11 +26,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import {
-  LocationList,
   LocationWrite,
   OperationalStatus,
   Status,
+  locationFormOptions,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -58,6 +60,7 @@ const formSchema = z.object({
   mode: z.enum(["instance", "kind"] as const),
   parent: z.string().optional().nullable(),
   organizations: z.array(z.string()).default([]),
+  availability_status: z.enum(["available", "unavailable"] as const),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -65,44 +68,62 @@ type FormValues = z.infer<typeof formSchema>;
 interface Props {
   facilityId: string;
   onSuccess?: () => void;
-  location?: LocationList;
+  locationId?: string;
   parentId?: string;
 }
+
+const defaultValues: FormValues = {
+  name: "",
+  description: "",
+  status: "active",
+  operational_status: "O",
+  form: "ro",
+  mode: "instance",
+  parent: null,
+  organizations: [],
+  availability_status: "available",
+};
 
 export default function LocationForm({
   facilityId,
   onSuccess,
-  location,
+  locationId,
   parentId,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  // Initialize form with either edit values or create defaults
+  const { data: location, isLoading } = useQuery({
+    queryKey: ["location", locationId],
+    queryFn: query(locationApi.get, {
+      pathParams: { facility_id: facilityId, id: locationId },
+    }),
+    enabled: !!locationId,
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: location
-      ? {
-          name: location.name,
-          description: location.description,
-          status: location.status,
-          operational_status: location.operational_status,
-          form: location.form,
-          mode: location.mode,
-          parent: parentId || null,
-          organizations: [],
-        }
-      : {
-          name: "",
-          description: "",
-          status: "active",
-          operational_status: "O",
-          form: "ro",
-          mode: "instance",
-          parent: parentId || null,
-          organizations: [],
-        },
+    defaultValues: {
+      ...defaultValues,
+      parent: parentId || null,
+    },
   });
+
+  useEffect(() => {
+    if (location) {
+      form.reset({
+        name: location.name,
+        description: location.description,
+        status: location.status,
+        operational_status: location.operational_status,
+        form: location.form,
+        mode: location.mode,
+        parent: parentId || null,
+        organizations: [],
+        availability_status: location.availability_status || "available",
+      });
+    }
+  }, [location, form, parentId]);
 
   const { mutate: submitForm, isPending } = useMutation({
     mutationFn: location?.id
@@ -137,24 +158,6 @@ export default function LocationForm({
     submitForm(locationData);
   }
 
-  const locationFormOptions = [
-    { value: "si", label: "Site" },
-    { value: "bu", label: "Building" },
-    { value: "wi", label: "Wing" },
-    { value: "wa", label: "Ward" },
-    { value: "lvl", label: "Level" },
-    { value: "co", label: "Corridor" },
-    { value: "ro", label: "Room" },
-    { value: "bd", label: "Bed" },
-    { value: "ve", label: "Vehicle" },
-    { value: "ho", label: "House" },
-    { value: "ca", label: "Cabinet" },
-    { value: "rd", label: "Road" },
-    { value: "area", label: "Area" },
-    { value: "jdn", label: "Jurisdiction" },
-    { value: "vi", label: "Virtual" },
-  ];
-
   const statusOptions: { value: Status; label: string }[] = [
     { value: "active", label: "Active" },
     { value: "inactive", label: "Inactive" },
@@ -177,6 +180,10 @@ export default function LocationForm({
     { value: "instance", label: "Instance" },
     { value: "kind", label: "Kind" },
   ];
+
+  if (locationId && isLoading) {
+    return <div className="p-4">Loading...</div>;
+  }
 
   return (
     <Form {...form}>

@@ -17,17 +17,77 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
-import { Encounter } from "@/types/emr/encounter";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import locationApi from "@/types/location/locationApi";
 
 interface Props {
-  encounter: Encounter;
+  entityType: "encounter" | "location";
+  entityId: string;
+  currentOrganizations: FacilityOrganization[];
   facilityId: string;
   trigger?: React.ReactNode;
   onUpdate?: () => void;
 }
 
-export default function ManageEncounterOrganizations({
-  encounter,
+type MutationRoute =
+  | typeof routes.encounter.addOrganization
+  | typeof routes.encounter.removeOrganization
+  | typeof locationApi.addOrganization
+  | typeof locationApi.removeOrganization;
+
+interface EncounterPathParams {
+  encounterId: string;
+}
+
+interface LocationPathParams {
+  facility_id: string;
+  id: string;
+}
+
+type PathParams = EncounterPathParams | LocationPathParams;
+
+interface MutationParams {
+  route: MutationRoute;
+  pathParams: PathParams;
+  queryKey: string[];
+}
+
+function getMutationParams(
+  entityType: "encounter" | "location",
+  entityId: string,
+  facilityId: string,
+  isAdd: boolean,
+): MutationParams {
+  if (entityType === "encounter") {
+    return {
+      route: isAdd
+        ? routes.encounter.addOrganization
+        : routes.encounter.removeOrganization,
+      pathParams: { encounterId: entityId } as EncounterPathParams,
+      queryKey: ["encounter", entityId],
+    };
+  }
+  return {
+    route: isAdd ? locationApi.addOrganization : locationApi.removeOrganization,
+    pathParams: { facility_id: facilityId, id: entityId } as LocationPathParams,
+    queryKey: ["location", entityId],
+  };
+}
+
+function getInvalidateQueries(
+  entityType: "encounter" | "location",
+  entityId: string,
+) {
+  if (entityType === "encounter") {
+    return ["encounter", entityId];
+  }
+  return ["location", entityId, "organizations"];
+}
+
+export default function LinkDepartmentsSheet({
+  entityType,
+  entityId,
+  currentOrganizations,
   facilityId,
   trigger,
   onUpdate,
@@ -37,13 +97,21 @@ export default function ManageEncounterOrganizations({
   const queryClient = useQueryClient();
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: (organizationId: string) =>
-      mutate(routes.encounter.addOrganization, {
-        pathParams: { encounterId: encounter.id },
+    mutationFn: (organizationId: string) => {
+      const { route, pathParams } = getMutationParams(
+        entityType,
+        entityId,
+        facilityId,
+        true,
+      );
+      return mutate(route, {
+        pathParams,
         body: { organization: organizationId },
-      })({ organization: organizationId }),
+      })({ organization: organizationId });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
+      const invalidateQueries = getInvalidateQueries(entityType, entityId);
+      queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success("Organization added successfully");
       setSelectedOrg("");
       setOpen(false);
@@ -58,13 +126,26 @@ export default function ManageEncounterOrganizations({
   });
 
   const { mutate: removeOrganization, isPending: isRemoving } = useMutation({
-    mutationFn: (organizationId: string) =>
-      mutate(routes.encounter.removeOrganization, {
-        pathParams: { encounterId: encounter.id },
+    mutationFn: (organizationId: string) => {
+      const { route, pathParams } = getMutationParams(
+        entityType,
+        entityId,
+        facilityId,
+        false,
+      );
+      return mutate(route, {
+        pathParams,
         body: { organization: organizationId },
-      })({ organization: organizationId }),
+      })({ organization: organizationId });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
+      const { queryKey } = getMutationParams(
+        entityType,
+        entityId,
+        facilityId,
+        false,
+      );
+      queryClient.invalidateQueries({ queryKey });
       toast.success("Organization removed successfully");
       onUpdate?.();
     },
@@ -118,7 +199,7 @@ export default function ManageEncounterOrganizations({
                 {t("current_organizations")}
               </h3>
               <div className="space-y-2">
-                {encounter.organizations.map((org) => (
+                {currentOrganizations.map((org) => (
                   <div
                     key={org.id}
                     className="flex items-center justify-between rounded-md border p-2"
@@ -148,7 +229,7 @@ export default function ManageEncounterOrganizations({
                     </Button>
                   </div>
                 ))}
-                {encounter.organizations.length === 0 && (
+                {currentOrganizations.length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     {t("no_organizations_added_yet")}
                   </p>

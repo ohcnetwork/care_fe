@@ -14,7 +14,10 @@ import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { LocationList as LocationListType } from "@/types/location/location";
+import {
+  LocationList as LocationListType,
+  getLocationFormLabel,
+} from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
@@ -93,69 +96,59 @@ export default function LocationList({ facilityId }: Props) {
               data.results.map((location: LocationListType) => (
                 <Card key={location.id}>
                   <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between flex-wrap">
-                        <div className="space-y-1 mb-2">
-                          <h3 className="text-lg font-semibold">
-                            {location.name}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">
-                              {location.form.toUpperCase()}
-                            </Badge>
-                            <Badge
-                              variant={
-                                location.status === "active"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {location.status}
-                            </Badge>
-                            <Badge
-                              variant={
-                                location.availability_status === "available"
-                                  ? "default"
-                                  : "destructive"
-                              }
-                            >
-                              {location.availability_status}
-                            </Badge>
+                    <div className="flex flex-col h-full">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between flex-wrap">
+                          <div className="space-y-1 mb-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-lg font-semibold">
+                                {location.name}
+                              </h3>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditLocation(location)}
+                              >
+                                <CareIcon icon="l-pen" className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">
+                                {getLocationFormLabel(location.form)}
+                              </Badge>
+                              <Badge
+                                variant={
+                                  location.status === "active"
+                                    ? "secondary"
+                                    : "default"
+                                }
+                              >
+                                {location.status}
+                              </Badge>
+                              <Badge
+                                variant={
+                                  location.availability_status === "available"
+                                    ? "secondary"
+                                    : "default"
+                                }
+                              >
+                                {location.availability_status}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditLocation(location)}
-                          >
-                            <CareIcon icon="l-pen" className="h-4 w-4" />
-                          </Button>
-                          <Button variant="link" asChild>
-                            <Link href={`/location/${location.id}`}>
-                              {t("view_details")}
-                              <CareIcon
-                                icon="l-arrow-right"
-                                className="h-4 w-4 ml-2"
-                              />
-                            </Link>
-                          </Button>
-                        </div>
                       </div>
-                      {location.description && (
-                        <p className="text-sm text-gray-500 line-clamp-2">
-                          {location.description}
-                        </p>
-                      )}
-                      {location.has_children && (
-                        <div className="text-sm text-primary">
-                          <CareIcon
-                            icon="l-folder"
-                            className="h-4 w-4 inline mr-1"
-                          />
-                          {t("has_child_locations")}
-                        </div>
-                      )}
+                      <div className="mt-auto pt-4 flex justify-end">
+                        <Button variant="link" asChild>
+                          <Link href={`/location/${location.id}`}>
+                            {t("view_details")}
+                            <CareIcon
+                              icon="l-arrow-right"
+                              className="h-4 w-4 ml-2"
+                            />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

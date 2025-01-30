@@ -156,7 +156,7 @@ export default function OrganizationFacilities({
                       asChild
                     >
                       <Link
-                        href={`/facility/${facility.id}`}
+                        href={`/facility/${facility.id}/overview`}
                         className="text-sm w-full hover:underline"
                       >
                         {t("view_facility")}
