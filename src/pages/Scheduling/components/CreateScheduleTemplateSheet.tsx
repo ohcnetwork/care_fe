@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
 import { ArrowRightIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
@@ -17,6 +18,14 @@ import WeekdayCheckbox, {
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -235,6 +244,9 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
+  const [openDialog, setOpenDialog] = useState(false);
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
+
   return (
     <Sheet
       open={qParams.sheet === "create_template"}
@@ -351,21 +363,56 @@ export default function CreateScheduleTemplateSheet({
                           {form.watch(`availabilities.${index}.name`)}
                         </span>
                       </div>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="text-gray-600 hover:text-gray-900"
-                        onClick={() => {
-                          const availabilities =
-                            form.getValues("availabilities");
-                          availabilities.splice(index, 1);
-                          form.setValue("availabilities", availabilities);
-                        }}
-                      >
-                        <CareIcon icon="l-trash" className="text-base" />
-                        <span className="ml-2">{t("remove")}</span>
-                      </Button>
+                      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                        <DialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="text-gray-600 hover:text-gray-900"
+                            onClick={() => {
+                              setRemoveIndex(index);
+                              setOpenDialog(true);
+                            }}
+                          >
+                            <CareIcon icon="l-trash" className="text-base" />
+                            <span className="ml-2">{t("remove")}</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>{t("are_you_sure")}</DialogTitle>
+                            <DialogDescription>
+                              {t("this_will_permanently_remove_the_template")}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setOpenDialog(false)}
+                            >
+                              {t("cancel")}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => {
+                                const availabilities =
+                                  form.getValues("availabilities");
+                                if (removeIndex !== null) {
+                                  availabilities.splice(removeIndex, 1);
+                                  form.setValue(
+                                    "availabilities",
+                                    availabilities,
+                                  );
+                                }
+                                setOpenDialog(false);
+                              }}
+                            >
+                              {t("remove")}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4">
