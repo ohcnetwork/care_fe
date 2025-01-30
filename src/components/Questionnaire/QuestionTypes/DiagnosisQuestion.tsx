@@ -116,6 +116,7 @@ export function DiagnosisQuestion({
   }, [patientDiagnoses]);
 
   const handleAddDiagnosis = (code: Code) => {
+    if (diagnoses.some((d) => d.code.code === code.code)) return;
     const newDiagnoses = [
       ...diagnoses,
       { ...DIAGNOSIS_INITIAL_VALUE, code },

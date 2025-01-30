@@ -310,6 +310,7 @@ export function SymptomQuestion({
   }, [patientSymptoms]);
 
   const handleAddSymptom = (code: Code) => {
+    if (symptoms.some((s) => s.code.code === code.code)) return;
     const newSymptoms = [
       ...symptoms,
       { ...SYMPTOM_INITIAL_VALUE, code },
