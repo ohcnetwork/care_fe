@@ -99,13 +99,17 @@ describe("Patient Management", () => {
     // ... other test cases ...
   ];
 
+  before(() => {
+    cy.loginByApi("doctor");
+  });
+
   beforeEach(() => {
-    cy.visit("/login");
+    cy.loginByApi("doctor");
+    cy.visit("/");
   });
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      cy.loginByApi("doctor");
       facilityCreation.selectFacility("GHC Trikaripur");
       patientCreation
         .clickSearchPatients()
@@ -134,7 +138,6 @@ describe("Patient Management", () => {
   });
 
   it("search patient with phone number and verifies details", () => {
-    cy.loginByApi("doctor");
     facilityCreation.selectFacility("GHC Trikaripur");
     patientCreation
       .clickSearchPatients()
