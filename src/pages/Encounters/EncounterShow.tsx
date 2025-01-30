@@ -6,7 +6,6 @@ import Loading from "@/components/Common/Loading";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { EncounterProvider } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
@@ -177,12 +176,7 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <EncounterProvider
-      initialContext={{
-        encounter: encounterData,
-        patient: encounterData.patient,
-      }}
-    >
+    <div>
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
           title={t("encounter")}
@@ -241,8 +235,8 @@ export const EncounterShow = (props: Props) => {
           </Link>
         </div>
       </nav>
-      <div className="mt-4 w-full border-b-2 border-secondary-200">
-        <div className="mt-2 flex w-full flex-col md:flex-row">
+      <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
+        <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={encounterData.patient}
@@ -288,6 +282,6 @@ export const EncounterShow = (props: Props) => {
           <SelectedTab {...encounterTabProps} />
         </div>
       </div>
-    </EncounterProvider>
+    </div>
   );
 };

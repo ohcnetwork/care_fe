@@ -1,5 +1,5 @@
-import { Code } from "../../questionnaire/code";
-import { UserBase } from "../../user/user";
+import { Code } from "@/types/questionnaire/code";
+import { UserBase } from "@/types/user/user";
 
 export const DIAGNOSIS_CLINICAL_STATUS = [
   "active",
@@ -19,7 +19,7 @@ export const DIAGNOSIS_VERIFICATION_STATUS = [
   "differential",
   "confirmed",
   "refuted",
-  "entered-in-error",
+  "entered_in_error",
 ] as const;
 
 export type DiagnosisVerificationStatus =
@@ -33,6 +33,7 @@ export type Onset = {
 };
 
 export interface Diagnosis {
+  id: string;
   code: Code;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
@@ -44,6 +45,7 @@ export interface Diagnosis {
 }
 
 export interface DiagnosisRequest {
+  id?: string;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
   code: Code;

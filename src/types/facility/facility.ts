@@ -1,5 +1,10 @@
 import { Organization } from "@/types/organization/organization";
 
+export interface FacilityBareMinimum {
+  id: string;
+  name: string;
+}
+
 export interface BaseFacility {
   id: string;
   name: string;

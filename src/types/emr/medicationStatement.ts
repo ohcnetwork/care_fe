@@ -29,14 +29,26 @@ export type MedicationStatement = {
   reason?: string;
 
   medication: Code;
-  dosage_text?: string;
+  dosage_text: string;
   effective_period?: Period;
 
   patient: string; // UUID
   encounter: string; // UUID
 
-  information_source?: MedicationStatementInformationSourceType;
+  information_source: MedicationStatementInformationSourceType;
 
+  note?: string;
+};
+
+export type MedicationStatementRequest = {
+  id?: string;
+  status: MedicationStatementStatus;
+  reason?: string;
+  medication: Code;
+  encounter?: string; // UUID
+  dosage_text: string;
+  effective_period?: Period;
+  information_source: MedicationStatementInformationSourceType;
   note?: string;
 };
 
@@ -45,10 +57,10 @@ export type MedicationStatementRead = {
   status: MedicationStatementStatus;
   reason?: string;
   medication: Code;
-  dosage_text?: string;
+  dosage_text: string;
   effective_period?: Period;
   encounter: string;
-  information_source?: MedicationStatementInformationSourceType;
+  information_source: MedicationStatementInformationSourceType;
   note?: string;
   created_at: string;
   modified_at: string;

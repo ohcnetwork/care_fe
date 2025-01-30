@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { useTimer } from "@/hooks/useTimer";
 
-import useVoiceRecorder from "../../Utils/useVoiceRecorder";
+import useVoiceRecorder from "@/Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -88,12 +88,12 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             ? "PERMISSION_DENIED"
             : "WAITING_TO_RECORD",
         );
-      } catch (error) {
+      } catch {
         setStatus(null);
       }
     };
 
-    show && checkMicPermission();
+    if (show) checkMicPermission();
 
     return () => {
       setStatus(null);

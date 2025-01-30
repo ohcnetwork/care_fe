@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -17,6 +18,7 @@ import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
+import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout from "./components/OrganizationLayout";
 
@@ -35,14 +37,14 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
 
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
+  const { data: users, isFetching: isFetchingUsers } = useQuery({
     queryKey: ["organizationUsers", id, qParams.search, qParams.page],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
       queryParams: {
         username: qParams.search,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!id,
@@ -56,7 +58,14 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("users")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <EntityBadge
+              title={t("users")}
+              count={users?.count}
+              isFetching={isFetchingUsers}
+              translationParams={{ entity: "User" }}
+            />
+          </div>
           <div className="flex gap-2">
             <AddUserSheet
               open={openAddUserSheet}
@@ -66,6 +75,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               onUserCreated={(user) => {
                 updateQuery({ sheet: "link", username: user.username });
               }}
+              organizationId={id}
             />
             <LinkUserSheet
               organizationId={id}
@@ -91,20 +101,10 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             data-cy="search-user"
           />
         </div>
-        {isLoadingUsers ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="h-12 w-12 rounded-full bg-gray-200 animate-pulse" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+        {isFetchingUsers ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardGridSkeleton count={6} />
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {users?.results?.length === 0 ? (

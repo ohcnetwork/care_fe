@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { CaretDownIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,7 +15,7 @@ import {
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -65,6 +65,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDisplayName,
@@ -107,19 +108,30 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
   const today = new Date();
 
-  // Case 1: Today only
+  // Case 1: Today only or Yesterday only
   if (
-    dateFrom === dateQueryString(today) &&
-    dateTo === dateQueryString(today)
+    (dateFrom === dateQueryString(today) &&
+      dateTo === dateQueryString(today)) ||
+    (dateFrom === dateQueryString(subDays(today, 1)) &&
+      dateTo === dateQueryString(subDays(today, 1)))
   ) {
-    return (
-      <>
-        <span className="text-black">{t("today")}</span>
-        <span className="pl-1 text-gray-500">
-          ({formatDate(dateFrom, "dd MMM yyyy")})
-        </span>
-      </>
-    );
+    <>
+      {dateFrom === dateQueryString(today) ? (
+        <>
+          <span className="text-black">{t("today")}</span>
+          <span className="pl-1 text-gray-500">
+            ({formatDate(dateFrom, "dd MMM yyyy")})
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="text-black">{t("yesterday")}</span>
+          <span className="pl-1 text-gray-500">
+            ({formatDate(dateFrom, "dd MMM yyyy")})
+          </span>
+        </>
+      )}
+    </>;
   }
 
   // Case 2: Pre-defined ranges
@@ -128,11 +140,6 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       label: t("last_week_short"),
       from: subDays(today, 7),
       to: today,
-    },
-    {
-      label: t("yesterday"),
-      from: subDays(today, 1),
-      to: subDays(today, 1),
     },
     {
       label: t("next_week_short"),
@@ -192,8 +199,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 
     return (
       <>
-        <span>{t("on")} </span>
-        <span className="text-black">
+        <span className="capitalize text-gray-500">{t("on")} </span>
+        <span className="pl-1 text-black ">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -204,8 +211,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (dateFrom && !dateTo) {
     return (
       <>
-        <span>{t("after")} </span>
-        <span className="text-black">
+        <span className="capitalize text-gray-500">{t("after")} </span>
+        <span className="pl-1 text-black">
           {formatDate(dateFrom, "dd MMM yyyy")}
         </span>
       </>
@@ -215,8 +222,10 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (!dateFrom && dateTo) {
     return (
       <>
-        <span>{t("before")} </span>
-        <span className="text-black">{formatDate(dateTo, "dd MMM yyyy")}</span>
+        <span className=" capitalize text-gray-500">{t("before")} </span>
+        <span className="pl-1 text-black">
+          {formatDate(dateTo, "dd MMM yyyy")}
+        </span>
       </>
     );
   }
@@ -238,7 +247,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
-  const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],
@@ -253,12 +262,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   );
 
   useEffect(() => {
+    // trigger this effect only when there are no query params already applied, and once the query is loaded
+    if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
+      return;
+    }
+
     const updates: Partial<QueryParams> = {};
 
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
-      !schedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
@@ -292,7 +305,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading]);
+  }, [schedulableUsersQuery.isLoading, qParams]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -328,8 +341,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       breadcrumbs={false}
       options={
         <Tabs
-          value={viewMode}
-          onValueChange={(value) => setViewMode(value as "board" | "list")}
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "board" | "list")}
         >
           <TabsList>
             <TabsTrigger value="board">
@@ -344,8 +357,8 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         </Tabs>
       }
     >
-      <div className="mt-4 py-4 flex flex-col md:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start">
+      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
+        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
           <div className="mt-1">
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
@@ -445,19 +458,19 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
           <div>
             <div className="flex items-center gap-1 -mt-2">
-              <Label>
-                <DateRangeDisplay
-                  dateFrom={qParams.date_from}
-                  dateTo={qParams.date_to}
-                />
-              </Label>
               <Popover modal>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Edit3Icon className="size-4" />
+                  <Button variant="ghost">
+                    <Label>
+                      <DateRangeDisplay
+                        dateFrom={qParams.date_from}
+                        dateTo={qParams.date_to}
+                      />
+                    </Label>
+                    <Edit3Icon />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto">
+                <PopoverContent className="w-auto" align="start">
                   <div className="flex flex-col gap-4">
                     <div className="flex justify-between">
                       <Button
@@ -589,55 +602,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             value={qParams.search ?? ""}
             onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
           />
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="secondary">
-                <CareIcon icon="l-filter" className="mr-2" />
-                <span>{t("filter")}</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="mr-11">
-              <div>
-                <Label className="mb-2">{t("date")}</Label>
-                <DateRangePicker
-                  date={{
-                    from: qParams.date_from
-                      ? new Date(qParams.date_from)
-                      : undefined,
-                    to: qParams.date_to ? new Date(qParams.date_to) : undefined,
-                  }}
-                  onChange={(date) =>
-                    setQParams({
-                      ...qParams,
-                      date_from: date?.from ? dateQueryString(date.from) : null,
-                      date_to: date?.to ? dateQueryString(date?.to) : null,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex justify-end bg-gray-100 mt-6 -m-4 py-3 px-4 rounded-md">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setQParams({
-                      date_from: null,
-                      date_to: null,
-                      slot: null,
-                      search: null,
-                      practitioner: null,
-                    })
-                  }
-                >
-                  <ReloadIcon className="mr-2" />
-                  {t("clear_all_filters")}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
         </div>
       </div>
 
-      {viewMode === "board" ? (
+      {activeTab === "board" ? (
         <ScrollArea>
           <div className="flex w-max space-x-4">
             {(
@@ -726,12 +694,27 @@ function AppointmentColumn(props: {
         !data && "animate-pulse",
       )}
     >
-      <div className="flex px-3 items-center gap-3 mb-4">
+      <div className="flex px-3 items-center gap-2 mb-4">
         <h2 className="font-semibold capitalize text-base px-1">
           {t(props.status)}
         </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-sm">
-          {data?.count ?? "..."}
+        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+          {data?.count == null ? (
+            "..."
+          ) : data.count === appointments.length ? (
+            data.count
+          ) : (
+            <Trans
+              i18nKey="showing_x_of_y"
+              values={{
+                x: appointments.length,
+                y: data.count,
+              }}
+              components={{
+                strong: <span className="font-bold" />,
+              }}
+            />
+          )}
         </span>
       </div>
       {appointments.length === 0 ? (
@@ -832,6 +815,7 @@ function AppointmentRow(props: {
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
           value={status}
+          className="w-full overflow-scroll"
           onValueChange={(value) => setStatus(value as Appointment["status"])}
         >
           <TabsList>

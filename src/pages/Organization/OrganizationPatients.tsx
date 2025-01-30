@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -19,6 +20,7 @@ import { Patient } from "@/types/emr/newPatient";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -69,7 +71,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     });
   };
 
-  const { data: patients, isLoading } = useQuery({
+  const { data: patients, isFetching } = useQuery({
     queryKey: ["organizationPatients", id, qParams],
     queryFn: query.debounced(organizationApi.listPatients, {
       pathParams: { id },
@@ -77,7 +79,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         ...(organization?.org_type === "govt" && { organization: id }),
         page: qParams.page,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         ...advancedFilter.filter,
       },
     }),
@@ -96,7 +98,14 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("patients")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <EntityBadge
+              title={t("patients")}
+              count={patients?.count}
+              isFetching={isFetching}
+              translationParams={{ entity: "Patient" }}
+            />
+          </div>
         </div>
 
         <SearchByMultipleFields
@@ -111,36 +120,8 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3" />
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+          {isFetching ? (
+            <CardGridSkeleton count={6} />
           ) : patients?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">

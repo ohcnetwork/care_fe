@@ -165,7 +165,6 @@ export default defineConfig(({ mode }) => {
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
-      __CORE_ENV__: { ...env },
     },
     plugins: [
       TanStackRouterVite(),
@@ -214,6 +213,7 @@ export default defineConfig(({ mode }) => {
       checker({
         typescript: true,
         eslint: {
+          useFlatConfig: true,
           lintCommand: "eslint ./src",
           dev: {
             logLevel: ["error"],

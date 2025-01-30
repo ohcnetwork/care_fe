@@ -6,7 +6,7 @@ CARE now uses TanStack Query (formerly React Query) as its data fetching solutio
 
 For new API integrations, we recommend using TanStack Query with `query` utility function. This is a wrapper around `fetch` that works seamlessly with TanStack Query. It handles response parsing, error handling, setting headers, and more.
 
-```tsx
+````tsx
 import { useQuery } from "@tanstack/react-query";
 import query from "@/Utils/request/query";
 
@@ -90,7 +90,7 @@ useQuery({
     silent: true  // Optional: suppress error notifications
   })
 });
-```
+````
 
 ### Debounced Queries
 
@@ -99,18 +99,18 @@ For search inputs or other scenarios requiring debounced API calls, use `query.d
 ```tsx
 function SearchComponent() {
   const [search, setSearch] = useState("");
-  
+
   const { data } = useQuery({
-    queryKey: ['search', search],
+    queryKey: ["search", search],
     queryFn: query.debounced(routes.search, {
       queryParams: { q: search },
-      debounceInterval: 500 // Optional: defaults to 500ms
+      debounceInterval: 500, // Optional: defaults to 500ms
     }),
-    enabled: search.length > 0
+    enabled: search.length > 0,
   });
 
   return (
-    <Input 
+    <Input
       value={search}
       onChange={(e) => setSearch(e.target.value)}
       placeholder="Search..."
@@ -127,7 +127,7 @@ All API errors are now handled globally. Common scenarios like:
 
 - Session expiry -> Redirects to /session-expired
 - Bad requests (400/406) -> Shows error notification
-are automatically handled.
+  are automatically handled.
 
 Use the `silent: true` option to suppress error notifications for specific queries.
 
@@ -137,6 +137,7 @@ For data mutations, we provide a `mutate` utility that works seamlessly with Tan
 
 ```tsx
 import { useMutation } from "@tanstack/react-query";
+
 import mutate from "@/Utils/request/mutate";
 
 function CreatePrescription({ consultationId }: { consultationId: string }) {
@@ -150,8 +151,10 @@ function CreatePrescription({ consultationId }: { consultationId: string }) {
   });
 
   return (
-    <Button 
-      onClick={() => createPrescription({ medicineId: "123", dosage: "1x daily" })}
+    <Button
+      onClick={() =>
+        createPrescription({ medicineId: "123", dosage: "1x daily" })
+      }
       disabled={isPending}
     >
       Create Prescription
@@ -164,8 +167,8 @@ function UpdatePatient({ patientId }: { patientId: string }) {
   const { mutate: updatePatient } = useMutation({
     mutationFn: mutate(PatientRoutes.update, {
       pathParams: { id: patientId },
-      silent: true // Optional: suppress error notifications
-    })
+      silent: true, // Optional: suppress error notifications
+    }),
   });
 
   const handleSubmit = (data: PatientData) => {
@@ -179,6 +182,7 @@ function UpdatePatient({ patientId }: { patientId: string }) {
 ### mutate
 
 `mutate` is our wrapper around the API call functionality that works with TanStack Query's `useMutation`. It:
+
 - Handles request body serialization
 - Sets appropriate headers
 - Integrates with our global error handling
@@ -186,24 +190,24 @@ function UpdatePatient({ patientId }: { patientId: string }) {
 
 ```typescript
 interface APICallOptions {
-  pathParams?: Record<string, string>;  // URL parameters
-  queryParams?: QueryParams;            // Query string parameters
-  body?: TBody;                         // Request body
-  silent?: boolean;                     // Suppress error notifications
-  headers?: HeadersInit;                // Additional headers
+  pathParams?: Record<string, string>; // URL parameters
+  queryParams?: QueryParams; // Query string parameters
+  body?: TBody; // Request body
+  silent?: boolean; // Suppress error notifications
+  headers?: HeadersInit; // Additional headers
 }
 
 // Basic usage
 useMutation({
-  mutationFn: mutate(routes.users.create)
+  mutationFn: mutate(routes.users.create),
 });
 
 // With parameters
 useMutation({
   mutationFn: mutate(routes.users.update, {
     pathParams: { id },
-    silent: true  // Optional: suppress error notifications
-  })
+    silent: true, // Optional: suppress error notifications
+  }),
 });
 ```
 
@@ -223,11 +227,14 @@ Here's the same API call implemented both ways:
 ```tsx
 // Legacy Pattern (existing code)
 function LegacyComponent({ id }) {
-  const { data, loading, error, refetch } = useTanStackQueryInstead(UserRoutes.getUser, {
-    pathParams: { id },
-    prefetch: true,
-    refetchOnWindowFocus: false
-  });
+  const { data, loading, error, refetch } = useTanStackQueryInstead(
+    UserRoutes.getUser,
+    {
+      pathParams: { id },
+      prefetch: true,
+      refetchOnWindowFocus: false,
+    },
+  );
 }
 
 // Modern Pattern (new code)
@@ -235,10 +242,10 @@ function ModernComponent({ id }) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [UserRoutes.getUser.path, id],
     queryFn: query(UserRoutes.getUser, {
-      pathParams: { id }
+      pathParams: { id },
     }),
     enabled: true,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 }
 ```
@@ -253,7 +260,7 @@ When migrating from `useTanStackQueryInstead` to direct TanStack Query usage:
   prefetch: true      -> enabled: true
   loading            -> isLoading
   refetchOnWindowFocus: false -> refetchOnWindowFocus: false
-  
+
   // Response structure
   data               -> data (direct access, no .data property)
   res.status         -> Use error handling or onError callback
@@ -264,37 +271,40 @@ When migrating from `useTanStackQueryInstead` to direct TanStack Query usage:
 ### Common Patterns
 
 1. **Conditional Fetching**:
+
 ```tsx
 // Legacy
-useTanStackQueryInstead(route, { prefetch: shouldFetch })
+useTanStackQueryInstead(route, { prefetch: shouldFetch });
 
 // Modern
 useQuery({
   queryKey: [route.path],
   queryFn: query(route),
-  enabled: shouldFetch
-})
+  enabled: shouldFetch,
+});
 ```
 
 2. **With Parameters**:
+
 ```tsx
 // Legacy
-useTanStackQueryInstead(route, { 
-  pathParams: { id }, 
-  query: { filter } 
-})
+useTanStackQueryInstead(route, {
+  pathParams: { id },
+  query: { filter },
+});
 
 // Modern
 useQuery({
   queryKey: [route.path, id, filter],
   queryFn: query(route, {
     pathParams: { id },
-    queryParams: { filter }
-  })
-})
+    queryParams: { filter },
+  }),
+});
 ```
 
 3. **Error Handling**:
+
 ```tsx
 // Legacy
 const { error, res } = useTanStackQueryInstead(route);
@@ -304,10 +314,10 @@ if (res?.status === 403) handleForbidden();
 useQuery({
   queryKey: [route.path],
   queryFn: query(route, {
-    silent: true // Optional: suppress error notifications
-  })
+    silent: true, // Optional: suppress error notifications
+  }),
   // Error handling is now done globally
-})
+});
 ```
 
 ## Legacy Support: `useTanStackQueryInstead`
@@ -319,9 +329,12 @@ import { useTanStackQueryInstead } from "@care/request";
 import FooRoutes from "@foo/routes";
 
 export default function FooDetails({ children, id }) {
-  const { res, data, loading, error } = useTanStackQueryInstead(FooRoutes.getFoo, {
-    pathParams: { id },
-  });
+  const { res, data, loading, error } = useTanStackQueryInstead(
+    FooRoutes.getFoo,
+    {
+      pathParams: { id },
+    },
+  );
 
   if (loading) return <Loading />;
 

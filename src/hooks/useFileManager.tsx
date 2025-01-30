@@ -1,16 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import DialogModal from "@/components/Common/Dialog";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
 import { StateInterface } from "@/components/Files/FileUpload";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FileUploadModel } from "@/components/Patient/models";
 
@@ -167,7 +171,7 @@ export default function useFileManager(
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
-    onArchive && onArchive();
+    onArchive?.();
   };
 
   const archiveFile = (
@@ -217,7 +221,7 @@ export default function useFileManager(
     onSuccess: (_, { associating_id }) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
-      onEdit && onEdit();
+      onEdit?.();
       queryClient.invalidateQueries({
         queryKey: ["files", fileType, associating_id],
       });
@@ -290,22 +294,29 @@ export default function useFileManager(
           className="mx-2 my-4 flex w-full flex-col"
         >
           <div>
-            <TextAreaFormField
+            <Label className="text-gray-800 mb-2">
+              <Trans
+                i18nKey="state_reason_for_archiving"
+                values={{ name: archiveDialogueOpen?.name }}
+                components={{ strong: <strong /> }}
+              />
+            </Label>
+            <Textarea
               name="editFileName"
               id="archive-file-reason"
-              label={
-                <span>
-                  State the reason for archiving{" "}
-                  <b>{archiveDialogueOpen?.name}</b> file?
-                </span>
-              }
               rows={6}
               required
               placeholder="Type the reason..."
               value={archiveReason}
-              onChange={(e) => setArchiveReason(e.value)}
-              error={archiveReasonError}
+              onChange={(e) => setArchiveReason(e.target.value)}
+              className={cn(
+                archiveReasonError &&
+                  "border-red-500 focus-visible:ring-red-500",
+              )}
             />
+            {archiveReasonError && (
+              <p className="text-sm text-red-500">{archiveReasonError}</p>
+            )}
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
             <Button
@@ -507,7 +518,7 @@ export default function useFileManager(
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
       toast.success(t("file_download_completed"));
-    } catch (err) {
+    } catch {
       toast.error(t("file_download_failed"));
     }
   };

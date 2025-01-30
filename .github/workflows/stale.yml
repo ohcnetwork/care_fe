@@ -5,10 +5,10 @@ on:
 
 jobs:
   stale:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     if: github.repository == 'ohcnetwork/care_fe'
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-label: "stale"

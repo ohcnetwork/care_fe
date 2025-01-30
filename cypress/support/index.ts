@@ -1,4 +1,4 @@
-import { ErrorMessageItem } from "./commands";
+import { ErrorMessageItem } from "@/support/commands";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -16,7 +16,8 @@ declare global {
       clickCancelButton(buttonText?: string): Chainable<Element>;
       typeAndSelectOption(
         element: string,
-        referance: string,
+        reference: string,
+        skipVerification?: boolean,
       ): Chainable<Element>;
       clickAndMultiSelectOption(
         selector: string,

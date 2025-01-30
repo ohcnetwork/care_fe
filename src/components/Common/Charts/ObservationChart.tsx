@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { Avatar } from "@/components/Common/Avatar";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { ObservationAnalyzeResponse } from "@/types/emr/observation";
 import { Code } from "@/types/questionnaire/code";
 
-import { Avatar } from "../Avatar";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 
 export type ObservationPlotConfig = {

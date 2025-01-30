@@ -210,7 +210,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         </div>
 
         <div>
-          <ScrollArea className="h-[calc(100vh-24rem)] -mr-3 pr-3 pb-4">
+          <ScrollArea className="max-h-[calc(100vh-18rem)] overflow-auto -mr-3 pr-3 pb-4">
             {view === "schedule" && (
               <ScheduleTemplates
                 facilityId={facilityId}
@@ -282,7 +282,7 @@ function DayDetailsPopover({
         </Button>
       </div>
 
-      <ScrollArea className="h-[22rem]">
+      <ScrollArea className="max-h-[22rem] overflow-auto">
         {templates.map((template) => (
           <div key={template.id} className="border-t pt-3 mt-3">
             <div className="flex items-center">
