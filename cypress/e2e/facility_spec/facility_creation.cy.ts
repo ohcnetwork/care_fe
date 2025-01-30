@@ -11,11 +11,14 @@ describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
 
-  beforeEach(() => {
-    // Set larger viewport to ensure all elements are visible
-    cy.viewport(1920, 1080);
-    cy.visit("/login");
+  before(() => {
     cy.loginByApi("nurse");
+  });
+
+  beforeEach(() => {
+    cy.viewport(1920, 1080);
+    cy.loginByApi("nurse");
+    cy.visit("/");
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {

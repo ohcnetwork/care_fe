@@ -1,86 +1,25 @@
 import "cypress-localstorage-commands";
 
-const LOCAL_STORAGE_MEMORY = {};
-
 Cypress.Commands.add("loginByApi", (role: string) => {
-  const token = LOCAL_STORAGE_MEMORY["care_token"];
+  const sessionName = `login-${role}`;
 
-  if (!token) {
+  return cy.session(sessionName, () => {
+    cy.visit("/login");
     cy.fixture("users").then((users) => {
       const user = users[role];
-
       if (!user) {
         throw new Error(`User role "${role}" not found in users fixture`);
       }
 
-      // First do UI login to get tokens
       cy.get('[data-cy="username"]').type(user.username);
       cy.get('[data-cy="password"]').type(user.password);
       cy.get('[data-cy="submit"]').click();
 
-      // Verify successful login by checking we're not on login page
+      // Wait for successful login
       cy.url().should("not.include", "/login");
-
-      // Save session after successful login
-      Object.keys(localStorage).forEach((key) => {
-        LOCAL_STORAGE_MEMORY[key] = localStorage[key];
-      });
     });
-  } else {
-    // If token exists, just restore the session
-    Object.keys(LOCAL_STORAGE_MEMORY).forEach((key) => {
-      localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
-    });
-  }
+  });
 });
-
-Cypress.on("uncaught:exception", () => {
-  // returning false here prevents Cypress from
-  // failing the test
-  return false;
-});
-
-/**
- * getAttached(selector)
- * getAttached(selectorFn)
- *
- * Waits until the selector finds an attached element, then yields it (wrapped).
- * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
- */
-Cypress.Commands.add("getAttached", (selector: string) => {
-  const getElement =
-    typeof selector === "function"
-      ? selector
-      : ($d: JQuery<Document>) =>
-          $d.find(selector) as unknown as JQuery<HTMLElement>;
-
-  let $el: JQuery<HTMLElement> | null = null;
-
-  return cy
-    .document()
-    .should(($d: Document) => {
-      $el = getElement(Cypress.$($d));
-      // Ensure $el is an HTMLElement before checking if it is detached
-      if ($el.length && $el[0] instanceof HTMLElement) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        expect(Cypress.dom.isDetached($el[0])).to.be.false; // Access the first HTMLElement
-      } else {
-        throw new Error("Element is not an HTMLElement or is detached.");
-      }
-    })
-    .then(() => cy.wrap($el));
-});
-
-Cypress.Commands.add(
-  "awaitUrl",
-  (url: string, disableLoginVerification = false) => {
-    cy.intercept(/getcurrentuser/).as("currentuser");
-    cy.visit(url);
-    disableLoginVerification
-      ? cy.wait("@currentuser")
-      : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
-  },
-);
 
 Cypress.Commands.add("verifyNotification", (text: string) => {
   return cy
@@ -91,10 +30,6 @@ Cypress.Commands.add("verifyNotification", (text: string) => {
     .then(() => {
       cy.closeNotification();
     });
-});
-
-Cypress.Commands.add("clearAllFilters", () => {
-  return cy.get("#clear-all-filters").click();
 });
 
 Cypress.Commands.add("clickSubmitButton", (buttonText = "Submit") => {

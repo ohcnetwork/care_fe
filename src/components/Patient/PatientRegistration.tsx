@@ -64,7 +64,7 @@ import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
 
 interface PatientRegistrationPageProps {
-  facilityId: string;
+  facilityId?: string;
   patientId?: string;
 }
 
@@ -219,11 +219,13 @@ export default function PatientRegistration(
       return;
     }
 
-    createPatient({
-      ...values,
-      facility: facilityId,
-      ward_old: undefined,
-    });
+    if (facilityId) {
+      createPatient({
+        ...values,
+        facility: facilityId,
+        ward_old: undefined,
+      });
+    }
   }
 
   const sidebarItems = [
@@ -511,8 +513,12 @@ export default function PatientRegistration(
                 }}
               >
                 <TabsList className="mb-2" defaultValue="dob">
-                  <TabsTrigger value="dob">{t("date_of_birth")}</TabsTrigger>
-                  <TabsTrigger value="age">{t("age")}</TabsTrigger>
+                  <TabsTrigger value="dob" data-cy="dob-tab">
+                    {t("date_of_birth")}
+                  </TabsTrigger>
+                  <TabsTrigger value="age" data-cy="age-tab">
+                    {t("age")}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="dob">
                   <FormField
