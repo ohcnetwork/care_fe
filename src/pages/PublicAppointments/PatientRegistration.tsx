@@ -267,19 +267,30 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="space-y-3">
                     <FormLabel required>{t("sex")}</FormLabel>
                     <FormControl>
                       <RadioGroup
-                        value={field.value}
+                        {...field}
                         onValueChange={field.onChange}
-                        className="flex items-center gap-4"
+                        value={field.value}
+                        className="flex gap-5 flex-wrap"
                       >
                         {GENDER_TYPES.map((g) => (
-                          <Fragment key={g.id}>
-                            <RadioGroupItem value={g.id.toString()} />
-                            <Label>{g.text}</Label>
-                          </Fragment>
+                          <FormItem
+                            key={g.id}
+                            className="flex items-center space-x-2 space-y-0"
+                          >
+                            <FormControl>
+                              <RadioGroupItem
+                                value={g.id}
+                                data-cy={`gender-radio-${g.id.toLowerCase()}`}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {t(`GENDER__${g.id}`)}
+                            </FormLabel>
+                          </FormItem>
                         ))}
                       </RadioGroup>
                     </FormControl>
