@@ -131,32 +131,32 @@ describe("Patient Management", () => {
         ENCOUNTER_PRIORITY,
       ]);
     });
+  });
 
-    it("search patient with phone number | Create a new encounter", () => {
-      facilityCreation.selectFacility("GHC Trikaripur");
-      patientCreation
-        .clickSearchPatients()
-        .searchPatient(TEST_PHONE)
-        .verifySearchResults(PATIENT_DETAILS)
-        .selectPatientFromResults(PATIENT_DETAILS.name)
-        .enterYearOfBirth("1999")
-        .clickVerifyButton();
+  it("search patient with phone number | Create a new encounter", () => {
+    facilityCreation.selectFacility("GHC Trikaripur");
+    patientCreation
+      .clickSearchPatients()
+      .searchPatient(TEST_PHONE)
+      .verifySearchResults(PATIENT_DETAILS)
+      .selectPatientFromResults(PATIENT_DETAILS.name)
+      .enterYearOfBirth("1999")
+      .clickVerifyButton();
 
-      patientVerify
-        .verifyPatientName(PATIENT_DETAILS.name)
-        .verifyCreateEncounterButton()
-        .clickCreateEncounter()
-        .selectEncounterType(ENCOUNTER_TYPE)
-        .selectEncounterStatus(ENCOUNTER_STATUS)
-        .selectEncounterPriority(ENCOUNTER_PRIORITY)
-        .clickSubmitEncounter()
-        .assertEncounterCreationSuccess();
+    patientVerify
+      .verifyPatientName(PATIENT_DETAILS.name)
+      .verifyCreateEncounterButton()
+      .clickCreateEncounter()
+      .selectEncounterType(ENCOUNTER_TYPE)
+      .selectEncounterStatus(ENCOUNTER_STATUS)
+      .selectEncounterPriority(ENCOUNTER_PRIORITY)
+      .clickSubmitEncounter()
+      .assertEncounterCreationSuccess();
 
-      patientDashboard.verifyEncounterPatientInfo([
-        ENCOUNTER_TYPE,
-        ENCOUNTER_STATUS,
-        ENCOUNTER_PRIORITY,
-      ]);
-    });
+    patientDashboard.verifyEncounterPatientInfo([
+      ENCOUNTER_TYPE,
+      ENCOUNTER_STATUS,
+      ENCOUNTER_PRIORITY,
+    ]);
   });
 });
