@@ -9,6 +9,7 @@ import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
+import { Updates } from "./patientUpdates";
 
 export interface PatientProps {
   facilityId: string;
