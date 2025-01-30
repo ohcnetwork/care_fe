@@ -59,7 +59,7 @@ export function AppointmentSlotPicker({
     const isSelected = isSameDay(date, selectedDate);
     const isBeforeToday = isBefore(date, startOfToday());
     const availability = heatmapQuery.data?.[dateQueryString(date)];
-    const isToday = date.toDateString() === new Date().toDateString();
+    const isToday = isSameDay(date, new Date());
 
     if (
       heatmapQuery.isFetching ||
