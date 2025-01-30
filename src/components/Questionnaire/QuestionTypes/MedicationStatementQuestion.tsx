@@ -60,6 +60,7 @@ import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
+  encounterId: string;
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
@@ -90,6 +91,7 @@ export function MedicationStatementQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
+  encounterId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
@@ -109,6 +111,7 @@ export function MedicationStatementQuestion({
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),

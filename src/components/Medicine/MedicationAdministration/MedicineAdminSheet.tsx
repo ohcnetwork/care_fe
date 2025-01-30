@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Search } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -21,6 +22,7 @@ import medicationAdministrationApi from "@/types/emr/medicationAdministration/me
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
+import { createMedicationAdministrationRequest } from "./utils";
 
 interface MedicineAdminSheetProps {
   open: boolean;
@@ -95,19 +97,7 @@ export function MedicineAdminSheet({
         if (medicine && hasMedicationInfo(medicine)) {
           setAdministrationRequests((prev) => ({
             ...prev,
-            [id]: {
-              request: id,
-              encounter: encounterId,
-              medication: {
-                code: medicine.medication.code,
-                display: medicine.medication.display,
-                system: medicine.medication.system,
-              },
-              occurrence_period_start: new Date().toISOString(),
-              occurrence_period_end: new Date().toISOString(),
-              note: "",
-              status: "completed",
-            },
+            [id]: createMedicationAdministrationRequest(medicine, encounterId),
           }));
         }
       } else {
@@ -162,13 +152,15 @@ export function MedicineAdminSheet({
         >
           <SheetHeader className="space-y-4 flex-shrink-0 mr-2">
             <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl">Administer Medicines</SheetTitle>
+              <SheetTitle className="text-xl">
+                {t("administer_medicines")}
+              </SheetTitle>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search Medicine"
+                  placeholder={t("search_medicine")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-8"
@@ -245,14 +237,14 @@ export function MedicineAdminSheet({
                   setAdministrationRequests({});
                 }}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 type="submit"
                 className="bg-[#006D4C] hover:bg-[#006D4C]/90"
                 disabled={selectedMedicines.size === 0}
               >
-                Administer Medicines ({selectedMedicines.size})
+                {t("administer_medicines")} ({selectedMedicines.size})
               </Button>
             </div>
           </SheetFooter>

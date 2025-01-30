@@ -1,33 +1,41 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
+import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import Loading from "@/components/Common/Loading";
+import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import routes from "@/Utils/request/api";
+import routes, { Type } from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
   MedicationAdministration,
   MedicationAdministrationRequest,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
 import { MedicineAdminSheet } from "./MedicineAdminSheet";
+import { createMedicationAdministrationRequest } from "./utils";
 
 interface AdministrationTabProps {
-  loadingAdministrations: boolean;
-  activeMedications: MedicationRequestRead[] | undefined;
   patientId: string;
   encounterId: string;
 }
@@ -40,13 +48,12 @@ const timeSlots = [
 ];
 
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
-  loadingAdministrations,
-  activeMedications,
   patientId,
   encounterId,
 }) => {
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
+  const [showStopped, setShowStopped] = useState(false);
   const [endSlotIndex, setEndSlotIndex] = useState(() => {
     const hour = currentDate.getHours();
     if (hour < 6) return 0;
@@ -77,6 +84,34 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     return slots;
   }, [endSlotDate, endSlotIndex]);
 
+  const { data: activeMedications, refetch: refetchActive } = useQuery({
+    queryKey: ["medication_requests_active", patientId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId: patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 100,
+        status: ["active", "on-hold", "draft", "unknown"].join(","),
+      },
+    }),
+    enabled: !!patientId,
+  });
+
+  const { data: stoppedMedications, refetch: refetchStopped } = useQuery({
+    queryKey: ["medication_requests_stopped", patientId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId: patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 100,
+        status: ["ended", "completed", "cancelled", "entered_in_error"].join(
+          ",",
+        ),
+      },
+    }),
+    enabled: !!patientId,
+  });
+
   const { data: administrations, refetch: refetchAdministrations } = useQuery({
     queryKey: ["medication_administrations", patientId, visibleSlots],
     queryFn: query(routes.medicationAdministration.list, {
@@ -103,6 +138,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }),
     enabled: !!patientId && !!visibleSlots?.length,
   });
+
+  const medications = showStopped
+    ? [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ]
+    : activeMedications?.results || [];
+
+  const isLoading = !activeMedications || !stoppedMedications;
 
   // Get last administered date for each medication
   const lastAdministeredDates = administrations?.results?.reduce(
@@ -215,32 +259,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<MedicationAdministrationRequest | null>(null);
 
   const handleAdminister = (medication: MedicationRequestRead) => {
-    // Create new administration request
-    setAdministrationRequest({
-      request: medication.id,
-      encounter: encounterId,
-      note: "",
-      occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      status: "completed",
-      medication: medication.medication,
-      // TODO: Undo comment after FE dosage type is fixed
-      // dosage: {
-      //   text: medication.dosage_instruction[0]?.text,
-      //   site: medication.dosage_instruction[0]?.site,
-      //   route: medication.dosage_instruction[0]?.route,
-      //   method: medication.dosage_instruction[0]?.method,
-      //   ...(medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity && {
-      //     dose: {
-      //       value:
-      //         medication.dosage_instruction[0].dose_and_rate.dose_quantity
-      //           .value,
-      //       unit: medication.dosage_instruction[0].dose_and_rate.dose_quantity
-      //         .unit,
-      //     },
-      //   }),
-      // },
-    });
+    setAdministrationRequest(
+      createMedicationAdministrationRequest(medication, encounterId),
+    );
     setSelectedMedication(medication);
     setDialogOpen(true);
   };
@@ -249,7 +270,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     medication: MedicationRequestRead,
     admin: MedicationAdministration,
   ) => {
-    // Convert existing administration to request
     setAdministrationRequest({
       id: admin.id,
       request: admin.request,
@@ -265,10 +285,45 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     setDialogOpen(true);
   };
 
-  return loadingAdministrations ? (
+  const { mutate: discontinueMedication } = useMutation({
+    mutationFn: mutate(
+      {
+        method: "POST",
+        path: `/api/v1/patient/${patientId}/medication/request/upsert/`,
+        TRes: Type<MedicationRequestRead[]>(),
+        TBody: Type<{ datapoints: MedicationRequestRead[] }>(),
+      },
+      {
+        pathParams: { patientId },
+      },
+    ),
+    onSuccess: () => {
+      refetchActive();
+      refetchStopped();
+    },
+  });
+
+  const handleDiscontinue = (medication: MedicationRequestRead) => {
+    discontinueMedication({
+      datapoints: [
+        {
+          ...medication,
+          status: "ended",
+          encounter: encounterId,
+        },
+      ],
+    });
+  };
+
+  return isLoading ? (
     <div className="min-h-[200px] flex items-center justify-center">
       <Loading />
     </div>
+  ) : !medications?.length ? (
+    <EmptyState
+      message="No Active Medications"
+      description="There are no medications to administer at this time"
+    />
   ) : (
     <div className="flex flex-col gap-2 m-2">
       <div className="flex justify-end">
@@ -278,7 +333,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           onClick={() => setIsSheetOpen(true)}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Administer Medicine
+          {t("administer_medicine")}
         </Button>
       </div>
 
@@ -291,7 +346,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="flex items-center gap-2 whitespace-break-spaces">
                   {lastModifiedDate && (
                     <div className="text-xs text-[#6b7280]">
-                      Last modified {formatDistanceToNow(lastModifiedDate)} ago
+                      {t("last_modified")}{" "}
+                      {formatDistanceToNow(lastModifiedDate)} {t("ago")}
                     </div>
                   )}
                 </div>
@@ -365,7 +421,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r ">
               {/* Headers */}
               <div className="p-4 font-medium text-sm border-t bg-[#F3F4F6] text-secondary-700">
-                Medicine:
+                {t("medicine")}:
               </div>
               {visibleSlots.map((slot, i) => (
                 <div
@@ -384,9 +440,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <div className="border-t bg-[#F3F4F6]" />
 
               {/* Medication rows */}
-              {activeMedications?.map((medication) => (
+              {medications?.map((medication) => (
                 <React.Fragment key={medication.id}>
-                  <div className="p-4 border-t">
+                  <div className={`p-4 border-t`}>
                     <div className="font-semibold truncate">
                       {medication.medication?.display}
                     </div>
@@ -400,6 +456,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                           As Needed / PRN
                         </span>
                       )}
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-md font-medium ${
+                          medication.status === "active"
+                            ? "text-emerald-900 bg-emerald-100"
+                            : "text-gray-900 bg-gray-100"
+                        }`}
+                      >
+                        {t(medication.status)}
+                      </span>
                     </div>
                     <div className="text-xs mt-1 font-medium truncate">
                       {formatDosage(medication.dosage_instruction[0])},{" "}
@@ -480,7 +545,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                             </div>
                           );
                         })}
-                        {isCurrentSlot && (
+                        {isCurrentSlot && medication.status === "active" && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -494,20 +559,48 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     );
                   })}
                   <div className="p-4 border-t flex justify-center">
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-0">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => {
+                            handleDiscontinue(medication);
+                            // Close the popover after clicking
+                            const button =
+                              document.activeElement as HTMLElement;
+                            button?.blur();
+                          }}
+                        >
+                          <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                          Discontinue
+                        </Button>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </React.Fragment>
               ))}
             </div>
           </div>
 
-          <div className="p-4 border-t border-[#e5e7eb] flex items-center gap-2">
-            <CareIcon icon="l-eye" className="h-4 w-4" />
-            <span className="text-sm">Hide </span>
-            <span className="text-sm font-medium">1 Stopped</span>
-            <span className="text-sm"> prescription(s)</span>
+          <div
+            className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+            onClick={() => setShowStopped(!showStopped)}
+          >
+            <CareIcon
+              icon={showStopped ? "l-eye-slash" : "l-eye"}
+              className="h-4 w-4"
+            />
+            <span className="text-sm underline">
+              {showStopped ? t("hide") : t("show")}{" "}
+              {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+              {t("prescriptions")}
+            </span>
           </div>
         </Card>
         <ScrollBar orientation="horizontal" />
@@ -539,7 +632,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             refetchAdministrations();
           }
         }}
-        medications={activeMedications || []}
+        medications={medications || []}
         lastAdministeredDates={lastAdministeredDates}
         patientId={patientId}
         encounterId={encounterId}

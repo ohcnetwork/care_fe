@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
+import { t } from "i18next";
 
 import { Label } from "@/components/ui/label";
 
@@ -25,38 +26,43 @@ export function MedicineItem({
       </h3>
       {lastAdministeredDate && (
         <p className="text-sm text-muted-foreground">
-          Last administered{" "}
-          {formatDistanceToNow(new Date(lastAdministeredDate))} ago
+          {t("last_administered")}{" "}
+          {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}
         </p>
       )}
       <p className="text-sm text-muted-foreground">
-        Prescribed {formatDistanceToNow(new Date(medication.created_date))} ago
-        by {medication.created_by?.first_name}{" "}
+        {t("prescribed")}{" "}
+        {formatDistanceToNow(new Date(medication.created_date))} {t("ago")}
+        {t("by")} {medication.created_by?.first_name}{" "}
         {medication.created_by?.last_name}
       </p>
 
       <div className="grid grid-cols-4 gap-4">
         <div>
-          <Label className="text-xs text-muted-foreground">Dosage</Label>
+          <Label className="text-xs text-muted-foreground">{t("dosage")}</Label>
           <p className="font-medium">
             {formatDosage(medication.dosage_instruction[0])}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">Frequency</Label>
+          <Label className="text-xs text-muted-foreground">
+            {t("frequency")}
+          </Label>
           <p className="font-medium">
             {getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
               ?.meaning || "-"}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">Route</Label>
+          <Label className="text-xs text-muted-foreground">{t("route")}</Label>
           <p className="font-medium">
-            {medication.dosage_instruction[0]?.route?.display || "Oral"}
+            {medication.dosage_instruction[0]?.route?.display}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">Duration</Label>
+          <Label className="text-xs text-muted-foreground">
+            {t("duration")}
+          </Label>
           <p className="font-medium">
             {medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
               ?.value || "-"}{" "}

@@ -125,6 +125,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                patientId={id}
               />
             )}
           </div>

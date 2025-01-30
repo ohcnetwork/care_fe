@@ -60,6 +60,7 @@ import {
 import { Question } from "@/types/questionnaire/question";
 
 interface AllergyQuestionProps {
+  encounterId: string;
   patientId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
@@ -116,6 +117,7 @@ export function AllergyQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
+  encounterId,
 }: AllergyQuestionProps) {
   const allergies =
     (questionnaireResponse.values?.[0]?.value as AllergyIntoleranceRequest[]) ||
@@ -126,6 +128,7 @@ export function AllergyQuestion({
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),

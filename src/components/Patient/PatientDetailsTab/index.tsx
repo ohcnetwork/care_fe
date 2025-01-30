@@ -1,7 +1,7 @@
+import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
-import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 
 import { Patient } from "@/types/emr/newPatient";
 
@@ -14,6 +14,7 @@ export interface PatientProps {
   facilityId: string;
   id: string;
   patientData: Patient;
+  patientId: string;
 }
 
 export const patientTabs = [
@@ -35,7 +36,7 @@ export const patientTabs = [
   },
   {
     route: "updates",
-    component: Updates,
+    component: QuestionnaireResponsesList,
   },
   {
     route: "resource_requests",

@@ -45,6 +45,7 @@ import {
 } from "@/types/questionnaire/form";
 
 interface DiagnosisQuestionProps {
+  encounterId: string;
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
@@ -83,6 +84,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
 }
 
 export function DiagnosisQuestion({
+  encounterId,
   patientId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
@@ -96,6 +98,7 @@ export function DiagnosisQuestion({
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),

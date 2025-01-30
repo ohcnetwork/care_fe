@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -71,8 +72,8 @@ export const MedicineAdminDialog = ({
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
               {administrationRequest.id
-                ? "Edit Administration"
-                : "Administer Medicine"}
+                ? t("edit_administration")
+                : t("administer_medicine")}
             </DialogTitle>
           </div>
         </DialogHeader>
@@ -89,14 +90,14 @@ export const MedicineAdminDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={isPending}>
             {isPending
-              ? "Saving..."
+              ? t("saving")
               : administrationRequest.id
-                ? "Update"
-                : "Administer Medicine"}
+                ? t("update")
+                : t("administer_medicine")}
           </Button>
         </DialogFooter>
       </DialogContent>

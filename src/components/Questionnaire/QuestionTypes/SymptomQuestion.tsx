@@ -46,6 +46,7 @@ import {
 } from "@/types/questionnaire/form";
 
 interface SymptomQuestionProps {
+  encounterId: string;
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
@@ -281,6 +282,7 @@ export function SymptomQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  encounterId,
 }: SymptomQuestionProps) {
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
@@ -290,6 +292,7 @@ export function SymptomQuestion({
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),
