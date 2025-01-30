@@ -23,7 +23,7 @@ import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { RESOURCE_CHOICES } from "@/common/constants";
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -33,8 +33,6 @@ import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 interface resourceProps {
   id: string;
 }
-
-const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const initForm: Partial<UpdateResourceRequest> = {
   assigned_facility: null,
@@ -205,9 +203,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 label="Status"
                 name="status"
                 value={state.form.status}
-                options={resourceStatusOptions}
+                options={RESOURCE_STATUS_CHOICES}
                 onChange={handleChange}
-                optionLabel={(option) => option}
+                optionLabel={(option) => t(`resource_status__${option}`)}
               />
             </div>
             <div className="md:col-span-1">

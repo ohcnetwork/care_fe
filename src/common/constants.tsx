@@ -162,16 +162,15 @@ export const RESOURCE_CATEGORY_CHOICES = [
   { id: "FINANCIAL", text: "Financial" },
   { id: "OTHERS", text: "Other" },
 ];
-
-export const RESOURCE_CHOICES: Array<OptionsType> = [
-  { id: 10, text: "PENDING" },
-  { id: 15, text: "ON HOLD" },
-  { id: 20, text: "APPROVED" },
-  { id: 30, text: "REJECTED" },
-  { id: 55, text: "TRANSPORTATION TO BE ARRANGED" },
-  { id: 70, text: "TRANSFER IN PROGRESS" },
-  { id: 80, text: "COMPLETED" },
-];
+export const RESOURCE_STATUS_CHOICES = [
+  { icon: "l-clock", text: "pending" },
+  { icon: "l-check", text: "approved" },
+  { icon: "l-ban", text: "rejected" },
+  { icon: "l-file-slash", text: "cancelled" },
+  { icon: "l-truck", text: "transportation_to_be_arranged" },
+  { icon: "l-spinner", text: "transfer_in_progress" },
+  { icon: "l-check-circle", text: "completed" },
+] as const;
 
 export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 1, text: "created_date", desc: "ASC Created Date" },
