@@ -156,7 +156,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               setIsPastTime(newValue === "yes");
               if (newValue === "no") {
                 // Set both times to current time
-                const now = new Date().toISOString().slice(0, 16);
+                const now = new Date().toISOString();
                 onChange({
                   ...administrationRequest,
                   occurrence_period_start: now,

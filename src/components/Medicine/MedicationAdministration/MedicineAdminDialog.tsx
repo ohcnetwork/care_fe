@@ -63,8 +63,6 @@ export const MedicineAdminDialog = ({
     });
   };
 
-  console.log("patientId", patientId);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
