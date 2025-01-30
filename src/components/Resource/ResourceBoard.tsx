@@ -43,7 +43,7 @@ export default function BoardView() {
     cacheBlacklist: ["title"],
   });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
-  // eslint-disable-next-line
+
   const appliedFilters = formatFilter(qParams);
   const { t } = useTranslation();
 

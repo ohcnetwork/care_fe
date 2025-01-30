@@ -24,6 +24,7 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
+import LocationRoutes from "./routes/LocationRoutes";
 import OrganizationRoutes from "./routes/OrganizationRoutes";
 import QuestionnaireRoutes from "./routes/questionnaireRoutes";
 
@@ -56,6 +57,7 @@ const Routes: AppRoutes = {
   ...UserRoutes,
   ...OrganizationRoutes,
   ...QuestionnaireRoutes,
+  ...LocationRoutes,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,

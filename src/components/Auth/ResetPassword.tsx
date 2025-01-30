@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/input-password";
 
-import { validateRule } from "@/components/Users/UserFormValidations";
+import { ValidationHelper } from "@/components/Users/UserFormValidations";
 
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
@@ -27,9 +27,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
-  const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
-  const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
-    useState(false);
+  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
   const handleChange = (e: any) => {
@@ -124,40 +122,41 @@ const ResetPassword = (props: ResetPasswordProps) => {
               name="password"
               placeholder={t("new_password")}
               onChange={handleChange}
-              onFocus={() => setPasswordInputInFocus(true)}
-              onBlur={() => setPasswordInputInFocus(false)}
+              onFocus={() => setIsPasswordFieldFocused(true)}
+              onBlur={() => setIsPasswordFieldFocused(false)}
             />
             {errors.password && (
               <div className="mt-1 text-red-500 text-xs" data-input-error>
                 {errors.password}
               </div>
             )}
-            {passwordInputInFocus && (
-              <div className="text-sm mt-2 pl-2 text-secondary-500">
-                {validateRule(
-                  form.password?.length >= 8,
-                  t("password_length_validation"),
-                  !form.password,
-                  t("password_length_met"),
-                )}
-                {validateRule(
-                  form.password !== form.password.toUpperCase(),
-                  t("password_lowercase_validation"),
-                  !form.password,
-                  t("password_lowercase_met"),
-                )}
-                {validateRule(
-                  form.password !== form.password.toLowerCase(),
-                  t("password_uppercase_validation"),
-                  !form.password,
-                  t("password_uppercase_met"),
-                )}
-                {validateRule(
-                  /\d/.test(form.password),
-                  t("password_number_validation"),
-                  !form.password,
-                  t("password_number_met"),
-                )}
+            {isPasswordFieldFocused && (
+              <div
+                className="text-small mt-2 pl-2 text-secondary-500"
+                aria-live="polite"
+              >
+                <ValidationHelper
+                  isInputEmpty={!form.password}
+                  successMessage={t("password_success_message")}
+                  validations={[
+                    {
+                      description: "password_length_validation",
+                      fulfilled: form.password?.length >= 8,
+                    },
+                    {
+                      description: "password_lowercase_validation",
+                      fulfilled: /[a-z]/.test(form.password),
+                    },
+                    {
+                      description: "password_uppercase_validation",
+                      fulfilled: /[A-Z]/.test(form.password),
+                    },
+                    {
+                      description: "password_number_validation",
+                      fulfilled: /\d/.test(form.password),
+                    },
+                  ]}
+                />
               </div>
             )}
           </div>
@@ -167,23 +166,12 @@ const ResetPassword = (props: ResetPasswordProps) => {
               name="confirm"
               placeholder={t("confirm_password")}
               onChange={handleChange}
-              onFocus={() => setConfirmPasswordInputInFocus(true)}
-              onBlur={() => setConfirmPasswordInputInFocus(false)}
             />
             {errors.confirm && (
               <div className="mt-1 text-red-500 text-xs" data-input-error>
                 {errors.confirm}
               </div>
             )}
-            {confirmPasswordInputInFocus &&
-              form.confirm.length > 0 &&
-              form.password.length > 0 &&
-              validateRule(
-                form.confirm === form.password,
-                t("password_mismatch"),
-                !form.password && form.password.length > 0,
-                t("password_match"),
-              )}
           </div>
         </div>
 
