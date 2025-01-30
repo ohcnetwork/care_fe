@@ -44,12 +44,12 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/organization/${id}`,
-      title: "Organizations",
+      path: `/departments/${id}`,
+      title: "Departments",
       icon: "d-hospital",
     },
     {
-      path: `/organization/${id}/users`,
+      path: `/departments/${id}/users`,
       title: "Users",
       icon: "d-people",
     },
@@ -98,9 +98,7 @@ export default function FacilityOrganizationLayout({
           {orgParents.reverse().map((parent) => (
             <>
               <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink
-                  href={`/facility/${facilityId}/organization/${parent.id}`}
-                >
+                <BreadcrumbLink href={`/departments/${parent.id}`}>
                   {parent.name}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -111,9 +109,7 @@ export default function FacilityOrganizationLayout({
           ))}
           <BreadcrumbItem key={org.id}>
             <BreadcrumbLink asChild>
-              <Link href={`/facility/${facilityId}/organization/${org.id}`}>
-                {org.name}
-              </Link>
+              <Link href={`/departments/${org.id}`}>{org.name}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>

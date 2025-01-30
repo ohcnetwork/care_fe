@@ -4,13 +4,12 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import FacilityOrganizationIndex from "@/pages/FacilityOrganization/FacilityOrganizationIndex";
-import FacilityOrganizationUsers from "@/pages/FacilityOrganization/FacilityOrganizationUsers";
-import FacilityOrganizationView from "@/pages/FacilityOrganization/FacilityOrganizationView";
-import LocationList from "@/pages/Location/LocationList";
-import LocationView from "@/pages/Location/LocationView";
-
 import { GeneralSettings } from "./general/general";
+import LocationList from "./locations/LocationList";
+import LocationView from "./locations/LocationView";
+import FacilityOrganizationIndex from "./organizations/FacilityOrganizationIndex";
+import FacilityOrganizationUsers from "./organizations/FacilityOrganizationUsers";
+import FacilityOrganizationView from "./organizations/FacilityOrganizationView";
 
 interface SettingsLayoutProps {
   facilityId: string;
