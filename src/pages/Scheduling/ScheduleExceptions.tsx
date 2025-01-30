@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,6 +10,14 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import Loading from "@/components/Common/Loading";
 
@@ -63,6 +72,7 @@ const ScheduleExceptionItem = (
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.delete, {
@@ -112,16 +122,36 @@ const ScheduleExceptionItem = (
             </span>
           </div>
         </div>
-        {/* working on alertdialog */}
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={isPending}
-          onClick={() => deleteException(undefined)}
-        >
-          <CareIcon icon="l-minus-circle" className="text-base" />
-          <span className="ml-2">{t("remove")}</span>
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="secondary" size="sm" disabled={isPending}>
+              <CareIcon icon="l-minus-circle" className="text-base" />
+              <span className="ml-2">{t("remove")}</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("are_you_sure")}</DialogTitle>
+              <DialogDescription>
+                {t("this_will_permanently_remove_the_exception")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  deleteException(undefined);
+                  setOpen(false);
+                }}
+              >
+                {t("remove")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       {/* TODO: Add this information */}
       {/* <div className="px-4 py-2">
