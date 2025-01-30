@@ -274,3 +274,10 @@ export const conditionalAttribute = <T>(
 ) => {
   return condition ? attributes : {};
 };
+
+export const conditionalArrayAttribute = <T>(
+  condition: boolean,
+  attributes: T[],
+) => {
+  return condition ? attributes : [];
+};

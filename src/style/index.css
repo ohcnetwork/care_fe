@@ -758,30 +758,6 @@ button:disabled,
   z-index: 100000 !important;
 }
 
-.warranty-card::before{
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -2;
-  background: url('/images/wave_scene.svg'), linear-gradient(to bottom right, #057a55, #03543f);
-  background-position: top right;
-  background-size: cover;
-}
-
-.warranty-card::after{
-  content : "";
-  position: absolute;
-  z-index: -1;
-  right: 0;
-  top: 0;
-  width: 50%;
-  height: 50%;
-  /*background: url('/images/circle.svg') no-repeat center;*/
-}
-
 .login-hero{
   background: linear-gradient(to bottom right, rgba(4, 78, 55, 0.466), rgba(2, 54, 40, 0.521)), url('/images/wave_scene_square.png');
   background-size: cover;

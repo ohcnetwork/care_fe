@@ -5,6 +5,8 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel, UserModel } from "@/components/Users/models";
 
+import { conditionalArrayAttribute } from "@/Utils/utils";
+
 interface NavigationLink {
   name: string;
   url: string;
@@ -39,20 +41,19 @@ function generateFacilityLinks(
     { name: t("encounters"), url: `${baseUrl}/encounters`, icon: "d-patient" },
     { name: t("resource"), url: "/resource", icon: "d-book-open" },
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
+    ...conditionalArrayAttribute(!!user, [
+      {
+        name: t("my_schedules"),
+        url: `${baseUrl}/users/${user?.username}/availability`,
+        icon: "d-calendar",
+      },
+    ]),
     {
-      name: t("organization"),
-      url: `${baseUrl}/organization`,
-      icon: "d-book-open",
+      name: t("settings"),
+      url: `${baseUrl}/settings`,
+      icon: "l-setting",
     },
   ];
-
-  if (user) {
-    links.push({
-      name: t("my_schedules"),
-      url: `${baseUrl}/users/${user.username}/availability`,
-      icon: "d-calendar",
-    });
-  }
 
   return links;
 }

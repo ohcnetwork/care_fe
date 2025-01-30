@@ -95,14 +95,14 @@ export default function CreateFacilityOrganizationSheet({
       <SheetTrigger asChild>
         <Button variant="primary_gradient">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Create Organization
+          Create Department/Team
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Create Organization</SheetTitle>
+          <SheetTitle>Create Department/Team</SheetTitle>
           <SheetDescription>
-            Create a new organization in this facility.
+            Create a new department/team in this facility.
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
@@ -111,7 +111,7 @@ export default function CreateFacilityOrganizationSheet({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter organization name"
+              placeholder="Enter department/team name"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function CreateFacilityOrganizationSheet({
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter organization description (optional)"
+              placeholder="Enter department/team description (optional)"
             />
           </div>
 

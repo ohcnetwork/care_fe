@@ -19,6 +19,7 @@ import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EditFacilitySheet from "./components/EditFacilitySheet";
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -35,13 +36,13 @@ export default function OrganizationFacilities({
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, cacheBlacklist: ["name"] });
 
-  const { data: facilities, isLoading } = useQuery({
+  const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
     queryFn: query.debounced(routes.facility.list, {
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         organization: id,
         name: qParams.name,
         ...advancedFilter.filter,
@@ -58,7 +59,14 @@ export default function OrganizationFacilities({
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("facilities")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <EntityBadge
+              title={t("facilities")}
+              count={facilities?.count}
+              isFetching={isFetching}
+              customTranslation="facility_count"
+            />
+          </div>
           <AddFacilitySheet organizationId={id} />
         </div>
 
@@ -82,7 +90,7 @@ export default function OrganizationFacilities({
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
           data-cy="facility-cards"
         >
-          {isLoading ? (
+          {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
