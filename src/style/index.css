@@ -31,12 +31,9 @@
 
 html {
     @apply w-full h-full;
-    min-height: -webkit-fill-available;
 }
 
 body {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
     font-family: "Figtree", sans-serif;
     color: #453c52;
     @apply font-sans text-secondary-900 w-full h-full antialiased;
