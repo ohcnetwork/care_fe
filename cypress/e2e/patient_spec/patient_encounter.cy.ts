@@ -6,8 +6,8 @@ const patientEncounter = new PatientEncounter();
 
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
-    // Login and set up any necessary test state
-    cy.visit("/login");
+    cy.loginByApi("devnurse");
+    cy.visit("/");
   });
 
   it("Create a new ABG questionnaire and verify the values", () => {
@@ -15,7 +15,6 @@ describe("Patient Encounter Questionnaire", () => {
       pco2: "120",
       po2: "80",
     };
-    cy.loginByApi("devnurse");
     facilityCreation.selectFacility("GHC Trikaripur");
 
     // Chain the methods instead of multiple separate calls

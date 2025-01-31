@@ -39,7 +39,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
+import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -269,8 +269,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  <ManageEncounterOrganizations
-                    encounter={encounter}
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
                     facilityId={encounter.facility.id}
                     trigger={
                       <div className="flex flex-wrap gap-2">
