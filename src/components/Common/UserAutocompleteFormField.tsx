@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { Autocomplete } from "@/components/Form/FormFields/Autocomplete";
@@ -10,7 +11,7 @@ import { UserType } from "@/components/Users/UserFormValidations";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import {
   classNames,
   formatName,
@@ -33,35 +34,38 @@ type UserSearchProps = BaseProps & {
 
 export default function UserAutocomplete(props: UserSearchProps) {
   const field = useFormFieldPropsResolver(props);
-  const [query, setQuery] = useState("");
+  const [queryParam, setQueryParam] = useState("");
   const [disabled, setDisabled] = useState(false);
 
-  const { data, loading } = useTanStackQueryInstead(routes.userList, {
-    query: {
-      home_facility: props.homeFacility,
-      user_type: props.userType,
-      search_text: query,
-      limit: 50,
-      offset: 0,
-    },
+  const { data, isLoading } = useQuery({
+    queryKey: ["user", props.homeFacility, props.facilityId],
+    queryFn: query(routes.userList, {
+      queryParams: {
+        home_facility: props.homeFacility,
+        user_type: props.userType,
+        search_text: queryParam,
+        limit: 50,
+        offset: 0,
+      },
+    }),
   });
 
   useEffect(() => {
     if (
-      loading ||
-      query ||
+      isLoading ||
+      queryParam ||
       !field.required ||
       !props.noResultsError ||
-      !data?.results
+      !data
     ) {
       return;
     }
 
-    if (data.results.length === 0) {
+    if (data.count === 0) {
       setDisabled(true);
       field.handleChange(undefined as unknown as UserBareMinimum);
     }
-  }, [loading, field.required, data?.results, props.noResultsError]);
+  }, [isLoading, field.required, data?.results, props.noResultsError]);
 
   const getAvatar = (option: UserBareMinimum) => {
     return (
@@ -94,8 +98,8 @@ export default function UserAutocomplete(props: UserSearchProps) {
           `${option.user_type} - ${option.username}`
         }
         optionValue={(option) => option}
-        onQuery={setQuery}
-        isLoading={loading}
+        onQuery={setQueryParam}
+        isLoading={isLoading}
       />
     </FormField>
   );
