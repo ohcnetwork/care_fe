@@ -20,11 +20,12 @@ export const FacilityMapsLink = ({
   const href = isAndroidDevice
     ? `geo:0,0?q=${latitude},${longitude}`
     : `https://maps.google.com/?q=${latitude},${longitude}`;
+  const target = isAndroidDevice ? "_self" : "_blank";
   return (
     <a
       className="text-sm text-primary flex items-center gap-1 w-max"
       href={href}
-      target="_blank"
+      target={target}
       rel="noreferrer"
     >
       {t("show_on_maps")}
