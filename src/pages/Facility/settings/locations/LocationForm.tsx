@@ -57,7 +57,6 @@ const formSchema = z.object({
     "jdn",
     "vi",
   ] as const),
-  mode: z.enum(["instance", "kind"] as const),
   parent: z.string().optional().nullable(),
   organizations: z.array(z.string()).default([]),
   availability_status: z.enum(["available", "unavailable"] as const),
@@ -78,7 +77,6 @@ const defaultValues: FormValues = {
   status: "active",
   operational_status: "O",
   form: "ro",
-  mode: "instance",
   parent: null,
   organizations: [],
   availability_status: "available",
@@ -117,7 +115,6 @@ export default function LocationForm({
         status: location.status,
         operational_status: location.operational_status,
         form: location.form,
-        mode: location.mode,
         parent: parentId || null,
         organizations: [],
         availability_status: location.availability_status || "available",
@@ -146,6 +143,8 @@ export default function LocationForm({
   function onSubmit(values: FormValues) {
     const locationData: LocationWrite = {
       ...values,
+      // Mode = instance only for beds
+      mode: values.form === "bd" ? "instance" : "kind",
       description: values.description || "",
       organizations: values.organizations,
       parent: values.parent || undefined,
@@ -174,11 +173,6 @@ export default function LocationForm({
     { value: "K", label: "Contaminated" },
     { value: "O", label: "Operational" },
     { value: "U", label: "Unoccupied" },
-  ];
-
-  const modeOptions = [
-    { value: "instance", label: "Instance" },
-    { value: "kind", label: "Kind" },
   ];
 
   if (locationId && isLoading) {
@@ -234,34 +228,6 @@ export default function LocationForm({
                   </FormControl>
                   <SelectContent>
                     {locationFormOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="mode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("mode")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {modeOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
