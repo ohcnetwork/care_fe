@@ -62,7 +62,9 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <p className="text-muted-foreground">{t("no_symptoms_recorded")}</p>
+        <CardContent className="px-2 pb-3 pt-2">
+          <p className="text-muted-foreground">{t("no_symptoms_recorded")}</p>
+        </CardContent>
       </SymptomListLayout>
     );
   }

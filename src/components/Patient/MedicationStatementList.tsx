@@ -139,10 +139,10 @@ export function MedicationStatementList({
   if (!filteredMedications?.length) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="px-4 py-0 pt-4 flex justify-between flex-row">
           <CardTitle>{t("ongoing_medications")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-5 pt-2">
           <p className="text-muted-foreground">{t("no_ongoing_medications")}</p>
         </CardContent>
       </Card>

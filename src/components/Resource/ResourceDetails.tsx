@@ -1,5 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,10 +17,9 @@ import CommentSection from "@/components/Resource/ResourceCommentSection";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { PatientModel } from "@/types/emr/patient";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 function PatientCard({ patient }: { patient: PatientModel }) {
   const { t } = useTranslation();
@@ -103,119 +102,17 @@ function FacilityCard({
   );
 }
 
-const RequestLetter = (data: ResourceRequest) => {
-  const { t } = useTranslation();
-  return (
-    <div id="section-to-print" className="print bg-white">
-      <div className="mx-4 p-4 lg:mx-20">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="text-2xl font-bold">{t("request_letter")}</div>
-          <div className="mt-2 text-sm text-gray-600">
-            {t("reference_no")}: {data.id}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="mb-6 text-right">
-          <div className="font-semibold">
-            {t("date")}: {formatDateTime(data.created_date)}
-          </div>
-        </div>
-
-        {/* From Address */}
-        <div className="mb-6">
-          <div className="font-semibold">{t("from")}:</div>
-          <div className="mt-1">{data.origin_facility.name}</div>
-        </div>
-
-        {/* Subject Line */}
-        <div className="mb-6">
-          <div className="font-semibold">
-            {t("subject")}: {t("request_for")} {data.title}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="mb-6 leading-relaxed">
-          <p className="mb-4">
-            {t("request_the_following_resource")}
-            {data.emergency ? t("on_emergency_basis") : ""}:
-          </p>
-
-          <div className="mb-4 ml-4">
-            <div>
-              <span className="font-semibold">{t("request_title")}:</span>{" "}
-              {data.title}
-            </div>
-            <div>
-              <span className="font-semibold">{t("category")}:</span>{" "}
-              {RESOURCE_CATEGORY_CHOICES.find(
-                (item) => item.id === data.category,
-              )?.text || "--"}
-            </div>
-            <div>
-              <span className="font-semibold">{t("quantity_required")}:</span>{" "}
-              {data.requested_quantity}
-            </div>
-            <div className="mt-2">
-              <span className="font-semibold">{t("reason_for_request")}:</span>
-              <p className="mt-1">{data.reason || "--"}</p>
-            </div>
-          </div>
-
-          {/* Status Section */}
-          <div className="mb-4">
-            <span className="font-semibold">{t("current_status")}: </span>
-            <span className="rounded bg-gray-100 px-2 py-1">{data.status}</span>
-          </div>
-        </div>
-
-        {/* Signature Section */}
-        <div className="mt-12 flex justify-between">
-          <div>
-            <div className="mb-20">
-              <div className="font-semibold">{t("requested_by")}:</div>
-              <div>{formatName(data.created_by)}</div>
-              <div className="text-sm text-gray-600">
-                {formatDateTime(data.created_date)}
-              </div>
-            </div>
-          </div>
-
-          {data.status !== "PENDING" && (
-            <div>
-              <div className="mb-20">
-                <div className="font-semibold">
-                  {data.status === "REJECTED" ? t("rejected") : t("approved")}
-                  {t("by")}:
-                </div>
-                <div>{formatName(data.updated_by)}</div>
-                <div className="text-sm text-gray-600">
-                  {formatDateTime(data.modified_date)}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function ResourceDetails(props: { id: string }) {
-  const [isPrintMode, setIsPrintMode] = useState(false);
   const { t } = useTranslation();
-  const { data, loading } = useTanStackQueryInstead(routes.getResourceDetails, {
-    pathParams: { id: props.id },
-    onResponse: ({ res, data }) => {
-      if (!res && !data) {
-        navigate("/not-found");
-      }
-    },
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["resource_request", props.id],
+    queryFn: query(routes.getResourceDetails, {
+      pathParams: { id: props.id },
+    }),
   });
 
-  if (loading || !data) {
+  if (isLoading || !data) {
     return <Loading />;
   }
 
@@ -230,7 +127,7 @@ export default function ResourceDetails(props: { id: string }) {
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-2 w-full">
             <Button
-              onClick={() => setIsPrintMode(true)}
+              onClick={() => navigate(`/resource/${props.id}/print`)}
               className="w-full sm:w-auto"
             >
               <CareIcon icon="l-file-alt" className="mr-2 h-4 w-4" />
@@ -371,25 +268,6 @@ export default function ResourceDetails(props: { id: string }) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Print Mode */}
-      {isPrintMode && (
-        <div className="fixed inset-0 z-50 bg-white">
-          <div className="mx-auto max-w-4xl p-4">
-            <div className="mb-4 flex justify-end gap-2">
-              <Button onClick={() => window.print()}>
-                <CareIcon icon="l-print" className="mr-2 h-4 w-4" />
-                {t("print")}
-              </Button>
-              <Button variant="outline" onClick={() => setIsPrintMode(false)}>
-                <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
-                {t("close")}
-              </Button>
-            </div>
-            {RequestLetter(data)}
-          </div>
-        </div>
-      )}
     </Page>
   );
 }

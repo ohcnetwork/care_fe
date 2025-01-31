@@ -157,12 +157,16 @@ export const FilesTab = (props: FilesTabProps) => {
   });
 
   useEffect(() => {
-    if (fileUpload.files.length > 0 && fileUpload.files[0] !== undefined) {
+    if (
+      fileUpload.files.length > 0 &&
+      fileUpload.files[0] !== undefined &&
+      !fileUpload.previewing
+    ) {
       setOpenUploadDialog(true);
     } else {
       setOpenUploadDialog(false);
     }
-  }, [fileUpload.files]);
+  }, [fileUpload.files, fileUpload.previewing]);
 
   useEffect(() => {
     if (!openUploadDialog) {

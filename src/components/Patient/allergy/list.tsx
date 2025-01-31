@@ -74,7 +74,7 @@ export function AllergyList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <CardContent className="px-2 pb-2">
+        <CardContent className="px-2 pb-3 pt-2">
           <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
         </CardContent>
       </AllergyListLayout>
