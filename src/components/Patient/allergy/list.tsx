@@ -40,7 +40,6 @@ export function AllergyList({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
   });
 
