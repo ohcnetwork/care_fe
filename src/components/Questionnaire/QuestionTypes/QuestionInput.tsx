@@ -135,12 +135,7 @@ export function QuestionInput({
             }
             return null;
           case "allergy_intolerance":
-            if (encounterId) {
-              return (
-                <AllergyQuestion {...commonProps} encounterId={encounterId} />
-              );
-            }
-            return null;
+            return <AllergyQuestion {...commonProps} />;
           case "symptom":
             if (encounterId) {
               return (
