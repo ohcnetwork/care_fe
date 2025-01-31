@@ -3,6 +3,8 @@ import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
+  state: "Kerala",
+  district: "Ernakulam",
   localBody: "Aluva",
   ward: "4",
 };
