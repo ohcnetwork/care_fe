@@ -73,11 +73,7 @@ export class PatientCreation {
     return this;
   }
 
-  verifySearchResults(patientDetails: {
-    name: string;
-    sex: string;
-    phone: string;
-  }) {
+  verifySearchResults(patientDetails: { name: string; phone: string }) {
     // Convert object values to an array of strings
     const detailsArray = Object.values(patientDetails);
     cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
