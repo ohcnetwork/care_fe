@@ -1,9 +1,8 @@
 import { ReactNode, useEffect, useRef } from "react";
 
-import Breadcrumbs from "@/components/Common/Breadcrumbs";
-import PageHeadTitle from "@/components/Common/PageHeadTitle";
+import { cn } from "@/lib/utils";
 
-import { classNames } from "@/Utils/utils";
+import PageHeadTitle from "@/components/Common/PageHeadTitle";
 
 export interface PageTitleProps {
   title: string;
@@ -32,15 +31,9 @@ export default function PageTitle({
   title,
   className = "",
   componentRight = <></>,
-  breadcrumbs = true,
-  crumbsReplacements = {},
   focusOnLoad = false,
   isInsidePage = false,
   changePageMetadata = true,
-  // New props passed to Breadcrumbs
-  hideBack = false,
-  backUrl,
-  onBackClick,
   hideTitleOnPage,
 }: PageTitleProps) {
   const divRef = useRef<any>();
@@ -54,23 +47,12 @@ export default function PageTitle({
   return (
     <div
       ref={divRef}
-      className={classNames(!isInsidePage && "mb-2 md:mb-4", className)}
+      className={cn(!isInsidePage && "mb-2 md:mb-4", className)}
     >
-      <div className="flex flex-col items-start md:flex-row md:items-center">
-        {breadcrumbs && (
-          <Breadcrumbs
-            replacements={crumbsReplacements}
-            className="flex-grow"
-            hideBack={hideBack}
-            backUrl={backUrl}
-            onBackClick={onBackClick}
-          />
-        )}
-      </div>
       {changePageMetadata && <PageHeadTitle title={title} />}
 
       <div
-        className={classNames(
+        className={cn(
           "mt-1 flex",
           !!componentRight &&
             "flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0",
