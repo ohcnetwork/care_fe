@@ -3,7 +3,6 @@ import { UserBase } from "@/types/user/user";
 export type userChildProps = {
   userData: UserBase;
   username: string;
-  refetchUserData?: () => void;
 };
 
 export default function UserColumns({

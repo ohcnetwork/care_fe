@@ -768,25 +768,3 @@ export const PREVIEWABLE_FILE_EXTENSIONS = [
   "gif",
   "webp",
 ] as const;
-
-export const HEADER_CONTENT_TYPES = {
-  pdf: "application/pdf",
-  txt: "text/plain",
-  jpeg: "image/jpeg",
-  jpg: "image/jpeg",
-  doc: "application/msword",
-  xls: "application/vnd.ms-excel",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  epub: "application/epub+zip",
-  gif: "image/gif",
-  html: "text/html",
-  htm: "text/html",
-  mp4: "video/mp4",
-  png: "image/png",
-  ppt: "application/vnd.ms-powerpoint",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  svg: "image/svg+xml",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-} as const;
-
-export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;

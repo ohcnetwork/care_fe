@@ -9,7 +9,6 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -92,8 +91,6 @@ export default function UserForm({
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
       phone_number: validators.phoneNumber.required,
-      alt_phone_number: validators.phoneNumber.optional,
-      phone_number_is_whatsapp: z.boolean().default(true),
       gender: z.enum(GENDERS),
       /* TODO: Userbase doesn't currently support these, neither does BE
       but we will probably need these */
@@ -130,8 +127,6 @@ export default function UserForm({
       last_name: "",
       email: "",
       phone_number: "",
-      alt_phone_number: "",
-      phone_number_is_whatsapp: true,
     },
   });
 
@@ -151,7 +146,6 @@ export default function UserForm({
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender,
-        phone_number_is_whatsapp: true,
       };
       form.reset(formData);
     }
@@ -163,16 +157,12 @@ export default function UserForm({
   //const userType = form.watch("user_type");
   const usernameInput = form.watch("username");
   const phoneNumber = form.watch("phone_number");
-  const isWhatsApp = form.watch("phone_number_is_whatsapp");
 
   useEffect(() => {
-    if (isWhatsApp) {
-      form.setValue("alt_phone_number", phoneNumber);
-    }
     if (usernameInput && usernameInput.length > 0 && !isEditMode) {
       form.trigger("username");
     }
-  }, [phoneNumber, isWhatsApp, form, usernameInput, isEditMode]);
+  }, [phoneNumber, form, usernameInput, isEditMode]);
 
   const { isLoading: isUsernameChecking, isError: isUsernameTaken } = useQuery({
     queryKey: ["checkUsername", usernameInput],
@@ -496,24 +486,26 @@ export default function UserForm({
           </>
         )}
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>{t("email")}</FormLabel>
-              <FormControl>
-                <Input
-                  data-cy="email-input"
-                  type="email"
-                  placeholder={t("email")}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditMode && (
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>{t("email")}</FormLabel>
+                <FormControl>
+                  <Input
+                    data-cy="email-input"
+                    type="email"
+                    placeholder={t("email")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -534,48 +526,6 @@ export default function UserForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="alt_phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("alternate_phone_number")}</FormLabel>
-                <FormControl>
-                  <PhoneInput
-                    data-cy="alt-phone-number-input"
-                    placeholder={t("enter_phone_number")}
-                    {...field}
-                    disabled={isWhatsApp}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="phone_number_is_whatsapp"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox
-                  data-cy="whatsapp-checkbox"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>
-                  {t("whatsapp_number_same_as_phone_number")}
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="gender"

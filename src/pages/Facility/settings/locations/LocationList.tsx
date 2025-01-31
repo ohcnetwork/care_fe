@@ -40,6 +40,7 @@ export default function LocationList({ facilityId }: Props) {
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
+        parent: "",
         offset: (page - 1) * limit,
         limit,
         name: searchQuery || undefined,
