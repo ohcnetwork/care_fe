@@ -237,6 +237,7 @@ export default defineConfig(({ mode }) => {
           name: "Care",
           short_name: "Care",
           background_color: "#ffffff",
+          theme_color: "#ffffff",
           display: "standalone",
           icons: [
             {
