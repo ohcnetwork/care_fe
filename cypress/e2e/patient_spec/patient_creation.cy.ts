@@ -9,10 +9,12 @@ import {
   patientCreation,
 } from "@/pageObject/Patients/PatientCreation";
 import { patientDashboard } from "@/pageObject/Patients/PatientDashboard";
+import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { patientVerify } from "@/pageObject/Patients/PatientVerify";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
 const facilityCreation = new FacilityCreation();
+const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
@@ -46,7 +48,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "non_binary",
+        gender: "Non_Binary",
         bloodGroup: "O+",
         age: "25",
         address: generateAddress(true),
@@ -60,7 +62,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "transgender",
+        gender: "Transgender",
         bloodGroup: "AB+",
         age: "30",
         address: generateAddress(),
@@ -73,7 +75,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "female",
+        gender: "Female",
         bloodGroup: "Unknown",
         age: "25",
         sameAsPermanentAddress: false,
@@ -90,7 +92,7 @@ describe("Patient Management", () => {
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: true,
         emergencyPhoneNumber: generatePhoneNumber(),
-        gender: "male",
+        gender: "Male",
         bloodGroup: "B+",
         dateOfBirth: "01-01-1990",
         address: generateAddress(),
@@ -133,7 +135,7 @@ describe("Patient Management", () => {
     });
   });
 
-  it("search patient with phone number | Create a new encounter", () => {
+  it("Search patient with phone number and create a new encounter", () => {
     facilityCreation.selectFacility("GHC Trikaripur");
     patientCreation
       .clickSearchPatients()
@@ -157,6 +159,39 @@ describe("Patient Management", () => {
       ENCOUNTER_TYPE,
       ENCOUNTER_STATUS,
       ENCOUNTER_PRIORITY,
+    ]);
+  });
+
+  it("Edit a patient details and verify the changes", () => {
+    const updatedPatientData: Partial<PatientFormData> = {
+      name: generateName(),
+      phoneNumber: generatePhoneNumber(),
+      gender: "Female",
+      bloodGroup: "AB+",
+      address: generateAddress(true),
+    };
+
+    facilityCreation.selectFacility("GHC Trikaripur");
+    patientEncounter
+      .navigateToEncounters()
+      .openFirstEncounterDetails()
+      .clickPatientDetailsButton()
+      .clickPatientEditButton();
+
+    patientCreation
+      .enterName(updatedPatientData.name, true)
+      .enterPhoneNumber(updatedPatientData.phoneNumber, true)
+      .selectGender(updatedPatientData.gender)
+      .selectBloodGroup(updatedPatientData.bloodGroup)
+      .enterAddress(updatedPatientData.address, true)
+      .submitPatientUpdateForm()
+      .verifyUpdateSuccess();
+
+    cy.verifyContentPresence("#general-info", [
+      updatedPatientData.name,
+      updatedPatientData.phoneNumber,
+      updatedPatientData.gender,
+      updatedPatientData.address,
     ]);
   });
 });

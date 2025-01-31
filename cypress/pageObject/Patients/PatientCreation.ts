@@ -1,7 +1,7 @@
 export interface PatientFormData {
   name: string;
   phoneNumber: string;
-  gender: "male" | "female" | "transgender" | "non_binary";
+  gender: "Male" | "Female" | "Transgender" | "Non_Binary";
   bloodGroup:
     | "Unknown"
     | "A+"
@@ -89,15 +89,21 @@ export class PatientCreation {
     return this;
   }
 
-  enterName(name: string) {
-    cy.get(this.selectors.nameInput).type(name);
+  enterName(name: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
     return this;
   }
 
-  enterPhoneNumber(phoneNumber: string) {
+  enterPhoneNumber(phoneNumber: string, clearBeforeTyping: boolean = false) {
     cy.typeIntoField(this.selectors.phoneInput, phoneNumber, {
       skipVerification: true,
+      clearBeforeTyping,
     });
+    return this;
+  }
+
+  verifyUpdateSuccess() {
+    cy.verifyNotification("Patient Updated Successfully");
     return this;
   }
 
@@ -125,8 +131,10 @@ export class PatientCreation {
     return this;
   }
 
-  enterAddress(address: string) {
-    cy.typeIntoField(this.selectors.addressInput, address);
+  enterAddress(address: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.addressInput, address, {
+      clearBeforeTyping,
+    });
     return this;
   }
 
@@ -189,6 +197,11 @@ export class PatientCreation {
 
   submitPatientForm() {
     cy.clickSubmitButton("Save and Continue");
+    return this;
+  }
+
+  submitPatientUpdateForm() {
+    cy.clickSubmitButton("Save");
     return this;
   }
 
