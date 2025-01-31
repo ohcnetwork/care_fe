@@ -1,7 +1,19 @@
 import { SquareArrowOutUpRight } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { isAndroidDevice } from "@/Utils/utils";
+
+const useValidateCoordinates = (latitude: number, longitude: number) => {
+  useEffect(() => {
+    if (latitude < -90 || latitude > 90) {
+      console.error("Invalid latitude. Must be between -90 and 90 degrees.");
+    }
+    if (longitude < -180 || longitude > 180) {
+      console.error("Invalid longitude. Must be between -180 and 180 degrees.");
+    }
+  }, [latitude, longitude]);
+};
 
 export const FacilityMapsLink = ({
   latitude,
@@ -10,12 +22,7 @@ export const FacilityMapsLink = ({
   latitude: number & { __brand: "ValidLatitude" };
   longitude: number & { __brand: "ValidLongitude" };
 }) => {
-  if (latitude < -90 || latitude > 90) {
-    throw new Error("Invalid latitude. Must be between -90 and 90 degrees.");
-  }
-  if (longitude < -180 || longitude > 180) {
-    throw new Error("Invalid longitude. Must be between -180 and 180 degrees.");
-  }
+  useValidateCoordinates(latitude, longitude);
   const { t } = useTranslation();
   const href = isAndroidDevice
     ? `geo:0,0?q=${latitude},${longitude}`
