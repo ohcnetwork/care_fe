@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -18,6 +19,7 @@ import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EditFacilitySheet from "./components/EditFacilitySheet";
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
 interface Props {
@@ -34,13 +36,13 @@ export default function OrganizationFacilities({
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, cacheBlacklist: ["name"] });
 
-  const { data: facilities, isLoading } = useQuery({
+  const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
     queryFn: query.debounced(routes.facility.list, {
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         organization: id,
         name: qParams.name,
         ...advancedFilter.filter,
@@ -57,7 +59,14 @@ export default function OrganizationFacilities({
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("facilities")}</h2>
+          <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+            <EntityBadge
+              title={t("facilities")}
+              count={facilities?.count}
+              isFetching={isFetching}
+              customTranslation="facility_count"
+            />
+          </div>
           <AddFacilitySheet organizationId={id} />
         </div>
 
@@ -81,32 +90,8 @@ export default function OrganizationFacilities({
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
           data-cy="facility-cards"
         >
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="h-48 bg-gray-200 animate-pulse" />
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4" />
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/3" />
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3" />
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+          {isFetching ? (
+            <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
@@ -171,7 +156,7 @@ export default function OrganizationFacilities({
                       asChild
                     >
                       <Link
-                        href={`/facility/${facility.id}`}
+                        href={`/facility/${facility.id}/settings/general`}
                         className="text-sm w-full hover:underline"
                       >
                         {t("view_facility")}

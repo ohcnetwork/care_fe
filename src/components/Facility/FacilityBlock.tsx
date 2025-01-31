@@ -14,7 +14,7 @@ export default function FacilityBlock(props: {
     redirect ? (
       <Link
         target="_blank"
-        href={`/facility/${facility.id}`}
+        href={`/facility/${facility.id}/overview`}
         className={props.className}
       >
         {props.children}

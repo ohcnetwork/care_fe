@@ -28,13 +28,13 @@ env:
 jobs:
   test:
     if: github.repository == 'ohcnetwork/care_fe'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     name: Test
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
         uses: actions/cache@v4
@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-buildx-test-
 
       - name: Test build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
@@ -63,7 +63,7 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/develop' || startsWith(github.event.ref, 'refs/tags/v')
     name: Build & Push to container registries
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
 
@@ -113,7 +113,7 @@ jobs:
             ${{ runner.os }}-buildx-build-
 
       - name: Build and push image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
@@ -133,7 +133,7 @@ jobs:
     needs: build
     if: startsWith(github.event.ref, 'refs/tags/v')
     name: Notify release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Notify release
         run: |

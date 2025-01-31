@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -10,6 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { formatName } from "@/Utils/utils";
 import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -41,55 +44,71 @@ export function DiagnosisTable({
       {showHeader && (
         <TableHeader>
           <TableRow>
-            <TableHead>Diagnosis</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Verification</TableHead>
-            <TableHead>Onset</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>By</TableHead>
+            <TableHead>{t("diagnosis")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("verification")}</TableHead>
+            <TableHead>{t("onset")}</TableHead>
+            <TableHead>{t("notes")}</TableHead>
+            <TableHead>{t("created_by")}</TableHead>
           </TableRow>
         </TableHeader>
       )}
       <TableBody>
-        {diagnoses.map((diagnosis: Diagnosis) => (
-          <TableRow>
-            <TableCell className="font-medium">
-              {diagnosis.code.display}
-            </TableCell>
-            <TableCell>
-              <Badge
-                variant="outline"
-                className={`whitespace-nowrap ${getStatusBadgeStyle(diagnosis.clinical_status)}`}
+        {diagnoses.map((diagnosis: Diagnosis, index) => {
+          const isEnteredInError =
+            diagnosis.verification_status === "entered_in_error";
+
+          return (
+            <>
+              <TableRow
+                key={index}
+                className={
+                  isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
+                }
               >
-                {diagnosis.clinical_status}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="whitespace-nowrap">
-                {diagnosis.verification_status}
-              </Badge>
-            </TableCell>
-            <TableCell className="whitespace-nowrap">
-              {diagnosis.onset?.onset_datetime
-                ? new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
-                : "-"}
-            </TableCell>
-            <TableCell className="max-w-[200px] truncate">
-              {diagnosis.note || "-"}
-            </TableCell>
-            <TableCell className="whitespace-nowrap flex items-center gap-2">
-              <Avatar
-                name={`${diagnosis.created_by?.first_name} ${diagnosis.created_by?.last_name}`}
-                className="w-4 h-4"
-                imageUrl={diagnosis.created_by?.profile_picture_url}
-              />
-              <span className="text-sm">
-                {diagnosis.created_by?.first_name}{" "}
-                {diagnosis.created_by?.last_name}
-              </span>
-            </TableCell>
-          </TableRow>
-        ))}
+                <TableCell className="font-medium">
+                  {diagnosis.code.display}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`whitespace-nowrap ${getStatusBadgeStyle(diagnosis.clinical_status)}`}
+                  >
+                    {t(diagnosis.clinical_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={isEnteredInError ? "destructive" : "outline"}
+                    className="whitespace-nowrap capitalize"
+                  >
+                    {t(diagnosis.verification_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {diagnosis.onset?.onset_datetime
+                    ? new Date(
+                        diagnosis.onset.onset_datetime,
+                      ).toLocaleDateString()
+                    : "-"}
+                </TableCell>
+                <TableCell className="max-w-[200px] truncate">
+                  {diagnosis.note || "-"}
+                </TableCell>
+                <TableCell className="whitespace-nowrap flex items-center gap-2">
+                  <Avatar
+                    name={formatName(diagnosis.created_by)}
+                    className="w-4 h-4"
+                    imageUrl={diagnosis.created_by?.profile_picture_url}
+                  />
+                  <span className="text-sm">
+                    {formatName(diagnosis.created_by)}
+                  </span>
+                </TableCell>
+              </TableRow>
+            </>
+          );
+        })}
       </TableBody>
     </Table>
   );

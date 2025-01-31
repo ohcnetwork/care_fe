@@ -41,9 +41,11 @@ export type MedicationStatement = {
 };
 
 export type MedicationStatementRequest = {
+  id?: string;
   status: MedicationStatementStatus;
   reason?: string;
   medication: Code;
+  encounter?: string; // UUID
   dosage_text: string;
   effective_period?: Period;
   information_source: MedicationStatementInformationSourceType;

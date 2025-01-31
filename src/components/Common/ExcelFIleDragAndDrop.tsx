@@ -47,7 +47,7 @@ export default function ExcelFileDragAndDrop({
   const closeModal = () => {
     setSelectedFile(undefined);
     setFileData([]);
-    onClose && onClose();
+    onClose?.();
   };
 
   const onSelectFile = (file: Blob) => {
@@ -96,7 +96,7 @@ export default function ExcelFileDragAndDrop({
       setParsedData(parsedData);
       setValidData(ParsedDataWithOutErrors);
       if (ParsedDataWithOutErrors.length !== 0) {
-        setIsValid && setIsValid(true);
+        setIsValid?.(true);
       }
     }
   }, [fileData]);
@@ -197,7 +197,7 @@ export default function ExcelFileDragAndDrop({
                 setFileData([]);
                 setErrors([]);
                 setValidData([]);
-                setIsValid && setIsValid(false);
+                if (setIsValid) setIsValid(false);
                 dragProps.setDragOver(false);
                 dragProps.setFileDropError("");
               }}
@@ -224,6 +224,7 @@ export default function ExcelFileDragAndDrop({
           <a
             className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-secondary-50 active:text-primary-800"
             href={sampleLink}
+            rel="noreferrer"
             target="_blank"
             download
             onClick={(e) => e.stopPropagation()}

@@ -39,7 +39,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
+import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -90,7 +90,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         >
           <div className="flex justify-items-start gap-5 lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
-              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24">
+              <div className="w-16 min-w-16 bg-secondary-200 h-16 md:w-24 md:h-24 rounded">
                 <Avatar name={patient.name} className="w-full h-full" />
               </div>
             </div>
@@ -269,8 +269,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  <ManageEncounterOrganizations
-                    encounter={encounter}
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
                     facilityId={encounter.facility.id}
                     trigger={
                       <div className="flex flex-wrap gap-2">
@@ -307,8 +309,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           id="consultation-buttons"
         >
           {!completedEncounterStatus.includes(encounter.status) && (
-            <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-              <DropdownMenu>
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
                     {t("update")}
@@ -321,6 +326,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       <Link
                         href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
                         className="cursor-pointer text-gray-800"
+                        data-cy="update-encounter-option"
                       >
                         {t(option.title)}
                       </Link>

@@ -89,7 +89,10 @@ export default function UserDashboard() {
             data-cy="facility-list"
           >
             {facilities.map((facility) => (
-              <Link key={facility.id} href={`/facility/${facility.id}`}>
+              <Link
+                key={facility.id}
+                href={`/facility/${facility.id}/overview`}
+              >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar

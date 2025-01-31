@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { classNames } from "@/Utils/utils";
@@ -5,6 +7,54 @@ import { classNames } from "@/Utils/utils";
 export type UserType = "doctor" | "nurse" | "staff" | "volunteer";
 
 export type Gender = "male" | "female" | "non_binary" | "transgender";
+
+type Validation = {
+  description: string;
+  fulfilled: boolean;
+};
+
+type ValidationHelperProps = {
+  validations: Validation[];
+  successMessage: string;
+  isInputEmpty: boolean;
+};
+export const ValidationHelper = ({
+  validations,
+  successMessage,
+  isInputEmpty,
+}: ValidationHelperProps) => {
+  const unfulfilledValidations = validations.filter(
+    (validation) => !validation.fulfilled,
+  );
+
+  const allValid = unfulfilledValidations.length === 0 && !isInputEmpty;
+
+  return (
+    <div>
+      {isInputEmpty &&
+        validations.map((validation, index) => (
+          <div key={index} className="text-gray-500 mb-2 text-sm">
+            <Trans i18nKey={validation.description} />
+          </div>
+        ))}
+      {!isInputEmpty &&
+        !allValid &&
+        unfulfilledValidations.map((validation, index) => (
+          <div key={index} className="text-gray-500 mb-2 text-sm">
+            <Trans i18nKey={validation.description} />
+          </div>
+        ))}
+      {allValid && (
+        <>
+          <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
+          <span className="text-green-600 mt-3 ml-1 text-sm">
+            {successMessage}
+          </span>
+        </>
+      )}
+    </div>
+  );
+};
 
 export const validateRule = (
   isConditionMet: boolean,
