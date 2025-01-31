@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -18,14 +19,18 @@ interface Props {
   patientId: string;
 }
 
-function formatValue(value: string, type: string): string {
+function formatValue(
+  value: string,
+  type: string,
+  unit?: { display?: string },
+): string {
   switch (type) {
     case "dateTime":
       return formatDateTime(value);
     case "choice":
       return properCase(value);
     default:
-      return value;
+      return `${value}${unit?.display ? ` ${unit.display}` : ""}`;
   }
 }
 
@@ -43,16 +48,8 @@ function QuestionResponseValue({
 
   return (
     <div className="flex flex-col space-y-0.5">
-      <div className="text-xs text-muted-foreground">
-        {question.text}
-        {question.code && (
-          <span className="ml-1 text-xs text-muted-foreground">
-            ({question.code.display})
-          </span>
-        )}
-      </div>
-      <div className="text-sm whitespace-pre-wrap">
-        {formatValue(String(value), question.type)}
+      <div className="text-sm font-medium whitespace-pre-wrap">
+        {formatValue(String(value), question.type, question.unit)}
         {response.note && (
           <span className="ml-2 text-xs text-muted-foreground">
             ({response.note})
@@ -70,34 +67,67 @@ function QuestionGroup({
   group: Question;
   responses: any[];
 }) {
-  // If this is a nested group (like BP with systolic/diastolic)
-  if (group.questions?.some((q) => q.questions)) {
-    return (
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium text-secondary-700">
-          {group.text}
-          {group.code && (
-            <span className="ml-1 text-xs text-muted-foreground">
-              ({group.code.display})
-            </span>
-          )}
-        </h4>
-        <div className="space-y-2 pl-3">
-          {group.questions?.map((subGroup) => (
-            <QuestionGroup
-              key={subGroup.id}
-              group={subGroup}
-              responses={responses}
-            />
-          ))}
+  // Map the group.queswtions
+  if (group.questions) {
+    return group.questions?.map((q: Question) => {
+      if (q.questions) {
+        return (
+          <div className="space-y-2" key={q.id}>
+            <h4 className="text-sm font-medium text-secondary-700">
+              {q.text}
+              {q.code && (
+                <span className="ml-1 text-xs text-muted-foreground">
+                  ({q.code.display})
+                </span>
+              )}
+            </h4>
+            <div className="space-y-2 pl-3">
+              {q.questions?.map((subGroup: Question) => (
+                <QuestionGroup
+                  key={subGroup.id}
+                  group={subGroup}
+                  responses={responses}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-2" key={q.id}>
+          <h4 className="text-sm font-medium text-secondary-700">
+            {q.text}
+            {q.code && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({q.code.display})
+              </span>
+            )}
+          </h4>
+          <div
+            className={`space-y-2 pl-3 ${q.styling_metadata?.classes || ""}`}
+          >
+            {[q]?.map((question: Question) => {
+              const response = responses.find(
+                (r) => r.question_id === question.id,
+              );
+              if (!response) return null;
+              return (
+                <QuestionResponseValue
+                  key={question.id}
+                  question={question}
+                  response={response}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>
-    );
+      );
+    });
   }
 
-  // Regular group with questions
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" key={group.id}>
       <h4 className="text-sm font-medium text-secondary-700">
         {group.text}
         {group.code && (
@@ -109,7 +139,7 @@ function QuestionGroup({
       <div
         className={`space-y-2 pl-3 ${group.styling_metadata?.classes || ""}`}
       >
-        {group.questions?.map((question) => {
+        {[group]?.map((question: Question) => {
           const response = responses.find((r) => r.question_id === question.id);
           if (!response) return null;
           return (
@@ -122,6 +152,102 @@ function QuestionGroup({
         })}
       </div>
     </div>
+  );
+}
+
+function StructuredResponseBadge({
+  type,
+  submitType,
+}: {
+  type: string;
+  submitType: string;
+}) {
+  const colors = {
+    symptom: "bg-yellow-100 text-yellow-800",
+    diagnosis: "bg-blue-100 text-blue-800",
+    medication_request: "bg-green-100 text-green-800",
+  };
+
+  return (
+    <Badge
+      variant="outline"
+      className={`${colors[type as keyof typeof colors]} border-none`}
+    >
+      {submitType === "CREATE" ? "Created" : "Updated"}{" "}
+      {properCase(type.replace("_", " "))}
+    </Badge>
+  );
+}
+
+function ResponseCard({ item }: { item: QuestionnaireResponse }) {
+  const isStructured = !item.questionnaire;
+  const structuredType = Object.keys(item.structured_responses || {})[0];
+
+  return (
+    <Card className="flex flex-col py-3 px-4 transition-colors hover:bg-muted/50">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">
+              {item.questionnaire?.title ||
+                Object.keys(item.structured_responses || {}).map((key) =>
+                  properCase(key.replace("_", " ")),
+                )}
+            </h3>
+            {isStructured && structuredType && (
+              <StructuredResponseBadge
+                type={structuredType}
+                submitType={
+                  Object.values(item.structured_responses || {})[0]?.submit_type
+                }
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <CareIcon icon="l-clock" className="h-3 w-3" />
+            <span>{formatDateTime(item.created_date)}</span>
+            <span>•</span>
+            <span>
+              by {item.created_by?.first_name || ""}{" "}
+              {item.created_by?.last_name || ""}
+              {item.created_by?.user_type && ` (${item.created_by?.user_type})`}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {item.questionnaire && (
+        <div className="mt-4 space-y-4">
+          {item.questionnaire?.questions.map((question: Question) => {
+            if (question.type === "structured") return null;
+
+            const response = item.responses.find(
+              (r) => r.question_id === question.id,
+            );
+
+            if (question.type === "group") {
+              return (
+                <QuestionGroup
+                  key={question.id}
+                  group={question}
+                  responses={item.responses}
+                />
+              );
+            }
+
+            if (!response) return null;
+
+            return (
+              <QuestionResponseValue
+                key={question.id}
+                question={question}
+                response={response}
+              />
+            );
+          })}
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -138,7 +264,7 @@ export default function QuestionnaireResponsesList({
         patientId: patientId,
       }}
       query={{
-        encounter: encounter?.id,
+        ...(encounter && { encounter: encounter.id }),
       }}
     >
       {() => (
@@ -159,88 +285,10 @@ export default function QuestionnaireResponsesList({
             </PaginatedList.WhenLoading>
 
             <PaginatedList.Items<QuestionnaireResponse> className="grid gap-4">
-              {(item) => (
-                <Card
-                  key={item.id}
-                  className="flex flex-col py-2 px-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-start gap-4">
-                      <div>
-                        <h3 className="text-sm font-medium">
-                          {item.questionnaire?.title ||
-                            Object.keys(item.structured_responses || {}).map(
-                              (key) => properCase(key),
-                            )}
-                        </h3>
-                        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                          <CareIcon icon="l-clock" className="h-3 w-3" />
-                          <span>{formatDateTime(item.created_date)}</span>
-                          <span className="mt-0.5 text-xs text-muted-foreground">
-                            {!item.questionnaire && (
-                              <>
-                                {Object.values(
-                                  item.structured_responses ?? {},
-                                )[0]?.submit_type === "CREATE"
-                                  ? "Created"
-                                  : "Updated"}{" "}
-                              </>
-                            )}
-                            {
-                              <>
-                                by {item.created_by?.first_name || ""}{" "}
-                                {item.created_by?.last_name || ""}
-                                {item.created_by?.user_type &&
-                                  ` (${item.created_by?.user_type})`}
-                              </>
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {item.questionnaire && (
-                    <div className="mt-3 border-t pt-3">
-                      <div className="space-y-4">
-                        {item.questionnaire?.questions.map(
-                          (question: Question) => {
-                            // Skip structured questions for now as they need special handling
-                            if (question.type === "structured") return null;
-
-                            const response = item.responses.find(
-                              (r) => r.question_id === question.id,
-                            );
-
-                            if (question.type === "group") {
-                              return (
-                                <QuestionGroup
-                                  key={question.id}
-                                  group={question}
-                                  responses={item.responses}
-                                />
-                              );
-                            }
-
-                            if (!response) return null;
-
-                            return (
-                              <QuestionResponseValue
-                                key={question.id}
-                                question={question}
-                                response={response}
-                              />
-                            );
-                          },
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </Card>
-              )}
+              {(item) => <ResponseCard key={item.id} item={item} />}
             </PaginatedList.Items>
 
-            <div className="flex w-full items-center justify-center">
+            <div className="flex w-full items-center justify-center mt-4">
               <PaginatedList.Paginator hideIfSinglePage />
             </div>
           </div>
