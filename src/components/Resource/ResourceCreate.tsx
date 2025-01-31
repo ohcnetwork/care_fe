@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+// import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -44,7 +44,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
+// import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import validators from "@/Utils/validators";
 import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
@@ -81,14 +81,14 @@ export default function ResourceCreate(props: ResourceProps) {
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
 
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: () =>
-      query(routes.getAnyFacility, {
-        pathParams: { id: String(facilityId) },
-      }),
-    enabled: !!facilityId,
-  });
+  // const { data: facilityData } = useQuery({
+  //   queryKey: ["facility", facilityId],
+  //   queryFn: () =>
+  //     query(routes.getAnyFacility, {
+  //       pathParams: { id: String(facilityId) },
+  //     }),
+  //   enabled: !!facilityId,
+  // });
 
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceFormSchema),
@@ -157,10 +157,6 @@ export default function ResourceCreate(props: ResourceProps) {
   return (
     <Page
       title={t("create_resource_request")}
-      crumbsReplacements={{
-        [facilityId]: { name: facilityData?.name || "" },
-        resource: { style: "pointer-events-none" },
-      }}
       backUrl={`/facility/${facilityId}`}
     >
       <div className="container mx-auto max-w-4xl">

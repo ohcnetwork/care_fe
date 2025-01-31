@@ -43,11 +43,9 @@ export default function Page(props: PageProps) {
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}
-          breadcrumbs={props.breadcrumbs}
           backUrl={props.backUrl}
           hideBack={props.hideBack}
           componentRight={props.componentRight}
-          crumbsReplacements={props.crumbsReplacements}
           focusOnLoad={props.focusOnLoad}
           onBackClick={props.onBackClick}
           isInsidePage={true}

@@ -2,25 +2,22 @@ import { ReactNode, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { BreadcrumbItem } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 export interface PageTitleProps {
   title: string;
   className?: string;
   componentRight?: ReactNode;
-  breadcrumbs?: boolean;
-  crumbsReplacements?: {
-    [key: string]: {
-      name?: string;
-      uri?: string;
-      style?: string;
-      hide?: boolean;
-    };
-  };
   focusOnLoad?: boolean;
   isInsidePage?: boolean;
   changePageMetadata?: boolean;
-  // New props for Breadcrumbs
   hideBack?: boolean;
   backUrl?: string;
   hideTitleOnPage?: boolean;
@@ -34,9 +31,13 @@ export default function PageTitle({
   focusOnLoad = false,
   isInsidePage = false,
   changePageMetadata = true,
+  hideBack = false,
+  backUrl,
+  onBackClick,
   hideTitleOnPage,
 }: PageTitleProps) {
   const divRef = useRef<any>();
+  const { goBack } = useAppHistory();
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
@@ -49,6 +50,25 @@ export default function PageTitle({
       ref={divRef}
       className={cn(!isInsidePage && "mb-2 md:mb-4", className)}
     >
+      <div className="flex flex-col items-start md:flex-row md:items-center">
+        {!hideBack && (
+          <BreadcrumbItem>
+            <Button
+              variant="link"
+              type="button"
+              className="rounded bg-gray-200/50 px-1 text-sm font-normal text-gray-800 transition hover:bg-gray-200/75 hover:no-underline"
+              size="xs"
+              onClick={() => {
+                if (onBackClick && onBackClick() === false) return;
+                goBack(backUrl);
+              }}
+            >
+              <CareIcon icon="l-arrow-left" className="h-5 text-gray-700" />
+              <span className="pr-2">Back</span>
+            </Button>
+          </BreadcrumbItem>
+        )}
+      </div>
       {changePageMetadata && <PageHeadTitle title={title} />}
 
       <div

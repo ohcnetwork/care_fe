@@ -89,7 +89,7 @@ export default function FacilityOrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name} `} breadcrumbs={false}>
+    <Page title={`${org.name} `}>
       {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
       <Breadcrumb className="mt-1">
         <BreadcrumbList>

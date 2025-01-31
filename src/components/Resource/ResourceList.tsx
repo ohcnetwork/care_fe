@@ -206,7 +206,6 @@ export default function ListView() {
           filenamePrefix="resource_requests"
         />
       }
-      breadcrumbs={false}
       options={
         <>
           <div className="md:px-4"></div>

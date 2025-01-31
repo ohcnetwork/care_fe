@@ -71,7 +71,6 @@ export default function BoardView() {
                 filenamePrefix="resource_requests"
               />
             }
-            breadcrumbs={false}
           />
         </div>
 

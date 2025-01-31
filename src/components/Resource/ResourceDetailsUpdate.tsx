@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useReducer, useState } from "react";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ const initialState = {
 
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
-  const [qParams, _] = useQueryParams();
+  // const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
@@ -131,20 +131,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const { data: resourceDetails } = useTanStackQueryInstead(
-    routes.getResourceDetails,
-    {
-      pathParams: { id: props.id },
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          const d = data;
-          d["status"] = qParams.status || data.status;
-          dispatch({ type: "set_form", form: d });
-        }
-        setIsLoading(false);
-      },
-    },
-  );
+  // const { data: resourceDetails } = useTanStackQueryInstead(
+  //   routes.getResourceDetails,
+  //   {
+  //     pathParams: { id: props.id },
+  //     onResponse: ({ res, data }) => {
+  //       if (res && data) {
+  //         const d = data;
+  //         d["status"] = qParams.status || data.status;
+  //         dispatch({ type: "set_form", form: d });
+  //       }
+  //       setIsLoading(false);
+  //     },
+  //   },
+  // );
 
   const handleSubmit = async () => {
     const validForm = validateForm();
@@ -192,11 +192,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-    <Page
-      title="Update Request"
-      backUrl={`/resource/${props.id}`}
-      crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
-    >
+    <Page title="Update Request" backUrl={`/resource/${props.id}`}>
       <div className="mt-4">
         <Card className="flex w-full flex-col">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

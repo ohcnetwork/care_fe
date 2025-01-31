@@ -338,7 +338,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     <Page
       title={t("appointments")}
       hideBack={true}
-      breadcrumbs={false}
       options={
         <Tabs
           value={activeTab}
