@@ -60,6 +60,7 @@ export default function PageTitle({
               size="xs"
               onClick={() => {
                 if (onBackClick && onBackClick() === false) return;
+                // console.log(backUrl);
                 goBack(backUrl);
               }}
             >
