@@ -138,7 +138,7 @@ export default function QuestionnaireResponsesList({
         patientId: patientId,
       }}
       query={{
-        ...(encounter && { encounter: encounter.id }),
+        encounter: encounter?.id,
       }}
     >
       {() => (
