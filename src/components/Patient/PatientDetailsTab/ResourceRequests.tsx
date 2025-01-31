@@ -112,7 +112,11 @@ export const ResourceRequests = (props: PatientProps) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/resource/${request.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/facility/${request.origin_facility.id}/resource/${request.id}`,
+                        )
+                      }
                     >
                       <CareIcon icon="l-eye" className="mr-2" />
                       {t("view")}

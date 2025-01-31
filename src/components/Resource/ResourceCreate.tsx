@@ -130,7 +130,7 @@ export default function ResourceCreate(props: ResourceProps) {
 
       if (res?.ok && responseData) {
         toast.success(t("resource_created_successfully"));
-        navigate(`/resource/${responseData.id}`);
+        navigate(`/facility/${facilityId}/resource/${responseData.id}`);
       }
     } catch (error) {
       console.error(error);

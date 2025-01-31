@@ -5,9 +5,15 @@ import ResourceList from "@/components/Resource/ResourceList";
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const ResourceRoutes: AppRoutes = {
-  "/resource": () => <ResourceList />,
-  "/resource/:id": ({ id }) => <ResourceDetails id={id} />,
-  "/resource/:id/update": ({ id }) => <ResourceDetailsUpdate id={id} />,
+  "/facility/:facilityId/resource": ({ facilityId }) => (
+    <ResourceList facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/resource/:id": ({ facilityId, id }) => (
+    <ResourceDetails facilityId={facilityId} id={id} />
+  ),
+  "/facility/:facilityId/resource/:id/update": ({ facilityId, id }) => (
+    <ResourceDetailsUpdate facilityId={facilityId} id={id} />
+  ),
 };
 
 export default ResourceRoutes;

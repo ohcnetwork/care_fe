@@ -12,6 +12,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -58,12 +59,12 @@ function EmptyState() {
   );
 }
 
-export default function ResourceList() {
+export default function ResourceList({ facilityId }: { facilityId: string }) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["title"],
   });
-  const { status, title } = qParams;
+  const { status, title, outgoing } = qParams;
 
   const searchOptions = [
     {
@@ -85,13 +86,16 @@ export default function ResourceList() {
   const { data: queryResources, isLoading } = useQuery<
     PaginatedResponse<ResourceRequest>
   >({
-    queryKey: ["resources", qParams],
+    queryKey: ["resources", facilityId, qParams],
     queryFn: query.debounced(routes.listResourceRequests, {
       queryParams: {
         status: currentStatus,
         title,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        ...(outgoing
+          ? { origin_facility: facilityId }
+          : { assigned_facility: facilityId }),
       },
     }),
   });
@@ -154,6 +158,39 @@ export default function ResourceList() {
                     </div>
                   </PopoverContent>
                 </Popover>
+                <div className="hidden md:flex items-center">
+                  <Tabs
+                    value={outgoing ? "outgoing" : "incoming"}
+                    className="w-full"
+                  >
+                    <TabsList className="bg-transparent p-0 h-8">
+                      <TabsTrigger
+                        value="outgoing"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: true,
+                            title,
+                          })
+                        }
+                      >
+                        {t("outgoing")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="incoming"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: false,
+                            title,
+                          })
+                        }
+                      >
+                        {t("incoming")}
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
 
               <div className="hidden md:flex items-center">
@@ -240,7 +277,7 @@ export default function ResourceList() {
               {resources.map((resource: ResourceRequest) => (
                 <Card
                   key={resource.id}
-                  className="hover:shadow-lg transition-shadow group"
+                  className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
@@ -252,41 +289,63 @@ export default function ResourceList() {
                       {resource.reason}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {resource.emergency && (
-                          <Badge
-                            variant="outline"
-                            className="bg-red-100 text-red-800"
-                          >
-                            {t("emergency")}
-                          </Badge>
-                        )}
+                  <CardContent className="flex flex-col space-y-2 px-6 py-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {resource.emergency && (
+                        <Badge
+                          variant="outline"
+                          className="bg-red-100 text-red-800"
+                        >
+                          {t("emergency")}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
+                        {
+                          RESOURCE_CATEGORY_CHOICES.find(
+                            (o) => o.id === resource.category,
+                          )?.text
+                        }
+                      </Badge>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      {outgoing ? (
                         <Badge
                           variant="outline"
                           className="bg-gray-100 text-gray-800"
                         >
-                          {
-                            RESOURCE_CATEGORY_CHOICES.find(
-                              (o) => o.id === resource.category,
-                            )?.text
-                          }
+                          <CareIcon
+                            icon="l-arrow-to-right"
+                            className="mr-2 h-4 w-4"
+                          />
+                          {resource.assigned_facility?.name}
                         </Badge>
-                      </div>
-                      <Separator className="my-2" />
-                      <Link
-                        href={`/resource/${resource.id}`}
-                        className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-                      >
-                        View Details
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-1 h-4 w-4"
-                        />
-                      </Link>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="bg-gray-100 text-gray-800"
+                        >
+                          <CareIcon
+                            icon="l-arrow-from-right"
+                            className="mr-2 h-4 w-4"
+                          />
+                          {resource.origin_facility?.name}
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
+                  <CardFooter className="flex flex-col p-0">
+                    <Separator className="my-2" />
+                    <Link
+                      href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
+                      className="items-center self-end p-2 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                    >
+                      View Details
+                      <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
+                    </Link>
+                  </CardFooter>
                 </Card>
               ))}
               {queryResources?.count &&

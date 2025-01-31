@@ -203,11 +203,17 @@ const RequestLetter = (data: ResourceRequest) => {
   );
 };
 
-export default function ResourceDetails(props: { id: string }) {
+export default function ResourceDetails({
+  id,
+  facilityId,
+}: {
+  id: string;
+  facilityId: string;
+}) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { t } = useTranslation();
   const { data, loading } = useTanStackQueryInstead(routes.getResourceDetails, {
-    pathParams: { id: props.id },
+    pathParams: { id: id },
     onResponse: ({ res, data }) => {
       if (!res && !data) {
         navigate("/not-found");
@@ -222,8 +228,8 @@ export default function ResourceDetails(props: { id: string }) {
   return (
     <Page
       title="Request Details"
-      crumbsReplacements={{ [props.id]: { name: data.title } }}
-      backUrl="/resource/board"
+      crumbsReplacements={{ [id]: { name: data.title } }}
+      backUrl={`/facility/${facilityId}/resource`}
     >
       <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
         {/* Action Buttons */}
@@ -239,7 +245,9 @@ export default function ResourceDetails(props: { id: string }) {
             <Button
               variant="outline"
               className="w-full sm:w-auto"
-              onClick={() => navigate(`/resource/${data.id}/update`)}
+              onClick={() =>
+                navigate(`/facility/${facilityId}/resource/${id}/update`)
+              }
             >
               <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
               {t("update_status")}
@@ -261,7 +269,9 @@ export default function ResourceDetails(props: { id: string }) {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("status")}</p>
-                <Badge>{data.status}</Badge>
+                <Badge>
+                  {t(`resource_status__${data.status.toLowerCase()}`)}
+                </Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("category")}</p>
@@ -367,7 +377,7 @@ export default function ResourceDetails(props: { id: string }) {
             <CardTitle className="text-lg">{t("comments")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <CommentSection id={props.id} />
+            <CommentSection id={id} />
           </CardContent>
         </Card>
       </div>

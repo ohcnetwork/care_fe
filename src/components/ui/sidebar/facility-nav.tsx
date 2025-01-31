@@ -35,7 +35,11 @@ function generateFacilityLinks(
       icon: "d-patient",
     },
     { name: t("encounters"), url: `${baseUrl}/encounters`, icon: "d-patient" },
-    { name: t("resource"), url: "/resource", icon: "d-book-open" },
+    {
+      name: t("resource"),
+      url: `${baseUrl}/resource`,
+      icon: "d-book-open",
+    },
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
     {
       name: t("settings"),

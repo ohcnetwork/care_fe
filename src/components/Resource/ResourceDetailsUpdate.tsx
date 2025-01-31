@@ -32,6 +32,7 @@ import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
   id: string;
+  facilityId: string;
 }
 
 const initForm: Partial<UpdateResourceRequest> = {
@@ -178,7 +179,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       if (res && res.status == 200 && data) {
         dispatch({ type: "set_form", form: data });
         toast.success(t("request_updated_successfully"));
-        navigate(`/resource/${props.id}`);
+        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -192,7 +193,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   return (
     <Page
       title="Update Request"
-      backUrl={`/resource/${props.id}`}
+      backUrl={`/facility/${props.facilityId}/resource/${props.id}`}
       crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >
       <div className="mt-4">
@@ -204,8 +205,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 name="status"
                 value={state.form.status}
                 options={RESOURCE_STATUS_CHOICES}
+                optionValue={(option) => option.text}
                 onChange={handleChange}
-                optionLabel={(option) => t(`resource_status__${option}`)}
+                optionLabel={(option) => t(`resource_status__${option.text}`)}
               />
             </div>
             <div className="md:col-span-1">
