@@ -1047,6 +1047,7 @@
   "has_domestic_healthcare_support": "Has domestic healthcare support?",
   "has_sari": "Has SARI (Severe Acute Respiratory illness)?",
   "health-profile": "Health Profile",
+  "health_profile": "Health Profile",
   "hearing": "We are hearing you...",
   "help_confirmed": "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.",
   "help_differential": "One of a set of potential (and typically mutually exclusive) diagnoses asserted to further guide the diagnostic process and preliminary treatment.",

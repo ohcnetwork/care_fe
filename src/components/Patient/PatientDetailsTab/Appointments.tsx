@@ -23,14 +23,14 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 export const Appointments = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
   const { data } = useQuery({
-    queryKey: ["patient-appointments", id],
+    queryKey: ["patient-appointments", patientId],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { patient: id, limit: 100 },
+      queryParams: { patient: patientId, limit: 100 },
     }),
   });
 
@@ -65,7 +65,7 @@ export const Appointments = (props: PatientProps) => {
         </h2>
         <Button variant="outline_primary" asChild>
           <Link
-            href={`/facility/${facilityId}/patient/${id}/book-appointment`}
+            href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
             className="flex items-center justify-center w-full sm:w-auto"
           >
             <CareIcon icon="l-plus" className="mr-2" />

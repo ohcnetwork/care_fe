@@ -16,7 +16,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
-  const { facilityId, id: patientId } = props;
+  const { facilityId, patientId } = props;
   const { t } = useTranslation();
 
   return (

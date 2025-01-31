@@ -13,7 +13,7 @@ import { ResourceRequests } from "./ResourceRequests";
 
 export interface PatientProps {
   facilityId: string;
-  id: string;
+  patientId: string;
   patientData: Patient;
 }
 

@@ -14,14 +14,14 @@ import routes from "@/Utils/request/api";
 import { Encounter } from "@/types/emr/encounter";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { id, facilityId } = props;
+  const { patientId, facilityId } = props;
 
   const { t } = useTranslation();
 
   return (
     <PaginatedList
       route={routes.encounter.list}
-      query={{ patient: id }}
+      query={{ patient: patientId }}
       perPage={5}
     >
       {() => (
@@ -37,7 +37,7 @@ const EncounterHistory = (props: PatientProps) => {
               <div className="flex w-full items-center justify-center pt-4">
                 <Button variant="outline_primary" asChild>
                   <Link
-                    href={`/facility/${facilityId}/patient/${id}/consultation`}
+                    href={`/facility/${facilityId}/patient/${patientId}/consultation`}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
                       <CareIcon icon="l-chat-bubble-user" className="text-xl" />
