@@ -93,10 +93,9 @@ export const Appointments = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : appointments.length ? (
-              appointments.map((appointment, i) => (
+              appointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell className="font-medium">
-                    {i + 1}
                     {appointment.token_slot.availability.name}
                   </TableCell>
                   <TableCell>
