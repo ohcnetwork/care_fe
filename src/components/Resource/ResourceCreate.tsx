@@ -258,7 +258,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
+                      <FormLabel required>{t("category")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -302,7 +302,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("request_title")}</FormLabel>
+                      <FormLabel required>{t("request_title")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -323,7 +323,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("request_reason")}</FormLabel>
+                      <FormLabel required>{t("request_reason")}</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
@@ -369,7 +369,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="referring_facility_contact_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("contact_person")}</FormLabel>
+                        <FormLabel required>{t("contact_person")}</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -389,7 +389,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="referring_facility_contact_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("contact_phone")}</FormLabel>
+                        <FormLabel required>{t("contact_phone")}</FormLabel>
                         <FormControl>
                           <PhoneInput
                             {...field}

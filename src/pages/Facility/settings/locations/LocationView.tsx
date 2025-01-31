@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +19,7 @@ import { LocationList, getLocationFormLabel } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
+import { LocationCard } from "./components/LocationCard";
 
 interface Props {
   id: string;
@@ -159,77 +159,11 @@ export default function LocationView({ id, facilityId }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {children?.results?.length ? (
                 children.results.map((childLocation: LocationList) => (
-                  <Card key={childLocation.id}>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between flex-wrap">
-                          <div className="space-y-1 mb-2">
-                            <h3 className="text-lg font-semibold">
-                              {childLocation.name}
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">
-                                {childLocation.form.toUpperCase()}
-                              </Badge>
-                              <Badge
-                                variant={
-                                  childLocation.status === "active"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                              >
-                                {childLocation.status}
-                              </Badge>
-                              <Badge
-                                variant={
-                                  childLocation.availability_status ===
-                                  "available"
-                                    ? "default"
-                                    : "destructive"
-                                }
-                              >
-                                {childLocation.availability_status}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditLocation(childLocation)}
-                            >
-                              <CareIcon icon="l-pen" className="h-4 w-4" />
-                            </Button>
-                            <Button variant="link" asChild>
-                              <Link
-                                href={`/facility/${facilityId}/location/${childLocation.id}`}
-                              >
-                                {t("view_details")}
-                                <CareIcon
-                                  icon="l-arrow-right"
-                                  className="h-4 w-4"
-                                />
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
-                        {childLocation.description && (
-                          <p className="text-sm text-gray-500 line-clamp-2">
-                            {childLocation.description}
-                          </p>
-                        )}
-                        {childLocation.has_children && (
-                          <div className="text-sm text-primary">
-                            <CareIcon
-                              icon="l-folder"
-                              className="h-4 w-4 inline mr-1"
-                            />
-                            {t("has_child_locations")}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <LocationCard
+                    key={childLocation.id}
+                    location={childLocation}
+                    onEdit={handleEditLocation}
+                  />
                 ))
               ) : (
                 <Card className="col-span-full">

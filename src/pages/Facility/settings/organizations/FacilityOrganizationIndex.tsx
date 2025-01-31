@@ -34,6 +34,9 @@ export default function FacilityOrganizationIndex({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId },
+      queryParams: {
+        parent: "",
+      },
     }),
     enabled: !!facilityId,
   });
@@ -52,7 +55,12 @@ export default function FacilityOrganizationIndex({
 
   if (!data?.results?.length) {
     return (
-      <Page title={t("organizations")}>
+      <Page
+        title={t("organizations")}
+        breadcrumbs={false}
+        hideBack={true}
+        hideTitleOnPage={true}
+      >
         <div className="flex justify-center md:justify-end mt-2 mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>

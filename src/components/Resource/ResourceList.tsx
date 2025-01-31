@@ -328,7 +328,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <Separator className="my-2" />
                     <Link
                       href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
-                      className="items-center self-end p-2 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                      className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
                     >
                       View Details
                       <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
