@@ -62,13 +62,13 @@ export default function MedicationRequestTable({
   const EmptyState = ({ searching }: { searching?: boolean }) => (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
       <div className="rounded-full bg-secondary/10 p-3">
-        <CareIcon icon="l-tablets" className="text-3xl text-muted-foreground" />
+        <CareIcon icon="l-tablets" className="text-3xl text-gray-500" />
       </div>
       <div className="max-w-[200px] space-y-1">
         <h3 className="font-medium">
           {searching ? "No matches found" : "No Prescriptions"}
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500">
           {searching
             ? `No medications match "${searchQuery}"`
             : "No medications have been prescribed yet"}
@@ -105,19 +105,19 @@ export default function MedicationRequestTable({
 
       <div className="rounded-lg border">
         <div className="flex items-center gap-2 border-b p-2">
-          <CareIcon icon="l-search" className="text-lg text-muted-foreground" />
+          <CareIcon icon="l-search" className="text-lg text-gray-500" />
           <input
             type="text"
             placeholder="Search medications..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-muted-foreground hover:text-foreground"
+              className="h-6 px-2 text-gray-500 hover:text-foreground"
               onClick={() => setSearchQuery("")}
             >
               <CareIcon icon="l-times" className="text-lg" />

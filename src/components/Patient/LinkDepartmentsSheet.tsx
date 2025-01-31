@@ -209,7 +209,7 @@ export default function LinkDepartmentsSheet({
                       <div className="flex flex-col">
                         <span className="font-medium">{org.name}</span>
                         {org.description && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-gray-500">
                             {org.description}
                           </span>
                         )}
@@ -230,7 +230,7 @@ export default function LinkDepartmentsSheet({
                   </div>
                 ))}
                 {currentOrganizations.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("no_organizations_added_yet")}
                   </p>
                 )}

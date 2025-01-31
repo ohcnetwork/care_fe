@@ -63,7 +63,7 @@ export function SymptomsList({
         encounterId={encounterId}
       >
         <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-muted-foreground">{t("no_symptoms_recorded")}</p>
+          <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
         </CardContent>
       </SymptomListLayout>
     );

@@ -37,7 +37,7 @@ function PatientCard({ patient }: { patient: PatientModel }) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <p className="text-sm font-medium">{t("name")}</p>
-            <p className="text-sm text-muted-foreground">{patient.name}</p>
+            <p className="text-sm text-gray-500">{patient.name}</p>
           </div>
 
           <div className="space-y-1">
@@ -60,12 +60,12 @@ function PatientCard({ patient }: { patient: PatientModel }) {
                 </a>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">--</p>
+              <p className="text-sm text-gray-500">--</p>
             )}
           </div>
           <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium">{t("address")}</p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            <p className="text-sm text-gray-500 whitespace-pre-wrap">
               {[patient.address].filter(Boolean).join(", ") || "--"}
             </p>
           </div>
@@ -92,7 +92,7 @@ function FacilityCard({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <p className="text-sm font-medium">{t("name")}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500">
               {facilityData?.name || "--"}
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("category")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500">
                   {RESOURCE_CATEGORY_CHOICES.find(
                     (item) => item.id === data.category,
                   )?.text || "--"}
@@ -170,7 +170,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("contact_person")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500">
                   {data.referring_facility_contact_name || "--"}
                 </p>
               </div>
@@ -194,7 +194,7 @@ export default function ResourceDetails(props: { id: string }) {
                     </a>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">--</p>
+                  <p className="text-sm text-gray-500">--</p>
                 )}
               </div>
             </div>
@@ -203,7 +203,7 @@ export default function ResourceDetails(props: { id: string }) {
 
             <div className="space-y-2">
               <p className="text-sm font-medium">{t("reason")}</p>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              <p className="text-sm text-gray-500 whitespace-pre-wrap">
                 {data.reason || "--"}
               </p>
             </div>
@@ -237,20 +237,20 @@ export default function ResourceDetails(props: { id: string }) {
               {data.created_by && (
                 <div className="space-y-1">
                   <p className="text-sm font-medium">{t("created_by")}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {formatName(data.created_by)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500">
                     {formatDateTime(data.created_date)}
                   </p>
                 </div>
               )}
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("last_modified_by")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500">
                   {formatName(data.updated_by)}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   {formatDateTime(data.modified_date)}
                 </p>
               </div>

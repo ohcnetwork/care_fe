@@ -25,17 +25,17 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
-    queryKey: ["resourceRequests", id],
+    queryKey: ["resourceRequests", patientId],
     queryFn: query(routes.listResourceRequests, {
       queryParams: {
-        related_patient: id,
+        related_patient: patientId,
       },
     }),
-    enabled: !!id,
+    enabled: !!patientId,
   });
 
   const getStatusBadge = (status: ResourceRequest["status"]) => {

@@ -120,7 +120,7 @@ export function ComboboxQuantityInput({
               autoFocus={autoFocus}
             />
             {selectedUnit && (
-              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                 {selectedUnit.display}
               </div>
             )}

@@ -20,7 +20,7 @@ import {
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
@@ -39,10 +39,10 @@ export const Demography = (props: PatientProps) => {
   const handleEditClick = (sectionId: string) => {
     if (facilityId) {
       navigate(
-        `/facility/${facilityId}/patient/${id}/update?section=${sectionId}`,
+        `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
       );
     } else {
-      navigate(`/patient/${id}/update?section=${sectionId}`);
+      navigate(`/patient/${patientId}/update?section=${sectionId}`);
     }
   };
 

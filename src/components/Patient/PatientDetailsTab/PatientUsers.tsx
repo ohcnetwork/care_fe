@@ -203,25 +203,25 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 }
 
 export const PatientUsers = (props: PatientProps) => {
-  const { id } = props;
+  const { patientId } = props;
   const queryClient = useQueryClient();
 
   const { data: users } = useQuery({
-    queryKey: ["patientUsers", id],
+    queryKey: ["patientUsers", patientId],
     queryFn: query(routes.patient.users.listUsers, {
-      pathParams: { patientId: id },
+      pathParams: { patientId },
     }),
   });
 
   const { mutate: removeUser } = useMutation({
     mutationFn: (user: string) =>
       mutate(routes.patient.users.removeUser, {
-        pathParams: { patientId: id },
+        pathParams: { patientId },
         body: { user },
       })({ user }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["patientUsers", id],
+        queryKey: ["patientUsers", patientId],
       });
       toast.success("User removed successfully");
     },
@@ -313,7 +313,7 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("users")}
             </div>
-            <AddUserSheet patientId={id} />
+            <AddUserSheet patientId={patientId} />
           </div>
           <ManageUsers />
         </div>

@@ -238,12 +238,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                         ? `Dr. ${userData.first_name} ${userData.last_name}`
                         : `${userData.first_name} ${userData.last_name}`}
                     </h3>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-gray-500 truncate">
                       {userData.user_type}
                     </p>
 
                     {/* <p className="text-xs mt-4">Education: </p>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-gray-500 truncate">
                       {userData.qualification}
                     </p> */}
                   </div>
@@ -251,7 +251,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
                 <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-gray-500">
                       {facilityResponse?.name}
                     </div>
                   </div>

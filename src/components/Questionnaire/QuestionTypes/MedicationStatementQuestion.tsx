@@ -61,6 +61,7 @@ import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
   patientId: string;
+  encounterId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
@@ -90,6 +91,7 @@ export function MedicationStatementQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
+  encounterId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
@@ -110,6 +112,7 @@ export function MedicationStatementQuestion({
       pathParams: { patientId },
       queryParams: {
         limit: 100,
+        encounter: encounterId,
       },
     }),
   });

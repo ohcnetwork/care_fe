@@ -154,9 +154,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Edit Questionnaire</h1>
-          <p className="text-sm text-muted-foreground">
-            {questionnaire.description}
-          </p>
+          <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
@@ -215,7 +213,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 : ""
                             }`}
                           >
-                            <span className="font-medium text-muted-foreground">
+                            <span className="font-medium text-gray-500">
                               {index + 1}.
                             </span>
                             <span className="flex-1 truncate">
@@ -244,7 +242,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     }}
                                     className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
                                   >
-                                    <span className="font-medium text-muted-foreground">
+                                    <span className="font-medium text-gray-500">
                                       {index + 1}.{subIndex + 1}
                                     </span>
                                     <span className="flex-1 truncate">
@@ -359,7 +357,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 <CardHeader className="flex flex-row items-center justify-between border-b">
                   <div>
                     <CardTitle>Questions</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-gray-500 mt-1">
                       {questionnaire.questions?.length || 0} question
                       {questionnaire.questions?.length !== 1 ? "s" : ""}
                     </p>
@@ -410,7 +408,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   id={`question-${question.id}`}
                                   className="relative"
                                 >
-                                  <div className="absolute -left-10 top-4 font-medium text-muted-foreground">
+                                  <div className="absolute -left-10 top-4 font-medium text-gray-500">
                                     {index + 1}.
                                   </div>
                                   <QuestionEditor
@@ -549,7 +547,7 @@ function QuestionEditor({
     >
       <div className="flex items-center p-4">
         <div {...dragHandleProps} className="mr-2 cursor-move">
-          <CareIcon icon="l-arrow" className="h-4 w-4 text-muted-foreground" />
+          <CareIcon icon="l-arrow" className="h-4 w-4 text-gray-500" />
         </div>
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
@@ -569,7 +567,7 @@ function QuestionEditor({
           </div>
           <CareIcon
             icon={isExpanded ? "l-angle-up" : "l-angle-down"}
-            className="h-4 w-4 text-muted-foreground"
+            className="h-4 w-4 text-gray-500"
           />
         </CollapsibleTrigger>
         <Button

@@ -16,7 +16,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
-  const { facilityId, id: patientId } = props;
+  const { facilityId, patientId } = props;
   const { t } = useTranslation();
 
   return (
@@ -42,7 +42,7 @@ export const Updates = (props: PatientProps) => {
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden">
               <PaginatedList.WhenEmpty>
                 <Card className="p-6">
-                  <div className="text-lg font-medium text-muted-foreground">
+                  <div className="text-lg font-medium text-gray-500">
                     {t("no_update_available")}
                   </div>
                 </Card>
@@ -63,7 +63,7 @@ export const Updates = (props: PatientProps) => {
                     <div className="flex items-start gap-4">
                       <CareIcon
                         icon="l-file-alt"
-                        className="mt-1 h-5 w-5 text-muted-foreground"
+                        className="mt-1 h-5 w-5 text-gray-500"
                       />
                       <div>
                         <h3 className="text-lg font-medium">
@@ -72,11 +72,11 @@ export const Updates = (props: PatientProps) => {
                               item.structured_responses,
                             )}
                         </h3>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
                           <CareIcon icon="l-calender" className="h-4 w-4" />
                           <span>{formatDateTime(item.created_date)}</span>
                         </div>
-                        <div className="mt-1 text-sm text-muted-foreground">
+                        <div className="mt-1 text-sm text-gray-500">
                           by {item.created_by?.first_name || ""}{" "}
                           {item.created_by?.last_name || ""}
                           {` (${item.created_by?.user_type})`}
