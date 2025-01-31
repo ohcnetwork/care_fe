@@ -215,7 +215,13 @@ export default function PatientRegistration(
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatient({ ...values, ward_old: undefined });
+      updatePatient({
+        ...values,
+        ward_old: undefined,
+        age: values.age_or_dob === "age" ? values.age : undefined,
+        date_of_birth:
+          values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+      });
       return;
     }
 

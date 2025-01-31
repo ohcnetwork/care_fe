@@ -140,7 +140,11 @@ export default function FacilityForm(props: FacilityProps) {
     data: FacilityFormValues,
   ) => {
     if (facilityId) {
-      updateFacility(data);
+      updateFacility({
+        ...data,
+        latitude: data.latitude ?? 0,
+        longitude: data.longitude ?? 0,
+      });
     } else {
       createFacility(data);
     }
@@ -224,8 +228,12 @@ export default function FacilityForm(props: FacilityProps) {
         )?.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: Number(facilityData.latitude),
-        longitude: Number(facilityData.longitude),
+        latitude: facilityData.latitude
+          ? Number(facilityData.latitude)
+          : undefined,
+        longitude: facilityData.longitude
+          ? Number(facilityData.longitude)
+          : undefined,
         is_public: facilityData.is_public,
       });
     }
@@ -466,7 +474,10 @@ export default function FacilityForm(props: FacilityProps) {
                       {...field}
                       type="number"
                       onChange={(e) => {
-                        form.setValue("latitude", Number(e.target.value));
+                        form.setValue(
+                          "latitude",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        );
                       }}
                       data-cy="facility-latitude"
                       placeholder="Enter latitude"
@@ -490,7 +501,10 @@ export default function FacilityForm(props: FacilityProps) {
                       {...field}
                       type="number"
                       onChange={(e) => {
-                        form.setValue("longitude", Number(e.target.value));
+                        form.setValue(
+                          "longitude",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        );
                       }}
                       data-cy="facility-longitude"
                       placeholder="Enter longitude"
