@@ -137,9 +137,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   });
   useEffect(() => {
     if (resourceDetails) {
-      const d = resourceDetails;
-      d["status"] = qParams.status || resourceDetails.status.toLowerCase();
-      dispatch({ type: "set_form", form: d });
+      dispatch({
+        type: "set_form",
+        form: {
+          ...resourceDetails,
+          status: qParams.status || resourceDetails.status.toLowerCase(),
+        },
+      });
     }
     setIsLoading(false);
   }, [resourceDetails]);
