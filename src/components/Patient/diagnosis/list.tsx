@@ -63,7 +63,9 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
       >
-        <p className="text-gray-500 px-2 pb-2">{t("no_diagnoses_recorded")}</p>
+        <CardContent className="px-2 pb-3 pt-2">
+          <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
+        </CardContent>
       </DiagnosisListLayout>
     );
   }

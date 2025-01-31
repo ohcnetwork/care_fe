@@ -54,6 +54,7 @@ import {
   formatName,
   getReadableDuration,
   saveElementAsImage,
+  stringifyGeoOrganization,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import {
@@ -211,7 +212,7 @@ const AppointmentDetails = ({
   appointment: Appointment;
   facility: FacilityData;
 }) => {
-  const { patient, user } = appointment;
+  const { user } = appointment;
   const { t } = useTranslation();
 
   return (
@@ -331,14 +332,7 @@ const AppointmentDetails = ({
                 {appointment.patient.address || t("no_address_provided")}
               </p>
               <p className="text-gray-600">
-                {[
-                  patient.ward,
-                  patient.local_body,
-                  patient.district,
-                  patient.state,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
+                {stringifyGeoOrganization(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}

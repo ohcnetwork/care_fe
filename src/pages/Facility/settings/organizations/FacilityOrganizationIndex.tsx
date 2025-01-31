@@ -34,6 +34,9 @@ export default function FacilityOrganizationIndex({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId },
+      queryParams: {
+        parent: "",
+      },
     }),
     enabled: !!facilityId,
   });

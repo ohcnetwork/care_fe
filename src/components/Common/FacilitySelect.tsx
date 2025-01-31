@@ -17,8 +17,6 @@ interface BaseFacilitySelectProps {
   disabled?: boolean;
   multiple?: boolean;
   facilityType?: number;
-  district?: string;
-  state?: string;
   showAll?: boolean;
   showNOptions?: number | undefined;
   freeText?: boolean;
@@ -100,10 +98,7 @@ export const FacilitySelect = ({
       onChange={setSelected}
       fetchData={facilitySearch}
       showNOptions={showNOptions}
-      optionLabel={(option: any) =>
-        option.name +
-        (option.district_object ? `, ${option.district_object.name}` : "")
-      }
+      optionLabel={(option: any) => option.name}
       compareBy="id"
       className={className}
       error={errors}
