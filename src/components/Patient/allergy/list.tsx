@@ -40,7 +40,6 @@ export function AllergyList({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
   });
 
@@ -75,7 +74,7 @@ export function AllergyList({
         encounterId={encounterId}
       >
         <CardContent className="px-2 pb-3 pt-2">
-          <p className="text-muted-foreground">{t("no_allergies_recorded")}</p>
+          <p className="text-gray-500">{t("no_allergies_recorded")}</p>
         </CardContent>
       </AllergyListLayout>
     );

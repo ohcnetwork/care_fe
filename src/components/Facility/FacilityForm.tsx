@@ -476,7 +476,7 @@ export default function FacilityForm({
                   <FormLabel className="text-base">
                     {t("make_facility_public")}
                   </FormLabel>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("make_facility_public_description")}
                   </p>
                 </div>

@@ -29,7 +29,7 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
+            !date && "text-gray-500",
           )}
         >
           <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />

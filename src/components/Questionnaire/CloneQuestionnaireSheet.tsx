@@ -147,7 +147,7 @@ export default function CloneQuestionnaireSheet({
                     </Badge>
                   ))
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500">
                   No organizations selected
                 </p>
               )}
@@ -180,7 +180,7 @@ export default function CloneQuestionnaireSheet({
                           <Building className="h-4 w-4" />
                           <span>{org.name}</span>
                           {org.description && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-gray-500">
                               - {org.description}
                             </span>
                           )}

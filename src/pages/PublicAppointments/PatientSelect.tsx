@@ -167,9 +167,7 @@ export default function PatientSelect({
                   <>
                     <td className="p-4 align-middle text-left">
                       <div className="font-medium">{patient.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {patient.id}
-                      </div>
+                      <div className="text-xs text-gray-500">{patient.id}</div>
                     </td>
                     <td className="p-4 align-middle text-left">
                       {patient.phone_number}

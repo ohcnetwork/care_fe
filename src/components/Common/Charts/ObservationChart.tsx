@@ -152,7 +152,7 @@ export const ObservationVisualizer = ({
         {codeGroups.map((group, index) => (
           <Card key={index} className="p-4">
             <div
-              className="flex items-center justify-center text-muted-foreground"
+              className="flex items-center justify-center text-gray-500"
               style={{ height: `${height}px` }}
             >
               No data available
@@ -365,7 +365,7 @@ export const ObservationVisualizer = ({
                                   details.note && (
                                     <div
                                       key={code.code}
-                                      className="text-sm text-muted-foreground"
+                                      className="text-sm text-gray-500"
                                     >
                                       <span className="font-medium">
                                         {code.display}:
