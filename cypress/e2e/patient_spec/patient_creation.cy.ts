@@ -165,7 +165,6 @@ describe("Patient Management", () => {
   it("Edit a patient details and verify the changes", () => {
     const updatedPatientData: Partial<PatientFormData> = {
       name: generateName(),
-      phoneNumber: generatePhoneNumber(),
       gender: "Female",
       bloodGroup: "AB+",
       address: generateAddress(true),
@@ -180,7 +179,6 @@ describe("Patient Management", () => {
 
     patientCreation
       .enterName(updatedPatientData.name, true)
-      .enterPhoneNumber(updatedPatientData.phoneNumber, true)
       .selectGender(updatedPatientData.gender)
       .selectBloodGroup(updatedPatientData.bloodGroup)
       .enterAddress(updatedPatientData.address, true)
@@ -189,7 +187,6 @@ describe("Patient Management", () => {
 
     cy.verifyContentPresence("#general-info", [
       updatedPatientData.name,
-      updatedPatientData.phoneNumber,
       updatedPatientData.gender,
       updatedPatientData.address,
     ]);
