@@ -16,10 +16,11 @@ export interface CameraCaptureDialogProps {
   onHide: () => void;
   onCapture: (file: File, fileName: string) => void;
   onResetCapture: () => void;
+  onSubmit?: () => void;
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
-  const { show, onHide, onCapture, onResetCapture } = props;
+  const { show, onHide, onCapture, onResetCapture, onSubmit } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
 
   const [cameraFacingMode, setCameraFacingMode] = useState(
@@ -174,6 +175,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   onClick={() => {
                     setPreviewImage(null);
                     onHide();
+                    onSubmit && onSubmit();
                   }}
                   className="m-2"
                 >
@@ -239,6 +241,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                     onClick={() => {
                       onHide();
                       setPreviewImage(null);
+                      onSubmit && onSubmit();
                     }}
                   >
                     {t("submit")}
