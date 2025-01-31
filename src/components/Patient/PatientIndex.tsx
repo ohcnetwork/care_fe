@@ -140,9 +140,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <h1 className="text-3xl font-bold tracking-tight">
               {t("search_patients")}
             </h1>
-            <p className="text-muted-foreground">
-              {t("search_patient_page_text")}
-            </p>
+            <p className="text-gray-500">{t("search_patient_page_text")}</p>
           </div>
 
           <div>
@@ -168,7 +166,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <h3 className="text-lg font-semibold">
                             {t("no_patient_record_found")}
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-6">
+                          <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
                           <AddPatientButton outline />

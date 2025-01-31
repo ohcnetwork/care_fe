@@ -143,7 +143,7 @@ export function MedicationStatementList({
           <CardTitle>{t("ongoing_medications")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">{t("no_ongoing_medications")}</p>
+          <p className="text-gray-500">{t("no_ongoing_medications")}</p>
         </CardContent>
       </Card>
     );

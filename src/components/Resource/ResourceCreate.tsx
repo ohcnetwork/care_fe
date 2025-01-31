@@ -184,7 +184,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   <h3 className="text-lg font-medium">
                     {t("basic_information")}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("resource_request_basic_info_description")}
                   </p>
                 </div>
@@ -292,7 +292,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   <h3 className="text-lg font-medium">
                     {t("request_details")}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("resource_request_details_description")}
                   </p>
                 </div>
@@ -348,7 +348,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     <h3 className="text-lg font-medium">
                       {t("contact_information")}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500">
                       {t("contact_information_description")}
                     </p>
                   </div>
