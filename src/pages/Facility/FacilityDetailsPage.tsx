@@ -10,6 +10,7 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapsLink";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
@@ -36,7 +37,6 @@ export function FacilityDetailsPage({ id }: Props) {
       pathParams: { id },
     }),
   });
-
   const { Pagination } = useFilters({
     limit: 18,
   });
@@ -115,6 +115,12 @@ export function FacilityDetailsPage({ id }: Props) {
               <h1 className="text-3xl font-bold">{facility.name}</h1>
               <p className="text-lg text-muted-foreground">
                 {[facility.address].filter(Boolean).join(", ")}
+                {facility.latitude && facility.longitude && (
+                  <FacilityMapsLink
+                    latitude={facility.latitude}
+                    longitude={facility.longitude}
+                  />
+                )}
               </p>
             </div>
 

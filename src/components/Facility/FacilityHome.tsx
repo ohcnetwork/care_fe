@@ -6,13 +6,7 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Hospital,
-  MapPin,
-  MoreVertical,
-  Settings,
-  SquareArrowOutUpRight,
-} from "lucide-react";
+import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +28,7 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapsLink";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
@@ -44,7 +39,6 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
-import { isAndroidDevice } from "@/Utils/utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -128,29 +122,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
         navigate("/facility");
       },
     });
-  };
-  const getMapsLink = (latitude: number, longitude: number) => {
-    return isAndroidDevice ? (
-      <a
-        className="text-sm text-primary flex items-center gap-1 w-max"
-        href={`geo:0,0?q=${latitude},${longitude}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {t("show_on_maps")}
-        <SquareArrowOutUpRight className="h-3 w-3" />
-      </a>
-    ) : (
-      <a
-        className="text-sm text-primary flex items-center gap-1 w-max"
-        href={`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {t("show_on_maps")}
-        <SquareArrowOutUpRight className="h-3 w-3" />
-      </a>
-    );
   };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
@@ -351,12 +322,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             )}
                           </div>
                         )}
-                        {facilityData.latitude &&
-                          facilityData.longitude &&
-                          getMapsLink(
-                            facilityData.latitude,
-                            facilityData.longitude,
-                          )}
+                        {facilityData.latitude && facilityData.longitude && (
+                          <FacilityMapsLink
+                            latitude={facilityData.latitude}
+                            longitude={facilityData.longitude}
+                          />
+                        )}
                       </div>
                     </div>
 
