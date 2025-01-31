@@ -9,10 +9,12 @@ import {
   patientCreation,
 } from "@/pageObject/Patients/PatientCreation";
 import { patientDashboard } from "@/pageObject/Patients/PatientDashboard";
+import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { patientVerify } from "@/pageObject/Patients/PatientVerify";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
 
 const facilityCreation = new FacilityCreation();
+const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
@@ -21,7 +23,6 @@ describe("Patient Management", () => {
   const TEST_PHONE = "9495031234";
   const PATIENT_DETAILS = {
     name: "Nihal",
-    sex: "Male",
     phone: TEST_PHONE,
   };
 
@@ -46,7 +47,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "non_binary",
+        gender: "Non_Binary",
         bloodGroup: "O+",
         age: "25",
         address: generateAddress(true),
@@ -60,7 +61,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "transgender",
+        gender: "Transgender",
         bloodGroup: "AB+",
         age: "30",
         address: generateAddress(),
@@ -73,7 +74,7 @@ describe("Patient Management", () => {
         name: generateName(),
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: false,
-        gender: "female",
+        gender: "Female",
         bloodGroup: "Unknown",
         age: "25",
         sameAsPermanentAddress: false,
@@ -90,7 +91,7 @@ describe("Patient Management", () => {
         phoneNumber: generatePhoneNumber(),
         hasEmergencyContact: true,
         emergencyPhoneNumber: generatePhoneNumber(),
-        gender: "male",
+        gender: "Male",
         bloodGroup: "B+",
         dateOfBirth: "01-01-1990",
         address: generateAddress(),
@@ -98,10 +99,6 @@ describe("Patient Management", () => {
     },
     // ... other test cases ...
   ];
-
-  before(() => {
-    cy.loginByApi("doctor");
-  });
 
   beforeEach(() => {
     cy.loginByApi("doctor");
@@ -137,11 +134,57 @@ describe("Patient Management", () => {
     });
   });
 
-  it("search patient with phone number and verifies details", () => {
+  it("Search patient with phone number and create a new encounter", () => {
     facilityCreation.selectFacility("GHC Trikaripur");
     patientCreation
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
-      .verifySearchResults(PATIENT_DETAILS);
+      .verifySearchResults(PATIENT_DETAILS)
+      .selectPatientFromResults(PATIENT_DETAILS.name)
+      .enterYearOfBirth("1999")
+      .clickVerifyButton();
+
+    patientVerify
+      .verifyPatientName(PATIENT_DETAILS.name)
+      .verifyCreateEncounterButton()
+      .clickCreateEncounter()
+      .selectEncounterType(ENCOUNTER_TYPE)
+      .selectEncounterStatus(ENCOUNTER_STATUS)
+      .selectEncounterPriority(ENCOUNTER_PRIORITY)
+      .clickSubmitEncounter()
+      .assertEncounterCreationSuccess();
+
+    patientDashboard.verifyEncounterPatientInfo([
+      ENCOUNTER_TYPE,
+      ENCOUNTER_STATUS,
+      ENCOUNTER_PRIORITY,
+    ]);
+  });
+
+  it("Edit a patient details and verify the changes", () => {
+    const updatedPatientData: Partial<PatientFormData> = {
+      gender: "Female",
+      bloodGroup: "AB+",
+      address: generateAddress(true),
+    };
+
+    facilityCreation.selectFacility("GHC Trikaripur");
+    patientEncounter
+      .navigateToEncounters()
+      .openFirstEncounterDetails()
+      .clickPatientDetailsButton()
+      .clickPatientEditButton();
+
+    patientCreation
+      .selectGender(updatedPatientData.gender)
+      .selectBloodGroup(updatedPatientData.bloodGroup)
+      .enterAddress(updatedPatientData.address, true)
+      .submitPatientUpdateForm()
+      .verifyUpdateSuccess();
+
+    cy.verifyContentPresence("#general-info", [
+      updatedPatientData.gender,
+      updatedPatientData.address,
+    ]);
   });
 });

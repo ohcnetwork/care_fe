@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,9 +13,10 @@ import { Input } from "@/components/ui/input";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import query from "@/Utils/request/query";
-import { LocationList } from "@/types/location/location";
+import { LocationList, getLocationFormLabel } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
@@ -27,6 +28,7 @@ interface Props {
 
 export default function LocationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +41,13 @@ export default function LocationView({ id, facilityId }: Props) {
   const { data: location } = useQuery({
     queryKey: ["location", facilityId, id],
     queryFn: query(locationApi.get, {
+      pathParams: { facility_id: facilityId, id },
+    }),
+  });
+
+  const { data: locationOrganizations } = useQuery({
+    queryKey: ["location", id, "organizations"],
+    queryFn: query(locationApi.getOrganizations, {
       pathParams: { facility_id: facilityId, id },
     }),
   });
@@ -77,36 +86,68 @@ export default function LocationView({ id, facilityId }: Props) {
     setSelectedLocation(null);
   };
 
+  if (!location)
+    return (
+      <div className="p-4">
+        <CardGridSkeleton count={6} />
+      </div>
+    );
+
   return (
     <Page title={location?.name || t("location")}>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between items-start gap-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold">{t("child_locations")}</h2>
-            <Badge variant="outline">{location?.form.toUpperCase()}</Badge>
-            <Badge
-              variant={location?.status === "active" ? "default" : "secondary"}
-            >
-              {location?.status}
-            </Badge>
-            {location && "mode" in location && location.mode === "kind" && (
-              <Button variant="default" onClick={handleAddLocation}>
-                <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-                {t("add_child_location")}
-              </Button>
-            )}
+        <div className="flex justify-between">
+          <div className="flex flex-col justify-between items-start gap-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold">{t("locations")}</h2>
+              <Badge variant="outline">
+                {getLocationFormLabel(location?.form)}
+              </Badge>
+              <Badge
+                variant={
+                  location?.status === "active" ? "default" : "secondary"
+                }
+              >
+                {location?.status}
+              </Badge>
+              {location && "mode" in location && location.mode === "kind" && (
+                <Button variant="default" onClick={handleAddLocation}>
+                  <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                  {t("add_location")}
+                </Button>
+              )}
+            </div>
+            <div className="w-72">
+              <Input
+                placeholder={t("search_by_name")}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full"
+              />
+            </div>
           </div>
-          <div className="w-72">
-            <Input
-              placeholder={t("search_by_name")}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
+          {locationOrganizations && (
+            <LinkDepartmentsSheet
+              entityType="location"
+              entityId={id}
+              currentOrganizations={locationOrganizations.results}
+              facilityId={facilityId}
+              trigger={
+                <Button variant="outline">
+                  <CareIcon icon="l-building" className="h-4 w-4 mr-2" />
+                  {t("manage_organizations")}
+                </Button>
+              }
+              onUpdate={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["location", facilityId, id],
+                });
               }}
-              className="w-full"
             />
-          </div>
+          )}
         </div>
 
         {isLoading ? (

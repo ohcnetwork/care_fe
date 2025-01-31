@@ -53,9 +53,7 @@ export function FacilityCard({ facility, className }: Props) {
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-end">
             <Button variant="outline" asChild>
-              <Link href={`/facility/${facility.id}/overview`}>
-                View Facility
-              </Link>
+              <Link href={`/facility/${facility.id}`}>View Facility</Link>
             </Button>
           </div>
         </div>

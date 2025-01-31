@@ -89,7 +89,7 @@ export const Demography = (props: PatientProps) => {
             {t("emergency_contact_person_name")}
           </div>
           <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
-            {props.name || "-"}
+            -
           </div>
         </div>
       </div>
@@ -298,6 +298,7 @@ export const Demography = (props: PatientProps) => {
                     <h1 className="text-xl">{t(`patient__${subtab.id}`)}</h1>
                     {subtab.allowEdit && (
                       <Button
+                        data-cy="edit-patient-button"
                         variant="outline"
                         disabled={!!patientData.death_datetime}
                         onClick={withPermissionCheck(() =>

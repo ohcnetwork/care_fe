@@ -39,7 +39,7 @@ function generateFacilityLinks(
     { name: t("users"), url: `${baseUrl}/users`, icon: "d-people" },
     {
       name: t("settings"),
-      url: `${baseUrl}/settings`,
+      url: `${baseUrl}/settings/general`,
       icon: "l-setting",
     },
   ];
