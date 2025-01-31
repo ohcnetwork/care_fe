@@ -11,10 +11,6 @@ describe("User Creation", () => {
   const userCreation = new UserCreation();
   const userRole = "Doctor";
 
-  before(() => {
-    cy.loginByApi("admin");
-  });
-
   beforeEach(() => {
     cy.loginByApi("admin");
     cy.visit("/");

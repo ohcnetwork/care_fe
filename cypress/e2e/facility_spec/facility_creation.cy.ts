@@ -11,10 +11,6 @@ describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
 
-  before(() => {
-    cy.loginByApi("nurse");
-  });
-
   beforeEach(() => {
     cy.viewport(1920, 1080);
     cy.loginByApi("nurse");

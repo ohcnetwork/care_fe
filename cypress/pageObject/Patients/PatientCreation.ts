@@ -1,7 +1,7 @@
 export interface PatientFormData {
   name: string;
   phoneNumber: string;
-  gender: "male" | "female" | "transgender" | "non_binary";
+  gender: "Male" | "Female" | "Transgender" | "Non_Binary";
   bloodGroup:
     | "Unknown"
     | "A+"
@@ -54,6 +54,8 @@ export class PatientCreation {
     samePhoneNumberCheckbox: '[data-cy="same-phone-number-checkbox"]',
     stateSelect: '[data-cy="select-state"]',
     districtSelect: '[data-cy="select-district"]',
+    yearOfBirthInput: '[data-cy="year-of-birth-input"]',
+    verifyButton: '[data-cy="confirm-verification-button"]',
   };
 
   // Actions
@@ -71,14 +73,11 @@ export class PatientCreation {
     return this;
   }
 
-  verifySearchResults(patientDetails: {
-    name: string;
-    sex: string;
-    phone: string;
-  }) {
+  verifySearchResults(patientDetails: { name: string; phone: string }) {
     // Convert object values to an array of strings
     const detailsArray = Object.values(patientDetails);
     cy.verifyContentPresence(this.selectors.patientCard, detailsArray);
+    return this;
   }
 
   clickSearchPatients() {
@@ -86,15 +85,21 @@ export class PatientCreation {
     return this;
   }
 
-  enterName(name: string) {
-    cy.get(this.selectors.nameInput).type(name);
+  enterName(name: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.nameInput, name, { clearBeforeTyping });
     return this;
   }
 
-  enterPhoneNumber(phoneNumber: string) {
+  enterPhoneNumber(phoneNumber: string, clearBeforeTyping: boolean = false) {
     cy.typeIntoField(this.selectors.phoneInput, phoneNumber, {
       skipVerification: true,
+      clearBeforeTyping,
     });
+    return this;
+  }
+
+  verifyUpdateSuccess() {
+    cy.verifyNotification("Patient Updated Successfully");
     return this;
   }
 
@@ -122,8 +127,10 @@ export class PatientCreation {
     return this;
   }
 
-  enterAddress(address: string) {
-    cy.typeIntoField(this.selectors.addressInput, address);
+  enterAddress(address: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField(this.selectors.addressInput, address, {
+      clearBeforeTyping,
+    });
     return this;
   }
 
@@ -189,6 +196,11 @@ export class PatientCreation {
     return this;
   }
 
+  submitPatientUpdateForm() {
+    cy.clickSubmitButton("Save");
+    return this;
+  }
+
   clickSamePhoneNumberCheckbox() {
     cy.get('[data-cy="same-phone-number-checkbox"]').click();
     return this;
@@ -226,6 +238,21 @@ export class PatientCreation {
         cy.typeAndSelectOption(this.selectors.districtSelect, district);
       }
     });
+    return this;
+  }
+
+  selectPatientFromResults(patientName: string) {
+    cy.verifyAndClickElement(this.selectors.patientCard, patientName);
+    return this;
+  }
+
+  enterYearOfBirth(year: string) {
+    cy.typeIntoField(this.selectors.yearOfBirthInput, year);
+    return this;
+  }
+
+  clickVerifyButton() {
+    cy.verifyAndClickElement(this.selectors.verifyButton, "Verify");
     return this;
   }
 }

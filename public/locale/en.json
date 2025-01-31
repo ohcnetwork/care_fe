@@ -1513,7 +1513,7 @@
   "patient_status": "Patient Status",
   "patient_transfer_birth_match_note": "Note: Year of birth must match the patient to process the transfer request.",
   "patient_update_error": "Could not update patient",
-  "patient_update_success": "Patient Updated Sucessfully",
+  "patient_update_success": "Patient Updated Successfully",
   "patients": "Patients",
   "patients_per_slot": "Patients per Slot",
   "pending": "Pending",
