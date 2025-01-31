@@ -840,16 +840,7 @@ function AppointmentRow(props: {
                   {t("patient")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
-                  {t("room_apt")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
                   {t("consulting_doctor")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("labels")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("triage_category")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
                   {t("current_status")}
@@ -913,16 +904,7 @@ function AppointmentRowItem({
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Room Information"}</p>
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {formatDisplayName(appointment.user)}
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Labels"}</p>
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Triage Category"}</p>
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <AppointmentStatusDropdown
