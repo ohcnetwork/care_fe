@@ -11,6 +11,7 @@ export default function useAppHistory() {
   const resetHistory = useContext(ResetHistoryContext);
 
   const goBack = (fallbackUrl?: string) => {
+    // needs a look into this
     if (history.length > 1)
       // Otherwise, navigate to history present in the app navigation history stack.
       return navigate(history[1]);
