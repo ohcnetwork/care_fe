@@ -89,7 +89,7 @@ export const Demography = (props: PatientProps) => {
             {t("emergency_contact_person_name")}
           </div>
           <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
-            {props.name || "-"}
+            -
           </div>
         </div>
       </div>
