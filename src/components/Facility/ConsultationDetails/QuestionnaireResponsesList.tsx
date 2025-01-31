@@ -1,10 +1,11 @@
+import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -19,37 +20,50 @@ interface Props {
   patientId: string;
 }
 
-function formatValue(
-  value: string,
-  type: string,
-  unit?: { display?: string },
-): string {
+interface QuestionResponseProps {
+  question: Question;
+  response?: {
+    values: Array<{
+      value?: any;
+      value_quantity?: {
+        value: number;
+      };
+    }>;
+    note?: string;
+    question_id: string;
+  };
+}
+
+function formatValue(value: string | number, type: string): string {
   switch (type) {
     case "dateTime":
-      return formatDateTime(value);
+      return formatDateTime(value.toString());
     case "choice":
-      return properCase(value);
+      return properCase(value.toString());
+    case "decimal":
+    case "integer":
+      return value.toString();
     default:
-      return `${value}${unit?.display ? ` ${unit.display}` : ""}`;
+      return value.toString();
   }
 }
 
-function QuestionResponseValue({
-  question,
-  response,
-}: {
-  question: Question;
-  response: any;
-}) {
+function QuestionResponseValue({ question, response }: QuestionResponseProps) {
+  if (!response) return null;
+
   const value =
     response.values[0]?.value || response.values[0]?.value_quantity?.value;
 
   if (!value) return null;
 
   return (
-    <div className="flex flex-col space-y-0.5">
+    <div>
+      <div className="text-xs text-muted-foreground">{question.text}</div>
       <div className="text-sm font-medium whitespace-pre-wrap">
-        {formatValue(String(value), question.type, question.unit)}
+        {formatValue(value, question.type)}
+        {question.unit?.code && (
+          <span className="ml-1 text-xs">{question.unit.code}</span>
+        )}
         {response.note && (
           <span className="ml-2 text-xs text-muted-foreground">
             ({response.note})
@@ -63,85 +77,54 @@ function QuestionResponseValue({
 function QuestionGroup({
   group,
   responses,
+  level = 0,
 }: {
   group: Question;
   responses: any[];
+  level?: number;
 }) {
-  // Map the group.queswtions
-  if (group.questions) {
-    return group.questions?.map((q: Question) => {
-      if (q.questions) {
-        return (
-          <div className="space-y-2" key={q.id}>
-            <h4 className="text-sm font-medium text-secondary-700">
-              {q.text}
-              {q.code && (
-                <span className="ml-1 text-xs text-muted-foreground">
-                  ({q.code.display})
-                </span>
-              )}
-            </h4>
-            <div className="space-y-2 pl-3">
-              {q.questions?.map((subGroup: Question) => (
-                <QuestionGroup
-                  key={subGroup.id}
-                  group={subGroup}
-                  responses={responses}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      }
+  const hasResponses = responses.some((r) =>
+    group.questions?.some((q) => q.id === r.question_id),
+  );
 
-      return (
-        <div className="space-y-2" key={q.id}>
+  if (!hasResponses) return null;
+
+  const containerClass = group.styling_metadata?.containerClasses || "";
+  const classes = group.styling_metadata?.classes || "";
+
+  return (
+    <div className={`space-y-2 ${classes}`}>
+      {group.text && (
+        <div className="flex flex-col space-y-1">
           <h4 className="text-sm font-medium text-secondary-700">
-            {q.text}
-            {q.code && (
+            {group.text}
+            {group.code && (
               <span className="ml-1 text-xs text-muted-foreground">
-                ({q.code.display})
+                ({group.code.display})
               </span>
             )}
           </h4>
-          <div
-            className={`space-y-2 pl-3 ${q.styling_metadata?.classes || ""}`}
-          >
-            {[q]?.map((question: Question) => {
-              const response = responses.find(
-                (r) => r.question_id === question.id,
-              );
-              if (!response) return null;
-              return (
-                <QuestionResponseValue
-                  key={question.id}
-                  question={question}
-                  response={response}
-                />
-              );
-            })}
-          </div>
+          {level === 0 && <Separator className="my-2" />}
         </div>
-      );
-    });
-  }
+      )}
+      <div className={`${containerClass}`}>
+        {group.questions?.map((question) => {
+          if (question.type === "group") {
+            return (
+              <QuestionGroup
+                key={question.id}
+                group={question}
+                responses={responses}
+                level={level + 1}
+              />
+            );
+          }
 
-  return (
-    <div className="space-y-2" key={group.id}>
-      <h4 className="text-sm font-medium text-secondary-700">
-        {group.text}
-        {group.code && (
-          <span className="ml-1 text-xs text-muted-foreground">
-            ({group.code.display})
-          </span>
-        )}
-      </h4>
-      <div
-        className={`space-y-2 pl-3 ${group.styling_metadata?.classes || ""}`}
-      >
-        {[group]?.map((question: Question) => {
+          if (question.type === "structured") return null;
+
           const response = responses.find((r) => r.question_id === question.id);
           if (!response) return null;
+
           return (
             <QuestionResponseValue
               key={question.id}
@@ -166,15 +149,19 @@ function StructuredResponseBadge({
     symptom: "bg-yellow-100 text-yellow-800",
     diagnosis: "bg-blue-100 text-blue-800",
     medication_request: "bg-green-100 text-green-800",
+    medication_statement: "bg-purple-100 text-purple-800",
+    follow_up_appointment: "bg-pink-100 text-pink-800",
   };
 
   return (
     <Badge
       variant="outline"
-      className={`${colors[type as keyof typeof colors]} border-none`}
+      className={`${
+        colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
+      } border-none`}
     >
       {submitType === "CREATE" ? "Created" : "Updated"}{" "}
-      {properCase(type.replace("_", " "))}
+      {properCase(type.replace(/_/g, " "))}
     </Badge>
   );
 }
@@ -187,31 +174,30 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
     <Card className="flex flex-col py-3 px-4 transition-colors hover:bg-muted/50">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium">
-              {item.questionnaire?.title ||
-                Object.keys(item.structured_responses || {}).map((key) =>
-                  properCase(key.replace("_", " ")),
-                )}
-            </h3>
-            {isStructured && structuredType && (
-              <StructuredResponseBadge
-                type={structuredType}
-                submitType={
-                  Object.values(item.structured_responses || {})[0]?.submit_type
-                }
-              />
-            )}
-          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <CareIcon icon="l-clock" className="h-3 w-3" />
+            <div className="flex items-center gap-2">
+              {isStructured && structuredType ? (
+                <StructuredResponseBadge
+                  type={structuredType}
+                  submitType={
+                    Object.values(item.structured_responses || {})[0]
+                      ?.submit_type
+                  }
+                />
+              ) : (
+                <h3 className="text-sm font-medium">
+                  {item.questionnaire?.title} {t("filed")}
+                </h3>
+              )}
+            </div>
+            <span>{t("at")}</span>
             <span>{formatDateTime(item.created_date)}</span>
-            <span>•</span>
-            <span>
-              by {item.created_by?.first_name || ""}{" "}
+            <span>{t("by")}</span>
+            <div>
+              {item.created_by?.first_name || ""}{" "}
               {item.created_by?.last_name || ""}
               {item.created_by?.user_type && ` (${item.created_by?.user_type})`}
-            </span>
+            </div>
           </div>
         </div>
       </div>
@@ -220,10 +206,6 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
         <div className="mt-4 space-y-4">
           {item.questionnaire?.questions.map((question: Question) => {
             if (question.type === "structured") return null;
-
-            const response = item.responses.find(
-              (r) => r.question_id === question.id,
-            );
 
             if (question.type === "group") {
               return (
@@ -235,6 +217,9 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
               );
             }
 
+            const response = item.responses.find(
+              (r) => r.question_id === question.id,
+            );
             if (!response) return null;
 
             return (
