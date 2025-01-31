@@ -78,6 +78,7 @@ interface MedicationRequestQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  encounterId: string;
 }
 
 export function MedicationRequestQuestion({
@@ -85,6 +86,7 @@ export function MedicationRequestQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   patientId,
+  encounterId,
 }: MedicationRequestQuestionProps) {
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
@@ -94,6 +96,7 @@ export function MedicationRequestQuestion({
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),

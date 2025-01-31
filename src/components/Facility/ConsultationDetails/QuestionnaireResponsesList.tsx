@@ -14,7 +14,8 @@ import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 interface Props {
-  encounter: Encounter;
+  encounter?: Encounter;
+  patientId: string;
 }
 
 function formatValue(value: string, type: string): string {
@@ -124,17 +125,20 @@ function QuestionGroup({
   );
 }
 
-export default function QuestionnaireResponsesList({ encounter }: Props) {
+export default function QuestionnaireResponsesList({
+  encounter,
+  patientId,
+}: Props) {
   const { t } = useTranslation();
 
   return (
     <PaginatedList
       route={routes.getQuestionnaireResponses}
       pathParams={{
-        patientId: encounter.patient.id,
+        patientId: patientId,
       }}
       query={{
-        encounter: encounter.id,
+        ...(encounter && { encounter: encounter.id }),
       }}
     >
       {() => (

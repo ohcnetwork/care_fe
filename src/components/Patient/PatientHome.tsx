@@ -135,6 +135,7 @@ export const PatientHome = (props: {
               <Tab
                 facilityId={facilityId || ""}
                 id={id}
+                patientId={id}
                 patientData={patientData}
               />
             )}

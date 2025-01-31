@@ -1,3 +1,4 @@
+import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
@@ -66,7 +67,7 @@ export const facilityPatientTabs = [
   },
   {
     route: "updates",
-    component: Updates,
+    component: QuestionnaireResponsesList,
   },
   {
     route: "resource_requests",
