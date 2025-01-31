@@ -311,29 +311,17 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </Badge>
                     </div>
                     <div className="flex flex-row gap-2">
-                      {outgoing ? (
-                        <Badge
-                          variant="outline"
-                          className="bg-gray-100 text-gray-800"
-                        >
-                          <CareIcon
-                            icon="l-arrow-to-right"
-                            className="mr-2 h-4 w-4"
-                          />
-                          {resource.assigned_facility?.name}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="bg-gray-100 text-gray-800"
-                        >
-                          <CareIcon
-                            icon="l-arrow-from-right"
-                            className="mr-2 h-4 w-4"
-                          />
-                          {resource.origin_facility?.name}
-                        </Badge>
-                      )}
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
+                        {resource.origin_facility?.name}
+                        <CareIcon
+                          icon="l-arrow-right"
+                          className="mx-2 h-4 w-4"
+                        />
+                        {resource.assigned_facility?.name}
+                      </Badge>
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col p-0">
