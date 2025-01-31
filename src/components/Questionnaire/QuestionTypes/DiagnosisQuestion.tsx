@@ -46,6 +46,7 @@ import {
 
 interface DiagnosisQuestionProps {
   patientId: string;
+  encounterId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
@@ -84,6 +85,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
 
 export function DiagnosisQuestion({
   patientId,
+  encounterId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -96,6 +98,7 @@ export function DiagnosisQuestion({
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: {
+        encounter: encounterId,
         limit: 100,
       },
     }),

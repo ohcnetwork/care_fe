@@ -46,8 +46,9 @@ export function generatePhoneNumber(): string {
   return `${firstDigit}${remainingDigitsStr}`;
 }
 
-export function generateAddress(): string {
+export function generateAddress(multiLine: boolean = false): string {
   const houseNumbers = ["123", "45A", "67B", "89", "234"];
+  const apartments = ["Apt 4B", "Unit 12", "Flat 3A", "Suite 7", "#15"];
   const streets = [
     "Main Street",
     "Park Avenue",
@@ -64,10 +65,13 @@ export function generateAddress(): string {
   ];
 
   const randomHouse = houseNumbers[getRandomIndex(houseNumbers.length)];
+  const randomApt = apartments[getRandomIndex(apartments.length)];
   const randomStreet = streets[getRandomIndex(streets.length)];
   const randomArea = areas[getRandomIndex(areas.length)];
 
-  return `${randomHouse}, ${randomStreet}, ${randomArea}`;
+  return multiLine
+    ? `${randomHouse} ${randomStreet}\n${randomApt}\n${randomArea}`
+    : `${randomHouse}, ${randomStreet}, ${randomArea}`;
 }
 
 export function generateUsername(firstName: string): string {

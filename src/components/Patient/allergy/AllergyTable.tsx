@@ -95,9 +95,7 @@ export function AllergyTable({
             {allergy.note && (
               <TableRow>
                 <TableCell colSpan={7} className="px-4 py-2 bg-muted/50">
-                  <div className="text-xs text-muted-foreground mb-1">
-                    Notes
-                  </div>
+                  <div className="text-xs text-gray-500 mb-1">Notes</div>
                   <div className="text-sm">{allergy.note}</div>
                 </TableCell>
               </TableRow>
