@@ -137,7 +137,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       onResponse: ({ res, data }) => {
         if (res && data) {
           const d = data;
-          d["status"] = qParams.status || data.status;
+          d["status"] = qParams.status || data.status.toLowerCase();
           dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
@@ -233,11 +233,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <FacilitySelect
                 multiple={false}
                 name="assigned_facility"
-                facilityType={1510}
-                selected={state.form.assigned_facility_object}
-                setSelected={(obj) =>
-                  setFacility(obj, "assigned_facility_object")
-                }
+                selected={state.form.assigned_facility}
+                setSelected={(obj) => setFacility(obj, "assigned_facility")}
                 errors={state.errors.assigned_facility}
               />
             </div>
