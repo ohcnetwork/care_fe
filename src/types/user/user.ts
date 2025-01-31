@@ -30,7 +30,4 @@ export type CreateUserModel = {
   geo_organization: string;
 };
 
-export type UpdateUserModel = Omit<
-  CreateUserModel,
-  "username" | "password" | "email"
->;
+export type UpdateUserModel = Omit<CreateUserModel, "username" | "password">;

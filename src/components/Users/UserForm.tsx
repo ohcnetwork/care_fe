@@ -486,7 +486,7 @@ export default function UserForm({
           </>
         )}
 
-        {!isEditMode && (
+        {
           <FormField
             control={form.control}
             name="email"
@@ -505,7 +505,7 @@ export default function UserForm({
               </FormItem>
             )}
           />
-        )}
+        }
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
