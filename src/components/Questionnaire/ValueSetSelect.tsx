@@ -1,3 +1,4 @@
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
+  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -18,6 +20,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -51,6 +55,7 @@ export default function ValueSetSelect({
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const searchQuery = useQuery({
     queryKey: ["valueset", system, "expand", count, search],
@@ -103,6 +108,33 @@ export default function ValueSetSelect({
       </CommandList>
     </Command>
   );
+
+  if (isMobile && !hideTrigger) {
+    return (
+      <>
+        <Button
+          variant="outline"
+          role="combobox"
+          onClick={() => setInternalOpen(true)}
+          className={cn(
+            "w-full justify-between",
+            wrapTextForSmallScreen
+              ? "h-auto md:h-9 whitespace-normal text-left md:truncate"
+              : "truncate",
+            !value?.display && "text-gray-400",
+          )}
+          disabled={disabled}
+        >
+          <span>{value?.display || placeholder}</span>
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+        </Button>
+        <CommandDialog open={internalOpen} onOpenChange={setInternalOpen}>
+          {content}
+        </CommandDialog>
+      </>
+    );
+  }
+
   return (
     <Popover
       open={controlledOpen || internalOpen}
@@ -121,7 +153,8 @@ export default function ValueSetSelect({
               !value?.display && "text-gray-400",
             )}
           >
-            {value?.display || placeholder}
+            <span>{value?.display || placeholder}</span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
       )}
