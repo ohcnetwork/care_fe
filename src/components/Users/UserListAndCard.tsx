@@ -1,5 +1,6 @@
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -11,12 +12,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 
-import {
-  formatName,
-  formatPhoneNumber,
-  isUserOnline,
-  relativeTime,
-} from "@/Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
 const GetDetailsButton = (username: string) => {
@@ -116,7 +112,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
             <div>
               <div className="text-gray-500">{t("phone_number")}</div>
               <div className="font-medium truncate">
-                {formatPhoneNumber(user.phone_number) ?? "-"}
+                {formatPhoneNumberIntl(user.phone_number)}
               </div>
             </div>
           </div>
@@ -132,11 +128,7 @@ export const UserGrid = ({ users }: { users?: UserBase[] }) => (
   </div>
 );
 
-const UserListHeader = ({
-  showDistrictColumn,
-}: {
-  showDistrictColumn: boolean;
-}) => {
+const UserListHeader = () => {
   const { t } = useTranslation();
   return (
     <thead>
@@ -147,9 +139,6 @@ const UserListHeader = ({
         <th className="w-32 px-10 py-3 text-left">{t("status")}</th>
         <th className="px-10 py-3 text-left">{t("role")}</th>
         <th className="px-4 py-3 text-left">{t("contact_number")}</th>
-        {showDistrictColumn && (
-          <th className="px-4 py-3 text-left">{t("district")}</th>
-        )}
       </tr>
     </thead>
   );
@@ -192,20 +181,17 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.user_type}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
-        {formatPhoneNumber(user.phone_number)}
+        {formatPhoneNumberIntl(user.phone_number)}
       </td>
       <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>
   );
 };
 export const UserList = ({ users }: { users?: UserBase[] }) => {
-  const showDistrictColumn = users?.some(
-    (user) => "district_object" in user || "district" in user,
-  );
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="relative min-w-full divide-y divide-gray-200">
-        <UserListHeader showDistrictColumn={showDistrictColumn ?? false} />
+        <UserListHeader />
         <tbody className="divide-y divide-gray-200 bg-white">
           {users?.map((user) => <UserListRow key={user.id} user={user} />)}
         </tbody>

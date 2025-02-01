@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
@@ -35,11 +36,11 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { PartialPatientModel } from "@/types/emr/newPatient";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
+    useQueryParams();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] =
     useState<PartialPatientModel | null>(null);
@@ -91,7 +92,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const handleSearch = useCallback((key: string, value: string) => {
     if (key === "phone_number") {
-      setPhoneNumber(value.length >= 13 || value === "" ? value : "");
+      setPhoneNumberQuery({
+        phone_number: isValidPhoneNumber(value) || value === "" ? value : null,
+      });
     }
   }, []);
 
@@ -99,10 +102,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     queryKey: ["patient-search", facilityId, phoneNumber],
     queryFn: query.debounced(routes.searchPatient, {
       body: {
-        phone_number: parsePhoneNumber(phoneNumber) || "",
+        phone_number: phoneNumber,
       },
     }),
-    enabled: !!phoneNumber,
+    enabled: !!isValidPhoneNumber(phoneNumber),
   });
 
   const handlePatientSelect = (patient: PartialPatientModel) => {
@@ -137,9 +140,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <h1 className="text-3xl font-bold tracking-tight">
               {t("search_patients")}
             </h1>
-            <p className="text-muted-foreground">
-              {t("search_patient_page_text")}
-            </p>
+            <p className="text-gray-500">{t("search_patient_page_text")}</p>
           </div>
 
           <div>
@@ -165,7 +166,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <h3 className="text-lg font-semibold">
                             {t("no_patient_record_found")}
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-6">
+                          <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
                           <AddPatientButton outline />
@@ -228,6 +229,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
+              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -240,10 +242,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <Button
               variant="outline"
               onClick={() => setVerificationOpen(false)}
+              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button className="mb-2" onClick={handleVerify}>
+            <Button
+              className="mb-2"
+              onClick={handleVerify}
+              data-cy="confirm-verification-button"
+            >
               {t("verify")}
             </Button>
           </DialogFooter>

@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import { QuestionInput } from "./QuestionInput";
@@ -14,7 +17,11 @@ interface QuestionGroupProps {
   question: Question;
   encounterId?: string;
   questionnaireResponses: QuestionnaireResponse[];
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
@@ -123,9 +130,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         <div className="space-y-1">
           <QuestionLabel question={question} groupLabel />
           {question.description && (
-            <p className="text-sm text-muted-foreground">
-              {question.description}
-            </p>
+            <p className="text-sm text-gray-500">{question.description}</p>
           )}
         </div>
       )}

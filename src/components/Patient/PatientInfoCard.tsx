@@ -39,7 +39,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
+import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -119,7 +119,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-gray-500 font-medium">
                     Start Date
                   </span>
                   <span className="text-xs">
@@ -129,7 +129,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-gray-500 font-medium">
                     End Date
                   </span>
                   <span className="text-xs">
@@ -140,7 +140,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 </div>
                 {props.encounter.external_identifier && (
                   <div className="flex flex-col space-y-1 col-span-1">
-                    <span className="text-xs text-muted-foreground font-medium">
+                    <span className="text-xs text-gray-500 font-medium">
                       Hospital Identifier
                     </span>
                     <span className="text-xs">
@@ -186,7 +186,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -227,7 +227,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -269,8 +269,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  <ManageEncounterOrganizations
-                    encounter={encounter}
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
                     facilityId={encounter.facility.id}
                     trigger={
                       <div className="flex flex-wrap gap-2">
@@ -307,8 +309,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           id="consultation-buttons"
         >
           {!completedEncounterStatus.includes(encounter.status) && (
-            <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-              <DropdownMenu>
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="primary">
                     {t("update")}
@@ -321,6 +326,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       <Link
                         href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
                         className="cursor-pointer text-gray-800"
+                        data-cy="update-encounter-option"
                       >
                         {t(option.title)}
                       </Link>

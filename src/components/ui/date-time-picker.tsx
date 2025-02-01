@@ -68,14 +68,14 @@ export function DateTimePicker({
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
-            !value && "text-muted-foreground",
+            !value && "text-gray-500",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {value ? (
-            format(value, "MM/dd/yyyy hh:mm aa")
+            format(value, "dd/MM/yyyy hh:mm aa")
           ) : (
-            <span>MM/DD/YYYY hh:mm aa</span>
+            <span>DD/MM/YYYY hh:mm aa</span>
           )}
         </Button>
       </PopoverTrigger>

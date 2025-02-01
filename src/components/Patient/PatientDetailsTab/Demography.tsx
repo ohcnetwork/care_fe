@@ -20,7 +20,7 @@ import {
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
@@ -37,9 +37,13 @@ export const Demography = (props: PatientProps) => {
   };
 
   const handleEditClick = (sectionId: string) => {
-    navigate(
-      `/facility/${facilityId}/patient/${id}/update?section=${sectionId}`,
-    );
+    if (facilityId) {
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
+      );
+    } else {
+      navigate(`/patient/${patientId}/update?section=${sectionId}`);
+    }
   };
 
   const hasEditPermission = () => {
@@ -85,7 +89,7 @@ export const Demography = (props: PatientProps) => {
             {t("emergency_contact_person_name")}
           </div>
           <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
-            {props.name || "-"}
+            -
           </div>
         </div>
       </div>
@@ -192,52 +196,8 @@ export const Demography = (props: PatientProps) => {
           value: patientData.permanent_address,
         },
         ...getGeoOrgDetails(patientData.geo_organization),
-
-        // TODO: Replace with Geo_Org
-        // {
-        //   label: t("nationality"),
-        //   value: patientData.nationality,
-        // },
-        // {
-        //   label: t("state"),
-        //   value: patientData.state,
-        // },
-        // {
-        //   label: t("district"),
-        //   value: patientData.district_object?.name,
-        // },
-        // {
-        //   label: t("local_body"),
-        //   value: patientData.local_body_object?.name,
-        // },
-        // {
-        //   label: t("ward"),
-        //   value: (
-        //     <>
-        //       {(patientData.ward_object &&
-        //         patientData.ward_object.number +
-        //           ", " +
-        //           patientData.ward_object.name) ||
-        //         "-"}
-        //     </>
-        //   ),
-        // },
       ],
     },
-    // {
-    //   id: "volunteer-contact",
-    //   hidden: !patientData.assigned_to_object,
-    //   details: [
-    //     <EmergencyContact
-    //       number={patientData.assigned_to_object?.alt_phone_number}
-    //       name={
-    //         patientData.assigned_to_object
-    //           ? formatName(patientData.assigned_to_object)
-    //           : undefined
-    //       }
-    //     />,
-    //   ],
-    // },
   ];
 
   return (
@@ -265,22 +225,6 @@ export const Demography = (props: PatientProps) => {
         </div>
 
         <div className="lg:basis-4/5">
-          <div className="mb-2 flex flex-row justify-between">
-            <div>
-              <Button
-                id="update-patient-details"
-                variant="outline"
-                className="mt-4"
-                disabled={!!patientData.death_datetime}
-                onClick={withPermissionCheck(() =>
-                  navigate(`/facility/${id}/patient/${id}/update`),
-                )}
-              >
-                <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
-                {t("edit_profile")}
-              </Button>
-            </div>
-          </div>
           {/* <div className="mt-4 rounded-md border border-blue-400 bg-blue-50 p-5 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
             {[
               { label: t("abha_number"), value: "-" },
@@ -310,6 +254,7 @@ export const Demography = (props: PatientProps) => {
                     <h1 className="text-xl">{t(`patient__${subtab.id}`)}</h1>
                     {subtab.allowEdit && (
                       <Button
+                        data-cy="edit-patient-button"
                         variant="outline"
                         disabled={!!patientData.death_datetime}
                         onClick={withPermissionCheck(() =>

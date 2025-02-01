@@ -29,9 +29,6 @@ export type UserFacilityModel = {
 
 export type UserModel = UserBareMinimum & {
   external_id: string;
-  local_body?: number;
-  district?: number;
-  state?: number;
   video_connect_link: string;
   phone_number?: string;
   alt_phone_number?: string;
@@ -51,9 +48,6 @@ export type UserModel = UserBareMinimum & {
 };
 
 export interface UserAssignedModel extends UserBareMinimum {
-  local_body?: number;
-  district?: number;
-  state?: number;
   phone_number?: string;
   alt_phone_number?: string;
   video_connect_link: string;

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,7 +9,6 @@ import * as z from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -28,26 +28,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { validateRule } from "@/components/Users/UserFormValidations";
+import {
+  ValidationHelper,
+  validateRule,
+} from "@/components/Users/UserFormValidations";
 
 import { GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 import { CreateUserModel, UpdateUserModel, UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
 interface Props {
   onSubmitSuccess?: (user: UserBase) => void;
   existingUsername?: string;
+  organizationId?: string;
 }
 
-export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
+export default function UserForm({
+  onSubmitSuccess,
+  existingUsername,
+  organizationId,
+}: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
+  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
   const userFormSchema = z
     .object({
@@ -58,34 +70,27 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
         ? z.string().optional()
         : z
             .string()
-            .min(4, t("username_min_length_validation"))
-            .max(16, t("username_max_length_validation"))
-            .regex(/^[a-z0-9._-]*$/, t("username_characters_validation"))
-            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_start_end_validation"))
+            .min(4, t("field_required"))
+            .max(16, t("username_not_valid"))
+            .regex(/^[a-z0-9._-]*$/, t("username_not_valid"))
+            .regex(/^[a-z0-9].*[a-z0-9]$/, t("username_not_valid"))
             .refine(
               (val) => !val.match(/(?:[._-]{2,})/),
-              t("username_consecutive_validation"),
+              t("username_not_valid"),
             ),
       password: isEditMode
         ? z.string().optional()
         : z
             .string()
-            .min(8, t("password_length_validation"))
-            .regex(/[a-z]/, t("password_lowercase_validation"))
-            .regex(/[A-Z]/, t("password_uppercase_validation"))
-            .regex(/[0-9]/, t("password_number_validation")),
+            .min(8, t("field_required"))
+            .regex(/[a-z]/, t("new_password_validation"))
+            .regex(/[A-Z]/, t("new_password_validation"))
+            .regex(/[0-9]/, t("new_password_validation")),
       c_password: isEditMode ? z.string().optional() : z.string(),
       first_name: z.string().min(1, t("field_required")),
       last_name: z.string().min(1, t("field_required")),
       email: z.string().email(t("invalid_email_address")),
-      phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation")),
-      alt_phone_number: z
-        .string()
-        .regex(/^\+91[0-9]{10}$/, t("phone_number_validation"))
-        .optional(),
-      phone_number_is_whatsapp: z.boolean().default(true),
+      phone_number: validators.phoneNumber.required,
       gender: z.enum(GENDERS),
       /* TODO: Userbase doesn't currently support these, neither does BE
       but we will probably need these */
@@ -115,9 +120,13 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       user_type: "staff",
-      phone_number: "+91",
-      alt_phone_number: "+91",
-      phone_number_is_whatsapp: true,
+      username: "",
+      password: "",
+      c_password: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone_number: "",
     },
   });
 
@@ -128,7 +137,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     }),
     enabled: !!existingUsername,
   });
-
   useEffect(() => {
     if (userData && isEditMode) {
       const formData: Partial<UserFormValues> = {
@@ -138,25 +146,23 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender,
-        phone_number_is_whatsapp: true,
       };
       form.reset(formData);
     }
   }, [userData, form, isEditMode]);
 
+  const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
+  const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
+
   //const userType = form.watch("user_type");
   const usernameInput = form.watch("username");
   const phoneNumber = form.watch("phone_number");
-  const isWhatsApp = form.watch("phone_number_is_whatsapp");
 
   useEffect(() => {
-    if (isWhatsApp) {
-      form.setValue("alt_phone_number", phoneNumber);
-    }
     if (usernameInput && usernameInput.length > 0 && !isEditMode) {
       form.trigger("username");
     }
-  }, [phoneNumber, isWhatsApp, form, usernameInput, isEditMode]);
+  }, [phoneNumber, form, usernameInput, isEditMode]);
 
   const { isLoading: isUsernameChecking, isError: isUsernameTaken } = useQuery({
     queryKey: ["checkUsername", usernameInput],
@@ -174,12 +180,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
     const isInitialRender = usernameInput === "";
 
     if (username?.message) {
-      return validateRule(
-        false,
-        username.message,
-        isInitialRender,
-        t("username_valid"),
-      );
+      return null;
     } else if (isUsernameChecking) {
       return (
         <div className="flex items-center gap-1">
@@ -244,9 +245,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       });
       onSubmitSuccess?.(resp);
     },
-    onError: (error) => {
-      toast.error(error?.message ?? t("user_update_error"));
-    },
   });
 
   const onSubmit = async (data: UserFormValues) => {
@@ -262,6 +260,20 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
       } as CreateUserModel);
     }
   };
+
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org) levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
 
   return (
     <Form {...form}>
@@ -347,10 +359,57 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                         data-cy="username-input"
                         placeholder={t("username")}
                         {...field}
+                        onFocus={() => setIsUsernameFieldFocused(true)}
+                        onBlur={() => setIsUsernameFieldFocused(false)}
                       />
                     </div>
                   </FormControl>
-                  {renderUsernameFeedback(usernameInput ?? "")}
+                  {isUsernameFieldFocused ? (
+                    <>
+                      <div
+                        className="text-small mt-2 pl-2 text-secondary-500"
+                        aria-live="polite"
+                      >
+                        <ValidationHelper
+                          isInputEmpty={!field.value}
+                          successMessage={t("username_success_message")}
+                          validations={[
+                            {
+                              description: "username_min_length_validation",
+                              fulfilled: (field.value || "").length >= 4,
+                            },
+                            {
+                              description: "username_max_length_validation",
+                              fulfilled: (field.value || "").length <= 16,
+                            },
+                            {
+                              description: "username_characters_validation",
+                              fulfilled: /^[a-z0-9._-]*$/.test(
+                                field.value || "",
+                              ),
+                            },
+                            {
+                              description: "username_start_end_validation",
+                              fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
+                                field.value || "",
+                              ),
+                            },
+                            {
+                              description: "username_consecutive_validation",
+                              fulfilled: !/(?:[._-]{2,})/.test(
+                                field.value || "",
+                              ),
+                            },
+                          ]}
+                        />
+                      </div>
+                      <div className="pl-2">
+                        {renderUsernameFeedback(usernameInput || "")}
+                      </div>
+                    </>
+                  ) : (
+                    <FormMessage />
+                  )}
                 </FormItem>
               )}
             />
@@ -367,9 +426,41 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
                         data-cy="password-input"
                         placeholder={t("password")}
                         {...field}
+                        onFocus={() => setIsPasswordFieldFocused(true)}
+                        onBlur={() => setIsPasswordFieldFocused(false)}
                       />
                     </FormControl>
-                    <FormMessage />
+                    {isPasswordFieldFocused ? (
+                      <div
+                        className="text-small mt-2 pl-2 text-secondary-500"
+                        aria-live="polite"
+                      >
+                        <ValidationHelper
+                          isInputEmpty={!field.value}
+                          successMessage={t("password_success_message")}
+                          validations={[
+                            {
+                              description: "password_length_validation",
+                              fulfilled: (field.value || "").length >= 8,
+                            },
+                            {
+                              description: "password_lowercase_validation",
+                              fulfilled: /[a-z]/.test(field.value || ""),
+                            },
+                            {
+                              description: "password_uppercase_validation",
+                              fulfilled: /[A-Z]/.test(field.value || ""),
+                            },
+                            {
+                              description: "password_number_validation",
+                              fulfilled: /\d/.test(field.value || ""),
+                            },
+                          ]}
+                        />
+                      </div>
+                    ) : (
+                      <FormMessage />
+                    )}
                   </FormItem>
                 )}
               />
@@ -395,24 +486,26 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
           </>
         )}
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>{t("email")}</FormLabel>
-              <FormControl>
-                <Input
-                  data-cy="email-input"
-                  type="email"
-                  placeholder={t("email")}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditMode && (
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>{t("email")}</FormLabel>
+                <FormControl>
+                  <Input
+                    data-cy="email-input"
+                    type="email"
+                    placeholder={t("email")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -422,11 +515,9 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormLabel required>{t("phone_number")}</FormLabel>
                 <FormControl>
-                  <Input
+                  <PhoneInput
                     data-cy="phone-number-input"
-                    type="tel"
-                    placeholder="+91XXXXXXXXXX"
-                    maxLength={13}
+                    placeholder={t("enter_phone_number")}
                     {...field}
                   />
                 </FormControl>
@@ -435,50 +526,6 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="alt_phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("alternate_phone_number")}</FormLabel>
-                <FormControl>
-                  <Input
-                    data-cy="alt-phone-number-input"
-                    placeholder="+91XXXXXXXXXX"
-                    type="tel"
-                    maxLength={13}
-                    {...field}
-                    disabled={isWhatsApp}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="phone_number_is_whatsapp"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox
-                  data-cy="whatsapp-checkbox"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>
-                  {t("whatsapp_number_same_as_phone_number")}
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="gender"
@@ -585,8 +632,12 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
               <FormItem>
                 <FormControl>
                   <GovtOrganizationSelector
-                    value={field.value}
-                    onChange={field.onChange}
+                    {...field}
+                    value={form.watch("geo_organization")}
+                    selected={selectedLevels}
+                    onChange={(value) =>
+                      form.setValue("geo_organization", value)
+                    }
                     required={!isEditMode}
                   />
                 </FormControl>
@@ -600,6 +651,7 @@ export default function UserForm({ onSubmitSuccess, existingUsername }: Props) {
           type="submit"
           className="w-full"
           data-cy="submit-user-form"
+          variant="primary"
           disabled={
             isLoadingUser ||
             !form.formState.isDirty ||

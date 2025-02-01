@@ -3,7 +3,10 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import {
   Question,
   StructuredQuestionType,
@@ -20,7 +23,7 @@ const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
 interface QuestionRendererProps {
   questions: Question[];
   responses: QuestionnaireResponse[];
-  onResponseChange: (responses: QuestionnaireResponse[]) => void;
+  onResponseChange: (values: ResponseValue[], questionId: string) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
@@ -53,19 +56,6 @@ export function QuestionRenderer({
     }
   }, [activeGroupId]);
 
-  const handleResponseChange = (updatedResponse: QuestionnaireResponse) => {
-    const newResponses = [...responses];
-    const index = newResponses.findIndex(
-      (r) => r.question_id === updatedResponse.question_id,
-    );
-    if (index !== -1) {
-      newResponses[index] = updatedResponse;
-    } else {
-      newResponses.push(updatedResponse);
-    }
-    onResponseChange(newResponses);
-  };
-
   const shouldBeFullWidth = (question: Question): boolean =>
     question.type === "structured" &&
     !!question.structured_type &&
@@ -86,7 +76,7 @@ export function QuestionRenderer({
             question={question}
             encounterId={encounterId}
             questionnaireResponses={responses}
-            updateQuestionnaireResponseCB={handleResponseChange}
+            updateQuestionnaireResponseCB={onResponseChange}
             errors={errors}
             clearError={clearError}
             disabled={disabled}

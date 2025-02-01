@@ -107,7 +107,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">No encounters found</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-gray-500 mb-4">
         Try adjusting your filters or create a new encounter
       </p>
     </Card>
@@ -658,7 +658,10 @@ export function EncounterList({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="encounter-list-cards"
+        >
           {isLoading ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (

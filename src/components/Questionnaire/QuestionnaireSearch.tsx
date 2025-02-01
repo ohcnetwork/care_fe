@@ -60,6 +60,7 @@ export function QuestionnaireSearch({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-cy="add-questionnaire-button"
           variant="outline"
           className="w-full justify-between"
           disabled={disabled || isLoading}
@@ -70,7 +71,7 @@ export function QuestionnaireSearch({
                 icon="l-spinner"
                 className="mr-2 h-4 w-4 animate-spin"
               />
-              Loading...
+              {t("loading")}
             </>
           ) : (
             <span>{t("add_questionnaire")}</span>
@@ -82,10 +83,10 @@ export function QuestionnaireSearch({
         <div className="flex items-center border-b px-3">
           <CareIcon
             icon="l-search"
-            className="mr-2 h-4 w-4 shrink-0 text-muted-foreground"
+            className="mr-2 h-4 w-4 shrink-0 text-gray-500"
           />
           <input
-            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Search questionnaires..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -99,7 +100,7 @@ export function QuestionnaireSearch({
               <Skeleton className="h-8 w-full" />
             </div>
           ) : filteredQuestionnaires.length === 0 ? (
-            <div className="p-4 text-sm text-muted-foreground">
+            <div className="p-4 text-sm text-gray-500">
               {t("no_questionnaires_found")}
             </div>
           ) : (

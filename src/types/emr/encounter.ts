@@ -26,7 +26,7 @@ export const ENCOUNTER_CLASS = [
 
 export const ENCOUNTER_DIET_PREFERENCE = [
   "vegetarian",
-  "diary_free",
+  "dairy_free",
   "nut_free",
   "gluten_free",
   "vegan",

@@ -22,7 +22,10 @@ import {
   QuestionValidationError,
   ValidationErrorResponse,
 } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -69,6 +72,7 @@ export function QuestionnaireForm({
     QuestionnaireFormState[]
   >([]);
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
+
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -101,7 +105,7 @@ export function QuestionnaireForm({
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
-  useNavigationPrompt(isDirty, t("unsaved_changes"));
+  useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
 
   useEffect(() => {
     if (!isInitialized && questionnaireSlug) {
@@ -372,7 +376,7 @@ export function QuestionnaireForm({
                   {form.questionnaire.title}
                 </h2>
                 {form.questionnaire.description && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {form.questionnaire.description}
                   </p>
                 )}
@@ -403,11 +407,23 @@ export function QuestionnaireForm({
               encounterId={encounterId}
               questions={form.questionnaire.questions}
               responses={form.responses}
-              onResponseChange={(responses) => {
+              onResponseChange={(
+                values: ResponseValue[],
+                questionId: string,
+                note?: string,
+              ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
                     formItem.questionnaire.id === form.questionnaire.id
-                      ? { ...formItem, responses, errors: [] }
+                      ? {
+                          ...formItem,
+                          responses: formItem.responses.map((r) =>
+                            r.question_id === questionId
+                              ? { ...r, values, note: note }
+                              : r,
+                          ),
+                          errors: [],
+                        }
                       : formItem,
                   ),
                 );
@@ -479,7 +495,7 @@ export function QuestionnaireForm({
               {t("cancel")}
             </Button>
             <Button
-              type="button"
+              type="submit"
               onClick={handleSubmit}
               disabled={isPending || hasErrors}
               className="relative"
@@ -508,7 +524,7 @@ export function QuestionnaireForm({
         {import.meta.env.DEV && (
           <div className="p-4 space-y-6 max-w-4xl">
             <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-            <pre className="text-sm text-muted-foreground">
+            <pre className="text-sm text-gray-500">
               {JSON.stringify(questionnaireForms, null, 2)}
             </pre>
           </div>

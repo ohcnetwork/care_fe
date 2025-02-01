@@ -32,7 +32,9 @@ interface QuestionInputProps {
   questionnaireResponses: QuestionnaireResponse[];
   encounterId?: string;
   updateQuestionnaireResponseCB: (
-    questionnaireResponse: QuestionnaireResponse,
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
   ) => void;
   errors: QuestionValidationError[];
   clearError: () => void;
@@ -61,20 +63,21 @@ export function QuestionInput({
   }
 
   const handleAddValue = () => {
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [...questionnaireResponse.values, { type: "string", value: "" }],
-    });
+    updateQuestionnaireResponseCB(
+      [...questionnaireResponse.values, { type: "string", value: "" }],
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const removeValue = (index: number) => {
     const updatedValues = questionnaireResponse.values.filter(
       (_, i) => i !== index,
     );
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: updatedValues,
-    });
+    updateQuestionnaireResponseCB(
+      updatedValues,
+      questionnaireResponse.question_id,
+    );
   };
 
   const renderSingleInput = (index: number = 0) => {
@@ -112,15 +115,45 @@ export function QuestionInput({
       case "structured":
         switch (question.structured_type) {
           case "medication_request":
-            return <MedicationRequestQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <MedicationRequestQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return null;
           case "medication_statement":
-            return <MedicationStatementQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <MedicationStatementQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return null;
           case "allergy_intolerance":
             return <AllergyQuestion {...commonProps} />;
           case "symptom":
-            return <SymptomQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <SymptomQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  patientId={patientId}
+                />
+              );
+            }
+            return null;
           case "diagnosis":
-            return <DiagnosisQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return null;
           case "appointment":
             return <AppointmentQuestion {...commonProps} />;
           case "encounter":
@@ -128,8 +161,8 @@ export function QuestionInput({
               return (
                 <EncounterQuestion
                   {...commonProps}
-                  encounterId={encounterId}
                   facilityId={facilityId}
+                  encounterId={encounterId}
                 />
               );
             }
@@ -193,9 +226,13 @@ export function QuestionInput({
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}
-                      updateQuestionnaireResponseCB={
-                        updateQuestionnaireResponseCB
-                      }
+                      handleUpdateNote={(note) => {
+                        updateQuestionnaireResponseCB(
+                          [...questionnaireResponse.values],
+                          questionnaireResponse.question_id,
+                          note,
+                        );
+                      }}
                       disabled={disabled}
                     />
                   )}
@@ -219,7 +256,13 @@ export function QuestionInput({
             </Button>
             <NotesInput
               questionnaireResponse={questionnaireResponse}
-              updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+              handleUpdateNote={(note) => {
+                updateQuestionnaireResponseCB(
+                  [...questionnaireResponse.values],
+                  questionnaireResponse.question_id,
+                  note,
+                );
+              }}
               disabled={disabled}
             />
           </div>
@@ -231,7 +274,10 @@ export function QuestionInput({
   const error = errors.find((e) => e.question_id === question.id)?.error;
 
   return (
-    <div className="space-y-2">
+    <div
+      className="space-y-2"
+      data-cy={`question-${question.text?.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
     </div>

@@ -94,7 +94,7 @@ export class FacilityCreation {
       { label: "Address", message: "Address is required" },
       {
         label: "Phone Number",
-        message: "Phone number must start with +91 followed by 10 digits",
+        message: "Invalid input",
       },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
@@ -126,7 +126,18 @@ export class FacilityCreation {
       .should("not.be.empty");
   }
 
-  fillLocationHierarchy(location: { localBody: string; ward: string }) {
+  fillLocationHierarchy(location: {
+    state: string;
+    district: string;
+    localBody: string;
+    ward: string;
+  }) {
+    cy.typeAndSelectOption('[data-cy="select-state"]', location.state, false);
+    cy.typeAndSelectOption(
+      '[data-cy="select-district"]',
+      location.district,
+      false,
+    );
     // Don't verify selection for local body (false parameter)
     cy.typeAndSelectOption(
       '[data-cy="select-local_body"]',

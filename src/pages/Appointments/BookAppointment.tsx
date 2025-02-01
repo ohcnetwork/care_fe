@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -52,6 +52,21 @@ export default function BookAppointment(props: Props) {
     }),
   });
   const resource = resourcesQuery.data?.users.find((r) => r.id === resourceId);
+
+  useEffect(() => {
+    const users = resourcesQuery.data?.users;
+    if (!users) {
+      return;
+    }
+
+    if (users.length === 1) {
+      setResourceId(users[0].id);
+    }
+
+    if (users.length === 0) {
+      toast.error(t("no_practitioners_found"));
+    }
+  }, [resourcesQuery.data?.users]);
 
   const { mutateAsync: createAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.slots.createAppointment, {
@@ -114,7 +129,7 @@ export default function BookAppointment(props: Props) {
                 onValueChange={(value) => setResourceId(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("show_all")}>
+                  <SelectValue placeholder={t("select_practitioner")}>
                     {resource && (
                       <div className="flex items-center gap-2">
                         <Avatar

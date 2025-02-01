@@ -1,1 +1,1 @@
-import "./commands";
+import "@/support/commands";

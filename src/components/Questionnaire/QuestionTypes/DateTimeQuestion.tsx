@@ -13,11 +13,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 
 interface DateTimeQuestionProps {
   questionnaireResponse: QuestionnaireResponse;
-  updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
+  updateQuestionnaireResponseCB: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+  ) => void;
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
@@ -43,15 +50,16 @@ export function DateTimeQuestion({
       date.setMinutes(currentValue.getMinutes());
     }
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
         {
           type: "dateTime",
           value: date.toISOString(),
         },
       ],
-    });
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,15 +70,17 @@ export function DateTimeQuestion({
     date.setHours(hours);
     date.setMinutes(minutes);
 
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
+    updateQuestionnaireResponseCB(
+      [
+        ...questionnaireResponse.values,
         {
           type: "dateTime",
           value: date.toISOString(),
         },
       ],
-    });
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
   };
 
   const formatTime = (date: Date | undefined) => {
@@ -89,7 +99,7 @@ export function DateTimeQuestion({
             variant="outline"
             className={cn(
               "flex-1 justify-start text-left font-normal",
-              !currentValue && "text-muted-foreground",
+              !currentValue && "text-gray-500",
               classes,
             )}
             disabled={disabled}

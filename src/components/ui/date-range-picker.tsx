@@ -37,7 +37,7 @@ export function DateRangePicker({
             variant={"outline"}
             className={cn(
               "justify-center text-left font-normal",
-              !date && "text-muted-foreground",
+              !date && "text-gray-500",
             )}
           >
             <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />

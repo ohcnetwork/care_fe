@@ -6,7 +6,6 @@ import Loading from "@/components/Common/Loading";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { EncounterProvider } from "@/components/Facility/ConsultationDetails/EncounterContext";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
@@ -57,31 +56,6 @@ export const EncounterShow = (props: Props) => {
     ...pluginTabs,
   };
 
-  // if (Object.keys(tabs).includes(tab.toUpperCase())) {
-  //   tab = tab.toUpperCase();
-  // }
-  // const [showDoctors, setShowDoctors] = useState(false);
-  // const [patientData, setPatientData] = useState<PatientModel>();
-  // const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
-
-  // const getPatientGender = (patientData: any) =>
-  //   GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
-
-  // const getPatientAddress = (patientData: any) =>
-  //   `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
-
-  // const getPatientComorbidities = (patientData: any) => {
-  //   if (patientData?.medical_history?.length) {
-  //     return humanizeStrings(
-  //       patientData.medical_history.map((item: any) => item.disease),
-  //     );
-  //   } else {
-  //     return "None";
-  //   }
-  // };
-
-  // const authUser = useAuthUser();
-
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
@@ -92,62 +66,6 @@ export const EncounterShow = (props: Props) => {
     }),
     enabled: !!encounterId,
   });
-
-  // const encounterQuery = useTanStackQueryInstead(routes.encounter.get, {
-  //   pathParams: { id: consultationId },
-  // });
-
-  // const consultationData = encounterQuery.data;
-  // const bedId = consultationData?.current_bed?.bed_object?.id;
-
-  // const isCameraAttached = useTanStackQueryInstead(routes.listAssetBeds, {
-  //   prefetch: !!bedId,
-  //   query: { bed: bedId },
-  // }).data?.results.some((a) => a.asset_object.asset_class === "ONVIF");
-
-  // const patientDataQuery = useTanStackQueryInstead(routes.getPatient, {
-  //   pathParams: { id: consultationQuery.data?.patient ?? "" },
-  //   prefetch: !!consultationQuery.data?.patient,
-  //   onResponse: ({ data }) => {
-  //     if (!data) {
-  //       return;
-  //     }
-  //     setPatientData({
-  //       ...data,
-  //       gender: getPatientGender(data),
-  //       address: getPatientAddress(data),
-  //       comorbidities: getPatientComorbidities(data),
-  //       is_declared_positive: data.is_declared_positive ? "Yes" : "No",
-  //       is_vaccinated: patientData?.is_vaccinated ? "Yes" : "No",
-  //     } as any);
-  //   },
-  // });
-
-  // const fetchData = useCallback(
-  //   async (id: string) => {
-  //     // Get shifting data
-  //     const shiftRequestsQuery = await request(routes.listShiftRequests, {
-  //       query: { patient: id },
-  //     });
-  //     if (shiftRequestsQuery.data?.results) {
-  //       setActiveShiftingData(shiftRequestsQuery.data.results);
-  //     }
-  //   },
-  //   [consultationId, patientData?.is_vaccinated],
-  // );
-
-  // useEffect(() => {
-  //   const id = patientDataQuery.data?.id;
-  //   if (!id) {
-  //     return;
-  //   }
-  //   fetchData(id);
-  //   triggerGoal("Patient Consultation Viewed", {
-  //     facilityId: facilityId,
-  //     consultationId: consultationId,
-  //     userId: authUser.id,
-  //   });
-  // }, [patientDataQuery.data?.id]);
 
   if (isLoading || !encounterData) {
     return <Loading />;
@@ -177,12 +95,7 @@ export const EncounterShow = (props: Props) => {
     }`;
 
   return (
-    <EncounterProvider
-      initialContext={{
-        encounter: encounterData,
-        patient: encounterData.patient,
-      }}
-    >
+    <div>
       <nav className="relative flex flex-wrap items-start justify-between">
         <PageTitle
           title={t("encounter")}
@@ -236,6 +149,7 @@ export const EncounterShow = (props: Props) => {
             href={`/facility/${facilityId}/patient/${encounterData.patient.id}`}
             className="btn btn-primary m-1 w-full hover:text-white"
             id="patient-details"
+            data-cy="patient-details-button"
           >
             {t("patient_details")}
           </Link>
@@ -288,6 +202,6 @@ export const EncounterShow = (props: Props) => {
           <SelectedTab {...encounterTabProps} />
         </div>
       </div>
-    </EncounterProvider>
+    </div>
   );
 };

@@ -15,7 +15,7 @@ import {
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -262,12 +262,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   );
 
   useEffect(() => {
+    // trigger this effect only when there are no query params already applied, and once the query is loaded
+    if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
+      return;
+    }
+
     const updates: Partial<QueryParams> = {};
 
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
-      !schedulableUsersQuery.isLoading &&
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
@@ -301,7 +305,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...updates,
       });
     }
-  }, [schedulableUsersQuery.isLoading]);
+  }, [schedulableUsersQuery.isLoading, qParams]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -690,12 +694,27 @@ function AppointmentColumn(props: {
         !data && "animate-pulse",
       )}
     >
-      <div className="flex px-3 items-center gap-3 mb-4">
+      <div className="flex px-3 items-center gap-2 mb-4">
         <h2 className="font-semibold capitalize text-base px-1">
           {t(props.status)}
         </h2>
-        <span className="bg-gray-200 px-2 py-1 rounded-md text-sm">
-          {data?.count ?? "..."}
+        <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+          {data?.count == null ? (
+            "..."
+          ) : data.count === appointments.length ? (
+            data.count
+          ) : (
+            <Trans
+              i18nKey="showing_x_of_y"
+              values={{
+                x: appointments.length,
+                y: data.count,
+              }}
+              components={{
+                strong: <span className="font-bold" />,
+              }}
+            />
+          )}
         </span>
       </div>
       {appointments.length === 0 ? (
@@ -796,6 +815,7 @@ function AppointmentRow(props: {
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
           value={status}
+          className="w-full overflow-scroll"
           onValueChange={(value) => setStatus(value as Appointment["status"])}
         >
           <TabsList>
@@ -820,16 +840,7 @@ function AppointmentRow(props: {
                   {t("patient")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
-                  {t("room_apt")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
                   {t("consulting_doctor")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("labels")}
-                </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
-                  {t("triage_category")}
                 </TableHead>
                 <TableHead className="font-semibold text-black text-xs">
                   {t("current_status")}
@@ -893,16 +904,7 @@ function AppointmentRowItem({
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Room Information"}</p>
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {formatDisplayName(appointment.user)}
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Labels"}</p>
-      </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        <p>{"Need Triage Category"}</p>
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <AppointmentStatusDropdown

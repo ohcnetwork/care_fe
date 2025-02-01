@@ -1,14 +1,14 @@
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
-import { toast } from "sonner";
-
-import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
-import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
+import {
+  Organization,
+  OrganizationParent,
+} from "@/types/organization/organization";
 import { Quantity } from "@/types/questionnaire/quantity";
 
 const DATE_FORMAT = "DD/MM/YYYY";
@@ -108,157 +108,10 @@ export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
 };
 
-export const getPincodeDetails = async (pincode: string, apiKey: string) => {
-  const response = await fetch(
-    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
-  );
-  const data = await response.json();
-  if (!data.records || data.records.length === 0) {
-    toast.error("Invalid pincode");
-    return null;
-  }
-  return data.records[0];
-};
-
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
     ? dayjs().subtract(5, "minutes").isBefore(user.last_login)
     : false;
-};
-
-export interface CountryData {
-  flag: string;
-  name: string;
-  code: string;
-}
-
-export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
-  if (!phoneNumber) return "";
-  if (phoneNumber === "+91") return "";
-  const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-  let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
-  if (parsedNumber.length < 12) return "";
-  if (countryCode && phoneCodes[countryCode]) {
-    parsedNumber = phoneCodes[countryCode].code + parsedNumber;
-  } else if (!phoneNumber.startsWith("+")) {
-    return undefined;
-  }
-  parsedNumber = "+" + parsedNumber;
-  return parsedNumber;
-};
-
-export const formatPhoneNumber = (phoneNumber: string) => {
-  if (phoneNumber.startsWith("+91")) {
-    phoneNumber = phoneNumber.startsWith("+910")
-      ? phoneNumber.slice(4)
-      : phoneNumber.slice(3);
-    const landline_code = IN_LANDLINE_AREA_CODES.find((code) =>
-      phoneNumber.startsWith(code),
-    );
-    if (landline_code === undefined)
-      return "+91" + " " + phoneNumber.slice(0, 5) + " " + phoneNumber.slice(5);
-    const subscriber_no_length = 10 - landline_code.length;
-    return (
-      "+91" +
-      " " +
-      landline_code +
-      " " +
-      phoneNumber.slice(
-        landline_code.length,
-        subscriber_no_length / 2 + landline_code.length,
-      ) +
-      " " +
-      phoneNumber.slice(subscriber_no_length / 2 + landline_code.length)
-    );
-  } else if (phoneNumber.startsWith("1800")) {
-    return "1800" + " " + phoneNumber.slice(4, 7) + " " + phoneNumber.slice(7);
-  } else if (phoneNumber.startsWith("+")) {
-    const countryCode = getCountryCode(phoneNumber);
-    if (!countryCode) return phoneNumber;
-    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-    return (
-      "+" +
-      phoneCodes[countryCode].code +
-      " " +
-      phoneNumber.slice(phoneCodes[countryCode].code.length + 1)
-    );
-  }
-  return phoneNumber;
-};
-
-export const getCountryCode = (phoneNumber: string) => {
-  if (phoneNumber.startsWith("+")) {
-    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
-    const phoneCodesArr = Object.keys(phoneCodes);
-    phoneNumber = phoneNumber.slice(1);
-    const allMatchedCountries: { name: string; code: string }[] = [];
-    for (let i = 0; i < phoneCodesArr.length; i++) {
-      if (
-        phoneNumber.startsWith(
-          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
-        )
-      ) {
-        allMatchedCountries.push({
-          name: phoneCodesArr[i],
-          code: phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
-        });
-      }
-    }
-    // returns the country which is longest in case there are multiple matches
-    if (allMatchedCountries.length === 0) return undefined;
-    const matchedCountry = allMatchedCountries.reduce((max, country) =>
-      max.code > country.code ? max : country,
-    );
-    const sameCodeCountries = allMatchedCountries.filter(
-      (country) => country.code === matchedCountry.code,
-    );
-    if (matchedCountry === undefined) return undefined;
-    // some countries share same country code but differ in area codes
-    // The area codes are checked for such countries
-    if (matchedCountry.code == "1") {
-      const areaCode = phoneNumber.substring(1, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "US"
-      );
-    } else if (matchedCountry.code === "262") {
-      const areaCode = phoneNumber.substring(3, 6);
-      return sameCodeCountries.find((country) =>
-        AREACODES[country.name]?.includes(areaCode),
-      )?.name;
-    } else if (matchedCountry.code === "61") {
-      const areaCode = phoneNumber.substring(2, 7);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "AU"
-      );
-    } else if (matchedCountry.code === "599") {
-      const areaCode = phoneNumber.substring(3, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "CW"
-      );
-    } else if (matchedCountry.code == "7") {
-      const areaCode = phoneNumber.substring(1, 2);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "RU"
-      );
-    } else if (matchedCountry.code == "47") {
-      const areaCode = phoneNumber.substring(2, 4);
-      return (
-        sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode),
-        )?.name ?? "NO"
-      );
-    }
-    return matchedCountry.name;
-  }
-  return undefined;
 };
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
@@ -273,7 +126,6 @@ export const formatPatientAge = (
   obj: PatientModel | Patient,
   abbreviated = false,
 ) => {
-  if (obj.age != null) return `${obj.age} Y`;
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -412,4 +264,23 @@ export const conditionalAttribute = <T>(
   attributes: Record<string, T>,
 ) => {
   return condition ? attributes : {};
+};
+
+export const conditionalArrayAttribute = <T>(
+  condition: boolean,
+  attributes: T[],
+) => {
+  return condition ? attributes : [];
+};
+
+export const stringifyGeoOrganization = (org: Organization) => {
+  const levels: string[] = [];
+
+  let current: OrganizationParent | undefined = org;
+  while (current?.name) {
+    levels.push(current.name);
+    current = current.parent;
+  }
+
+  return levels.join(", ");
 };

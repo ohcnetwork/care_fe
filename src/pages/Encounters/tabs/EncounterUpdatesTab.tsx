@@ -7,6 +7,7 @@ import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 export const EncounterUpdatesTab = ({
+  facilityId,
   encounter,
   patient,
 }: EncounterTabProps) => {
@@ -15,25 +16,40 @@ export const EncounterUpdatesTab = ({
       {/* Main Content Area */}
       <div className="flex flex-col xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {/* Allergies Section */}
           <div>
-            <AllergyList patientId={patient.id} encounterId={encounter.id} />
+            <AllergyList
+              facilityId={facilityId}
+              patientId={patient.id}
+              encounterId={encounter.id}
+            />
           </div>
 
           {/* Symptoms Section */}
           <div>
-            <SymptomsList patientId={patient.id} encounterId={encounter.id} />
+            <SymptomsList
+              patientId={patient.id}
+              encounterId={encounter.id}
+              facilityId={facilityId}
+            />
           </div>
 
           {/* Diagnoses Section */}
           <div>
-            <DiagnosisList patientId={patient.id} encounterId={encounter.id} />
+            <DiagnosisList
+              patientId={patient.id}
+              encounterId={encounter.id}
+              facilityId={facilityId}
+            />
           </div>
 
           {/* Questionnaire Responses Section */}
           <div>
-            <QuestionnaireResponsesList encounter={encounter} />
+            <QuestionnaireResponsesList
+              encounter={encounter}
+              patientId={patient.id}
+            />
           </div>
         </div>
 

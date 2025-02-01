@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,9 +15,9 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
@@ -27,14 +27,14 @@ export default function UserAvatar({ username }: { username: string }) {
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
 
-  const { data: userData, loading: isLoading } = useTanStackQueryInstead(
-    routes.getUserDetails,
-    {
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ["getUserDetails", username],
+    queryFn: query(routes.getUserDetails, {
       pathParams: {
         username: username,
       },
-    },
-  );
+    }),
+  });
 
   if (isLoading || !userData) {
     return <Loading />;
