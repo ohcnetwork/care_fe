@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
@@ -27,7 +26,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
+import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
@@ -146,19 +145,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     },
   );
 
-  const { mutate: updateResource } = useMutation({
-    mutationFn: mutate(routes.updateResource, {
-      pathParams: { id: props.id },
-    }),
-    onSuccess: (data) => {
-      dispatch({ type: "set_form", form: data });
-      toast.success(t("request_updated_successfully"));
-      navigate(`/facility/${props.facilityId}/resource/${props.id}`);
-      setIsLoading(false);
-    },
-    onError: (_error) => setIsLoading(false),
-  });
-
   const handleSubmit = async () => {
     const validForm = validateForm();
 
@@ -183,7 +169,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         approving_facility: state.form.approving_facility?.id,
         related_patient: state.form.related_patient?.id,
       };
-      updateResource(resourceData);
+
+      const { res, data } = await request(routes.updateResource, {
+        pathParams: { id: props.id },
+        body: resourceData,
+      });
+      setIsLoading(false);
+
+      if (res && res.status == 200 && data) {
+        dispatch({ type: "set_form", form: data });
+        toast.success(t("request_updated_successfully"));
+        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
+      } else {
+        setIsLoading(false);
+      }
     }
   };
 
