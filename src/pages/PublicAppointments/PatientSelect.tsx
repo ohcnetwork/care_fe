@@ -14,8 +14,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatient } from "@/pages/Patient/Utils";
+import { Patient } from "@/types/emr/newPatient";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
@@ -55,9 +54,7 @@ export default function PatientSelect({
     );
   }
 
-  const { data: patientData, isLoading } = useQuery<
-    PaginatedResponse<AppointmentPatient>
-  >({
+  const { data: patientData, isLoading } = useQuery({
     queryKey: ["otp-patient"],
     queryFn: query(routes.otp.getPatient, {
       headers: {
@@ -106,11 +103,11 @@ export default function PatientSelect({
     );
   };
 
-  const getPatienDoBorAge = (patient: AppointmentPatient) => {
+  const getPatienDoBorAge = (patient: Patient) => {
     if (patient.date_of_birth) {
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }
-    const yearOfBirth = parseInt(patient.year_of_birth ?? "");
+    const yearOfBirth = patient.year_of_birth;
     const age = dayjs().year() - yearOfBirth;
     return `${age} years`;
   };
@@ -170,15 +167,13 @@ export default function PatientSelect({
                   <>
                     <td className="p-4 align-middle text-left">
                       <div className="font-medium">{patient.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {patient.id}
-                      </div>
+                      <div className="text-xs text-gray-500">{patient.id}</div>
                     </td>
                     <td className="p-4 align-middle text-left">
                       {patient.phone_number}
                     </td>
                     <td className="p-4 align-middle text-left">
-                      {getPatienDoBorAge(patient as AppointmentPatient)}
+                      {getPatienDoBorAge(patient)}
                     </td>
                     <td className="p-4 align-middle text-left">
                       {t(`GENDER__${patient.gender}`)}

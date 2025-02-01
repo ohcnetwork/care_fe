@@ -236,8 +236,8 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: "Care",
           short_name: "Care",
-          theme_color: "#0e9f6e",
           background_color: "#ffffff",
+          theme_color: "#ffffff",
           display: "standalone",
           icons: [
             {
@@ -287,6 +287,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 4000,
+      host: "0.0.0.0",
     },
     preview: {
       headers: {

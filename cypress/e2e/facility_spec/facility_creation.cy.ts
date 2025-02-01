@@ -3,6 +3,8 @@ import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
+  state: "Kerala",
+  district: "Ernakulam",
   localBody: "Aluva",
   ward: "4",
 };
@@ -12,10 +14,9 @@ describe("Facility Management", () => {
   const facilityType = "Primary Health Centre";
 
   beforeEach(() => {
-    // Set larger viewport to ensure all elements are visible
     cy.viewport(1920, 1080);
-    cy.visit("/login");
     cy.loginByApi("nurse");
+    cy.visit("/");
   });
 
   it("Create a new facility using the admin role and verify validation errors", () => {

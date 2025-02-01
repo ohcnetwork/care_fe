@@ -152,7 +152,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
               {!isLoading &&
                 (!selectedOrganizations ||
                   selectedOrganizations.length === 0) && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("no_organizations_selected")}
                   </p>
                 )}
@@ -185,7 +185,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
                           <Building className="h-4 w-4" />
                           <span>{org.name}</span>
                           {org.description && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-gray-500">
                               - {org.description}
                             </span>
                           )}

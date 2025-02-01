@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import {
+  facilityPatientTabs,
+  patientTabs,
+} from "@/components/Patient/PatientDetailsTab";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -20,7 +23,7 @@ import { Patient } from "@/types/emr/newPatient";
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
-  page: (typeof patientTabs)[0]["route"];
+  page: (typeof patientTabs | typeof facilityPatientTabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
 
@@ -40,7 +43,9 @@ export const PatientHome = (props: {
     return <Loading />;
   }
 
-  const Tab = patientTabs.find((t) => t.route === page)?.component;
+  const tabs = facilityId ? facilityPatientTabs : patientTabs;
+
+  const Tab = tabs.find((t) => t.route === page)?.component;
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
@@ -51,13 +56,15 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          <Button asChild variant="primary">
-            <Link
-              href={`/facility/${facilityId}/patient/${id}/book-appointment`}
-            >
-              {t("schedule_appointment")}
-            </Link>
-          </Button>
+          {facilityId && (
+            <Button asChild variant="primary">
+              <Link
+                href={`/facility/${facilityId}/patient/${id}/book-appointment`}
+              >
+                {t("schedule_appointment")}
+              </Link>
+            </Button>
+          )}
         </>
       }
     >
@@ -99,10 +106,14 @@ export const PatientHome = (props: {
           role="navigation"
         >
           <div className="flex flex-row" role="tablist">
-            {patientTabs.map((tab) => (
+            {tabs.map((tab) => (
               <Link
                 key={tab.route}
-                href={`/facility/${facilityId}/patient/${id}/${tab.route}`}
+                href={
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${id}/${tab.route}`
+                    : `/patient/${id}/${tab.route}`
+                }
                 className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   page === tab.route
                     ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
@@ -123,7 +134,7 @@ export const PatientHome = (props: {
             {Tab && (
               <Tab
                 facilityId={facilityId || ""}
-                id={id}
+                patientId={id}
                 patientData={patientData}
               />
             )}

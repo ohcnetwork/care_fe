@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import CircularProgress from "@/components/Common/CircularProgress";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -42,14 +42,14 @@ const CommentSection = (props: { id: string }) => {
     >
       {(_, query) => (
         <div className="flex w-full flex-col">
-          <TextAreaFormField
+          <Textarea
             name="comment"
-            placeholder="Type your comment"
+            placeholder={t("type_your_comment")}
             value={commentBox}
-            onChange={(e) => setCommentBox(e.value)}
+            onChange={(e) => setCommentBox(e.target.value)}
           />
 
-          <div className="flex w-full justify-end">
+          <div className="flex w-full justify-end mt-2">
             <Button
               variant="primary"
               onClick={async () => {
@@ -57,13 +57,13 @@ const CommentSection = (props: { id: string }) => {
                 query.refetch();
               }}
             >
-              Post Your Comment
+              {t("post_your_comment")}
             </Button>
           </div>
           <div className="w-full">
             <div>
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-                <span>No comments available</span>
+                <span>{t("no_comments_available")}</span>
               </PaginatedList.WhenEmpty>
               <PaginatedList.WhenLoading>
                 <CircularProgress className="h-12 w-12" />

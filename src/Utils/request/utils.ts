@@ -48,7 +48,7 @@ export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
 
   const authorizationHeader = getAuthorizationHeader();
   if (authorizationHeader && !noAuth) {
-    headers.append("Authorization", authorizationHeader);
+    headers.set("Authorization", authorizationHeader);
   }
 
   return headers;

@@ -101,9 +101,9 @@ export default function DateField({
   };
 
   return (
-    <div className="flex items-center gap-2 ">
-      <div className="flex flex-col gap-1 w-1/3">
-        <Label>{t("day")}</Label>
+    <div className="flex items-center gap-2">
+      <div className="flex-1">
+        <Label className="mb-1">{t("day")}</Label>
         <Input
           type="number"
           placeholder="DD"
@@ -117,8 +117,8 @@ export default function DateField({
         />
       </div>
 
-      <div className="flex flex-col gap-1 w-1/3">
-        <Label>{t("month")}</Label>
+      <div className="flex-1">
+        <Label className="mb-1">{t("month")}</Label>
         <Input
           type="number"
           placeholder="MM"
@@ -132,14 +132,13 @@ export default function DateField({
         />
       </div>
 
-      <div className="flex flex-col gap-1 w-1/3">
-        <Label>{t("year")}</Label>
+      <div className="flex-1">
+        <Label className="mb-1">{t("year")}</Label>
         <Input
           type="number"
           placeholder="YYYY"
           value={year}
           onChange={handleYearChange}
-          max={new Date().getFullYear()}
           min={1900}
           id={`${id}-year-input`}
           data-cy={`${id}-year-input`}
