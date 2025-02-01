@@ -587,7 +587,7 @@ const FileUploadDialog = ({
       aria-labelledby="file-upload-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit"
+        className="mb-8 rounded-lg p-5 max-w-fit md:max-w-[30rem]"
         aria-describedby="file-upload"
       >
         <DialogHeader>
@@ -607,8 +607,8 @@ const FileUploadDialog = ({
                     >
                       <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
                       <span className="truncate">
-                        {file.name.length > 30
-                          ? `${file.name.substring(0, 20)}...`
+                        {file.name.length > 40
+                          ? `${file.name.substring(0, 30)}...`
                           : file.name}
                       </span>
                     </span>
@@ -638,6 +638,7 @@ const FileUploadDialog = ({
                   value={fileUpload.fileNames[0] || ""}
                   disabled={fileUpload.uploading}
                   onChange={(e) => fileUpload.setFileName(e.target.value)}
+                  className="ml-0.5 mb-1"
                 />
                 {fileUpload.error && (
                   <p className="mt-2 text-sm text-red-600">
@@ -656,8 +657,8 @@ const FileUploadDialog = ({
                   >
                     <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
                     <span className="truncate">
-                      {file.name.length > 30
-                        ? `${file.name.substring(0, 20)}...`
+                      {file.name.length > 40
+                        ? `${file.name.substring(0, 30)}...`
                         : file.name}
                     </span>
                   </span>
@@ -688,6 +689,7 @@ const FileUploadDialog = ({
                     onChange={(e) =>
                       fileUpload.setFileName(e.target.value, index)
                     }
+                    className="ml-0.5 mb-0.5"
                   />
                   {index === 0 && fileUpload.error && (
                     <p className="mt-2 text-sm text-red-600">

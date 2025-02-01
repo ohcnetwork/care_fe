@@ -289,6 +289,23 @@ export default function useFileUpload(
 
     setProgress(0);
     const errors: File[] = [];
+    if (combineToPDF) {
+      if (!uploadFileNames.length || !uploadFileNames[0]) {
+        setError(t("file_error__single_file_name"));
+        return;
+      }
+    } else {
+      for (const [index, file] of files.entries()) {
+        const filename =
+          allowNameFallback && uploadFileNames[index] === "" && file
+            ? file.name
+            : uploadFileNames[index];
+        if (!filename) {
+          setError(t("file_error__single_file_name"));
+          return;
+        }
+      }
+    }
 
     if (combineToPDF && files.length > 1) {
       const pdfFile = await generatePDF(files);
@@ -300,22 +317,15 @@ export default function useFileUpload(
         return;
       }
     }
-    for (const [index, file] of files.entries()) {
-      const filename =
-        allowNameFallback && uploadFileNames[index] === "" && file
-          ? file.name
-          : uploadFileNames[index];
-      if (!filename) {
-        setError(t("file_error__single_file_name"));
-        return;
-      }
-      setUploading(true);
 
+    setUploading(true);
+
+    for (const [index, file] of files.entries()) {
       try {
         const data = await createUpload({
           original_name: file.name ?? "",
           file_type: fileType,
-          name: filename,
+          name: uploadFileNames[index],
           associating_id,
           file_category: category,
           mime_type: file.type ?? "",
