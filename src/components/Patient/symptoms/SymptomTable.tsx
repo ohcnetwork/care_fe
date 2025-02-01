@@ -12,7 +12,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { formatName } from "@/Utils/utils";
+// import { formatName } from "@/Utils/utils";
 import { Symptom } from "@/types/emr/symptom/symptom";
 
 export const getStatusBadgeStyle = (status: string) => {
@@ -103,12 +103,12 @@ export function SymptomTable({
                 </TableCell>
                 <TableCell className="whitespace-nowrap flex items-center gap-2">
                   <Avatar
-                    name={formatName(symptom.created_by)}
-                    className="w-4 h-4"
+                    name={symptom.created_by?.username || "Unknown"}
+                    className="w-6 h-6"
                     imageUrl={symptom.created_by?.profile_picture_url}
                   />
-                  <span className="text-sm">
-                    {formatName(symptom.created_by)}
+                  <span className="text-sm font-medium">
+                    {symptom.created_by?.username || "Unknown"}
                   </span>
                 </TableCell>
               </TableRow>

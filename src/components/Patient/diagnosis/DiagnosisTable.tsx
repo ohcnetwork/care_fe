@@ -101,8 +101,8 @@ export function DiagnosisTable({
                     className="w-4 h-4"
                     imageUrl={diagnosis.created_by?.profile_picture_url}
                   />
-                  <span className="text-sm">
-                    {formatName(diagnosis.created_by)}
+                  <span className="text-sm font-medium">
+                    {diagnosis.created_by?.username || "Unknown"}
                   </span>
                 </TableCell>
               </TableRow>
