@@ -6,8 +6,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -381,25 +379,6 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-
-              {form.questionnaire.id !== questionnaireData?.id && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setQuestionnaireForms((prev) =>
-                      prev.filter(
-                        (f) => f.questionnaire.id !== form.questionnaire.id,
-                      ),
-                    );
-                  }}
-                  disabled={isPending}
-                >
-                  <CareIcon icon="l-times-circle" />
-                  <span>Remove</span>
-                </Button>
-              )}
             </div>
 
             <QuestionRenderer
