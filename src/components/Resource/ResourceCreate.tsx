@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -60,7 +59,6 @@ export default function ResourceCreate(props: ResourceProps) {
   const { goBack } = useAppHistory();
   const { facilityId } = props;
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
   const [{ related_patient }] = useQueryParams();
   const authUser = useAuthUser();
 
@@ -107,21 +105,18 @@ export default function ResourceCreate(props: ResourceProps) {
     },
   });
 
-  const { mutate: createResource } = useMutation({
+  const { mutate: createResource, isPending } = useMutation({
     mutationFn: mutate(routes.createResource),
     onSuccess: (data: ResourceRequest) => {
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
-      setIsLoading(false);
     },
     onError: (_error) => {
       toast.error(t("something_went_wrong"));
-      setIsLoading(false);
     },
   });
 
   const onSubmit = async (data: ResourceFormValues) => {
-    setIsLoading(true);
     const resourceData: CreateResourceRequest = {
       status: "PENDING",
       category: data.category,
@@ -149,7 +144,7 @@ export default function ResourceCreate(props: ResourceProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 
@@ -413,8 +408,14 @@ export default function ResourceCreate(props: ResourceProps) {
                 >
                   {t("cancel")}
                 </Button>
-                <Button type="submit" variant="default" disabled={isLoading}>
-                  {isLoading ? <Loading /> : t("submit")}
+                <Button type="submit" variant="default" disabled={isPending}>
+                  {isPending && (
+                    <CareIcon
+                      icon="l-spinner"
+                      className="mr-2 h-4 w-4 animate-spin"
+                    />
+                  )}
+                  {isPending ? t("submitting") : t("submit")}
                 </Button>
               </div>
             </form>
