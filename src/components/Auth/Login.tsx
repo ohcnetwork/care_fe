@@ -35,7 +35,6 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
@@ -110,13 +109,7 @@ const Login = (props: LoginProps) => {
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: async (phone: string) => {
-      const response = await request(routes.otp.sendOtp, {
-        body: { phone_number: phone },
-        silent: true,
-      });
-      return response;
-    },
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -280,7 +273,7 @@ const Login = (props: LoginProps) => {
 
     try {
       if (!isOtpSent) {
-        await sendOtp(phone);
+        await sendOtp({ phone_number: phone });
         setIsOtpSent(true);
       } else {
         await verifyOtp({ phone_number: phone, otp });
