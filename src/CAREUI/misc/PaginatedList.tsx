@@ -13,7 +13,7 @@ import useTanStackQueryInstead, {
 import { classNames } from "@/Utils/utils";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
-// only this file is pending except this remaining is ready for review
+
 interface PaginatedListContext<TItem>
   extends ReturnType<typeof useTanStackQueryInstead<PaginatedResponse<TItem>>> {
   items: TItem[];
