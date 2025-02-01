@@ -102,8 +102,8 @@ const Login = (props: LoginProps) => {
       FiltersCache.invaldiateAll();
       return await signIn(data);
     },
-    onSuccess: ({ res }) => {
-      setCaptcha(res?.status === 429);
+    onSuccess: (res) => {
+      setCaptcha(!!res?.access);
     },
   });
 

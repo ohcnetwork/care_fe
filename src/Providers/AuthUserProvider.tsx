@@ -10,8 +10,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
+import query, { callApi } from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
@@ -56,12 +55,12 @@ export default function AuthUserProvider({
 
   const signIn = useCallback(
     async (creds: { username: string; password: string }) => {
-      const query = await request(routes.login, { body: creds });
+      const data = await callApi(routes.login, { body: creds });
 
-      if (query.res?.ok && query.data) {
-        setAccessToken(query.data.access);
-        localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
-        localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
+      if (data?.access && data?.refresh) {
+        setAccessToken(data.access);
+        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
@@ -70,7 +69,7 @@ export default function AuthUserProvider({
         }
       }
 
-      return query;
+      return data;
     },
     [queryClient],
   );
@@ -155,19 +154,22 @@ const updateRefreshToken = async (silent = false) => {
     return;
   }
 
-  const { res, data } = await request(routes.token_refresh, {
-    body: { refresh },
-    silent,
-  });
+  try {
+    const data = await callApi(routes.token_refresh, {
+      body: { refresh },
+      silent,
+    });
 
-  if (res?.status !== 200 || !data) {
+    if (!data) {
+      throw new Error("Token refresh failed");
+    }
+
+    localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+    localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+  } catch {
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
-    return;
   }
-
-  localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-  localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 };
 
 const getRedirectURL = () => {

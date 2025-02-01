@@ -3,11 +3,10 @@ import { createContext, useContext } from "react";
 import { UserModel } from "@/components/Users/models";
 
 import { JwtTokenObtainPair, LoginCredentials } from "@/Utils/request/api";
-import { RequestResult } from "@/Utils/request/types";
+import { ApiResponse } from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
 
-type SignInReturnType = RequestResult<JwtTokenObtainPair>;
-
+type SignInReturnType = ApiResponse<JwtTokenObtainPair>;
 interface AuthContextType {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;

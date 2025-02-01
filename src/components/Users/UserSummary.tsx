@@ -28,7 +28,7 @@ import {
   showUserPasswordReset,
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { callApi } from "@/Utils/request/query";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
 
@@ -40,7 +40,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
-      return await request(routes.deleteUser, {
+      return await callApi(routes.deleteUser, {
         pathParams: { username: userData?.username || "" },
       });
     },

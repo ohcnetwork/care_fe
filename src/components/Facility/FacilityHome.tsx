@@ -34,7 +34,6 @@ import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query, { callApi } from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
@@ -150,16 +149,17 @@ export const FacilityHome = ({ facilityId }: Props) => {
   };
 
   const handleCoverImageDelete = async (onError: () => void) => {
-    const { res } = await request(routes.deleteFacilityCoverImage, {
-      pathParams: { id: facilityId },
-    });
-    if (res?.ok) {
+    try {
+      await callApi(routes.deleteFacilityCoverImage, {
+        pathParams: { id: facilityId },
+      });
+
       toast.success(t("cover_image_deleted"));
       queryClient.invalidateQueries({
         queryKey: ["facility", facilityId],
       });
       setEditCoverImage(false);
-    } else {
+    } catch {
       onError();
     }
   };
