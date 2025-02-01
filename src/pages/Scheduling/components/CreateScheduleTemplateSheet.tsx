@@ -431,7 +431,7 @@ export default function CreateScheduleTemplateSheet({
                         )}
                       /> */}
 
-                      <div className="flex items-center gap-4 col-span-2 md:col-span-1">
+                      <div className="flex items-center gap-1 sm:gap-4 col-span-2 md:col-span-1">
                         <FormField
                           control={form.control}
                           name={`availabilities.${index}.start_time`}
