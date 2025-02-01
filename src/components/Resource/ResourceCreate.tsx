@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -44,10 +44,13 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import validators from "@/Utils/validators";
-import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  CreateResourceRequest,
+  ResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
   facilityId: number;
@@ -104,40 +107,36 @@ export default function ResourceCreate(props: ResourceProps) {
     },
   });
 
+  const { mutate: createResource } = useMutation({
+    mutationFn: mutate(routes.createResource),
+    onSuccess: (data: ResourceRequest) => {
+      toast.success(t("resource_created_successfully"));
+      navigate(`/facility/${facilityId}/resource/${data.id}`);
+      setIsLoading(false);
+    },
+    onError: (_error) => {
+      toast.error(t("something_went_wrong"));
+      setIsLoading(false);
+    },
+  });
+
   const onSubmit = async (data: ResourceFormValues) => {
     setIsLoading(true);
-
-    try {
-      const resourceData: CreateResourceRequest = {
-        status: "PENDING",
-        category: data.category,
-        origin_facility: String(props.facilityId),
-        assigned_facility: data.assigned_facility?.id || null,
-        approving_facility: null,
-        emergency: data.emergency === "true",
-        title: data.title,
-        reason: data.reason,
-        referring_facility_contact_name: data.referring_facility_contact_name,
-        referring_facility_contact_number:
-          data.referring_facility_contact_number,
-        related_patient: related_patient,
-        priority: data.priority,
-      };
-
-      const { res, data: responseData } = await request(routes.createResource, {
-        body: resourceData,
-      });
-
-      if (res?.ok && responseData) {
-        toast.success(t("resource_created_successfully"));
-        navigate(`/facility/${facilityId}/resource/${responseData.id}`);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(t("something_went_wrong"));
-    } finally {
-      setIsLoading(false);
-    }
+    const resourceData: CreateResourceRequest = {
+      status: "PENDING",
+      category: data.category,
+      origin_facility: String(props.facilityId),
+      assigned_facility: data.assigned_facility?.id || null,
+      approving_facility: null,
+      emergency: data.emergency === "true",
+      title: data.title,
+      reason: data.reason,
+      referring_facility_contact_name: data.referring_facility_contact_name,
+      referring_facility_contact_number: data.referring_facility_contact_number,
+      related_patient: related_patient,
+      priority: data.priority,
+    };
+    createResource(resourceData);
   };
 
   const fillMyDetails = () => {

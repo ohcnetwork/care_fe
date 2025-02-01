@@ -12,7 +12,7 @@ import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { callApi } from "@/Utils/request/query";
 
 interface ResetPasswordProps {
   token: string;
@@ -75,28 +75,34 @@ const ResetPassword = (props: ResetPasswordProps) => {
     const valid = validateData();
     if (valid) {
       valid.token = props.token;
-      const { res, error } = await request(routes.resetPassword, {
-        body: { ...valid },
-      });
-      if (res?.ok) {
+
+      try {
+        await callApi(routes.resetPassword, {
+          body: { ...valid },
+        });
+
         localStorage.removeItem(LocalStorageKeys.accessToken);
         toast.success(t("password_reset_success"));
         navigate("/login");
-      } else if (res && error) {
-        setErrors(error);
+      } catch (error: any) {
+        if (error.cause) {
+          setErrors(error.cause);
+        }
       }
     }
   };
 
   useEffect(() => {
     const checkResetToken = async () => {
-      const { res } = await request(routes.checkResetToken, {
-        body: { token: props.token },
-      });
-      if (!res || !res.ok) {
+      try {
+        await callApi(routes.checkResetToken, {
+          body: { token: props.token },
+        });
+      } catch {
         navigate("/invalid-reset");
       }
     };
+
     if (props.token) {
       checkResetToken();
     } else {

@@ -33,7 +33,6 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
 import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
@@ -76,13 +75,7 @@ export default function PatientLogin({
   }
 
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-    mutationFn: (phoneNumber: string) =>
-      request(routes.otp.sendOtp, {
-        body: {
-          phone_number: phoneNumber,
-        },
-        silent: true,
-      }),
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
@@ -99,7 +92,7 @@ export default function PatientLogin({
       setError(t("phone_number_validation_error"));
       return;
     }
-    sendOTP(phoneNumber);
+    sendOTP({ phone_number: phoneNumber });
   };
 
   const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
@@ -245,7 +238,7 @@ export default function PatientLogin({
             </Button>
             <a
               className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP(phoneNumber)}
+              onClick={() => sendOTP({ phone_number: phoneNumber })}
             >
               {t("didnt_receive_a_message")} {t("resend_otp")}
             </a>

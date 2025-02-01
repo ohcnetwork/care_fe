@@ -33,7 +33,7 @@ import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
@@ -111,17 +111,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
   };
 
   const handleDeleteSubmit = async () => {
-    await request(routes.deleteFacility, {
+    const res = await callApi(routes.deleteFacility, {
       pathParams: { id: facilityId },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          toast.success(
-            t("deleted_successfully", { name: facilityData?.name }),
-          );
-        }
-        navigate("/facility");
-      },
     });
+    if (res) {
+      toast.success(t("deleted_successfully", { name: facilityData?.name }));
+      navigate("/facility");
+    }
   };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
