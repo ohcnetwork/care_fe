@@ -110,12 +110,16 @@ export const FacilityHome = ({ facilityId }: Props) => {
   };
 
   const handleDeleteSubmit = async () => {
-    const res = await callApi(routes.deleteFacility, {
-      pathParams: { id: facilityId },
-    });
-    if (res) {
-      toast.success(t("deleted_successfully", { name: facilityData?.name }));
-      navigate("/facility");
+    try {
+      const res = await callApi(routes.deleteFacility, {
+        pathParams: { id: facilityId },
+      });
+      if (res) {
+        toast.success(t("deleted_successfully", { name: facilityData?.name }));
+        navigate("/facility");
+      }
+    } catch (_error) {
+      toast.error(t("delete_failed", { name: facilityData?.name }));
     }
   };
 

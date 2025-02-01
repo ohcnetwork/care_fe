@@ -65,14 +65,17 @@ export default function UserAvatar({ username }: { username: string }) {
   };
 
   const handleAvatarDelete = async (onError: () => void) => {
-    const response = await callApi(routes.deleteProfilePicture, {
-      pathParams: { username },
-    });
-    if (response) {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      toast.success(t("profile_picture_deleted"));
-      setEditAvatar(false);
-    } else {
+    try {
+      const response = await callApi(routes.deleteProfilePicture, {
+        pathParams: { username },
+      });
+
+      if (response) {
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        toast.success(t("profile_picture_deleted"));
+        setEditAvatar(false);
+      }
+    } catch (_error) {
       onError();
     }
   };

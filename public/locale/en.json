@@ -683,6 +683,7 @@
   "delete_facility": "Delete Facility",
   "delete_item": "Delete {{name}}",
   "delete_record": "Delete Record",
+  "deleted_failed": "{{name}} deleted failed",
   "deleted_successfully": "{{name}} deleted successfully",
   "deleting": "Deleting...",
   "demography": "Demography",
