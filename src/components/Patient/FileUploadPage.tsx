@@ -5,6 +5,7 @@ import { FileUpload } from "@/components/Files/FileUpload";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { PatientModel } from "@/types/emr/patient";
 
 export default function FileUploadPage(props: {
   facilityId: string;
@@ -14,7 +15,7 @@ export default function FileUploadPage(props: {
 }) {
   const { facilityId, patientId, encounterId, type } = props;
 
-  const { data: patient } = useQuery({
+  const { data: patient } = useQuery<PatientModel>({
     queryKey: ["patient", patientId],
     queryFn: query(routes.getPatient, {
       pathParams: { id: patientId },
