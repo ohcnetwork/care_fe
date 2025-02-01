@@ -5,10 +5,6 @@ const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 
 describe("Patient Encounter Questionnaire", () => {
-  before(() => {
-    cy.loginByApi("devnurse");
-  });
-
   beforeEach(() => {
     cy.loginByApi("devnurse");
     cy.visit("/");

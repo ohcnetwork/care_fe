@@ -218,7 +218,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                   <h3 className="text-base md:text-lg font-semibold mb-1">
                     {t("no_encounters_found")}
                   </h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-gray-500">
                     {t("create_a_new_encounter_to_get_started")}
                   </p>
                 </div>
@@ -233,7 +233,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
               <h3 className="text-xl font-semibold mb-1">
                 {t("verification_failed")}
               </h3>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-gray-500 mb-6">
                 {t("please_enter_correct_birth_year")}
               </p>
               <Button

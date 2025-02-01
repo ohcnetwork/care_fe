@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,42 +32,39 @@ import request from "@/Utils/request/request";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
 
-export default function UserSummaryTab({
-  userData,
-  refetchUserData,
-}: {
-  userData?: UserBase;
-  refetchUserData?: () => void;
-}) {
+export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const { t } = useTranslation();
   const [showDeleteDialog, setshowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+
+  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
+    mutationFn: async () => {
+      return await request(routes.deleteUser, {
+        pathParams: { username: userData?.username || "" },
+      });
+    },
+    onSuccess: () => {
+      toast.success(t("user_deleted_successfully"));
+      setshowDeleteDialog(false);
+      navigate("/users");
+    },
+    onError: () => {
+      setshowDeleteDialog(false);
+      toast.error(t("user_delete_error"));
+    },
+  });
   if (!userData) {
     return <></>;
   }
 
   const handleSubmit = async () => {
-    setIsDeleting(true);
-    const { res, error } = await request(routes.deleteUser, {
-      pathParams: { username: userData.username },
-    });
-    setIsDeleting(false);
-    if (res?.status === 204) {
-      toast.success(t("user_deleted_successfully"));
-      setshowDeleteDialog(!showDeleteDialog);
-      navigate("/users");
-    } else {
-      toast.error(t("user_delete_error") + ": " + (error || ""));
-      setshowDeleteDialog(!showDeleteDialog);
-    }
+    deleteUser();
   };
 
   const userColumnsData = {
     userData,
     username: userData.username,
-    refetchUserData,
   };
   const deletePermitted = showUserDelete(authUser, userData);
   const passwordResetPermitted = showUserPasswordReset(authUser, userData);

@@ -3,6 +3,8 @@ import { generatePhoneNumber } from "@/utils/commonUtils";
 import { generateFacilityData } from "@/utils/facilityData";
 
 const LOCATION_HIERARCHY = {
+  state: "Kerala",
+  district: "Ernakulam",
   localBody: "Aluva",
   ward: "4",
 };
@@ -10,10 +12,6 @@ const LOCATION_HIERARCHY = {
 describe("Facility Management", () => {
   const facilityPage = new FacilityCreation();
   const facilityType = "Primary Health Centre";
-
-  before(() => {
-    cy.loginByApi("nurse");
-  });
 
   beforeEach(() => {
     cy.viewport(1920, 1080);
