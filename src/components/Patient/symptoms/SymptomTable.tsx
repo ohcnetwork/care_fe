@@ -108,7 +108,7 @@ export function SymptomTable({
                     imageUrl={symptom.created_by?.profile_picture_url}
                   />
                   <span className="text-sm">
-                    {formatName(symptom.created_by)}
+                    {symptom.created_by?.username}
                   </span>
                 </TableCell>
               </TableRow>

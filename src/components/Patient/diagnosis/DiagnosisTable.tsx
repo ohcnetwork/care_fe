@@ -102,7 +102,7 @@ export function DiagnosisTable({
                     imageUrl={diagnosis.created_by?.profile_picture_url}
                   />
                   <span className="text-sm">
-                    {formatName(diagnosis.created_by)}
+                    {diagnosis.created_by?.username}
                   </span>
                 </TableCell>
               </TableRow>
