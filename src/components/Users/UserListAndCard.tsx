@@ -57,7 +57,10 @@ export const UserStatusIndicator = ({
           <span className="text-xs text-green-700">{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="secondary" className="bg-yellow-100 whitespace-nowrap">
+        <Badge
+          variant="secondary"
+          className="bg-yellow-100 whitespace md:px-0 md:py-0 "
+        >
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-yellow-500 mr-2" />
           <span className="text-xs text-yellow-700">
             {relativeTime(user.last_login)}
