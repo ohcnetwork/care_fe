@@ -179,22 +179,22 @@ export const PatientHome = (props: {
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <TooltipProvider delayDuration={1}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            {patientData.modified_date
-                              ? relativeDate(patientData.modified_date)
-                              : "--:--"}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {patientData.modified_date
-                            ? formatDateTime(patientData.modified_date)
-                            : "--:--"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    {patientData.modified_date ? (
+                      <TooltipProvider delayDuration={1}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              {relativeDate(patientData.modified_date)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {formatDateTime(patientData.modified_date)}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      "--:--"
+                    )}
                   </div>
                 </div>
 
@@ -207,22 +207,22 @@ export const PatientHome = (props: {
                     </span>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <TooltipProvider delayDuration={1}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            {patientData.created_date
-                              ? relativeDate(patientData.created_date)
-                              : "--:--"}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {patientData.created_date
-                            ? formatDateTime(patientData.created_date)
-                            : "--:--"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    {patientData.created_date ? (
+                      <TooltipProvider delayDuration={1}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              {relativeDate(patientData.created_date)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {formatDateTime(patientData.created_date)}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      "--:--"
+                    )}
                   </div>
                 </div>
               </div>
