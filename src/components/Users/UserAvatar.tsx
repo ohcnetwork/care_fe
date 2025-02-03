@@ -15,7 +15,8 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import query, { callApi } from "@/Utils/request/query";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
@@ -66,20 +67,17 @@ export default function UserAvatar({ username }: { username: string }) {
 
   const handleAvatarDelete = async (onError: () => void) => {
     try {
-      const response = await callApi(routes.deleteProfilePicture, {
+      await mutate(routes.deleteProfilePicture, {
         pathParams: { username },
-      });
+      })(null);
 
-      if (response) {
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        toast.success(t("profile_picture_deleted"));
-        setEditAvatar(false);
-      }
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      toast.success(t("profile_picture_deleted"));
+      setEditAvatar(false);
     } catch (_error) {
       onError();
     }
   };
-
   return (
     <>
       <AvatarEditModal
