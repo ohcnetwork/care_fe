@@ -24,6 +24,7 @@ import { formatDosage } from "@/components/Medicine/utils";
 import routes, { Type } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import {
   MedicationAdministration,
   MedicationAdministrationRequest,
@@ -430,20 +431,26 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     enabled: !!patientId && !!visibleSlots?.length,
   });
 
-  // Get last administered date for each medication
-  const lastAdministeredDates = React.useMemo(() => {
-    return administrations?.results?.reduce<Record<string, string>>(
+  // Get last administered date and last administered by for each medication
+  const lastAdministeredDetails = React.useMemo(() => {
+    return administrations?.results?.reduce<{
+      dates: Record<string, string>;
+      performers: Record<string, string>;
+    }>(
       (acc, admin) => {
-        const existingDate = acc[admin.request];
+        const existingDate = acc.dates[admin.request];
         const adminDate = new Date(admin.occurrence_period_start);
 
         if (!existingDate || adminDate > new Date(existingDate)) {
-          acc[admin.request] = admin.occurrence_period_start;
+          acc.dates[admin.request] = admin.occurrence_period_start;
+          acc.performers[admin.request] = admin.created_by
+            ? formatName(admin.created_by)
+            : "";
         }
 
         return acc;
       },
-      {},
+      { dates: {}, performers: {} },
     );
   }, [administrations?.results]);
 
@@ -715,20 +722,22 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             </div>
           </div>
 
-          <div
-            className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-            onClick={() => setShowStopped(!showStopped)}
-          >
-            <CareIcon
-              icon={showStopped ? "l-eye-slash" : "l-eye"}
-              className="h-4 w-4"
-            />
-            <span className="text-sm underline">
-              {showStopped ? t("hide") : t("show")}{" "}
-              {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-              {t("prescriptions")}
-            </span>
-          </div>
+          {stoppedMedications?.results?.length > 0 && (
+            <div
+              className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+              onClick={() => setShowStopped(!showStopped)}
+            >
+              <CareIcon
+                icon={showStopped ? "l-eye-slash" : "l-eye"}
+                className="h-4 w-4"
+              />
+              <span className="text-sm underline">
+                {showStopped ? t("hide") : t("show")}{" "}
+                {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                {t("prescriptions")}
+              </span>
+            </div>
+          )}
         </Card>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
@@ -745,7 +754,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             }
           }}
           medication={selectedMedication}
-          lastAdministeredDate={lastAdministeredDates?.[selectedMedication.id]}
+          lastAdministeredDate={
+            lastAdministeredDetails?.dates[selectedMedication.id]
+          }
+          lastAdministeredBy={
+            lastAdministeredDetails?.performers[selectedMedication.id]
+          }
           administrationRequest={administrationRequest}
           patientId={patientId}
         />
@@ -760,7 +774,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           }
         }}
         medications={medications}
-        lastAdministeredDates={lastAdministeredDates}
+        lastAdministeredDates={lastAdministeredDetails?.dates}
         patientId={patientId}
         encounterId={encounterId}
       />

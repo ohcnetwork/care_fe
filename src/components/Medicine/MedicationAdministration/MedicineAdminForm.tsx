@@ -1,12 +1,22 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
 import React, { useState } from "react";
 
-import { DateTimePicker } from "@/components/ui/date-time-picker";
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -19,6 +29,7 @@ import {
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
+import { formatName } from "@/Utils/utils";
 import {
   MEDICATION_ADMINISTRATION_STATUS,
   MedicationAdministrationRequest,
@@ -29,6 +40,7 @@ import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
   lastAdministeredDate?: string;
+  lastAdministeredBy?: string;
   administrationRequest: MedicationAdministrationRequest;
   onChange: (request: MedicationAdministrationRequest) => void;
   formId: string;
@@ -37,6 +49,7 @@ interface MedicineAdminFormProps {
 export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   medication,
   lastAdministeredDate,
+  lastAdministeredBy,
   administrationRequest,
   onChange,
   formId,
@@ -66,36 +79,93 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     return date < startTime ? t("end_time_before_start_error") : "";
   };
 
-  const handleStartTimeChange = (newTime: string) => {
+  const handleDateChange = (newTime: string, isStartTime: boolean) => {
     const date = new Date(newTime);
-    const error = validateDateTime(date, true);
+
+    // Preserve existing time if available
+    const existingDateStr = isStartTime
+      ? administrationRequest.occurrence_period_start
+      : administrationRequest.occurrence_period_end;
+
+    if (existingDateStr) {
+      const existingDate = new Date(existingDateStr);
+      date.setHours(existingDate.getHours());
+      date.setMinutes(existingDate.getMinutes());
+    }
+
+    const error = validateDateTime(date, isStartTime);
 
     if (error) {
-      setStartTimeError(error);
+      isStartTime ? setStartTimeError(error) : setEndTimeError(error);
       return;
     }
 
-    setStartTimeError("");
+    isStartTime ? setStartTimeError("") : setEndTimeError("");
+
     onChange({
       ...administrationRequest,
-      occurrence_period_start: newTime,
-      occurrence_period_end: newTime,
+      ...(isStartTime
+        ? {
+            occurrence_period_start: date.toISOString(),
+            occurrence_period_end: date.toISOString(),
+          }
+        : {
+            occurrence_period_end: date.toISOString(),
+          }),
     });
   };
 
-  const handleEndTimeChange = (newTime: string) => {
-    const date = new Date(newTime);
-    const error = validateDateTime(date, false);
+  const formatTime = (date: string | undefined) => {
+    if (!date) return "";
+    try {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) return "";
+      return `${dateObj.getHours().toString().padStart(2, "0")}:${dateObj
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    } catch {
+      return "";
+    }
+  };
 
+  const handleTimeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    isStartTime: boolean,
+  ) => {
+    const [hours, minutes] = event.target.value.split(":").map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return;
+
+    const dateStr = isStartTime
+      ? administrationRequest.occurrence_period_start
+      : administrationRequest.occurrence_period_end;
+
+    if (!dateStr) return;
+
+    const currentDate = new Date(dateStr);
+    if (isNaN(currentDate.getTime())) return;
+
+    currentDate.setHours(hours);
+    currentDate.setMinutes(minutes);
+
+    const error = validateDateTime(currentDate, isStartTime);
     if (error) {
-      setEndTimeError(error);
+      isStartTime ? setStartTimeError(error) : setEndTimeError(error);
       return;
     }
 
-    setEndTimeError("");
+    isStartTime ? setStartTimeError("") : setEndTimeError("");
+
     onChange({
       ...administrationRequest,
-      occurrence_period_end: newTime,
+      ...(isStartTime
+        ? {
+            occurrence_period_start: currentDate.toISOString(),
+            occurrence_period_end: currentDate.toISOString(),
+          }
+        : {
+            occurrence_period_end: currentDate.toISOString(),
+          }),
     });
   };
 
@@ -108,7 +178,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         {lastAdministeredDate && (
           <p className="text-sm text-gray-500">
             {t("last_administered")}{" "}
-            {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}
+            {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}{" "}
+            {t("by")} {formatName(medication.created_by)}
           </p>
         )}
         <p className="text-sm text-gray-500">
@@ -116,8 +187,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           {formatDistanceToNow(
             new Date(medication.authored_on || medication.created_date),
           )}{" "}
-          {t("ago")} {t("by")} {medication.created_by?.first_name}{" "}
-          {medication.created_by?.last_name}
+          {t("ago")} {t("by")} {lastAdministeredBy}
         </p>
       </div>
 
@@ -218,18 +288,51 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("start_time")}</Label>
-        <DateTimePicker
-          value={
-            administrationRequest.occurrence_period_start
-              ? new Date(administrationRequest.occurrence_period_start)
-              : undefined
-          }
-          onChange={(date) => {
-            if (!date) return;
-            handleStartTimeChange(date.toISOString());
-          }}
-          disabled={!isPastTime || !!administrationRequest.id}
-        />
+        <div className="flex gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "flex-1 justify-start text-left font-normal",
+                  !administrationRequest.occurrence_period_start &&
+                    "text-gray-500",
+                )}
+                disabled={!isPastTime || !!administrationRequest.id}
+              >
+                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                {administrationRequest.occurrence_period_start
+                  ? format(
+                      new Date(administrationRequest.occurrence_period_start),
+                      "PPP",
+                    )
+                  : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={
+                  administrationRequest.occurrence_period_start
+                    ? new Date(administrationRequest.occurrence_period_start)
+                    : undefined
+                }
+                onSelect={(date) => {
+                  if (!date) return;
+                  handleDateChange(date.toISOString(), true);
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Input
+            type="time"
+            className="w-[150px]"
+            value={formatTime(administrationRequest.occurrence_period_start)}
+            onChange={(e) => handleTimeChange(e, true)}
+            disabled={!isPastTime || !!administrationRequest.id}
+          />
+        </div>
         {startTimeError && (
           <p className="text-sm text-red-500">{startTimeError}</p>
         )}
@@ -237,24 +340,59 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("end_time")}</Label>
-        <DateTimePicker
-          value={
-            administrationRequest.occurrence_period_end
-              ? new Date(administrationRequest.occurrence_period_end)
-              : administrationRequest.occurrence_period_start
-                ? new Date(administrationRequest.occurrence_period_start)
-                : undefined
-          }
-          onChange={(date) => {
-            if (!date) return;
-            handleEndTimeChange(date.toISOString());
-          }}
-          disabled={
-            !isPastTime ||
-            (!!administrationRequest.id &&
-              administrationRequest.status !== "in_progress")
-          }
-        />
+        <div className="flex gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "flex-1 justify-start text-left font-normal",
+                  !administrationRequest.occurrence_period_end &&
+                    "text-gray-500",
+                )}
+                disabled={
+                  !isPastTime ||
+                  (!!administrationRequest.id &&
+                    administrationRequest.status !== "in_progress")
+                }
+              >
+                <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                {administrationRequest.occurrence_period_end
+                  ? format(
+                      new Date(administrationRequest.occurrence_period_end),
+                      "PPP",
+                    )
+                  : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={
+                  administrationRequest.occurrence_period_end
+                    ? new Date(administrationRequest.occurrence_period_end)
+                    : undefined
+                }
+                onSelect={(date) => {
+                  if (!date) return;
+                  handleDateChange(date.toISOString(), false);
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Input
+            type="time"
+            className="w-[150px]"
+            value={formatTime(administrationRequest.occurrence_period_end)}
+            onChange={(e) => handleTimeChange(e, false)}
+            disabled={
+              !isPastTime ||
+              (!!administrationRequest.id &&
+                administrationRequest.status !== "in_progress")
+            }
+          />
+        </div>
         {endTimeError && <p className="text-sm text-red-500">{endTimeError}</p>}
       </div>
     </div>

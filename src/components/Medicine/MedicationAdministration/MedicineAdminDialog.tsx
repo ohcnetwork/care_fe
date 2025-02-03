@@ -26,6 +26,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   medication: MedicationRequestRead;
   lastAdministeredDate?: string;
+  lastAdministeredBy?: string;
   administrationRequest: MedicationAdministrationRequest;
   patientId: string;
 }
@@ -35,6 +36,7 @@ export const MedicineAdminDialog = ({
   onOpenChange,
   medication,
   lastAdministeredDate,
+  lastAdministeredBy,
   administrationRequest: initialRequest,
   patientId,
 }: Props) => {
@@ -85,6 +87,7 @@ export const MedicineAdminDialog = ({
           <MedicineAdminForm
             medication={medication}
             lastAdministeredDate={lastAdministeredDate}
+            lastAdministeredBy={lastAdministeredBy}
             administrationRequest={administrationRequest}
             onChange={setAdministrationRequest}
             formId="single"

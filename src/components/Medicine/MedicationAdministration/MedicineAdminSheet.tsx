@@ -40,6 +40,7 @@ interface MedicineListItemProps {
   onSelect: (checked: boolean) => void;
   administrationRequest?: MedicationAdministrationRequest;
   lastAdministeredDate?: string;
+  lastAdministeredBy?: string;
   onAdministrationChange: (request: MedicationAdministrationRequest) => void;
 }
 
@@ -49,6 +50,7 @@ const MedicineListItem = ({
   onSelect,
   administrationRequest,
   lastAdministeredDate,
+  lastAdministeredBy,
   onAdministrationChange,
 }: MedicineListItemProps) => {
   const medicationDisplay =
@@ -85,6 +87,7 @@ const MedicineListItem = ({
             <MedicineAdminForm
               medication={medicine}
               lastAdministeredDate={lastAdministeredDate}
+              lastAdministeredBy={lastAdministeredBy}
               formId={medicine.id}
               administrationRequest={administrationRequest}
               onChange={onAdministrationChange}
