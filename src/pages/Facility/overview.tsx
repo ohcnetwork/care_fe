@@ -61,10 +61,10 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               <Link
                 key={shortcut.href}
                 href={shortcut.href}
-                className="block transition-all duration-200 hover:scale-102 hover:shadow-md"
+                className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
               >
-                <Card className="border-0 shadow-sm hover:bg-gray-50">
-                  <CardHeader className="flex flex-row items-center gap-4">
+                <Card className="border-0 shadow-sm hover:bg-gray-50 h-full">
+                  <CardHeader className="h-full flex flex-row items-center gap-4">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <shortcut.icon className="h-6 w-6 text-primary" />
                     </div>
