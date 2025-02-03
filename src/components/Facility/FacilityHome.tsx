@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -33,6 +34,7 @@ import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
@@ -104,23 +106,24 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
+  const { mutate: deleteFacility } = useMutation({
+    mutationFn: () =>
+      mutate(routes.deleteFacility, { pathParams: { id: facilityId } })(null),
+    onSuccess: () => {
+      toast.success(t("deleted_successfully", { name: facilityData?.name }));
+      navigate("/facility");
+    },
+    onError: () => {
+      toast.error(t("delete_failed", { name: facilityData?.name }));
+    },
+  });
+
+  const handleDeleteSubmit = () => {
+    deleteFacility();
+  };
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
-  };
-
-  const handleDeleteSubmit = async () => {
-    try {
-      const res = await callApi(routes.deleteFacility, {
-        pathParams: { id: facilityId },
-      });
-      if (res) {
-        toast.success(t("deleted_successfully", { name: facilityData?.name }));
-        navigate("/facility");
-      }
-    } catch (_error) {
-      toast.error(t("delete_failed", { name: facilityData?.name }));
-    }
   };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {

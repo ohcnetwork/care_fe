@@ -28,7 +28,7 @@ import {
   showUserPasswordReset,
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import { callApi } from "@/Utils/request/query";
+import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
 
@@ -39,11 +39,10 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
-    mutationFn: async () => {
-      return await callApi(routes.deleteUser, {
+    mutationFn: () =>
+      mutate(routes.deleteUser, {
         pathParams: { username: userData?.username || "" },
-      });
-    },
+      })(null),
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
       setshowDeleteDialog(false);

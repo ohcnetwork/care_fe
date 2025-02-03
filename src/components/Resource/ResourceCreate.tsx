@@ -46,10 +46,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
-import {
-  CreateResourceRequest,
-  ResourceRequest,
-} from "@/types/resourceRequest/resourceRequest";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
   facilityId: number;
@@ -117,7 +114,7 @@ export default function ResourceCreate(props: ResourceProps) {
   });
 
   const onSubmit = async (data: ResourceFormValues) => {
-    const resourceData: CreateResourceRequest = {
+    createResource({
       status: "PENDING",
       category: data.category,
       origin_facility: String(props.facilityId),
@@ -130,8 +127,7 @@ export default function ResourceCreate(props: ResourceProps) {
       referring_facility_contact_number: data.referring_facility_contact_number,
       related_patient: related_patient,
       priority: data.priority,
-    };
-    createResource(resourceData);
+    });
   };
 
   const fillMyDetails = () => {
