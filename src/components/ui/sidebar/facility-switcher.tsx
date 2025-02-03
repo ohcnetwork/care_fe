@@ -69,7 +69,7 @@ export function FacilitySwitcher({
               <DropdownMenuItem
                 key={index}
                 onClick={() => {
-                  navigate(`/facility/${facility.id}`);
+                  navigate(`/facility/${facility.id}/overview`);
                   if (isMobile) {
                     setOpenMobile(false);
                   }

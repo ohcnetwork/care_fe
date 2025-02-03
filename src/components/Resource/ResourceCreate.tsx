@@ -137,7 +137,7 @@ export default function ResourceCreate(props: ResourceProps) {
 
       if (res?.ok && responseData) {
         toast.success(t("resource_created_successfully"));
-        navigate(`/resource/${responseData.id}`);
+        navigate(`/facility/${facilityId}/resource/${responseData.id}`);
       }
     } catch (error) {
       console.error(error);
@@ -202,7 +202,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   <h3 className="text-lg font-medium">
                     {t("basic_information")}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("resource_request_basic_info_description")}
                   </p>
                 </div>
@@ -276,7 +276,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
+                      <FormLabel required>{t("category")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -310,7 +310,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   <h3 className="text-lg font-medium">
                     {t("request_details")}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("resource_request_details_description")}
                   </p>
                 </div>
@@ -320,7 +320,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("request_title")}</FormLabel>
+                      <FormLabel required>{t("request_title")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -341,7 +341,7 @@ export default function ResourceCreate(props: ResourceProps) {
                   name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("request_reason")}</FormLabel>
+                      <FormLabel required>{t("request_reason")}</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
@@ -366,7 +366,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     <h3 className="text-lg font-medium">
                       {t("contact_information")}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500">
                       {t("contact_information_description")}
                     </p>
                   </div>
@@ -387,7 +387,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="referring_facility_contact_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("contact_person")}</FormLabel>
+                        <FormLabel required>{t("contact_person")}</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -407,7 +407,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="referring_facility_contact_number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("contact_phone")}</FormLabel>
+                        <FormLabel required>{t("contact_phone")}</FormLabel>
                         <FormControl>
                           <PhoneInput
                             {...field}

@@ -34,7 +34,7 @@ export function FacilityCard({ facility, className }: Props) {
               </h3>
               {/* @ts-expect-error Type is not defined properly */}
               {facility.facility_type?.name}
-              <p className="text-sm text-muted-foreground truncate">
+              <p className="text-sm text-gray-500 truncate">
                 {[facility.address].filter(Boolean).join(", ")}
               </p>
 

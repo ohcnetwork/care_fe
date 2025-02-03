@@ -74,10 +74,6 @@ export class UserCreation {
         label: "Phone Number",
         message: "Invalid input",
       },
-      {
-        label: "Alternate Phone Number",
-        message: "Invalid input",
-      },
       { label: "State", message: "Required" },
     ]);
     return this;

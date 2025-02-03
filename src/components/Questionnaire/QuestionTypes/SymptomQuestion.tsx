@@ -47,6 +47,7 @@ import {
 
 interface SymptomQuestionProps {
   patientId: string;
+  encounterId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
     values: ResponseValue[],
@@ -281,6 +282,7 @@ export function SymptomQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  encounterId,
 }: SymptomQuestionProps) {
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
@@ -291,6 +293,7 @@ export function SymptomQuestion({
       pathParams: { patientId },
       queryParams: {
         limit: 100,
+        encounter: encounterId,
       },
     }),
   });

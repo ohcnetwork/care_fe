@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next";
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import Pagination from "@/components/Common/Pagination";
 import Tabs from "@/components/Common/Tabs";
 import FileBlock from "@/components/Files/FileBlock";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -276,17 +277,19 @@ export const FileUpload = (props: FileUploadProps) => {
                   <CareIcon icon="l-times" />
                 </button>
               </div>
-              <TextFormField
+              <Label>{t("enter_file_name")}</Label>
+              <Input
                 name="consultation_file"
                 type="text"
-                label={t("enter_file_name")}
                 id="upload-file-name"
                 required
                 value={fileUpload.fileNames[0] || ""}
                 disabled={fileUpload.uploading}
-                onChange={(e) => fileUpload.setFileName(e.value)}
-                error={fileUpload.error || undefined}
+                onChange={(e) => fileUpload.setFileName(e.target.value)}
               />
+              {fileUpload.error && (
+                <p className="text-red-500 text-sm mt-1">{fileUpload.error}</p>
+              )}
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline_primary"

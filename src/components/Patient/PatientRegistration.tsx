@@ -8,7 +8,6 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -42,7 +41,6 @@ import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
 
 import {
   BLOOD_GROUP_CHOICES, // DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
@@ -83,7 +81,6 @@ export default function PatientRegistration(
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -191,31 +188,15 @@ export default function PatientRegistration(
     },
   });
 
-  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
-    pincode: form.watch("pincode")?.toString() || "",
-  });
-
-  useEffect(() => {
-    // Fill by pincode for patient registration
-    if (patientId) return;
-    const levels: Organization[] = [];
-    if (stateOrg) levels.push(stateOrg);
-    if (districtOrg) levels.push(districtOrg);
-    setSelectedLevels(levels);
-
-    if (levels.length == 2) {
-      setShowAutoFilledPincode(true);
-      const timer = setTimeout(() => {
-        setShowAutoFilledPincode(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    return () => setShowAutoFilledPincode(false);
-  }, [stateOrg, districtOrg, patientId]);
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (patientId) {
-      updatePatient({ ...values, ward_old: undefined });
+      updatePatient({
+        ...values,
+        ward_old: undefined,
+        age: values.age_or_dob === "age" ? values.age : undefined,
+        date_of_birth:
+          values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+      });
       return;
     }
 
@@ -513,8 +494,12 @@ export default function PatientRegistration(
                 }}
               >
                 <TabsList className="mb-2" defaultValue="dob">
-                  <TabsTrigger value="dob">{t("date_of_birth")}</TabsTrigger>
-                  <TabsTrigger value="age">{t("age")}</TabsTrigger>
+                  <TabsTrigger value="dob" data-cy="dob-tab">
+                    {t("date_of_birth")}
+                  </TabsTrigger>
+                  <TabsTrigger value="age" data-cy="age-tab">
+                    {t("age")}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="dob">
                   <FormField
@@ -569,7 +554,15 @@ export default function PatientRegistration(
                             data-cy="age-input"
                           />
                         </FormControl>
+
                         <FormMessage />
+                        {form.getValues("age") && (
+                          <div className="text-violet-600 text-sm font-bold">
+                            {t("year_of_birth")}:{" "}
+                            {new Date().getFullYear() -
+                              Number(form.getValues("age"))}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -664,22 +657,6 @@ export default function PatientRegistration(
                       />
                     </FormControl>
                     <FormMessage />
-                    {showAutoFilledPincode && (
-                      <div
-                        role="status"
-                        aria-live="polite"
-                        className="flex items-center"
-                      >
-                        <CareIcon
-                          icon="l-check-circle"
-                          className="mr-2 text-sm text-green-500"
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm text-primary-500">
-                          {t("pincode_autofill")}
-                        </span>
-                      </div>
-                    )}
                   </FormItem>
                 )}
               />
@@ -710,7 +687,7 @@ export default function PatientRegistration(
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
