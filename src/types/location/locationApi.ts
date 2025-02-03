@@ -11,7 +11,7 @@ export default {
     TRes: Type<PaginatedResponse<LocationList>>(),
   },
   get: {
-    path: "/api/v1/facility/{facility_id}/location/{id}",
+    path: "/api/v1/facility/{facility_id}/location/{id}/",
     method: HttpMethod.GET,
     TRes: Type<LocationDetail>(),
   },
@@ -22,7 +22,7 @@ export default {
     TBody: Type<LocationWrite>(),
   },
   update: {
-    path: "/api/v1/facility/{facility_id}/location/{id}",
+    path: "/api/v1/facility/{facility_id}/location/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<LocationDetail>(),
     TBody: Type<LocationWrite>(),

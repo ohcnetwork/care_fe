@@ -72,7 +72,6 @@ export function DateTimeQuestion({
 
     updateQuestionnaireResponseCB(
       [
-        ...questionnaireResponse.values,
         {
           type: "dateTime",
           value: date.toISOString(),
@@ -99,7 +98,7 @@ export function DateTimeQuestion({
             variant="outline"
             className={cn(
               "flex-1 justify-start text-left font-normal",
-              !currentValue && "text-muted-foreground",
+              !currentValue && "text-gray-500",
               classes,
             )}
             disabled={disabled}

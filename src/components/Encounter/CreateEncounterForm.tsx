@@ -226,7 +226,7 @@ export default function CreateEncounterForm({
                           <div className="flex flex-col items-center text-center">
                             <Icon className="size-6" />
                             <div className="text-sm font-bold">{label}</div>
-                            <div className="text-wrap text-xs text-center text-xs text-muted-foreground">
+                            <div className="text-wrap text-xs text-center text-xs text-gray-500">
                               {description}
                             </div>
                           </div>

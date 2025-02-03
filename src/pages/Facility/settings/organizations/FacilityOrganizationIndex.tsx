@@ -34,6 +34,9 @@ export default function FacilityOrganizationIndex({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId },
+      queryParams: {
+        parent: "",
+      },
     }),
     enabled: !!facilityId,
   });
@@ -52,7 +55,12 @@ export default function FacilityOrganizationIndex({
 
   if (!data?.results?.length) {
     return (
-      <Page title={t("organizations")}>
+      <Page
+        title={t("organizations")}
+        breadcrumbs={false}
+        hideBack={true}
+        hideTitleOnPage={true}
+      >
         <div className="flex justify-center md:justify-end mt-2 mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
@@ -69,7 +77,7 @@ export default function FacilityOrganizationIndex({
             <div className="rounded-full bg-primary/10 p-6 mb-4">
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
-            <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
+            <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
               {t("organization_access_help")}
             </p>
           </CardContent>

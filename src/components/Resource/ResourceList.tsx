@@ -1,285 +1,351 @@
+import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { ExportButton } from "@/components/Common/Export";
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Form/SearchInput";
-import BadgesList from "@/components/Resource/ResourceBadges";
-import { formatFilter } from "@/components/Resource/ResourceCommons";
-import ListFilter from "@/components/Resource/ResourceFilter";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import {
+  RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_STATUS_CHOICES,
+} from "@/common/constants";
+
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { useView } from "@/Utils/useView";
-import { formatDateTime } from "@/Utils/utils";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
-export default function ListView() {
-  const [, setView] = useView("resource", "list");
-  const {
-    qParams,
-    Pagination,
-    FilterBadges,
-    advancedFilter,
-    resultsPerPage,
-    updateQuery,
-  } = useFilters({ cacheBlacklist: ["title"], limit: 12 });
+const COMPLETED = ["completed", "rejected", "cancelled"];
+const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
+  (o) => !COMPLETED.includes(o),
+);
 
-  const { t } = useTranslation();
-
-  const appliedFilters = formatFilter(qParams);
-
-  const { loading, data, refetch } = useTanStackQueryInstead(
-    routes.listResourceRequests,
-    {
-      query: formatFilter({
-        ...qParams,
-        limit: resultsPerPage,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-      }),
-    },
-  );
-
-  const showResourceCardList = (data: ResourceRequest[]) => {
-    if (data && !data.length) {
-      return (
-        <div className="w-full mt-64 flex flex-1 justify-center text-secondary-600">
-          {t("no_results_found")}
-        </div>
-      );
-    }
-
-    return data.map((resource: ResourceRequest, i) => (
-      <div
-        key={i}
-        className="w-full border border-b-2 border-gray-200  col-span-6"
-      >
-        <div className=" flex grid w-full gap-1 overflow-hidden bg-white p-4    sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
-          <div className="col-span-1 px-3 text-left">
-            <div className="text-sm font-bold capitalize">{resource.title}</div>
-          </div>
-
-          <div className="col-span-1 flex flex-col px-2 text-left">
-            <div className="category">
-              <dt
-                title={t("LOG_UPDATE_FIELD_LABEL__patient_category")}
-                className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-              >
-                <CareIcon icon="l-box" className="text-lg mr-1" />
-                <dd className="text-sm font-bold leading-5 text-secondary-900">
-                  {resource.category || ""}
-                </dd>
-              </dt>
-            </div>
-          </div>
-
-          <div className="col-span-1 flex flex-col px-3 text-left">
-            <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row ">
-              {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
-                <dt
-                  title={t("resource_status")}
-                  className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center overflow-hidden whitespace-nowrap text-ellipsis truncate"
-                >
-                  <Badge
-                    variant="secondary"
-                    className="text-lg font-bold text-sky-600 truncate bg-gray-300 rounded-full uppercase text-center"
-                  >
-                    <span className="mr-1">
-                      <CareIcon icon="l-truck" />
-                    </span>
-                    {t(`${resource.status}`)}
-                  </Badge>
-                </dt>
-              ) : (
-                <dt
-                  title={t("resource_status")}
-                  className="w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full leading-4"
-                >
-                  <Badge
-                    variant={
-                      resource.status === "APPROVED" ? "primary" : "secondary"
-                    }
-                    className={`text-lg font-bold rounded-full uppercase ${
-                      resource.status === "APPROVED"
-                        ? "bg-sky-200"
-                        : "bg-yellow-200"
-                    }`}
-                  >
-                    <span className="mr-1">
-                      <CareIcon icon="l-truck" />
-                    </span>
-                    {t(`${resource.status}`)}
-                  </Badge>
-                </dt>
-              )}
-
-              <div>
-                {resource.emergency && (
-                  <span className="mt-1.5 inline-block shrink-0 rounded-full bg-red-100 px-2 py-1 text-xs font-medium leading-4 text-red-800">
-                    {t("emergency")}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="text-center">
-              <dt
-                title={t("last_modified")}
-                className={"flex items-center text-sm font-medium leading-5"}
-              >
-                <CareIcon icon="l-stopwatch" className="mr-1" />
-                <dd className="text-xs font-medium leading-5">
-                  {formatDateTime(resource.modified_date) || "--"}
-                </dd>
-              </dt>
-            </div>
-          </div>
-
-          <div className="col-span-1 text-left">
-            <dt
-              title={t("origin_facility")}
-              className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-            >
-              <CareIcon icon="l-plane-departure" className="mr-2" />
-              <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.origin_facility?.name}
-              </dd>
-            </dt>
-
-            <dt
-              title={t("resource_approving_facility")}
-              className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-            >
-              <CareIcon icon="l-user-check" className="mr-2" />
-              <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.approving_facility?.name}
-              </dd>
-            </dt>
-
-            <dt
-              title={t("assigned_facility")}
-              className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-            >
-              <CareIcon icon="l-plane-arrival" className="mr-2" />
-              <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {resource.assigned_facility?.name || t("yet_to_be_decided")}
-              </dd>
-            </dt>
-          </div>
-          <div className="col-span-1 mt-2 flex flex-col text-left">
-            <Link
-              href={`/resource/${resource.id}`}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
-            >
-              <CareIcon icon="l-eye" className="text-lg" /> {t("all_details")}
-            </Link>
-          </div>
-        </div>
+function EmptyState() {
+  return (
+    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+      <div className="rounded-full bg-primary/10 p-3 mb-4">
+        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
-    ));
-  };
+      <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        {t("adjust_resource_filters")}
+      </p>
+    </Card>
+  );
+}
+
+export default function ResourceList({ facilityId }: { facilityId: string }) {
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+    cacheBlacklist: ["title"],
+  });
+  const { status, title, outgoing } = qParams;
+
+  const searchOptions = [
+    {
+      key: "title",
+      label: "Title",
+      type: "text" as const,
+      placeholder: t("search_by_resource_title"),
+      value: title || "",
+    },
+  ];
+
+  const isActive = !status || !COMPLETED.includes(status);
+  const currentStatuses = isActive ? ACTIVE : COMPLETED;
+
+  // Set default status based on active/completed tab
+  const defaultStatus = isActive ? "pending" : "completed";
+  const currentStatus = status || defaultStatus;
+
+  const { data: queryResources, isLoading } = useQuery<
+    PaginatedResponse<ResourceRequest>
+  >({
+    queryKey: ["resources", facilityId, qParams],
+    queryFn: query.debounced(routes.listResourceRequests, {
+      queryParams: {
+        status: currentStatus,
+        title,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        ...(outgoing
+          ? { origin_facility: facilityId }
+          : { assigned_facility: facilityId }),
+      },
+    }),
+  });
+
+  const resources = queryResources?.results || [];
 
   return (
-    <Page
-      title={t("resource")}
-      hideBack
-      componentRight={
-        <ExportButton
-          variant="secondary"
-          className="ml-4 bg-transparent shadow-none text-black rounded-full"
-          action={async () => {
-            const { data } = await request(routes.downloadResourceRequests, {
-              query: { ...appliedFilters, csv: true },
-            });
-            return data ?? null;
-          }}
-          filenamePrefix="resource_requests"
-        />
-      }
-      breadcrumbs={false}
-      options={
-        <>
-          <div className="md:px-4"></div>
-          <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-            <SearchInput
-              name="title"
-              value={qParams.title}
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              placeholder={t("search_resource")}
-            />
-          </div>
+    <Page title={t("resource")} hideBack={true}>
+      <div className="space-y-4 mt-2">
+        <div className="rounded-lg border bg-card shadow-sm">
+          <div className="flex flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 min-w-[120px] justify-start",
+                        title &&
+                          "bg-primary/10 text-primary hover:bg-primary/20",
+                      )}
+                    >
+                      <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
+                      {title ? (
+                        <span className="truncate">{title}</span>
+                      ) : (
+                        t("search")
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[20rem] p-3"
+                    align="start"
+                    onEscapeKeyDown={(event) => event.preventDefault()}
+                  >
+                    <div className="space-y-4">
+                      <h4 className="font-medium leading-none">
+                        {t("search_resource")}
+                      </h4>
+                      <SearchByMultipleFields
+                        id="resource-search"
+                        options={searchOptions}
+                        initialOptionIndex={0}
+                        onFieldChange={() =>
+                          updateQuery({
+                            status: currentStatus,
+                            title: undefined,
+                          })
+                        }
+                        onSearch={(key, value) =>
+                          updateQuery({
+                            status: currentStatus,
+                            [key]: value || undefined,
+                          })
+                        }
+                        className="w-full border-none shadow-none"
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <div className="hidden md:flex items-center">
+                  <Tabs
+                    value={outgoing ? "outgoing" : "incoming"}
+                    className="w-full"
+                  >
+                    <TabsList className="bg-transparent p-0 h-8">
+                      <TabsTrigger
+                        value="outgoing"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: true,
+                            title,
+                          })
+                        }
+                      >
+                        {t("outgoing")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="incoming"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            outgoing: false,
+                            title,
+                          })
+                        }
+                      >
+                        {t("incoming")}
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
 
-          <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <Button variant={"primary"} onClick={() => setView("board")}>
-              <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
-              {t("board_view")}
-            </Button>
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-          </div>
-        </>
-      }
-    >
-      <BadgesList {...{ appliedFilters, FilterBadges }} />
+              <div className="hidden md:flex items-center">
+                <Tabs
+                  value={isActive ? "active" : "completed"}
+                  className="w-full"
+                >
+                  <TabsList className="bg-transparent p-0 h-8">
+                    <TabsTrigger
+                      value="active"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status: "pending",
+                          title,
+                        })
+                      }
+                    >
+                      {t("active")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="completed"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status: "completed",
+                          title,
+                        })
+                      }
+                    >
+                      {t("completed")}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </div>
 
-      <div className="px-1">
-        {loading ? (
-          <Loading />
-        ) : (
-          <div>
-            <div className="-mb-4 mr-2 mt-4 flex justify-end">
-              <button
-                className="text-xs hover:text-blue-800"
-                onClick={() => refetch()}
-              >
-                <CareIcon
-                  icon="l-refresh"
-                  className="mr-1"
-                  aria-hidden="true"
-                />
-                {t("refresh_list")}
-              </button>
-            </div>
-            <div className="mx-5 mt-5 grid w-full gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
-              <div className="col-span-1 uppercase sm:text-center md:text-center lg:block lg:text-left">
-                {t("resource")}
-              </div>
-              <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                {t("LOG_UPDATE_FIELD_LABEL__patient_category")}
-              </div>
-              <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                {t("consent__status")}
-              </div>
-              <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                {t("facilities")}
-              </div>
-              <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-                {t("LOG_UPDATE_FIELD_LABEL__action")}
-              </div>
-            </div>
-            <div>{showResourceCardList(data?.results || [])}</div>
-            <div>
-              <Pagination totalCount={data?.count || 0} />
+            <Separator className="hidden md:block" />
+
+            <div className="hidden md:block p-4">
+              <Tabs value={currentStatus} className="w-full">
+                <TabsList className="bg-transparent p-0 h-8">
+                  {currentStatuses.map((statusOption) => (
+                    <TabsTrigger
+                      key={statusOption}
+                      value={statusOption}
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status: statusOption,
+                          title,
+                        })
+                      }
+                    >
+                      <CareIcon
+                        icon={
+                          RESOURCE_STATUS_CHOICES.find(
+                            (o) => o.text === statusOption,
+                          )?.icon || "l-folder-open"
+                        }
+                        className="mr-2 h-4 w-4"
+                      />
+                      {t(`resource_status__${statusOption}`)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </div>
           </div>
-        )}
+        </div>
+
+        <div
+          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="resource-list-cards"
+        >
+          {isLoading ? (
+            <CardGridSkeleton count={6} />
+          ) : resources.length === 0 ? (
+            <div className="col-span-full">
+              <EmptyState />
+            </div>
+          ) : (
+            <>
+              {resources.map((resource: ResourceRequest) => (
+                <Card
+                  key={resource.id}
+                  className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
+                >
+                  <CardHeader className="space-y-1 pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="group-hover:text-primary transition-colors">
+                        {resource.title}
+                      </CardTitle>
+                    </div>
+                    <CardDescription className="line-clamp-2">
+                      {resource.reason}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col space-y-2 px-6 py-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {resource.emergency && (
+                        <Badge
+                          variant="outline"
+                          className="bg-red-100 text-red-800"
+                        >
+                          {t("emergency")}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
+                        {
+                          RESOURCE_CATEGORY_CHOICES.find(
+                            (o) => o.id === resource.category,
+                          )?.text
+                        }
+                      </Badge>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 text-gray-800"
+                      >
+                        {resource.origin_facility?.name}
+                        <CareIcon
+                          icon="l-arrow-right"
+                          className="mx-2 h-4 w-4"
+                        />
+                        {resource.assigned_facility?.name}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col p-0">
+                    <Separator className="my-2" />
+                    <Link
+                      href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
+                      className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                    >
+                      View Details
+                      <CareIcon icon="l-arrow-right" className="ml-1 h-4 w-4" />
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
+              {queryResources?.count &&
+                queryResources.count > resultsPerPage && (
+                  <div className="col-span-full">
+                    <Pagination totalCount={queryResources.count} />
+                  </div>
+                )}
+            </>
+          )}
+        </div>
       </div>
-      <ListFilter
-        {...advancedFilter}
-        showResourceStatus={true}
-        key={window.location.search}
-      />
     </Page>
   );
 }

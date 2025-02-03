@@ -40,7 +40,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
 
   if (!medications?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );

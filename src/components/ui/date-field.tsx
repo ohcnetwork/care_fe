@@ -102,8 +102,8 @@ export default function DateField({
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex flex-col gap-1">
-        <Label>{t("day")}</Label>
+      <div className="flex-1">
+        <Label className="mb-1">{t("day")}</Label>
         <Input
           type="number"
           placeholder="DD"
@@ -113,13 +113,12 @@ export default function DateField({
           max={31}
           id={`${id}-day-input`}
           data-cy={`${id}-day-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Label>{t("month")}</Label>
+      <div className="flex-1">
+        <Label className="mb-1">{t("month")}</Label>
         <Input
           type="number"
           placeholder="MM"
@@ -129,13 +128,12 @@ export default function DateField({
           max={12}
           id={`${id}-month-input`}
           data-cy={`${id}-month-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Label>{t("year")}</Label>
+      <div className="flex-1">
+        <Label className="mb-1">{t("year")}</Label>
         <Input
           type="number"
           placeholder="YYYY"
@@ -144,7 +142,6 @@ export default function DateField({
           min={1900}
           id={`${id}-year-input`}
           data-cy={`${id}-year-input`}
-          className="w-[10rem]"
           disabled={disabled}
         />
       </div>

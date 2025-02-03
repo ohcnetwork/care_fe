@@ -65,6 +65,7 @@ export type FileUploadReturn = {
   removeFile: (index: number) => void;
   clearFiles: () => void;
   uploading: boolean;
+  previewing?: boolean;
 };
 
 // Array of image extensions
@@ -96,6 +97,7 @@ export default function useFileUpload(
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [audioModalOpen, setAudioModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const [files, setFiles] = useState<File[]>([]);
   const queryClient = useQueryClient();
@@ -343,6 +345,7 @@ export default function useFileUpload(
     setFiles(errors);
     setUploadFileNames(errors?.map((f) => f.name) ?? []);
     setError(t("file_error__network"));
+    setCameraModalOpen(false);
   };
 
   const clearFiles = () => {
@@ -360,6 +363,7 @@ export default function useFileUpload(
           setFiles((prev) => [...prev, file]);
         }}
         onResetCapture={clearFiles}
+        setPreview={setPreviewing}
       />
       <AudioCaptureDialog
         show={audioModalOpen}
@@ -414,5 +418,6 @@ export default function useFileUpload(
     },
     clearFiles,
     uploading,
+    previewing,
   };
 }
