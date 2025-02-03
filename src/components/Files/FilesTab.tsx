@@ -641,7 +641,10 @@ const FileUploadDialog = ({
                   required
                   value={fileUpload.fileNames[0] || ""}
                   disabled={fileUpload.uploading}
-                  onChange={(e) => fileUpload.setFileName(e.target.value)}
+                  onChange={(e) => {
+                    fileUpload.setFileName(e.target.value);
+                    fileUpload.setError(null);
+                  }}
                   className="ml-0.5 mb-1"
                 />
                 {fileUpload.error && (
@@ -690,9 +693,10 @@ const FileUploadDialog = ({
                     required
                     value={fileUpload.fileNames[index] || ""}
                     disabled={fileUpload.uploading}
-                    onChange={(e) =>
-                      fileUpload.setFileName(e.target.value, index)
-                    }
+                    onChange={(e) => {
+                      fileUpload.setFileName(e.target.value, index);
+                      fileUpload.setError(null);
+                    }}
                     className="ml-0.5 mb-0.5"
                   />
                   {index === 0 && fileUpload.error && (

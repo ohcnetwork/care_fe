@@ -49,6 +49,7 @@ export type FileInputProps = Omit<
 export type FileUploadReturn = {
   progress: null | number;
   error: null | string;
+  setError: (error: string | null) => void;
   validateFiles: () => boolean;
   handleCameraCapture: () => void;
   handleAudioCapture: () => void;
@@ -327,7 +328,10 @@ export default function useFileUpload(
         const data = await createUpload({
           original_name: file.name ?? "",
           file_type: fileType,
-          name: uploadFileNames[index],
+          name:
+            allowNameFallback && uploadFileNames[index] === "" && file
+              ? file.name
+              : uploadFileNames[index],
           associating_id,
           file_category: category,
           mime_type: file.type ?? "",
@@ -398,6 +402,7 @@ export default function useFileUpload(
   return {
     progress,
     error,
+    setError,
     validateFiles: validateFileUpload,
     handleCameraCapture: () => setCameraModalOpen(true),
     handleAudioCapture: () => setAudioModalOpen(true),
