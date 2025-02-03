@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Search } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -120,7 +121,11 @@ export function MedicineAdminSheet({
       },
     ),
     onSuccess: () => {
+      toast.success(t("medication_administration_saved"));
       handleClose();
+    },
+    onError: (error) => {
+      toast.error(error.message || t("something_went_wrong"));
     },
   });
 
@@ -166,7 +171,9 @@ export function MedicineAdminSheet({
     const administrations = Array.from(selectedMedicines).map(
       (id) => administrationRequests[id],
     );
-    upsertAdministrations({ datapoints: administrations });
+    upsertAdministrations({
+      datapoints: administrations,
+    });
   };
 
   const handleClose = () => {
@@ -238,6 +245,10 @@ export function MedicineAdminSheet({
                 type="submit"
                 className="bg-[#006D4C] hover:bg-[#006D4C]/90"
                 disabled={selectedMedicines.size === 0 || isPending}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmit(e as any);
+                }}
               >
                 {isPending
                   ? t("saving")

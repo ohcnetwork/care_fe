@@ -408,6 +408,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
+        limit: 100,
         ...(visibleSlots.length > 0 && {
           occurrence_period_start_after: (() => {
             const firstSlot = visibleSlots[0];
