@@ -53,7 +53,10 @@ interface QuestionResponseProps {
   };
 }
 
-function formatValue(value: ResponseValueType["value"], type: string): string {
+export function formatValue(
+  value: ResponseValueType["value"],
+  type: string,
+): string {
   if (!value) return "";
 
   // Handle complex objects
