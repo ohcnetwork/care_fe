@@ -45,7 +45,7 @@ export default function LocationSheet({
         <div className="mt-6">
           <LocationForm
             facilityId={facilityId}
-            location={location}
+            locationId={location?.id}
             parentId={parentId}
             onSuccess={() => onOpenChange(false)}
           />

@@ -115,15 +115,45 @@ export function QuestionInput({
       case "structured":
         switch (question.structured_type) {
           case "medication_request":
-            return <MedicationRequestQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <MedicationRequestQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return null;
           case "medication_statement":
-            return <MedicationStatementQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <MedicationStatementQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return null;
           case "allergy_intolerance":
             return <AllergyQuestion {...commonProps} />;
           case "symptom":
-            return <SymptomQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <SymptomQuestion
+                  {...commonProps}
+                  encounterId={encounterId}
+                  patientId={patientId}
+                />
+              );
+            }
+            return null;
           case "diagnosis":
-            return <DiagnosisQuestion {...commonProps} />;
+            if (encounterId) {
+              return (
+                <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
+              );
+            }
+            return null;
           case "appointment":
             return <AppointmentQuestion {...commonProps} />;
           case "encounter":
@@ -131,8 +161,8 @@ export function QuestionInput({
               return (
                 <EncounterQuestion
                   {...commonProps}
-                  encounterId={encounterId}
                   facilityId={facilityId}
+                  encounterId={encounterId}
                 />
               );
             }

@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +16,7 @@ import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
+import { LocationCard } from "./components/LocationCard";
 
 interface Props {
   facilityId: string;
@@ -37,6 +36,7 @@ export default function LocationList({ facilityId }: Props) {
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
+        parent: "",
         offset: (page - 1) * limit,
         limit,
         name: searchQuery || undefined,
@@ -91,74 +91,11 @@ export default function LocationList({ facilityId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data?.results?.length ? (
               data.results.map((location: LocationListType) => (
-                <Card key={location.id}>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between flex-wrap">
-                        <div className="space-y-1 mb-2">
-                          <h3 className="text-lg font-semibold">
-                            {location.name}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">
-                              {location.form.toUpperCase()}
-                            </Badge>
-                            <Badge
-                              variant={
-                                location.status === "active"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {location.status}
-                            </Badge>
-                            <Badge
-                              variant={
-                                location.availability_status === "available"
-                                  ? "default"
-                                  : "destructive"
-                              }
-                            >
-                              {location.availability_status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditLocation(location)}
-                          >
-                            <CareIcon icon="l-pen" className="h-4 w-4" />
-                          </Button>
-                          <Button variant="link" asChild>
-                            <Link href={`/location/${location.id}`}>
-                              {t("view_details")}
-                              <CareIcon
-                                icon="l-arrow-right"
-                                className="h-4 w-4 ml-2"
-                              />
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
-                      {location.description && (
-                        <p className="text-sm text-gray-500 line-clamp-2">
-                          {location.description}
-                        </p>
-                      )}
-                      {location.has_children && (
-                        <div className="text-sm text-primary">
-                          <CareIcon
-                            icon="l-folder"
-                            className="h-4 w-4 inline mr-1"
-                          />
-                          {t("has_child_locations")}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <LocationCard
+                  key={location.id}
+                  location={location}
+                  onEdit={handleEditLocation}
+                />
               ))
             ) : (
               <Card className="col-span-full">

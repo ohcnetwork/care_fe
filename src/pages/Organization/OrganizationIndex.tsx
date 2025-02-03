@@ -57,7 +57,7 @@ export default function OrganizationIndex() {
             <div className="rounded-full bg-primary/10 p-6 mb-4">
               <CareIcon icon="d-hospital" className="h-12 w-12 text-primary" />
             </div>
-            <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
+            <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
               Organizations help you manage facilities, users, and resources
               efficiently. Contact your administrator to get access.
             </p>

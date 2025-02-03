@@ -1,11 +1,14 @@
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
-import { toast } from "sonner";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
+import {
+  Organization,
+  OrganizationParent,
+} from "@/types/organization/organization";
 import { Quantity } from "@/types/questionnaire/quantity";
 
 const DATE_FORMAT = "DD/MM/YYYY";
@@ -103,18 +106,6 @@ export const isAppleDevice = _isAppleDevice();
  */
 export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
-};
-
-export const getPincodeDetails = async (pincode: string, apiKey: string) => {
-  const response = await fetch(
-    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
-  );
-  const data = await response.json();
-  if (!data.records || data.records.length === 0) {
-    toast.error("Invalid pincode");
-    return null;
-  }
-  return data.records[0];
 };
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
@@ -280,4 +271,16 @@ export const conditionalArrayAttribute = <T>(
   attributes: T[],
 ) => {
   return condition ? attributes : [];
+};
+
+export const stringifyGeoOrganization = (org: Organization) => {
+  const levels: string[] = [];
+
+  let current: OrganizationParent | undefined = org;
+  while (current?.name) {
+    levels.push(current.name);
+    current = current.parent;
+  }
+
+  return levels.join(", ");
 };

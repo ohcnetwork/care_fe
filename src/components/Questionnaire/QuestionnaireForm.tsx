@@ -376,7 +376,7 @@ export function QuestionnaireForm({
                   {form.questionnaire.title}
                 </h2>
                 {form.questionnaire.description && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {form.questionnaire.description}
                   </p>
                 )}
@@ -524,7 +524,7 @@ export function QuestionnaireForm({
         {import.meta.env.DEV && (
           <div className="p-4 space-y-6 max-w-4xl">
             <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-            <pre className="text-sm text-muted-foreground">
+            <pre className="text-sm text-gray-500">
               {JSON.stringify(questionnaireForms, null, 2)}
             </pre>
           </div>

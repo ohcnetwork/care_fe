@@ -130,9 +130,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         <div className="space-y-1">
           <QuestionLabel question={question} groupLabel />
           {question.description && (
-            <p className="text-sm text-muted-foreground">
-              {question.description}
-            </p>
+            <p className="text-sm text-gray-500">{question.description}</p>
           )}
         </div>
       )}
