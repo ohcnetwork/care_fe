@@ -62,12 +62,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           {medication.medication?.display}
         </h3>
         {lastAdministeredDate && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500">
             {t("last_administered")}{" "}
             {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}
           </p>
         )}
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500">
           {t("prescribed")}{" "}
           {formatDistanceToNow(new Date(medication.created_date))} {t("ago")}{" "}
           {t("by")} {medication.created_by?.first_name}{" "}
@@ -77,30 +77,26 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <Label className="text-xs text-muted-foreground">{t("dosage")}</Label>
+          <Label className="text-xs text-gray-500">{t("dosage")}</Label>
           <p className="font-medium">
             {formatDosage(medication.dosage_instruction[0])}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">
-            {t("frequency")}
-          </Label>
+          <Label className="text-xs text-gray-500">{t("frequency")}</Label>
           <p className="font-medium">
             {getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
               ?.meaning || "-"}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">{t("route")}</Label>
+          <Label className="text-xs text-gray-500">{t("route")}</Label>
           <p className="font-medium">
             {medication.dosage_instruction[0]?.route?.display || "Oral"}
           </p>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">
-            {t("duration")}
-          </Label>
+          <Label className="text-xs text-gray-500">{t("duration")}</Label>
           <p className="font-medium">
             {medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
               ?.value || "-"}{" "}

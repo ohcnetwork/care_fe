@@ -158,7 +158,7 @@ export function MedicineAdminSheet({
             </div>
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder={t("search_medicine")}
                   value={search}
