@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Search } from "lucide-react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,7 +24,7 @@ import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import { createMedicationAdministrationRequest } from "./utils";
 
-interface MedicineAdminSheetProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   medications: MedicationRequestRead[];
@@ -33,13 +33,67 @@ interface MedicineAdminSheetProps {
   encounterId: string;
 }
 
-interface MedicationWithRequiredFields extends MedicationRequestRead {
-  medication: {
-    display: string;
-    code: string;
-    system: string;
-  };
+interface MedicineListItemProps {
+  medicine: MedicationRequestRead;
+  isSelected: boolean;
+  onSelect: (checked: boolean) => void;
+  administrationRequest?: MedicationAdministrationRequest;
+  lastAdministeredDate?: string;
+  onAdministrationChange: (request: MedicationAdministrationRequest) => void;
 }
+
+const MedicineListItem = ({
+  medicine,
+  isSelected,
+  onSelect,
+  administrationRequest,
+  lastAdministeredDate,
+  onAdministrationChange,
+}: MedicineListItemProps) => {
+  const medicationDisplay =
+    medicine.medication?.display || t("unnamed_medication");
+
+  return (
+    <div className="border-b border-border py-4">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{medicationDisplay}</span>
+            {medicine.dosage_instruction[0]?.as_needed_boolean && (
+              <span className="text-sm text-rose-500">
+                {t("as_needed_prn")}
+              </span>
+            )}
+          </div>
+        </div>
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onSelect}
+          className="mt-1"
+          aria-label="Select for administration"
+        />
+      </div>
+
+      <div
+        className={`grid gap-4 overflow-hidden transition-all ${
+          isSelected ? "grid-rows-[1fr] mt-4" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="min-h-0">
+          {isSelected && administrationRequest && (
+            <MedicineAdminForm
+              medication={medicine}
+              lastAdministeredDate={lastAdministeredDate}
+              formId={medicine.id}
+              administrationRequest={administrationRequest}
+              onChange={onAdministrationChange}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export function MedicineAdminSheet({
   open,
@@ -48,7 +102,7 @@ export function MedicineAdminSheet({
   lastAdministeredDates,
   patientId,
   encounterId,
-}: MedicineAdminSheetProps) {
+}: Props) {
   const [search, setSearch] = useState("");
   const [selectedMedicines, setSelectedMedicines] = useState<Set<string>>(
     new Set(),
@@ -58,86 +112,78 @@ export function MedicineAdminSheet({
   >({});
   const formRef = useRef<HTMLFormElement>(null);
 
-  const { mutate: upsertAdministrations } = useMutation({
+  const { mutate: upsertAdministrations, isPending } = useMutation({
     mutationFn: mutate(
       medicationAdministrationApi.upsertMedicationAdministration,
       {
-        pathParams: { patientId: patientId },
+        pathParams: { patientId },
       },
     ),
     onSuccess: () => {
-      onOpenChange(false);
+      handleClose();
     },
   });
 
-  // Type guard to check if a medicine has all required fields
-  const hasMedicationInfo = (
-    medicine: MedicationRequestRead,
-  ): medicine is MedicationWithRequiredFields => {
-    return !!(
-      medicine.medication?.display &&
-      medicine.medication?.code &&
-      medicine.medication?.system
+  const filteredMedicines = medications.filter((medicine) => {
+    const display = medicine.medication?.display;
+    return (
+      typeof display === "string" &&
+      display.toLowerCase().includes(search.toLowerCase())
     );
-  };
+  });
 
-  const filteredMedicines = medications
-    .filter(hasMedicationInfo)
-    .filter((medicine) =>
-      medicine.medication.display.toLowerCase().includes(search.toLowerCase()),
-    );
-
-  const handleSelect = (id: string, checked: boolean) => {
-    setSelectedMedicines((prev) => {
-      const next = new Set(prev);
-      if (checked) {
-        next.add(id);
-        // Initialize administration request for this medicine
-        const medicine = medications.find((m) => m.id === id);
-        if (medicine && hasMedicationInfo(medicine)) {
-          setAdministrationRequests((prev) => ({
-            ...prev,
-            [id]: createMedicationAdministrationRequest(medicine, encounterId),
-          }));
+  const handleSelect = useCallback(
+    (id: string, checked: boolean) => {
+      setSelectedMedicines((prev) => {
+        const next = new Set(prev);
+        if (checked) {
+          next.add(id);
+          const medicine = medications.find((m) => m.id === id);
+          if (medicine?.medication?.display) {
+            setAdministrationRequests((prev) => ({
+              ...prev,
+              [id]: createMedicationAdministrationRequest(
+                medicine,
+                encounterId,
+              ),
+            }));
+          }
+        } else {
+          next.delete(id);
+          setAdministrationRequests((prev) => {
+            const { [id]: _, ...rest } = prev;
+            return rest;
+          });
         }
-      } else {
-        next.delete(id);
-        // Remove administration request for this medicine
-        setAdministrationRequests((prev) => {
-          const next = { ...prev };
-          delete next[id];
-          return next;
-        });
-      }
-      return next;
-    });
+        return next;
+      });
+    },
+    [medications, encounterId],
+  );
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const administrations = Array.from(selectedMedicines).map(
+      (id) => administrationRequests[id],
+    );
+    upsertAdministrations({ datapoints: administrations });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const administrations = Array.from(selectedMedicines).map((id) => {
-      return administrationRequests[id];
-    });
-
-    upsertAdministrations({
-      datapoints: administrations,
-    });
-
+  const handleClose = () => {
     onOpenChange(false);
     setSelectedMedicines(new Set());
     setAdministrationRequests({});
   };
 
-  const handleAdministrationChange = (
-    medicineId: string,
-    request: MedicationAdministrationRequest,
-  ) => {
-    setAdministrationRequests((prev) => ({
-      ...prev,
-      [medicineId]: request,
-    }));
-  };
+  const handleAdministrationChange = useCallback(
+    (medicineId: string, request: MedicationAdministrationRequest) => {
+      setAdministrationRequests((prev) => ({
+        ...prev,
+        [medicineId]: request,
+      }));
+    },
+    [],
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -151,100 +197,51 @@ export function MedicineAdminSheet({
           className="flex flex-col h-full"
         >
           <SheetHeader className="space-y-4 flex-shrink-0 mr-2">
-            <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl">
-                {t("administer_medicines")}
-              </SheetTitle>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  placeholder={t("search_medicine")}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
+            <SheetTitle className="text-xl">
+              {t("administer_medicines")}
+            </SheetTitle>
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder={t("search_medicine")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8"
+              />
             </div>
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto mt-8">
             <div className="space-y-2 pb-4 mr-2">
               {filteredMedicines.map((medicine) => (
-                <div key={medicine.id} className="border-b border-border py-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {medicine.medication?.display}
-                        </span>
-                        {medicine.dosage_instruction[0]?.as_needed_boolean && (
-                          <span className="text-sm text-rose-500">
-                            As Needed / PRN
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Checkbox
-                      checked={selectedMedicines.has(medicine.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelect(medicine.id, checked as boolean)
-                      }
-                      className="mt-1"
-                      aria-label="Select for administration"
-                    />
-                  </div>
-
-                  <div
-                    className={`grid gap-4 overflow-hidden transition-all ${
-                      selectedMedicines.has(medicine.id)
-                        ? "grid-rows-[1fr] mt-4"
-                        : "grid-rows-[0fr]"
-                    }`}
-                  >
-                    <div className="min-h-0">
-                      {selectedMedicines.has(medicine.id) && (
-                        <MedicineAdminForm
-                          medication={medicine}
-                          lastAdministeredDate={
-                            lastAdministeredDates?.[medicine.id]
-                          }
-                          formId={medicine.id}
-                          administrationRequest={
-                            administrationRequests[medicine.id]
-                          }
-                          onChange={(request) =>
-                            handleAdministrationChange(medicine.id, request)
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <MedicineListItem
+                  key={medicine.id}
+                  medicine={medicine}
+                  isSelected={selectedMedicines.has(medicine.id)}
+                  onSelect={(checked) => handleSelect(medicine.id, checked)}
+                  administrationRequest={administrationRequests[medicine.id]}
+                  lastAdministeredDate={lastAdministeredDates?.[medicine.id]}
+                  onAdministrationChange={(request) =>
+                    handleAdministrationChange(medicine.id, request)
+                  }
+                />
               ))}
             </div>
           </div>
 
           <SheetFooter className="border-t pt-4 mr-2">
             <div className="flex justify-between w-full">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  onOpenChange(false);
-                  setSelectedMedicines(new Set());
-                  setAdministrationRequests({});
-                }}
-              >
+              <Button type="button" variant="outline" onClick={handleClose}>
                 {t("cancel")}
               </Button>
               <Button
                 type="submit"
                 className="bg-[#006D4C] hover:bg-[#006D4C]/90"
-                disabled={selectedMedicines.size === 0}
+                disabled={selectedMedicines.size === 0 || isPending}
               >
-                {t("administer_medicines")} ({selectedMedicines.size})
+                {isPending
+                  ? t("saving")
+                  : `${t("administer_medicines")} (${selectedMedicines.size})`}
               </Button>
             </div>
           </SheetFooter>

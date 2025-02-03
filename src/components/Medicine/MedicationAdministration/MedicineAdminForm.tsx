@@ -41,17 +41,61 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   onChange,
   formId,
 }) => {
-  // Initialize isPastTime based on whether the times are different
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
       administrationRequest.occurrence_period_end || !!administrationRequest.id,
   );
+  const [startTimeError, setStartTimeError] = useState("");
+  const [endTimeError, setEndTimeError] = useState("");
 
-  const handleStartTimeChange = (newStartTime: string) => {
+  const validateDateTime = (date: Date, isStartTime: boolean): string => {
+    const now = new Date();
+    const authoredOn = new Date(medication.authored_on);
+    const startTime = new Date(administrationRequest.occurrence_period_start);
+
+    if (date > now) {
+      return t(
+        isStartTime ? "start_time_future_error" : "end_time_future_error",
+      );
+    }
+
+    if (isStartTime) {
+      return date < authoredOn ? t("start_time_before_authored_error") : "";
+    }
+
+    return date < startTime ? t("end_time_before_start_error") : "";
+  };
+
+  const handleStartTimeChange = (newTime: string) => {
+    const date = new Date(newTime);
+    const error = validateDateTime(date, true);
+
+    if (error) {
+      setStartTimeError(error);
+      return;
+    }
+
+    setStartTimeError("");
     onChange({
       ...administrationRequest,
-      occurrence_period_start: newStartTime,
-      occurrence_period_end: newStartTime,
+      occurrence_period_start: newTime,
+      occurrence_period_end: newTime,
+    });
+  };
+
+  const handleEndTimeChange = (newTime: string) => {
+    const date = new Date(newTime);
+    const error = validateDateTime(date, false);
+
+    if (error) {
+      setEndTimeError(error);
+      return;
+    }
+
+    setEndTimeError("");
+    onChange({
+      ...administrationRequest,
+      occurrence_period_end: newTime,
     });
   };
 
@@ -69,8 +113,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         )}
         <p className="text-sm text-gray-500">
           {t("prescribed")}{" "}
-          {formatDistanceToNow(new Date(medication.created_date))} {t("ago")}{" "}
-          {t("by")} {medication.created_by?.first_name}{" "}
+          {formatDistanceToNow(
+            new Date(medication.authored_on || medication.created_date),
+          )}{" "}
+          {t("ago")} {t("by")} {medication.created_by?.first_name}{" "}
           {medication.created_by?.last_name}
         </p>
       </div>
@@ -188,6 +234,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           }}
           disabled={!isPastTime || !!administrationRequest.id}
         />
+        {startTimeError && (
+          <p className="text-sm text-red-500">{startTimeError}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -202,10 +251,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           }
           onChange={(date) => {
             if (!date) return;
-            onChange({
-              ...administrationRequest,
-              occurrence_period_end: date.toISOString(),
-            });
+            handleEndTimeChange(date.toISOString());
           }}
           disabled={
             !isPastTime ||
@@ -213,6 +259,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               administrationRequest.status !== "in_progress")
           }
         />
+        {endTimeError && <p className="text-sm text-red-500">{endTimeError}</p>}
       </div>
     </div>
   );
