@@ -15,10 +15,7 @@ import {
 } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  AppointmentPatient,
-  AppointmentPatientRegister,
-} from "@/pages/Patient/Utils";
+import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
@@ -626,7 +623,7 @@ const routes = {
     getPatient: {
       path: "/api/v1/otp/patient/",
       method: "GET",
-      TRes: Type<PaginatedResponse<AppointmentPatient>>(),
+      TRes: Type<PaginatedResponse<Patient>>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",
@@ -637,7 +634,7 @@ const routes = {
       path: "/api/v1/otp/patient/",
       method: "POST",
       TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<AppointmentPatient>(),
+      TRes: Type<Patient>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",

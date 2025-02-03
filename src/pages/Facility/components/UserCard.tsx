@@ -53,14 +53,12 @@ export function UserCard({ user, className, facilityId }: Props) {
 
             <div className="flex grow flex-col min-w-0">
               <h3 className="truncate text-xl font-semibold">{name}</h3>
-              <p className="text-sm text-muted-foreground">{user.user_type}</p>
+              <p className="text-sm text-gray-500">{user.user_type}</p>
 
               {user.qualification && (
                 <>
                   <p className="text-xs mt-3">{t("education")}: </p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.qualification}
-                  </p>
+                  <p className="text-sm text-gray-500">{user.qualification}</p>
                 </>
               )}
             </div>

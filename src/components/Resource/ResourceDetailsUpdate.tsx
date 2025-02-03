@@ -23,7 +23,7 @@ import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { RESOURCE_CHOICES } from "@/common/constants";
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -32,9 +32,8 @@ import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
   id: string;
+  facilityId: string;
 }
-
-const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const initForm: Partial<UpdateResourceRequest> = {
   assigned_facility: null,
@@ -138,7 +137,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       onResponse: ({ res, data }) => {
         if (res && data) {
           const d = data;
-          d["status"] = qParams.status || data.status;
+          d["status"] = qParams.status || data.status.toLowerCase();
           dispatch({ type: "set_form", form: d });
         }
         setIsLoading(false);
@@ -180,7 +179,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       if (res && res.status == 200 && data) {
         dispatch({ type: "set_form", form: data });
         toast.success(t("request_updated_successfully"));
-        navigate(`/resource/${props.id}`);
+        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -194,7 +193,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   return (
     <Page
       title="Update Request"
-      backUrl={`/resource/${props.id}`}
+      backUrl={`/facility/${props.facilityId}/resource/${props.id}`}
       crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >
       <div className="mt-4">
@@ -205,9 +204,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 label="Status"
                 name="status"
                 value={state.form.status}
-                options={resourceStatusOptions}
+                options={RESOURCE_STATUS_CHOICES}
+                optionValue={(option) => option.text}
                 onChange={handleChange}
-                optionLabel={(option) => option}
+                optionLabel={(option) => t(`resource_status__${option.text}`)}
               />
             </div>
             <div className="md:col-span-1">
@@ -233,11 +233,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <FacilitySelect
                 multiple={false}
                 name="assigned_facility"
-                facilityType={1510}
-                selected={state.form.assigned_facility_object}
-                setSelected={(obj) =>
-                  setFacility(obj, "assigned_facility_object")
-                }
+                selected={state.form.assigned_facility}
+                setSelected={(obj) => setFacility(obj, "assigned_facility")}
                 errors={state.errors.assigned_facility}
               />
             </div>

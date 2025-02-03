@@ -150,7 +150,7 @@ export function AppointmentQuestion({
             slotsQuery.data.results.length === 0) &&
           selectedDate &&
           resource ? (
-            <div className="rounded-md border border-input px-3 py-2 text-sm text-muted-foreground">
+            <div className="rounded-md border border-input px-3 py-2 text-sm text-gray-500">
               {t("no_slots_available")}
             </div>
           ) : (

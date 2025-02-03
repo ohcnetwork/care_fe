@@ -58,9 +58,7 @@ export default function ObservationsList(props: Props) {
   if (isLoading) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-muted-foreground">
-          {t("loading")}
-        </div>
+        <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
       </Card>
     );
   }
@@ -70,7 +68,7 @@ export default function ObservationsList(props: Props) {
   if (observations.length === 0) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-muted-foreground">
+        <div className="text-lg font-medium text-gray-500">
           {t("no_observations")}
         </div>
       </Card>
@@ -83,7 +81,7 @@ export default function ObservationsList(props: Props) {
         {observations.map((item: Observation) => (
           <Card key={item.id} className="flex items-center justify-between p-4">
             <div>
-              <div className="text-xs flex items-center gap-1 text-muted-foreground">
+              <div className="text-xs flex items-center gap-1 text-gray-500">
                 <CareIcon icon="l-calender" />
                 <span>{formatDateTime(item.effective_datetime)}</span>
               </div>
@@ -102,16 +100,14 @@ export default function ObservationsList(props: Props) {
                 </div>
               )}
               {item.note && (
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {item.note}
-                </div>
+                <div className="mt-1 text-sm text-gray-500">{item.note}</div>
               )}
             </div>
           </Card>
         ))}
         {hasNextPage && (
           <div ref={ref} className="flex justify-center p-4">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-500">
               {isFetchingNextPage ? t("loading_more") : t("load_more")}
             </div>
           </div>

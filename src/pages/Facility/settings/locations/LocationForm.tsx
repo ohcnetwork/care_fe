@@ -217,10 +217,7 @@ export default function LocationForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("location_form")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -245,10 +242,7 @@ export default function LocationForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("status")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -273,10 +267,7 @@ export default function LocationForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("operational_status")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />

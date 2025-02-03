@@ -25,17 +25,17 @@ import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
-  const { patientData, facilityId, id } = props;
+  const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
-    queryKey: ["resourceRequests", id],
+    queryKey: ["resourceRequests", patientId],
     queryFn: query(routes.listResourceRequests, {
       queryParams: {
-        related_patient: id,
+        related_patient: patientId,
       },
     }),
-    enabled: !!id,
+    enabled: !!patientId,
   });
 
   const getStatusBadge = (status: ResourceRequest["status"]) => {
@@ -112,7 +112,11 @@ export const ResourceRequests = (props: PatientProps) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/resource/${request.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/facility/${request.origin_facility.id}/resource/${request.id}`,
+                        )
+                      }
                     >
                       <CareIcon icon="l-eye" className="mr-2" />
                       {t("view")}

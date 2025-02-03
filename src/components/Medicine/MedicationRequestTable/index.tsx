@@ -33,13 +33,13 @@ export const EmptyState = ({
 }: EmptyStateProps) => (
   <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
     <div className="rounded-full bg-secondary/10 p-3">
-      <CareIcon icon="l-tablets" className="text-3xl text-muted-foreground" />
+      <CareIcon icon="l-tablets" className="text-3xl text-gray-500" />
     </div>
     <div className="max-w-[200px] space-y-1">
       <h3 className="font-medium">
         {message || (searching ? "No matches found" : "No Prescriptions")}
       </h3>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-500">
         {description ||
           (searching
             ? `No medications match "${searchQuery}"`
@@ -119,13 +119,13 @@ export default function MedicationRequestTable({
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
-              Prescriptions
+              {t("prescriptions")}
             </TabsTrigger>
             <TabsTrigger
               value="administration"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
             >
-              Medicine Administration
+              {t("medicine_administration")}
             </TabsTrigger>
           </TabsList>
 
@@ -133,22 +133,19 @@ export default function MedicationRequestTable({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between p-2 gap-2">
                 <div className="flex items-center gap-2 flex-1">
-                  <CareIcon
-                    icon="l-search"
-                    className="text-lg text-muted-foreground"
-                  />
+                  <CareIcon icon="l-search" className="text-lg text-gray-500" />
                   <input
                     type="text"
-                    placeholder="Search medications..."
+                    placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
                   />
                   {searchQuery && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-muted-foreground hover:text-foreground"
+                      className="h-6 px-2 text-gray-500 hover:text-foreground"
                       onClick={() => setSearchQuery("")}
                     >
                       <CareIcon icon="l-times" className="text-lg" />
