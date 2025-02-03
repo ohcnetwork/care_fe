@@ -33,7 +33,7 @@ export default function AddUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" data-cy="add-user-button">
+        <Button variant="outline" data-cy="add-user-button" className="ml-3">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           {t("add_user")}
         </Button>
