@@ -1,26 +1,16 @@
 import careConfig from "@careConfig";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
+import { Hospital, MapPin } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -84,13 +74,7 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
       label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
       value: geoOrg.name,
     },
-  ]
-    .concat(parentDetails)
-    .map((org, index) => (
-      <div key={index}>
-        <span className="text-gray-500">{org.value}</span>
-      </div>
-    ));
+  ].concat(parentDetails);
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
@@ -209,106 +193,76 @@ export const FacilityHome = ({ facilityId }: Props) => {
       />
       <div className="container mx-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          <Card className="overflow-hidden border-none bg-transparent shadow-none">
-            <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+          <Card className="border-none bg-transparent shadow-none">
+            <div className="group rounded-3xl relative h-64 w-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
                     src={facilityData.read_cover_image_url}
                     alt={facilityData?.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <div className="absolute rounded-lg inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
-                <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
+                <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
+              <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
+                <Button variant="link">
+                  <Avatar
+                    name={facilityData.name}
+                    className="h-20 w-20 rounded-md border-4 border-white shadow-lg"
+                  />
+                </Button>
+              </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+              <div className="absolute bottom-0 left-0 translate-x-0 ml-[7rem]">
                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 md:gap-4">
-                      <Avatar
-                        name={facilityData.name}
-                        className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
-                      />
-                      <div className="min-w-0">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <h1 className="text-sm md:text-3xl text-white md:font-bold">
-                                {facilityData?.name}
-                              </h1>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-sm text-white bg-black rounded-md p-2">
-                                {facilityData?.name}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                    <div className="text-white">
+                      <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
+                        {facilityData?.name}
+                      </h1>
+                      <h2 className="text-base sm:text-sm md:text-md lg:text-sm text-white/70">
+                        {facilityData?.facility_type}
+                      </h2>
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          aria-label={t("facility_actions_menu")}
-                          className="bg-white/20 hover:bg-white/40 w-8 h-8"
-                        >
-                          <MoreVertical className="h-4 w-4 text-white" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 md:w-56">
-                        {hasPermissionToEditCoverImage && (
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => setEditCoverImage(true)}
-                          >
-                            <Settings className="mr-2 h-4 w-4" />
-                            {t("edit_cover_photo")}
-                          </DropdownMenuItem>
-                        )}
-
-                        <EditFacilitySheet
-                          facilityId={facilityId}
-                          trigger={
-                            <DropdownMenuItem
-                              className=" cursor-pointer"
-                              onSelect={(e) => {
-                                e.preventDefault();
-                              }}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              {t("update_facility")}
-                            </DropdownMenuItem>
-                          }
-                        />
-                        {/* TODO: get permissions from backend */}
-                        {/* {hasPermissionToDeleteFacility && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setOpenDeleteDialog(true)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t("delete_facility")}
-                          </DropdownMenuItem>
-                        )} */}
-                        <PLUGIN_Component
-                          __name="FacilityHomeActions"
-                          facility={facilityData}
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <PLUGIN_Component
+                      __name="FacilityHomeActions"
+                      facility={facilityData}
+                    />
                   </div>
                 </div>
+              </div>
+              <div className="absolute right-0 top-0 p-1 text-white">
+                {hasPermissionToEditCoverImage && (
+                  <Button
+                    variant="link"
+                    onClick={() => setEditCoverImage(true)}
+                    aria-label={t("facility_actions_menu")}
+                    className="text-white"
+                  >
+                    <CareIcon icon="l-edit" />
+                    <span className="underline">{t("edit_cover_photo")}</span>
+                  </Button>
+                )}
               </div>
             </div>
 
             <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2 flex justify-end">
+                <EditFacilitySheet
+                  facilityId={facilityId}
+                  trigger={
+                    <Button className="cursor-pointer" variant={"secondary"}>
+                      <CareIcon icon="l-edit" />
+                      {t("update_facility")}
+                    </Button>
+                  }
+                />
+              </div>
               <Card>
                 <CardContent>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
@@ -319,7 +273,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           <div className="mt-2 text-sm">
                             {renderGeoOrganizations(
                               facilityData?.geo_organization,
-                            )}
+                            ).map((org, index) => (
+                              <div key={index}>
+                                <span className="text-gray-500">
+                                  {org.value}
+                                  {org.label && ` (${org.label})`}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -357,7 +318,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <Badge
                               key={feature}
                               variant="secondary"
-                              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              className="flex items-center gap-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1"
                             >
                               {getFacilityFeatureIcon(feature)}
                               <span>
