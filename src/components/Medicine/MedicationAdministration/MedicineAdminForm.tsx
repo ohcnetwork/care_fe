@@ -159,10 +159,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           onValueChange={(value: MedicationAdministrationStatus) =>
             onChange({ ...administrationRequest, status: value })
           }
-          disabled={
-            !!administrationRequest.id &&
-            administrationRequest.status !== "in_progress"
-          }
         >
           <SelectTrigger>
             <SelectValue placeholder={t("select_status")} />
