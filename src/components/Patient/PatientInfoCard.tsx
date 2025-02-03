@@ -101,7 +101,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 {patient.name}
                 <div className="mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
               </div>
             </div>
@@ -114,7 +115,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 {patient.name}
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
