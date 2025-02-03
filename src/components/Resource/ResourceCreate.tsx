@@ -167,7 +167,7 @@ export default function ResourceCreate(props: ResourceProps) {
       crumbsReplacements={{
         [facilityId]: { name: facilityData?.name || "" },
         resource: {
-          uri: `/resource`,
+          uri: `/facility/${facilityId}/resource`,
           style: "pointer-events-none",
         },
       }}
