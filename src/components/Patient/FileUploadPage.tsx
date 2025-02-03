@@ -1,8 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
+
 import Page from "@/components/Common/Page";
 import { FileUpload } from "@/components/Files/FileUpload";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 
 export default function FileUploadPage(props: {
   facilityId: string;
@@ -11,10 +13,15 @@ export default function FileUploadPage(props: {
   type: "encounter" | "patient";
 }) {
   const { facilityId, patientId, encounterId, type } = props;
-  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
-    pathParams: { id: patientId },
-    prefetch: !!patientId,
+
+  const { data: patient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId },
+    }),
+    enabled: !!patientId,
   });
+
   return (
     <Page
       hideBack={false}
