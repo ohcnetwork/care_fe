@@ -159,7 +159,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     try {
       await mutate(routes.deleteFacilityCoverImage, {
         pathParams: { id: facilityId },
-      })({});
+      })(null);
 
       toast.success(t("cover_image_deleted"));
       queryClient.invalidateQueries({
