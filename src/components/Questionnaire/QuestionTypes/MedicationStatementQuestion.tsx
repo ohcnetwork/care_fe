@@ -60,8 +60,8 @@ import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 
 interface MedicationStatementQuestionProps {
-  encounterId: string;
   patientId: string;
+  encounterId: string;
   question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
@@ -111,8 +111,8 @@ export function MedicationStatementQuestion({
     queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
       queryParams: {
-        encounter: encounterId,
         limit: 100,
+        encounter: encounterId,
       },
     }),
   });
