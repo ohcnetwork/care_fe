@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   ZoomControls,
@@ -13,8 +15,6 @@ import { Button } from "@/components/ui/button";
 import Page from "@/components/Common/Page";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-
-import { classNames } from "@/Utils/utils";
 
 type Props = {
   children: ReactNode;
@@ -41,7 +41,7 @@ export default function PrintPreview(props: Props) {
           <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
             <div
               id="section-to-print"
-              className={classNames("w-full", props.className)}
+              className={cn("w-full", props.className)}
             >
               {props.children}
             </div>

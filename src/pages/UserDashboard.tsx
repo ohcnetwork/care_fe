@@ -30,7 +30,7 @@ export default function UserDashboard() {
             <h1 className="text-xl md:text-2xl font-bold">
               Welcome back, {user.first_name}!
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground">
+            <p className="text-sm md:text-base text-gray-500">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -89,7 +89,10 @@ export default function UserDashboard() {
             data-cy="facility-list"
           >
             {facilities.map((facility) => (
-              <Link key={facility.id} href={`/facility/${facility.id}`}>
+              <Link
+                key={facility.id}
+                href={`/facility/${facility.id}/overview`}
+              >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
@@ -100,11 +103,11 @@ export default function UserDashboard() {
                       <h3 className="font-medium truncate text-sm md:text-base">
                         {facility.name}
                       </h3>
-                      <p className="text-xs md:text-sm text-muted-foreground truncate">
+                      <p className="text-xs md:text-sm text-gray-500 truncate">
                         View facility details
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
                   </CardContent>
                 </Card>
               </Link>
@@ -133,11 +136,11 @@ export default function UserDashboard() {
                       <h3 className="font-medium truncate text-sm md:text-base">
                         {org.name}
                       </h3>
-                      <p className="text-xs md:text-sm text-muted-foreground truncate">
+                      <p className="text-xs md:text-sm text-gray-500 truncate">
                         {getOrgLabel(org.org_type, org.metadata)}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
                   </CardContent>
                 </Card>
               </Link>

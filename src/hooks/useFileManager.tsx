@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import DialogModal from "@/components/Common/Dialog";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
 import { StateInterface } from "@/components/Files/FileUpload";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import {
@@ -135,7 +135,7 @@ export default function useFileManager(
 
   const validateArchiveReason = (name: any) => {
     if (name.trim() === "") {
-      setArchiveReasonError("Please enter a valid reason!");
+      setArchiveReasonError(t("please_enter_a_valid_reason"));
       return false;
     } else {
       setArchiveReasonError("");
@@ -204,7 +204,7 @@ export default function useFileManager(
 
   const validateEditFileName = (name: string) => {
     if (name.trim() === "") {
-      setEditError("Please enter a name!");
+      setEditError(t("please_enter_a_name"));
       return false;
     } else {
       setEditError("");
@@ -278,8 +278,7 @@ export default function useFileManager(
             <div className="text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
               <span className="text-sm text-secondary-600">
-                This action is irreversible. Once a file is archived it cannot
-                be unarchived.
+                {t("this_action_is_irreversible")}
               </span>
             </div>
           </div>
@@ -348,7 +347,7 @@ export default function useFileManager(
       >
         <div className="mb-8 text-xs text-secondary-700">
           <CareIcon icon="l-archive" className="mr-2" />
-          This file has been archived and cannot be unarchived.
+          {t("this_file_has_been_archived")}
         </div>
         <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
           {[
@@ -425,7 +424,7 @@ export default function useFileManager(
               />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black">Rename File</h1>
+              <h1 className="text-xl text-black">{t("rename_file")}</h1>
             </div>
           </div>
         }
@@ -440,16 +439,19 @@ export default function useFileManager(
           className="flex w-full flex-col"
         >
           <div>
-            <TextFormField
+            <Label>{t("enter_the_file_name")}</Label>
+            <Input
               name="editFileName"
               id="edit-file-name"
-              label="Enter the file name"
               value={editDialogueOpen?.name}
               onChange={(e) => {
-                setEditDialogueOpen({ ...editDialogueOpen, name: e.value });
+                setEditDialogueOpen({
+                  ...editDialogueOpen,
+                  name: e.target.value,
+                });
               }}
-              error={editError}
             />
+            {editError && <p className="text-sm text-red-500">{editError}</p>}
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
             <Button
