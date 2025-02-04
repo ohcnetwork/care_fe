@@ -173,6 +173,7 @@ const routes = {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Facility Endpoints

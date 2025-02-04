@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,6 +10,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
 
@@ -53,9 +54,13 @@ export default function AuthUserProvider({
     );
   }, [user]);
 
+  const { mutateAsync: signInMutate } = useMutation({
+    mutationFn: mutate(routes.login),
+  });
+
   const signIn = useCallback(
     async (creds: { username: string; password: string }) => {
-      const data = await callApi(routes.login, { body: creds });
+      const data = await signInMutate(creds);
 
       if (data?.access && data?.refresh) {
         setAccessToken(data.access);
