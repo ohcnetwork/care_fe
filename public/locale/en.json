@@ -2019,6 +2019,8 @@
   "thank_you_for_choosing": "Thank you for choosing our care service",
   "the_request_for_resources_placed_by_yourself_is": "The request for resource (details below) placed by yourself is",
   "third_party_software_licenses": "Third Party Software Licenses",
+  "this_action_is_irreversible": "This action is irreversible. Once a file is archived it cannot be unarchived.",
+  "this_file_has_been_archived": "This file has been archived and cannot be unarchived.",
   "this_will_permanently_remove_the_template": "This will permanently remove the template and cannot be undone",
   "time": "Time",
   "time_slot": "Time Slot",
