@@ -6,7 +6,8 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
-    "src/service-worker.ts"
+    "src/service-worker.ts",
+    "src/pluginTypes.ts"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",
@@ -28,6 +29,18 @@
       [
         "src/index.tsx"
       ]
+    ],
+    [
+      "pluginMap",
+      [
+        "src/pluginTypes.ts"
+      ]
+    ],
+    [
+      "@supportedBrowsers",
+      [
+        "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
     ]
   ],
   "respectGitignore": true,
@@ -35,6 +48,7 @@
     "src/index.tsx",
     "vite.config.mts",
     "tailwind.config.js",
-    "cypress.config.ts"
+    "cypress.config.ts",
+    "scripts/**"
   ]
 }
