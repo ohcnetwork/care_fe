@@ -210,7 +210,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <img
                     src={facilityData.read_cover_image_url}
                     alt={facilityData?.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover rounded-2xl"
                   />
                   <div className="absolute rounded-lg inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
@@ -273,7 +273,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   }
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent>
                     <div className="flex flex-col gap-4">
