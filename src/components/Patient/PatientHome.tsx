@@ -23,7 +23,7 @@ import {
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientAge, relativeDate } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -171,20 +171,21 @@ export const PatientHome = (props: {
             >
               <div className="my-1 rounded-sm p-2">
                 <div>
-                  <div className="text-xs font-normal text-gray-600">
-                    {t("last_updated_by")}{" "}
-                    <span className="font-semibold text-gray-900">
+                  <div className="text-xs font-normal leading-5 text-gray-600">
+                    {t("last_updated_by")}
+                    <div className="font-semibold text-gray-900">
                       {patientData.updated_by?.first_name}{" "}
                       {patientData.updated_by?.last_name}
-                    </span>
+                    </div>
                   </div>
+
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
                     {patientData.modified_date ? (
                       <TooltipProvider delayDuration={1}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span>
-                              {relativeDate(patientData.modified_date)}
+                              {relativeTime(patientData.modified_date)}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -200,11 +201,11 @@ export const PatientHome = (props: {
 
                 <div className="mt-4">
                   <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("patient_profile_created_by")}{" "}
-                    <span className="font-semibold text-gray-900">
+                    {t("patient_profile_created_by")}
+                    <div className="font-semibold text-gray-900">
                       {patientData.created_by?.first_name}{" "}
                       {patientData.created_by?.last_name}
-                    </span>
+                    </div>
                   </div>
                   <div className="whitespace-normal text-sm font-semibold text-gray-900">
                     {patientData.created_date ? (
@@ -212,7 +213,7 @@ export const PatientHome = (props: {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span>
-                              {relativeDate(patientData.created_date)}
+                              {relativeTime(patientData.created_date)}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
