@@ -4,7 +4,6 @@ import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,7 +16,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-// import ContactLink from "@/components/Common/ContactLink";
+import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
@@ -168,6 +167,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const hasPermissionToEditCoverImage = true;
 
+  //  TODO: get permissions from backend to delete facility
+
   const coverImageHint = (
     <>
       {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
@@ -294,7 +295,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("mobile_number")}
                           </span>
                           <div>
-                            {formatPhoneNumberIntl(facilityData?.phone_number)}
+                            <ContactLink
+                              tel={String(facilityData?.phone_number)}
+                            />
                           </div>
                         </div>
                         <div className="flex flex-col m-2">
