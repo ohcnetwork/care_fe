@@ -72,7 +72,6 @@ export function DateTimeQuestion({
 
     updateQuestionnaireResponseCB(
       [
-        ...questionnaireResponse.values,
         {
           type: "dateTime",
           value: date.toISOString(),
