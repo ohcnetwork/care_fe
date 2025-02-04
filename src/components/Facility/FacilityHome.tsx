@@ -113,17 +113,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       toast.success(t("deleted_successfully", { name: facilityData?.name }));
       navigate("/facility");
     },
-    onError: () => {
-      toast.error(t("delete_failed", { name: facilityData?.name }));
-    },
   });
 
   const handleDeleteSubmit = () => {
     deleteFacility();
-  };
-
-  const handleDeleteClose = () => {
-    setOpenDeleteDialog(false);
   };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
@@ -198,7 +191,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         action="Delete"
         variant="destructive"
         show={openDeleteDialog}
-        onClose={handleDeleteClose}
+        onClose={() => setOpenDeleteDialog(false)}
         onConfirm={handleDeleteSubmit}
       />
       <AvatarEditModal

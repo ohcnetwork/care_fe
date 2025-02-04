@@ -108,12 +108,9 @@ export default function ResourceCreate(props: ResourceProps) {
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
-    onError: (_error) => {
-      toast.error(t("something_went_wrong"));
-    },
   });
 
-  const onSubmit = async (data: ResourceFormValues) => {
+  const onSubmit = (data: ResourceFormValues) => {
     createResource({
       status: "PENDING",
       category: data.category,

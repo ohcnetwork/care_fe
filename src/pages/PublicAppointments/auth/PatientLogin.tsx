@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
 const FormSchema = z.object({
@@ -81,9 +79,6 @@ export default function PatientLogin({
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
     },
-    onError: () => {
-      toast.error(t("error_sending_otp"));
-    },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -124,12 +119,6 @@ export default function PatientLogin({
           `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
       }
-    },
-    onError: (error: HTTPError) => {
-      const errorData = error.cause as { errors: Array<{ otp: string }> };
-      const errorMessage =
-        errorData?.errors?.[0]?.otp || t("error_verifying_otp");
-      toast.error(errorMessage);
     },
   });
 

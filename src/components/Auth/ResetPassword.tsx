@@ -73,7 +73,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
   };
   const { mutate: resetPassword } = useMutation({
     mutationFn: mutate(routes.resetPassword),
-    onSuccess: (_data) => {
+    onSuccess: () => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       toast.success(t("password_reset_success"));
       navigate("/login");

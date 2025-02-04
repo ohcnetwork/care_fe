@@ -74,7 +74,7 @@ export default function UserAvatar({ username }: { username: string }) {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       toast.success(t("profile_picture_deleted"));
       setEditAvatar(false);
-    } catch (_error) {
+    } catch {
       onError();
     }
   };
