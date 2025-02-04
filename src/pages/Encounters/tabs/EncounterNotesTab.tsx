@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { formatRelative } from "date-fns";
 import {
   Info,
   Loader2,
@@ -52,6 +53,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
@@ -154,21 +156,28 @@ const MessageItem = ({ message }: { message: Message }) => {
             isCurrentUser ? "items-end" : "items-start",
           )}
         >
-          <span className="text-xs text-gray-500 mb-1">
-            {message.created_by.username}
-          </span>
+          <p className="text-xs space-x-2 mb-1">
+            <span className="text-gray-700 font-medium">
+              {message.created_by.username}
+            </span>
+            <time
+              className="text-gray-500"
+              dateTime={message.created_date}
+              title={formatDateTime(message.created_date)}
+            >
+              {formatRelative(message.created_date, new Date())}
+            </time>
+          </p>
           <div
             className={cn(
               "p-3 rounded-lg break-words",
               isCurrentUser
-                ? "bg-primary-100 text-white rounded-br-none"
-                : "bg-gray-100 rounded-bl-none",
+                ? "bg-white text-black rounded-tr-none border border-gray-200"
+                : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
             {message.message && (
-              <div className="mt-4">
-                <Markdown content={message.message} className="text-sm" />
-              </div>
+              <Markdown content={message.message} className="text-sm" />
             )}
           </div>
         </div>
@@ -376,9 +385,6 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
-    },
-    onError: () => {
-      toast.error(t("Failed to send message"));
     },
   });
 
