@@ -431,7 +431,7 @@ export default function CreateScheduleTemplateSheet({
                         )}
                       /> */}
 
-                      <div className="flex items-center gap-4 col-span-2 md:col-span-1">
+                      <div className="flex items-center gap-0 sm:gap-4 col-span-2 md:col-span-1">
                         <FormField
                           control={form.control}
                           name={`availabilities.${index}.start_time`}
@@ -466,13 +466,16 @@ export default function CreateScheduleTemplateSheet({
                       {form.watch(`availabilities.${index}.slot_type`) ===
                         "appointment" && (
                         <>
-                          <div className="flex items-center gap-4 col-span-2 md:col-span-1">
+                          <div className="flex items-center gap-2 sm:gap-4 col-span-2 md:col-span-1">
                             <FormField
                               control={form.control}
                               name={`availabilities.${index}.slot_size_in_minutes`}
                               render={({ field }) => (
                                 <FormItem className="flex-1">
-                                  <FormLabel required>
+                                  <FormLabel
+                                    required
+                                    className="whitespace-nowrap"
+                                  >
                                     {t("schedule_slot_size_label")}
                                   </FormLabel>
                                   <FormControl>
@@ -497,7 +500,10 @@ export default function CreateScheduleTemplateSheet({
                               name={`availabilities.${index}.tokens_per_slot`}
                               render={({ field }) => (
                                 <FormItem className="flex-1">
-                                  <FormLabel required>
+                                  <FormLabel
+                                    required
+                                    className="whitespace-nowrap"
+                                  >
                                     {t("patients_per_slot")}
                                   </FormLabel>
                                   <FormControl>
