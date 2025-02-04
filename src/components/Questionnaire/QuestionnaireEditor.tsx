@@ -427,7 +427,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 </Badge>
                               ))
                           ) : (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-gray-500">
                               No organizations selected
                             </p>
                           )}
@@ -458,7 +458,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                       <Building className="h-4 w-4" />
                                       <span>{org.name}</span>
                                       {org.description && (
-                                        <span className="text-xs text-muted-foreground">
+                                        <span className="text-xs text-gray-500">
                                           - {org.description}
                                         </span>
                                       )}
@@ -507,7 +507,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       placeholder="unique-identifier-for-questionnaire"
                       className="font-mono"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-gray-500 mt-1">
                       A unique URL-friendly identifier for this questionnaire
                     </p>
                   </div>
