@@ -45,7 +45,7 @@ export default function AuthUserProvider({
   const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const { data: refreshTokenData, error: refreshTokenError } = useQuery({
-    queryKey: ["currentUser", accessToken],
+    queryKey: ["user-refresh-token"],
     queryFn: query(routes.token_refresh, { body: { refresh: refresh || "" } }),
     refetchInterval: careConfig.auth.tokenRefreshInterval,
     enabled: !!refresh,
