@@ -1,5 +1,6 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +16,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,6 +41,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import organizationApi from "@/types/organization/organizationApi";
 import {
   AnswerOption,
   EnableWhen,
@@ -46,10 +56,11 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
+import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
-  id: string;
+  id?: string;
 }
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
@@ -58,6 +69,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
+  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
   const {
     data: initialQuestionnaire,
@@ -66,13 +79,36 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   } = useQuery({
     queryKey: ["questionnaireDetail", id],
     queryFn: query(questionnaireApi.detail, {
-      pathParams: { id },
+      pathParams: { id: id! },
     }),
+    enabled: !!id,
   });
 
-  const { mutate: updateQuestionnaire, isPending } = useMutation({
+  const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
+    useQuery({
+      queryKey: ["organizations", orgSearchQuery],
+      queryFn: query(organizationApi.list, {
+        queryParams: {
+          org_type: "role",
+          name: orgSearchQuery || undefined,
+        },
+      }),
+    });
+
+  const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
+    mutationFn: mutate(questionnaireApi.create),
+    onSuccess: (data: QuestionnaireDetail) => {
+      toast.success("Questionnaire created successfully");
+      navigate(`/questionnaire/${data.slug}`);
+    },
+    onError: (_error) => {
+      toast.error("Failed to create questionnaire");
+    },
+  });
+
+  const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
-      pathParams: { id },
+      pathParams: { id: id! },
     }),
     onSuccess: () => {
       toast.success("Questionnaire updated successfully");
@@ -83,7 +119,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireDetail | null>(null);
+    useState<QuestionnaireDetail | null>(() => {
+      if (!id) {
+        return {
+          id: "",
+          title: "",
+          description: "",
+          status: "draft",
+          version: "1.0",
+          subject_type: "patient",
+          questions: [],
+          slug: "",
+          tags: [],
+        } as QuestionnaireDetail;
+      }
+      return null;
+    });
 
   useEffect(() => {
     if (initialQuestionnaire) {
@@ -91,7 +142,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
   }, [initialQuestionnaire]);
 
-  if (isLoading) return <Loading />;
+  if (id && isLoading) return <Loading />;
   if (error) {
     return (
       <Alert variant="destructive">
@@ -122,8 +173,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
+  const handleSave = () => {
+    if (id) {
+      updateQuestionnaire(questionnaire);
+    } else {
+      createQuestionnaire({
+        ...questionnaire,
+        organizations: selectedOrgIds,
+      });
+    }
+  };
+
   const handleCancel = () => {
-    navigate(`/questionnaire/${id}`);
+    navigate(id ? `/questionnaire/${id}` : "/questionnaire");
   };
 
   const handleDragEnd = (result: any) => {
@@ -148,12 +210,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
 
+  const handleToggleOrganization = (orgId: string) => {
+    setSelectedOrgIds((current) =>
+      current.includes(orgId)
+        ? current.filter((id) => id !== orgId)
+        : [...current, orgId],
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* Top bar: Title + Buttons */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Edit Questionnaire</h1>
+          <h1 className="text-2xl font-bold">
+            {id ? "Edit Questionnaire" : "Create Questionnaire"}
+          </h1>
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
@@ -161,12 +232,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Cancel
           </Button>
-          <Button
-            onClick={() => updateQuestionnaire(questionnaire)}
-            disabled={isPending}
-          >
+          <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
-            Save
+            {id ? "Save" : "Create"}
           </Button>
         </div>
       </div>
@@ -182,7 +250,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         <TabsContent value="edit">
           <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
-            {/* Left Sidebar: Navigation */}
             <div className="space-y-4">
               <Card>
                 <CardHeader>
@@ -318,11 +385,100 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label>Organizations</Label>
+                    {id ? (
+                      <ManageQuestionnaireOrganizationsSheet
+                        questionnaireId={id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
+                            <Building className="mr-2 h-4 w-4" />
+                            Manage Organizations
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOrgIds.length > 0 ? (
+                            availableOrganizations?.results
+                              .filter((org) => selectedOrgIds.includes(org.id))
+                              .map((org) => (
+                                <Badge
+                                  key={org.id}
+                                  variant="secondary"
+                                  className="flex items-center gap-1"
+                                >
+                                  {org.name}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                    onClick={() =>
+                                      handleToggleOrganization(org.id)
+                                    }
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </Badge>
+                              ))
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              No organizations selected
+                            </p>
+                          )}
+                        </div>
+
+                        <Command className="rounded-lg border shadow-md">
+                          <CommandInput
+                            placeholder="Search organizations..."
+                            onValueChange={setOrgSearchQuery}
+                          />
+                          <CommandList>
+                            <CommandEmpty>No organizations found.</CommandEmpty>
+                            <CommandGroup>
+                              {isLoadingOrganizations ? (
+                                <div className="flex items-center justify-center py-6">
+                                  <Loader2 className="h-6 w-6 animate-spin" />
+                                </div>
+                              ) : (
+                                availableOrganizations?.results.map((org) => (
+                                  <CommandItem
+                                    key={org.id}
+                                    value={org.id}
+                                    onSelect={() =>
+                                      handleToggleOrganization(org.id)
+                                    }
+                                  >
+                                    <div className="flex flex-1 items-center gap-2">
+                                      <Building className="h-4 w-4" />
+                                      <span>{org.name}</span>
+                                      {org.description && (
+                                        <span className="text-xs text-muted-foreground">
+                                          - {org.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {selectedOrgIds.includes(org.id) && (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </CommandItem>
+                                ))
+                              )}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Main Content */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -338,6 +494,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         updateQuestionnaireField("title", e.target.value)
                       }
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                      id="slug"
+                      value={questionnaire.slug}
+                      onChange={(e) =>
+                        updateQuestionnaireField("slug", e.target.value)
+                      }
+                      placeholder="unique-identifier-for-questionnaire"
+                      className="font-mono"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      A unique URL-friendly identifier for this questionnaire
+                    </p>
                   </div>
 
                   <div>
@@ -368,7 +540,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     onClick={() => {
                       const newQuestion: Question = {
                         id: crypto.randomUUID(),
-                        link_id: `Q-${Date.now()}`,
+                        link_id: `${questionnaire.questions.length + 1}`,
                         text: "New Question",
                         type: "string",
                         questions: [],
@@ -619,7 +791,6 @@ function QuestionEditor({
               <Select
                 value={type}
                 onValueChange={(val: QuestionType) => {
-                  // Reset questions array when changing from group to another type
                   if (val !== "group") {
                     updateField("type", val, { questions: [] });
                   } else {

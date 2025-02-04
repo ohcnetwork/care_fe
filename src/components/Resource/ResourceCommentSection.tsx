@@ -1,84 +1,125 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import PaginatedList from "@/CAREUI/misc/PaginatedList";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
-import CircularProgress from "@/components/Common/CircularProgress";
+import PaginationComponent from "@/components/Common/Pagination";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
 const CommentSection = (props: { id: string }) => {
+  const { id } = props;
   const [commentBox, setCommentBox] = useState("");
+  const queryClient = useQueryClient();
 
-  const onSubmitComment = async () => {
-    const payload = {
-      comment: commentBox,
-    };
+  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+
+  const { data: resourceComments, isLoading } = useQuery({
+    queryKey: ["resourceComments", id, qParams],
+    queryFn: query(routes.getResourceComments, {
+      queryParams: {
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+      },
+      pathParams: { id },
+    }),
+  });
+
+  const { mutate: addComment } = useMutation({
+    mutationFn: mutate(routes.addResourceComments, {
+      pathParams: { id },
+    }),
+    onSuccess: () => {
+      toast.success(t("comment_added_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["resourceComments", id] });
+    },
+  });
+
+  const submitComment = () => {
     if (!/\S+/.test(commentBox)) {
       toast.error(t("comment_min_length"));
       return;
     }
-    const { res } = await request(routes.addResourceComments, {
-      pathParams: { id: props.id },
-      body: payload,
+    addComment({
+      comment: commentBox,
     });
-    if (res?.ok) {
-      toast.success(t("comment_added_successfully"));
-    }
     setCommentBox("");
   };
-  return (
-    <PaginatedList
-      route={routes.getResourceComments}
-      pathParams={{ id: props.id }}
-    >
-      {(_, query) => (
-        <div className="flex w-full flex-col">
-          <Textarea
-            name="comment"
-            placeholder={t("type_your_comment")}
-            value={commentBox}
-            onChange={(e) => setCommentBox(e.target.value)}
-          />
 
-          <div className="flex w-full justify-end mt-2">
-            <Button
-              variant="primary"
-              onClick={async () => {
-                await onSubmitComment();
-                query.refetch();
-              }}
-            >
-              {t("post_your_comment")}
-            </Button>
-          </div>
-          <div className="w-full">
+  return (
+    <div className="flex w-full flex-col">
+      <div>
+        <Textarea
+          name="comment"
+          placeholder={t("type_your_comment")}
+          value={commentBox}
+          onChange={(e) => setCommentBox(e.target.value)}
+        />
+
+        <div className="flex w-full justify-end mt-2">
+          <Button variant="primary" onClick={submitComment}>
+            {t("post_your_comment")}
+          </Button>
+        </div>
+
+        <div className="w-full">
+          {isLoading ? (
             <div>
-              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-                <span>{t("no_comments_available")}</span>
-              </PaginatedList.WhenEmpty>
-              <PaginatedList.WhenLoading>
-                <CircularProgress className="h-12 w-12" />
-              </PaginatedList.WhenLoading>
-              <PaginatedList.Items<CommentModel>>
-                {(item) => <Comment {...item} />}
-              </PaginatedList.Items>
-              <div className="flex w-full items-center justify-center">
-                <PaginatedList.Paginator hideIfSinglePage />
+              <div className="grid gap-5">
+                <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
               </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              {resourceComments?.results?.length === 0 ? (
+                <div className="p-flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+                  <span>{t("no_comments_available")}</span>
+                </div>
+              ) : (
+                <ul>
+                  {resourceComments?.results?.map((comment) => (
+                    <li key={comment.id} className="w-full">
+                      <Comment {...comment} />
+                    </li>
+                  ))}
+                  <div className="flex w-full items-center justify-center">
+                    <div
+                      className={cn(
+                        "flex w-full justify-center",
+                        (resourceComments?.count ?? 0) > RESULTS_PER_PAGE_LIMIT
+                          ? "visible"
+                          : "invisible",
+                      )}
+                    >
+                      <PaginationComponent
+                        cPage={qParams.page ?? 1}
+                        defaultPerPage={RESULTS_PER_PAGE_LIMIT}
+                        data={{ totalCount: resourceComments?.count ?? 0 }}
+                        onChange={(page) => setQueryParams({ page })}
+                      />
+                    </div>
+                  </div>
+                </ul>
+              )}
+            </div>
+          )}
         </div>
-      )}
-    </PaginatedList>
+      </div>
+    </div>
   );
 };
 

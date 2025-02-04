@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +21,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
@@ -90,6 +91,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [offset, setOffset] = useState(0);
   const [tab, setTab] = useState("UNARCHIVED");
   const authUser = useAuthUser();
+  const queryClient = useQueryClient();
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -119,54 +121,78 @@ export const FileUpload = (props: FileUploadProps) => {
       CLAIM: claimId,
     }[type] || "";
 
-  const activeFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: type,
-      associating_id: associatedId,
-      is_archived: false,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
-  });
-
-  const archivedFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: type,
-      associating_id: associatedId,
-      is_archived: true,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
-  });
-
-  const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: "discharge_summary",
-      associating_id: associatedId,
-      is_archived: false,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
-    prefetch: type === "consultation",
-    silent: true,
-  });
-
-  const queries = {
-    UNARCHIVED: activeFilesQuery,
-    ARCHIVED: archivedFilesQuery,
-    DISCHARGE_SUMMARY: dischargeSummaryQuery,
+  const refetchAll = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["viewUpload", "active", type, associatedId],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["viewUpload", "archived", type, associatedId],
+    });
+    if (type === "consultation") {
+      queryClient.invalidateQueries({
+        queryKey: ["viewUpload", "discharge_summary", associatedId],
+      });
+    }
   };
 
-  const refetchAll = async () =>
-    Promise.all(Object.values(queries).map((q) => q.refetch()));
-  const loading = Object.values(queries).some((q) => q.loading);
+  const { data: activeFiles, isLoading: activeFilesLoading } = useQuery({
+    queryKey: ["viewUpload", "active", type, associatedId, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: type,
+        associating_id: associatedId,
+        is_archived: false,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: offset,
+      },
+    }),
+  });
 
+  const { data: archivedFiles, isLoading: archivedFilesLoading } = useQuery({
+    queryKey: ["viewUpload", "archived", type, associatedId, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: type,
+        associating_id: associatedId,
+        is_archived: true,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: offset,
+      },
+    }),
+  });
+
+  const { data: dischargeSummary, isLoading: dischargeSummaryLoading } =
+    useQuery({
+      queryKey: ["viewUpload", "discharge_summary", associatedId, offset],
+      queryFn: query(routes.viewUpload, {
+        queryParams: {
+          file_type: "discharge_summary",
+          associating_id: associatedId,
+          is_archived: false,
+          limit: RESULTS_PER_PAGE_LIMIT,
+          offset: offset,
+          silent: true,
+        },
+      }),
+      enabled: type === "consultation",
+    });
+
+  const queries = {
+    UNARCHIVED: { data: activeFiles, isLoading: activeFilesLoading },
+    ARCHIVED: { data: archivedFiles, isLoading: archivedFilesLoading },
+    DISCHARGE_SUMMARY: {
+      data: dischargeSummary,
+      isLoading: dischargeSummaryLoading,
+    },
+  };
+
+  const loading = Object.values(queries).some((q) => q.isLoading);
   const fileQuery = queries[tab as keyof typeof queries];
 
   const tabs = [
     { text: "Active Files", value: "UNARCHIVED" },
     { text: "Archived Files", value: "ARCHIVED" },
-    ...(dischargeSummaryQuery.data?.results?.length
+    ...(dischargeSummary?.results?.length
       ? [
           {
             text: "Discharge Summary",

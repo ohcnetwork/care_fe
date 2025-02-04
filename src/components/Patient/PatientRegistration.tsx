@@ -554,7 +554,15 @@ export default function PatientRegistration(
                             data-cy="age-input"
                           />
                         </FormControl>
+
                         <FormMessage />
+                        {form.getValues("age") && (
+                          <div className="text-violet-600 text-sm font-bold">
+                            {t("year_of_birth")}:{" "}
+                            {new Date().getFullYear() -
+                              Number(form.getValues("age"))}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -679,7 +687,7 @@ export default function PatientRegistration(
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {form.watch("nationality") === "India" && (
                   <FormField
                     control={form.control}
