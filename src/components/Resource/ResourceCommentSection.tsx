@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,18 +11,13 @@ import { Avatar } from "@/components/Common/Avatar";
 import CircularProgress from "@/components/Common/CircularProgress";
 
 import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
+import request from "@/Utils/request/request";
 import { formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
-  const { mutate: addResourceComments } = useMutation({
-    mutationFn: mutate(routes.addResourceComments, {
-      pathParams: { id: props.id },
-    }),
-    onSuccess: () => toast.success(t("comment_added_successfully")),
-  });
+
   const onSubmitComment = async () => {
     const payload = {
       comment: commentBox,
@@ -32,7 +26,13 @@ const CommentSection = (props: { id: string }) => {
       toast.error(t("comment_min_length"));
       return;
     }
-    addResourceComments(payload);
+    const { res } = await request(routes.addResourceComments, {
+      pathParams: { id: props.id },
+      body: payload,
+    });
+    if (res?.ok) {
+      toast.success(t("comment_added_successfully"));
+    }
     setCommentBox("");
   };
   return (
