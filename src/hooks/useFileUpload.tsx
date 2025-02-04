@@ -142,7 +142,6 @@ export default function useFileUpload(
       const ext: string = file.name.split(".")[1];
       if (ExtImage.includes(ext)) {
         const options = {
-          initialQuality: 0.6,
           alwaysKeepResolution: true,
         };
         imageCompression(file, options).then((compressedFile: File) => {
