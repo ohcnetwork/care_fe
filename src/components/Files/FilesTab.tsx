@@ -1,27 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -38,12 +29,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import AudioPlayer from "@/components/Common/AudioPlayer";
 import Loading from "@/components/Common/Loading";
+import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
+import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
+import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
-import useFileUpload, { FileUploadReturn } from "@/hooks/useFileUpload";
+import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
 import { FILE_EXTENSIONS } from "@/common/constants";
@@ -52,21 +45,26 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { classNames } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { Encounter } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
   facilityId: string;
-  encounterId?: string;
   patientId?: string;
+  encounter?: Encounter;
+  patient?: Patient;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { encounterId, patientId, type } = props;
+  const { patientId, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
-  const { t } = useTranslation();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
+  const [selectedArchivedFile, setSelectedArchivedFile] =
+    useState<FileUploadModel | null>(null);
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
@@ -75,7 +73,7 @@ export const FilesTab = (props: FilesTabProps) => {
   const associatingId =
     {
       patient: patientId,
-      encounter: encounterId,
+      encounter: encounter?.id,
     }[type] || "";
 
   const fileCategories = [
@@ -189,87 +187,119 @@ export const FilesTab = (props: FilesTabProps) => {
     DOCUMENT: "l-file-medical",
   };
 
-  const getArchivedMessage = () => {
+  const getArchivedMessage = (file: FileUploadModel) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 text-2xl uppercase font-bold">
+        <span className="text-gray-200/90 self-center uppercase font-bold">
           {t("archived")}
         </span>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setSelectedArchivedFile(file);
+            setOpenArchivedFileDialog(true);
+          }}
+        >
+          <span className="flex flex-row items-center gap-1">
+            <CareIcon icon="l-archive-alt" />
+            {t("view")}
+          </span>
+        </Button>
       </div>
     );
+  };
+
+  const editPermission = () => {
+    if (type === "encounter") {
+      return (
+        encounter &&
+        ![
+          "completed",
+          "cancelled",
+          "entered_in_error",
+          "discontinued",
+        ].includes(encounter.status) &&
+        hasPermission("can_write_encounter")
+      );
+    } else if (type === "patient") {
+      return hasPermission("can_write_patient");
+    }
+    return false;
   };
 
   const DetailButtons = ({ file }: { file: FileUploadModel }) => {
     const filetype = getFileType(file);
     return (
-      <div className="flex flex-row gap-2 justify-end">
-        {filetype === "AUDIO" && !file.is_archived && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSelectedAudioFile(file);
-              setOpenAudioPlayerDialog(true);
-            }}
-          >
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-play-circle" className="mr-1" />
-              {t("play")}
-            </span>
-          </Button>
-        )}
-        {fileManager.isPreviewable(file) && (
-          <Button
-            variant="secondary"
-            onClick={() => fileManager.viewFile(file, associatingId)}
-          >
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-eye" />
-              {t("view")}
-            </span>
-          </Button>
-        )}
-        {
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
-                <CareIcon icon="l-ellipsis-h" />
+      <>
+        {editPermission() && (
+          <div className="flex flex-row gap-2 justify-end">
+            {filetype === "AUDIO" && !file.is_archived && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSelectedAudioFile(file);
+                  setOpenAudioPlayerDialog(true);
+                }}
+              >
+                <span className="flex flex-row items-center gap-1">
+                  <CareIcon icon="l-play-circle" className="mr-1" />
+                  {t("play")}
+                </span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem className="text-primary-900">
-                <button
-                  onClick={() => fileManager.downloadFile(file, associatingId)}
-                >
-                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                  <span>{t("download")}</span>
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-primary-900">
-                <button
-                  onClick={() => fileManager.archiveFile(file, associatingId)}
-                >
-                  <CareIcon icon="l-archive-alt" className="mr-1" />
-                  <span>{t("archive")}</span>
-                </button>
-              </DropdownMenuItem>
-              {hasPermission(
-                type === "encounter"
-                  ? "can_write_encounter"
-                  : "can_write_patient",
-              ) && (
-                <DropdownMenuItem className="text-primary-900">
-                  <button
-                    onClick={() => fileManager.editFile(file, associatingId)}
-                  >
-                    <CareIcon icon="l-pen" className="mr-1" />
-                    <span>{t("rename")}</span>
-                  </button>
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        }
-      </div>
+            )}
+            {fileManager.isPreviewable(file) && (
+              <Button
+                variant="secondary"
+                onClick={() => fileManager.viewFile(file, associatingId)}
+              >
+                <span className="flex flex-row items-center gap-1">
+                  <CareIcon icon="l-eye" />
+                  {t("view")}
+                </span>
+              </Button>
+            )}
+            {
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary">
+                    <CareIcon icon="l-ellipsis-h" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem className="text-primary-900">
+                    <button
+                      onClick={() =>
+                        fileManager.downloadFile(file, associatingId)
+                      }
+                    >
+                      <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                      <span>{t("download")}</span>
+                    </button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-primary-900">
+                    <button
+                      onClick={() =>
+                        fileManager.archiveFile(file, associatingId)
+                      }
+                    >
+                      <CareIcon icon="l-archive-alt" className="mr-1" />
+                      <span>{t("archive")}</span>
+                    </button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-primary-900">
+                    <button
+                      onClick={() => fileManager.editFile(file, associatingId)}
+                    >
+                      <CareIcon icon="l-pen" className="mr-1" />
+                      <span>{t("rename")}</span>
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            }
+          </div>
+        )}
+      </>
     );
   };
 
@@ -328,12 +358,7 @@ export const FilesTab = (props: FilesTabProps) => {
   };
 
   const FileUploadButtons = (): JSX.Element => {
-    if (
-      !hasPermission(
-        type === "encounter" ? "can_write_encounter" : "can_write_patient",
-      )
-    )
-      return <></>;
+    if (!editPermission()) return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -482,7 +507,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     )}
                   >
                     {file.is_archived ? (
-                      getArchivedMessage()
+                      getArchivedMessage(file)
                     ) : (
                       <DetailButtons file={file} />
                     )}
@@ -520,6 +545,11 @@ export const FilesTab = (props: FilesTabProps) => {
           associatingId={associatingId}
         />
       </div>
+      <ArchivedFileDialog
+        open={openArchivedFileDialog}
+        onOpenChange={setOpenArchivedFileDialog}
+        file={selectedArchivedFile}
+      />
       <FileUploadDialog
         open={openUploadDialog}
         onOpenChange={setOpenUploadDialog}
@@ -559,158 +589,5 @@ export const FilesTab = (props: FilesTabProps) => {
       </Tabs>
       <Pagination totalCount={files?.count || 0} />
     </div>
-  );
-};
-
-const FileUploadDialog = ({
-  open,
-  onOpenChange,
-  fileUpload,
-  associatingId,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  fileUpload: FileUploadReturn;
-  associatingId: string;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      aria-labelledby="file-upload-dialog"
-    >
-      <DialogContent
-        className="mb-8 rounded-lg p-5 max-w-fit"
-        aria-describedby="file-upload"
-      >
-        <DialogHeader>
-          <DialogTitle>
-            {fileUpload.files.length > 1 ? t("upload_files") : t("upload_file")}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-6 pr-5 max-h-[70vh] overflow-y-auto">
-          {fileUpload.files.map((file, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
-                <span className="flex items-center truncate">
-                  <CareIcon icon="l-paperclip" className="mr-2 shrink-0" />
-                  <span className="truncate max-w-xs" title={file.name}>
-                    {file.name}
-                  </span>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => fileUpload.removeFile(index)}
-                  disabled={fileUpload.uploading}
-                >
-                  <CareIcon icon="l-times" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor={`upload-file-name-${index}`}
-                  className="text-sm font-medium text-gray-700"
-                >
-                  {t("enter_file_name")}
-                </Label>
-                <Input
-                  name={`file_name_${index}`}
-                  type="text"
-                  id={`upload-file-name-${index}`}
-                  required
-                  className={
-                    index === 0 && fileUpload.error
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-primary"
-                  }
-                  value={fileUpload.fileNames[index] || ""}
-                  disabled={fileUpload.uploading}
-                  onChange={(e) =>
-                    fileUpload.setFileName(e.target.value, index)
-                  }
-                />
-                {index === 0 && fileUpload.error && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {fileUpload.error}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 mt-4">
-          <Button
-            variant="outline_primary"
-            onClick={() => fileUpload.handleFileUpload(associatingId)}
-            disabled={fileUpload.uploading}
-            className="w-full"
-            id="upload_file_button"
-          >
-            <CareIcon icon="l-check" className="mr-1" />
-            {t("upload")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={fileUpload.clearFiles}
-            disabled={fileUpload.uploading}
-          >
-            <CareIcon icon="l-trash-alt" className="mr-1" />
-            {t("discard")}
-          </Button>
-        </div>
-        {!!fileUpload.progress && (
-          <Progress value={fileUpload.progress} className="mt-4" />
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const AudioPlayerDialog = ({
-  open,
-  onOpenChange,
-  file,
-  type,
-  associatingId,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  file: FileUploadModel | null;
-  type: "encounter" | "patient";
-  associatingId: string;
-}) => {
-  const { t } = useTranslation();
-  const { data: fileData } = useQuery({
-    queryKey: [routes.retrieveUpload, type, file?.id],
-    queryFn: query(routes.retrieveUpload, {
-      queryParams: { file_type: type, associating_id: associatingId },
-      pathParams: { id: file?.id || "" },
-    }),
-    enabled: !!file?.id,
-  });
-  const { Player, stopPlayback } = AudioPlayer({
-    src: fileData?.read_signed_url || "",
-  });
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={() => {
-        stopPlayback();
-        onOpenChange(false);
-      }}
-      aria-labelledby="audio-player-dialog"
-    >
-      <DialogContent
-        className="mb-2 rounded-lg p-4"
-        aria-describedby="audio-player"
-      >
-        <DialogHeader>
-          <DialogTitle>{t("play_audio")}</DialogTitle>
-        </DialogHeader>
-        <Player />
-      </DialogContent>
-    </Dialog>
   );
 };
