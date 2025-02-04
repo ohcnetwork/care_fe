@@ -21,8 +21,15 @@ export default function ArchivedFileDialog({
 }) {
   const fileName = file?.name ? file.name + file.extension : "";
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      aria-labelledby="file-archive-dialog"
+    >
+      <DialogContent
+        className="mb-8 rounded-lg p-2 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
+        aria-describedby="file-archive"
+      >
         <DialogHeader>
           <DialogTitle>
             {t("archived_file")}: {fileName}

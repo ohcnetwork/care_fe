@@ -7,6 +7,7 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -413,8 +414,70 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const RenderTable = () => {
-    return (
+  const RenderCard = () => (
+    <div className="xl:hidden space-y-4 px-2">
+      {files?.results && files?.results?.length > 0 ? (
+        files.results.map((file) => {
+          const filetype = getFileType(file);
+          const fileName = file.name ? file.name + file.extension : "";
+
+          return (
+            <Card
+              key={file.id}
+              className={classNames(
+                "overflow-hidden",
+                file.is_archived ? "bg-white/50" : "bg-white",
+              )}
+            >
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                    <CareIcon icon={icons[filetype]} className="text-xl" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-gray-900 truncate">
+                      {fileName}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-500">{filetype}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">{t("date")}</div>
+                    <div className="font-medium">
+                      {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">{t("shared_by")}</div>
+                    <div className="font-medium">
+                      {file.uploaded_by?.username}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  {file.is_archived ? (
+                    getArchivedMessage(file)
+                  ) : (
+                    <DetailButtons file={file} />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })
+      ) : (
+        <div className="text-center py-4 text-gray-500">
+          {t("no_files_found")}
+        </div>
+      )}
+    </div>
+  );
+
+  const RenderTable = () => (
+    <div className="hidden xl:block">
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
@@ -524,8 +587,8 @@ export const FilesTab = (props: FilesTabProps) => {
           )}
         </TableBody>
       </Table>
-    );
-  };
+    </div>
+  );
 
   return (
     <div className="mt-5 space-y-4">
@@ -565,17 +628,6 @@ export const FilesTab = (props: FilesTabProps) => {
       >
         <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between">
           <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
-            {/* <TabsList className="flex flex-row flex-wrap gap-2 h-auto">
-              {fileCategories.map((category) => (
-                <TabsTrigger
-                  key={category.value}
-                  value={category.value}
-                  className="hover:text-secondary-900 hover:bg-white/50 mr-4"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList> */}
             <FilterButton />
           </div>
           <FileUploadButtons />
@@ -584,6 +636,7 @@ export const FilesTab = (props: FilesTabProps) => {
         {fileCategories.map((category) => (
           <TabsContent key={category.value} value={category.value}>
             <RenderTable />
+            <RenderCard />
           </TabsContent>
         ))}
       </Tabs>
