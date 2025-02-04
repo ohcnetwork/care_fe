@@ -16,16 +16,20 @@ import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -363,8 +367,11 @@ export default function CreateScheduleTemplateSheet({
                           {form.watch(`availabilities.${index}.name`)}
                         </span>
                       </div>
-                      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                        <DialogTrigger asChild>
+                      <AlertDialog
+                        open={openDialog}
+                        onOpenChange={setOpenDialog}
+                      >
+                        <AlertDialogTrigger asChild>
                           <Button
                             type="button"
                             variant="secondary"
@@ -378,23 +385,26 @@ export default function CreateScheduleTemplateSheet({
                             <CareIcon icon="l-trash" className="text-base" />
                             <span className="ml-2">{t("remove")}</span>
                           </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>{t("are_you_sure")}</DialogTitle>
-                            <DialogDescription>
-                              {t("this_will_permanently_remove_the_template")}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setOpenDialog(false)}
-                            >
-                              {t("cancel")}
-                            </Button>
-                            <Button
-                              variant="destructive"
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("are_you_sure")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <Alert variant="destructive" className="mt-4">
+                                <AlertTitle>{t("warning")}</AlertTitle>
+                                <AlertDescription>
+                                  {t(
+                                    "this_will_permanently_remove_the_template",
+                                  )}
+                                </AlertDescription>
+                              </Alert>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
                               onClick={() => {
                                 const availabilities =
                                   form.getValues("availabilities");
@@ -408,11 +418,11 @@ export default function CreateScheduleTemplateSheet({
                                 setOpenDialog(false);
                               }}
                             >
-                              {t("remove")}
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                              {t("confirm")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4">
