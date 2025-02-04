@@ -15,16 +15,20 @@ import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -259,8 +263,8 @@ const ScheduleTemplateEditor = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
+            <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+              <AlertDialogTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
@@ -270,33 +274,32 @@ const ScheduleTemplateEditor = ({
                   <Trash2Icon />
                   {isDeleting ? t("deleting") : t("delete")}
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("are_you_sure")}</DialogTitle>
-                  <DialogDescription>
-                    {t("this_will_permanently_remove_the_template")}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setDialogOpen(false)}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    variant="destructive"
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertTitle>{t("warning")}</AlertTitle>
+                      <AlertDescription>
+                        {t("this_will_permanently_remove_the_template")}
+                      </AlertDescription>
+                    </Alert>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
                     onClick={() => {
                       deleteTemplate();
                       setDialogOpen(false);
                     }}
                   >
-                    {t("delete")}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                    {t("confirm")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button
               variant="primary"
               type="submit"
@@ -326,6 +329,7 @@ const AvailabilityEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [openDialog, setOpenDialog] = useState(false);
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
@@ -388,15 +392,43 @@ const AvailabilityEditor = ({
           </span>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => deleteAvailability()}
-          disabled={isDeleting}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <CareIcon icon="l-trash" className="text-lg" />
-        </Button>
+        <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpenDialog(true)}
+              disabled={isDeleting}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <CareIcon icon="l-trash" className="text-lg" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("this_will_permanently_remove_the_template")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  deleteAvailability();
+                  setOpenDialog(false);
+                }}
+              >
+                {t("confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="space-y-4">
