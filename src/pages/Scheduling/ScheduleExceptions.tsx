@@ -9,15 +9,19 @@ import { cn } from "@/lib/utils";
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
@@ -122,36 +126,38 @@ const ScheduleExceptionItem = (
             </span>
           </div>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogTrigger asChild>
             <Button variant="secondary" size="sm" disabled={isPending}>
               <CareIcon icon="l-minus-circle" className="text-base" />
               <span className="ml-2">{t("remove")}</span>
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("are_you_sure")}</DialogTitle>
-              <DialogDescription>
-                {t("this_will_permanently_remove_the_exception")}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                {t("cancel")}
-              </Button>
-              <Button
-                variant="destructive"
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("this_will_permanently_remove_the_template")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
                 onClick={() => {
                   deleteException(undefined);
                   setOpen(false);
                 }}
               >
-                {t("remove")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+                {t("confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       {/* TODO: Add this information */}
       {/* <div className="px-4 py-2">
