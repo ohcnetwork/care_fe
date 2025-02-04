@@ -6,8 +6,8 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
-    "src/service-worker.ts",
-    "src/pluginTypes.ts"
+    "src/pluginTypes.ts",
+    "src/service-worker.ts"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",
@@ -19,6 +19,18 @@
   ],
   "ignoreUnresolved": [
     [
+      "./pluginMap",
+      [
+        "src/pluginTypes.ts"
+      ]
+    ],
+    [
+      "@/supportedBrowsers",
+      [
+        "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
+    [
       "tsx/cjs",
       [
         "node_modules/find-cypress-specs/src/index.js"
@@ -28,18 +40,6 @@
       "virtual:pwa-register",
       [
         "src/index.tsx"
-      ]
-    ],
-    [
-      "pluginMap",
-      [
-        "src/pluginTypes.ts"
-      ]
-    ],
-    [
-      "@supportedBrowsers",
-      [
-        "src/components/ErrorPages/BrowserWarning.tsx"
       ]
     ]
   ],
