@@ -56,7 +56,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           <h2 className="text-xl font-semibold mb-6 text-gray-900">
             {t("quick_actions")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {shortcuts.map((shortcut) => (
               <Link
                 key={shortcut.href}
