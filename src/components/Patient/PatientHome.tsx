@@ -145,7 +145,7 @@ export const PatientHome = (props: {
               />
             )}
           </div>
-          <div className="sticky top-20 mt-8 h-full lg:basis-1/6">
+          <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
             <section className="mb-4 space-y-2 md:flex">
               <div className="w-full lg:mx-0">
                 <div className="font-semibold text-secondary-900">
@@ -169,7 +169,7 @@ export const PatientHome = (props: {
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
             >
-              <div className="my-1 rounded-sm p-2">
+              <div className="my-1 rounded-sm py-2">
                 <div>
                   <div className="text-xs font-normal leading-5 text-gray-600">
                     {t("last_updated_by")}
@@ -179,7 +179,7 @@ export const PatientHome = (props: {
                     </div>
                   </div>
 
-                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
+                  <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
                       <TooltipProvider delayDuration={1}>
                         <Tooltip>
@@ -207,7 +207,7 @@ export const PatientHome = (props: {
                       {patientData.created_by?.last_name}
                     </div>
                   </div>
-                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
+                  <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
                       <TooltipProvider delayDuration={1}>
                         <Tooltip>
