@@ -55,8 +55,7 @@ const MedicineListItem = ({
   onAdministrationChange,
   isValid,
 }: MedicineListItemProps) => {
-  const medicationDisplay =
-    medicine.medication?.display || t("unnamed_medication");
+  const medicationDisplay = medicine.medication?.display;
 
   return (
     <div className="border-b border-border py-4">
@@ -132,9 +131,6 @@ export function MedicineAdminSheet({
     onSuccess: () => {
       toast.success(t("medication_administration_saved"));
       handleClose();
-    },
-    onError: (error) => {
-      toast.error(error.message || t("something_went_wrong"));
     },
   });
 

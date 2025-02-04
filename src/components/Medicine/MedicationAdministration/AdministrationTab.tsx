@@ -21,7 +21,7 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import routes, { Type } from "@/Utils/request/api";
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -34,21 +34,11 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
 import { MedicineAdminSheet } from "./MedicineAdminSheet";
-import { createMedicationAdministrationRequest } from "./utils";
-
-// Constants
-const TIME_SLOTS = [
-  { label: "12:00 AM - 06:00 AM", start: "00:00", end: "06:00" },
-  { label: "06:00 AM - 12:00 PM", start: "06:00", end: "12:00" },
-  { label: "12:00 PM - 06:00 PM", start: "12:00", end: "18:00" },
-  { label: "06:00 PM - 12:00 AM", start: "18:00", end: "24:00" },
-] as const;
-
-const STATUS_COLORS = {
-  completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  in_progress: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  default: "bg-red-50 text-red-700 border-red-200",
-} as const;
+import {
+  STATUS_COLORS,
+  TIME_SLOTS,
+  createMedicationAdministrationRequest,
+} from "./utils";
 
 const ACTIVE_STATUSES = ["active", "on-hold", "draft", "unknown"] as const;
 const INACTIVE_STATUSES = [
@@ -346,14 +336,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
-  const [endSlotIndex, setEndSlotIndex] = useState(() => {
-    const hour = currentDate.getHours();
-    if (hour < 6) return 0;
-    if (hour < 12) return 1;
-    if (hour < 18) return 2;
-    return 3;
-  });
-
+  const [endSlotIndex, setEndSlotIndex] = useState(
+    Math.floor(currentDate.getHours() / 6),
+  );
   // Calculate visible slots based on end slot
   const visibleSlots = React.useMemo(() => {
     const slots = [];
@@ -508,17 +493,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Mutations
   const { mutate: discontinueMedication } = useMutation({
-    mutationFn: mutate(
-      {
-        method: "POST",
-        path: `/api/v1/patient/${patientId}/medication/request/upsert/`,
-        TRes: Type<MedicationRequestRead[]>(),
-        TBody: Type<{ datapoints: MedicationRequestRead[] }>(),
-      },
-      {
-        pathParams: { patientId },
-      },
-    ),
+    mutationFn: mutate(medicationRequestApi.upsert, {
+      pathParams: { patientId },
+    }),
     onSuccess: () => {
       refetchActive();
       refetchStopped();

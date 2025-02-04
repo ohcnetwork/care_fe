@@ -318,7 +318,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                       new Date(administrationRequest.occurrence_period_start),
                       "PPP",
                     )
-                  : "Pick a date"}
+                  : t("pick_a_date")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -334,6 +334,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   handleDateChange(date.toISOString(), true);
                 }}
                 initialFocus
+                disabled={(date) => {
+                  const now = new Date();
+                  const encounterStart = new Date(medication.authored_on);
+                  return date < encounterStart || date > now;
+                }}
               />
             </PopoverContent>
           </Popover>
@@ -374,7 +379,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                       new Date(administrationRequest.occurrence_period_end),
                       "PPP",
                     )
-                  : "Pick a date"}
+                  : t("pick_a_date")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -390,6 +395,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   handleDateChange(date.toISOString(), false);
                 }}
                 initialFocus
+                disabled={(date) => {
+                  const now = new Date();
+                  const encounterStart = new Date(medication.authored_on);
+                  return date < encounterStart || date > now;
+                }}
               />
             </PopoverContent>
           </Popover>

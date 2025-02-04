@@ -60,9 +60,6 @@ export const MedicineAdminDialog = ({
       onOpenChange(false);
       toast.success(t("medication_administration_saved"));
     },
-    onError: (error) => {
-      toast.error(error.message || t("something_went_wrong"));
-    },
   });
 
   const handleSubmit = () => {
