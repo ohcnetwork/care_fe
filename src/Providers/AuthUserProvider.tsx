@@ -9,7 +9,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
+import routes, { JwtTokenObtainPair } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
@@ -50,17 +50,16 @@ export default function AuthUserProvider({
       body: { refresh: refreshToken || "" },
     }),
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken,
+    enabled: !!refreshToken && !!user, // Disable query if user is undefined
   });
 
   useEffect(() => {
-    if (!user) {
-      return;
-    }
     if (refreshTokenError) {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
+      return;
     }
+
     if (refreshTokenData) {
       localStorage.setItem(
         LocalStorageKeys.accessToken,
@@ -71,32 +70,21 @@ export default function AuthUserProvider({
         refreshTokenData.refresh,
       );
     }
-  }, [user]);
+  }, [refreshTokenData, refreshTokenError]);
 
-  const { mutateAsync: signInMutate } = useMutation({
+  const { mutateAsync: signInData, isPending: isSigningIn } = useMutation({
     mutationFn: mutate(routes.login),
-  });
+    onSuccess: (data: JwtTokenObtainPair) => {
+      setAccessToken(data.access);
+      localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+      localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
-  const signIn = useCallback(
-    async (creds: { username: string; password: string }) => {
-      const data = await signInMutate(creds);
-
-      if (data?.access && data?.refresh) {
-        setAccessToken(data.access);
-        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-
-        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
-        if (location.pathname === "/" || location.pathname === "/login") {
-          navigate(getRedirectOr("/"));
-        }
+      if (location.pathname === "/" || location.pathname === "/login") {
+        navigate(getRedirectOr("/"));
       }
-
-      return data;
     },
-    [queryClient],
-  );
+  });
 
   const patientLogin = (tokenData: TokenData, redirectUrl: string) => {
     setPatientToken(tokenData);
@@ -159,8 +147,9 @@ export default function AuthUserProvider({
   return (
     <AuthUserContext.Provider
       value={{
-        signIn,
+        signIn: (creds) => signInData(creds),
         signOut,
+        isSigningIn,
         user,
         patientLogin,
         patientToken,

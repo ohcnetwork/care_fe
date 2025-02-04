@@ -70,7 +70,7 @@ interface LoginProps {
 }
 
 const Login = (props: LoginProps) => {
-  const { signIn, patientLogin } = useAuthContext();
+  const { signIn, patientLogin, isSigningIn } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
@@ -296,8 +296,7 @@ const Login = (props: LoginProps) => {
   };
 
   // Loading state derived from mutations
-  const isLoading =
-    staffLoginMutation.isPending || sendOtpPending || verifyOtpPending;
+  const isLoading = isSigningIn || sendOtpPending || verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
