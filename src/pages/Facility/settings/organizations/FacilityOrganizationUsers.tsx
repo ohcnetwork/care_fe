@@ -90,7 +90,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {users?.results?.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-6 text-center text-gray-500">
@@ -115,7 +115,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                             {userRole.user.first_name} {userRole.user.last_name}
                           </h1>
                           <span className="text-sm text-gray-500">
-                            <span className="mr-2">
+                            <span className="mr-2 break-words">
                               {userRole.user.username}
                             </span>
                             <UserStatusIndicator user={userRole.user} />

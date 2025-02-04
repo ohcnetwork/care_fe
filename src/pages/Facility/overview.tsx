@@ -56,15 +56,15 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           <h2 className="text-xl font-semibold mb-6 text-gray-900">
             {t("quick_actions")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {shortcuts.map((shortcut) => (
               <Link
                 key={shortcut.href}
                 href={shortcut.href}
-                className="block transition-all duration-200 hover:scale-102 hover:shadow-md"
+                className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
               >
-                <Card className="border-0 shadow-sm hover:bg-gray-50">
-                  <CardHeader className="flex flex-row items-center gap-4">
+                <Card className="border-0 shadow-sm hover:bg-gray-50 h-full">
+                  <CardHeader className="h-full flex flex-row items-center gap-4">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <shortcut.icon className="h-6 w-6 text-primary" />
                     </div>
