@@ -109,6 +109,7 @@ export const PatientHome = (props: {
             {tabs.map((tab) => (
               <Link
                 key={tab.route}
+                data-cy={`tab-${tab.route}`}
                 href={
                   facilityId
                     ? `/facility/${facilityId}/patient/${id}/${tab.route}`
