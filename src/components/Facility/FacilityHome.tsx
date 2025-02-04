@@ -107,11 +107,30 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }),
   });
   const { mutate: deleteFacility } = useMutation({
-    mutationFn: () =>
-      mutate(routes.deleteFacility, { pathParams: { id: facilityId } })(null),
+    mutationFn: mutate(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+    }),
     onSuccess: () => {
-      toast.success(t("deleted_successfully", { name: facilityData?.name }));
+      toast.success(
+        t("entity_deleted_successfully", { name: facilityData?.name }),
+      );
       navigate("/facility");
+    },
+  });
+
+  const { mutate: mutateAvatarDelete } = useMutation({
+    mutationFn: mutate(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facilityId },
+    }),
+    onSuccess: () => {
+      toast.success(t("cover_image_deleted"));
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      setEditCoverImage(false);
+    },
+    onError: (error) => {
+      throw error;
     },
   });
 
@@ -147,18 +166,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-
   const handleCoverImageDelete = async (onError: () => void) => {
     try {
-      await mutate(routes.deleteFacilityCoverImage, {
-        pathParams: { id: facilityId },
-      })(null);
-
-      toast.success(t("cover_image_deleted"));
-      queryClient.invalidateQueries({
-        queryKey: ["facility", facilityId],
-      });
-      setEditCoverImage(false);
+      mutateAvatarDelete();
     } catch {
       onError();
     }

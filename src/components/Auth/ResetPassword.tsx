@@ -96,8 +96,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
 
   const { isError } = useQuery({
     queryKey: ["checkResetToken", { token: props.token }],
-    queryFn: () =>
-      query(routes.checkResetToken, { body: { token: props.token } }),
+    queryFn: query(routes.checkResetToken, { body: { token: props.token } }),
     enabled: !!props.token,
   });
 

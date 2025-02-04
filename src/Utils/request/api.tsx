@@ -214,6 +214,7 @@ const routes = {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   getFacilityUsers: {
@@ -236,6 +237,7 @@ const routes = {
     path: "/api/v1/facility/{id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Patient

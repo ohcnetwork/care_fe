@@ -264,7 +264,7 @@
   "delete_facility": "ಸೌಲಭ್ಯವನ್ನು ಅಳಿಸಿ",
   "delete_item": "{{name}}ಅಳಿಸಿ",
   "delete_record": "ದಾಖಲೆ ಅಳಿಸಿ",
-  "deleted_successfully": "{{name}} ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ",
+  "entity_deleted_successfully": "{{name}} ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ",
   "describe_why_the_asset_is_not_working": "ಸ್ವತ್ತು ಏಕೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿಲ್ಲ ಎಂಬುದನ್ನು ವಿವರಿಸಿ",
   "description": "ವಿವರಣೆ",
   "details_about_the_equipment": "ಸಲಕರಣೆಗಳ ಬಗ್ಗೆ ವಿವರಗಳು",

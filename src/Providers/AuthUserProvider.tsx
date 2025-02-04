@@ -42,13 +42,15 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
-  const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
+  const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const { data: refreshTokenData, error: refreshTokenError } = useQuery({
     queryKey: ["user-refresh-token"],
-    queryFn: query(routes.token_refresh, { body: { refresh: refresh || "" } }),
+    queryFn: query(routes.token_refresh, {
+      body: { refresh: refreshToken || "" },
+    }),
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refresh,
+    enabled: !!refreshToken,
   });
   if (refreshTokenError) {
     localStorage.removeItem(LocalStorageKeys.accessToken);
