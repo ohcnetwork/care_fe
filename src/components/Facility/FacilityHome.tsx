@@ -222,6 +222,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <Button variant="link">
                   <Avatar
                     name={facilityData.name}
+                    alt={`${facilityData.name} avatar`}
                     className="h-20 w-20 rounded-md border-4 border-white shadow-lg"
                   />
                 </Button>
