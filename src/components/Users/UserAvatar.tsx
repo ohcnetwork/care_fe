@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -26,6 +26,20 @@ export default function UserAvatar({ username }: { username: string }) {
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
+
+  const { mutate: mutateAvatarDelete } = useMutation({
+    mutationFn: mutate(routes.deleteProfilePicture, {
+      pathParams: { username },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      toast.success(t("profile_picture_deleted"));
+      setEditAvatar(false);
+    },
+    onError: (error) => {
+      throw error;
+    },
+  });
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["getUserDetails", username],
@@ -67,13 +81,7 @@ export default function UserAvatar({ username }: { username: string }) {
 
   const handleAvatarDelete = async (onError: () => void) => {
     try {
-      await mutate(routes.deleteProfilePicture, {
-        pathParams: { username },
-      })(null);
-
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      toast.success(t("profile_picture_deleted"));
-      setEditAvatar(false);
+      mutateAvatarDelete();
     } catch {
       onError();
     }

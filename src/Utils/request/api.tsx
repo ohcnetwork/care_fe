@@ -167,6 +167,7 @@ const routes = {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
     TRes: Type<UserModel>(),
+    TBody: Type<void>(),
   },
 
   deleteUser: {
