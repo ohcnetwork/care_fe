@@ -52,20 +52,24 @@ export default function AuthUserProvider({
     refetchInterval: careConfig.auth.tokenRefreshInterval,
     enabled: !!refreshToken,
   });
-  if (refreshTokenError) {
-    localStorage.removeItem(LocalStorageKeys.accessToken);
-    localStorage.removeItem(LocalStorageKeys.refreshToken);
-  }
-  if (refreshTokenData) {
-    localStorage.setItem(LocalStorageKeys.accessToken, refreshTokenData.access);
-    localStorage.setItem(
-      LocalStorageKeys.refreshToken,
-      refreshTokenData.refresh,
-    );
-  }
+
   useEffect(() => {
     if (!user) {
       return;
+    }
+    if (refreshTokenError) {
+      localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
+    }
+    if (refreshTokenData) {
+      localStorage.setItem(
+        LocalStorageKeys.accessToken,
+        refreshTokenData.access,
+      );
+      localStorage.setItem(
+        LocalStorageKeys.refreshToken,
+        refreshTokenData.refresh,
+      );
     }
   }, [user]);
 
