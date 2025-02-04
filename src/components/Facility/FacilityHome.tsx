@@ -1,9 +1,10 @@
 import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital, MapPin } from "lucide-react";
+import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -16,7 +17,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import ContactLink from "@/components/Common/ContactLink";
+// import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
@@ -62,17 +63,26 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
     currentParent = currentParent.parent;
   }
 
+  const formatValue = (name: string, label: string) => {
+    return name.endsWith(label)
+      ? name.replace(new RegExp(`${label}$`), "").trim()
+      : name;
+  };
+
   const parentDetails = orgParents.map((org) => {
+    const label = getOrgLabel(org.org_type, org.metadata);
     return {
-      label: getOrgLabel(org.org_type, org.metadata),
-      value: org.name,
+      label,
+      value: formatValue(org.name, label),
     };
   });
 
+  const geoOrgLabel = getOrgLabel(geoOrg.org_type, geoOrg.metadata);
+
   return [
     {
-      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
-      value: geoOrg.name,
+      label: geoOrgLabel,
+      value: formatValue(geoOrg.name, geoOrgLabel),
     },
   ].concat(parentDetails);
 };
@@ -263,41 +273,58 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   }
                 />
               </div>
-              <Card>
-                <CardContent>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-gray-500" />
-                      <div>
-                        {facilityData?.geo_organization && (
-                          <div className="mt-2 text-sm">
-                            {renderGeoOrganizations(
-                              facilityData?.geo_organization,
+              <div className="flex gap-3">
+                <Card className="basis-1/2">
+                  <CardContent>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col m-2">
+                        <span className="font-medium">{t("address")}</span>
+                        <div className="text-gray-700">
+                          {facilityData.geo_organization &&
+                            renderGeoOrganizations(
+                              facilityData.geo_organization,
                             ).map((org, index) => (
-                              <div key={index}>
-                                <span className="text-gray-500">
-                                  {org.value}
-                                  {org.label && ` (${org.label})`}
-                                </span>
-                              </div>
+                              <span key={index}>{org.value} </span>
                             ))}
-                          </div>
-                        )}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="mt-1">
-                          <ContactLink
-                            tel={String(facilityData?.phone_number)}
-                          />
+                      <div className="flex gap-5">
+                        <div className="flex flex-col m-2">
+                          <span className="font-medium">
+                            {t("mobile_number")}
+                          </span>
+                          <div>
+                            {formatPhoneNumberIntl(facilityData?.phone_number)}
+                          </div>
+                        </div>
+                        <div className="flex flex-col m-2">
+                          <span className="font-medium">
+                            {t("location_details")}
+                          </span>
+                          <div>{/* Add Location Link Here */}</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                <Card className="basis-1/2">
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-2">
+                      {facilityData.geo_organization &&
+                        renderGeoOrganizations(
+                          facilityData.geo_organization,
+                        ).map((item, index) => (
+                          <div key={index} className="flex flex-col">
+                            <span className="font-semibold text-gray-600">
+                              {item.label}
+                            </span>
+                            <span className="text-gray-800">{item.value}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {facilityData?.features?.some((feature: number) =>
                 FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
