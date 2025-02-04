@@ -43,7 +43,7 @@
     "cypress:install": "cross-env NODE_ENV=development cypress install",
     "prepare": "husky",
     "lint": "eslint ./src",
-    "unimported": "npx unimported",
+    "unimported": "unimported",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./cypress --write",
     "sort-locales": "node ./scripts/sort-locales.js"
@@ -199,6 +199,7 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
       "eslint --fix",
+      "unimported",
       "git update-index --again"
     ],
     "public/locale/*.json": [
