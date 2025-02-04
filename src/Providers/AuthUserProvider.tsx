@@ -11,7 +11,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import query, { callApi } from "@/Utils/request/query";
+import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
@@ -42,16 +42,29 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
+  const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
+
+  const { data: refreshTokenData, error: refreshTokenError } = useQuery({
+    queryKey: ["currentUser", accessToken],
+    queryFn: query(routes.token_refresh, { body: { refresh: refresh || "" } }),
+    refetchInterval: careConfig.auth.tokenRefreshInterval,
+    enabled: !!refresh,
+  });
+  if (refreshTokenError) {
+    localStorage.removeItem(LocalStorageKeys.accessToken);
+    localStorage.removeItem(LocalStorageKeys.refreshToken);
+  }
+  if (refreshTokenData) {
+    localStorage.setItem(LocalStorageKeys.accessToken, refreshTokenData.access);
+    localStorage.setItem(
+      LocalStorageKeys.refreshToken,
+      refreshTokenData.refresh,
+    );
+  }
   useEffect(() => {
     if (!user) {
       return;
     }
-
-    updateRefreshToken(true);
-    setInterval(
-      () => updateRefreshToken(),
-      careConfig.auth.tokenRefreshInterval,
-    );
   }, [user]);
 
   const { mutateAsync: signInMutate } = useMutation({
@@ -151,31 +164,6 @@ export default function AuthUserProvider({
     </AuthUserContext.Provider>
   );
 }
-
-const updateRefreshToken = async (silent = false) => {
-  const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
-
-  if (!refresh) {
-    return;
-  }
-
-  try {
-    const data = await callApi(routes.token_refresh, {
-      body: { refresh },
-      silent,
-    });
-
-    if (!data) {
-      throw new Error("Token refresh failed");
-    }
-
-    localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-    localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-  } catch {
-    localStorage.removeItem(LocalStorageKeys.accessToken);
-    localStorage.removeItem(LocalStorageKeys.refreshToken);
-  }
-};
 
 const getRedirectURL = () => {
   return new URLSearchParams(window.location.search).get("redirect");

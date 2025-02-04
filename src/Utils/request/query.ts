@@ -5,8 +5,6 @@ import { ApiCallOptions, ApiRoute, HTTPError } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-export type ApiResponse<TData> = TData;
-
 export async function callApi<Route extends ApiRoute<unknown, unknown>>(
   { path, method, noAuth }: Route,
   options?: ApiCallOptions<Route>,
