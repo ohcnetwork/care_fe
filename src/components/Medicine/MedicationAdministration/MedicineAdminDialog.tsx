@@ -42,6 +42,7 @@ export const MedicineAdminDialog = ({
 }: Props) => {
   const [administrationRequest, setAdministrationRequest] =
     React.useState<MedicationAdministrationRequest>(initialRequest);
+  const [isFormValid, setIsFormValid] = React.useState(true);
 
   // Update state when initialRequest changes
   React.useEffect(() => {
@@ -66,7 +67,7 @@ export const MedicineAdminDialog = ({
 
   const handleSubmit = () => {
     upsertAdministration({
-      datapoints: [administrationRequest], // Send as single-item array for upsert
+      datapoints: [administrationRequest],
     });
   };
 
@@ -85,12 +86,13 @@ export const MedicineAdminDialog = ({
 
         <div className="py-4">
           <MedicineAdminForm
+            formId="single"
             medication={medication}
             lastAdministeredDate={lastAdministeredDate}
             lastAdministeredBy={lastAdministeredBy}
             administrationRequest={administrationRequest}
             onChange={setAdministrationRequest}
-            formId="single"
+            isValid={setIsFormValid}
           />
         </div>
 
@@ -98,7 +100,7 @@ export const MedicineAdminDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={isPending}>
+          <Button onClick={handleSubmit} disabled={isPending || !isFormValid}>
             {isPending
               ? t("saving")
               : administrationRequest.id

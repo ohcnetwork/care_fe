@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Search } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ interface MedicineListItemProps {
   lastAdministeredDate?: string;
   lastAdministeredBy?: string;
   onAdministrationChange: (request: MedicationAdministrationRequest) => void;
+  isValid: (valid: boolean) => void;
 }
 
 const MedicineListItem = ({
@@ -52,6 +53,7 @@ const MedicineListItem = ({
   lastAdministeredDate,
   lastAdministeredBy,
   onAdministrationChange,
+  isValid,
 }: MedicineListItemProps) => {
   const medicationDisplay =
     medicine.medication?.display || t("unnamed_medication");
@@ -91,6 +93,7 @@ const MedicineListItem = ({
               formId={medicine.id}
               administrationRequest={administrationRequest}
               onChange={onAdministrationChange}
+              isValid={isValid}
             />
           )}
         </div>
@@ -107,13 +110,16 @@ export function MedicineAdminSheet({
   patientId,
   encounterId,
 }: Props) {
-  const [search, setSearch] = useState("");
   const [selectedMedicines, setSelectedMedicines] = useState<Set<string>>(
     new Set(),
   );
   const [administrationRequests, setAdministrationRequests] = useState<
     Record<string, MedicationAdministrationRequest>
   >({});
+  const [formValidation, setFormValidation] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [search, setSearch] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   const { mutate: upsertAdministrations, isPending } = useMutation({
@@ -195,6 +201,22 @@ export function MedicineAdminSheet({
     [],
   );
 
+  const handleFormValidation = useCallback(
+    (medicineId: string, isValid: boolean) => {
+      setFormValidation((prev) => ({
+        ...prev,
+        [medicineId]: isValid,
+      }));
+    },
+    [],
+  );
+
+  const isAllFormsValid = useMemo(
+    () =>
+      Array.from(selectedMedicines).every((id) => formValidation[id] !== false),
+    [selectedMedicines, formValidation],
+  );
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -234,6 +256,7 @@ export function MedicineAdminSheet({
                   onAdministrationChange={(request) =>
                     handleAdministrationChange(medicine.id, request)
                   }
+                  isValid={(valid) => handleFormValidation(medicine.id, valid)}
                 />
               ))}
             </div>
@@ -247,7 +270,9 @@ export function MedicineAdminSheet({
               <Button
                 type="submit"
                 className="bg-[#006D4C] hover:bg-[#006D4C]/90"
-                disabled={selectedMedicines.size === 0 || isPending}
+                disabled={
+                  selectedMedicines.size === 0 || isPending || !isAllFormsValid
+                }
                 onClick={(e) => {
                   e.preventDefault();
                   handleSubmit(e as any);

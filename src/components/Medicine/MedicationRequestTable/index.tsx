@@ -186,20 +186,22 @@ export default function MedicationRequestTable({
                     <div className="p-2">
                       <MedicationsTable medications={displayedMedications} />
                     </div>
-                    <div
-                      className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                      onClick={() => setShowStopped(!showStopped)}
-                    >
-                      <CareIcon
-                        icon={showStopped ? "l-eye-slash" : "l-eye"}
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm underline">
-                        {showStopped ? t("hide") : t("show")}{" "}
-                        {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                        {t("prescriptions")}
-                      </span>
-                    </div>
+                    {!!stoppedMedications?.results?.length && (
+                      <div
+                        className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                        onClick={() => setShowStopped(!showStopped)}
+                      >
+                        <CareIcon
+                          icon={showStopped ? "l-eye-slash" : "l-eye"}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm underline">
+                          {showStopped ? t("hide") : t("show")}{" "}
+                          {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                          {t("prescriptions")}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>

@@ -2,7 +2,7 @@
 
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ interface MedicineAdminFormProps {
   administrationRequest: MedicationAdministrationRequest;
   onChange: (request: MedicationAdministrationRequest) => void;
   formId: string;
+  isValid?: (valid: boolean) => void;
 }
 
 export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
@@ -53,6 +54,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   administrationRequest,
   onChange,
   formId,
+  isValid,
 }) => {
   const [isPastTime, setIsPastTime] = useState(
     administrationRequest.occurrence_period_start !==
@@ -79,6 +81,33 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     return date < startTime ? t("end_time_before_start_error") : "";
   };
 
+  // Validate and notify parent whenever times change
+  useEffect(() => {
+    if (
+      !administrationRequest.occurrence_period_start ||
+      !administrationRequest.occurrence_period_end
+    ) {
+      isValid?.(false);
+      return;
+    }
+
+    const startDate = new Date(administrationRequest.occurrence_period_start);
+    const endDate = new Date(administrationRequest.occurrence_period_end);
+
+    const startError = validateDateTime(startDate, true);
+    const endError = validateDateTime(endDate, false);
+
+    setStartTimeError(startError);
+    setEndTimeError(endError);
+
+    isValid?.(!startError && !endError);
+  }, [
+    administrationRequest.occurrence_period_start,
+    administrationRequest.occurrence_period_end,
+    isValid,
+    validateDateTime,
+  ]);
+
   const handleDateChange = (newTime: string, isStartTime: boolean) => {
     const date = new Date(newTime);
 
@@ -92,15 +121,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       date.setHours(existingDate.getHours());
       date.setMinutes(existingDate.getMinutes());
     }
-
-    const error = validateDateTime(date, isStartTime);
-
-    if (error) {
-      isStartTime ? setStartTimeError(error) : setEndTimeError(error);
-      return;
-    }
-
-    isStartTime ? setStartTimeError("") : setEndTimeError("");
 
     onChange({
       ...administrationRequest,
@@ -147,14 +167,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
     currentDate.setHours(hours);
     currentDate.setMinutes(minutes);
-
-    const error = validateDateTime(currentDate, isStartTime);
-    if (error) {
-      isStartTime ? setStartTimeError(error) : setEndTimeError(error);
-      return;
-    }
-
-    isStartTime ? setStartTimeError("") : setEndTimeError("");
 
     onChange({
       ...administrationRequest,
