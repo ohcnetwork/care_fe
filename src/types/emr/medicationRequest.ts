@@ -42,16 +42,23 @@ export const UCUM_TIME_UNITS = [
   "a",
 ] as const;
 
-export const MEDICATION_REQUEST_STATUS = [
+export const ACTIVE_MEDICATION_STATUSES = [
   "active",
   "on-hold",
+  "draft",
+  "unknown",
+] as const;
+
+export const INACTIVE_MEDICATION_STATUSES = [
   "ended",
-  "stopped",
   "completed",
   "cancelled",
   "entered_in_error",
-  "draft",
-  "unknown",
+] as const;
+
+export const MEDICATION_REQUEST_STATUS = [
+  ...ACTIVE_MEDICATION_STATUSES,
+  ...INACTIVE_MEDICATION_STATUSES,
 ] as const;
 
 export type MedicationRequestStatus =

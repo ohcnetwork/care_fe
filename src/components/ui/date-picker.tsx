@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { t } from "i18next";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
                 <span className="hidden sm:block">{format(date, "PPP")}</span>
               </>
             ) : (
-              <span>Pick a date</span>
+              <span>{t("pick_a_date")}</span>
             )}
           </span>
         </Button>
