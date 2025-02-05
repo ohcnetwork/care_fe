@@ -274,7 +274,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   }
                 />
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent>
                     <div className="flex flex-col gap-4 m-2">
@@ -283,13 +283,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           {t("address")}
                         </span>
                         <div className="text-gray-700">
-                          {facilityData.geo_organization &&
+                          {/* {facilityData.geo_organization &&
                             renderGeoOrganizations(
                               facilityData.geo_organization,
                             ).map((org, index) => (
                               <span key={index}>{org.value} </span>
-                            ))}
-                          {facilityData.pincode}
+                            ))} */}
+                          {facilityData.address}
                         </div>
                       </div>
                       <div className="flex gap-5">
