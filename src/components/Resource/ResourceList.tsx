@@ -52,7 +52,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-gray-500 mb-4">
         {t("adjust_resource_filters")}
       </p>
     </Card>
