@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, isBefore, isSameDay } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -27,6 +26,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { TokenSlotButton } from "@/pages/Appointments/components/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
@@ -238,12 +238,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                         ? `Dr. ${userData.first_name} ${userData.last_name}`
                         : `${userData.first_name} ${userData.last_name}`}
                     </h3>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-gray-500 truncate">
                       {userData.user_type}
                     </p>
 
                     {/* <p className="text-xs mt-4">Education: </p>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-gray-500 truncate">
                       {userData.qualification}
                     </p> */}
                   </div>
@@ -251,7 +251,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
                 <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-gray-500">
                       {facilityResponse?.name}
                     </div>
                   </div>
@@ -293,62 +293,18 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                           {availability.name}
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {slots.map((slot) => {
-                            const percentage =
-                              slot.allocated / availability.tokens_per_slot;
-                            const isPastSlot =
-                              isSameDay(selectedDate, new Date()) &&
-                              isBefore(slot.start_datetime, new Date());
-
-                            return (
-                              <Button
-                                key={slot.id}
-                                size="lg"
-                                variant={
-                                  selectedSlot?.id === slot.id
-                                    ? "primary"
-                                    : "outline"
-                                }
-                                onClick={() => {
-                                  if (selectedSlot?.id === slot.id) {
-                                    setSelectedSlot(undefined);
-                                  } else {
-                                    setSelectedSlot({
-                                      ...slot,
-                                      availability: availability,
-                                    });
-                                  }
-                                }}
-                                disabled={
-                                  slot.allocated ===
-                                    availability.tokens_per_slot || isPastSlot
-                                }
-                                className="flex flex-col items-center group gap-0"
-                              >
-                                <span className="font-semibold">
-                                  {format(slot.start_datetime, "HH:mm")}
-                                </span>
-                                <span
-                                  className={cn(
-                                    "text-xs group-hover:text-inherit",
-                                    percentage >= 1
-                                      ? "text-gray-400"
-                                      : percentage >= 0.8
-                                        ? "text-red-600"
-                                        : percentage >= 0.6
-                                          ? "text-yellow-600"
-                                          : "text-green-600",
-                                    selectedSlot?.id === slot.id &&
-                                      "text-white",
-                                  )}
-                                >
-                                  {availability.tokens_per_slot -
-                                    slot.allocated}{" "}
-                                  left
-                                </span>
-                              </Button>
-                            );
-                          })}
+                          {slots.map((slot) => (
+                            <TokenSlotButton
+                              key={slot.id}
+                              slot={slot}
+                              availability={availability}
+                              selectedSlotId={selectedSlot?.id}
+                              onClick={() =>
+                                setSelectedSlot({ ...slot, availability })
+                              }
+                              selectedDate={selectedDate}
+                            />
+                          ))}
                         </div>
                       </div>
                     ),

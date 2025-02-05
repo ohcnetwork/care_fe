@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { t } from "i18next";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
 
@@ -37,7 +38,7 @@ export function DateRangePicker({
             variant={"outline"}
             className={cn(
               "justify-center text-left font-normal",
-              !date && "text-muted-foreground",
+              !date && "text-gray-500",
             )}
           >
             <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
@@ -51,7 +52,7 @@ export function DateRangePicker({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{t("pick_a_date")}</span>
             )}
           </Button>
         </PopoverTrigger>

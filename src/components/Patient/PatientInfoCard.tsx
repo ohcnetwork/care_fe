@@ -39,7 +39,7 @@ import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
-import ManageEncounterOrganizations from "./ManageEncounterOrganizations";
+import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
 
 export interface PatientInfoCardProps {
   patient: Patient;
@@ -101,7 +101,8 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 {patient.name}
                 <div className="mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
               </div>
             </div>
@@ -114,12 +115,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 {patient.name}
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
-                  {formatPatientAge(patient, true)} • {patient.gender}
+                  {formatPatientAge(patient, true)} •{" "}
+                  {t(`GENDER__${patient.gender}`)}
                 </div>
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-gray-500 font-medium">
                     Start Date
                   </span>
                   <span className="text-xs">
@@ -129,7 +131,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-gray-500 font-medium">
                     End Date
                   </span>
                   <span className="text-xs">
@@ -140,7 +142,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 </div>
                 {props.encounter.external_identifier && (
                   <div className="flex flex-col space-y-1 col-span-1">
-                    <span className="text-xs text-muted-foreground font-medium">
+                    <span className="text-xs text-gray-500 font-medium">
                       Hospital Identifier
                     </span>
                     <span className="text-xs">
@@ -186,7 +188,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -227,7 +229,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               key={index}
                               className="flex items-center gap-2 text-sm"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-gray-500">
                                 {formatDateTime(history.moved_at)}
                               </span>
                               <span className="font-medium">
@@ -269,8 +271,10 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  <ManageEncounterOrganizations
-                    encounter={encounter}
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
                     facilityId={encounter.facility.id}
                     trigger={
                       <div className="flex flex-wrap gap-2">

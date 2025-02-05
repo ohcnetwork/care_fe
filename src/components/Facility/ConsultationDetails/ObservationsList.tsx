@@ -7,6 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card } from "@/components/ui/card";
 
+import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -58,9 +60,7 @@ export default function ObservationsList(props: Props) {
   if (isLoading) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-muted-foreground">
-          {t("loading")}
-        </div>
+        <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
       </Card>
     );
   }
@@ -70,7 +70,7 @@ export default function ObservationsList(props: Props) {
   if (observations.length === 0) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-muted-foreground">
+        <div className="text-lg font-medium text-gray-500">
           {t("no_observations")}
         </div>
       </Card>
@@ -83,7 +83,7 @@ export default function ObservationsList(props: Props) {
         {observations.map((item: Observation) => (
           <Card key={item.id} className="flex items-center justify-between p-4">
             <div>
-              <div className="text-xs flex items-center gap-1 text-muted-foreground">
+              <div className="text-xs flex items-center gap-1 text-gray-500">
                 <CareIcon icon="l-calender" />
                 <span>{formatDateTime(item.effective_datetime)}</span>
               </div>
@@ -98,21 +98,19 @@ export default function ObservationsList(props: Props) {
               )}
               {item.value.value && (
                 <div className="mt-1 font-medium whitespace-pre-wrap">
-                  {item.value.value}
+                  {formatValue(item.value.value, item.value_type)}
                 </div>
               )}
               {item.note && (
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {item.note}
-                </div>
+                <div className="mt-1 text-sm text-gray-500">{item.note}</div>
               )}
             </div>
           </Card>
         ))}
         {hasNextPage && (
           <div ref={ref} className="flex justify-center p-4">
-            <div className="text-sm text-muted-foreground">
-              {isFetchingNextPage ? t("loading_more") : t("load_more")}
+            <div className="text-sm text-gray-500">
+              {isFetchingNextPage ? t("loading") : t("load_more")}
             </div>
           </div>
         )}

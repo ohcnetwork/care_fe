@@ -117,7 +117,7 @@ export function AppSidebar({
 
       <SidebarContent>
         {facilitySidebar && !selectedOrganization && (
-          <FacilityNav selectedFacility={selectedFacility} user={user} />
+          <FacilityNav selectedFacility={selectedFacility} />
         )}
         {selectedOrganization && (
           <OrgNav organizations={user?.organizations || []} />

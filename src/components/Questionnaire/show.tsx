@@ -293,7 +293,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="preview" className="max-w-3xl mx-auto">
+        <TabsContent value="preview" className="mx-auto">
           <Card>
             <CardHeader>
               <CardTitle>{questionnaire.title}</CardTitle>
