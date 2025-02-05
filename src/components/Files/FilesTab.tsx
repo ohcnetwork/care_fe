@@ -157,6 +157,7 @@ export const FilesTab = (props: FilesTabProps) => {
     onUpload: () => {
       refetch();
     },
+    compress: false,
   });
 
   useEffect(() => {

@@ -32,6 +32,7 @@ export type FileUploadOptions = {
   onUpload?: (file: FileUploadModel) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
+  compress?: boolean;
 } & (
   | {
       allowedExtensions?: string[];
@@ -137,20 +138,22 @@ export default function useFileUpload(
     }
     const selectedFiles = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...selectedFiles]);
-
-    selectedFiles.forEach((file) => {
-      const ext: string = file.name.split(".")[1];
-      if (ExtImage.includes(ext)) {
-        const options = {
-          alwaysKeepResolution: true,
-        };
-        imageCompression(file, options).then((compressedFile: File) => {
-          setFiles((prev) =>
-            prev.map((f) => (f.name === file.name ? compressedFile : f)),
-          );
-        });
-      }
-    });
+    if (options.compress) {
+      selectedFiles.forEach((file) => {
+        const ext: string = file.name.split(".")[1];
+        if (ExtImage.includes(ext)) {
+          const options = {
+            initialQuality: 0.6,
+            alwaysKeepResolution: true,
+          };
+          imageCompression(file, options).then((compressedFile: File) => {
+            setFiles((prev) =>
+              prev.map((f) => (f.name === file.name ? compressedFile : f)),
+            );
+          });
+        }
+      });
+    }
   };
 
   useEffect(() => {
