@@ -91,6 +91,20 @@ export default function AuthUserProvider({
   };
 
   const signOut = useCallback(async () => {
+    const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+    const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+
+    if (accessToken && refreshToken) {
+      try {
+        await mutate({
+          ...routes.logout,
+          TRes: Type<Record<string, never>>(),
+        })({ access: accessToken, refresh: refreshToken });
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
+    }
+
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
