@@ -3,7 +3,6 @@ import { useNavigate } from "raviger";
 
 import { Badge } from "@/components/ui/badge";
 
-// import { Button } from "@/components/ui/button";
 import Loading from "@/components/Common/Loading";
 
 import query from "@/Utils/request/query";
@@ -30,9 +29,6 @@ export function QuestionnaireList() {
           <h1 className="text-2xl font-bold">Questionnaires</h1>
           <p className="text-gray-600">Manage and view questionnaires</p>
         </div>
-        {/* <Button onClick={() => navigate("/questionnaire/create")}>
-          Create New
-        </Button> */}
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow">
