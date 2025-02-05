@@ -25,12 +25,18 @@ jobs:
 
       - name: Determine PR Origin
         id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "is_forked=${{ github.event.pull_request.head.repo.full_name != github.repository }}" >> $GITHUB_OUTPUT
+          else
+            echo "is_forked=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.11.0"
+          cache: "npm"
 
       - name: Install dependencies 📦
         run: npm ci
@@ -38,8 +44,8 @@ jobs:
       - name: Build ⚙️
         run: npm run build
 
-      - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
+      - name: Cypress run (non-forked) 🥬
+        if: ${{ steps.pr_origin.outputs.is_forked != 'true' }}
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -50,14 +56,14 @@ jobs:
           record: true
           parallel: true
         env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
-      - name: Cypress run for Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'true'
+      - name: Cypress run (forked) 🥬
+        if: ${{ steps.pr_origin.outputs.is_forked == 'true' }}
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -65,7 +71,7 @@ jobs:
           start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
-          record: true
+          record: false
           parallel: true
         env:
           CYPRESS_SPLIT_TESTS: "true"
