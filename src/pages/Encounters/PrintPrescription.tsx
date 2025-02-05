@@ -40,7 +40,7 @@ export const PrintPrescription = (props: {
 
   if (!medications?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );
@@ -144,7 +144,7 @@ export const PrintPrescription = (props: {
           </div>
 
           {/* Footer */}
-          <div className="mt-8 space-y-1 pt-2 text-[10px] text-muted-foreground flex justify-between">
+          <div className="mt-8 space-y-1 pt-2 text-[10px] text-gray-500 flex justify-between">
             <p>
               {t("generated_on")} {format(new Date(), "PPP 'at' p")}
             </p>

@@ -32,8 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { FacilityModel } from "@/components/Facility/models";
 
-import { useStateAndDistrictFromPincode } from "@/hooks/useStateAndDistrictFromPincode";
-
 import { FACILITY_FEATURE_TYPES, FACILITY_TYPES } from "@/common/constants";
 import { validatePincode } from "@/common/validation";
 
@@ -44,7 +42,6 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
-import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
@@ -52,22 +49,14 @@ interface FacilityProps {
   onSubmitSuccess?: () => void;
 }
 
-function extractHierarchyLevels(org: Organization | undefined): Organization[] {
-  const levels: Organization[] = [];
-  while (org && org.level_cache >= 0) {
-    levels.unshift(org as Organization);
-    org = org.parent as Organization | undefined;
-  }
-  return levels;
-}
-
-export default function FacilityForm(props: FacilityProps) {
+export default function FacilityForm({
+  facilityId,
+  onSubmitSuccess,
+}: FacilityProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const { facilityId, organizationId, onSubmitSuccess } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
@@ -140,7 +129,11 @@ export default function FacilityForm(props: FacilityProps) {
     data: FacilityFormValues,
   ) => {
     if (facilityId) {
-      updateFacility(data);
+      updateFacility({
+        ...data,
+        latitude: data.latitude ?? 0,
+        longitude: data.longitude ?? 0,
+      });
     } else {
       createFacility(data);
     }
@@ -172,41 +165,6 @@ export default function FacilityForm(props: FacilityProps) {
     }
   };
 
-  const { stateOrg, districtOrg } = useStateAndDistrictFromPincode({
-    pincode: form.watch("pincode")?.toString() || "",
-  });
-
-  const { data: org } = useQuery({
-    queryKey: ["organization", organizationId],
-    queryFn: query(organizationApi.get, {
-      pathParams: { id: organizationId },
-    }),
-    enabled: !!organizationId && !facilityId,
-  });
-
-  useEffect(() => {
-    if (facilityId) return;
-    const orgLevels = extractHierarchyLevels(org);
-    const districtMatch =
-      districtOrg && orgLevels.some((level) => level.name === districtOrg.name);
-    const levels: Organization[] = [];
-    if (districtMatch) return;
-    if (stateOrg) levels.push(stateOrg);
-    if (districtOrg) levels.push(districtOrg);
-    if (!stateOrg && !districtOrg && org) levels.push(org);
-
-    setSelectedLevels(levels);
-
-    if (levels.length == 2) {
-      setShowAutoFilledPincode(true);
-      const timer = setTimeout(() => {
-        setShowAutoFilledPincode(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    return () => setShowAutoFilledPincode(false);
-  }, [stateOrg, districtOrg, organizationId, facilityId]);
-
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
@@ -224,8 +182,12 @@ export default function FacilityForm(props: FacilityProps) {
         )?.id,
         address: facilityData.address,
         phone_number: facilityData.phone_number,
-        latitude: Number(facilityData.latitude),
-        longitude: Number(facilityData.longitude),
+        latitude: facilityData.latitude
+          ? Number(facilityData.latitude)
+          : undefined,
+        longitude: facilityData.longitude
+          ? Number(facilityData.longitude)
+          : undefined,
         is_public: facilityData.is_public,
       });
     }
@@ -367,22 +329,6 @@ export default function FacilityForm(props: FacilityProps) {
                     />
                   </FormControl>
                   <FormMessage />
-                  {showAutoFilledPincode && (
-                    <div
-                      role="status"
-                      aria-live="polite"
-                      className="flex items-center"
-                    >
-                      <CareIcon
-                        icon="l-check-circle"
-                        className="mr-2 text-sm text-green-500"
-                        aria-hidden="true"
-                      />
-                      <span className="text-sm text-primary-500">
-                        {t("pincode_autofill")}
-                      </span>
-                    </div>
-                  )}
                 </FormItem>
               )}
             />
@@ -466,7 +412,10 @@ export default function FacilityForm(props: FacilityProps) {
                       {...field}
                       type="number"
                       onChange={(e) => {
-                        form.setValue("latitude", Number(e.target.value));
+                        form.setValue(
+                          "latitude",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        );
                       }}
                       data-cy="facility-latitude"
                       placeholder="Enter latitude"
@@ -490,7 +439,10 @@ export default function FacilityForm(props: FacilityProps) {
                       {...field}
                       type="number"
                       onChange={(e) => {
-                        form.setValue("longitude", Number(e.target.value));
+                        form.setValue(
+                          "longitude",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        );
                       }}
                       data-cy="facility-longitude"
                       placeholder="Enter longitude"
@@ -524,7 +476,7 @@ export default function FacilityForm(props: FacilityProps) {
                   <FormLabel className="text-base">
                     {t("make_facility_public")}
                   </FormLabel>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     {t("make_facility_public_description")}
                   </p>
                 </div>

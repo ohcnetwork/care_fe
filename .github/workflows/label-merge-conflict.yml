@@ -24,5 +24,6 @@ jobs:
           wait_ms: 15000
           detect_merge_changes: false
           conflict_comment: |
-            :wave: Hi, @${author},
-            Conflicts have been detected against the base branch. Please rebase your branch against the base branch.
+            Conflicts have been detected against the base branch. Please merge the base branch into your branch.
+            cc: @${author}
+            > _See: https://docs.ohc.network/docs/contributing#how-to-resolve-merge-conflicts_

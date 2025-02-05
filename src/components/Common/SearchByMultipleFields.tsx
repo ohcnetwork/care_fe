@@ -365,7 +365,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full flex items-center justify-center text-muted-foreground"
+          className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
             inputRef.current?.focus();

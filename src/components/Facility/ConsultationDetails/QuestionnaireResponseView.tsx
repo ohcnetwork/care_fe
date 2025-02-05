@@ -41,7 +41,7 @@ export default function QuestionnaireResponseView({
   if (!formResponse) {
     return (
       <Card className="p-6 text-center">
-        <p className="text-lg font-medium text-muted-foreground">
+        <p className="text-lg font-medium text-gray-500">
           {t("error_loading_questionnaire_response")}
         </p>
       </Card>
@@ -54,12 +54,12 @@ export default function QuestionnaireResponseView({
         <Card className="p-6">
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500">
                 {formResponse.questionnaire?.description}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-calender" className="h-4 w-4" />
                 <span>{formatDateTime(formResponse.created_date)}</span>
@@ -95,13 +95,13 @@ export default function QuestionnaireResponseView({
 
                     return (
                       <div key={question.id} className="grid grid-cols-2 gap-4">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-gray-500">
                           {question.text}
                         </div>
                         <div className="font-medium">
                           {String(value)}
                           {questionResponse.note && (
-                            <span className="ml-2 text-sm text-muted-foreground">
+                            <span className="ml-2 text-sm text-gray-500">
                               ({questionResponse.note})
                             </span>
                           )}

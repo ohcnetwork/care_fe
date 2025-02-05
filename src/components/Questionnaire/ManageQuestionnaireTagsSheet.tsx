@@ -175,9 +175,7 @@ export default function ManageQuestionnaireTagsSheet({
                 </Badge>
               ))}
               {!isLoading && (!selectedTags || selectedTags.length === 0) && (
-                <p className="text-sm text-muted-foreground">
-                  {t("no_tags_selected")}
-                </p>
+                <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
               )}
             </div>
           </div>
