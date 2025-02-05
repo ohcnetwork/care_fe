@@ -43,7 +43,7 @@ export type PatientRegistrationFormComponentType = React.FC<{
 
 export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
   facilityId: string;
-  id: string;
+  patientId: string;
   patientData: Patient;
 }>;
 
