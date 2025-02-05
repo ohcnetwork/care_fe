@@ -134,16 +134,6 @@ export default function AuthUserProvider({
     return <Loading />;
   }
 
-  const SelectedRouter = () => {
-    if (user) {
-      return children;
-    } else if (patientToken?.token) {
-      return otpAuthorized;
-    } else {
-      return unauthorized;
-    }
-  };
-
   return (
     <AuthUserContext.Provider
       value={{
@@ -155,7 +145,7 @@ export default function AuthUserProvider({
         patientToken,
       }}
     >
-      <SelectedRouter />
+      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
     </AuthUserContext.Provider>
   );
 }
