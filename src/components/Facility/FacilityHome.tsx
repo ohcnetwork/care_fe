@@ -118,7 +118,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const { mutate: mutateAvatarDelete } = useMutation({
+  const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(routes.deleteFacilityCoverImage, {
       pathParams: { id: facilityId },
     }),
@@ -129,14 +129,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       });
       setEditCoverImage(false);
     },
-    onError: (error) => {
-      throw error;
-    },
   });
-
-  const handleDeleteSubmit = () => {
-    deleteFacility();
-  };
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
     const formData = new FormData();
@@ -168,7 +161,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   };
   const handleCoverImageDelete = async (onError: () => void) => {
     try {
-      mutateAvatarDelete();
+      await deleteAvatar();
     } catch {
       onError();
     }
@@ -202,7 +195,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         variant="destructive"
         show={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
-        onConfirm={handleDeleteSubmit}
+        onConfirm={() => deleteFacility()}
       />
       <AvatarEditModal
         title={t("edit_cover_photo")}

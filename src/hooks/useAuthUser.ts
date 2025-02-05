@@ -8,7 +8,7 @@ import { TokenData } from "@/types/auth/otpToken";
 interface AuthContextType {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<JwtTokenObtainPair>;
-  isSigningIn: boolean;
+  isAuthenticating: boolean;
   signOut: () => Promise<void>;
   patientLogin: (tokenData: TokenData, redirectUrl: string) => void;
   patientToken: TokenData | null;

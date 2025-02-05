@@ -44,35 +44,30 @@ export default function AuthUserProvider({
 
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
-  const { data: refreshTokenData, error: refreshTokenError } = useQuery({
+  const tokenRefreshQuery = useQuery({
     queryKey: ["user-refresh-token"],
     queryFn: query(routes.token_refresh, {
       body: { refresh: refreshToken || "" },
     }),
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!user, // Disable query if user is undefined
+    enabled: !!refreshToken && !!user,
   });
 
   useEffect(() => {
-    if (refreshTokenError) {
+    if (tokenRefreshQuery.isError) {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       return;
     }
 
-    if (refreshTokenData) {
-      localStorage.setItem(
-        LocalStorageKeys.accessToken,
-        refreshTokenData.access,
-      );
-      localStorage.setItem(
-        LocalStorageKeys.refreshToken,
-        refreshTokenData.refresh,
-      );
+    if (tokenRefreshQuery.data) {
+      const { access, refresh } = tokenRefreshQuery.data;
+      localStorage.setItem(LocalStorageKeys.accessToken, access);
+      localStorage.setItem(LocalStorageKeys.refreshToken, refresh);
     }
-  }, [refreshTokenData, refreshTokenError]);
+  }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
-  const { mutateAsync: signInData, isPending: isSigningIn } = useMutation({
+  const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(routes.login),
     onSuccess: (data: JwtTokenObtainPair) => {
       setAccessToken(data.access);
@@ -99,6 +94,7 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    setAccessToken(null);
     setPatientToken(null);
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
@@ -137,9 +133,9 @@ export default function AuthUserProvider({
   return (
     <AuthUserContext.Provider
       value={{
-        signIn: (creds) => signInData(creds),
+        signIn,
         signOut,
-        isSigningIn,
+        isAuthenticating,
         user,
         patientLogin,
         patientToken,
