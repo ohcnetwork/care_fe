@@ -60,7 +60,7 @@ export default function PageTitle({
         {breadcrumbs && (
           <Breadcrumbs
             replacements={crumbsReplacements}
-            className="flex-grow"
+            className="grow"
             hideBack={hideBack}
             backUrl={backUrl}
             onBackClick={onBackClick}

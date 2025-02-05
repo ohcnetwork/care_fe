@@ -224,7 +224,7 @@ export function MedicineAdminSheet({
           onSubmit={handleSubmit}
           className="flex flex-col h-full"
         >
-          <SheetHeader className="space-y-4 flex-shrink-0 mr-2">
+          <SheetHeader className="space-y-4 shrink-0 mr-2">
             <SheetTitle className="text-xl">
               {t("administer_medicines")}
             </SheetTitle>

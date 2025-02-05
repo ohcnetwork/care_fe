@@ -210,7 +210,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       <div className="container mx-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
           <Card className="overflow-hidden border-none bg-transparent shadow-none">
-            <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+            <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-linear-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
@@ -218,7 +218,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     alt={facilityData?.name}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
                 <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
@@ -250,7 +250,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -313,7 +313,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <CardContent>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
                     <div className="flex items-start gap-3">
-                      <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-gray-500" />
+                      <MapPin className="mt-2 h-5 w-5 shrink-0 text-gray-500" />
                       <div>
                         {facilityData?.geo_organization && (
                           <div className="mt-2 text-sm">

@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
+
 import Loading from "@/components/Common/Loading";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import PageTitle from "@/components/Common/PageTitle";
@@ -145,19 +147,20 @@ export const EncounterShow = (props: Props) => {
                 )}
             </>
           )} */}
-          <Link
-            href={`/facility/${facilityId}/patient/${encounterData.patient.id}`}
-            className="btn btn-primary m-1 w-full hover:text-white"
-            id="patient-details"
-            data-cy="patient-details-button"
-          >
-            {t("patient_details")}
-          </Link>
+          <Button variant="primary" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${encounterData.patient.id}`}
+              id="patient-details"
+              data-cy="patient-details-button"
+            >
+              {t("patient_details")}
+            </Link>
+          </Button>
         </div>
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
         <div className="mt-2 xl:mt-0 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border border-gray-200 bg-white text-black shadow-sm overflow-hidden">
             <PatientInfoCard
               patient={encounterData.patient}
               encounter={encounterData}

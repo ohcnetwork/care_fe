@@ -125,7 +125,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           </div>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-4">
+              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
                     name={formatDisplayName(selectedUser)}
@@ -246,7 +246,7 @@ export const PatientUsers = (props: PatientProps) => {
         {users?.results.map((user) => (
           <div
             key={user.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-xs"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">

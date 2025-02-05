@@ -19,7 +19,7 @@ export default function UserDashboard() {
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm">
+      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border border-gray-200 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
             name={user.first_name}

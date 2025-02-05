@@ -157,7 +157,7 @@ export default function CloneQuestionnaireSheet({
           {/* Organization Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Add Organizations</h3>
-            <Command className="rounded-lg border shadow-md">
+            <Command className="rounded-lg border border-gray-200 shadow-md">
               <CommandInput
                 placeholder="Search organizations..."
                 onValueChange={setSearchQuery}

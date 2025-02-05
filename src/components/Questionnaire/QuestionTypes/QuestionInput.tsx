@@ -220,9 +220,8 @@ export function QuestionInput({
                   {!question.structured_type && !question.repeats && (
                     <NotesInput
                       className={cn({
-                        "bg-white border rounded-l-none -ml-2": !(
-                          question.type === "text"
-                        ),
+                        "bg-white border border-gray-200 rounded-l-none -ml-2":
+                          !(question.type === "text"),
                         "mt-2": question.type === "text",
                       })}
                       questionnaireResponse={questionnaireResponse}

@@ -78,7 +78,7 @@ export const CardGridSkeleton = ({ count }: { count: number }) =>
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col h-full gap-4">
             <div className="flex gap-4">
-              <Skeleton className="h-12 w-12 sm:h-16 sm:w-16 rounded-full flex-shrink-0" />
+              <Skeleton className="h-12 w-12 sm:h-16 sm:w-16 rounded-full shrink-0" />
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex flex-col gap-1">
                   <Skeleton className="h-5 w-32 mb-1" />

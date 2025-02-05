@@ -73,7 +73,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
 
   const renderBasicInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <BasicInfoDetails user={userData} />
       </div>
     );
@@ -81,7 +81,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
 
   const renderContactInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <ContactInfoDetails user={userData} />
       </div>
     );

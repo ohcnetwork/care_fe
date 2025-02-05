@@ -91,7 +91,7 @@ export default function UserResetPassword({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6">
       {!isEditing && (
         <div className="mb-4 flex justify-start">
           <Button

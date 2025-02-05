@@ -180,7 +180,10 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
-              className={cn(view === "schedule" && "shadow", "hover:bg-white")}
+              className={cn(
+                view === "schedule" && "shadow-sm",
+                "hover:bg-white",
+              )}
             >
               {t("schedule")}
             </Button>
@@ -188,7 +191,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               variant={view === "exceptions" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
-                view === "exceptions" && "shadow",
+                view === "exceptions" && "shadow-sm",
                 "hover:bg-white",
               )}
             >

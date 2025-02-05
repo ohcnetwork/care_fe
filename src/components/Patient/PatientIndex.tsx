@@ -69,7 +69,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         {t("add_new_patient")}
         <kbd
           className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
+            "hidden h-5 select-none items-center gap-1 rounded border border-gray-200 bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
             outline
               ? "border-input bg-transparent"
               : "bg-white/20 border-white/20 text-white",

@@ -89,7 +89,7 @@ export default function UserAvatar({ username }: { username: string }) {
         onClose={() => setEditAvatar(false)}
       />
       <div>
-        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
+        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
               imageUrl={userData?.profile_picture_url}

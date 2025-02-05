@@ -77,7 +77,7 @@ export const ResourceRequests = (props: PatientProps) => {
         </Button>
       </div>
 
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border border-gray-200 bg-white">
         <Table>
           <TableHeader>
             <TableRow>

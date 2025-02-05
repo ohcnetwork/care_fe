@@ -144,7 +144,7 @@ export function FacilityDetailsPage({ id }: Props) {
           </>
         )}
         {users.length === 0 && (
-          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
             <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
               No users Found
             </div>

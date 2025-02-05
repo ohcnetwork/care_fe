@@ -392,7 +392,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 <Command>
                   <CommandInput
                     placeholder={t("search")}
-                    className="outline-none border-none ring-0 shadow-none"
+                    className="outline-hidden border-none ring-0 shadow-none"
                   />
                   <CommandList>
                     <CommandEmpty>
@@ -746,7 +746,7 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-white p-3 rounded shadow group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
+    <div className="bg-white p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
       <div className="flex justify-between items-start mb-2">
         <div>
           <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out">
@@ -854,7 +854,7 @@ function AppointmentRow(props: {
               {appointments.map((appointment) => (
                 <TableRow
                   key={appointment.id}
-                  className="shadow rounded-lg cursor-pointer group"
+                  className="shadow-sm rounded-lg cursor-pointer group"
                   onClick={() =>
                     navigate(
                       `/facility/${props.facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
@@ -1071,7 +1071,7 @@ export const SlotFilter = ({
         <Command>
           <CommandInput
             placeholder={t("search")}
-            className="outline-none border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none"
           />
           <CommandList>
             <CommandEmpty>{t("no_slots_found")}</CommandEmpty>

@@ -43,32 +43,6 @@ module.exports = {
         warning: colors.amber,
         alert: colors.violet,
         gray: colors.gray,
-        patient: {
-          comfort: {
-            DEFAULT: colors.slate[200],
-            fore: colors.slate[700],
-          },
-          stable: {
-            DEFAULT: "#59D4FF",
-            fore: colors.white,
-          },
-          abnormal: {
-            DEFAULT: "#F6CB23",
-            fore: colors.yellow[900],
-          },
-          critical: {
-            DEFAULT: colors.red[500],
-            fore: colors.red[100],
-          },
-          unknown: {
-            DEFAULT: secondary[400],
-            fore: secondary[800],
-          },
-          activelydying: {
-            DEFAULT: colors.red[800],
-            fore: colors.red[100],
-          },
-        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -121,7 +95,6 @@ module.exports = {
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    require("@tailwindcss/container-queries"),
     require("tailwindcss-animate"),
   ],
 };

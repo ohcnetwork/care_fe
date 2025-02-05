@@ -339,7 +339,7 @@ export default function CreateScheduleTemplateSheet({
                 {form.watch("availabilities")?.map((_, index) => (
                   <div
                     key={index}
-                    className="flex flex-col rounded-lg bg-white p-4 shadow"
+                    className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between pb-6">
                       <div className="flex items-center gap-2">

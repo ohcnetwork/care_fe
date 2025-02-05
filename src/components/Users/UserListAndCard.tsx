@@ -85,7 +85,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
               imageUrl={
                 "profile_picture_url" in user ? user.profile_picture_url : ""
               }
-              className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
+              className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl shrink-0"
             />
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex flex-col gap-1">
@@ -221,7 +221,7 @@ export default function UserListAndCardView({
           )}
         </>
       ) : (
-        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             {t("no_users_found")}
           </div>

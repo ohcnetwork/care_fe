@@ -116,7 +116,7 @@ export default function FacilityOrganizationSelector(
       <div className="space-y-4">
         {/* Selected Organization Display */}
         {selectedOrganization && (
-          <div className="rounded-md border p-3 bg-gray-50">
+          <div className="rounded-md border border-gray-200 p-3 bg-gray-50">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{selectedOrganization.name}</p>
@@ -145,7 +145,7 @@ export default function FacilityOrganizationSelector(
               )}
               <div className="flex-1">
                 <div className="flex gap-2">
-                  <div className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-sm">
+                  <div className="flex items-center h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base shadow-xs">
                     {org.name}
                   </div>
                   <Button

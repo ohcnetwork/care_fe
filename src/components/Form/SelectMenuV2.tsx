@@ -97,7 +97,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
         onChange={(selection: any) => props.onChange(selection.value)}
       >
         <>
-          <Label className="sr-only !relative">{props.placeholder}</Label>
+          <Label className="sr-only relative!">{props.placeholder}</Label>
           <div className="relative">
             <ListboxButton
               className={classNames(

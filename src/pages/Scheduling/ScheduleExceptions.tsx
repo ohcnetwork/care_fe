@@ -85,7 +85,7 @@ const ScheduleExceptionItem = (
   return (
     <div
       className={cn(
-        "rounded-lg bg-white py-2 shadow",
+        "rounded-lg bg-white py-2 shadow-sm",
         isPending && "opacity-50",
       )}
     >

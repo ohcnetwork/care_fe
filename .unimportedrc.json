@@ -12,10 +12,10 @@
   "ignoreUnused": [
     "@fontsource/figtree",
     "@originjs/vite-plugin-federation",
+    "@tailwindcss/vite",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
-    "cross-env",
-    "postcss-loader"
+    "cross-env"
   ],
   "ignoreUnresolved": [
     [
@@ -28,6 +28,12 @@
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
+    [
+      "tailwindcss/colors",
+      [
+        "tailwind.config.js"
       ]
     ],
     [

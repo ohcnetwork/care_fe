@@ -97,7 +97,7 @@ const ThreadItem = ({
 }) => (
   <button
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border ",
+      "group relative w-full p-4 text-left rounded-lg transition-colors border border-gray-200",
       isSelected
         ? "bg-primary-100 hover:bg-primary/15 border-primary"
         : "hover:bg-gray-100 hover:border-gray-200",

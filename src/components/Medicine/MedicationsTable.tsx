@@ -47,7 +47,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">

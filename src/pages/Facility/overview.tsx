@@ -38,7 +38,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-8">
         {/* Welcome Header */}
-        <div className="bg-white rounded-lg p-6 shadow-sm">
+        <div className="bg-white rounded-lg p-6 shadow-xs">
           <div className="flex items-center gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -63,7 +63,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 href={shortcut.href}
                 className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
               >
-                <Card className="border-0 shadow-sm hover:bg-gray-50 h-full">
+                <Card className="border-0 shadow-xs hover:bg-gray-50 h-full">
                   <CardHeader className="h-full flex flex-row items-center gap-4">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <shortcut.icon className="h-6 w-6 text-primary" />

@@ -438,7 +438,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   )
                 }
               >
-                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("cancel")}
               </Button>
               <Button
@@ -446,7 +446,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 className="sm:w-1/5"
                 type="submit"
               >
-                <span className="bg-gradient-to-b from-white/15 to-transparent" />
+                <span className="bg-linear-to-b from-white/15 to-transparent" />
                 {t("register_patient")}
               </Button>
             </div>

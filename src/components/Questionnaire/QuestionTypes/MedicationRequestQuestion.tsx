@@ -213,12 +213,15 @@ export function MedicationRequestQuestion({
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
-              className={cn("max-w-[2304px] relative lg:border rounded-md", {
-                "bg-gray-50/50": !desktopLayout,
-              })}
+              className={cn(
+                "max-w-[2304px] relative lg:border lg:border-gray-200 rounded-md",
+                {
+                  "bg-gray-50/50": !desktopLayout,
+                },
+              )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -275,7 +278,7 @@ export function MedicationRequestQuestion({
                       >
                         <div
                           className={cn(
-                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-sm text-sm",
+                            "flex items-center gap-2 px-2 py-0.5 rounded-md shadow-xs text-sm",
                             expandedMedicationIndex === index
                               ? "bg-gray-50"
                               : "bg-gray-100",
@@ -506,7 +509,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px,180px,170px,160px,300px,180px,250px,180px,160px,200px,180px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[280px_180px_170px_160px_300px_180px_250px_180px_160px_200px_180px_48px] border-b hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",

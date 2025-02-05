@@ -249,7 +249,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsList>
 
         <TabsContent value="edit">
-          <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
+          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
             <div className="space-y-4">
               <Card>
                 <CardHeader>
@@ -433,7 +433,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           )}
                         </div>
 
-                        <Command className="rounded-lg border shadow-md">
+                        <Command className="rounded-lg border border-gray-200 shadow-md">
                           <CommandInput
                             placeholder="Search organizations..."
                             onValueChange={setOrgSearchQuery}
@@ -713,7 +713,7 @@ function QuestionEditor({
     <Collapsible
       open={isExpanded}
       onOpenChange={onToggleExpand}
-      className={`rounded-lg border bg-card text-card-foreground shadow-sm ${
+      className={`rounded-lg border border-gray-200 bg-card text-card-foreground shadow-sm ${
         depth > 0 ? "border-l-4 border-l-primary/20" : ""
       }`}
     >
@@ -1074,7 +1074,7 @@ function QuestionEditor({
                   {(question.enable_when || []).map((condition, idx) => (
                     <div
                       key={idx}
-                      className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                      className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-start"
                     >
                       <div>
                         <Label className="text-xs">Question</Label>

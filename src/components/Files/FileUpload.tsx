@@ -34,7 +34,7 @@ export const LinearProgressWithLabel = (props: { value: number }) => {
           />
         </div>
       </div>
-      <div className="min-w-[35]">
+      <div className="min-w-35">
         <p className="text-slate-600">{`${Math.round(props.value)}%`}</p>
       </div>
     </div>

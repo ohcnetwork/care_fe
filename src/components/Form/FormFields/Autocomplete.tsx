@@ -191,7 +191,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                     {({ focus }) => (
                       <div className="flex flex-row gap-2">
                         {option?.image}
-                        <div className="flex flex-grow flex-col">
+                        <div className="flex grow flex-col">
                           <div className="flex justify-between">
                             <span>{option.label}</span>
                             <span>{option.icon}</span>

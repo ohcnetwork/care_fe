@@ -183,7 +183,7 @@ export default function ManageQuestionnaireTagsSheet({
           {/* Tag Selector */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("add_tags")}</h3>
-            <Command className="rounded-lg border shadow-md">
+            <Command className="rounded-lg border border-gray-200 shadow-md">
               <CommandInput
                 placeholder={t("search_tags")}
                 onValueChange={setSearchQuery}
@@ -221,7 +221,7 @@ export default function ManageQuestionnaireTagsSheet({
           <Collapsible
             open={isCreateOpen}
             onOpenChange={setIsCreateOpen}
-            className="rounded-lg border p-4"
+            className="rounded-lg border border-gray-200 p-4"
           >
             <CollapsibleTrigger asChild>
               <Button

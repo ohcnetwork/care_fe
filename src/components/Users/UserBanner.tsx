@@ -12,7 +12,7 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
 
   return (
     <div className="mt-2 flex flex-col justify-between gap-3 sm:flex-row">
-      <div className="mb-3 flex w-full flex-col justify-between gap-3 rounded bg-white p-3 shadow-sm transition-all duration-200 ease-in-out sm:flex-row md:p-6">
+      <div className="mb-3 flex w-full flex-col justify-between gap-3 rounded bg-white p-3 shadow-xs transition-all duration-200 ease-in-out sm:flex-row md:p-6">
         <div className="flex flex-row gap-2 self-center">
           <Avatar
             imageUrl={userData?.profile_picture_url}

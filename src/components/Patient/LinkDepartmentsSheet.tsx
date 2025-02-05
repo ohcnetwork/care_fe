@@ -202,7 +202,7 @@ export default function LinkDepartmentsSheet({
                 {currentOrganizations.map((org) => (
                   <div
                     key={org.id}
-                    className="flex items-center justify-between rounded-md border p-2"
+                    className="flex items-center justify-between rounded-md border border-gray-200 p-2"
                   >
                     <div className="flex items-center space-x-2">
                       <Building className="h-4 w-4 text-blue-400" />

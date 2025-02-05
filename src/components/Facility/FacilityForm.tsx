@@ -197,7 +197,7 @@ export default function FacilityForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -292,7 +292,7 @@ export default function FacilityForm({
         </div>
 
         {/* Contact Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -374,7 +374,7 @@ export default function FacilityForm({
         </div>
 
         {/* Location Information */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">{t("location_details")}</h3>
             <Button
@@ -458,13 +458,13 @@ export default function FacilityForm({
         </div>
 
         {/* Visibility Settings */}
-        <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/5">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-gray-50">
                 <FormControl>
                   <Checkbox
                     checked={field.value}

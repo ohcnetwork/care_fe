@@ -1,5 +1,8 @@
 import { HTMLAttributes, ReactNode } from "react";
 
+/**
+ * @deprecated Use the `Card` component from `@/components/ui/card` instead.
+ */
 export default function Card(
   props: {
     children?: ReactNode;
@@ -9,7 +12,7 @@ export default function Card(
   return (
     <div
       {...rest}
-      className={"rounded-lg bg-white p-4 shadow " + props.className}
+      className={"rounded-lg bg-white p-4 shadow-sm " + props.className}
     >
       {children}
     </div>

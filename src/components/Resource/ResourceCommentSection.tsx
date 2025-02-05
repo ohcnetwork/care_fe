@@ -130,14 +130,14 @@ export const Comment = ({
   created_by,
   created_date,
 }: CommentModel) => (
-  <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
+  <div className="mt-4 flex w-full flex-col rounded-lg border border-gray-200 bg-white p-4 text-secondary-800">
     <div className="w-full">
       <p className="break-words whitespace-pre-wrap">
         {comment.replace(/\n+/g, "\n")}
       </p>
     </div>
     <div className="flex w-full items-center">
-      <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
+      <div className="mr-auto flex items-center rounded-md border border-gray-200 bg-secondary-100 py-1 pl-2 pr-3">
         <Avatar
           name={`${created_by.first_name} ${created_by.last_name}`}
           className="h-8 w-8 "

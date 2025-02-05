@@ -26,7 +26,7 @@ const IconIndex: React.FC = () => {
       <input
         type="text"
         placeholder={t("search")}
-        className="mb-4 w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="mb-4 w-full rounded-md border border-gray-300 p-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -34,7 +34,7 @@ const IconIndex: React.FC = () => {
         {filteredIcons.map((iconName) => (
           <div
             key={iconName}
-            className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 shadow-xs"
           >
             <CareIcon icon={iconName as IconName} className="mb-2 text-3xl" />
             <span className="mb-2 text-sm font-medium">{iconName}</span>

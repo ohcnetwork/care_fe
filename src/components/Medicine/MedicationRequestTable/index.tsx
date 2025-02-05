@@ -139,7 +139,7 @@ export default function MedicationRequestTable({
                     placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+                    className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
                   />
                   {searchQuery && (
                     <Button
