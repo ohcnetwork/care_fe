@@ -35,16 +35,15 @@ import { LocationChildren } from "./components/LocationChildren";
 interface Props {
   facilityId: string;
 }
-
 export default function LocationList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+
   const [selectedLocation, setSelectedLocation] =
     useState<LocationListType | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useView("users", "card");
   const navigate = useNavigate();
-
   const { data, isLoading } = useQuery({
     queryKey: ["locations", facilityId, searchQuery],
     queryFn: query.debounced(locationApi.list, {
@@ -55,17 +54,14 @@ export default function LocationList({ facilityId }: Props) {
       },
     }),
   });
-
   const handleAddLocation = () => {
     setSelectedLocation(null);
     setIsSheetOpen(true);
   };
-
   const handleSheetClose = () => {
     setIsSheetOpen(false);
     setSelectedLocation(null);
   };
-
   return (
     <div className="space-y-6">
       <div className="">
@@ -80,14 +76,14 @@ export default function LocationList({ facilityId }: Props) {
               <TabsList className="flex">
                 <TabsTrigger value="card" id="user-card-view">
                   <div className="flex items-center gap-2">
-                    <CareIcon icon="l-credit-card" className="text-lg" />
-                    <span>{t("card")}</span>
+                    <CareIcon icon="l-list-ul" className="text-lg" />
+                    <span>{t("list")}</span>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger value="list" id="user-list-view">
                   <div className="flex items-center gap-2">
-                    <CareIcon icon="l-list-ul" className="text-lg" />
-                    <span>{t("list")}</span>
+                    <CareIcon icon="l-sitemap" className="text-lg" />
+                    <span>{t("map")}</span>
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -103,7 +99,6 @@ export default function LocationList({ facilityId }: Props) {
               />
             </div>
           </div>
-
           <Button variant="primary" onClick={handleAddLocation}>
             <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
             {t("add_location")}
@@ -125,7 +120,6 @@ export default function LocationList({ facilityId }: Props) {
           </p>
         </div>
       </div>
-
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />
@@ -139,7 +133,6 @@ export default function LocationList({ facilityId }: Props) {
                 <TableHead>{t("location_form")}</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
               {data?.results.map((location) => (
                 <React.Fragment key={location.id}>
@@ -165,9 +158,16 @@ export default function LocationList({ facilityId }: Props) {
                         />
                         <span className="ml-2">{location.name}</span>
                       </div>
-
                       {/* Right Section: Button */}
-                      <div className="flex">
+                      <div className="flex items-center">
+                        <Button
+                          variant="outline"
+                          className="mr-3"
+                          onClick={() => setSelectedLocation(null)}
+                        >
+                          <CareIcon icon="l-plus" className="w-4 h-5" />
+                          Expand All
+                        </Button>
                         <Button
                           variant="outline"
                           className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-auto"
@@ -178,19 +178,17 @@ export default function LocationList({ facilityId }: Props) {
                         </Button>
                       </div>
                     </TableCell>
-
                     <TableCell>
                       {getLocationFormLabel(location?.form)}
                     </TableCell>
                   </TableRow>
-
                   {/* Recursive Child Rendering */}
                   {selectedLocation?.id === location.id &&
                   location.has_children ? (
                     <LocationChildren
                       facilityId={facilityId}
                       location={location}
-                      level={0}
+                      level={1}
                     />
                   ) : null}
                 </React.Fragment>
