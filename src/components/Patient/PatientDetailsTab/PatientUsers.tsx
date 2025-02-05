@@ -103,7 +103,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline_primary">
+        <Button variant="outline_primary" data-cy="assign-user-button">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           {t("assign_user")}
         </Button>
@@ -114,7 +114,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="space-y-4">
+          <div className="space-y-4" data-cy="patient-user-selector-container">
             <h3 className="text-sm font-medium">{t("search_user")}</h3>
             <UserSelector
               selected={selectedUser}
@@ -167,7 +167,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   {t("select_role")}
                 </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger>
+                  <SelectTrigger data-cy="patient-user-role-select">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -188,6 +188,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               </div>
 
               <Button
+                data-cy="patient-user-assign-button"
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
@@ -264,7 +265,11 @@ export const PatientUsers = (props: PatientProps) => {
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-cy="patient-user-remove-button"
+                  >
                     <CareIcon icon="l-trash" className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
@@ -280,6 +285,7 @@ export const PatientUsers = (props: PatientProps) => {
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
+                      data-cy="patient-user-remove-confirm-button"
                       onClick={() => removeUser(user.id)}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
@@ -306,7 +312,7 @@ export const PatientUsers = (props: PatientProps) => {
   };
 
   return (
-    <div className="mt-4 px-4 md:px-0" data-test-id="patient-users">
+    <div className="mt-4 px-4 md:px-0" data-cy="patient-users">
       <div className="group my-2 w-full">
         <div className="h-full space-y-2">
           <div className="flex flex-row items-center justify-between">
