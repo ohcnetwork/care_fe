@@ -7,6 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card } from "@/components/ui/card";
 
+import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -96,7 +98,7 @@ export default function ObservationsList(props: Props) {
               )}
               {item.value.value && (
                 <div className="mt-1 font-medium whitespace-pre-wrap">
-                  {item.value.value}
+                  {formatValue(item.value.value, item.value_type)}
                 </div>
               )}
               {item.note && (
@@ -108,7 +110,7 @@ export default function ObservationsList(props: Props) {
         {hasNextPage && (
           <div ref={ref} className="flex justify-center p-4">
             <div className="text-sm text-gray-500">
-              {isFetchingNextPage ? t("loading_more") : t("load_more")}
+              {isFetchingNextPage ? t("loading") : t("load_more")}
             </div>
           </div>
         )}

@@ -8,16 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  CardListSkeleton,
+} from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import EditFacilityUserRoleSheet from "@/pages/FacilityOrganization/components/EditFacilityUserRoleSheet";
-import FacilityOrganizationLayout from "@/pages/FacilityOrganization/components/FacilityOrganizationLayout";
-import LinkFacilityUserSheet from "@/pages/FacilityOrganization/components/LinkFacilityUserSheet";
+import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/components/EditFacilityUserRoleSheet";
+import FacilityOrganizationLayout from "@/pages/Facility/settings/organizations/components/FacilityOrganizationLayout";
+import LinkFacilityUserSheet from "@/pages/Facility/settings/organizations/components/LinkFacilityUserSheet";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
@@ -57,6 +60,19 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
 
   if (!id) {
     return null;
+  }
+
+  if (isLoadingUsers) {
+    return (
+      <FacilityOrganizationLayout id={id} facilityId={facilityId}>
+        <div className="grid gap-4">
+          <CardListSkeleton count={1} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardGridSkeleton count={6} />
+          </div>
+        </div>
+      </FacilityOrganizationLayout>
+    );
   }
 
   return (
@@ -102,90 +118,81 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
           </div>
         </div>
 
-        {isLoadingUsers ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <CardGridSkeleton count={6} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {users?.results?.length === 0 ? (
-              <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
-                  {t("no_users_found")}
-                </CardContent>
-              </Card>
-            ) : (
-              users?.results?.map((userRole: OrganizationUserRole) => (
-                <Card key={userRole.id} className="h-full">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col h-full gap-4">
-                      <div className="flex gap-4">
-                        <Avatar
-                          name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                          imageUrl={userRole.user.profile_picture_url}
-                          className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
-                        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {users?.results?.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-center text-gray-500">
+                {t("no_users_found")}
+              </CardContent>
+            </Card>
+          ) : (
+            users?.results?.map((userRole: OrganizationUserRole) => (
+              <Card key={userRole.id} className="h-full">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col h-full gap-4">
+                    <div className="flex gap-4">
+                      <Avatar
+                        name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                        imageUrl={userRole.user.profile_picture_url}
+                        className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
+                      />
 
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex flex-col gap-1">
-                            <h1 className="text-base font-bold break-words pr-2">
-                              {userRole.user.first_name}{" "}
-                              {userRole.user.last_name}
-                            </h1>
-                            <span className="text-sm text-gray-500">
-                              <span className="mr-2">
-                                {userRole.user.username}
-                              </span>
-                              <UserStatusIndicator user={userRole.user} />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex flex-col gap-1">
+                          <h1 className="text-base font-bold break-words pr-2">
+                            {userRole.user.first_name} {userRole.user.last_name}
+                          </h1>
+                          <span className="text-sm text-gray-500">
+                            <span className="mr-2 break-words">
+                              {userRole.user.username}
                             </span>
-                          </div>
+                            <UserStatusIndicator user={userRole.user} />
+                          </span>
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-500">{t("role")}</div>
-                          <div className="font-medium truncate">
-                            {userRole.role.name}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500">
-                            {t("phone_number")}
-                          </div>
-                          <div className="font-medium truncate">
-                            {userRole.user.phone_number}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-auto pt-2">
-                        <EditFacilityUserRoleSheet
-                          facilityId={facilityId}
-                          organizationId={id}
-                          userRole={userRole}
-                          trigger={
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="w-full gap-2"
-                            >
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="h-4 w-4"
-                              />
-                              <span>{t("more_details")}</span>
-                            </Button>
-                          }
-                        />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        )}
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-500">{t("role")}</div>
+                        <div className="font-medium truncate">
+                          {userRole.role.name}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">{t("phone_number")}</div>
+                        <div className="font-medium truncate">
+                          {userRole.user.phone_number}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-2">
+                      <EditFacilityUserRoleSheet
+                        facilityId={facilityId}
+                        organizationId={id}
+                        userRole={userRole}
+                        trigger={
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="w-full gap-2"
+                          >
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="h-4 w-4"
+                            />
+                            <span>{t("more_details")}</span>
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
 
         <Pagination totalCount={users?.count || 0} />
       </div>

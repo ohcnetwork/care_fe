@@ -17,6 +17,7 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
+import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -647,6 +648,14 @@ const routes = {
       path: "/api/v1/patient/{patientId}/medication/statement/",
       method: "GET",
       TRes: Type<PaginatedResponse<MedicationStatement>>(),
+    },
+  },
+
+  medicationAdministration: {
+    list: {
+      path: "/api/v1/patient/{patientId}/medication/administration/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<MedicationAdministration>>(),
     },
   },
 } as const;
