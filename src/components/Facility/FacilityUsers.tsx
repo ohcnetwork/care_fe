@@ -32,7 +32,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   let usersList: JSX.Element = <></>;
 
-  const { data: userListData, isLoading: userListLoading } = useQuery({
+  const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams],
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
@@ -45,7 +45,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
     enabled: !!facilityId,
   });
 
-  if (userListLoading || !userListData) {
+  if (userListFetching || !userListData) {
     usersList =
       activeTab === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -71,10 +71,15 @@ export default function FacilityUsers(props: { facilityId: string }) {
       title={t("users_management")}
       componentRight={
         <Badge
-          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3"
+          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
           variant="outline"
         >
-          {t("user_count", { count: userListData?.count ?? 0 })}
+          {userListFetching
+            ? t("loading")
+            : t("entity_count", {
+                count: userListData?.count ?? 0,
+                entity: "User",
+              })}
         </Badge>
       }
     >

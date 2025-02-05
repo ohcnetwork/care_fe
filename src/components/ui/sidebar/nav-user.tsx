@@ -191,15 +191,6 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {patient && (
-                <DropdownMenuItem>
-                  <BadgeCheck />
-                  {t("profile")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}>
               <LogOut />
               {t("logout")}

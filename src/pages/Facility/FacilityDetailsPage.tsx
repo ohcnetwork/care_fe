@@ -113,7 +113,7 @@ export function FacilityDetailsPage({ id }: Props) {
           <div className="px-4 space-y-2">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">{facility.name}</h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-gray-500">
                 {[facility.address].filter(Boolean).join(", ")}
               </p>
             </div>

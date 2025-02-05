@@ -21,7 +21,6 @@ interface ImportMetaEnv {
   readonly REACT_GMAPS_API_KEY?: string;
   readonly REACT_GOV_DATA_API_KEY?: string;
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
-  readonly REACT_SAMPLE_FORMAT_ASSET_IMPORT?: string;
   readonly REACT_WARTIME_SHIFTING?: string;
   readonly REACT_STILL_WATCHING_IDLE_TIMEOUT?: string;
   readonly REACT_STILL_WATCHING_PROMPT_DURATION?: string;

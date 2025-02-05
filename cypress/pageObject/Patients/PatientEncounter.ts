@@ -69,4 +69,17 @@ export class PatientEncounter {
     cy.verifyContentPresence('[data-cy="encounter-overview"]', expectedValues);
     return this;
   }
+
+  clickPatientDetailsButton() {
+    cy.verifyAndClickElement(
+      '[data-cy="patient-details-button"]',
+      "Patient Details",
+    );
+    return this;
+  }
+
+  clickPatientEditButton() {
+    cy.verifyAndClickElement('[data-cy="edit-patient-button"]', "Edit");
+    return this;
+  }
 }

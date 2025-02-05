@@ -35,14 +35,6 @@ import {
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -62,6 +54,7 @@ import {
   formatName,
   getReadableDuration,
   saveElementAsImage,
+  stringifyGeoOrganization,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import {
@@ -72,7 +65,6 @@ import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentFinalStatuses,
-  AppointmentStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApis";
@@ -220,7 +212,7 @@ const AppointmentDetails = ({
   appointment: Appointment;
   facility: FacilityData;
 }) => {
-  const { patient, user } = appointment;
+  const { user } = appointment;
   const { t } = useTranslation();
 
   return (
@@ -340,14 +332,7 @@ const AppointmentDetails = ({
                 {appointment.patient.address || t("no_address_provided")}
               </p>
               <p className="text-gray-600">
-                {[
-                  patient.ward,
-                  patient.local_body,
-                  patient.district,
-                  patient.state,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
+                {stringifyGeoOrganization(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
@@ -446,31 +431,8 @@ const AppointmentActions = ({
     return null;
   }
 
-  if (!["booked", "checked_in", "in_consultation"].includes(currentStatus)) {
-    return (
-      <div className="w-48">
-        <Label className="mb-2">{t("change_status")}</Label>
-        <Select
-          value={currentStatus}
-          onValueChange={(value) => onChange(value as Appointment["status"])}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {AppointmentStatuses.map((status, index) => (
-              <SelectItem key={index} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 w-64 mx-auto">
+    <div className="flex flex-col gap-2 w-full md:w-64 mx-auto">
       <Button variant="outline" onClick={onViewPatient} size="lg">
         <PersonIcon className="size-4 mr-2" />
         {t("view_patient")}

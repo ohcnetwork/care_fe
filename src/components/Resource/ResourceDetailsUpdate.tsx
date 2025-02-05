@@ -1,11 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { toast } from "sonner";
 
 import Card from "@/CAREUI/display/Card";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
@@ -15,25 +19,23 @@ import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import RadioFormField from "@/components/Form/FormFields/RadioFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { RESOURCE_CHOICES } from "@/common/constants";
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
   id: string;
+  facilityId: string;
 }
-
-const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const initForm: Partial<UpdateResourceRequest> = {
   assigned_facility: null,
@@ -62,7 +64,6 @@ const initialState = {
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
   const [qParams, _] = useQueryParams();
-  const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -84,17 +85,16 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   };
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
+  const { data, isLoading: assignedUserLoading } = useQuery({
+    queryKey: ["user", props.facilityId],
+    queryFn: query(routes.userList),
+  });
 
-  const { loading: assignedUserLoading } = useTanStackQueryInstead(
-    routes.userList,
-    {
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data && data.count) {
-          SetAssignedUser(data.results[0]);
-        }
-      },
-    },
-  );
+  useEffect(() => {
+    if (data) {
+      SetAssignedUser(data.results[0]);
+    }
+  }, [data]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -129,28 +129,40 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     form[name] = selected;
     dispatch({ type: "set_form", form });
   };
-
-  const { data: resourceDetails } = useTanStackQueryInstead(
-    routes.getResourceDetails,
-    {
+  const { data: resourceDetails } = useQuery({
+    queryKey: ["resource", props.facilityId, props.id],
+    queryFn: query(routes.getResourceDetails, {
       pathParams: { id: props.id },
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          const d = data;
-          d["status"] = qParams.status || data.status;
-          dispatch({ type: "set_form", form: d });
-        }
-        setIsLoading(false);
+    }),
+  });
+  useEffect(() => {
+    if (resourceDetails) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...resourceDetails,
+          status: qParams.status || resourceDetails.status.toLowerCase(),
+        },
+      });
+    }
+  }, [resourceDetails]);
+
+  const { mutate: updateResource, isPending: updateResourceLoading } =
+    useMutation({
+      mutationFn: mutate(routes.updateResource, {
+        pathParams: { id: props.id },
+      }),
+      onSuccess: (data) => {
+        dispatch({ type: "set_form", form: data });
+        toast.success(t("request_updated_successfully"));
+        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
       },
-    },
-  );
+    });
 
   const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
-      setIsLoading(true);
-
       const resourceData: UpdateResourceRequest = {
         id: props.id,
         status: state.form.status,
@@ -169,31 +181,18 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         approving_facility: state.form.approving_facility?.id,
         related_patient: state.form.related_patient?.id,
       };
-
-      const { res, data } = await request(routes.updateResource, {
-        pathParams: { id: props.id },
-        body: resourceData,
-      });
-      setIsLoading(false);
-
-      if (res && res.status == 200 && data) {
-        dispatch({ type: "set_form", form: data });
-        toast.success(t("request_updated_successfully"));
-        navigate(`/resource/${props.id}`);
-      } else {
-        setIsLoading(false);
-      }
+      updateResource(resourceData);
     }
   };
 
-  if (isLoading) {
+  if (updateResourceLoading || !resourceDetails) {
     return <Loading />;
   }
 
   return (
     <Page
       title="Update Request"
-      backUrl={`/resource/${props.id}`}
+      backUrl={`/facility/${props.facilityId}/resource/${props.id}`}
       crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >
       <div className="mt-4">
@@ -204,9 +203,10 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 label="Status"
                 name="status"
                 value={state.form.status}
-                options={resourceStatusOptions}
+                options={RESOURCE_STATUS_CHOICES}
+                optionValue={(option) => option.text}
                 onChange={handleChange}
-                optionLabel={(option) => option}
+                optionLabel={(option) => t(`resource_status__${option.text}`)}
               />
             </div>
             <div className="md:col-span-1">
@@ -232,11 +232,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <FacilitySelect
                 multiple={false}
                 name="assigned_facility"
-                facilityType={1510}
-                selected={state.form.assigned_facility_object}
-                setSelected={(obj) =>
-                  setFacility(obj, "assigned_facility_object")
-                }
+                selected={state.form.assigned_facility}
+                setSelected={(obj) => setFacility(obj, "assigned_facility")}
                 errors={state.errors.assigned_facility}
               />
             </div>
@@ -254,15 +251,23 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             </div>
 
             <div className="md:col-span-2">
-              <TextAreaFormField
+              <Label className="text-gray-700 mb-3 mt-1">
+                {t("request_reason")}
+              </Label>
+              <Textarea
                 rows={5}
                 name="reason"
-                placeholder="Type your description here"
+                placeholder={t("request_reason_placeholder")}
                 value={state.form.reason}
-                onChange={handleChange}
-                label="Reason of Request*"
-                error={state.errors.reason}
+                onChange={(e) =>
+                  handleChange({ name: e.target.name, value: e.target.value })
+                }
               />
+              {state.errors.reason && (
+                <p className="text-red-500 text-sm mt-2">
+                  {state.errors.emergency}
+                </p>
+              )}
             </div>
 
             <div>
