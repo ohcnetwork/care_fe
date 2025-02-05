@@ -9,7 +9,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes, { JwtTokenObtainPair } from "@/Utils/request/api";
+import routes, { JwtTokenObtainPair, Type } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
