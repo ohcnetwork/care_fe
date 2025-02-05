@@ -973,7 +973,7 @@ const AppointmentStatusDropdown = ({
   };
 
   return (
-    <div className="w-32">
+    <div className="w-32" onClick={(e) => e.stopPropagation()}>
       <Select
         value={currentStatus}
         onValueChange={(value) =>
