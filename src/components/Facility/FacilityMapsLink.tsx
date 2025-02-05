@@ -6,12 +6,12 @@ import { isAndroidDevice } from "@/Utils/utils";
 const isValidLatitude = (latitude: string) => {
   if (latitude === "0E-16") return false;
   const lat = parseFloat(latitude);
-  return !isNaN(lat) && lat >= -90 && lat <= 90;
+  return !Number.isNaN(lat) && lat >= -90 && lat <= 90;
 };
 const isValidLongitude = (longitude: string) => {
   if (longitude === "0E-16") return false;
   const long = parseFloat(longitude);
-  return !isNaN(long) && long >= -180 && long <= 180;
+  return !Number.isNaN(long) && long >= -180 && long <= 180;
 };
 
 export const FacilityMapsLink = ({
