@@ -324,16 +324,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         )}
                         {facilityData.latitude && facilityData.longitude && (
                           <FacilityMapsLink
-                            latitude={
-                              facilityData.latitude as number & {
-                                __brand: "ValidLatitude";
-                              }
-                            }
-                            longitude={
-                              facilityData.longitude as number & {
-                                __brand: "ValidLongitude";
-                              }
-                            }
+                            latitude={facilityData.latitude.toString()}
+                            longitude={facilityData.longitude.toString()}
                           />
                         )}
                       </div>

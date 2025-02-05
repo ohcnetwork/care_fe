@@ -117,14 +117,8 @@ export function FacilityDetailsPage({ id }: Props) {
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
-                    latitude={
-                      facility.latitude as number & { __brand: "ValidLatitude" }
-                    }
-                    longitude={
-                      facility.longitude as number & {
-                        __brand: "ValidLongitude";
-                      }
-                    }
+                    latitude={facility.latitude.toString()}
+                    longitude={facility.longitude.toString()}
                   />
                 )}
               </p>
