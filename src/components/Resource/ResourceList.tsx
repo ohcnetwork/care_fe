@@ -21,6 +21,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -52,7 +59,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_resource_filters")}
       </p>
     </Card>
@@ -190,6 +197,79 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
+                </div>
+                {/* Mobile View - Select Component */}
+                <div className="md:hidden ">
+                  <Select
+                    value={outgoing ? "outgoing" : "incoming"}
+                    onValueChange={(value) =>
+                      updateQuery({
+                        outgoing: value === "outgoing",
+                        title,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-[120px]">
+                      <SelectValue placeholder={t("Type")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="outgoing">{t("outgoing")}</SelectItem>
+                      <SelectItem value="incoming">{t("incoming")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:hidden">
+                  <Select
+                    value={isActive ? "active" : "completed"}
+                    onValueChange={(value) =>
+                      updateQuery({
+                        status: value === "active" ? "pending" : "completed",
+                        title,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-[120px]">
+                      <SelectValue placeholder={t("Status")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">{t("active")}</SelectItem>
+                      <SelectItem value="completed">
+                        {t("completed")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:hidden">
+                  <Select
+                    value={currentStatus}
+                    onValueChange={(value) =>
+                      updateQuery({
+                        status: value,
+                        title,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-[120px]">
+                      <SelectValue placeholder={t("Status")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currentStatuses.map((statusOption) => (
+                        <SelectItem key={statusOption} value={statusOption}>
+                          <div className="flex items-center">
+                            <CareIcon
+                              icon={
+                                RESOURCE_STATUS_CHOICES.find(
+                                  (o) => o.text === statusOption,
+                                )?.icon || "l-folder-open"
+                              }
+                              className="mr-2 h-4 w-4"
+                            />
+                            {t(`resource_status__${statusOption}`)}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
