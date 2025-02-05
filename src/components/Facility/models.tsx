@@ -38,9 +38,8 @@ export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export interface CommentModel {
   id: string;
-  created_by_object: UserBareMinimum;
   created_date: string;
   modified_date: string;
   comment: string;
-  created_by: number;
+  created_by: UserBareMinimum;
 }
