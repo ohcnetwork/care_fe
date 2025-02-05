@@ -115,6 +115,7 @@ export const FilesTab = (props: FilesTabProps) => {
     onEdit: refetch,
     uploadedFiles:
       files?.results
+        .filter((file) => !file.is_archived)
         .slice()
         .reverse()
         .map((file) => ({
