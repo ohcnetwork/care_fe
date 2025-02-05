@@ -252,10 +252,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   <Button
                     variant="link"
                     onClick={() => setEditCoverImage(true)}
-                    aria-label={t("facility_actions_menu")}
+                    aria-label={t("edit_cover_photo")}
                     className="text-white"
                   >
-                    <CareIcon icon="l-edit" />
+                    <CareIcon icon="l-edit" aria-hidden="true" />
                     <span className="underline">{t("edit_cover_photo")}</span>
                   </Button>
                 )}
