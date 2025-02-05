@@ -39,10 +39,12 @@ export default function FacilityOrganizationIndex({
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
+  const LIMIT = 1000;
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query(routes.facilityOrganization.list, {
       pathParams: { facilityId },
+      queryParams: { limit: LIMIT },
     }),
     enabled: !!facilityId,
   });
