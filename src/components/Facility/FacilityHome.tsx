@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
+import { Hospital } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
