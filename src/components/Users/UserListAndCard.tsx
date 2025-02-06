@@ -133,7 +133,7 @@ const UserListHeader = () => {
   return (
     <thead>
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
-        <th className=" bg-gray-50 px-4 py-3 text-left">{t("name")}</th>
+        <th className="px-4 py-3 text-left">{t("name")}</th>
         <th className="w-32 px-10 py-3 text-left">{t("status")}</th>
         <th className="px-10 py-3 text-left">{t("role")}</th>
         <th className="px-4 py-3 text-left">{t("contact_number")}</th>
