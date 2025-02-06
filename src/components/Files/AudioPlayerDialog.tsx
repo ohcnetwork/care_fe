@@ -1,9 +1,12 @@
-import { DialogContent, DialogTitle } from "@radix-ui/react-dialog";
-import { Dialog } from "@radix-ui/react-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 
-import { DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import AudioPlayer from "@/components/Common/AudioPlayer";
 import { FileUploadModel } from "@/components/Patient/models";
@@ -45,7 +48,7 @@ export default function AudioPlayerDialog({
       aria-labelledby="audio-player-dialog"
     >
       <DialogContent
-        className="mb-2 rounded-lg p-4"
+        className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
         aria-describedby="audio-player"
       >
         <DialogHeader>

@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +47,6 @@ import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { classNames } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -272,33 +273,42 @@ export const FilesTab = (props: FilesTabProps) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuItem className="text-primary-900">
-                    <button
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      size="sm"
                       onClick={() =>
                         fileManager.downloadFile(file, associatingId)
                       }
+                      variant="ghost"
+                      className="w-full flex flex-row justify-stretch items-center"
                     >
                       <CareIcon icon="l-arrow-circle-down" className="mr-1" />
                       <span>{t("download")}</span>
-                    </button>
+                    </Button>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-primary-900">
-                    <button
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      size="sm"
                       onClick={() =>
                         fileManager.archiveFile(file, associatingId)
                       }
+                      variant="ghost"
+                      className="w-full flex flex-row justify-stretch items-center"
                     >
                       <CareIcon icon="l-archive-alt" className="mr-1" />
                       <span>{t("archive")}</span>
-                    </button>
+                    </Button>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-primary-900">
-                    <button
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      size="sm"
                       onClick={() => fileManager.editFile(file, associatingId)}
+                      variant="ghost"
+                      className="w-full flex flex-row justify-stretch items-center"
                     >
                       <CareIcon icon="l-pen" className="mr-1" />
                       <span>{t("rename")}</span>
-                    </button>
+                    </Button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -389,30 +399,34 @@ export const FilesTab = (props: FilesTabProps) => {
           >
             <Label
               htmlFor="file_upload_patient"
-              className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
+              className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
             </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
-          <DropdownMenuItem className="flex flex-row items-center text-primary-900">
-            <button
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => fileUpload.handleCameraCapture()}
-              className="flex flex-row items-center "
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
-              <CareIcon icon="l-camera" className="mr-1" />
+              <CareIcon icon="l-camera" />
               <span>{t("open_camera")}</span>
-            </button>
+            </Button>
           </DropdownMenuItem>
-          <DropdownMenuItem className="flex flex-row items-center text-primary-900">
-            <button
+          <DropdownMenuItem asChild>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => fileUpload.handleAudioCapture()}
-              className="flex flex-row items-center"
+              className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
-              <CareIcon icon="l-microphone" className="mr-1" />
+              <CareIcon icon="l-microphone" />
               <span>{t("record")}</span>
-            </button>
+            </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -429,7 +443,7 @@ export const FilesTab = (props: FilesTabProps) => {
           return (
             <Card
               key={file.id}
-              className={classNames(
+              className={cn(
                 "overflow-hidden",
                 file.is_archived ? "bg-white/50" : "bg-white",
               )}
@@ -510,12 +524,10 @@ export const FilesTab = (props: FilesTabProps) => {
               return (
                 <TableRow
                   key={file.id}
-                  className={classNames(
-                    "shadow rounded-md overflow-hidden group",
-                  )}
+                  className={cn("shadow rounded-md overflow-hidden group")}
                 >
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -545,7 +557,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     </div>
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -553,7 +565,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     {filetype}
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -561,7 +573,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
@@ -569,7 +581,7 @@ export const FilesTab = (props: FilesTabProps) => {
                     {file.uploaded_by?.username}
                   </TableCell>
                   <TableCell
-                    className={classNames(
+                    className={cn(
                       "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
