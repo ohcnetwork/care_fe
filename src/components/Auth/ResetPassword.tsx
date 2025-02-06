@@ -1,5 +1,6 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -12,7 +13,8 @@ import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface ResetPasswordProps {
   token: string;
@@ -69,40 +71,36 @@ const ResetPassword = (props: ResetPasswordProps) => {
     }
     return form;
   };
+  const { mutate: resetPassword } = useMutation({
+    mutationFn: mutate(routes.resetPassword),
+    onSuccess: () => {
+      localStorage.removeItem(LocalStorageKeys.accessToken);
+      toast.success(t("password_reset_success"));
+      navigate("/login");
+    },
+    onError: (error) => {
+      if (error.cause) {
+        setErrors(error.cause);
+      }
+    },
+  });
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
       valid.token = props.token;
-      const { res, error } = await request(routes.resetPassword, {
-        body: { ...valid },
-      });
-      if (res?.ok) {
-        localStorage.removeItem(LocalStorageKeys.accessToken);
-        toast.success(t("password_reset_success"));
-        navigate("/login");
-      } else if (res && error) {
-        setErrors(error);
-      }
+      resetPassword(valid);
     }
   };
 
-  useEffect(() => {
-    const checkResetToken = async () => {
-      const { res } = await request(routes.checkResetToken, {
-        body: { token: props.token },
-      });
-      if (!res || !res.ok) {
-        navigate("/invalid-reset");
-      }
-    };
-    if (props.token) {
-      checkResetToken();
-    } else {
-      navigate("/invalid-reset");
-    }
-  }, []);
+  const { isError } = useQuery({
+    queryKey: ["checkResetToken", { token: props.token }],
+    queryFn: query(routes.checkResetToken, { body: { token: props.token } }),
+    enabled: !!props.token,
+  });
+
+  if (isError) navigate("/invalid-reset");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

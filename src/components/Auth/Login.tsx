@@ -35,7 +35,6 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
@@ -71,7 +70,7 @@ interface LoginProps {
 }
 
 const Login = (props: LoginProps) => {
-  const { signIn, patientLogin } = useAuthContext();
+  const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
@@ -103,20 +102,14 @@ const Login = (props: LoginProps) => {
       FiltersCache.invaldiateAll();
       return await signIn(data);
     },
-    onSuccess: ({ res }) => {
-      setCaptcha(res?.status === 429);
+    onError: (error) => {
+      setCaptcha(error.status == 429);
     },
   });
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: async (phone: string) => {
-      const response = await request(routes.otp.sendOtp, {
-        body: { phone_number: phone },
-        silent: true,
-      });
-      return response;
-    },
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -280,7 +273,7 @@ const Login = (props: LoginProps) => {
 
     try {
       if (!isOtpSent) {
-        await sendOtp(phone);
+        await sendOtp({ phone_number: phone });
         setIsOtpSent(true);
       } else {
         await verifyOtp({ phone_number: phone, otp });
@@ -303,8 +296,7 @@ const Login = (props: LoginProps) => {
   };
 
   // Loading state derived from mutations
-  const isLoading =
-    staffLoginMutation.isPending || sendOtpPending || verifyOtpPending;
+  const isLoading = isAuthenticating || sendOtpPending || verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
