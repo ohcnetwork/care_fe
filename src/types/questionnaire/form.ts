@@ -10,84 +10,29 @@ import { Quantity } from "@/types/questionnaire/quantity";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
-type ResponseValueBase = {
+/**
+ * A short hand for defining response value types
+ */
+type RV<T extends string, V> = {
   value_code?: Code;
   value_quantity?: Quantity;
-};
-
-export type StringResponseValue = ResponseValueBase & {
-  type: "string";
-  value: string | undefined;
-};
-
-export type NumberResponseValue = ResponseValueBase & {
-  type: "number";
-  value: number | undefined;
-};
-
-export type BooleanResponseValue = ResponseValueBase & {
-  type: "boolean";
-  value: boolean | undefined;
-};
-
-export type DateTimeResponseValue = ResponseValueBase & {
-  type: "dateTime";
-  value: Date | undefined;
-};
-
-export type AllergyIntoleranceResponseValue = ResponseValueBase & {
-  type: "allergy_intolerance";
-  value: AllergyIntoleranceRequest[];
-};
-
-export type MedicationRequestResponseValue = ResponseValueBase & {
-  type: "medication_request";
-  value: MedicationRequest[];
-};
-
-export type MedicationStatementResponseValue = ResponseValueBase & {
-  type: "medication_statement";
-  value: MedicationStatementRequest[];
-};
-
-export type LocationAssociationResponseValue = ResponseValueBase & {
-  type: "location_association";
-  value: LocationAssociationQuestion[];
-};
-
-export type SymptomResponseValue = ResponseValueBase & {
-  type: "symptom";
-  value: SymptomRequest[];
-};
-
-export type DiagnosisResponseValue = ResponseValueBase & {
-  type: "diagnosis";
-  value: DiagnosisRequest[];
-};
-
-export type EncounterResponseValue = ResponseValueBase & {
-  type: "encounter";
-  value: EncounterEditRequest[];
-};
-
-export type CreateAppointmentResponseValue = ResponseValueBase & {
-  type: "appointment";
-  value: CreateAppointmentQuestion[];
+  type: T;
+  value: V;
 };
 
 export type ResponseValue =
-  | StringResponseValue
-  | NumberResponseValue
-  | BooleanResponseValue
-  | DateTimeResponseValue
-  | AllergyIntoleranceResponseValue
-  | MedicationRequestResponseValue
-  | MedicationStatementResponseValue
-  | LocationAssociationResponseValue
-  | SymptomResponseValue
-  | DiagnosisResponseValue
-  | EncounterResponseValue
-  | CreateAppointmentResponseValue;
+  | RV<"string", string | undefined>
+  | RV<"number", number | undefined>
+  | RV<"boolean", boolean | undefined>
+  | RV<"dateTime", Date | undefined>
+  | RV<"allergy_intolerance", AllergyIntoleranceRequest[]>
+  | RV<"medication_request", MedicationRequest[]>
+  | RV<"medication_statement", MedicationStatementRequest[]>
+  | RV<"location_association", LocationAssociationQuestion[]>
+  | RV<"symptom", SymptomRequest[]>
+  | RV<"diagnosis", DiagnosisRequest[]>
+  | RV<"encounter", EncounterEditRequest[]>
+  | RV<"appointment", CreateAppointmentQuestion[]>;
 
 export interface QuestionnaireResponse {
   question_id: string;
