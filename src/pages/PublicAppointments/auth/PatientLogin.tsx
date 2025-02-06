@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -33,8 +32,6 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
-import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
 
 const FormSchema = z.object({
@@ -76,20 +73,11 @@ export default function PatientLogin({
   }
 
   const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-    mutationFn: (phoneNumber: string) =>
-      request(routes.otp.sendOtp, {
-        body: {
-          phone_number: phoneNumber,
-        },
-        silent: true,
-      }),
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       if (page === "send") {
         navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
       }
-    },
-    onError: () => {
-      toast.error(t("error_sending_otp"));
     },
   });
 
@@ -99,26 +87,11 @@ export default function PatientLogin({
       setError(t("phone_number_validation_error"));
       return;
     }
-    sendOTP(phoneNumber);
+    sendOTP({ phone_number: phoneNumber });
   };
 
   const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
-    mutationFn: async ({
-      phone_number,
-      otp,
-    }: {
-      phone_number: string;
-      otp: string;
-    }) => {
-      const response = await mutate(routes.otp.loginByOtp, { silent: true })({
-        phone_number,
-        otp,
-      });
-      if ("errors" in response) {
-        throw response;
-      }
-      return response;
-    },
+    mutationFn: mutate(routes.otp.loginByOtp),
     onSuccess: (response: { access: string }) => {
       if (response.access) {
         const tokenData: TokenData = {
@@ -131,12 +104,6 @@ export default function PatientLogin({
           `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
         );
       }
-    },
-    onError: (error: HTTPError) => {
-      const errorData = error.cause as { errors: Array<{ otp: string }> };
-      const errorMessage =
-        errorData?.errors?.[0]?.otp || t("error_verifying_otp");
-      toast.error(errorMessage);
     },
   });
 
@@ -245,7 +212,7 @@ export default function PatientLogin({
             </Button>
             <a
               className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-              onClick={() => sendOTP(phoneNumber)}
+              onClick={() => sendOTP({ phone_number: phoneNumber })}
             >
               {t("didnt_receive_a_message")} {t("resend_otp")}
             </a>

@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,8 +15,8 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
@@ -27,12 +27,24 @@ export default function UserAvatar({ username }: { username: string }) {
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
 
+  const { mutate: mutateAvatarDelete } = useMutation({
+    mutationFn: mutate(routes.deleteProfilePicture, {
+      pathParams: { username },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getUserDetails", username] });
+      if (authUser.username === username) {
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      }
+      toast.success(t("profile_picture_deleted"));
+      setEditAvatar(false);
+    },
+  });
+
   const { data: userData, isLoading } = useQuery({
     queryKey: ["getUserDetails", username],
     queryFn: query(routes.getUserDetails, {
-      pathParams: {
-        username: username,
-      },
+      pathParams: { username },
     }),
   });
 
@@ -53,7 +65,12 @@ export default function UserAvatar({ username }: { username: string }) {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          queryClient.invalidateQueries({
+            queryKey: ["getUserDetails", username],
+          });
+          if (authUser.username === username) {
+            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          }
           toast.success(t("avatar_updated_success"));
           setEditAvatar(false);
         }
@@ -66,18 +83,12 @@ export default function UserAvatar({ username }: { username: string }) {
   };
 
   const handleAvatarDelete = async (onError: () => void) => {
-    const { res } = await request(routes.deleteProfilePicture, {
-      pathParams: { username },
-    });
-    if (res?.ok) {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      toast.success(t("profile_picture_deleted"));
-      setEditAvatar(false);
-    } else {
+    try {
+      mutateAvatarDelete();
+    } catch {
       onError();
     }
   };
-
   return (
     <>
       <AvatarEditModal

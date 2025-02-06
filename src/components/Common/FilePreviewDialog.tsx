@@ -82,6 +82,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
+  const [scale, setScale] = useState(1.0);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -95,6 +96,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       ...file_state,
       zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
     });
+    setScale((prevScale) => Math.min(prevScale + 0.25, 2));
   };
 
   const handleZoomOut = () => {
@@ -103,6 +105,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       ...file_state,
       zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
     });
+    setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
   };
 
   const fileName = file_state?.name
@@ -133,6 +136,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setPage(1);
     setNumPages(1);
     setIndex(-1);
+    setScale(1);
     onClose?.();
   };
 
@@ -214,7 +218,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   </a>
                 </Button>
               )}
-              <Button variant="outline" type="button" onClick={onClose}>
+              <Button variant="outline" type="button" onClick={handleClose}>
                 {t("close")}
               </Button>
             </div>
@@ -249,6 +253,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       setNumPages(numPages);
                     }}
                     pageNumber={page}
+                    scale={scale}
                   />
                 </Suspense>
               ) : previewExtensions.includes(file_state.extension) ? (
@@ -341,6 +346,9 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               {file_state.extension === "pdf" && (
                 <>
                   {[
+                    ["Zoom In", "l-search-plus", handleZoomIn, scale >= 2],
+                    [`${Math.round(scale * 100)}%`, false, () => {}, false],
+                    ["Zoom Out", "l-search-minus", handleZoomOut, scale <= 0.5],
                     [
                       "Previous",
                       "l-arrow-left",
