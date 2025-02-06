@@ -40,7 +40,7 @@ export function LocationSearch({
     queryKey: ["locations", facilityId, mode, search],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, search },
+      queryParams: { mode, name: search },
     }),
     enabled: facilityId !== "preview",
   });
