@@ -42,6 +42,7 @@ export function LocationSearch({
       pathParams: { facility_id: facilityId },
       queryParams: { mode, search },
     }),
+    enabled: facilityId !== "preview",
   });
 
   return (
