@@ -25,6 +25,9 @@ export default function ArchivedFileDialog({
   onOpenChange: (open: boolean) => void;
   file: FileUploadModel | null;
 }) {
+  if (!file) {
+    return <></>;
+  }
   const fileName = file?.name ? file.name + file.extension : "";
   return (
     <Dialog
@@ -60,11 +63,11 @@ export default function ArchivedFileDialog({
           </div>
           <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span>
-              {t("archived_by")}: {file?.archived_by?.username}
+              {t("archived_by")}: {file.archived_by?.username}
             </span>
             <span>
               {t("archived_at")}:{" "}
-              {dayjs(file?.archived_datetime).format("DD MMM YYYY, hh:mm A")}
+              {dayjs(file.archived_datetime).format("DD MMM YYYY, hh:mm A")}
             </span>
           </div>
         </div>
