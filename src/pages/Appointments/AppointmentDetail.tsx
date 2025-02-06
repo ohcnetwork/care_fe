@@ -219,8 +219,10 @@ const AppointmentDetails = ({
     <div className="container md:p-6 max-w-3xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>
-            <span className="mr-3">{t("schedule_information")}</span>
+          <CardTitle className="">
+            <span className="mr-3 inline-block mb-2">
+              {t("schedule_information")}
+            </span>
             <Badge
               variant={
                 (
