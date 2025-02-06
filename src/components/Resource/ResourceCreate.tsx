@@ -165,10 +165,13 @@ export default function ResourceCreate(props: ResourceProps) {
     <Page
       title={t("create_resource_request")}
       crumbsReplacements={{
-        [facilityId]: { name: facilityData?.name || "" },
+        [facilityId]: {
+          name: facilityData?.name || "",
+          uri: `/facility/${facilityId}/settings/general`,
+        },
         resource: { style: "pointer-events-none" },
       }}
-      backUrl={`/facility/${facilityId}`}
+      backUrl={`/facility/${facilityId}/settings/general`}
     >
       <div className="container mx-auto max-w-4xl">
         <Card className="mt-4">
