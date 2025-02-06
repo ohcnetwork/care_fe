@@ -32,21 +32,19 @@ export default function UserAvatar({ username }: { username: string }) {
       pathParams: { username },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["getUserDetails", username] });
+      if (authUser.username === username) {
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      }
       toast.success(t("profile_picture_deleted"));
       setEditAvatar(false);
-    },
-    onError: (error) => {
-      throw error;
     },
   });
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["getUserDetails", username],
     queryFn: query(routes.getUserDetails, {
-      pathParams: {
-        username: username,
-      },
+      pathParams: { username },
     }),
   });
 
@@ -67,7 +65,12 @@ export default function UserAvatar({ username }: { username: string }) {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          queryClient.invalidateQueries({
+            queryKey: ["getUserDetails", username],
+          });
+          if (authUser.username === username) {
+            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          }
           toast.success(t("avatar_updated_success"));
           setEditAvatar(false);
         }
