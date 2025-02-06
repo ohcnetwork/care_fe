@@ -1,5 +1,6 @@
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +16,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,6 +48,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import organizationApi from "@/types/organization/organizationApi";
 import {
   AnswerOption,
   EnableWhen,
@@ -46,11 +63,23 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
+import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
-  id: string;
+  id?: string;
 }
+
+const STRUCTURED_QUESTION_TYPES = [
+  { value: "allergy_intolerance", label: "Allergy Intolerance" },
+  { value: "medication_request", label: "Medication Request" },
+  { value: "medication_statement", label: "Medication Statement" },
+  { value: "symptom", label: "Symptom" },
+  { value: "diagnosis", label: "Diagnosis" },
+  { value: "encounter", label: "Encounter" },
+  { value: "appointment", label: "Appointment" },
+  { value: "location_association", label: "Location Association" },
+] as const;
 
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
@@ -58,6 +87,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
+  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
   const {
     data: initialQuestionnaire,
@@ -66,13 +97,36 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   } = useQuery({
     queryKey: ["questionnaireDetail", id],
     queryFn: query(questionnaireApi.detail, {
-      pathParams: { id },
+      pathParams: { id: id! },
     }),
+    enabled: !!id,
   });
 
-  const { mutate: updateQuestionnaire, isPending } = useMutation({
+  const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
+    useQuery({
+      queryKey: ["organizations", orgSearchQuery],
+      queryFn: query(organizationApi.list, {
+        queryParams: {
+          org_type: "role",
+          name: orgSearchQuery || undefined,
+        },
+      }),
+    });
+
+  const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
+    mutationFn: mutate(questionnaireApi.create),
+    onSuccess: (data: QuestionnaireDetail) => {
+      toast.success("Questionnaire created successfully");
+      navigate(`/questionnaire/${data.slug}`);
+    },
+    onError: (_error) => {
+      toast.error("Failed to create questionnaire");
+    },
+  });
+
+  const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
-      pathParams: { id },
+      pathParams: { id: id! },
     }),
     onSuccess: () => {
       toast.success("Questionnaire updated successfully");
@@ -83,7 +137,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireDetail | null>(null);
+    useState<QuestionnaireDetail | null>(() => {
+      if (!id) {
+        return {
+          id: "",
+          title: "",
+          description: "",
+          status: "draft",
+          version: "1.0",
+          subject_type: "patient",
+          questions: [],
+          slug: "",
+          tags: [],
+        } as QuestionnaireDetail;
+      }
+      return null;
+    });
 
   useEffect(() => {
     if (initialQuestionnaire) {
@@ -91,7 +160,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }
   }, [initialQuestionnaire]);
 
-  if (isLoading) return <Loading />;
+  if (id && isLoading) return <Loading />;
   if (error) {
     return (
       <Alert variant="destructive">
@@ -122,18 +191,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  const handleCancel = () => {
-    navigate(`/questionnaire/${id}`);
+  const handleSave = () => {
+    if (id) {
+      updateQuestionnaire(questionnaire);
+    } else {
+      createQuestionnaire({
+        ...questionnaire,
+        organizations: selectedOrgIds,
+      });
+    }
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(questionnaire.questions);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    updateQuestionnaireField("questions", items);
+  const handleCancel = () => {
+    navigate(id ? `/questionnaire/${id}` : "/questionnaire");
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -148,12 +218,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
 
+  const handleToggleOrganization = (orgId: string) => {
+    setSelectedOrgIds((current) =>
+      current.includes(orgId)
+        ? current.filter((id) => id !== orgId)
+        : [...current, orgId],
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* Top bar: Title + Buttons */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Edit Questionnaire</h1>
+          <h1 className="text-2xl font-bold">
+            {id ? "Edit Questionnaire" : "Create Questionnaire"}
+          </h1>
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
@@ -161,12 +240,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Cancel
           </Button>
-          <Button
-            onClick={() => updateQuestionnaire(questionnaire)}
-            disabled={isPending}
-          >
+          <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
-            Save
+            {id ? "Save" : "Create"}
           </Button>
         </div>
       </div>
@@ -182,7 +258,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         <TabsContent value="edit">
           <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
-            {/* Left Sidebar: Navigation */}
             <div className="space-y-4">
               <Card>
                 <CardHeader>
@@ -318,11 +393,100 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label>Organizations</Label>
+                    {id ? (
+                      <ManageQuestionnaireOrganizationsSheet
+                        questionnaireId={id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
+                            <Building className="mr-2 h-4 w-4" />
+                            Manage Organizations
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOrgIds.length > 0 ? (
+                            availableOrganizations?.results
+                              .filter((org) => selectedOrgIds.includes(org.id))
+                              .map((org) => (
+                                <Badge
+                                  key={org.id}
+                                  variant="secondary"
+                                  className="flex items-center gap-1"
+                                >
+                                  {org.name}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                    onClick={() =>
+                                      handleToggleOrganization(org.id)
+                                    }
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </Badge>
+                              ))
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              No organizations selected
+                            </p>
+                          )}
+                        </div>
+
+                        <Command className="rounded-lg border shadow-md">
+                          <CommandInput
+                            placeholder="Search organizations..."
+                            onValueChange={setOrgSearchQuery}
+                          />
+                          <CommandList>
+                            <CommandEmpty>No organizations found.</CommandEmpty>
+                            <CommandGroup>
+                              {isLoadingOrganizations ? (
+                                <div className="flex items-center justify-center py-6">
+                                  <Loader2 className="h-6 w-6 animate-spin" />
+                                </div>
+                              ) : (
+                                availableOrganizations?.results.map((org) => (
+                                  <CommandItem
+                                    key={org.id}
+                                    value={org.id}
+                                    onSelect={() =>
+                                      handleToggleOrganization(org.id)
+                                    }
+                                  >
+                                    <div className="flex flex-1 items-center gap-2">
+                                      <Building className="h-4 w-4" />
+                                      <span>{org.name}</span>
+                                      {org.description && (
+                                        <span className="text-xs text-gray-500">
+                                          - {org.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {selectedOrgIds.includes(org.id) && (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </CommandItem>
+                                ))
+                              )}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Main Content */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -338,6 +502,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         updateQuestionnaireField("title", e.target.value)
                       }
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="slug">Slug</Label>
+                    <Input
+                      id="slug"
+                      value={questionnaire.slug}
+                      onChange={(e) =>
+                        updateQuestionnaireField("slug", e.target.value)
+                      }
+                      placeholder="unique-identifier-for-questionnaire"
+                      className="font-mono"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      A unique URL-friendly identifier for this questionnaire
+                    </p>
                   </div>
 
                   <div>
@@ -368,7 +548,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     onClick={() => {
                       const newQuestion: Question = {
                         id: crypto.randomUUID(),
-                        link_id: `Q-${Date.now()}`,
+                        link_id: `${questionnaire.questions.length + 1}`,
                         text: "New Question",
                         type: "string",
                         questions: [],
@@ -387,70 +567,67 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </Button>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="questions">
-                      {(provided) => (
-                        <div
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className="space-y-6"
-                        >
-                          {questionnaire.questions.map((question, index) => (
-                            <Draggable
-                              key={question.id}
-                              draggableId={question.id}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  id={`question-${question.id}`}
-                                  className="relative"
-                                >
-                                  <div className="absolute -left-10 top-4 font-medium text-gray-500">
-                                    {index + 1}.
-                                  </div>
-                                  <QuestionEditor
-                                    question={question}
-                                    onChange={(updatedQuestion) => {
-                                      const newQuestions = [
-                                        ...questionnaire.questions,
-                                      ];
-                                      newQuestions[index] = updatedQuestion;
-                                      updateQuestionnaireField(
-                                        "questions",
-                                        newQuestions,
-                                      );
-                                    }}
-                                    onDelete={() => {
-                                      const newQuestions =
-                                        questionnaire.questions.filter(
-                                          (_, i) => i !== index,
-                                        );
-                                      updateQuestionnaireField(
-                                        "questions",
-                                        newQuestions,
-                                      );
-                                    }}
-                                    dragHandleProps={provided.dragHandleProps}
-                                    isExpanded={expandedQuestions.has(
-                                      question.id,
-                                    )}
-                                    onToggleExpand={() =>
-                                      toggleQuestionExpanded(question.id)
-                                    }
-                                    depth={0}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
+                  <div className="space-y-6">
+                    {questionnaire.questions.map((question, index) => (
+                      <div
+                        key={question.id}
+                        id={`question-${question.id}`}
+                        className="relative"
+                      >
+                        <div className="absolute -left-4 top-4 font-medium text-gray-500">
+                          {index + 1}.
                         </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
+                        <QuestionEditor
+                          key={question.id}
+                          question={question}
+                          onChange={(updatedQuestion) => {
+                            const newQuestions = [...questionnaire.questions];
+                            newQuestions[index] = updatedQuestion;
+                            updateQuestionnaireField("questions", newQuestions);
+                          }}
+                          onDelete={() => {
+                            const newQuestions = questionnaire.questions.filter(
+                              (_, i) => i !== index,
+                            );
+                            updateQuestionnaireField("questions", newQuestions);
+                          }}
+                          isExpanded={expandedQuestions.has(question.id)}
+                          onToggleExpand={() =>
+                            toggleQuestionExpanded(question.id)
+                          }
+                          depth={0}
+                          onMoveUp={() => {
+                            if (index > 0) {
+                              const newQuestions = [...questionnaire.questions];
+                              [newQuestions[index - 1], newQuestions[index]] = [
+                                newQuestions[index],
+                                newQuestions[index - 1],
+                              ];
+                              updateQuestionnaireField(
+                                "questions",
+                                newQuestions,
+                              );
+                            }
+                          }}
+                          onMoveDown={() => {
+                            if (index < questionnaire.questions.length - 1) {
+                              const newQuestions = [...questionnaire.questions];
+                              [newQuestions[index], newQuestions[index + 1]] = [
+                                newQuestions[index + 1],
+                                newQuestions[index],
+                              ];
+                              updateQuestionnaireField(
+                                "questions",
+                                newQuestions,
+                              );
+                            }
+                          }}
+                          isFirst={index === 0}
+                          isLast={index === questionnaire.questions.length - 1}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -482,22 +659,28 @@ interface QuestionEditorProps {
   question: Question;
   onChange: (updated: Question) => void;
   onDelete: () => void;
-  dragHandleProps?: any;
   isExpanded: boolean;
   onToggleExpand: () => void;
   depth: number;
   parentId?: string;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 function QuestionEditor({
   question,
   onChange,
   onDelete,
-  dragHandleProps,
   isExpanded,
   onToggleExpand,
   depth,
   parentId,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
 }: QuestionEditorProps) {
   const {
     text,
@@ -546,9 +729,6 @@ function QuestionEditor({
       }`}
     >
       <div className="flex items-center p-4">
-        <div {...dragHandleProps} className="mr-2 cursor-move">
-          <CareIcon icon="l-arrow" className="h-4 w-4 text-gray-500" />
-        </div>
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-medium text-left">
@@ -570,17 +750,48 @@ function QuestionEditor({
             className="h-4 w-4 text-gray-500"
           />
         </CollapsibleTrigger>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <CareIcon icon="l-trash-alt" className="h-4 w-4 text-destructive" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isFirst && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp?.();
+                }}
+              >
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Move Up
+              </DropdownMenuItem>
+            )}
+            {!isLast && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown?.();
+                }}
+              >
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Move Down
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive"
+            >
+              <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <CollapsibleContent>
@@ -619,7 +830,6 @@ function QuestionEditor({
               <Select
                 value={type}
                 onValueChange={(val: QuestionType) => {
-                  // Reset questions array when changing from group to another type
                   if (val !== "group") {
                     updateField("type", val, { questions: [] });
                   } else {
@@ -661,19 +871,11 @@ function QuestionEditor({
                     <SelectValue placeholder="Select structured type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="allergy_intolerance">
-                      Allergy Intolerance
-                    </SelectItem>
-                    <SelectItem value="medication_request">
-                      Medication Request
-                    </SelectItem>
-                    <SelectItem value="medication_statement">
-                      Medication Statement
-                    </SelectItem>
-                    <SelectItem value="symptom">Symptom</SelectItem>
-                    <SelectItem value="diagnosis">Diagnosis</SelectItem>
-                    <SelectItem value="encounter">Encounter</SelectItem>
-                    <SelectItem value="appointment">Appointment</SelectItem>
+                    {STRUCTURED_QUESTION_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1140,69 +1342,53 @@ function QuestionEditor({
                   Add Sub-Question
                 </Button>
               </div>
-
-              <DragDropContext
-                onDragEnd={(result) => {
-                  if (!result.destination) return;
-
-                  const items = Array.from(questions || []);
-                  const [reorderedItem] = items.splice(result.source.index, 1);
-                  items.splice(result.destination.index, 0, reorderedItem);
-
-                  updateField("questions", items);
-                }}
-              >
-                <Droppable droppableId={`group-${getQuestionPath()}`}>
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="space-y-4"
-                    >
-                      {(questions || []).map((subQuestion, idx) => (
-                        <Draggable
-                          key={subQuestion.id}
-                          draggableId={`${getQuestionPath()}-${subQuestion.id}`}
-                          index={idx}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                            >
-                              <QuestionEditor
-                                key={subQuestion.id}
-                                question={subQuestion}
-                                onChange={(updated) => {
-                                  const newQuestions = [...(questions || [])];
-                                  newQuestions[idx] = updated;
-                                  updateField("questions", newQuestions);
-                                }}
-                                onDelete={() => {
-                                  const newQuestions = questions?.filter(
-                                    (_, i) => i !== idx,
-                                  );
-                                  updateField("questions", newQuestions);
-                                }}
-                                dragHandleProps={provided.dragHandleProps}
-                                isExpanded={expandedSubQuestions.has(
-                                  subQuestion.id,
-                                )}
-                                onToggleExpand={() =>
-                                  toggleSubQuestionExpanded(subQuestion.id)
-                                }
-                                depth={depth + 1}
-                                parentId={getQuestionPath()}
-                              />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
+              <div className="space-y-4">
+                {(questions || []).map((subQuestion, idx) => (
+                  <QuestionEditor
+                    key={subQuestion.id}
+                    question={subQuestion}
+                    onChange={(updated) => {
+                      const newQuestions = [...(questions || [])];
+                      newQuestions[idx] = updated;
+                      updateField("questions", newQuestions);
+                    }}
+                    onDelete={() => {
+                      const newQuestions = questions?.filter(
+                        (_, i) => i !== idx,
+                      );
+                      updateField("questions", newQuestions);
+                    }}
+                    isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                    onToggleExpand={() =>
+                      toggleSubQuestionExpanded(subQuestion.id)
+                    }
+                    depth={depth + 1}
+                    parentId={getQuestionPath()}
+                    onMoveUp={() => {
+                      if (idx > 0) {
+                        const newQuestions = [...(questions || [])];
+                        [newQuestions[idx - 1], newQuestions[idx]] = [
+                          newQuestions[idx],
+                          newQuestions[idx - 1],
+                        ];
+                        updateField("questions", newQuestions);
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (idx < (questions?.length || 0) - 1) {
+                        const newQuestions = [...(questions || [])];
+                        [newQuestions[idx], newQuestions[idx + 1]] = [
+                          newQuestions[idx + 1],
+                          newQuestions[idx],
+                        ];
+                        updateField("questions", newQuestions);
+                      }
+                    }}
+                    isFirst={idx === 0}
+                    isLast={idx === (questions?.length || 0) - 1}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -214,8 +214,8 @@ export function EncounterList({
 
   return (
     <Page title={t("encounters")} hideBack={true}>
-      <div className="space-y-4 mt-2">
-        <div className="rounded-lg border bg-card shadow-sm">
+      <div className="space-y-4 mt-2 flex flex-col">
+        <div className="rounded-lg border bg-card shadow-sm flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -467,83 +467,85 @@ export function EncounterList({
               <div className="hidden md:flex items-center">
                 <Tabs value={status || "all"} className="w-full">
                   <TabsList className="bg-transparent p-0 h-8">
-                    <TabsTrigger
-                      value="all"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: undefined,
-                        })
-                      }
-                    >
-                      All
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="planned"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: "planned",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-                      Planned
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="in_progress"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: "in_progress",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
-                      In Progress
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="discharged"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: "discharged",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
-                      Discharged
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: "completed",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
-                      Completed
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="cancelled"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() =>
-                        updateQuery({
-                          ...{ encounter_class: encounterClass, priority },
-                          status: "cancelled",
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
-                      Cancelled
-                    </TabsTrigger>
+                    <div className="flex flex-wrap">
+                      <TabsTrigger
+                        value="all"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: undefined,
+                          })
+                        }
+                      >
+                        {t("all")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="planned"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: "planned",
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
+                        {t("encounter_status__planned")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="in_progress"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: "in_progress",
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
+                        {t("encounter_class__in_progress")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="discharged"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: "discharged",
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                        {t("discharge")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="completed"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: "completed",
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                        {t("completed")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="cancelled"
+                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                        onClick={() =>
+                          updateQuery({
+                            ...{ encounter_class: encounterClass, priority },
+                            status: "cancelled",
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
+                        {t("cancelled")}
+                      </TabsTrigger>
+                    </div>
                   </TabsList>
                 </Tabs>
               </div>
@@ -555,103 +557,105 @@ export function EncounterList({
             <div className="hidden md:block p-4">
               <Tabs value={encounterClass || "all"} className="w-full">
                 <TabsList className="bg-transparent p-0 h-8">
-                  <TabsTrigger
-                    value="all"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: undefined,
-                      })
-                    }
-                  >
-                    All Types
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="imp"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "imp",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-hospital" className="mr-2 h-4 w-4" />
-                    Inpatient
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="amb"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "amb",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
-                    Ambulatory
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="obsenc"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "obsenc",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
-                    Observation
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="emer"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "emer",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-ambulance" className="mr-2 h-4 w-4" />
-                    Emergency
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="vr"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "vr",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
-                    Virtual
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="hh"
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    onClick={() =>
-                      updateQuery({
-                        status,
-                        priority,
-                        encounter_class: "hh",
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
-                    Home Health
-                  </TabsTrigger>
+                  <div className="flex flex-wrap">
+                    <TabsTrigger
+                      value="all"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: undefined,
+                        })
+                      }
+                    >
+                      {t("all")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="imp"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "imp",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-hospital" className="mr-2 h-4 w-4" />
+                      {t("encounter_class__imp")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="amb"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "amb",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-user" className="mr-2 h-4 w-4" />
+                      {t("encounter_class__amb")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="obsenc"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "obsenc",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-eye" className="mr-2 h-4 w-4" />
+                      {t("encounter_class__obsenc")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="emer"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "emer",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-ambulance" className="mr-2 h-4 w-4" />
+                      {t("emergency")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="vr"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "vr",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-video" className="mr-2 h-4 w-4" />
+                      {t("encounter_class__vr")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="hh"
+                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      onClick={() =>
+                        updateQuery({
+                          status,
+                          priority,
+                          encounter_class: "hh",
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
+                      {t("encounter_class__hh")}
+                    </TabsTrigger>
+                  </div>
                 </TabsList>
               </Tabs>
             </div>

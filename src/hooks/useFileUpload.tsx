@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { t } from "i18next";
+import jsPDF from "jspdf";
 import {
   ChangeEvent,
   DetailedHTMLProps,
@@ -31,6 +32,7 @@ export type FileUploadOptions = {
   onUpload?: (file: FileUploadModel) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
   allowNameFallback?: boolean;
+  compress?: boolean;
 } & (
   | {
       allowedExtensions?: string[];
@@ -48,10 +50,14 @@ export type FileInputProps = Omit<
 export type FileUploadReturn = {
   progress: null | number;
   error: null | string;
+  setError: (error: string | null) => void;
   validateFiles: () => boolean;
   handleCameraCapture: () => void;
   handleAudioCapture: () => void;
-  handleFileUpload: (associating_id: string) => Promise<void>;
+  handleFileUpload: (
+    associating_id: string,
+    combineToPDF?: boolean,
+  ) => Promise<void>;
   Dialogues: JSX.Element;
   Input: (_: FileInputProps) => JSX.Element;
   fileNames: string[];
@@ -98,27 +104,56 @@ export default function useFileUpload(
   const [files, setFiles] = useState<File[]>([]);
   const queryClient = useQueryClient();
 
+  const generatePDF = async (files: File[]): Promise<File | null> => {
+    try {
+      toast.info(t("file_conversion_in_progress"));
+      const pdf = new jsPDF();
+      const totalFiles = files.length;
+
+      for (const [index, file] of files.entries()) {
+        const imgData = URL.createObjectURL(file);
+        pdf.addImage(imgData, "JPEG", 10, 10, 190, 0);
+        URL.revokeObjectURL(imgData);
+        if (index < files.length - 1) pdf.addPage();
+        const progress = Math.round(((index + 1) / totalFiles) * 100);
+        setProgress(progress);
+      }
+      const pdfBlob = pdf.output("blob");
+      const pdfFile = new File([pdfBlob], "combined.pdf", {
+        type: "application/pdf",
+      });
+      setProgress(0);
+      toast.success(t("file_conversion_success"));
+      return pdfFile;
+    } catch (error) {
+      toast.error(t("file_error__generate_pdf"));
+      setError(t("file_error__generate_pdf", { error: String(error) }));
+      setProgress(0);
+      return null;
+    }
+  };
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
       return;
     }
     const selectedFiles = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...selectedFiles]);
-
-    selectedFiles.forEach((file) => {
-      const ext: string = file.name.split(".")[1];
-      if (ExtImage.includes(ext)) {
-        const options = {
-          initialQuality: 0.6,
-          alwaysKeepResolution: true,
-        };
-        imageCompression(file, options).then((compressedFile: File) => {
-          setFiles((prev) =>
-            prev.map((f) => (f.name === file.name ? compressedFile : f)),
-          );
-        });
-      }
-    });
+    if (options.compress) {
+      selectedFiles.forEach((file) => {
+        const ext: string = file.name.split(".")[1];
+        if (ExtImage.includes(ext)) {
+          const options = {
+            initialQuality: 0.6,
+            alwaysKeepResolution: true,
+          };
+          imageCompression(file, options).then((compressedFile: File) => {
+            setFiles((prev) =>
+              prev.map((f) => (f.name === file.name ? compressedFile : f)),
+            );
+          });
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -248,28 +283,57 @@ export default function useFileUpload(
       })(body),
   });
 
-  const handleUpload = async (associating_id: string) => {
+  const handleUpload = async (
+    associating_id: string,
+    combineToPDF?: boolean,
+  ) => {
+    if (combineToPDF && "allowedExtensions" in options) {
+      options.allowedExtensions = ["jpg", "png", "jpeg"];
+    }
     if (!validateFileUpload()) return;
 
     setProgress(0);
     const errors: File[] = [];
-
-    for (const [index, file] of files.entries()) {
-      const filename =
-        allowNameFallback && uploadFileNames[index] === "" && file
-          ? file.name
-          : uploadFileNames[index];
-      if (!filename) {
+    if (combineToPDF) {
+      if (!uploadFileNames.length || !uploadFileNames[0]) {
         setError(t("file_error__single_file_name"));
         return;
       }
-      setUploading(true);
+    } else {
+      for (const [index, file] of files.entries()) {
+        const filename =
+          allowNameFallback && uploadFileNames[index] === "" && file
+            ? file.name
+            : uploadFileNames[index];
+        if (!filename) {
+          setError(t("file_error__single_file_name"));
+          return;
+        }
+      }
+    }
 
+    if (combineToPDF && files.length > 1) {
+      const pdfFile = await generatePDF(files);
+      if (pdfFile) {
+        files.splice(0, files.length, pdfFile);
+      } else {
+        clearFiles();
+        setError(t("file_error__generate_pdf"));
+        return;
+      }
+    }
+
+    setUploading(true);
+
+    for (const [index, file] of files.entries()) {
       try {
         const data = await createUpload({
           original_name: file.name ?? "",
           file_type: fileType,
-          name: filename,
+          name:
+            allowNameFallback && uploadFileNames[index] === "" && file
+              ? file.name
+              : uploadFileNames[index],
           associating_id,
           file_category: category,
           mime_type: file.type ?? "",
@@ -340,6 +404,7 @@ export default function useFileUpload(
   return {
     progress,
     error,
+    setError,
     validateFiles: validateFileUpload,
     handleCameraCapture: () => setCameraModalOpen(true),
     handleAudioCapture: () => setAudioModalOpen(true),

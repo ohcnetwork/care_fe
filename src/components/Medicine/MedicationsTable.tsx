@@ -19,7 +19,7 @@ import {
 
 import { formatDosage, formatSig } from "./utils";
 
-function getFrequencyDisplay(
+export function getFrequencyDisplay(
   timing?: MedicationRequestDosageInstruction["timing"],
 ) {
   if (!timing) return undefined;

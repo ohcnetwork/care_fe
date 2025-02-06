@@ -293,7 +293,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="preview" className="max-w-3xl mx-auto">
+        <TabsContent value="preview" className="mx-auto">
           <Card>
             <CardHeader>
               <CardTitle>{questionnaire.title}</CardTitle>
@@ -304,10 +304,10 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CardContent>
               <QuestionnaireForm
                 questionnaireSlug={id}
-                patientId={"some_patient_id"}
+                patientId={"preview"}
                 subjectType={"encounter"}
-                encounterId={"some_encounter_id"}
-                facilityId={"facilityId"}
+                encounterId={"preview"}
+                facilityId={"preview"}
               />
             </CardContent>
           </Card>

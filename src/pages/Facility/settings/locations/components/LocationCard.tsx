@@ -82,7 +82,7 @@ export function LocationCard({ location, onEdit, className }: Props) {
               <h3 className="truncate text-lg font-semibold">
                 {location.name}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500">
                 {getLocationFormLabel(location.form)}
               </p>
 
