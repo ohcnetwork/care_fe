@@ -18,5 +18,9 @@
   "devnurse": {
     "username": "dev-nurse",
     "password": "Test@123"
+  },
+  "devdoctor": {
+    "username": "developdoctor",
+    "password": "Test@123"
   }
 }
