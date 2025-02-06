@@ -29,8 +29,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-
-import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
+import CreateFacilityOrganizationSheet from "@/pages/Facility/settings/organizations/components/CreateFacilityOrganizationSheet";
 
 export default function FacilityOrganizationIndex({
   facilityId,
@@ -48,6 +47,7 @@ export default function FacilityOrganizationIndex({
     }),
     enabled: !!facilityId,
   });
+  const TableData = data?.results || [];
   if (isLoading) {
     return (
       <div className="px-6 py-6 space-y-6">
@@ -60,7 +60,7 @@ export default function FacilityOrganizationIndex({
     );
   }
 
-  if (!data?.results?.length) {
+  if (!TableData?.length) {
     return (
       <Page
         title={t("organizations")}
@@ -96,7 +96,7 @@ export default function FacilityOrganizationIndex({
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
   const getChildren = (parentId: string) => {
-    return data.results.filter((org) => org.parent?.id === parentId);
+    return TableData.filter((org) => org.parent?.id === parentId);
   };
   const OrganizationRow = ({
     org,
@@ -133,7 +133,7 @@ export default function FacilityOrganizationIndex({
             toggleChildren(child.id, expand);
           });
         };
-        const shouldExpand = !children.some(
+        const shouldExpand = !children.every(
           (child) => prevExpandedRows[child.id],
         );
         newExpandedRows[org.id] = shouldExpand;
@@ -141,6 +141,7 @@ export default function FacilityOrganizationIndex({
         return newExpandedRows;
       });
     };
+    const allExpanded = children.every((child) => expandedRows[child.id]);
     return (
       <>
         <TableRow
@@ -176,21 +177,17 @@ export default function FacilityOrganizationIndex({
                 {children.length > 0 ? (
                   <>
                     <Button
-                      variant="outline"
-                      className="h-7 shadow-gray-400 border-gray-400 sm:p-2 sm:text-sm text-xs p-1"
+                      variant="white"
+                      size={"sm"}
                       onClick={toggleAllChildren}
                     >
                       <CareIcon
-                        icon="l-plus"
+                        icon={allExpanded ? "l-minus" : "l-plus"}
                         className="h-4 w-4 sm:h-2 sm:w-2"
                       />
-                      {t("expand_all")}
+                      {t(allExpanded ? "collapse_all" : "expand_all")}
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="sm:text-sm text-xs p-1 h-7 shadow-gray-400 border-gray-400"
-                      asChild
-                    >
+                    <Button variant="white" size={"sm"} asChild>
                       <Link
                         href={`/departments/${org.id}`}
                         className="text-[#030712] flex items-center"
@@ -201,11 +198,7 @@ export default function FacilityOrganizationIndex({
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    variant="outline"
-                    className="sm:text-sm text-xs p-1 h-7 shadow-gray-400 border-gray-400"
-                    asChild
-                  >
+                  <Button variant="white" size={"sm"} asChild>
                     <Link
                       href={`/departments/${org.id}`}
                       className="text-[#030712] flex items-center"
@@ -263,14 +256,12 @@ export default function FacilityOrganizationIndex({
           <p className="">
             {t("click")}{" "}
             <span className="font-semibold">{t("add_department_or_team")}</span>{" "}
-            {t("to_create_a_new_one")}
+            {t("to_create_new_one")}
           </p>
           <p className="">
             {t("click")}{" "}
             <span className="font-semibold">{t("see_details")}</span>{" "}
-            {t(
-              "to_open_manage_users_or_create_more_departments_teams_within_it",
-            )}
+            {t("to_manage_create_more")}
           </p>
         </div>
       </div>
@@ -286,10 +277,9 @@ export default function FacilityOrganizationIndex({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.results
-            .filter(
-              (org) => !org.parent || Object.keys(org.parent).length === 0,
-            ) // Parent rows only
+          {TableData.filter(
+            (org) => !org.parent || Object.keys(org.parent).length === 0,
+          ) // Parent rows only
             .map((parent) => (
               <OrganizationRow
                 key={parent.id}
