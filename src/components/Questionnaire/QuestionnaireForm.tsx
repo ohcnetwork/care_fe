@@ -262,13 +262,18 @@ export function QuestionnaireForm({
     // Continue with existing submission logic...
     const requests: BatchRequest[] = [];
     if (encounterId && patientId) {
-      const context = { patientId, encounterId };
+      const context = { facilityId, patientId, encounterId };
       // First, collect all structured data requests if encounterId is provided
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
           if (response.structured_type) {
+            console.log(
+              "Processing structured response",
+              response.structured_type,
+            );
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
+              console.log("Structured data found", structuredData);
               const structuredRequests = getStructuredRequests(
                 response.structured_type,
                 structuredData,

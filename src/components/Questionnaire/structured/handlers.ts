@@ -3,6 +3,8 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
+import { LocationAssociationQuestion } from "@/types/location/association";
+import locationApi from "@/types/location/locationApi";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
@@ -23,7 +25,7 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   }>;
 };
 
-const handlers: {
+export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
@@ -154,10 +156,47 @@ const handlers: {
       ];
     },
   },
+  location_association: {
+    getRequests: (
+      locationAssociations: LocationAssociationQuestion[],
+      { facilityId, encounterId },
+    ) => {
+      if (!locationAssociations.length) {
+        console.log("No location associations found");
+        return [];
+      }
+
+      if (!facilityId) {
+        console.log("No facility ID found");
+        return [];
+      }
+
+      return locationAssociations.map((locationAssociation) => {
+        console.log(
+          "Creating location association request",
+          locationAssociation,
+        );
+        return {
+          url: locationApi.createAssociation.path
+            .replace("{facility_external_id}", facilityId)
+            .replace("{location_external_id}", locationAssociation.location),
+          method: locationApi.createAssociation.method,
+          body: {
+            encounter: encounterId,
+            start_datetime: locationAssociation.start_datetime,
+            end_datetime: locationAssociation.end_datetime,
+            status: locationAssociation.status,
+            meta: locationAssociation.meta,
+          },
+          reference_id: `location_association_${locationAssociation}`,
+        };
+      });
+    },
+  },
 };
 
 export const getStructuredRequests = <T extends StructuredQuestionType>(
   type: T,
   data: DataTypeFor<T>[],
   context: StructuredHandlerContext,
-) => handlers[type].getRequests(data, context);
+) => structuredHandlers[type].getRequests(data, context);

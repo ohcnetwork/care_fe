@@ -4,6 +4,7 @@ import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import { LocationAssociationQuestion } from "@/types/location/association";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
@@ -21,7 +22,8 @@ export type ResponseValue = {
     | "symptom"
     | "diagnosis"
     | "encounter"
-    | "appointment";
+    | "appointment"
+    | "location_association";
 
   value?:
     | string
@@ -34,7 +36,8 @@ export type ResponseValue = {
     | SymptomRequest[]
     | DiagnosisRequest[]
     | Encounter
-    | CreateAppointmentQuestion;
+    | CreateAppointmentQuestion[]
+    | LocationAssociationQuestion[];
   value_code?: Code;
   value_quantity?: Quantity;
 };

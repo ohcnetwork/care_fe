@@ -4,6 +4,10 @@ import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import {
+  LocationAssociationQuestion,
+  LocationAssociationWrite,
+} from "@/types/location/association";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 import {
   AppointmentCreateRequest,
@@ -19,6 +23,7 @@ export interface StructuredDataMap {
   medication_statement: MedicationStatementRequest;
   encounter: Encounter;
   appointment: CreateAppointmentQuestion;
+  location_association: LocationAssociationQuestion;
 }
 
 // Map structured types to their request types
@@ -30,6 +35,7 @@ export interface StructuredRequestMap {
   medication_statement: { datapoints: MedicationStatementRequest[] };
   encounter: EncounterEditRequest;
   appointment: AppointmentCreateRequest;
+  location_association: LocationAssociationWrite;
 }
 
 export type RequestTypeFor<T extends StructuredQuestionType> =

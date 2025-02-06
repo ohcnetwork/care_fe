@@ -23,6 +23,7 @@ import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import { LocationAssociationQuestion } from "@/types/location/association";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
@@ -32,6 +33,7 @@ interface Props {
   patientId: string;
 }
 
+// TODO: Ensure that this type is not defined elsewhere.
 type ResponseValueType = {
   value?:
     | string
@@ -44,7 +46,8 @@ type ResponseValueType = {
     | MedicationStatementRequest[]
     | SymptomRequest[]
     | DiagnosisRequest[]
-    | CreateAppointmentQuestion;
+    | CreateAppointmentQuestion[]
+    | LocationAssociationQuestion[];
   value_quantity?: {
     value: number;
   };
