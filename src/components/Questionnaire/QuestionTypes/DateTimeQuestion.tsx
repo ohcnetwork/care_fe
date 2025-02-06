@@ -55,7 +55,7 @@ export function DateTimeQuestion({
       [
         {
           type: "dateTime",
-          value: date.toISOString(),
+          value: date,
         },
       ],
       questionnaireResponse.question_id,
@@ -75,7 +75,7 @@ export function DateTimeQuestion({
       [
         {
           type: "dateTime",
-          value: date.toISOString(),
+          value: date,
         },
       ],
       questionnaireResponse.question_id,
