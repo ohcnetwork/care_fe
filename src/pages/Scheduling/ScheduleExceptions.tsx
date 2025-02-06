@@ -148,6 +148,7 @@ const ScheduleExceptionItem = (
             <AlertDialogFooter>
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
+                variant="destructive"
                 onClick={() => {
                   deleteException();
                   setOpen(false);

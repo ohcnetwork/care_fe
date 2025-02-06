@@ -290,6 +290,7 @@ const ScheduleTemplateEditor = ({
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
+                    variant="destructive"
                     onClick={() => {
                       deleteTemplate();
                       setDialogOpen(false);
@@ -419,6 +420,7 @@ const AvailabilityEditor = ({
             <AlertDialogFooter>
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
               <AlertDialogAction
+                variant="destructive"
                 onClick={() => {
                   deleteAvailability();
                   setOpenDialog(false);

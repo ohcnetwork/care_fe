@@ -405,6 +405,7 @@ export default function CreateScheduleTemplateSheet({
                           <AlertDialogFooter>
                             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                             <AlertDialogAction
+                              variant={"destructive"}
                               onClick={() => {
                                 const availabilities =
                                   form.getValues("availabilities");
