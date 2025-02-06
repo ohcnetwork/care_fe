@@ -8,6 +8,12 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import PaginationComponent from "@/components/Common/Pagination";
@@ -18,7 +24,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, relativeTime } from "@/Utils/utils";
+import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
 const CommentSection = (props: { id: string }) => {
@@ -130,23 +136,46 @@ export const Comment = ({
   created_by,
   created_date,
 }: CommentModel) => (
-  <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
-    <div className="w-full">
-      <p className="break-words whitespace-pre-wrap">
-        {comment.replace(/\n+/g, "\n")}
-      </p>
-    </div>
-    <div className="flex w-full items-center">
-      <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
-        <Avatar
-          name={`${created_by.first_name} ${created_by.last_name}`}
-          className="h-8 w-8 "
-        />
-        <span className="pl-2 text-sm text-secondary-700">
-          {formatName(created_by)}
-        </span>
+  <div
+    className={cn(
+      "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
+      "justify-start",
+    )}
+  >
+    <div className="flex max-w-[80%] items-start gap-3">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex">
+              <Avatar
+                name={`${created_by.first_name} ${created_by.last_name}`}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{formatName(created_by)}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <div className="flex flex-col items-start">
+        <p className="text-xs space-x-2 mb-1">
+          <span className="text-gray-700 font-medium">
+            {formatName(created_by)}
+          </span>
+          <time
+            className="text-gray-500"
+            dateTime={created_date}
+            title={formatDateTime(created_date)}
+          >
+            {relativeTime(created_date)}
+          </time>
+        </p>
+        <div className="p-3 rounded-lg break-words bg-gray-100 border border-gray-200">
+          {comment.replace(/\n+/g, "\n")}
+        </div>
       </div>
-      <div className="text-xs">{relativeTime(created_date)}</div>
     </div>
   </div>
 );
