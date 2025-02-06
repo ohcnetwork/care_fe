@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { t } from "i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -54,7 +55,7 @@ export function DateTimeQuestion({
       [
         {
           type: "dateTime",
-          value: date.toISOString(),
+          value: date,
         },
       ],
       questionnaireResponse.question_id,
@@ -74,7 +75,7 @@ export function DateTimeQuestion({
       [
         {
           type: "dateTime",
-          value: date.toISOString(),
+          value: date,
         },
       ],
       questionnaireResponse.question_id,
@@ -104,7 +105,7 @@ export function DateTimeQuestion({
             disabled={disabled}
           >
             <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-            {currentValue ? format(currentValue, "PPP") : "Pick a date"}
+            {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

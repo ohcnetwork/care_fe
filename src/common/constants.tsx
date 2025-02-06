@@ -9,6 +9,7 @@ export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
   patientTokenKey: "care_patient_token",
+  loginPreference: "care_login_preference",
 };
 
 export interface OptionsType {

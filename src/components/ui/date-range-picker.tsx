@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { t } from "i18next";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
 
@@ -51,7 +52,7 @@ export function DateRangePicker({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>{t("pick_a_date")}</span>
             )}
           </Button>
         </PopoverTrigger>

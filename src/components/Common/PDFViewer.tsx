@@ -7,6 +7,7 @@ export default function PDFViewer(
     url: string;
     pageNumber: number;
     onDocumentLoadSuccess: (numPages: number) => void;
+    scale: number;
   }>,
 ) {
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -21,7 +22,11 @@ export default function PDFViewer(
           }
           className="w-full"
         >
-          <Page pageNumber={props.pageNumber} height={650} />
+          <Page
+            pageNumber={props.pageNumber}
+            height={650}
+            scale={props.scale}
+          />
         </Document>
       </div>
     </div>

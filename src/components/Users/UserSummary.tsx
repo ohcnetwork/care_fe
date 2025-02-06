@@ -28,29 +28,27 @@ import {
   showUserPasswordReset,
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
 
 export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const { t } = useTranslation();
-  const [showDeleteDialog, setshowDeleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
-    mutationFn: async () => {
-      return await request(routes.deleteUser, {
-        pathParams: { username: userData?.username || "" },
-      });
-    },
+    mutationFn: mutate(routes.deleteUser, {
+      pathParams: { username: userData?.username || "" },
+    }),
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
-      setshowDeleteDialog(false);
+      setShowDeleteDialog(false);
       navigate("/users");
     },
     onError: () => {
-      setshowDeleteDialog(false);
+      setShowDeleteDialog(false);
       toast.error(t("user_delete_error"));
     },
   });
@@ -94,7 +92,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           name={userData.username}
           handleOk={handleSubmit}
           handleCancel={() => {
-            setshowDeleteDialog(false);
+            setShowDeleteDialog(false);
           }}
         />
       )}
@@ -185,7 +183,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
             </div>
             <div className="w-3/4">
               <Button
-                onClick={() => setshowDeleteDialog(true)}
+                onClick={() => setShowDeleteDialog(true)}
                 variant="destructive"
                 data-testid="user-delete-button"
                 className="my-1 inline-flex"
