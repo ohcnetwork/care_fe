@@ -69,22 +69,31 @@ export function formatValue(
 function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   if (!response) return null;
 
-  const value =
-    response.values[0]?.value || response.values[0]?.value_quantity?.value;
-
-  if (!value) return null;
-
   return (
     <div>
       <div className="text-xs text-gray-500">{question.text}</div>
-      <div className="text-sm font-medium whitespace-pre-wrap">
-        {formatValue(value, question.type)}
-        {question.unit?.code && (
-          <span className="ml-1 text-xs">{question.unit.code}</span>
-        )}
-        {response.note && (
-          <span className="ml-2 text-xs text-gray-500">({response.note})</span>
-        )}
+      <div className="space-y-1">
+        {response.values.map((valueObj, index) => {
+          const value = valueObj.value || valueObj.value_quantity?.value;
+          if (!value) return null;
+
+          return (
+            <div
+              key={index}
+              className="text-sm font-medium whitespace-pre-wrap"
+            >
+              {formatValue(value, question.type)}
+              {question.unit?.code && (
+                <span className="ml-1 text-xs">{question.unit.code}</span>
+              )}
+              {index === response.values.length - 1 && response.note && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({response.note})
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
