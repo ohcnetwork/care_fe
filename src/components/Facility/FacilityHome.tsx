@@ -251,7 +251,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="secondary"
