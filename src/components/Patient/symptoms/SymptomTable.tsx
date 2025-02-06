@@ -1,6 +1,12 @@
 import { t } from "i18next";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -12,107 +18,135 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { formatName } from "@/Utils/utils";
-import { Symptom } from "@/types/emr/symptom/symptom";
-
-export const getStatusBadgeStyle = (status: string) => {
-  switch (status?.toLowerCase()) {
-    case "active":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "inactive":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    case "resolved":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "recurrence":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
+import {
+  SYMPTOM_CLINICAL_STATUS_STYLES,
+  SYMPTOM_SEVERITY_STYLES,
+  SYMPTOM_VERIFICATION_STATUS_STYLES,
+  Symptom,
+} from "@/types/emr/symptom/symptom";
 
 interface SymptomTableProps {
   symptoms: Symptom[];
-  showHeader?: boolean;
 }
 
-export function SymptomTable({
-  symptoms,
-  showHeader = true,
-}: SymptomTableProps) {
+export function SymptomTable({ symptoms }: SymptomTableProps) {
   return (
-    <Table>
-      {showHeader && (
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("symptom")}</TableHead>
-            <TableHead>{t("status")}</TableHead>
-            <TableHead>{t("severity")}</TableHead>
-            <TableHead>{t("onset")}</TableHead>
-            <TableHead>{t("verification")}</TableHead>
-            <TableHead>{t("notes")}</TableHead>
-            <TableHead>{t("created_by")}</TableHead>
-          </TableRow>
-        </TableHeader>
-      )}
+    <Table className="border-separate border-spacing-y-0.5">
+      <TableHeader>
+        <TableRow className="rounded-md overflow-hidden bg-gray-100">
+          <TableHead className="first:rounded-l-md h-auto  py-1 px-2  text-gray-600">
+            {t("symptom")}
+          </TableHead>
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+            {t("severity")}
+          </TableHead>
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+            {t("status")}
+          </TableHead>
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+            {t("verification")}
+          </TableHead>
+          <TableHead className="h-auto  py-1 px-2  text-gray-600">
+            {t("notes")}
+          </TableHead>
+          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+            {t("logged_by")}
+          </TableHead>
+        </TableRow>
+      </TableHeader>
       <TableBody>
-        {symptoms.map((symptom: Symptom, index: number) => {
-          const isEnteredInError =
-            symptom.verification_status === "entered_in_error";
+        {symptoms.map((symptom) => {
+          const note = symptom.note || "";
+          const MAX_NOTE_LENGTH = 15;
+          const isLongNote = note.length > MAX_NOTE_LENGTH;
+          const displayNote = isLongNote
+            ? `${note.slice(0, MAX_NOTE_LENGTH)}..`
+            : note;
 
           return (
-            <>
-              <TableRow
-                key={index}
-                className={
-                  isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined
-                }
-              >
-                <TableCell className="font-medium">
-                  {symptom.code.display}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={`whitespace-nowrap ${getStatusBadgeStyle(symptom.clinical_status)}`}
-                  >
-                    {t(symptom.clinical_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={"secondary"} className="whitespace-nowrap">
-                    {t(symptom.severity)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {symptom.onset?.onset_datetime
-                    ? new Date(
-                        symptom.onset.onset_datetime,
-                      ).toLocaleDateString()
-                    : "-"}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={isEnteredInError ? "destructive" : "outline"}
-                    className="whitespace-nowrap capitalize"
-                  >
-                    {t(symptom.verification_status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="max-w-[200px] truncate">
-                  {symptom.note || "-"}
-                </TableCell>
-                <TableCell className="whitespace-nowrap flex items-center gap-2">
+            <TableRow
+              key={symptom.id}
+              className={`rounded-md overflow-hidden bg-gray-50 ${
+                symptom.verification_status === "entered_in_error"
+                  ? "opacity-50"
+                  : ""
+              }`}
+            >
+              <TableCell className="font-medium first:rounded-l-md">
+                {symptom.code.display}
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`whitespace-nowrap ${
+                    SYMPTOM_SEVERITY_STYLES[symptom.severity]
+                  }`}
+                >
+                  {t(symptom.severity)}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`whitespace-nowrap ${
+                    SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
+                  }`}
+                >
+                  {t(symptom.clinical_status)}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`whitespace-nowrap capitalize ${
+                    SYMPTOM_VERIFICATION_STATUS_STYLES[
+                      symptom.verification_status
+                    ]
+                  }`}
+                >
+                  {t(symptom.verification_status)}
+                </Badge>
+              </TableCell>
+              <TableCell className="max-w-[200px]">
+                {note ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-950 truncate">
+                      {displayNote}
+                    </span>
+                    {isLongNote && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs shrink-0"
+                          >
+                            {t("see_note")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {note}
+                          </p>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
+              <TableCell className="last:rounded-r-md">
+                <div className="flex items-center gap-2">
                   <Avatar
-                    name={formatName(symptom.created_by)}
+                    name={symptom.created_by.username}
                     className="w-4 h-4"
-                    imageUrl={symptom.created_by?.profile_picture_url}
+                    imageUrl={symptom.created_by.profile_picture_url}
                   />
-                  <span className="text-sm">
-                    {formatName(symptom.created_by)}
-                  </span>
-                </TableCell>
-              </TableRow>
-            </>
+                  <span className="text-sm">{symptom.created_by.username}</span>
+                </div>
+              </TableCell>
+            </TableRow>
           );
         })}
       </TableBody>

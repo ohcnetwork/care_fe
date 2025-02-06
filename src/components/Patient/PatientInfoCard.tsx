@@ -12,6 +12,8 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -265,11 +267,25 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  {encounter.hospitalization?.discharge_disposition && (
-                    <Badge title="Discharge Disposition" variant="outline">
-                      {encounter.hospitalization.discharge_disposition}
-                    </Badge>
-                  )}
+                  {
+                    // (encounter.status === "discharged" ||
+                    //   encounter.status === "completed") &&
+                    encounter.hospitalization?.discharge_disposition && (
+                      <Badge
+                        title={t("discharge_disposition")}
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <CareIcon
+                          icon="l-signout"
+                          className="w-4 h-4 text-blue-400"
+                        />
+                        {t(
+                          `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
+                        )}
+                      </Badge>
+                    )
+                  }
 
                   <LinkDepartmentsSheet
                     entityType="encounter"
