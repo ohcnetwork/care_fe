@@ -677,6 +677,7 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
+    enabled: !!props.date_from && !!props.date_to,
   });
 
   let appointments = data?.results ?? [];
@@ -801,6 +802,7 @@ function AppointmentRow(props: {
         date_before: props.date_to,
       },
     }),
+    enabled: !!props.date_from && !!props.date_to,
   });
 
   let appointments = data?.results ?? [];
@@ -973,7 +975,7 @@ const AppointmentStatusDropdown = ({
   };
 
   return (
-    <div className="w-32">
+    <div className="w-32" onClick={(e) => e.stopPropagation()}>
       <Select
         value={currentStatus}
         onValueChange={(value) =>

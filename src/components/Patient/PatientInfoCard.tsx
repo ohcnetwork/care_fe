@@ -12,6 +12,8 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -201,6 +203,43 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverContent>
                   </Popover>
 
+                  {props.encounter.current_location && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                            title={`Current Location: ${props.encounter.current_location.name}`}
+                          >
+                            <Building className="w-4 h-4 text-blue-400" />
+                            {props.encounter.current_location.name}
+                            <ChevronDown className="h-3 w-3 opacity-50" />
+                          </Badge>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align={"start"} className="w-auto p-2">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">
+                            Current Location
+                          </h4>
+                          <p className="text-sm text-gray-700">
+                            {props.encounter.current_location.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {props.encounter.current_location.description}
+                          </p>
+                        </div>
+                        <Button variant="outline">
+                          <Link
+                            href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                          >
+                            Move Patient
+                          </Link>
+                        </Button>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                   <Popover>
                     <PopoverTrigger asChild>
                       <div>
@@ -265,11 +304,25 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Badge>
                   )}
 
-                  {encounter.hospitalization?.discharge_disposition && (
-                    <Badge title="Discharge Disposition" variant="outline">
-                      {encounter.hospitalization.discharge_disposition}
-                    </Badge>
-                  )}
+                  {
+                    // (encounter.status === "discharged" ||
+                    //   encounter.status === "completed") &&
+                    encounter.hospitalization?.discharge_disposition && (
+                      <Badge
+                        title={t("discharge_disposition")}
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <CareIcon
+                          icon="l-signout"
+                          className="w-4 h-4 text-blue-400"
+                        />
+                        {t(
+                          `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
+                        )}
+                      </Badge>
+                    )
+                  }
 
                   <LinkDepartmentsSheet
                     entityType="encounter"
