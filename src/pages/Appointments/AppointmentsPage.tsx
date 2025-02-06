@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -56,8 +55,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import UserAutocomplete from "@/components/ui/user-autocomplete";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -69,7 +68,6 @@ import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
   formatDisplayName,
-  formatName,
   formatPatientAge,
 } from "@/Utils/utils";
 import {
@@ -360,100 +358,23 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start">
           <div className="mt-1">
-            <Label className="mb-2 text-black">
+            <Label htmlFor="practitioner" className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
-                disabled={schedulableUsersQuery.isLoading}
-              >
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="min-w-60 justify-start"
-                >
-                  {practitioner ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={practitioner.profile_picture_url}
-                        name={formatName(practitioner)}
-                        className="size-6 rounded-full"
-                      />
-                      <span>{formatName(practitioner)}</span>
-                    </div>
-                  ) : (
-                    <span>{t("show_all")}</span>
-                  )}
-                  <CaretDownIcon className="ml-auto" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder={t("search")}
-                    className="outline-none border-none ring-0 shadow-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      {schedulableUsersQuery.isFetching
-                        ? t("searching")
-                        : t("no_results")}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      <PopoverClose className="w-full">
-                        <CommandItem
-                          value="all"
-                          onSelect={() =>
-                            setQParams({
-                              ...qParams,
-                              practitioner: null,
-                              slot: null,
-                            })
-                          }
-                          className="cursor-pointer"
-                        >
-                          <span>{t("show_all")}</span>
-                          {!qParams.practitioner && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </CommandItem>
-                      </PopoverClose>
-                      {schedulableUsersQuery.data?.users.map((user) => (
-                        <PopoverClose className="w-full" key={user.id}>
-                          <CommandItem
-                            value={formatName(user)}
-                            onSelect={() =>
-                              setQParams({
-                                ...qParams,
-                                practitioner: user.username,
-                                slot: null,
-                              })
-                            }
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Avatar
-                                imageUrl={user.profile_picture_url}
-                                name={formatName(user)}
-                                className="size-6 rounded-full"
-                              />
-                              <span>{formatName(user)}</span>
-                              <span className="text-xs text-gray-500 font-medium">
-                                {user.user_type}
-                              </span>
-                            </div>
-                            {qParams.practitioner === user.username && (
-                              <CheckIcon className="ml-auto" />
-                            )}
-                          </CommandItem>
-                        </PopoverClose>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <UserAutocomplete
+              value={practitioner || undefined}
+              id="practitioner"
+              options={{ users: resources ?? [] }}
+              onSelect={(user) => {
+                if (user) {
+                  setQParams({
+                    ...qParams,
+                    practitioner: user.username,
+                    slot: null,
+                  });
+                }
+              }}
+            />
           </div>
 
           <div>
