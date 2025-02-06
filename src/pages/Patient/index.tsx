@@ -128,12 +128,6 @@ function PatientIndex() {
         <CardContent className="mt-2 pt-2 px-6 pb-3">
           <div className="flex flex-col md:flex-row gap-2 justify-between">
             <div className="flex flex-row md:flex-col gap-2 md:gap-0">
-              <span className="text-xs font-medium">
-                {t("appointment_type")}:{" "}
-              </span>
-              <span className="text-sm">{"Currently doesn't exist"}</span>
-            </div>
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0">
               <span className="text-xs font-medium">{t("location")}: </span>
               <span className="text-sm">{"Facility Location"}</span>
             </div>

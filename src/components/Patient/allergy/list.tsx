@@ -1,12 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { PencilIcon } from "lucide-react";
+import {
+  BeakerIcon,
+  CookingPotIcon,
+  HeartPulseIcon,
+  LeafIcon,
+} from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -20,26 +32,54 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
-import { AllergyIntolerance } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import { formatName } from "@/Utils/utils";
+import {
+  ALLERGY_CLINICAL_STATUS_STYLES,
+  ALLERGY_CRITICALITY_STYLES,
+  ALLERGY_VERIFICATION_STATUS_STYLES,
+  AllergyCategory,
+  AllergyIntolerance,
+} from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface AllergyListProps {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
+  encounterStatus?: Encounter["status"];
 }
+
+export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
+  food: <CookingPotIcon className="h-4 w-4" aria-label="Food allergy" />,
+  medication: (
+    <BeakerIcon className="h-4 w-4" aria-label="Medication allergy" />
+  ),
+  environment: (
+    <LeafIcon className="h-4 w-4" aria-label="Environmental allergy" />
+  ),
+  biologic: (
+    <HeartPulseIcon className="h-4 w-4" aria-label="Biologic allergy" />
+  ),
+};
 
 export function AllergyList({
   facilityId,
   patientId,
   encounterId,
+  encounterStatus,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
-    queryKey: ["allergies", patientId, encounterId],
+    queryKey: ["allergies", patientId, encounterId, encounterStatus],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
+      queryParams: {
+        encounter: completedEncounterStatus.includes(encounterStatus as string)
+          ? encounterId
+          : undefined,
+      },
     }),
   });
 
@@ -80,81 +120,106 @@ export function AllergyList({
     );
   }
 
-  const getStatusBadgeStyle = (status: string | undefined) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "inactive":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getCategoryBadgeStyle = (category: string) => {
-    switch (category?.toLowerCase()) {
-      case "food":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "medication":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "environment":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   interface AllergyRowProps {
     allergy: AllergyIntolerance;
-    isEnteredInError?: boolean;
   }
 
-  function AllergyRow({ allergy, isEnteredInError }: AllergyRowProps) {
+  function AllergyRow({ allergy }: AllergyRowProps) {
+    const MAX_NOTE_LENGTH = 15;
+    const note = allergy.note || "";
+    const isLongNote = note.length > MAX_NOTE_LENGTH;
+    const displayNote = isLongNote
+      ? `${note.slice(0, MAX_NOTE_LENGTH)}..`
+      : note;
+
+    useEffect(() => {
+      console.log(
+        "Allergy Note:",
+        allergy.note,
+        isLongNote,
+        displayNote,
+        note.length,
+      );
+    }, [allergy.note, isLongNote, displayNote, note.length]);
+
     return (
       <TableRow
-        className={isEnteredInError ? "opacity-50 bg-gray-50/50" : undefined}
+        className={`rounded-md overflow-hidden bg-gray-50 ${
+          allergy.verification_status === "entered_in_error" ? "opacity-50" : ""
+        }`}
       >
-        <TableCell className="font-medium">{allergy.code.display}</TableCell>
-        <TableCell>
-          <Badge
-            variant="outline"
-            className={`whitespace-nowrap ${getCategoryBadgeStyle(
-              allergy.category ?? "",
-            )}`}
-          >
-            {t(allergy.category)}
-          </Badge>
+        <TableCell className="first:rounded-l-md">
+          <div className="flex items-center">
+            {CATEGORY_ICONS[allergy.category ?? ""]}
+          </div>
+        </TableCell>
+        <TableCell className="font-medium pl-0 ">
+          {allergy.code.display}
         </TableCell>
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap ${getStatusBadgeStyle(
-              allergy.clinical_status,
-            )}`}
+            className={`whitespace-nowrap ${
+              ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]
+            }`}
           >
             {t(allergy.clinical_status)}
           </Badge>
         </TableCell>
         <TableCell>
-          <Badge variant="secondary" className="whitespace-nowrap">
+          <Badge
+            variant="outline"
+            className={`whitespace-nowrap ${
+              ALLERGY_CRITICALITY_STYLES[allergy.criticality]
+            }`}
+          >
             {t(allergy.criticality)}
           </Badge>
         </TableCell>
         <TableCell>
           <Badge
-            variant={isEnteredInError ? "destructive" : "outline"}
-            className="whitespace-nowrap capitalize"
+            variant="outline"
+            className={`whitespace-nowrap capitalize ${
+              ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
+            }`}
           >
             {t(allergy.verification_status)}
           </Badge>
         </TableCell>
-        <TableCell className="whitespace-nowrap flex items-center gap-2">
-          <Avatar
-            name={allergy.created_by.username}
-            className="w-4 h-4"
-            imageUrl={allergy.created_by.profile_picture_url}
-          />
-          <span className="text-sm">{allergy.created_by.username}</span>
+        <TableCell className="text-sm text-gray-950">
+          {note && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-950 max-w-[200px]">{displayNote}</span>
+              {isLongNote && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs shrink-0"
+                    >
+                      {t("see_note")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {note}
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+          )}
+        </TableCell>
+        <TableCell className="last:rounded-r-md">
+          <div className="flex items-center gap-2">
+            <Avatar
+              name={allergy.created_by.username}
+              className="w-4 h-4"
+              imageUrl={allergy.created_by.profile_picture_url}
+            />
+            <span className="text-sm">{formatName(allergy.created_by)}</span>
+          </div>
         </TableCell>
       </TableRow>
     );
@@ -166,15 +231,28 @@ export function AllergyList({
       patientId={patientId}
       encounterId={encounterId}
     >
-      <Table>
+      <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
-          <TableRow>
-            <TableHead>{t("allergen")}</TableHead>
-            <TableHead>{t("category")}</TableHead>
-            <TableHead>{t("status")}</TableHead>
-            <TableHead>{t("criticality")}</TableHead>
-            <TableHead>{t("verification")}</TableHead>
-            <TableHead>{t("created_by")}</TableHead>
+          <TableRow className="rounded-md overflow-hidden bg-gray-100">
+            <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
+            <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
+              {t("allergen")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("status")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("criticality")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("verification")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("notes")}
+            </TableHead>
+            <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+              {t("logged_by")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -194,25 +272,24 @@ export function AllergyList({
                 (allergy) => allergy.verification_status === "entered_in_error",
               )
               .map((allergy) => (
-                <AllergyRow
-                  key={allergy.id}
-                  allergy={allergy}
-                  isEnteredInError
-                />
+                <AllergyRow key={allergy.id} allergy={allergy} />
               ))}
         </TableBody>
       </Table>
       {hasEnteredInErrorRecords && !showEnteredInError && (
-        <div className="flex justify-start">
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => setShowEnteredInError(true)}
-            className="text-xs underline text-gray-500"
-          >
-            {t("view_all")}
-          </Button>
-        </div>
+        <>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowEnteredInError(true)}
+              className="text-xs underline text-gray-950"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
+        </>
       )}
     </AllergyListLayout>
   );
@@ -230,15 +307,15 @@ const AllergyListLayout = ({
   children: ReactNode;
 }) => {
   return (
-    <Card>
-      <CardHeader className="px-4 py-0 pt-4 flex justify-between flex-row">
+    <Card className="border-none rounded-sm">
+      <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
         <CardTitle>{t("allergies")}</CardTitle>
         {facilityId && encounterId && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500"
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
           >
-            <PencilIcon size={12} />
+            <CareIcon icon="l-edit" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}

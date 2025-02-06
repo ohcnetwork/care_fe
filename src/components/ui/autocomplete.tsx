@@ -52,6 +52,7 @@ export default function Autocomplete({
   "data-cy": dataCy,
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
+
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const commandContent = (
@@ -124,26 +125,23 @@ export default function Autocomplete({
     );
   }
 
+  const selectedOption = options.find((option) => option.value === value);
+
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className={popoverClassName}>
         <Button
-          title={
-            value
-              ? options.find((option) => option.value === value)?.label
-              : undefined
-          }
+          title={selectedOption?.label}
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
           disabled={disabled}
           data-cy={dataCy}
+          onClick={() => setOpen(!open)}
         >
-          <span className="overflow-hidden">
-            {value
-              ? options.find((option) => option.value === value)?.label
-              : placeholder}
+          <span className={cn("truncate", !selectedOption && "text-gray-500")}>
+            {selectedOption ? selectedOption.label : placeholder}
           </span>
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>

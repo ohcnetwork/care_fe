@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
@@ -9,9 +9,9 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
+import routes, { JwtTokenObtainPair, Type } from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface Props {
@@ -42,38 +42,44 @@ export default function AuthUserProvider({
     enabled: !!localStorage.getItem(LocalStorageKeys.accessToken),
   });
 
+  const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+
+  const tokenRefreshQuery = useQuery({
+    queryKey: ["user-refresh-token"],
+    queryFn: query(routes.token_refresh, {
+      body: { refresh: refreshToken || "" },
+    }),
+    refetchInterval: careConfig.auth.tokenRefreshInterval,
+    enabled: !!refreshToken && !!user,
+  });
+
   useEffect(() => {
-    if (!user) {
+    if (tokenRefreshQuery.isError) {
+      localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
       return;
     }
 
-    updateRefreshToken(true);
-    setInterval(
-      () => updateRefreshToken(),
-      careConfig.auth.tokenRefreshInterval,
-    );
-  }, [user]);
+    if (tokenRefreshQuery.data) {
+      const { access, refresh } = tokenRefreshQuery.data;
+      localStorage.setItem(LocalStorageKeys.accessToken, access);
+      localStorage.setItem(LocalStorageKeys.refreshToken, refresh);
+    }
+  }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
-  const signIn = useCallback(
-    async (creds: { username: string; password: string }) => {
-      const query = await request(routes.login, { body: creds });
+  const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
+    mutationFn: mutate(routes.login),
+    onSuccess: (data: JwtTokenObtainPair) => {
+      setAccessToken(data.access);
+      localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+      localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
-      if (query.res?.ok && query.data) {
-        setAccessToken(query.data.access);
-        localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
-        localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
-
-        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
-        if (location.pathname === "/" || location.pathname === "/login") {
-          navigate(getRedirectOr("/"));
-        }
+      if (location.pathname === "/" || location.pathname === "/login") {
+        navigate(getRedirectOr("/"));
       }
-
-      return query;
     },
-    [queryClient],
-  );
+  });
 
   const patientLogin = (tokenData: TokenData, redirectUrl: string) => {
     setPatientToken(tokenData);
@@ -85,9 +91,24 @@ export default function AuthUserProvider({
   };
 
   const signOut = useCallback(async () => {
+    const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+    const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+
+    if (accessToken && refreshToken) {
+      try {
+        await mutate({
+          ...routes.logout,
+          TRes: Type<Record<string, never>>(),
+        })({ access: accessToken, refresh: refreshToken });
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
+    }
+
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    setAccessToken(null);
     setPatientToken(null);
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
@@ -123,52 +144,21 @@ export default function AuthUserProvider({
     return <Loading />;
   }
 
-  const SelectedRouter = () => {
-    if (user) {
-      return children;
-    } else if (patientToken?.token) {
-      return otpAuthorized;
-    } else {
-      return unauthorized;
-    }
-  };
-
   return (
     <AuthUserContext.Provider
       value={{
         signIn,
         signOut,
+        isAuthenticating,
         user,
         patientLogin,
         patientToken,
       }}
     >
-      <SelectedRouter />
+      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
     </AuthUserContext.Provider>
   );
 }
-
-const updateRefreshToken = async (silent = false) => {
-  const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
-
-  if (!refresh) {
-    return;
-  }
-
-  const { res, data } = await request(routes.token_refresh, {
-    body: { refresh },
-    silent,
-  });
-
-  if (res?.status !== 200 || !data) {
-    localStorage.removeItem(LocalStorageKeys.accessToken);
-    localStorage.removeItem(LocalStorageKeys.refreshToken);
-    return;
-  }
-
-  localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-  localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-};
 
 const getRedirectURL = () => {
   return new URLSearchParams(window.location.search).get("redirect");

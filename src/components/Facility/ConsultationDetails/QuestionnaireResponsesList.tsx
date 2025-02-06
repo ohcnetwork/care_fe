@@ -17,50 +17,27 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
-import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
-import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 interface Props {
   encounter?: Encounter;
   patientId: string;
 }
 
-type ResponseValueType = {
-  value?:
-    | string
-    | number
-    | boolean
-    | Date
-    | Encounter
-    | AllergyIntoleranceRequest[]
-    | MedicationRequest[]
-    | MedicationStatementRequest[]
-    | SymptomRequest[]
-    | DiagnosisRequest[]
-    | CreateAppointmentQuestion;
-  value_quantity?: {
-    value: number;
-  };
-};
-
 interface QuestionResponseProps {
   question: Question;
   response?: {
-    values: ResponseValueType[];
+    values: ResponseValue[];
     note?: string;
     question_id: string;
   };
 }
 
 export function formatValue(
-  value: ResponseValueType["value"],
+  value: ResponseValue["value"],
   type: string,
 ): string {
   if (!value) return "";
@@ -120,7 +97,7 @@ function QuestionGroup({
 }: {
   group: Question;
   responses: {
-    values: ResponseValueType[];
+    values: ResponseValue[];
     note?: string;
     question_id: string;
   }[];
