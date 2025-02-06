@@ -161,10 +161,15 @@ export const printAppointment = ({
           href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.7/dist/tailwind.min.css"
           rel="stylesheet"
         />
+        <!-- Include figtree font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
         <style>
-          body { margin: 0; padding: 16px; }
+          body { margin: 0; padding: 16px; font-family: "Figtree", sans-serif; }
           @media print {
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { margin: 0; }
+            body { margin: 1.6cm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }
         </style>
       </head>
@@ -172,8 +177,7 @@ export const printAppointment = ({
           <div
 id="appointment-token-card"
 style="
-  background-color: #F9FAFB; /* bg-gray-50 */
-  padding: 1rem;            /* p-4 */
+    
 "
 >
 <div
@@ -217,7 +221,7 @@ style="
         <h3
           style="
             font-size: 1.125rem;    /* text-lg */
-            line-height: 1.75rem;
+            line-height: 0.5rem;
             font-weight: 700;       /* font-bold */
             letter-spacing: -0.025em; /* tracking-tight (approx) */
           "
@@ -239,7 +243,7 @@ style="
       <div
         style="
           font-size: 0.875rem;             /* text-sm */
-          line-height: 1.25rem;
+          line-height: 0.5rem;
           white-space: nowrap;             /* whitespace-nowrap */
           text-align: center;              /* text-center */
           background-color: #F3F4F6;       /* bg-gray-100 */
@@ -270,7 +274,7 @@ style="
         <label
           style="
             font-size: 0.875rem; /* text-sm */
-            line-height: 1;      /* leading-none */
+            line-height: 0.5;      /* leading-none */
             font-weight: 500;    /* font-medium */
           "
         >
