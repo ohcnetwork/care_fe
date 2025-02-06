@@ -49,7 +49,7 @@ export function LocationSearch({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
         <div
-          className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm ring-offset-background flex items-center justify-between cursor-pointer"
+          className="w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer"
           role="combobox"
           aria-expanded={open}
         >

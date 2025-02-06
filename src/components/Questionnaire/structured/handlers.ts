@@ -175,10 +175,6 @@ export const structuredHandlers: {
       }
 
       return locationAssociations.map((locationAssociation) => {
-        console.log(
-          "Creating location association request",
-          locationAssociation,
-        );
         return {
           url: locationApi.createAssociation.path
             .replace("{facility_external_id}", facilityId)
