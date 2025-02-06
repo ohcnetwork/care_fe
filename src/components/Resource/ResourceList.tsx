@@ -21,13 +21,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -165,12 +158,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <div className="hidden md:flex items-center">
+                <div className="flex flex-wrap items-center gap-2">
                   <Tabs
                     value={outgoing ? "outgoing" : "incoming"}
                     className="w-full"
                   >
-                    <TabsList className="bg-transparent p-0 h-8">
+                    <TabsList className="bg-transparent p-0 h-8 flex justify-around">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -198,87 +191,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </TabsList>
                   </Tabs>
                 </div>
-                {/* Mobile View - Select Component */}
-                <div className="md:hidden ">
-                  <Select
-                    value={outgoing ? "outgoing" : "incoming"}
-                    onValueChange={(value) =>
-                      updateQuery({
-                        outgoing: value === "outgoing",
-                        title,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder={t("Type")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="outgoing">{t("outgoing")}</SelectItem>
-                      <SelectItem value="incoming">{t("incoming")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:hidden">
-                  <Select
-                    value={isActive ? "active" : "completed"}
-                    onValueChange={(value) =>
-                      updateQuery({
-                        status: value === "active" ? "pending" : "completed",
-                        title,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder={t("Status")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">{t("active")}</SelectItem>
-                      <SelectItem value="completed">
-                        {t("completed")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:hidden">
-                  <Select
-                    value={currentStatus}
-                    onValueChange={(value) =>
-                      updateQuery({
-                        status: value,
-                        title,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[120px]">
-                      <SelectValue placeholder={t("Status")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currentStatuses.map((statusOption) => (
-                        <SelectItem key={statusOption} value={statusOption}>
-                          <div className="flex items-center">
-                            <CareIcon
-                              icon={
-                                RESOURCE_STATUS_CHOICES.find(
-                                  (o) => o.text === statusOption,
-                                )?.icon || "l-folder-open"
-                              }
-                              className="mr-2 h-4 w-4"
-                            />
-                            {t(`resource_status__${statusOption}`)}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
-              <div className="hidden md:flex items-center">
+              <div className="lex flex-wrap items-center gap-2">
                 <Tabs
                   value={isActive ? "active" : "completed"}
                   className="w-full"
                 >
-                  <TabsList className="bg-transparent p-0 h-8">
+                  <TabsList className="bg-transparent p-0 h-8 flex justify-around">
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -308,11 +228,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
             </div>
 
-            <Separator className="hidden md:block" />
+            <Separator />
 
-            <div className="hidden md:block p-4">
+            <div className="p-4 h-auto overflow-hidden">
               <Tabs value={currentStatus} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
+                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
