@@ -116,8 +116,11 @@ export const structuredHandlers: {
     },
   },
   encounter: {
-    getRequests: (encounters, { patientId, encounterId }) => {
+    getRequests: (encounters, { facilityId, patientId, encounterId }) => {
       if (!encounterId) return [];
+      if (!facilityId) {
+        throw new Error("Cannot create encounter without a facility");
+      }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
           organizations: [],
@@ -128,7 +131,7 @@ export const structuredHandlers: {
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
-          facility: encounter.facility.id,
+          facility: facilityId,
         };
 
         return {
@@ -162,13 +165,13 @@ export const structuredHandlers: {
       { facilityId, encounterId },
     ) => {
       if (!locationAssociations.length) {
-        console.log("No location associations found");
         return [];
       }
 
       if (!facilityId) {
-        console.log("No facility ID found");
-        return [];
+        throw new Error(
+          "Cannot create location association without a facility",
+        );
       }
 
       return locationAssociations.map((locationAssociation) => {
