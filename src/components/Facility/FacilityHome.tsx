@@ -123,7 +123,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { mutateAsync: deleteAvatar } = useMutation({
     mutationFn: mutate(routes.deleteFacilityCoverImage, {
-
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {
