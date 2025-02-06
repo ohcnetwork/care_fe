@@ -103,6 +103,12 @@ const routes = {
     TBody: Type<LoginCredentials>(),
   },
 
+  logout: {
+    path: "/api/v1/auth/logout/",
+    method: "POST",
+    TBody: Type<JwtTokenObtainPair>(),
+  },
+
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",

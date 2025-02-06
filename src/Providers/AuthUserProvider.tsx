@@ -9,7 +9,8 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
+import routes, { Type } from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
 import { TokenData } from "@/types/auth/otpToken";
@@ -85,6 +86,20 @@ export default function AuthUserProvider({
   };
 
   const signOut = useCallback(async () => {
+    const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+    const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+
+    if (accessToken && refreshToken) {
+      try {
+        await mutate({
+          ...routes.logout,
+          TRes: Type<Record<string, never>>(),
+        })({ access: accessToken, refresh: refreshToken });
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
+    }
+
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
