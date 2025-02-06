@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useState } from "react";
@@ -38,12 +37,13 @@ interface Props {
 export default function LocationList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [expandedAll, setExpandedAll] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationListType | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useView("users", "card");
   const navigate = useNavigate();
+
   const { data, isLoading } = useQuery({
     queryKey: ["locations", facilityId, searchQuery],
     queryFn: query.debounced(locationApi.list, {
@@ -62,6 +62,10 @@ export default function LocationList({ facilityId }: Props) {
     setIsSheetOpen(false);
     setSelectedLocation(null);
   };
+  const handleExpandAll = () => {
+    setExpandedAll((prev) => !prev);
+  };
+
   return (
     <div className="space-y-6">
       <div className="">
@@ -74,13 +78,13 @@ export default function LocationList({ facilityId }: Props) {
               className="ml-auto"
             >
               <TabsList className="flex">
-                <TabsTrigger value="card" id="user-card-view">
+                <TabsTrigger value="list" id="user-card-view">
                   <div className="flex items-center gap-2">
                     <CareIcon icon="l-list-ul" className="text-lg" />
                     <span>{t("list")}</span>
                   </div>
                 </TabsTrigger>
-                <TabsTrigger value="list" id="user-list-view">
+                <TabsTrigger value="map" id="user-list-view">
                   <div className="flex items-center gap-2">
                     <CareIcon icon="l-sitemap" className="text-lg" />
                     <span>{t("map")}</span>
@@ -111,12 +115,9 @@ export default function LocationList({ facilityId }: Props) {
         </div>
         <div className="text-sm text-blue-900">
           <p>
-            Click <span className="font-semibold">"Add Location"</span> to add a
-            main location.
+            {t("addLocation")}
             <br />
-            Hover or focus to reveal{" "}
-            <span className="font-semibold">"See Details"</span>, which opens a
-            page for managing sub-locations.
+            {t("seeDetails")}
           </p>
         </div>
       </div>
@@ -129,7 +130,7 @@ export default function LocationList({ facilityId }: Props) {
           <Table>
             <TableHeader>
               <TableRow className="divide-x bg-gray-100">
-                <TableHead>{t("location")}</TableHead>
+                <TableHead className="w-[80%]">{t("location")}</TableHead>
                 <TableHead>{t("location_form")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -163,10 +164,10 @@ export default function LocationList({ facilityId }: Props) {
                         <Button
                           variant="outline"
                           className="mr-3"
-                          onClick={() => setSelectedLocation(null)}
+                          onClick={handleExpandAll}
                         >
                           <CareIcon icon="l-plus" className="w-4 h-5" />
-                          Expand All
+                          {expandedAll ? "Collapse All" : "Expand All"}
                         </Button>
                         <Button
                           variant="outline"
@@ -189,6 +190,7 @@ export default function LocationList({ facilityId }: Props) {
                       facilityId={facilityId}
                       location={location}
                       level={1}
+                      expandedAll={expandedAll}
                     />
                   ) : null}
                 </React.Fragment>

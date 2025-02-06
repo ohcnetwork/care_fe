@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,9 +17,15 @@ interface Props {
   facilityId: string;
   location: LocationListType;
   level: number;
+  expandedAll: boolean;
 }
 
-export function LocationChildren({ facilityId, location, level }: Props) {
+export function LocationChildren({
+  facilityId,
+  location,
+  level,
+  expandedAll,
+}: Props) {
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
     new Set(),
   );
@@ -46,6 +52,16 @@ export function LocationChildren({ facilityId, location, level }: Props) {
     });
   };
 
+  useEffect(() => {
+    if (expandedAll) {
+      setExpandedLocations(
+        new Set(children?.results?.map((loc) => loc.id) || []),
+      );
+    } else {
+      setExpandedLocations(new Set());
+    }
+  }, [expandedAll, children]);
+
   return (
     <>
       {children?.results?.map((childLocation: LocationListType) => (
@@ -54,7 +70,7 @@ export function LocationChildren({ facilityId, location, level }: Props) {
             className="divide-x font-medium cursor-pointer bg-gray-50 dark:bg-gray-800"
             onClick={() => toggleExpand(childLocation.id)}
           >
-            <TableCell className={`pl-${level * 4} flex items-center`}>
+            <TableCell className={`flex items-center pl-${level * 4}`}>
               {childLocation.has_children ? (
                 <CareIcon
                   icon={
@@ -79,6 +95,7 @@ export function LocationChildren({ facilityId, location, level }: Props) {
                 facilityId={facilityId}
                 location={childLocation}
                 level={level + 1}
+                expandedAll={expandedAll}
               />
             )}
         </React.Fragment>
