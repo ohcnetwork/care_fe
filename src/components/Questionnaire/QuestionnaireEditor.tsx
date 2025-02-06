@@ -1,5 +1,5 @@
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -24,6 +24,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -186,16 +193,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleCancel = () => {
     navigate(id ? `/questionnaire/${id}` : "/questionnaire");
-  };
-
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(questionnaire.questions);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    updateQuestionnaireField("questions", items);
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -559,70 +556,67 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </Button>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="questions">
-                      {(provided) => (
-                        <div
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className="space-y-6"
-                        >
-                          {questionnaire.questions.map((question, index) => (
-                            <Draggable
-                              key={question.id}
-                              draggableId={question.id}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  id={`question-${question.id}`}
-                                  className="relative"
-                                >
-                                  <div className="absolute -left-10 top-4 font-medium text-gray-500">
-                                    {index + 1}.
-                                  </div>
-                                  <QuestionEditor
-                                    question={question}
-                                    onChange={(updatedQuestion) => {
-                                      const newQuestions = [
-                                        ...questionnaire.questions,
-                                      ];
-                                      newQuestions[index] = updatedQuestion;
-                                      updateQuestionnaireField(
-                                        "questions",
-                                        newQuestions,
-                                      );
-                                    }}
-                                    onDelete={() => {
-                                      const newQuestions =
-                                        questionnaire.questions.filter(
-                                          (_, i) => i !== index,
-                                        );
-                                      updateQuestionnaireField(
-                                        "questions",
-                                        newQuestions,
-                                      );
-                                    }}
-                                    dragHandleProps={provided.dragHandleProps}
-                                    isExpanded={expandedQuestions.has(
-                                      question.id,
-                                    )}
-                                    onToggleExpand={() =>
-                                      toggleQuestionExpanded(question.id)
-                                    }
-                                    depth={0}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
+                  <div className="space-y-6">
+                    {questionnaire.questions.map((question, index) => (
+                      <div
+                        key={question.id}
+                        id={`question-${question.id}`}
+                        className="relative"
+                      >
+                        <div className="absolute -left-4 top-4 font-medium text-gray-500">
+                          {index + 1}.
                         </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
+                        <QuestionEditor
+                          key={question.id}
+                          question={question}
+                          onChange={(updatedQuestion) => {
+                            const newQuestions = [...questionnaire.questions];
+                            newQuestions[index] = updatedQuestion;
+                            updateQuestionnaireField("questions", newQuestions);
+                          }}
+                          onDelete={() => {
+                            const newQuestions = questionnaire.questions.filter(
+                              (_, i) => i !== index,
+                            );
+                            updateQuestionnaireField("questions", newQuestions);
+                          }}
+                          isExpanded={expandedQuestions.has(question.id)}
+                          onToggleExpand={() =>
+                            toggleQuestionExpanded(question.id)
+                          }
+                          depth={0}
+                          onMoveUp={() => {
+                            if (index > 0) {
+                              const newQuestions = [...questionnaire.questions];
+                              [newQuestions[index - 1], newQuestions[index]] = [
+                                newQuestions[index],
+                                newQuestions[index - 1],
+                              ];
+                              updateQuestionnaireField(
+                                "questions",
+                                newQuestions,
+                              );
+                            }
+                          }}
+                          onMoveDown={() => {
+                            if (index < questionnaire.questions.length - 1) {
+                              const newQuestions = [...questionnaire.questions];
+                              [newQuestions[index], newQuestions[index + 1]] = [
+                                newQuestions[index + 1],
+                                newQuestions[index],
+                              ];
+                              updateQuestionnaireField(
+                                "questions",
+                                newQuestions,
+                              );
+                            }
+                          }}
+                          isFirst={index === 0}
+                          isLast={index === questionnaire.questions.length - 1}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -654,22 +648,28 @@ interface QuestionEditorProps {
   question: Question;
   onChange: (updated: Question) => void;
   onDelete: () => void;
-  dragHandleProps?: any;
   isExpanded: boolean;
   onToggleExpand: () => void;
   depth: number;
   parentId?: string;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 function QuestionEditor({
   question,
   onChange,
   onDelete,
-  dragHandleProps,
   isExpanded,
   onToggleExpand,
   depth,
   parentId,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
 }: QuestionEditorProps) {
   const {
     text,
@@ -718,9 +718,6 @@ function QuestionEditor({
       }`}
     >
       <div className="flex items-center p-4">
-        <div {...dragHandleProps} className="mr-2 cursor-move">
-          <CareIcon icon="l-arrow" className="h-4 w-4 text-gray-500" />
-        </div>
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-medium text-left">
@@ -742,17 +739,48 @@ function QuestionEditor({
             className="h-4 w-4 text-gray-500"
           />
         </CollapsibleTrigger>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <CareIcon icon="l-trash-alt" className="h-4 w-4 text-destructive" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isFirst && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp?.();
+                }}
+              >
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Move Up
+              </DropdownMenuItem>
+            )}
+            {!isLast && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown?.();
+                }}
+              >
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Move Down
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive"
+            >
+              <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <CollapsibleContent>
@@ -1311,69 +1339,53 @@ function QuestionEditor({
                   Add Sub-Question
                 </Button>
               </div>
-
-              <DragDropContext
-                onDragEnd={(result) => {
-                  if (!result.destination) return;
-
-                  const items = Array.from(questions || []);
-                  const [reorderedItem] = items.splice(result.source.index, 1);
-                  items.splice(result.destination.index, 0, reorderedItem);
-
-                  updateField("questions", items);
-                }}
-              >
-                <Droppable droppableId={`group-${getQuestionPath()}`}>
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="space-y-4"
-                    >
-                      {(questions || []).map((subQuestion, idx) => (
-                        <Draggable
-                          key={subQuestion.id}
-                          draggableId={`${getQuestionPath()}-${subQuestion.id}`}
-                          index={idx}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                            >
-                              <QuestionEditor
-                                key={subQuestion.id}
-                                question={subQuestion}
-                                onChange={(updated) => {
-                                  const newQuestions = [...(questions || [])];
-                                  newQuestions[idx] = updated;
-                                  updateField("questions", newQuestions);
-                                }}
-                                onDelete={() => {
-                                  const newQuestions = questions?.filter(
-                                    (_, i) => i !== idx,
-                                  );
-                                  updateField("questions", newQuestions);
-                                }}
-                                dragHandleProps={provided.dragHandleProps}
-                                isExpanded={expandedSubQuestions.has(
-                                  subQuestion.id,
-                                )}
-                                onToggleExpand={() =>
-                                  toggleSubQuestionExpanded(subQuestion.id)
-                                }
-                                depth={depth + 1}
-                                parentId={getQuestionPath()}
-                              />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
+              <div className="space-y-4">
+                {(questions || []).map((subQuestion, idx) => (
+                  <QuestionEditor
+                    key={subQuestion.id}
+                    question={subQuestion}
+                    onChange={(updated) => {
+                      const newQuestions = [...(questions || [])];
+                      newQuestions[idx] = updated;
+                      updateField("questions", newQuestions);
+                    }}
+                    onDelete={() => {
+                      const newQuestions = questions?.filter(
+                        (_, i) => i !== idx,
+                      );
+                      updateField("questions", newQuestions);
+                    }}
+                    isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                    onToggleExpand={() =>
+                      toggleSubQuestionExpanded(subQuestion.id)
+                    }
+                    depth={depth + 1}
+                    parentId={getQuestionPath()}
+                    onMoveUp={() => {
+                      if (idx > 0) {
+                        const newQuestions = [...(questions || [])];
+                        [newQuestions[idx - 1], newQuestions[idx]] = [
+                          newQuestions[idx],
+                          newQuestions[idx - 1],
+                        ];
+                        updateField("questions", newQuestions);
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (idx < (questions?.length || 0) - 1) {
+                        const newQuestions = [...(questions || [])];
+                        [newQuestions[idx], newQuestions[idx + 1]] = [
+                          newQuestions[idx + 1],
+                          newQuestions[idx],
+                        ];
+                        updateField("questions", newQuestions);
+                      }
+                    }}
+                    isFirst={idx === 0}
+                    isLast={idx === (questions?.length || 0) - 1}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
