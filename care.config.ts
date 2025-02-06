@@ -64,11 +64,6 @@ const careConfig = {
   reCaptchaSiteKey:
     env.REACT_RECAPTCHA_SITE_KEY || "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
 
-  sampleFormats: {
-    assetImport:
-      env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
-  },
-
   wartimeShifting: boolean("REACT_WARTIME_SHIFTING"),
 
   stillWatching: {

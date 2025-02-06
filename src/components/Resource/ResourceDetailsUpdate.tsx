@@ -1,6 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { toast } from "sonner";
 
 import Card from "@/CAREUI/display/Card";
@@ -26,8 +28,8 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
@@ -62,7 +64,6 @@ const initialState = {
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
   const [qParams, _] = useQueryParams();
-  const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -84,17 +85,16 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   };
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
+  const { data, isLoading: assignedUserLoading } = useQuery({
+    queryKey: ["user", props.facilityId],
+    queryFn: query(routes.userList),
+  });
 
-  const { loading: assignedUserLoading } = useTanStackQueryInstead(
-    routes.userList,
-    {
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data && data.count) {
-          SetAssignedUser(data.results[0]);
-        }
-      },
-    },
-  );
+  useEffect(() => {
+    if (data) {
+      SetAssignedUser(data.results[0]);
+    }
+  }, [data]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -129,28 +129,40 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     form[name] = selected;
     dispatch({ type: "set_form", form });
   };
-
-  const { data: resourceDetails } = useTanStackQueryInstead(
-    routes.getResourceDetails,
-    {
+  const { data: resourceDetails } = useQuery({
+    queryKey: ["resource", props.facilityId, props.id],
+    queryFn: query(routes.getResourceDetails, {
       pathParams: { id: props.id },
-      onResponse: ({ res, data }) => {
-        if (res && data) {
-          const d = data;
-          d["status"] = qParams.status || data.status.toLowerCase();
-          dispatch({ type: "set_form", form: d });
-        }
-        setIsLoading(false);
+    }),
+  });
+  useEffect(() => {
+    if (resourceDetails) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...resourceDetails,
+          status: qParams.status || resourceDetails.status.toLowerCase(),
+        },
+      });
+    }
+  }, [resourceDetails]);
+
+  const { mutate: updateResource, isPending: updateResourceLoading } =
+    useMutation({
+      mutationFn: mutate(routes.updateResource, {
+        pathParams: { id: props.id },
+      }),
+      onSuccess: (data) => {
+        dispatch({ type: "set_form", form: data });
+        toast.success(t("request_updated_successfully"));
+        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
       },
-    },
-  );
+    });
 
   const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
-      setIsLoading(true);
-
       const resourceData: UpdateResourceRequest = {
         id: props.id,
         status: state.form.status,
@@ -169,24 +181,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         approving_facility: state.form.approving_facility?.id,
         related_patient: state.form.related_patient?.id,
       };
-
-      const { res, data } = await request(routes.updateResource, {
-        pathParams: { id: props.id },
-        body: resourceData,
-      });
-      setIsLoading(false);
-
-      if (res && res.status == 200 && data) {
-        dispatch({ type: "set_form", form: data });
-        toast.success(t("request_updated_successfully"));
-        navigate(`/facility/${props.facilityId}/resource/${props.id}`);
-      } else {
-        setIsLoading(false);
-      }
+      updateResource(resourceData);
     }
   };
 
-  if (isLoading) {
+  if (updateResourceLoading || !resourceDetails) {
     return <Loading />;
   }
 

@@ -12,6 +12,7 @@ import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import { GENDER_TYPES } from "@/common/constants";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import {
   Organization,
@@ -139,6 +140,11 @@ export const Demography = (props: PatientProps) => {
       id: "general-info",
       allowEdit: true,
       details: [
+        <PLUGIN_Component
+          key="patient_details_tab__demography__general_info"
+          __name="PatientDetailsTabDemographyGeneralInfo"
+          {...props}
+        />,
         { label: t("full_name"), value: patientData.name },
         {
           label: t("phone_number"),
