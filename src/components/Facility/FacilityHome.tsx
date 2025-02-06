@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -33,8 +34,8 @@ import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
@@ -105,24 +106,30 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
-
-  const handleDeleteClose = () => {
-    setOpenDeleteDialog(false);
-  };
-
-  const handleDeleteSubmit = async () => {
-    await request(routes.deleteFacility, {
+  const { mutate: deleteFacility } = useMutation({
+    mutationFn: mutate(routes.deleteFacility, {
       pathParams: { id: facilityId },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          toast.success(
-            t("deleted_successfully", { name: facilityData?.name }),
-          );
-        }
-        navigate("/facility");
-      },
-    });
-  };
+    }),
+    onSuccess: () => {
+      toast.success(
+        t("entity_deleted_successfully", { name: facilityData?.name }),
+      );
+      navigate("/facility");
+    },
+  });
+
+  const { mutateAsync: deleteAvatar } = useMutation({
+    mutationFn: mutate(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facilityId },
+    }),
+    onSuccess: () => {
+      toast.success(t("cover_image_deleted"));
+      queryClient.invalidateQueries({
+        queryKey: ["facility", facilityId],
+      });
+      setEditCoverImage(false);
+    },
+  });
 
   const handleCoverImageUpload = async (file: File, onError: () => void) => {
     const formData = new FormData();
@@ -152,18 +159,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-
   const handleCoverImageDelete = async (onError: () => void) => {
-    const { res } = await request(routes.deleteFacilityCoverImage, {
-      pathParams: { id: facilityId },
-    });
-    if (res?.ok) {
-      toast.success(t("cover_image_deleted"));
-      queryClient.invalidateQueries({
-        queryKey: ["facility", facilityId],
-      });
-      setEditCoverImage(false);
-    } else {
+    try {
+      await deleteAvatar();
+    } catch {
       onError();
     }
   };
@@ -195,8 +194,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
         action="Delete"
         variant="destructive"
         show={openDeleteDialog}
-        onClose={handleDeleteClose}
-        onConfirm={handleDeleteSubmit}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={() => deleteFacility()}
       />
       <AvatarEditModal
         title={t("edit_cover_photo")}
