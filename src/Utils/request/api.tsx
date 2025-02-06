@@ -626,9 +626,7 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<
-        { access: string } | { errors: Array<Record<string, string>> }
-      >(),
+      TRes: Type<{ access: string }>(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",

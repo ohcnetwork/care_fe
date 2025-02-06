@@ -91,22 +91,7 @@ export default function PatientLogin({
   };
 
   const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
-    mutationFn: async ({
-      phone_number,
-      otp,
-    }: {
-      phone_number: string;
-      otp: string;
-    }) => {
-      const response = await mutate(routes.otp.loginByOtp, { silent: true })({
-        phone_number,
-        otp,
-      });
-      if ("errors" in response) {
-        throw response;
-      }
-      return response;
-    },
+    mutationFn: mutate(routes.otp.loginByOtp),
     onSuccess: (response: { access: string }) => {
       if (response.access) {
         const tokenData: TokenData = {
