@@ -8,7 +8,7 @@ const patientDetails = new PatientDetails();
 
 describe("Patient Management", () => {
   beforeEach(() => {
-    cy.loginByApi("doctor");
+    cy.loginByApi("devdoctor");
     cy.visit("/");
   });
 
