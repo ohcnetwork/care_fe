@@ -23,6 +23,7 @@ export const EncounterUpdatesTab = ({
               facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
+              encounterStatus={encounter.status}
             />
           </div>
 
