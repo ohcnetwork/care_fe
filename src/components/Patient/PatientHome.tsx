@@ -5,6 +5,12 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
@@ -17,7 +23,7 @@ import {
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientAge, relativeDate } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -109,6 +115,7 @@ export const PatientHome = (props: {
             {tabs.map((tab) => (
               <Link
                 key={tab.route}
+                data-cy={`tab-${tab.route}`}
                 href={
                   facilityId
                     ? `/facility/${facilityId}/patient/${id}/${tab.route}`
@@ -139,7 +146,7 @@ export const PatientHome = (props: {
               />
             )}
           </div>
-          <div className="sticky top-20 mt-8 h-full lg:basis-1/6">
+          <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
             <section className="mb-4 space-y-2 md:flex">
               <div className="w-full lg:mx-0">
                 <div className="font-semibold text-secondary-900">
@@ -148,21 +155,6 @@ export const PatientHome = (props: {
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                     <div className="space-y-2">
-                      <Button
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        id="upload-patient-files"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${id}/files`,
-                          )
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-file-upload" className="text-xl" />
-                          {t("view_update_patient_files")}
-                        </span>
-                      </Button>
-
                       <PLUGIN_Component
                         __name="PatientHomeActions"
                         patient={patientData}
@@ -178,48 +170,61 @@ export const PatientHome = (props: {
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
             >
-              <div className="my-1 rounded-sm p-2">
+              <div className="my-1 rounded-sm py-2">
                 <div>
-                  <div className="text-xs font-normal text-gray-600">
-                    {t("last_updated_by")}{" "}
-                    <span className="font-semibold text-gray-900">
+                  <div className="text-xs font-normal leading-5 text-gray-600">
+                    {t("last_updated_by")}
+                    <div className="font-semibold text-gray-900">
                       {patientData.updated_by?.first_name}{" "}
                       {patientData.updated_by?.last_name}
-                    </span>
-                  </div>
-                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <div className="tooltip">
-                      <span className={`tooltip-text tooltip`}>
-                        {patientData.modified_date
-                          ? formatDateTime(patientData.modified_date)
-                          : "--:--"}
-                      </span>
-                      {patientData.modified_date
-                        ? relativeDate(patientData.modified_date)
-                        : "--:--"}
                     </div>
+                  </div>
+
+                  <div className="whitespace-normal text-xs font-normal text-gray-900">
+                    {patientData.modified_date ? (
+                      <TooltipProvider delayDuration={1}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              {relativeTime(patientData.modified_date)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {formatDateTime(patientData.modified_date)}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      "--:--"
+                    )}
                   </div>
                 </div>
 
                 <div className="mt-4">
                   <div className="text-xs font-normal leading-5 text-gray-600">
-                    {t("patient_profile_created_by")}{" "}
-                    <span className="font-semibold text-gray-900">
+                    {t("patient_profile_created_by")}
+                    <div className="font-semibold text-gray-900">
                       {patientData.created_by?.first_name}{" "}
                       {patientData.created_by?.last_name}
-                    </span>
-                  </div>
-                  <div className="whitespace-normal text-sm font-semibold text-gray-900">
-                    <div className="tooltip">
-                      <span className={`tooltip-text tooltip`}>
-                        {patientData.created_date
-                          ? formatDateTime(patientData.created_date)
-                          : "--:--"}
-                      </span>
-                      {patientData.created_date
-                        ? relativeDate(patientData.created_date)
-                        : "--:--"}
                     </div>
+                  </div>
+                  <div className="whitespace-normal text-xs font-normal text-gray-900">
+                    {patientData.created_date ? (
+                      <TooltipProvider delayDuration={1}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              {relativeTime(patientData.created_date)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {formatDateTime(patientData.created_date)}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      "--:--"
+                    )}
                   </div>
                 </div>
               </div>

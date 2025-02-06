@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 
@@ -12,7 +13,7 @@ import { FileManagerResult } from "@/hooks/useFileManager";
 import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 
 export interface FileBlockProps {
   file: FileUploadModel;
@@ -33,10 +34,13 @@ export default function FileBlock(props: FileBlockProps) {
 
   const filetype = fileManager.getFileType(file);
 
-  const fileData = useTanStackQueryInstead(routes.retrieveUpload, {
-    query: { file_type: fileManager.type, associating_id },
-    pathParams: { id: file.id || "" },
-    prefetch: filetype === "AUDIO" && !file.is_archived,
+  const { data: fileData } = useQuery({
+    queryKey: ["file", { id: file.id, type: fileManager.type, associating_id }],
+    queryFn: query(routes.retrieveUpload, {
+      queryParams: { file_type: fileManager.type, associating_id },
+      pathParams: { id: file.id || "" },
+    }),
+    enabled: filetype === "AUDIO" && !file.is_archived,
   });
 
   const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
@@ -82,7 +86,7 @@ export default function FileBlock(props: FileBlockProps) {
           <div className="w-full md:w-[300px]">
             <audio
               className="max-h-full w-full object-contain"
-              src={fileData.data?.read_signed_url}
+              src={fileData?.read_signed_url}
               controls
               preload="auto"
               controlsList="nodownload"

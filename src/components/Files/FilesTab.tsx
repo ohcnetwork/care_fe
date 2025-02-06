@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -153,7 +154,10 @@ export const FilesTab = (props: FilesTabProps) => {
       "pdf",
     ],
     allowNameFallback: false,
-    onUpload: () => refetch(),
+    onUpload: () => {
+      refetch();
+    },
+    compress: false,
   });
 
   useEffect(() => {
@@ -383,13 +387,13 @@ export const FilesTab = (props: FilesTabProps) => {
               e.preventDefault();
             }}
           >
-            <label
+            <Label
               htmlFor="file_upload_patient"
               className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
-            </label>
+            </Label>
             {fileUpload.Input({ className: "hidden" })}
           </DropdownMenuItem>
           <DropdownMenuItem className="flex flex-row items-center text-primary-900">

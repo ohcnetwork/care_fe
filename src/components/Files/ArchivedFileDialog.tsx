@@ -7,6 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { FileUploadModel } from "@/components/Patient/models";
 
@@ -27,12 +33,22 @@ export default function ArchivedFileDialog({
       aria-labelledby="file-archive-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-2 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
+        className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
         aria-describedby="file-archive"
       >
         <DialogHeader>
           <DialogTitle>
-            {t("archived_file")}: {fileName}
+            {t("archived_file")}:{" "}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="max-w-[200px] truncate inline-block align-bottom">
+                  {fileName}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{fileName}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
