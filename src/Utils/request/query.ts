@@ -31,15 +31,6 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
 
   const data = await getResponseBody<Route["TRes"]>(res);
 
-  if (url.includes("/login/")) {
-    throw new HTTPError({
-      message: "Request Failed",
-      status: 429,
-      silent: true,
-      cause: data as unknown as Record<string, unknown>,
-    });
-  }
-
   if (!res.ok) {
     const isSilent =
       typeof options?.silent === "function"
