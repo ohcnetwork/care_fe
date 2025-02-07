@@ -400,7 +400,6 @@ const AvailabilityEditor = ({
               size="icon"
               onClick={() => setOpenDialog(true)}
               disabled={isDeleting}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <CareIcon icon="l-trash" className="text-lg" />
             </Button>

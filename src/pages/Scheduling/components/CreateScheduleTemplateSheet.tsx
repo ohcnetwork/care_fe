@@ -376,7 +376,6 @@ export default function CreateScheduleTemplateSheet({
                             type="button"
                             variant="secondary"
                             size="sm"
-                            className="text-gray-600 hover:text-gray-900"
                             onClick={() => {
                               setRemoveIndex(index);
                               setOpenDialog(true);
