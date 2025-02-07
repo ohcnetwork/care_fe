@@ -285,7 +285,9 @@ const ScheduleTemplateEditor = ({
                     <Alert variant="destructive" className="mt-4">
                       <AlertTitle>{t("warning")}</AlertTitle>
                       <AlertDescription>
-                        {t("this_will_permanently_remove_the_template")}
+                        {t("this_will_permanently_remove_the_template", {
+                          data: "scheduled teplate",
+                        })}
                       </AlertDescription>
                     </Alert>
                   </AlertDialogDescription>
@@ -419,7 +421,9 @@ const AvailabilityEditor = ({
                 <Alert variant="destructive" className="mt-4">
                   <AlertTitle>{t("warning")}</AlertTitle>
                   <AlertDescription>
-                    {t("this_will_permanently_remove_the_template")}
+                    {t("this_will_permanently_remove_the_template", {
+                      data: "available session",
+                    })}
                   </AlertDescription>
                 </Alert>
               </AlertDialogDescription>

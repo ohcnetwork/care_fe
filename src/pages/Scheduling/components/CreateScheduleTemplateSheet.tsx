@@ -399,6 +399,9 @@ export default function CreateScheduleTemplateSheet({
                                 <AlertDescription>
                                   {t(
                                     "this_will_permanently_remove_the_template",
+                                    {
+                                      data: "session",
+                                    },
                                   )}
                                 </AlertDescription>
                               </Alert>
