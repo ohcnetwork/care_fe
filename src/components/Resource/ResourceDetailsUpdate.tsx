@@ -287,7 +287,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => goBack(`/resource/${props.id}`)}
+                onClick={() =>
+                  goBack(`/facility/${props.facilityId}/resource/${props.id}`)
+                }
               >
                 {t("cancel")}
               </Button>
