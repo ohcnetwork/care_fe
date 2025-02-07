@@ -47,7 +47,7 @@ export default function FacilityOrganizationIndex({
     }),
     enabled: !!facilityId,
   });
-  const TableData = data?.results || [];
+  const tableData = data?.results || [];
   if (isLoading) {
     return (
       <div className="px-6 py-6 space-y-6">
@@ -60,7 +60,7 @@ export default function FacilityOrganizationIndex({
     );
   }
 
-  if (!TableData?.length) {
+  if (!tableData?.length) {
     return (
       <Page
         title={t("organizations")}
@@ -96,7 +96,7 @@ export default function FacilityOrganizationIndex({
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
   const getChildren = (parentId: string) => {
-    return TableData.filter((org) => org.parent?.id === parentId);
+    return tableData.filter((org) => org.parent?.id === parentId);
   };
   const OrganizationRow = ({
     org,
@@ -146,13 +146,13 @@ export default function FacilityOrganizationIndex({
       <>
         <TableRow
           key={org.id}
-          style={{ "--indent": `${indent * 20}px` } as React.CSSProperties}
+          style={{ "--indent": `${indent}rem` } as React.CSSProperties}
         >
           <TableCell
             className={`${
               isTopLevel
-                ? "bg-white font-bold text-[#030712]"
-                : "bg-white font-medium text-[#030712]"
+                ? "bg-white font-bold text-gray-900"
+                : "bg-white font-medium text-gray-900"
             } flex justify-between items-center pl-[var(--indent)] flex-wrap gap-2`}
           >
             <div className="flex items-center">
@@ -166,7 +166,7 @@ export default function FacilityOrganizationIndex({
                 </button>
               ) : org.parent && Object.keys(org.parent).length > 0 ? (
                 <CareIcon
-                  icon="l-corner-up-right"
+                  icon="l-corner-down-right-alt"
                   className="h-4 w-4 text-gray-400"
                 />
               ) : null}
@@ -190,7 +190,7 @@ export default function FacilityOrganizationIndex({
                     <Button variant="white" size={"sm"} asChild>
                       <Link
                         href={`/departments/${org.id}`}
-                        className="text-[#030712] flex items-center"
+                        className="text-gray-900 flex items-center"
                       >
                         <CareIcon icon="l-eye" className="h-4 w-4" />
                         {t("see_details")}
@@ -201,7 +201,7 @@ export default function FacilityOrganizationIndex({
                   <Button variant="white" size={"sm"} asChild>
                     <Link
                       href={`/departments/${org.id}`}
-                      className="text-[#030712] flex items-center"
+                      className="text-gray-900 flex items-center"
                     >
                       <CareIcon icon="l-eye" className="h-4 w-4" />
                       {t("see_details")}
@@ -211,7 +211,7 @@ export default function FacilityOrganizationIndex({
               </>
             )}
           </TableCell>
-          <TableCell className="border-l bg-white font-semibold text-[#030712]">
+          <TableCell className="border-l bg-white font-semibold text-gray-900">
             {org.org_type}
           </TableCell>
         </TableRow>
@@ -236,11 +236,11 @@ export default function FacilityOrganizationIndex({
       hideTitleOnPage={true}
       breadcrumbs={false}
     >
-      <h2 className="mb-4 text-[#000000]">{t("departments")}</h2>
+      <h2 className="mb-4 text-black">{t("departments")}</h2>
       <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
         <div className="w-60">
           <Input
-            className="px-2 placeholder:text-xs placeholder:text-[#4B5563]"
+            className="px-2 placeholder:text-xs placeholder:text-gray-500"
             placeholder={t("filter_by_department_or_team_name")}
           ></Input>
         </div>
@@ -248,9 +248,9 @@ export default function FacilityOrganizationIndex({
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
       </div>
-      <div className="flex-col sm:flex-row items-center flex gap-3 text-[#1E3A8A] text-sm border-2 rounded-lg border-[#BFDBFE] bg-[#EFF6FF] p-4 mb-4">
-        <div className="p-2 bg-[#DBEAFE] rounded-sm">
-          <CareIcon icon="l-info-circle" className="h-6 w-6 text-[#1E40AF]" />
+      <div className="flex-col sm:flex-row items-center flex gap-3 text-blue-800 text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
+        <div className="p-2 bg-blue-100 rounded-sm">
+          <CareIcon icon="l-info-circle" className="h-6 w-6 text-blue-900" />
         </div>
         <div className="">
           <p className="">
@@ -268,18 +268,19 @@ export default function FacilityOrganizationIndex({
       <Table className="border rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-[#374151]  bg-[#f3f4f6]">
+            <TableHead className="w-[80%] border text-gray-700  bg-gray-200">
               {t("name")}
             </TableHead>
-            <TableHead className="bg-[#f3f4f6] text-[#374151]">
+            <TableHead className="bg-gray-200 text-gray-700">
               {t("category")}
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {TableData.filter(
-            (org) => !org.parent || Object.keys(org.parent).length === 0,
-          ) // Parent rows only
+          {tableData
+            .filter(
+              (org) => !org.parent || Object.keys(org.parent).length === 0,
+            ) // Parent rows only
             .map((parent) => (
               <OrganizationRow
                 key={parent.id}
