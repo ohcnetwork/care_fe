@@ -10,6 +10,7 @@ import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -33,7 +35,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -46,6 +47,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
+import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
@@ -58,6 +60,7 @@ export default function ResourceCreate(props: ResourceProps) {
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
   const authUser = useAuthUser();
+  const [qParams, _] = useQueryParams();
 
   const resourceFormSchema = z.object({
     category: z.string().min(1, { message: t("field_required") }),
@@ -127,6 +130,22 @@ export default function ResourceCreate(props: ResourceProps) {
     });
   };
 
+  const { data: facilities } = useQuery({
+    queryKey: ["facilities", qParams],
+    queryFn: query.debounced(facilityApi.getAllFacilities, {
+      queryParams: {
+        name: qParams.name,
+        facility_type: qParams.facility_type,
+        organization: qParams.organization,
+      },
+    }),
+  });
+
+  const facilityOptions = facilities?.results.map((facility) => ({
+    label: facility.name,
+    value: facility.id,
+  }));
+
   const fillMyDetails = () => {
     form.setValue(
       "referring_facility_contact_name",
@@ -182,15 +201,21 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="assigned_facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {t("facility_for_care_support")}
-                        </FormLabel>
+                        <Label className="text-gray-700 -mt-3 mb-3">
+                          {t("facility_assign_request")}
+                        </Label>
                         <FormControl>
-                          <FacilitySelect
-                            multiple={false}
-                            name="assigned_facility"
-                            selected={field.value}
-                            setSelected={field.onChange}
+                          <Autocomplete
+                            options={facilityOptions ?? []}
+                            value={field.value?.id ?? ""}
+                            placeholder={t("start_typing_to_search")}
+                            onChange={(value) => {
+                              const facility =
+                                facilities?.results.find(
+                                  (f) => f.id === value,
+                                ) ?? null;
+                              form.setValue("assigned_facility", facility);
+                            }}
                           />
                         </FormControl>
                         <FormDescription>

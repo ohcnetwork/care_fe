@@ -29,6 +29,7 @@ import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import facilityApi from "@/types/facility/facilityApi";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
@@ -158,17 +159,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       },
     });
 
-  const { data: facilitiesResponse } = useQuery<
-    PaginatedResponse<FacilityData>
-  >({
+  const { data: facilitiesResponse } = useQuery({
     queryKey: ["facilities", qParams],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
         name: qParams.name,
-        ...(qParams.facility_type && { facility_type: qParams.facility_type }),
-        ...(qParams.organization && {
-          organization: qParams.organization,
-        }),
+        facility_type: qParams.facility_type,
+        organization: qParams.organization,
       },
     }),
   });
