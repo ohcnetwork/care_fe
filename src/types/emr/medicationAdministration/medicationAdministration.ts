@@ -11,7 +11,6 @@ export const MEDICATION_ADMINISTRATION_STATUS = [
   "stopped",
   "in_progress",
   "on_hold",
-  "unknown",
   "cancelled",
 ] as const;
 
