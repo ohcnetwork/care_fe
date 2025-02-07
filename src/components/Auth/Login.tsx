@@ -106,10 +106,10 @@ const Login = (props: LoginProps) => {
   // Staff Login Mutation
   const staffLoginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      FiltersCache.invaldiateAll();
-      return await signIn(data);
+      FiltersCache.invalidateAll();
+      signIn(data);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setCaptcha(error.status == 429);
     },
   });
