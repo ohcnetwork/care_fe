@@ -37,12 +37,8 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import { HTTPError } from "@/Utils/request/types";
 import { TokenData } from "@/types/auth/otpToken";
-
-interface LoginFormData {
-  username: string;
-  password: string;
-}
 
 interface OtpLoginData {
   phone_number: string;
@@ -102,17 +98,6 @@ const Login = (props: LoginProps) => {
   useEffect(() => {
     localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
   }, [loginMode]);
-
-  // Staff Login Mutation
-  const staffLoginMutation = useMutation({
-    mutationFn: async (data: LoginFormData) => {
-      FiltersCache.invaldiateAll();
-      return await signIn(data);
-    },
-    onError: (error) => {
-      setCaptcha(error.status == 429);
-    },
-  });
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
@@ -233,7 +218,14 @@ const Login = (props: LoginProps) => {
     const validated = validateData();
     if (!validated) return;
 
-    staffLoginMutation.mutate(validated);
+    FiltersCache.invalidateAll();
+    try {
+      await signIn(validated);
+    } catch (error) {
+      if (error instanceof HTTPError) {
+        setCaptcha(error.status == 429);
+      }
+    }
   };
 
   const validateForgetData = () => {
