@@ -278,19 +278,10 @@ const Login = (props: LoginProps) => {
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      if (!isOtpSent) {
-        await sendOtp({ phone_number: phone });
-        setIsOtpSent(true);
-      } else {
-        await verifyOtp({ phone_number: phone, otp });
-      }
-    } catch (error: any) {
-      if (!isOtpSent) {
-        setOtpError(error.message);
-      } else {
-        setOtpValidationError(error.message);
-      }
+    if (!isOtpSent) {
+      sendOtp({ phone_number: phone });
+    } else {
+      verifyOtp({ phone_number: phone, otp });
     }
   };
 
