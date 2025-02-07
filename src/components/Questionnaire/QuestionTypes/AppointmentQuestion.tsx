@@ -62,7 +62,7 @@ export function AppointmentQuestion({
       [
         {
           type: "appointment",
-          value: [appointment] as unknown as ResponseValue["value"],
+          value: [appointment],
         },
       ],
       questionnaireResponse.question_id,

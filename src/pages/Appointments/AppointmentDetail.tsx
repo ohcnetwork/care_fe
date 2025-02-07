@@ -57,10 +57,7 @@ import {
   stringifyGeoOrganization,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import {
-  formatAppointmentSlotTime,
-  printAppointment,
-} from "@/pages/Appointments/utils";
+import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
@@ -161,17 +158,16 @@ export default function AppointmentDetail(props: Props) {
             facility={facilityQuery.data}
           />
           <div className="mt-3">
-            <div id="appointment-token-card" className="bg-gray-50 md:p-4">
-              <AppointmentTokenCard
-                appointment={appointmentQuery.data}
-                facility={facilityQuery.data}
-              />
+            <div id="section-to-print" className="print:w-[400px] print:pt-4">
+              <div id="appointment-token-card" className="bg-gray-50 md:p-4">
+                <AppointmentTokenCard
+                  appointment={appointmentQuery.data}
+                  facility={facilityQuery.data}
+                />
+              </div>
             </div>
             <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
-              <Button
-                variant="outline"
-                onClick={() => printAppointment({ t, facility, appointment })}
-              >
+              <Button variant="outline" onClick={() => print()}>
                 <PrinterIcon className="size-4 mr-2" />
                 <span>{t("print")}</span>
               </Button>

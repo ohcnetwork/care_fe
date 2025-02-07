@@ -70,6 +70,17 @@ interface QuestionnaireEditorProps {
   id?: string;
 }
 
+const STRUCTURED_QUESTION_TYPES = [
+  { value: "allergy_intolerance", label: "Allergy Intolerance" },
+  { value: "medication_request", label: "Medication Request" },
+  { value: "medication_statement", label: "Medication Statement" },
+  { value: "symptom", label: "Symptom" },
+  { value: "diagnosis", label: "Diagnosis" },
+  { value: "encounter", label: "Encounter" },
+  { value: "appointment", label: "Appointment" },
+  { value: "location_association", label: "Location Association" },
+] as const;
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -860,19 +871,11 @@ function QuestionEditor({
                     <SelectValue placeholder="Select structured type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="allergy_intolerance">
-                      Allergy Intolerance
-                    </SelectItem>
-                    <SelectItem value="medication_request">
-                      Medication Request
-                    </SelectItem>
-                    <SelectItem value="medication_statement">
-                      Medication Statement
-                    </SelectItem>
-                    <SelectItem value="symptom">Symptom</SelectItem>
-                    <SelectItem value="diagnosis">Diagnosis</SelectItem>
-                    <SelectItem value="encounter">Encounter</SelectItem>
-                    <SelectItem value="appointment">Appointment</SelectItem>
+                    {STRUCTURED_QUESTION_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
