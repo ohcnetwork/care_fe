@@ -168,7 +168,7 @@ export default function ResourceCreate(props: ResourceProps) {
                 <Alert>
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/facility/${facilityId}/patient/${related_patient}/demography`}
+                      href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
                       className="flex items-center gap-2"
                     >
                       <CareIcon
