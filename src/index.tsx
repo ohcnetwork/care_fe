@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-// Set API URL from environment variable
+// Expose Environment variable to window object for use in plugins
 window.CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
 window.__CORE_ENV__ = careConfig;
 

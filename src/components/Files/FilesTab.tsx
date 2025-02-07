@@ -700,7 +700,7 @@ const FileUploadDialog = ({
                     }}
                     className="ml-0.5 mb-0.5"
                   />
-                  {index === 0 && fileUpload.error && (
+                  {!fileUpload.fileNames[index] && fileUpload.error && (
                     <p className="mt-2 text-sm text-red-600">
                       {fileUpload.error}
                     </p>
