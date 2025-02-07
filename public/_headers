@@ -1,0 +1,6 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy-Report-Only: default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; object-src 'self'; report-uri https://csp-logger.ohc.network/
