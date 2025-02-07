@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { LocationTree } from "@/components/Location/LocationTree";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
@@ -219,24 +221,47 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         </div>
                       </PopoverTrigger>
                       <PopoverContent align={"start"} className="w-auto p-2">
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-sm">
-                            Current Location
-                          </h4>
-                          <p className="text-sm text-gray-700">
-                            {props.encounter.current_location.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {props.encounter.current_location.description}
-                          </p>
-                        </div>
-                        <Button variant="outline">
-                          <Link
-                            href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                        <div className="space-y-2 p-2 items-center">
+                          <div className="flex items-center gap-8 justify-between">
+                            <h4 className="font-medium text-sm">
+                              {t("location")}
+                            </h4>
+
+                            <LocationHistorySheet
+                              history={encounter.location_history}
+                              trigger={
+                                <div className="">
+                                  <CareIcon
+                                    icon="l-history"
+                                    className="w-4 h-4 text-gray-700"
+                                  />
+                                  <Button
+                                    variant="link"
+                                    className="text-gray-950 underline pl-1 pr-0  font-semibold"
+                                  >
+                                    {t("history")}
+                                  </Button>
+                                </div>
+                              }
+                            />
+                          </div>
+                          <div className="border-b border-gray-200 my-2" />
+                          <LocationTree
+                            location={props.encounter.current_location}
+                          />
+                          <div className="border-b border-dashed border-gray-200 my-2" />
+                          <Button
+                            variant="outline"
+                            className="border-gray-400 w-full"
                           >
-                            Move Patient
-                          </Link>
-                        </Button>
+                            <Link
+                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                              className="text-sm text-gray-950 font-semibold"
+                            >
+                              {t("update_location")}
+                            </Link>
+                          </Button>
+                        </div>
                       </PopoverContent>
                     </Popover>
                   )}
