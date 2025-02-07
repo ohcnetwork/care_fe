@@ -8,7 +8,6 @@ import {
   PatientFormData,
   patientCreation,
 } from "@/pageObject/Patients/PatientCreation";
-import { patientDashboard } from "@/pageObject/Patients/PatientDashboard";
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { patientVerify } from "@/pageObject/Patients/PatientVerify";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
@@ -126,7 +125,7 @@ describe("Patient Management", () => {
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
-      patientDashboard.verifyEncounterPatientInfo([
+      patientEncounter.verifyEncounterPatientInfo([
         ENCOUNTER_TYPE,
         ENCOUNTER_STATUS,
         ENCOUNTER_PRIORITY,
@@ -154,7 +153,7 @@ describe("Patient Management", () => {
       .clickSubmitEncounter()
       .assertEncounterCreationSuccess();
 
-    patientDashboard.verifyEncounterPatientInfo([
+    patientEncounter.verifyEncounterPatientInfo([
       ENCOUNTER_TYPE,
       ENCOUNTER_STATUS,
       ENCOUNTER_PRIORITY,

@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -11,7 +10,6 @@ import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -35,6 +33,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -44,13 +43,10 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
-import { PaginatedResponse } from "@/Utils/request/types";
 import validators from "@/Utils/validators";
-import { FacilityData } from "@/types/facility/facility";
-import facilityApi from "@/types/facility/facilityApi";
-import { CreateResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface ResourceProps {
   facilityId: number;
@@ -60,8 +56,6 @@ export default function ResourceCreate(props: ResourceProps) {
   const { goBack } = useAppHistory();
   const { facilityId } = props;
   const { t } = useTranslation();
-  const [qParams, _] = useQueryParams();
-  const [isLoading, setIsLoading] = useState(false);
   const [{ related_patient }] = useQueryParams();
   const authUser = useAuthUser();
 
@@ -94,26 +88,6 @@ export default function ResourceCreate(props: ResourceProps) {
     enabled: !!facilityId,
   });
 
-  const { data: facilitiesResponse } = useQuery<
-    PaginatedResponse<FacilityData>
-  >({
-    queryKey: ["facilities", qParams],
-    queryFn: query.debounced(facilityApi.getAllFacilities, {
-      queryParams: {
-        name: qParams.name,
-        ...(qParams.facility_type && { facility_type: qParams.facility_type }),
-        ...(qParams.organization && {
-          organization: qParams.organization,
-        }),
-      },
-    }),
-  });
-
-  const facilityOptions = facilitiesResponse?.results.map((facility) => ({
-    label: facility.name,
-    value: facility.id,
-  }));
-
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
@@ -128,40 +102,29 @@ export default function ResourceCreate(props: ResourceProps) {
     },
   });
 
-  const onSubmit = async (data: ResourceFormValues) => {
-    setIsLoading(true);
+  const { mutate: createResource, isPending } = useMutation({
+    mutationFn: mutate(routes.createResource),
+    onSuccess: (data: ResourceRequest) => {
+      toast.success(t("resource_created_successfully"));
+      navigate(`/facility/${facilityId}/resource/${data.id}`);
+    },
+  });
 
-    try {
-      const resourceData: CreateResourceRequest = {
-        status: "PENDING",
-        category: data.category,
-        origin_facility: String(props.facilityId),
-        assigned_facility: data.assigned_facility?.id || null,
-        approving_facility: null,
-        emergency: data.emergency === "true",
-        title: data.title,
-        reason: data.reason,
-        referring_facility_contact_name: data.referring_facility_contact_name,
-        referring_facility_contact_number:
-          data.referring_facility_contact_number,
-        related_patient: related_patient,
-        priority: data.priority,
-      };
-
-      const { res, data: responseData } = await request(routes.createResource, {
-        body: resourceData,
-      });
-
-      if (res?.ok && responseData) {
-        toast.success(t("resource_created_successfully"));
-        navigate(`/facility/${facilityId}/resource/${responseData.id}`);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(t("something_went_wrong"));
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: ResourceFormValues) => {
+    createResource({
+      status: "PENDING",
+      category: data.category,
+      origin_facility: String(props.facilityId),
+      assigned_facility: data.assigned_facility?.id || null,
+      approving_facility: null,
+      emergency: data.emergency === "true",
+      title: data.title,
+      reason: data.reason,
+      referring_facility_contact_name: data.referring_facility_contact_name,
+      referring_facility_contact_number: data.referring_facility_contact_number,
+      related_patient: related_patient,
+      priority: data.priority,
+    });
   };
 
   const fillMyDetails = () => {
@@ -174,7 +137,7 @@ export default function ResourceCreate(props: ResourceProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 
@@ -223,17 +186,11 @@ export default function ResourceCreate(props: ResourceProps) {
                           {t("facility_for_care_support")}
                         </FormLabel>
                         <FormControl>
-                          <Autocomplete
-                            options={facilityOptions ?? []}
-                            value={field.value?.id ?? ""}
-                            placeholder={t("start_typing_to_search")}
-                            onChange={(value) => {
-                              const facility =
-                                facilitiesResponse?.results.find(
-                                  (f) => f.id === value,
-                                ) ?? null;
-                              form.setValue("assigned_facility", facility);
-                            }}
+                          <FacilitySelect
+                            multiple={false}
+                            name="assigned_facility"
+                            selected={field.value}
+                            setSelected={field.onChange}
                           />
                         </FormControl>
                         <FormDescription>
@@ -444,8 +401,14 @@ export default function ResourceCreate(props: ResourceProps) {
                 >
                   {t("cancel")}
                 </Button>
-                <Button type="submit" variant="default" disabled={isLoading}>
-                  {isLoading ? <Loading /> : t("submit")}
+                <Button type="submit" variant="default" disabled={isPending}>
+                  {isPending && (
+                    <CareIcon
+                      icon="l-spinner"
+                      className="mr-2 h-4 w-4 animate-spin"
+                    />
+                  )}
+                  {isPending ? t("submitting") : t("submit")}
                 </Button>
               </div>
             </form>
