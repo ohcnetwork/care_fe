@@ -103,6 +103,12 @@ const routes = {
     TBody: Type<LoginCredentials>(),
   },
 
+  logout: {
+    path: "/api/v1/auth/logout/",
+    method: "POST",
+    TBody: Type<JwtTokenObtainPair>(),
+  },
+
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
@@ -168,12 +174,14 @@ const routes = {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
     TRes: Type<UserModel>(),
+    TBody: Type<void>(),
   },
 
   deleteUser: {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Facility Endpoints
@@ -213,6 +221,7 @@ const routes = {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   getFacilityUsers: {
@@ -235,6 +244,7 @@ const routes = {
     path: "/api/v1/facility/{id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Patient
@@ -616,9 +626,7 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<
-        { access: string } | { errors: Array<Record<string, string>> }
-      >(),
+      TRes: Type<{ access: string }>(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",

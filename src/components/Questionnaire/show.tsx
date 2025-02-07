@@ -304,10 +304,10 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CardContent>
               <QuestionnaireForm
                 questionnaireSlug={id}
-                patientId={"some_patient_id"}
+                patientId={"preview"}
                 subjectType={"encounter"}
-                encounterId={"some_encounter_id"}
-                facilityId={"facilityId"}
+                encounterId={"preview"}
+                facilityId={"preview"}
               />
             </CardContent>
           </Card>

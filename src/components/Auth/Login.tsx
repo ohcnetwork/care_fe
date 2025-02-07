@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -31,11 +31,12 @@ import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
+import { LocalStorageKeys } from "@/common/constants";
+
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import request from "@/Utils/request/request";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface LoginFormData {
@@ -71,7 +72,7 @@ interface LoginProps {
 }
 
 const Login = (props: LoginProps) => {
-  const { signIn, patientLogin } = useAuthContext();
+  const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
     careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
@@ -97,26 +98,25 @@ const Login = (props: LoginProps) => {
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
 
+  // Remember the last login mode
+  useEffect(() => {
+    localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
+  }, [loginMode]);
+
   // Staff Login Mutation
   const staffLoginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
       FiltersCache.invaldiateAll();
       return await signIn(data);
     },
-    onSuccess: ({ res }) => {
-      setCaptcha(res?.status === 429);
+    onError: (error) => {
+      setCaptcha(error.status == 429);
     },
   });
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: async (phone: string) => {
-      const response = await request(routes.otp.sendOtp, {
-        body: { phone_number: phone },
-        silent: true,
-      });
-      return response;
-    },
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -280,7 +280,7 @@ const Login = (props: LoginProps) => {
 
     try {
       if (!isOtpSent) {
-        await sendOtp(phone);
+        await sendOtp({ phone_number: phone });
         setIsOtpSent(true);
       } else {
         await verifyOtp({ phone_number: phone, otp });
@@ -303,8 +303,7 @@ const Login = (props: LoginProps) => {
   };
 
   // Loading state derived from mutations
-  const isLoading =
-    staffLoginMutation.isPending || sendOtpPending || verifyOtpPending;
+  const isLoading = isAuthenticating || sendOtpPending || verifyOtpPending;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,

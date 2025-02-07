@@ -22,6 +22,11 @@ export class PatientEncounter {
     return this;
   }
 
+  verifyEncounterPatientInfo(contents: string[]) {
+    cy.verifyContentPresence("#patient-infobadges", contents);
+    return this;
+  }
+
   // Questionnaire actions
   addQuestionnaire(questionnaireName: string) {
     cy.get('[data-cy="add-questionnaire-button"]').click();
