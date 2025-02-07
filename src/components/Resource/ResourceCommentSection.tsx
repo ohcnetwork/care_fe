@@ -97,11 +97,14 @@ const CommentSection = (props: { id: string }) => {
                 </div>
               ) : (
                 <ul>
-                  {resourceComments?.results?.map((comment) => (
-                    <li key={comment.id} className="w-full">
-                      <Comment {...comment} />
-                    </li>
-                  ))}
+                  {resourceComments?.results
+                    ?.slice()
+                    .reverse()
+                    .map((comment) => (
+                      <li key={comment.id} className="w-full">
+                        <Comment {...comment} />
+                      </li>
+                    ))}
                   <div className="flex w-full items-center justify-center">
                     <div
                       className={cn(
@@ -138,11 +141,10 @@ export const Comment = ({
 }: CommentModel) => (
   <div
     className={cn(
-      "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
-      "justify-start",
+      "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800",
     )}
   >
-    <div className="flex max-w-[80%] items-start gap-3">
+    <div className="flex items-start gap-3">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -159,23 +161,21 @@ export const Comment = ({
         </Tooltip>
       </TooltipProvider>
 
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start flex-grow">
         <p className="text-xs space-x-2 mb-1">
           <span className="text-gray-700 font-medium">
             {formatName(created_by)}
           </span>
-          <time
-            className="text-gray-500"
-            dateTime={created_date}
-            title={formatDateTime(created_date)}
-          >
-            {relativeTime(created_date)}
-          </time>
         </p>
-        <div className="p-3 rounded-lg break-words bg-gray-100 border border-gray-200">
-          {comment.replace(/\n+/g, "\n")}
-        </div>
+        <div>{comment.replace(/\n+/g, "\n")}</div>
       </div>
+      <time
+        className="text-gray-500 text-xs"
+        dateTime={created_date}
+        title={formatDateTime(created_date)}
+      >
+        {relativeTime(created_date)}
+      </time>
     </div>
   </div>
 );
