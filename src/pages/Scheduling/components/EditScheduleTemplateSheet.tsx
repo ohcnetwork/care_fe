@@ -263,7 +263,10 @@ const ScheduleTemplateEditor = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            <AlertDialog
+              open={isDialogOpen}
+              onOpenChange={(open) => setDialogOpen(open)}
+            >
               <AlertDialogTrigger asChild>
                 <Button
                   type="button"
@@ -288,7 +291,9 @@ const ScheduleTemplateEditor = ({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogCancel onClick={() => setDialogOpen(false)}>
+                    {t("cancel")}
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     variant="destructive"
                     onClick={() => {
@@ -393,7 +398,10 @@ const AvailabilityEditor = ({
           </span>
         </div>
 
-        <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialog
+          open={openDialog}
+          onOpenChange={(open) => setOpenDialog(open)}
+        >
           <AlertDialogTrigger asChild>
             <Button
               variant="ghost"
@@ -417,7 +425,9 @@ const AvailabilityEditor = ({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setOpenDialog(false)}>
+                {t("cancel")}
+              </AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
                 onClick={() => {

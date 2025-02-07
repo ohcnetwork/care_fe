@@ -369,7 +369,10 @@ export default function CreateScheduleTemplateSheet({
                       </div>
                       <AlertDialog
                         open={openDialog}
-                        onOpenChange={setOpenDialog}
+                        onOpenChange={(open) => {
+                          setOpenDialog(open);
+                          if (!open) setRemoveIndex(null);
+                        }}
                       >
                         <AlertDialogTrigger asChild>
                           <Button
@@ -402,7 +405,14 @@ export default function CreateScheduleTemplateSheet({
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogCancel
+                              onClick={() => {
+                                setOpenDialog(false);
+                                setRemoveIndex(null);
+                              }}
+                            >
+                              {t("cancel")}
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               variant={"destructive"}
                               onClick={() => {
@@ -416,6 +426,7 @@ export default function CreateScheduleTemplateSheet({
                                   );
                                 }
                                 setOpenDialog(false);
+                                setRemoveIndex(null);
                               }}
                             >
                               {t("confirm")}
