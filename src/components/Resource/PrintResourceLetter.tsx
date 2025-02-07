@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -7,25 +6,20 @@ import Loading from "@/components/Common/Loading";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { useBreadcrumbs } from "@/context/BreadcrumbsContext";
 
-export default function PrintResourceLetter({ id }: { id: string }) {
+export default function PrintResourceLetter() {
   const { t } = useTranslation();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["resource_request_letter", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: id },
-    }),
-  });
+  const { resourceDetails, isLoading } = useBreadcrumbs();
+  const data = resourceDetails;
 
   if (isLoading || !data) {
     return <Loading />;
   }
   return (
-    <PrintPreview title={t("request_letter")}>
+    <PrintPreview title={t("request_letter")} resName={data.title} id={data.id}>
       <div className="min-h-screen bg-white">
         <div className="mx-4 p-4 lg:mx-20">
           {/* Header */}

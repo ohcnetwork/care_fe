@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,9 +15,8 @@ import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { useBreadcrumbs } from "@/context/BreadcrumbsContext";
 import { PatientModel } from "@/types/emr/patient";
 
 function PatientCard({ patient }: { patient: PatientModel }) {
@@ -102,30 +100,17 @@ function FacilityCard({
   );
 }
 
-export default function ResourceDetails({
-  id,
-  facilityId,
-}: {
-  id: string;
-  facilityId: string;
-}) {
+export default function ResourceDetails() {
   const { t } = useTranslation();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id },
-    }),
-  });
-
+  const { facilityId, id, resourceDetails, isLoading } = useBreadcrumbs();
+  const data = resourceDetails;
   if (isLoading || !data) {
     return <Loading />;
   }
-
   return (
     <Page
       title="Request Details"
-      crumbsReplacements={{ [id]: { name: data.title } }}
+      crumbsReplacements={{ [id]: { name: data.title } }} // was already passing breadcrumb name here before :(
       backUrl={`/facility/${facilityId}/resource`}
     >
       <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">

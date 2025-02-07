@@ -21,6 +21,8 @@ type Props = {
   disabled?: boolean;
   className?: string;
   title: string;
+  resName?: string;
+  id?: string;
 };
 
 export default function PrintPreview(props: Props) {
@@ -28,7 +30,12 @@ export default function PrintPreview(props: Props) {
   const { t } = useTranslation();
 
   return (
-    <Page title={props.title}>
+    <Page
+      title={props.title}
+      crumbsReplacements={
+        props.id ? { [props.id]: { name: props.resName } } : {}
+      }
+    >
       <div className="mx-auto my-8 xl:w-[50rem] border rounded-xl border-gray-200 shadow-2xl overflow-hidden">
         <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
           <Button variant="primary" disabled={props.disabled} onClick={print}>

@@ -30,6 +30,7 @@ import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useBreadcrumbs } from "@/context/BreadcrumbsContext";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
@@ -129,12 +130,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     form[name] = selected;
     dispatch({ type: "set_form", form });
   };
-  const { data: resourceDetails } = useQuery({
-    queryKey: ["resource", props.facilityId, props.id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: props.id },
-    }),
-  });
+  const { resourceDetails } = useBreadcrumbs();
   useEffect(() => {
     if (resourceDetails) {
       dispatch({
