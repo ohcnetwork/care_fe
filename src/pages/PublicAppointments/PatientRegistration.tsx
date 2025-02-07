@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt } from "raviger";
-import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -24,13 +23,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { GENDER_TYPES } from "@/common/constants";
+import { GENDERS, GENDER_TYPES } from "@/common/constants";
 import { validateName, validatePincode } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
@@ -42,19 +40,20 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
-const initialForm: AppointmentPatientRegister & {
-  ageInputType: "age" | "date_of_birth";
-} = {
-  name: "",
-  gender: "1",
-  ageInputType: "date_of_birth",
-  year_of_birth: undefined,
-  date_of_birth: undefined,
-  phone_number: "",
-  address: "",
-  pincode: "",
-  geo_organization: undefined,
-};
+// const initialForm: Omit<AppointmentPatientRegister, "gender"> & {
+//   ageInputType: "age" | "date_of_birth";
+//   gender: "male" | "female" | "transgender" | "non_binary";
+// } = {
+//   name: "",
+//   gender: "male",
+//   ageInputType: "date_of_birth",
+//   year_of_birth: undefined,
+//   date_of_birth: undefined,
+//   phone_number: "",
+//   address: "",
+//   pincode: "",
+//   geo_organization: undefined,
+// };
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -83,7 +82,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .string()
         .min(1, t("field_required"))
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
-      gender: z.string().min(1, t("field_required")),
+      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
       year_of_birth: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
@@ -131,7 +130,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const form = useForm<PatientFormData>({
     resolver: formResolver,
-    defaultValues: initialForm,
+    defaultValues: {
+      name: "",
+      ageInputType: "date_of_birth",
+      year_of_birth: undefined,
+      date_of_birth: undefined,
+      address: "",
+      pincode: "",
+      geo_organization: undefined,
+    },
   });
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
@@ -159,9 +166,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           },
         );
       },
-      onError: (error) => {
-        toast.error(error?.message || t("failed_to_create_appointment"));
-      },
     });
 
   const { mutate: createPatient } = useMutation({
@@ -179,16 +183,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         patient: data.id,
         reason_for_visit: reason ?? "",
       });
-    },
-    onError: (error: HTTPError) => {
-      const errorData = error.cause;
-      const errors = errorData?.errors;
-      if (Array.isArray(errors) && errors.length > 0) {
-        const firstError = errors[0];
-        toast.error(firstError.msg);
-      } else {
-        toast.error(error.message);
-      }
     },
   });
 
@@ -361,7 +355,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <FormControl>
                           <Input
                             {...form.register("year_of_birth")}
-                            required={form.watch("ageInputType") === "age"}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -396,7 +389,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 name="pincode"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>{t("pincode")}</FormLabel>
+                    <FormLabel required>{t("pincode")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
