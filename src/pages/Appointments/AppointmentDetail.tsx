@@ -551,6 +551,7 @@ const AppointmentActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => cancelAppointment({ reason: "cancelled" })}
             >
               {t("confirm")}
@@ -581,6 +582,7 @@ const AppointmentActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
             >
               {t("confirm")}
