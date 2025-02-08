@@ -17,12 +17,14 @@ interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  canAccess: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
   facilityId,
+  canAccess,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -32,6 +34,7 @@ export function DiagnosisList({
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {

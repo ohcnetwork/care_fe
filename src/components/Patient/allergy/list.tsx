@@ -27,12 +27,14 @@ interface AllergyListProps {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
+  canAccess: boolean;
 }
 
 export function AllergyList({
   facilityId,
   patientId,
   encounterId,
+  canAccess,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -41,6 +43,7 @@ export function AllergyList({
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {

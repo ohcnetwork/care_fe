@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -12,11 +14,16 @@ import { Separator } from "@/components/ui/separator";
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
@@ -30,6 +37,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  facilityId?: string;
 }
 
 type ResponseValueType = {
@@ -282,9 +290,22 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
 export default function QuestionnaireResponsesList({
   encounter,
   patientId,
+  facilityId,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canViewPatientQuestionnaireResponses,
+  } = getPermissions(hasPermission, authUser);
+  const { goBack } = useAppHistory();
+
+  const canAccess = encounter
+    ? canViewClinicalData || canViewEncounter
+    : canViewPatientQuestionnaireResponses;
 
   const { data: questionnarieResponses, isLoading } = useQuery({
     queryKey: ["questionnaireResponses", patientId, qParams],
@@ -296,7 +317,23 @@ export default function QuestionnaireResponsesList({
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
     }),
+    enabled: canAccess,
   });
+  // redirect only if encounter is not present and canAccess is false
+  // This is ensure redirection is only active when this component is rendered as a patient tab
+  const enableRedirect = !encounter && !canAccess;
+
+  useEffect(() => {
+    if (enableRedirect) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(
+        facilityId
+          ? `/facility/${facilityId}/patient/${patientId}`
+          : `/patient/${patientId}`,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableRedirect]);
 
   return (
     <div className="mt-4 gap-4">

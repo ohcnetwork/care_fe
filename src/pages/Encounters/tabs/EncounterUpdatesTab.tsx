@@ -4,6 +4,11 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
+import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 export const EncounterUpdatesTab = ({
@@ -11,6 +16,13 @@ export const EncounterUpdatesTab = ({
   encounter,
   patient,
 }: EncounterTabProps) => {
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter } = getPermissions(
+    hasPermission,
+    authUser,
+  );
+  const canAccess = canViewClinicalData || canViewEncounter;
   return (
     <div className="flex flex-col gap-4">
       {/* Main Content Area */}
@@ -23,6 +35,7 @@ export const EncounterUpdatesTab = ({
               facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
+              canAccess={canAccess}
             />
           </div>
 
@@ -32,6 +45,7 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               facilityId={facilityId}
+              canAccess={canAccess}
             />
           </div>
 
@@ -41,6 +55,7 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               facilityId={facilityId}
+              canAccess={canAccess}
             />
           </div>
 
@@ -55,7 +70,7 @@ export const EncounterUpdatesTab = ({
 
         {/* Right Column - Observations */}
         <div className="xl:w-1/3">
-          <ObservationsList encounter={encounter} />
+          <ObservationsList encounter={encounter} canAccess={canAccess} />
         </div>
       </div>
     </div>

@@ -36,10 +36,15 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDisplayName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { UserBase } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -206,6 +211,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 export const PatientUsers = (props: PatientProps) => {
   const { patientId } = props;
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const authUser = useAuthUser();
+  const { canWritePatient } = getPermissions(hasPermission, authUser);
 
   const { data: users } = useQuery({
     queryKey: ["patientUsers", patientId],
@@ -263,37 +271,39 @@ export const PatientUsers = (props: PatientProps) => {
                   <p className="text-sm text-gray-500">{user.username}</p>
                 </div>
               </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    data-cy="patient-user-remove-button"
-                  >
-                    <CareIcon icon="l-trash" className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_remove", {
-                        name: formatDisplayName(user),
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      data-cy="patient-user-remove-confirm-button"
-                      onClick={() => removeUser(user.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              {canWritePatient && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-cy="patient-user-remove-button"
                     >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <CareIcon icon="l-trash" className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_remove", {
+                          name: formatDisplayName(user),
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        data-cy="patient-user-remove-confirm-button"
+                        onClick={() => removeUser(user.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-sm">
@@ -319,7 +329,7 @@ export const PatientUsers = (props: PatientProps) => {
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("users")}
             </div>
-            <AddUserSheet patientId={patientId} />
+            {canWritePatient && <AddUserSheet patientId={patientId} />}
           </div>
           <ManageUsers />
         </div>

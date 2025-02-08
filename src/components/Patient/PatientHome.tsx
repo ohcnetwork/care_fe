@@ -17,13 +17,19 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import {
   facilityPatientTabs,
+  getTabs,
   patientTabs,
 } from "@/components/Patient/PatientDetailsTab";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge, relativeTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { Patient } from "@/types/emr/newPatient";
 
 export const PatientHome = (props: {
@@ -34,6 +40,10 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
 
   const { t } = useTranslation();
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { getPatientTabs, getFacilityTabs } = getTabs(authUser, hasPermission);
+  const { canCreateAppointment } = getPermissions(hasPermission, authUser);
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
@@ -49,7 +59,7 @@ export const PatientHome = (props: {
     return <Loading />;
   }
 
-  const tabs = facilityId ? facilityPatientTabs : patientTabs;
+  const tabs = facilityId ? getFacilityTabs : getPatientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
@@ -62,7 +72,7 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          {facilityId && (
+          {facilityId && canCreateAppointment && (
             <Button asChild variant="primary">
               <Link
                 href={`/facility/${facilityId}/patient/${id}/book-appointment`}

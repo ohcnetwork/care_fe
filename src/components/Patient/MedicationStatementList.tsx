@@ -26,6 +26,7 @@ import { formatDateTime } from "@/Utils/utils";
 
 interface MedicationStatementListProps {
   patientId: string;
+  canAccess: boolean;
 }
 
 interface MedicationRowProps {
@@ -103,6 +104,7 @@ function MedicationRow({
 
 export function MedicationStatementList({
   patientId,
+  canAccess,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
   const [showEnteredInError, setShowEnteredInError] = useState(false);
@@ -112,6 +114,7 @@ export function MedicationStatementList({
     queryFn: query(routes.medicationStatement.list, {
       pathParams: { patientId },
     }),
+    enabled: canAccess,
   });
 
   if (isLoading) {

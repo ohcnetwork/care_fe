@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, navigate, useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -12,11 +14,16 @@ import { Card } from "@/components/ui/card";
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 import { PatientProps } from ".";
@@ -24,6 +31,13 @@ import { PatientProps } from ".";
 export const Updates = (props: PatientProps) => {
   const { facilityId, patientId } = props;
   const { t } = useTranslation();
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
+  const { canViewEncounter, canViewClinicalData } = getPermissions(
+    hasPermission,
+    authUser,
+  );
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
 
@@ -36,7 +50,20 @@ export const Updates = (props: PatientProps) => {
       },
       pathParams: { patientId },
     }),
+    enabled: canViewEncounter || canViewClinicalData,
   });
+
+  useEffect(() => {
+    if (!canViewEncounter && !canViewClinicalData) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(
+        facilityId
+          ? `/facility/${facilityId}/patient/${patientId}`
+          : `/patient/${patientId}`,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewEncounter, canViewClinicalData]);
 
   return (
     <div className="mt-4 px-3 md:px-0">

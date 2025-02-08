@@ -9,7 +9,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import { formatDateTime } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
@@ -18,6 +23,9 @@ interface EncounterCardProps {
 
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter } = getPermissions(hasPermission, authUser);
   return (
     <>
       <div className="pb-16 block relative border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
@@ -91,17 +99,19 @@ export const EncounterCard = (props: EncounterCardProps) => {
             ))}
         </div>
 
-        <Link
-          href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
-          className={cn(
-            buttonVariants({ variant: "secondary" }),
-            "mt-2 shadow-none border border-secondary-300",
-            !encounter.period.start && "pointer-events-none opacity-50",
-          )}
-        >
-          <CareIcon icon="l-plus-circle" />
-          {t("View Encounter")}
-        </Link>
+        {canViewEncounter && (
+          <Link
+            href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
+            className={cn(
+              buttonVariants({ variant: "secondary" }),
+              "mt-2 shadow-none border border-secondary-300",
+              !encounter.period.start && "pointer-events-none opacity-50",
+            )}
+          >
+            <CareIcon icon="l-plus-circle" />
+            {t("view_encounter")}
+          </Link>
+        )}
       </div>
     </>
   );
