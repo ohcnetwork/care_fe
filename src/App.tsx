@@ -18,21 +18,34 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { handleHttpError } from "@/Utils/request/errorHandler";
+import { HTTPError } from "@/Utils/request/types";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry(failureCount, error) {
+        // Fail-fast by skipping retries for non-5xx HTTP errors.
+        if (error instanceof HTTPError && error.status < 500) {
+          return false;
+        }
+
+        // Retries at most 2 times for HTTP 5xx errors or Network errors.
+        return failureCount < 2;
+      },
       refetchOnWindowFocus: false,
     },
   },
   queryCache: new QueryCache({
-    onError: handleHttpError,
+    onError: (error, query) => {
+      handleHttpError(error, query.meta);
+    },
   }),
   mutationCache: new MutationCache({
-    onError: handleHttpError,
+    onError: (error, _vars, _ctx, mutation) => {
+      handleHttpError(error, mutation.meta);
+    },
   }),
 });
 
