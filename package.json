@@ -78,6 +78,7 @@
     "@tanstack/react-query": "^5.64.1",
     "@tanstack/react-query-devtools": "^5.64.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "all": "^0.0.0",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
     "browserslist": "^4.24.4",

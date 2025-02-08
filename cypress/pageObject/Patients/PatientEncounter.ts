@@ -5,6 +5,11 @@ export class PatientEncounter {
     return this;
   }
 
+  openSettingsTab() {
+    cy.get('[data-sidebar="content"]').contains("Settings").click();
+    return this;
+  }
+
   openFirstEncounterDetails() {
     cy.get('[data-cy="encounter-list-cards"]')
       .first()
@@ -22,8 +27,28 @@ export class PatientEncounter {
     return this;
   }
 
+
+  openNotesTab() {
+    cy.get('#encounter_tab_nav').contains("Notes").click();
+    return this;
+  }
+
+  
+  
+  addMessageToThread() {
+    const message = "Hello, this is a test message!";
+    cy.get('textarea[placeholder="Type your message"]').type(message);
+    // Click the submit button
+    cy.get('button[type="submit"]').click();
+  }
+
   verifyEncounterPatientInfo(contents: string[]) {
     cy.verifyContentPresence("#patient-infobadges", contents);
+    return this;
+  }
+
+  startNewConversation() {
+    cy.contains("button", "Start New Discussion").should("be.visible").click();
     return this;
   }
 
