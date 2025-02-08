@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,7 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -55,12 +55,12 @@ interface ResourceProps {
 }
 
 export default function ResourceCreate(props: ResourceProps) {
+  const [facilitySearch, setFacilitySearch] = useState("");
   const { goBack } = useAppHistory();
   const { facilityId } = props;
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
   const authUser = useAuthUser();
-  const [qParams, _] = useQueryParams();
 
   const resourceFormSchema = z.object({
     category: z.string().min(1, { message: t("field_required") }),
@@ -131,12 +131,11 @@ export default function ResourceCreate(props: ResourceProps) {
   };
 
   const { data: facilities } = useQuery({
-    queryKey: ["facilities", qParams],
+    queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        name: qParams.name,
-        facility_type: qParams.facility_type,
-        organization: qParams.organization,
+        search_text: facilitySearch,
+        limit: 50,
       },
     }),
   });
@@ -201,14 +200,15 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="assigned_facility"
                     render={({ field }) => (
                       <FormItem>
-                        <Label className="text-gray-700 -mt-3 mb-3">
+                        <FormLabel required>
                           {t("facility_assign_request")}
-                        </Label>
+                        </FormLabel>
                         <FormControl>
                           <Autocomplete
                             options={facilityOptions ?? []}
                             value={field.value?.id ?? ""}
                             placeholder={t("start_typing_to_search")}
+                            onSearch={setFacilitySearch}
                             onChange={(value) => {
                               const facility =
                                 facilities?.results.find(

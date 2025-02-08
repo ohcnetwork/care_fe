@@ -64,6 +64,7 @@ const initialState = {
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
   const [qParams, _] = useQueryParams();
+  const [facilitySearch, setFacilitySearch] = useState("");
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -159,18 +160,17 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       },
     });
 
-  const { data: facilitiesResponse } = useQuery({
-    queryKey: ["facilities", qParams],
+  const { data: facilities } = useQuery({
+    queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        name: qParams.name,
-        facility_type: qParams.facility_type,
-        organization: qParams.organization,
+        search_text: facilitySearch,
+        limit: 50,
       },
     }),
   });
 
-  const facilityOptions = facilitiesResponse?.results.map((facility) => ({
+  const facilityOptions = facilities?.results.map((facility) => ({
     label: facility.name,
     value: facility.id,
   }));
@@ -249,6 +249,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 options={facilityOptions ?? []}
                 placeholder={t("start_typing_to_search")}
                 value={state.form.assigned_facility}
+                onSearch={setFacilitySearch}
                 onChange={(selected) =>
                   setFacility(selected, "assigned_facility")
                 }
