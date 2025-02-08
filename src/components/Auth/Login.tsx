@@ -36,24 +36,14 @@ import { LocalStorageKeys } from "@/common/constants";
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
+import { useHttpErrorHandler } from "@/Utils/request/errorHandler";
 import mutate from "@/Utils/request/mutate";
-import { HTTPError } from "@/Utils/request/types";
+import { useValueErrorHandler } from "@/Utils/request/useValueErrorHandler";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface OtpLoginData {
   phone_number: string;
   otp: string;
-}
-
-interface OtpError {
-  type: string;
-  loc: string[];
-  msg: string;
-  input: string;
-  ctx: {
-    error: string;
-  };
-  url: string;
 }
 
 interface OtpValidationError {
@@ -107,15 +97,12 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
     },
-    onError: (error: any) => {
-      const errors = error?.data || [];
-      if (Array.isArray(errors) && errors.length > 0) {
-        const firstError = errors[0] as OtpError;
-        setOtpError(firstError.msg);
-      } else {
-        setOtpError(t("send_otp_error"));
-      }
-    },
+  });
+
+  useValueErrorHandler({
+    match: { loc: ["phone_number"] },
+    onMatch: () => setOtpError(t("phone_number_validation_error")),
+    meta: { key: "send_op" },
   });
 
   // Verify OTP Mutation
@@ -212,6 +199,15 @@ const Login = (props: LoginProps) => {
     return form;
   };
 
+  // Handles HTTP 429 errors - Captcha due to too many requests
+  useHttpErrorHandler(({ status }) => {
+    if (status === 429) {
+      setCaptcha(true);
+      return true;
+    }
+    setCaptcha(false);
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     ViewCache.invalidateAll();
@@ -219,13 +215,7 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
-    try {
-      await signIn(validated);
-    } catch (error) {
-      if (error instanceof HTTPError) {
-        setCaptcha(error.status == 429);
-      }
-    }
+    signIn(validated);
   };
 
   const validateForgetData = () => {

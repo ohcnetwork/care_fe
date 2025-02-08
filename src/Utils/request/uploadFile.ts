@@ -33,7 +33,6 @@ const uploadFile = async (
         }
         Notification.BadRequest({ errs: error.errors });
         reject(new Error("Client error"));
-        reject(new Error("Client error"));
       } else {
         resolve();
       }

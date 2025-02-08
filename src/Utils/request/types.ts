@@ -54,14 +54,23 @@ export interface ApiCallOptions<Route extends ApiRoute<unknown, unknown>> {
   headers?: HeadersInit;
 }
 
-export type StructuredError = Record<string, string | string[]>;
+export type BadRequestValueError = {
+  type: "value_error";
+  loc: string[];
+  msg: string;
+  input: unknown;
+  ctx?: { error?: string };
+  url: string;
+};
 
-type HTTPErrorCause = StructuredError | Record<string, unknown> | undefined;
+export type BadRequestErrorResponse =
+  | { code: string; detail: string }
+  | { errors: (BadRequestValueError | object)[] };
 
 export class HTTPError extends Error {
   status: number;
   silent: boolean;
-  cause?: HTTPErrorCause;
+  cause?: BadRequestErrorResponse | undefined;
 
   constructor({
     message,
@@ -77,7 +86,7 @@ export class HTTPError extends Error {
     super(message, { cause });
     this.status = status;
     this.silent = silent;
-    this.cause = cause;
+    this.cause = cause as BadRequestErrorResponse | undefined;
   }
 }
 

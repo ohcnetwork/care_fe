@@ -67,7 +67,7 @@ export default function AuthUserProvider({
     }
   }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
 
-  const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
+  const { mutate: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(routes.login),
     onSuccess: (data: JwtTokenObtainPair) => {
       setAccessToken(data.access);

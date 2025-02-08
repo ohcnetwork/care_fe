@@ -2,12 +2,12 @@ import { createContext, useContext } from "react";
 
 import { UserModel } from "@/components/Users/models";
 
-import { JwtTokenObtainPair, LoginCredentials } from "@/Utils/request/api";
+import { LoginCredentials } from "@/Utils/request/api";
 import { TokenData } from "@/types/auth/otpToken";
 
 interface AuthContextType {
   user: UserModel | undefined;
-  signIn: (creds: LoginCredentials) => Promise<JwtTokenObtainPair>;
+  signIn: (creds: LoginCredentials) => void;
   isAuthenticating: boolean;
   signOut: () => Promise<void>;
   patientLogin: (tokenData: TokenData, redirectUrl: string) => void;

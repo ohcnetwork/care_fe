@@ -1,122 +1,170 @@
+import { MutationMeta, QueryMeta } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
+import React from "react";
 import { toast } from "sonner";
 
-import * as Notifications from "@/Utils/Notifications";
-import { HTTPError, StructuredError } from "@/Utils/request/types";
+import { HTTPError } from "@/Utils/request/types";
 
-export function handleHttpError(error: Error) {
-  // Skip handling silent errors and AbortError
-  if (("silent" in error && error.silent) || error.name === "AbortError") {
+type Meta = QueryMeta | MutationMeta | undefined;
+
+export type HttpErrorHandler = (error: HTTPError, meta: Meta) => boolean | void;
+
+const httpErrorHandlers: HttpErrorHandler[] = [];
+
+/**
+ * Registers a handler that will be called for all HTTP errors.
+ * The latest registered handler will be called first.
+ * @param handler - The handler to register.
+ */
+export function registerHttpErrorHandler(handler: HttpErrorHandler) {
+  httpErrorHandlers.splice(0, 0, handler);
+}
+
+/**
+ * Unregisters a handler that was previously registered using
+ * `registerHttpErrorHandler`.
+ * @param handler - The handler to unregister.
+ */
+export function unregisterHttpErrorHandler(handler: HttpErrorHandler) {
+  httpErrorHandlers.splice(httpErrorHandlers.indexOf(handler), 1);
+}
+
+/**
+ * Registers a handler that will be called for all HTTP errors.
+ *
+ * When the handler returns `true`, the error is considered handled and no
+ * other handlers will be called.
+ *
+ * The error handler will be unregistered when the component unmounts.
+ * @param handler - The handler to register.
+ */
+export function useHttpErrorHandler(handler: HttpErrorHandler) {
+  const handlerRef = React.useRef(handler);
+
+  React.useEffect(() => {
+    registerHttpErrorHandler(handlerRef.current);
+    return () => unregisterHttpErrorHandler(handlerRef.current);
+  }, [handlerRef]);
+}
+
+/**
+ * Handles HTTP errors.
+ * @param error - The error to handle.
+ */
+export function handleHttpError(error: Error, meta?: Meta) {
+  // If the error is an AbortError, skip further handling.
+  if (error.name === "AbortError") {
     return;
   }
 
+  // If the error is silenced, skip further handling.
+  //
+  // Voluntarily kept this check before the HTTPError instance check as errors
+  // from plugins may not be an instance of HTTPError, but plugins could choose
+  // to set the `silent` property regardless.
+  if ("silent" in error && error.silent) {
+    return;
+  }
+
+  // If the error is not an HTTPError, show a generic error message and skip
+  // further handling.
   if (!(error instanceof HTTPError)) {
     toast.error(error.message || t("something_went_wrong"));
     return;
   }
 
-  const cause = error.cause;
-
-  if (isNotFound(error)) {
-    toast.error((cause?.detail as string) || t("not_found"));
+  // Session expired handler is always called before any other handlers.
+  if (sessionExpiredHandler(error, meta)) {
     return;
   }
 
-  if (isSessionExpired(cause)) {
-    handleSessionExpired();
-    return;
-  }
-
-  if (isBadRequest(error)) {
-    const errs = cause?.errors;
-    if (isPydanticError(errs)) {
-      handlePydanticErrors(errs);
+  // Other handlers are called in the order they were registered.
+  for (const handler of httpErrorHandlers) {
+    if (handler(error, meta)) {
       return;
     }
+  }
 
-    if (isStructuredError(cause)) {
-      handleStructuredErrors(cause);
+  // Default / fallback handlers are called last.
+  for (const handler of [detailHandler, notFoundHandler, badRequestHandler]) {
+    if (handler(error, meta)) {
       return;
     }
+  }
 
-    Notifications.BadRequest({ errs });
+  // If no handler handled the error, show a generic error message.
+  toast.error(t("something_went_wrong"));
+}
+
+/**
+ * Handles HTTP errors with a `detail` property by showing it as an error.
+ */
+const detailHandler: HttpErrorHandler = ({ cause }) => {
+  if (cause && "detail" in cause && typeof cause.detail === "string") {
+    toast.error(cause.detail);
+    return true;
+  }
+};
+
+/**
+ * Handles HTTP 400 Bad Request errors by showing a generic error message.
+ */
+const badRequestHandler: HttpErrorHandler = ({ status, cause }) => {
+  if (status !== 400) {
+    return false;
+  }
+
+  if (cause && "errors" in cause) {
+    for (const error of cause.errors) {
+      if ("type" in error && error.type === "value_error") {
+        // If error has a ctx property with an error property, show the error.
+        if (error.ctx && "error" in error.ctx) {
+          toast.error(error.ctx.error);
+          continue;
+        }
+
+        if (typeof error.msg === "string") {
+          toast.error(error.msg);
+          continue;
+        }
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Handles Session Expired / Invalid Token errors by redirecting to the
+ * session expired page.
+ */
+const sessionExpiredHandler: HttpErrorHandler = ({ cause }) => {
+  if (!cause || !("code" in cause) || !("detail" in cause)) {
     return;
   }
 
-  toast.error((cause?.detail as string) || t("something_went_wrong"));
-}
+  if (
+    cause.code !== "token_not_valid" &&
+    cause.detail !== "Authentication credentials were not provided."
+  ) {
+    return;
+  }
 
-function isSessionExpired(error: HTTPError["cause"]) {
-  return (
-    // If Authorization header is not valid
-    error?.code === "token_not_valid" ||
-    // If Authorization header is not provided
-    error?.detail === "Authentication credentials were not provided."
-  );
-}
-
-function handleSessionExpired() {
+  // If the user is not already on the session expired page, navigate to it.
   if (!location.pathname.startsWith("/session-expired")) {
     navigate(`/session-expired?redirect=${window.location.href}`);
   }
-}
 
-function isBadRequest(error: HTTPError) {
-  return error.status === 400 || error.status === 406;
-}
-
-function isNotFound(error: HTTPError) {
-  return error.status === 404;
-}
-
-type PydanticError = {
-  type: string;
-  loc?: string[];
-  msg: string | Record<string, string>;
-  input?: unknown;
-  url?: string;
+  return true;
 };
 
-function isStructuredError(err: HTTPError["cause"]): err is StructuredError {
-  return typeof err === "object" && !Array.isArray(err);
-}
-
-function handleStructuredErrors(cause: StructuredError) {
-  for (const value of Object.values(cause)) {
-    if (Array.isArray(value)) {
-      value.forEach((err) => toast.error(err));
-      return;
-    }
-    if (typeof value === "string") {
-      toast.error(value);
-      return;
-    }
+/**
+ * Handles HTTP 404 Not Found errors by showing a generic error message.
+ */
+const notFoundHandler: HttpErrorHandler = ({ status }) => {
+  if (status === 404) {
+    toast.error(t("not_found"));
+    return true;
   }
-}
-
-function isPydanticError(errors: unknown): errors is PydanticError[] {
-  return (
-    Array.isArray(errors) &&
-    errors.every(
-      (error) => typeof error === "object" && error !== null && "type" in error,
-    )
-  );
-}
-
-function handlePydanticErrors(errors: PydanticError[]) {
-  errors.map(({ type, loc, msg }) => {
-    const message = typeof msg === "string" ? msg : Object.values(msg)[0];
-    if (!loc) {
-      toast.error(message);
-      return;
-    }
-    type = type
-      .replace("_", " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-    toast.error(message, {
-      description: `${type}: '${loc.join(".")}'`,
-      duration: 8000,
-    });
-  });
-}
+};
