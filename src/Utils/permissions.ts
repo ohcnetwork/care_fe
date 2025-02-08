@@ -19,10 +19,3 @@ export const showUserPasswordReset = (
 export const showAvatarEdit = (authUser: UserModel, targetUser: UserBase) => {
   return authUser.username === targetUser.username || authUser.is_superuser;
 };
-
-export const editUserPermissions = (
-  authUser: UserModel,
-  targetUser: UserBase,
-) => {
-  return authUser.username === targetUser.username;
-};

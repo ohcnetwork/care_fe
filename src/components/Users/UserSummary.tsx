@@ -21,14 +21,16 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import {
-  editUserPermissions,
   showAvatarEdit,
   showUserDelete,
   showUserPasswordReset,
 } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { usePermissions } from "@/context/PermissionContext";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 import { UserBase } from "@/types/user/user";
 
@@ -37,6 +39,8 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const [showDeleteDialog, setshowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const { hasPermission } = usePermissions();
+  const { canCreateUser } = getPermissions(hasPermission, authUser);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -69,7 +73,6 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const deletePermitted = showUserDelete(authUser, userData);
   const passwordResetPermitted = showUserPasswordReset(authUser, userData);
   const avatarPermitted = showAvatarEdit(authUser, userData);
-  const editPermissions = editUserPermissions(authUser, userData);
 
   const renderBasicInformation = () => {
     return (
@@ -104,7 +107,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
         setOpen={setShowEditUserSheet}
       />
       <div className="mt-10 flex flex-col gap-y-6">
-        {editPermissions && (
+        {(canCreateUser || authUser.username === userData.username) && (
           <Button
             variant="outline"
             className="w-fit self-end"
@@ -132,7 +135,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("personal_information_note_self")
-              : editPermissions
+              : canCreateUser
                 ? t("personal_information_note")
                 : t("personal_information_note_view")
           }
@@ -144,7 +147,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           note={
             authUser.username === userData.username
               ? t("contact_info_note_self")
-              : editPermissions
+              : canCreateUser
                 ? t("contact_info_note")
                 : t("contact_info_note_view")
           }

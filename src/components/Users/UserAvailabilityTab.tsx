@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -23,7 +24,11 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
+
+import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import {
@@ -31,6 +36,7 @@ import {
   formatTimeShort,
   humanizeStrings,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -65,6 +71,10 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewSchedule } = getPermissions(hasPermission, authUser);
+  const { goBack } = useAppHistory();
 
   const facilityId = useSlug("facility");
 
@@ -74,7 +84,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && canViewSchedule,
   });
 
   const exceptionsQuery = useQuery({
@@ -83,7 +93,20 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       pathParams: { facility_id: facilityId! },
       queryParams: { user: user.id },
     }),
+    enabled: !!facilityId && canViewSchedule,
   });
+
+  useEffect(() => {
+    if (!canViewSchedule) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(
+        facilityId
+          ? `/facility/${facilityId}/users/${user.username}`
+          : `/users/${user.username}`,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewSchedule]);
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;

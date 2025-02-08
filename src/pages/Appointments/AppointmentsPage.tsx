@@ -16,6 +16,7 @@ import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -61,7 +62,10 @@ import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -72,6 +76,7 @@ import {
   formatName,
   formatPatientAge,
 } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -249,6 +254,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
+  const { canViewAppointments } = getPermissions(hasPermission, authUser);
+
   const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
@@ -329,6 +338,13 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const slots = slotsQuery.data?.results?.filter((s) => s.allocated > 0);
   const slot = slots?.find((s) => s.id === qParams.slot);
+
+  useEffect(() => {
+    if (!canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack("/");
+    }
+  }, [canViewAppointments]);
 
   if (schedulableUsersQuery.isLoading) {
     return <Loading />;
@@ -626,6 +642,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 date_from={qParams.date_from}
                 date_to={qParams.date_to}
                 search={qParams.search?.toLowerCase()}
+                canViewAppointments={canViewAppointments}
               />
             ))}
           </div>
@@ -639,6 +656,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
           date_from={qParams.date_from}
           date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
+          canViewAppointments={canViewAppointments}
         />
       )}
     </Page>
@@ -653,6 +671,7 @@ function AppointmentColumn(props: {
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -677,7 +696,7 @@ function AppointmentColumn(props: {
         date_before: props.date_to,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];
@@ -777,6 +796,7 @@ function AppointmentRow(props: {
   date_from: string | null;
   date_to: string | null;
   search?: string;
+  canViewAppointments: boolean;
 }) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<Appointment["status"]>("booked");
@@ -802,7 +822,7 @@ function AppointmentRow(props: {
         date_before: props.date_to,
       },
     }),
-    enabled: !!props.date_from && !!props.date_to,
+    enabled: !!props.date_from && !!props.date_to && props.canViewAppointments,
   });
 
   let appointments = data?.results ?? [];

@@ -14,8 +14,13 @@ import {
 } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
@@ -46,6 +51,13 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
     enabled: !!id,
   });
 
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canManageFacilityOrganizationUsers, canCreateUser } = getPermissions(
+    hasPermission,
+    authUser,
+  );
+
   if (!id) {
     return null;
   }
@@ -69,24 +81,28 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">{t("users")}</h2>
           <div className="flex gap-2">
-            <AddUserSheet
-              open={openAddUserSheet}
-              setOpen={(open) => {
-                setQueryParams({ sheet: open ? "add" : "", username: "" });
-              }}
-              onUserCreated={(user) => {
-                setQueryParams({ sheet: "link", username: user.username });
-              }}
-            />
-            <LinkFacilityUserSheet
-              facilityId={facilityId}
-              organizationId={id}
-              open={openLinkUserSheet}
-              setOpen={(open) => {
-                setQueryParams({ sheet: open ? "link" : "", username: "" });
-              }}
-              preSelectedUsername={qParams.username}
-            />
+            {canCreateUser && (
+              <AddUserSheet
+                open={openAddUserSheet}
+                setOpen={(open) => {
+                  setQueryParams({ sheet: open ? "add" : "", username: "" });
+                }}
+                onUserCreated={(user) => {
+                  setQueryParams({ sheet: "link", username: user.username });
+                }}
+              />
+            )}
+            {canManageFacilityOrganizationUsers && (
+              <LinkFacilityUserSheet
+                facilityId={facilityId}
+                organizationId={id}
+                open={openLinkUserSheet}
+                setOpen={(open) => {
+                  setQueryParams({ sheet: open ? "link" : "", username: "" });
+                }}
+                preSelectedUsername={qParams.username}
+              />
+            )}
           </div>
         </div>
 
@@ -139,26 +155,28 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-2">
-                      <EditFacilityUserRoleSheet
-                        facilityId={facilityId}
-                        organizationId={id}
-                        userRole={userRole}
-                        trigger={
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="w-full gap-2"
-                          >
-                            <CareIcon
-                              icon="l-arrow-up-right"
-                              className="h-4 w-4"
-                            />
-                            <span>{t("more_details")}</span>
-                          </Button>
-                        }
-                      />
-                    </div>
+                    {canManageFacilityOrganizationUsers && (
+                      <div className="mt-auto pt-2">
+                        <EditFacilityUserRoleSheet
+                          facilityId={facilityId}
+                          organizationId={id}
+                          userRole={userRole}
+                          trigger={
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="w-full gap-2"
+                            >
+                              <CareIcon
+                                icon="l-arrow-up-right"
+                                className="h-4 w-4"
+                              />
+                              <span>{t("more_details")}</span>
+                            </Button>
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

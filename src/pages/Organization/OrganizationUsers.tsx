@@ -11,9 +11,13 @@ import { Avatar } from "@/components/Common/Avatar";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
@@ -33,6 +37,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     cacheBlacklist: ["search"],
   });
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
@@ -49,6 +54,12 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     }),
     enabled: !!id,
   });
+
+  const authUser = useAuthUser();
+  const { canCreateUser, canManageOrganizationUsers } = getPermissions(
+    hasPermission,
+    authUser,
+  );
 
   if (!id) {
     return null;
@@ -67,24 +78,28 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             />
           </div>
           <div className="flex gap-2">
-            <AddUserSheet
-              open={openAddUserSheet}
-              setOpen={(open) => {
-                updateQuery({ sheet: open ? "add" : "" });
-              }}
-              onUserCreated={(user) => {
-                updateQuery({ sheet: "link", username: user.username });
-              }}
-              organizationId={id}
-            />
-            <LinkUserSheet
-              organizationId={id}
-              open={openLinkUserSheet}
-              setOpen={(open) => {
-                updateQuery({ sheet: open ? "link" : "", username: "" });
-              }}
-              preSelectedUsername={qParams.username}
-            />
+            {canCreateUser && (
+              <AddUserSheet
+                open={openAddUserSheet}
+                setOpen={(open) => {
+                  updateQuery({ sheet: open ? "add" : "" });
+                }}
+                onUserCreated={(user) => {
+                  updateQuery({ sheet: "link", username: user.username });
+                }}
+                organizationId={id}
+              />
+            )}
+            {canManageOrganizationUsers && (
+              <LinkUserSheet
+                organizationId={id}
+                open={openLinkUserSheet}
+                setOpen={(open) => {
+                  updateQuery({ sheet: open ? "link" : "", username: "" });
+                }}
+                preSelectedUsername={qParams.username}
+              />
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -157,25 +172,27 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         </div>
                       </div>
 
-                      <div className="mt-auto pt-2">
-                        <EditUserRoleSheet
-                          organizationId={id}
-                          userRole={userRole}
-                          trigger={
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="w-full gap-2"
-                            >
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="h-4 w-4"
-                              />
-                              <span>{t("more_details")}</span>
-                            </Button>
-                          }
-                        />
-                      </div>
+                      {canManageOrganizationUsers && (
+                        <div className="mt-auto pt-2">
+                          <EditUserRoleSheet
+                            organizationId={id}
+                            userRole={userRole}
+                            trigger={
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="w-full gap-2"
+                              >
+                                <CareIcon
+                                  icon="l-arrow-up-right"
+                                  className="h-4 w-4"
+                                />
+                                <span>{t("more_details")}</span>
+                              </Button>
+                            }
+                          />
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

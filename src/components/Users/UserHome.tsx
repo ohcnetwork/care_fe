@@ -15,9 +15,12 @@ import UserSummaryTab from "@/components/Users/UserSummary";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, keysOf } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 
 export interface UserHomeProps {
   username?: string;
@@ -34,11 +37,13 @@ export default function UserHome(props: UserHomeProps) {
   let { username } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
   if (!username) {
     username = authUser.username;
   }
   const loggedInUser = username === authUser.username;
+  const { canViewSchedule } = getPermissions(hasPermission, authUser);
 
   const {
     data: userData,
@@ -68,7 +73,7 @@ export default function UserHome(props: UserHomeProps) {
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
-      hidden: !props.facilityId,
+      hidden: !props.facilityId || !canViewSchedule,
     },
   } satisfies Record<string, TabChildProp>;
 

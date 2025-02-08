@@ -37,10 +37,12 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { editUserPermissions } from "@/Utils/permissions";
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -122,7 +124,8 @@ export default function EditUserRoleSheet({
     });
   };
   const authUser = useAuthUser();
-  const editPermissions = editUserPermissions(authUser, userRole.user);
+  const { hasPermission } = usePermissions();
+  const { canCreateUser } = getPermissions(hasPermission, authUser);
 
   return (
     <>
@@ -246,7 +249,7 @@ export default function EditUserRoleSheet({
                 </AlertDialogContent>
               </AlertDialog>
 
-              {editPermissions && (
+              {canCreateUser && (
                 <Button
                   variant="outline"
                   className="w-full"

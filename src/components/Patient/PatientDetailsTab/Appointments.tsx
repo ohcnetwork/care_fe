@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,13 +20,26 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import scheduleApis from "@/types/scheduling/scheduleApis";
 
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewAppointments, canCreateAppointment } = getPermissions(
+    hasPermission,
+    authUser,
+  );
+  const { goBack } = useAppHistory();
 
   const { data } = useQuery({
     queryKey: ["patient-appointments", patientId],
@@ -32,7 +47,16 @@ export const Appointments = (props: PatientProps) => {
       pathParams: { facility_id: facilityId },
       queryParams: { patient: patientId, limit: 100 },
     }),
+    enabled: canViewAppointments,
   });
+
+  useEffect(() => {
+    if (!canViewAppointments) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facilityId}/patient/${patientId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewAppointments]);
 
   const appointments = data?.results;
 
@@ -63,15 +87,17 @@ export const Appointments = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
-        <Button variant="outline_primary" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
-            className="flex items-center justify-center w-full sm:w-auto"
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("schedule_appointment")}
-          </Link>
-        </Button>
+        {canCreateAppointment && (
+          <Button variant="outline_primary" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
+              className="flex items-center justify-center w-full sm:w-auto"
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("schedule_appointment")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="rounded-lg border bg-white">
