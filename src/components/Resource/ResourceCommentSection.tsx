@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -167,7 +168,9 @@ export const Comment = ({
             {formatName(created_by)}
           </span>
         </p>
-        <div>{comment.replace(/\n+/g, "\n")}</div>
+        <div className="break-words whitespace-pre-wrap">
+          <ReactMarkdown>{comment}</ReactMarkdown>
+        </div>
       </div>
       <time
         className="text-gray-500 text-xs"
