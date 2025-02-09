@@ -254,7 +254,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                       <Badge
                         className={
                           questionnaire.status === "active"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
                             : ""
                         }
                       >
