@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -167,7 +168,9 @@ export const Comment = ({
             {formatName(created_by)}
           </span>
         </p>
-        <div>{comment.replace(/\n+/g, "\n")}</div>
+        <div className="break-words whitespace-pre-wrap">
+          <Markdown content={comment} />
+        </div>
       </div>
       <time
         className="text-gray-500 text-xs"
