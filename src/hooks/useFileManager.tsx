@@ -250,14 +250,13 @@ export default function useFileManager(
   const Dialogues = (
     <>
       <FilePreviewDialog
-        show={file_state.open}
+        open={file_state.open}
         fileUrl={fileUrl}
         file_state={file_state}
         setFileState={setFileState}
         downloadURL={downloadURL}
         uploadedFiles={uploadedFiles}
-        onClose={handleFilePreviewClose}
-        fixedWidth={false}
+        onOpenChange={handleFilePreviewClose}
         className="h-[80vh] w-full md:h-screen"
         loadFile={viewFile}
         currentIndex={currentIndex}

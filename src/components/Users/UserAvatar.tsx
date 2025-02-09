@@ -97,7 +97,7 @@ export default function UserAvatar({ username }: { username: string }) {
         imageUrl={userData?.profile_picture_url}
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
-        onClose={() => setEditAvatar(false)}
+        onOpenChange={() => setEditAvatar(false)}
       />
       <div>
         <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
