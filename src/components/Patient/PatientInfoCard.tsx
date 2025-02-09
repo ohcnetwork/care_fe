@@ -17,6 +17,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -359,48 +368,77 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
           </div>
         </div>
-        <div
-          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
-          id="consultation-buttons"
-        >
-          {!completedEncounterStatus.includes(encounter.status) && (
-            <div
-              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-              data-cy="update-encounter-button"
-            >
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="primary">
-                    {t("update")}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {questionnaireOptions.map((option) => (
-                    <DropdownMenuItem key={option.slug} asChild>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
-                        className="cursor-pointer text-gray-800"
-                        data-cy="update-encounter-option"
-                      >
-                        {t(option.title)}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={handleMarkAsComplete}>
-                    {t("mark_as_complete")}
-                  </DropdownMenuItem>
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    encounter={encounter}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
+        <Dialog>
+          <div
+            className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+            id="consultation-buttons"
+          >
+            {!completedEncounterStatus.includes(encounter.status) && (
+              <div
+                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+                data-cy="update-encounter-button"
+              >
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="primary">
+                      {t("update")}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {questionnaireOptions.map((option) => (
+                      <DropdownMenuItem key={option.slug} asChild>
+                        <Link
+                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
+                          className="cursor-pointer text-gray-800"
+                          data-cy="update-encounter-option"
+                        >
+                          {t(option.title)}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+
+                    <DialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        {t("mark_as_complete")}
+                      </DropdownMenuItem>
+                    </DialogTrigger>
+
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      encounter={encounter}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+          </div>
+          <DialogContent>
+            <DialogHeader>{t("mark_as_complete")}</DialogHeader>
+            <DialogDescription>
+              {t("mark_encounter_as_complete_confirmation")}
+            </DialogDescription>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline" type="button">
+                  {t("cancel")}
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button
+                  variant="primary"
+                  onClick={handleMarkAsComplete}
+                  data-cy="mark-encounter-as-complete"
+                  type="submit"
+                >
+                  {t("mark_as_complete")}
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </section>
     </>
   );
