@@ -1,4 +1,10 @@
 export async function onRequest(context) {
+  // Skip middleware processing if the request is from the Worker
+  if (context.request.headers.get("X-From-Worker")) {
+    console.log("Bypassing middleware for Worker request");
+    return context.next();
+  }
+
   // Log to verify middleware is running
   console.log("Middleware triggered");
 
