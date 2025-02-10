@@ -52,7 +52,7 @@ const AppointmentTokenCard = ({ id, appointment, facility }: Props) => {
             <Label>{t("name")}</Label>
             <p className="font-semibold">{patient.name}</p>
             <p className="text-sm text-gray-600 font-medium">
-              {formatPatientAge(patient as any, true)},{" "}
+              {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </p>
           </div>

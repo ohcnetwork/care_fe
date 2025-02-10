@@ -262,7 +262,7 @@ export function QuestionnaireForm({
     // Continue with existing submission logic...
     const requests: BatchRequest[] = [];
     if (encounterId && patientId) {
-      const context = { patientId, encounterId };
+      const context = { facilityId, patientId, encounterId };
       // First, collect all structured data requests if encounterId is provided
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
@@ -303,11 +303,18 @@ export function QuestionnaireForm({
               )
               .map((response) => ({
                 question_id: response.question_id,
-                values: response.values.map((value) => ({
-                  ...(value.value_code
-                    ? { value_code: value.value_code }
-                    : { value: String(value.value) }),
-                })),
+                values: response.values.map((value) => {
+                  if (value.type === "dateTime" && value.value) {
+                    return {
+                      ...value,
+                      value: value.value.toISOString(),
+                    };
+                  }
+                  if (value.value_code) {
+                    return { value_code: value.value_code };
+                  }
+                  return { value: String(value.value) };
+                }),
                 note: response.note,
                 body_site: response.body_site,
                 method: response.method,

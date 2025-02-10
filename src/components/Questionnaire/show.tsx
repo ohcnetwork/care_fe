@@ -2,6 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -218,7 +220,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                   disabled={isPending}
                 >
                   {isPending ? "Deleting..." : "Delete"}
@@ -254,7 +256,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                       <Badge
                         className={
                           questionnaire.status === "active"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
                             : ""
                         }
                       >
@@ -304,10 +306,10 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CardContent>
               <QuestionnaireForm
                 questionnaireSlug={id}
-                patientId={"some_patient_id"}
+                patientId={"preview"}
                 subjectType={"encounter"}
-                encounterId={"some_encounter_id"}
-                facilityId={"facilityId"}
+                encounterId={"preview"}
+                facilityId={"preview"}
               />
             </CardContent>
           </Card>
