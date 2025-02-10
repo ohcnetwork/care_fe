@@ -45,7 +45,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
 
           {/* From Address */}
           <div className="mb-6">
-            <div className="font-semibold">{t("From")}:</div>
+            <div className="font-semibold">{t("from")}:</div>
             <div className="mt-1">{data.origin_facility.name}</div>
           </div>
 

@@ -7,7 +7,7 @@ import {
   LeafIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -131,16 +131,6 @@ export function AllergyList({
     const displayNote = isLongNote
       ? `${note.slice(0, MAX_NOTE_LENGTH)}..`
       : note;
-
-    useEffect(() => {
-      console.log(
-        "Allergy Note:",
-        allergy.note,
-        isLongNote,
-        displayNote,
-        note.length,
-      );
-    }, [allergy.note, isLongNote, displayNote, note.length]);
 
     return (
       <TableRow
