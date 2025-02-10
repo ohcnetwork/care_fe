@@ -97,21 +97,7 @@ export const EncounterShow = (props: Props) => {
   return (
     <div>
       <nav className="relative flex flex-wrap items-start justify-between">
-        <PageTitle
-          title={t("encounter")}
-          crumbsReplacements={{
-            [encounterId]: { name: encounterData.patient.name },
-            consultation: {
-              name: "Consultation",
-              uri: `/facility/${facilityId}/patient/${encounterData.patient.id}/consultation/${encounterId}/update`,
-            },
-            [encounterId]: {
-              name: encounterData.status,
-            },
-          }}
-          breadcrumbs={true}
-          backUrl="/patients"
-        />
+        <PageTitle title={t("encounter")} />
         <div
           className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
           id="consultationpage-header"
