@@ -12,6 +12,7 @@ import {
 import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
 import {
+  INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
@@ -66,8 +67,15 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
             const duration = instruction?.timing?.repeat?.bounds_duration;
             const remarks = formatSig(instruction);
             const notes = medication.note;
+            const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+              medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+            );
+
             return (
-              <TableRow key={medication.id} className="divide-x font-medium">
+              <TableRow
+                key={medication.id}
+                className={`divide-x font-medium ${isInactive ? "bg-gray-100" : ""}`}
+              >
                 <TableCell className="py-2 px-3">
                   {medication.medication?.display}
                 </TableCell>
