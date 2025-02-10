@@ -8,7 +8,7 @@ if (headers64) {
   const headersBuffer = Buffer.from(headers64, "base64");
   console.log("Decoded headers from base64.");
   const headers = headersBuffer.toString("utf-8");
-  const headersPath = path.join(__dirname, "_headers");
+  const headersPath = path.join(__dirname, "build", "_headers");
   console.log(`Writing headers to file at path: ${headersPath}`);
   fs.writeFileSync(headersPath, headers, "utf-8");
   console.log("Headers written to file successfully.");
