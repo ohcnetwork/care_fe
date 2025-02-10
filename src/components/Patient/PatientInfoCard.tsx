@@ -34,7 +34,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -44,8 +43,6 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
-
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -66,7 +63,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -372,16 +368,16 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
           </div>
         </div>
-        <AlertDialog>
-          <div
-            className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
-            id="consultation-buttons"
-          >
-            {!completedEncounterStatus.includes(encounter.status) && (
-              <div
-                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-                data-cy="update-encounter-button"
-              >
+        <div
+          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
+          id="consultation-buttons"
+        >
+          {!completedEncounterStatus.includes(encounter.status) && (
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <AlertDialog>
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="primary">
@@ -390,56 +386,42 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {questionnaireOptions.map((option) => (
-                      <DropdownMenuItem key={option.slug} asChild>
-                        <Link
-                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
-                          className="cursor-pointer text-gray-800"
-                          data-cy="update-encounter-option"
-                        >
-                          {t(option.title)}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
                     <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         {t("mark_as_complete")}
                       </DropdownMenuItem>
                     </AlertDialogTrigger>
-
                     <PLUGIN_Component
                       __name="PatientInfoCardActions"
                       encounter={encounter}
                     />
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            )}
-          </div>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("mark_encounter_as_complete_confirmation")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("mark_encounter_as_complete_confirmation")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
 
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
 
-              <AlertDialogAction
-                className={cn(buttonVariants({ variant: "primary" }))}
-                onClick={handleMarkAsComplete}
-                data-cy="mark-encounter-as-complete"
-              >
-                {t("mark_as_complete")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                    <AlertDialogAction
+                      className={cn(buttonVariants({ variant: "primary" }))}
+                      onClick={handleMarkAsComplete}
+                      data-cy="mark-encounter-as-complete"
+                    >
+                      {t("mark_as_complete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
+        </div>
       </section>
     </>
   );
