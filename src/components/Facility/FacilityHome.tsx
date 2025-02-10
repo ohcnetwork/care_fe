@@ -8,7 +8,6 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -26,7 +25,6 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
@@ -96,7 +94,6 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 
 export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
 
@@ -105,17 +102,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
     }),
-  });
-  const { mutate: deleteFacility } = useMutation({
-    mutationFn: mutate(routes.deleteFacility, {
-      pathParams: { id: facilityId },
-    }),
-    onSuccess: () => {
-      toast.success(
-        t("entity_deleted_successfully", { name: facilityData?.name }),
-      );
-      navigate("/facility");
-    },
   });
 
   const { mutateAsync: deleteAvatar } = useMutation({
@@ -184,19 +170,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   return (
     <div>
-      <ConfirmDialog
-        title={t("delete_item", { name: facilityData?.name })}
-        description={
-          <span>
-            {t("are_you_sure_want_to_delete", { name: facilityData?.name })}
-          </span>
-        }
-        action="Delete"
-        variant="destructive"
-        show={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        onConfirm={() => deleteFacility()}
-      />
       <AvatarEditModal
         title={t("edit_cover_photo")}
         open={editCoverImage}
@@ -286,16 +259,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             </DropdownMenuItem>
                           }
                         />
-                        {/* TODO: get permissions from backend */}
-                        {/* {hasPermissionToDeleteFacility && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setOpenDeleteDialog(true)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t("delete_facility")}
-                          </DropdownMenuItem>
-                        )} */}
                         <PLUGIN_Component
                           __name="FacilityHomeActions"
                           facility={facilityData}

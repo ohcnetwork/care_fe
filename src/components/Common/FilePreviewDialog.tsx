@@ -43,8 +43,8 @@ export const zoom_values = [
 type FilePreviewProps = {
   title?: ReactNode;
   description?: ReactNode;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  show: boolean;
+  onClose: () => void;
   file_state: StateInterface;
   setFileState: Dispatch<SetStateAction<StateInterface>>;
   downloadURL?: string;
@@ -72,8 +72,8 @@ const previewExtensions = [
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const {
-    open,
-    onOpenChange,
+    show,
+    onClose,
     file_state,
     setFileState,
     downloadURL,
@@ -90,10 +90,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [scale, setScale] = useState(1.0);
 
   useEffect(() => {
-    if (uploadedFiles && open) {
+    if (uploadedFiles && show) {
       setIndex(currentIndex);
     }
-  }, [uploadedFiles, open, currentIndex]);
+  }, [uploadedFiles, show, currentIndex]);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -142,7 +142,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setNumPages(1);
     setIndex(-1);
     setScale(1);
-    onOpenChange(false);
+    onClose?.();
   };
 
   const handleRotate = (rotation: number) => {
@@ -153,11 +153,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   function getRotationClass(rotation: number) {
-    let normalizedRotation = ((rotation % 360) + 360) % 360; // Normalize rotation to be within [0, 360)
+    let normalizedRotation = ((rotation % 360) + 360) % 360;
     if (normalizedRotation > 180) {
-      normalizedRotation -= 360; // Adjust to be within [-180, 180)
+      normalizedRotation -= 360;
     }
-    return normalizedRotation === -90 // Special case for -90 rotation since tailwind doesn't support 270deg
+    return normalizedRotation === -90
       ? "-rotate-90"
       : `rotate-${normalizedRotation}`;
   }
@@ -169,18 +169,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   );
 
   return (
-    <Dialog
-      onOpenChange={() => {
-        handleClose();
-      }}
-      open={open}
-    >
-      <DialogContent className="z-10 h-full w-full max-w-5xl flex-col gap-4 rounded-lg bg-white p-4 shadow-xl md:p-6">
+    <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
         <DialogHeader>
-          <DialogTitle>
-            <span className="text-sm text-gray-600">{t("file_preview")}</span>
+          <DialogTitle className="text-sm text-gray-600">
+            {t("file_preview")}
           </DialogTitle>
         </DialogHeader>
+
         {fileUrl ? (
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
@@ -267,7 +263,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""
-                    // eslint-disable-next-line i18next/no-literal-string
                     title="Source Files"
                     src={fileUrl}
                     className="h-[75vh] w-full"
