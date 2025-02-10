@@ -7,7 +7,7 @@ async function main() {
   const headersBase64 = process.env.HEADERS_BASE64;
 
   if (!headersBase64) {
-    console.error("HEADERS_BASE64 environment variable is not set.");
+    console.warn("HEADERS_BASE64 environment variable is not set.");
     return;
   }
 
