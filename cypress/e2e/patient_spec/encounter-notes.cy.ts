@@ -27,7 +27,7 @@ describe("Encounter Notes - Threads, Messages, and Notes", () => {
       cy.get('button[type="submit"]').click();
     });
 
-    cy.wait(1000);
+    
 
     // second thread
     cy.contains("button", "New Thread").click();
@@ -40,7 +40,7 @@ describe("Encounter Notes - Threads, Messages, and Notes", () => {
 
       cy.intercept("POST", "https://careapi.ohc.network/api/v1/auth/logout/").as("logoutRequest");
 
-    cy.wait(2000);
+    
 
     // logging as nurse
     cy.loginByApi("devnurse");
@@ -64,7 +64,7 @@ describe("Encounter Notes - Threads, Messages, and Notes", () => {
       cy.get('button[type="submit"]').click();
     });
 
-    cy.wait(1000);
+    
 
     // second thread in nurse login
     cy.contains("button", "New Thread").click();

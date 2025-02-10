@@ -35,8 +35,7 @@ export class PatientEncounter {
 
   
   
-  addMessageToThread() {
-    const message = "Hello, this is a test message!";
+  addMessageToThread(message: string) {
     cy.get('textarea[placeholder="Type your message"]').type(message);
     // Click the submit button
     cy.get('button[type="submit"]').click();
