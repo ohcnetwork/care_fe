@@ -52,7 +52,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-gray-500 mb-4">
         {t("adjust_resource_filters")}
       </p>
     </Card>
@@ -167,12 +167,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="items-center">
                   <Tabs
                     value={outgoing ? "outgoing" : "incoming"}
                     className="w-full"
                   >
-                    <TabsList className="bg-transparent p-0 h-8 flex justify-around">
+                    <TabsList className="bg-transparent p-0 h-8">
                       <TabsTrigger
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -202,12 +202,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </div>
               </div>
 
-              <div className="lex flex-wrap items-center gap-2">
+              <div className="items-center">
                 <Tabs
                   value={isActive ? "active" : "completed"}
                   className="w-full"
                 >
-                  <TabsList className="bg-transparent p-0 h-8 flex justify-around">
+                  <TabsList className="bg-transparent p-0 h-8">
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
