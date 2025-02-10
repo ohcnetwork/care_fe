@@ -10,6 +10,8 @@ import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import WeekdayCheckbox, {
@@ -28,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -417,7 +419,9 @@ export default function CreateScheduleTemplateSheet({
                               {t("cancel")}
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              variant={"destructive"}
+                              className={cn(
+                                buttonVariants({ variant: "destructive" }),
+                              )}
                               onClick={() => {
                                 const availabilities =
                                   form.getValues("availabilities");

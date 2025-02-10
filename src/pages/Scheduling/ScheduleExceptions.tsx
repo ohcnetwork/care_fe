@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
@@ -152,7 +152,7 @@ const ScheduleExceptionItem = (
                 {t("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
-                variant="destructive"
+                className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={() => {
                   deleteException();
                   setOpen(false);

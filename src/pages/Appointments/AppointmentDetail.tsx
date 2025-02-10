@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -551,8 +551,8 @@ const AppointmentActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
               onClick={() => cancelAppointment({ reason: "cancelled" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {t("confirm")}
             </AlertDialogAction>
@@ -582,8 +582,8 @@ const AppointmentActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {t("confirm")}
             </AlertDialogAction>
