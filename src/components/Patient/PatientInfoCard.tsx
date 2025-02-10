@@ -21,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -33,8 +32,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
 import { LocationTree } from "@/components/Location/LocationTree";
-
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -55,7 +52,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -401,18 +397,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {questionnaireOptions.map((option) => (
-                    <DropdownMenuItem key={option.slug} asChild>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
-                        className="cursor-pointer text-gray-800"
-                        data-cy="update-encounter-option"
-                      >
-                        {t(option.title)}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
                   <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                   <DropdownMenuItem onClick={handleMarkAsComplete}>
                     {t("mark_as_complete")}

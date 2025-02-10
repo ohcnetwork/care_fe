@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -81,11 +81,18 @@ export default function ResourceCreate(props: ResourceProps) {
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
-    queryFn: () =>
-      query(routes.getAnyFacility, {
-        pathParams: { id: String(facilityId) },
-      }),
+    queryFn: query(routes.getAnyFacility, {
+      pathParams: { id: String(facilityId) },
+    }),
     enabled: !!facilityId,
+  });
+
+  const { data: patientData } = useQuery({
+    queryKey: ["patient", related_patient],
+    queryFn: query(routes.patient.getPatient, {
+      pathParams: { id: String(related_patient) },
+    }),
+    enabled: !!related_patient,
   });
 
   const form = useForm<ResourceFormValues>({
@@ -145,23 +152,34 @@ export default function ResourceCreate(props: ResourceProps) {
     <Page
       title={t("create_resource_request")}
       crumbsReplacements={{
-        [facilityId]: { name: facilityData?.name || "" },
+        [facilityId]: {
+          name: facilityData?.name || "",
+          uri: `/facility/${facilityId}/settings/general`,
+        },
         resource: { style: "pointer-events-none" },
       }}
-      backUrl={`/facility/${facilityId}`}
+      backUrl={`/facility/${facilityId}/settings/general`}
     >
       <div className="container mx-auto max-w-4xl">
         <Card className="mt-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {related_patient && (
+              {patientData && (
                 <Alert>
                   <div className="flex items-center gap-2">
-                    <CareIcon icon="l-user" className="h-5 w-5 text-blue-700" />
-                    <AlertDescription className="text-sm text-blue-700">
-                      {t("linked_patient")}:{" "}
-                      <span className="font-medium">{related_patient}</span>
-                    </AlertDescription>
+                    <Link
+                      href={`/facility/${facilityId}/patient/${related_patient}/resource_requests`}
+                      className="flex items-center gap-2"
+                    >
+                      <CareIcon
+                        icon="l-user"
+                        className="h-5 w-5 text-blue-700"
+                      />
+                      <AlertDescription className="text-sm text-blue-700">
+                        {t("linked_patient")}:{" "}
+                        <span className="font-medium">{patientData.name}</span>
+                      </AlertDescription>
+                    </Link>
                   </div>
                 </Alert>
               )}
