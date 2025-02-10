@@ -153,7 +153,12 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="outline" size="sm">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-950 hover:text-gray-700 h-9"
+                  >
                     <Link
                       href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
                     >
@@ -161,7 +166,12 @@ export default function MedicationRequestTable({
                       {t("edit")}
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-950 hover:text-gray-700 h-9"
+                  >
                     <Link
                       href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
                     >
