@@ -309,7 +309,13 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               disabled={disabled}
             >
               <SelectTrigger className="h-8 md:h-9">
-                <SelectValue placeholder={t("status_placeholder")} />
+                <SelectValue
+                  placeholder={
+                    <span className="text-gray-500">
+                      {t("diagnosis_status_placeholder")}
+                    </span>
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
@@ -339,7 +345,13 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               disabled={disabled}
             >
               <SelectTrigger className="h-8 md:h-9">
-                <SelectValue placeholder={t("verification_placeholder")} />
+                <SelectValue
+                  placeholder={
+                    <span className="text-gray-500">
+                      {t("diagnosis_verification_placeholder")}
+                    </span>
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
