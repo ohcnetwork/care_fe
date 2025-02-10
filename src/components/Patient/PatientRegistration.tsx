@@ -732,18 +732,16 @@ export default function PatientRegistration(
           </form>
         </Form>
       </div>
-      {showDuplicate && (
-        <DuplicatePatientDialog
-          open={showDuplicate}
-          patientList={duplicatePatients}
-          handleOk={handleDialogClose}
-          onOpenChange={(open) => {
-            if (!open) {
-              handleDialogClose("close");
-            }
-          }}
-        />
-      )}
+      <DuplicatePatientDialog
+        open={showDuplicate}
+        patientList={duplicatePatients || []}
+        handleOk={handleDialogClose}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleDialogClose("close");
+          }
+        }}
+      />
     </Page>
   );
 }

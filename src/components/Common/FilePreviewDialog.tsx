@@ -263,7 +263,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 ) : previewExtensions.includes(file_state.extension) ? (
                   <iframe
                     sandbox=""
-                    title="Source Files"
+                    title={t("source_file")}
                     src={fileUrl}
                     className="h-[75vh] w-full"
                   />
@@ -284,7 +284,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   className="ml-4"
                   onClick={() => handleNext(index + 1)}
                   disabled={index >= uploadedFiles.length - 1}
-                  aria-label="Next file"
+                  aria-label={t("next_file")}
                 >
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Button>
@@ -296,7 +296,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <>
                     {[
                       [
-                        t("Zoom In"),
+                        t("zoom_in"),
                         "l-search-plus",
                         handleZoomIn,
                         file_state.zoom === zoom_values.length,
@@ -310,19 +310,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         false,
                       ],
                       [
-                        t("Zoom Out"),
+                        t("zoom_out"),
                         "l-search-minus",
                         handleZoomOut,
                         file_state.zoom === 1,
                       ],
                       [
-                        t("Rotate Left"),
+                        t("rotate_left"),
                         "l-corner-up-left",
                         () => handleRotate(-90),
                         false,
                       ],
                       [
-                        t("Rotate Right"),
+                        t("rotate_right"),
                         "l-corner-up-right",
                         () => handleRotate(90),
                         false,
@@ -349,23 +349,23 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 {file_state.extension === "pdf" && (
                   <>
                     {[
-                      ["Zoom In", "l-search-plus", handleZoomIn, scale >= 2],
+                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
                       [`${Math.round(scale * 100)}%`, false, () => {}, false],
                       [
-                        "Zoom Out",
+                        t("zoom_out"),
                         "l-search-minus",
                         handleZoomOut,
                         scale <= 0.5,
                       ],
                       [
-                        "Previous",
+                        t("previous"),
                         "l-arrow-left",
                         () => setPage((prev) => prev - 1),
                         page === 1,
                       ],
                       [`${page}/${numPages}`, false, () => ({}), false],
                       [
-                        "Next",
+                        t("next"),
                         "l-arrow-right",
                         () => setPage((prev) => prev + 1),
                         page === numPages,

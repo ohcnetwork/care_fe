@@ -289,7 +289,7 @@ const AvatarEditModal = ({
                       setIsCameraOpen(true);
                     }}
                   >
-                    {`${t("open")} ${t("camera")}`}
+                    {`${t("open_camera")}`}
                   </Button>
                   <div className="sm:flex-1" />
                   <Button

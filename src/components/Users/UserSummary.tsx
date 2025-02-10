@@ -87,16 +87,15 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
 
   return (
     <>
-      {showDeleteDialog && (
-        <UserDeleteDialog
-          show={showDeleteDialog}
-          name={userData.username}
-          handleOk={handleSubmit}
-          handleCancel={() => {
-            setShowDeleteDialog(false);
-          }}
-        />
-      )}
+      <UserDeleteDialog
+        show={showDeleteDialog}
+        name={userData.username}
+        handleOk={handleSubmit}
+        handleCancel={() => {
+          setShowDeleteDialog(false);
+        }}
+      />
+
       <EditUserSheet
         existingUsername={userData.username}
         open={showEditUserSheet}

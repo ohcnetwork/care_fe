@@ -176,7 +176,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         imageUrl={facilityData?.read_cover_image_url}
         handleUpload={handleCoverImageUpload}
         handleDelete={handleCoverImageDelete}
-        onOpenChange={() => setEditCoverImage(false)}
+        onOpenChange={(open) => setEditCoverImage(open)}
         hint={coverImageHint}
       />
       <div className="container mx-auto p-6">
