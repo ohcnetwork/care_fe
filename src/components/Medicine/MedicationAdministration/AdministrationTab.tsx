@@ -29,7 +29,11 @@ import {
   MedicationAdministration,
   MedicationAdministrationRequest,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+import {
+  ACTIVE_MEDICATION_STATUSES,
+  INACTIVE_MEDICATION_STATUSES,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -39,14 +43,6 @@ import {
   TIME_SLOTS,
   createMedicationAdministrationRequest,
 } from "./utils";
-
-const ACTIVE_STATUSES = ["active", "on-hold", "draft", "unknown"] as const;
-const INACTIVE_STATUSES = [
-  "ended",
-  "completed",
-  "cancelled",
-  "entered_in_error",
-] as const;
 
 // Utility Functions
 function isTimeInSlot(
@@ -211,9 +207,13 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onEditAdministration,
   onDiscontinue,
 }) => {
+  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+    medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+  );
+
   return (
     <React.Fragment>
-      <div className="p-4 border-t">
+      <div className={`p-4 border-t ${isInactive ? "bg-gray-100" : ""}`}>
         <div className="font-semibold truncate">
           {medication.medication?.display}
         </div>
@@ -247,7 +247,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         return (
           <div
             key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className="p-4 border-t relative text-sm"
+            className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
           >
             {administrationRecords?.map((admin) => {
               const colorClass =
@@ -260,16 +260,34 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                   className={`flex font-medium items-center gap-2 rounded-md p-2 mb-2 cursor-pointer justify-between border ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
-                  <div className="flex items-center gap-1">
-                    <CareIcon icon="l-check-circle" className="h-3 w-3" />
-                    {new Date(admin.occurrence_period_start).toLocaleTimeString(
-                      "en-US",
-                      {
+                  <div className="flex flex-col md:flex-row items-center gap-1">
+                    <div>
+                      <CareIcon
+                        icon="l-check-circle"
+                        className="h-3 w-3 self-center"
+                      />
+                      {new Date(
+                        admin.occurrence_period_start,
+                      ).toLocaleTimeString("en-US", {
                         hour: "numeric",
                         minute: "2-digit",
                         hour12: true,
-                      },
-                    )}
+                      })}
+                    </div>
+                    <div>
+                      {admin.occurrence_period_end && (
+                        <>
+                          {"- "}
+                          {new Date(
+                            admin.occurrence_period_end,
+                          ).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </>
+                      )}
+                    </div>
                   </div>
                   {admin.note && (
                     <Button
@@ -297,9 +315,11 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         );
       })}
 
-      <div className="p-4 border-t flex justify-center">
-        {ACTIVE_STATUSES.includes(
-          medication.status as (typeof ACTIVE_STATUSES)[number],
+      <div
+        className={`p-4 border-t flex justify-center ${isInactive ? "bg-gray-100" : ""}`}
+      >
+        {ACTIVE_MEDICATION_STATUSES.includes(
+          medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
         ) && (
           <Popover>
             <PopoverTrigger asChild>
@@ -336,6 +356,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [endSlotIndex, setEndSlotIndex] = useState(
     Math.floor(currentDate.getHours() / 6),
   );
@@ -369,7 +390,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        status: ACTIVE_STATUSES.join(","),
+        status: ACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
     enabled: !!patientId,
@@ -382,7 +403,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryParams: {
         encounter: encounterId,
         limit: 100,
-        status: INACTIVE_STATUSES.join(","),
+        status: INACTIVE_MEDICATION_STATUSES.join(","),
       },
     }),
     enabled: !!patientId,
@@ -581,36 +602,33 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       ]
     : activeMedications?.results || [];
 
+  const filteredMedications = medications.filter(
+    (med: MedicationRequestRead) => {
+      if (!searchQuery.trim()) return true;
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const medicationName = med.medication?.display?.toLowerCase() || "";
+      return medicationName.includes(searchTerm);
+    },
+  );
+
+  let content;
   if (!activeMedications || !stoppedMedications) {
-    return (
+    content = (
       <div className="min-h-[200px] flex items-center justify-center">
         <Loading />
       </div>
     );
-  }
-
-  if (!medications?.length) {
-    return (
+  } else if (!medications?.length) {
+    content = (
       <EmptyState
         message={t("no_active_medications")}
         description={t("no_medications_to_administer")}
       />
     );
-  }
-
-  return (
-    <div className="flex flex-col gap-2 m-2">
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-          onClick={() => setIsSheetOpen(true)}
-        >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("administer_medicine")}
-        </Button>
-      </div>
-
+  } else if (searchQuery && !filteredMedications.length) {
+    content = <EmptyState searching searchQuery={searchQuery} />;
+  } else {
+    content = (
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <Card className="w-full border-none shadow-none min-w-[640px]">
           <div className="grid grid-cols-[minmax(200px,2fr),repeat(4,minmax(140px,1fr)),40px]">
@@ -684,7 +702,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <div className="border-t bg-[#F3F4F6]" />
 
               {/* Medication rows */}
-              {medications?.map((medication) => (
+              {filteredMedications?.map((medication) => (
                 <MedicationRow
                   key={medication.id}
                   medication={medication}
@@ -718,6 +736,45 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         </Card>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2 mt-4 mx-2">
+      <div className="flex justify-between items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1">
+            <CareIcon icon="l-search" className="text-lg text-gray-500" />
+            <input
+              type="text"
+              placeholder={t("search_medications")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-gray-500 hover:text-foreground"
+                onClick={() => setSearchQuery("")}
+              >
+                <CareIcon icon="l-times" className="text-lg" />
+              </Button>
+            )}
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+          onClick={() => setIsSheetOpen(true)}
+        >
+          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+          {t("administer_medicine")}
+        </Button>
+      </div>
+
+      <div className="mt-4">{content}</div>
 
       {selectedMedication && administrationRequest && (
         <MedicineAdminDialog
