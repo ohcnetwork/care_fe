@@ -168,7 +168,6 @@ export const Comment = ({
             {formatName(created_by)}
           </span>
         </p>
-        {/* lint issue */}
         <div className="break-words whitespace-pre-wrap">
           <Markdown content={comment} />
         </div>
