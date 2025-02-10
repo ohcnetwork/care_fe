@@ -52,7 +52,7 @@ export function LocationTree({
               <CareIcon icon="l-check" className="h-4 w-4 text-gray-600" />
             </div>
           )}
-          {!isLatest && <div className="flex-1 w-[1px] bg-gray-200" />}
+          {!isLatest && <div className="flex-1 w-px bg-gray-200" />}
         </div>
       )}
       <div className="flex flex-col gap-3">
