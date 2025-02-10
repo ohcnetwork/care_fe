@@ -245,7 +245,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           </Badge>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent align={"start"} className="w-auto  p-2">
+                      <PopoverContent align={"start"} className="w-auto p-2">
                         <div className="space-y-2 p-2 items-center">
                           <div className="flex items-center gap-8 justify-between">
                             <h4 className="font-medium text-sm">
