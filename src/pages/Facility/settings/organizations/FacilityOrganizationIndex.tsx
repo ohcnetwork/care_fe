@@ -157,19 +157,36 @@ export default function FacilityOrganizationIndex({
           >
             <div className="flex items-center">
               {children.length > 0 ? (
-                <button onClick={() => toggleRow(org.id)} className=" mr-1">
+                <Button
+                  size={"icon"}
+                  variant={"link"}
+                  onClick={() => toggleRow(org.id)}
+                >
                   {expandedRows[org.id] ? (
                     <CareIcon icon="l-angle-down" className="h-5 w-5" />
                   ) : (
                     <CareIcon icon="l-angle-right" className="h-5 w-5" />
                   )}
-                </button>
+                </Button>
               ) : org.parent && Object.keys(org.parent).length > 0 ? (
                 <CareIcon
                   icon="l-corner-down-right-alt"
-                  className="h-4 w-4 text-gray-400"
+                  className="h-4 w-4 text-gray-400 ml-4"
                 />
-              ) : null}
+              ) : (
+                <Button
+                  size={"icon"}
+                  variant={"link"}
+                  onClick={() => toggleRow(org.id)}
+                  className="px-0"
+                >
+                  {expandedRows[org.id] ? (
+                    <CareIcon icon="l-angle-down" className="h-5 w-5" />
+                  ) : (
+                    <CareIcon icon="l-angle-right" className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
               {org.name}
             </div>
             {isTopLevel && (
