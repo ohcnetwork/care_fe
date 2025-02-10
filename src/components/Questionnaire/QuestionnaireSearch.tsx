@@ -80,7 +80,7 @@ export function QuestionnaireSearch({
           <CareIcon icon="l-arrow-down" className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[600px] p-0" align="start">
+      <PopoverContent className="w-full sm:w-[600px] p-0" align="start">
         <div className="flex items-center border-b px-3">
           <CareIcon
             icon="l-search"
