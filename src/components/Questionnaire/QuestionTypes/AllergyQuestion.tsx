@@ -8,12 +8,7 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  BeakerIcon,
-  CookingPotIcon,
-  HeartPulseIcon,
-  LeafIcon,
-} from "lucide-react";
+import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -42,9 +37,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import {
   ALLERGY_VERIFICATION_STATUS,
   AllergyIntolerance,
@@ -88,13 +85,6 @@ const ALLERGY_CATEGORIES: Record<AllergyCategory, string> = {
   biologic: "Biologic",
 };
 
-const CATEGORY_ICONS: Record<AllergyCategory, React.ReactNode> = {
-  food: <CookingPotIcon className="h-4 w-4" />,
-  medication: <BeakerIcon className="h-4 w-4" />,
-  environment: <LeafIcon className="h-4 w-4" />,
-  biologic: <HeartPulseIcon className="h-4 w-4" />,
-};
-
 function convertToAllergyRequest(
   allergy: AllergyIntolerance,
 ): AllergyIntoleranceRequest {
@@ -105,7 +95,9 @@ function convertToAllergyRequest(
     verification_status: allergy.verification_status,
     category: allergy.category,
     criticality: allergy.criticality,
-    last_occurrence: allergy.last_occurrence,
+    last_occurrence: allergy.last_occurrence
+      ? dateQueryString(new Date(allergy.last_occurrence))
+      : undefined,
     note: allergy.note,
     encounter: allergy.encounter,
   };
@@ -211,15 +203,15 @@ export function AllergyQuestion({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]"></TableHead>
-                  <TableHead className="w-[220px]">Substance</TableHead>
+                  <TableHead className="w-[220px]">{t("substance")}</TableHead>
                   <TableHead className="w-[65px] text-center px-0.5">
-                    Critical
+                    {t("criticality")}
                   </TableHead>
                   <TableHead className="w-[85px] text-center px-0.5">
-                    Status
+                    {t("status")}
                   </TableHead>
                   <TableHead className="w-[100px] text-center px-0.5 pr-6">
-                    Occurrence
+                    {t("occurrence")}
                   </TableHead>
                   <TableHead className="w-[35px]"></TableHead>
                 </TableRow>
@@ -315,7 +307,7 @@ export function AllergyQuestion({
                           }
                         >
                           <CheckCircledIcon className="h-4 w-4 mr-2" />
-                          Mark Active
+                          {t("mark_active")}
                         </DropdownMenuItem>
                       )}
                       {allergy.clinical_status !== "inactive" && (
@@ -327,7 +319,7 @@ export function AllergyQuestion({
                           }
                         >
                           <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                          Mark Inactive
+                          {t("mark_inactive")}
                         </DropdownMenuItem>
                       )}
                       {allergy.clinical_status !== "resolved" && (
@@ -339,7 +331,7 @@ export function AllergyQuestion({
                           }
                         >
                           <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                          Mark Resolved
+                          {t("mark_resolved")}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -348,7 +340,7 @@ export function AllergyQuestion({
                         onClick={() => handleRemoveAllergy(index)}
                       >
                         <MinusCircledIcon className="h-4 w-4 mr-2" />
-                        Remove Allergy
+                        {t("remove_allergy")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -356,7 +348,9 @@ export function AllergyQuestion({
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-xs text-gray-500">Criticality</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("criticality")}
+                    </Label>
                     <Select
                       value={allergy.criticality}
                       onValueChange={(value) =>
@@ -378,7 +372,9 @@ export function AllergyQuestion({
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-500">Status</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("status")}
+                    </Label>
                     <Select
                       value={allergy.verification_status}
                       onValueChange={(value) =>
@@ -405,7 +401,9 @@ export function AllergyQuestion({
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-500">Occurrence</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("occurrence")}
+                    </Label>
                     <Input
                       type="date"
                       value={allergy.last_occurrence || ""}
@@ -422,7 +420,9 @@ export function AllergyQuestion({
 
                 {allergy.note !== undefined && (
                   <div>
-                    <Label className="text-xs text-gray-500">Notes</Label>
+                    <Label className="text-xs text-gray-500">
+                      {t("notes")}
+                    </Label>
                     <Input
                       type="text"
                       placeholder="Add notes about the allergy..."
@@ -442,7 +442,7 @@ export function AllergyQuestion({
       )}
       <ValueSetSelect
         system="system-allergy-code"
-        placeholder="Search for allergies to add"
+        placeholder={t("search_for_allergies_to_add")}
         onSelect={handleAddAllergy}
         disabled={disabled}
       />
@@ -528,12 +528,14 @@ const AllergyTableRow = ({
             disabled={disabled}
           >
             <SelectTrigger className="h-7 w-[65px] px-1">
-              <SelectValue placeholder="Critical" />
+              <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="unable_to_assess">Unable to Assess</SelectItem>
+              <SelectItem value="low">{t("low")}</SelectItem>
+              <SelectItem value="high">{t("high")}</SelectItem>
+              <SelectItem value="unable_to_assess">
+                {t("unable_to_assess")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </TableCell>
@@ -550,7 +552,7 @@ const AllergyTableRow = ({
             disabled={disabled}
           >
             <SelectTrigger className="h-7 w-[85px] px-1">
-              <SelectValue placeholder="Verify" />
+              <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
               {Object.entries(ALLERGY_VERIFICATION_STATUS).map(
@@ -566,7 +568,7 @@ const AllergyTableRow = ({
         <TableCell className="min-w-[100px] py-1 px-1">
           <Input
             type="date"
-            value={allergy.last_occurrence || ""}
+            value={allergy.last_occurrence}
             onChange={(e) => onUpdate?.({ last_occurrence: e.target.value })}
             disabled={disabled}
             className="h-7 text-sm w-[100px] px-1"
@@ -587,14 +589,14 @@ const AllergyTableRow = ({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleNotesToggle}>
                 <Pencil2Icon className="h-4 w-4 mr-2" />
-                {showNotes ? "Hide Notes" : "Add Notes"}
+                {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
               {allergy.clinical_status !== "active" && (
                 <DropdownMenuItem
                   onClick={() => onUpdate?.({ clinical_status: "active" })}
                 >
                   <CheckCircledIcon className="h-4 w-4 mr-2" />
-                  Mark Active
+                  {t("mark_active")}
                 </DropdownMenuItem>
               )}
               {allergy.clinical_status !== "inactive" && (
@@ -602,7 +604,7 @@ const AllergyTableRow = ({
                   onClick={() => onUpdate?.({ clinical_status: "inactive" })}
                 >
                   <CircleBackslashIcon className="h-4 w-4 mr-2" />
-                  Mark Inactive
+                  {t("mark_inactive")}
                 </DropdownMenuItem>
               )}
               {allergy.clinical_status !== "resolved" && (
@@ -610,7 +612,7 @@ const AllergyTableRow = ({
                   onClick={() => onUpdate?.({ clinical_status: "resolved" })}
                 >
                   <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
-                  Mark Resolved
+                  {t("mark_resolved")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -619,7 +621,7 @@ const AllergyTableRow = ({
                 onClick={onRemove}
               >
                 <MinusCircledIcon className="h-4 w-4 mr-2" />
-                Remove Allergy
+                {t("remove_allergy")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -628,10 +630,10 @@ const AllergyTableRow = ({
       {showNotes && (
         <TableRow>
           <TableCell colSpan={6} className="px-4 py-2">
-            <Label className="text-xs text-gray-500">Notes</Label>
+            <Label className="text-xs text-gray-500">{t("notes")}</Label>
             <Input
               type="text"
-              placeholder="Add notes about the allergy..."
+              placeholder={t("add_notes_about_the_allergy")}
               value={allergy.note ?? ""}
               onChange={(e) => onUpdate?.({ note: e.target.value })}
               disabled={disabled}

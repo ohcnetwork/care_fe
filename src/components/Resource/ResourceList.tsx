@@ -103,7 +103,16 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const resources = queryResources?.results || [];
 
   return (
-    <Page title={t("resource")} hideBack={true}>
+    <Page
+      title={t("resource")}
+      hideBack={true}
+      crumbsReplacements={{
+        [facilityId]: {
+          name: facilityId || "",
+          uri: `/facility/${facilityId}/settings/general`,
+        },
+      }}
+    >
       <div className="space-y-4 mt-2">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">

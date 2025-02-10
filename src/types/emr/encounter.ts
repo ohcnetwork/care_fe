@@ -1,5 +1,6 @@
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
@@ -136,6 +137,7 @@ export interface Encounter {
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
+  current_location: LocationList;
 }
 
 export interface EncounterEditRequest {
