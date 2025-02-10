@@ -201,7 +201,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>
-                          {t("facility_assign_request")}
+                          {t("facility_for_care_support")}
                         </FormLabel>
                         <FormControl>
                           <Autocomplete
