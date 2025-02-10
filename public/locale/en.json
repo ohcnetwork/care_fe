@@ -1691,6 +1691,7 @@
   "questionnaire_not_exist": "The questionnaire you tried to access does not exist.",
   "questionnaire_submission_failed": "Failed to submit questionnaire",
   "questionnaire_submitted_successfully": "Questionnaire submitted successfully",
+  "questionnaires": "Questionnaire",
   "quick_access": "Quick Access",
   "quick_actions": "Quick Actions",
   "quick_actions_description": "Schedule an appointment or create a new encounter",
@@ -2285,6 +2286,7 @@
   "view_dashboard": "View Dashboard",
   "view_details": "View Details",
   "view_facility": "View Facility",
+  "view_facility_details": "View facility details",
   "view_files": "View Files",
   "view_patient": "View Patient",
   "view_patients": "View Patients",
@@ -2312,6 +2314,7 @@
   "we_ve_sent_you_a_code_to": "We've sent you a code to",
   "weekly_schedule": "Weekly Schedule",
   "weekly_working_hours_error": "Average weekly working hours must be a number between 0 and 168",
+  "welcome_back": "Welcome back, {{name}}!",
   "welcome_back_to_hospital_dashboard": "Welcome back to the overview ",
   "what_facility_assign_the_patient_to": "What facility would you like to assign the patient to",
   "whatsapp_number": "Whatsapp Number",
@@ -2331,6 +2334,8 @@
   "yesterday": "Yesterday",
   "yet_to_be_decided": "Yet to be decided",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
+  "your_facilities": "Your Facilities",
+  "your_organization": "Your Organizations",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out"
 }
