@@ -169,6 +169,7 @@ export const Comment = ({
           </span>
         </p>
         <div className="break-words whitespace-pre-wrap">
+          {/* markdown */}
           <Markdown content={comment} />
         </div>
       </div>
