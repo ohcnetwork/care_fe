@@ -12,19 +12,23 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -368,7 +372,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
             </div>
           </div>
         </div>
-        <Dialog>
+        <AlertDialog>
           <div
             className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
             id="consultation-buttons"
@@ -400,11 +404,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
-                    <DialogTrigger asChild>
+                    <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         {t("mark_as_complete")}
                       </DropdownMenuItem>
-                    </DialogTrigger>
+                    </AlertDialogTrigger>
 
                     <PLUGIN_Component
                       __name="PatientInfoCardActions"
@@ -415,30 +419,27 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               </div>
             )}
           </div>
-          <DialogContent>
-            <DialogHeader>{t("mark_as_complete")}</DialogHeader>
-            <DialogDescription>
-              {t("mark_encounter_as_complete_confirmation")}
-            </DialogDescription>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline" type="button">
-                  {t("cancel")}
-                </Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  variant="primary"
-                  onClick={handleMarkAsComplete}
-                  data-cy="mark-encounter-as-complete"
-                  type="submit"
-                >
-                  {t("mark_as_complete")}
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("mark_encounter_as_complete_confirmation")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+
+              <AlertDialogAction
+                className={cn(buttonVariants({ variant: "primary" }))}
+                onClick={handleMarkAsComplete}
+                data-cy="mark-encounter-as-complete"
+              >
+                {t("mark_as_complete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </section>
     </>
   );
