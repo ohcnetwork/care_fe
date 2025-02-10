@@ -21,6 +21,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -32,6 +33,8 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+
+import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -52,6 +55,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   const { mutate: updateEncounter } = useMutation({
     mutationFn: mutate(routes.encounter.update, {
@@ -99,7 +103,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="w-3 h-3 opacity-50 mt-1"
+                  />
+                </Link>
                 <div className="mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
@@ -113,7 +128,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="w-3 h-3 opacity-50 mt-1"
+                  />
+                </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
@@ -210,13 +236,16 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             variant="outline"
                             title={`Current Location: ${props.encounter.current_location.name}`}
                           >
-                            <Building className="w-4 h-4 text-blue-400" />
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
                             {props.encounter.current_location.name}
                             <ChevronDown className="h-3 w-3 opacity-50" />
                           </Badge>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent align={"start"} className="w-auto p-2">
+                      <PopoverContent align={"start"} className="w-auto  p-2">
                         <div className="space-y-2 p-2 items-center">
                           <div className="flex items-center gap-8 justify-between">
                             <h4 className="font-medium text-sm">
@@ -226,7 +255,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             <LocationHistorySheet
                               history={encounter.location_history}
                               trigger={
-                                <div className="">
+                                <div>
                                   <CareIcon
                                     icon="l-history"
                                     className="w-4 h-4 text-gray-700"
@@ -397,6 +426,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {questionnaireOptions.map((option) => (
+                    <DropdownMenuItem key={option.slug} asChild>
+                      <Link
+                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
+                        className="cursor-pointer text-gray-800"
+                        data-cy="update-encounter-option"
+                      >
+                        {t(option.title)}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
                   <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                   <DropdownMenuItem onClick={handleMarkAsComplete}>
                     {t("mark_as_complete")}

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -27,23 +28,21 @@ export function LocationHistorySheet({
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-xl">
-        <SheetHeader>
+        <SheetHeader className="px-1">
           <SheetTitle>{t("location_history")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 space-y-6">
+        <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
           {history.map((item, index) => (
             <div key={index}>
               <LocationTree
                 location={item.location}
                 datetime={item.start_datetime}
                 isLatest={index === 0}
+                showTimeline
               />
-              {index !== history.length - 1 && (
-                <div className="border-b border-dashed border-gray-200 mt-4" />
-              )}
             </div>
           ))}
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
