@@ -84,7 +84,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
             <div className="w-full lg:w-1/3">
               <Input
                 type="text"
-                placeholder={t("search_user")}
+                placeholder={t("search_users")}
                 value={qParams.search || ""}
                 onChange={(e) =>
                   updateQuery({
