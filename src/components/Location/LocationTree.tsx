@@ -38,7 +38,7 @@ export function LocationTree({
       {showTimeline && (
         <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
           <div
-            className={`absolute w-[1px] bg-gray-200 h-full ${isLatest ? "top-3" : "-top-3"}`}
+            className={`absolute w-px bg-gray-200 h-full ${isLatest ? "top-3" : "-top-3"}`}
           />
           {isLatest ? (
             <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center z-10">
