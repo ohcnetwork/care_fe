@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 
 import { DiagnosisTable } from "./DiagnosisTable";
@@ -18,16 +23,26 @@ interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
-  canAccess: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
   facilityId,
-  canAccess,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canSubmitEncounterQuestionnaire,
+    canSubmitPatientQuestionnaireResponses,
+  } = getPermissions(hasPermission, authUser.permissions);
+  const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
+  const canEdit = encounterId
+    ? canSubmitEncounterQuestionnaire
+    : canSubmitPatientQuestionnaireResponses;
 
   const { data: diagnoses, isLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
@@ -68,6 +83,7 @@ export function DiagnosisList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        canEdit={canEdit}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -81,6 +97,7 @@ export function DiagnosisList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      canEdit={canEdit}
     >
       <DiagnosisTable
         diagnoses={[
@@ -120,17 +137,19 @@ const DiagnosisListLayout = ({
   patientId,
   encounterId,
   children,
+  canEdit = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  canEdit?: boolean;
 }) => {
   return (
     <Card className="border-none rounded-sm">
       <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {facilityId && encounterId && (
+        {facilityId && encounterId && canEdit && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"

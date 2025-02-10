@@ -73,7 +73,10 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const [month, setMonth] = useState(new Date());
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canViewSchedule } = getPermissions(hasPermission, authUser);
+  const { canViewSchedule } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
   const { goBack } = useAppHistory();
 
   const facilityId = useSlug("facility");

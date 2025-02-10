@@ -1,5 +1,3 @@
-import { UserModel } from "@/components/Users/models";
-
 // Patient Permissions
 export const PERMISSION_CREATE_PATIENT = "can_create_patient";
 export const PERMISSION_WRITE_PATIENT = "can_write_patient";
@@ -192,193 +190,161 @@ export type HasPermissionFn = (
 
 export function getPermissions(
   hasPermission: HasPermissionFn,
-  authUser: UserModel,
+  permissions: string[],
 ): Permissions {
   return {
     // Patients
-    canCreatePatient: hasPermission(
-      PERMISSION_CREATE_PATIENT,
-      authUser.permissions,
-    ),
-    canWritePatient: hasPermission(
-      PERMISSION_WRITE_PATIENT,
-      authUser.permissions,
-    ),
-    canViewPatients: hasPermission(
-      PERMISSION_LIST_PATIENTS,
-      authUser.permissions,
-    ),
+    canCreatePatient: hasPermission(PERMISSION_CREATE_PATIENT, permissions),
+    canWritePatient: hasPermission(PERMISSION_WRITE_PATIENT, permissions),
+    canViewPatients: hasPermission(PERMISSION_LIST_PATIENTS, permissions),
     canViewClinicalData: hasPermission(
       PERMISSION_VIEW_CLINICAL_DATA,
-      authUser.permissions,
+      permissions,
     ),
     canViewPatientQuestionnaireResponses: hasPermission(
       PERMISSION_VIEW_QUESTIONNAIRE_RESPONSES,
-      authUser.permissions,
+      permissions,
     ),
     canSubmitPatientQuestionnaireResponses: hasPermission(
       PERMISSION_SUBMIT_PATIENT_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
 
     // Encounters
-    canCreateEncounter: hasPermission(
-      PERMISSION_CREATE_ENCOUNTER,
-      authUser.permissions,
-    ),
-    canListEncounters: hasPermission(
-      PERMISSION_LIST_ENCOUNTERS,
-      authUser.permissions,
-    ),
-    canWriteEncounter: hasPermission(
-      PERMISSION_WRITE_ENCOUNTER,
-      authUser.permissions,
-    ),
-    canViewEncounter: hasPermission(
-      PERMISSION_READ_ENCOUNTER,
-      authUser.permissions,
-    ),
+    canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
+    canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
+    canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
+    canViewEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
     canSubmitEncounterQuestionnaire: hasPermission(
       PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
 
     // Facility Organizations
     canCreateFacilityOrganization: hasPermission(
       PERMISSION_CREATE_FACILITY_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canCreateFacilityOrganizationRoot: hasPermission(
       PERMISSION_CREATE_FACILITY_ORGANIZATION_ROOT,
-      authUser.permissions,
+      permissions,
     ),
     canViewFacilityOrganizations: hasPermission(
       PERMISSION_VIEW_FACILITY_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canDeleteFacilityOrganization: hasPermission(
       PERMISSION_DELETE_FACILITY_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canManageFacilityOrganization: hasPermission(
       PERMISSION_MANAGE_FACILITY_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canListFacilityOrganizationUsers: hasPermission(
       PERMISSION_LIST_FACILITY_ORGANIZATION_USERS,
-      authUser.permissions,
+      permissions,
     ),
     canManageFacilityOrganizationUsers: hasPermission(
       PERMISSION_MANAGE_FACILITY_ORGANIZATION_USERS,
-      authUser.permissions,
+      permissions,
     ),
 
     // Facility
-    canCreateFacility: hasPermission(
-      PERMISSION_CREATE_FACILITY,
-      authUser.permissions,
-    ),
-    canReadFacility: hasPermission(
-      PERMISSION_READ_FACILITY,
-      authUser.permissions,
-    ),
-    canUpdateFacility: hasPermission(
-      PERMISSION_UPDATE_FACILITY,
-      authUser.permissions,
-    ),
+    canCreateFacility: hasPermission(PERMISSION_CREATE_FACILITY, permissions),
+    canReadFacility: hasPermission(PERMISSION_READ_FACILITY, permissions),
+    canUpdateFacility: hasPermission(PERMISSION_UPDATE_FACILITY, permissions),
 
     // Locations
     canListFacilityLocations: hasPermission(
       PERMISSION_LIST_FACILITY_LOCATIONS,
-      authUser.permissions,
+      permissions,
     ),
     canWriteFacilityLocation: hasPermission(
       PERMISSION_WRITE_FACILITY_LOCATIONS,
-      authUser.permissions,
+      permissions,
     ),
     canListFacilityLocationOrganizations: hasPermission(
       PERMISSION_LIST_FACILITY_LOCATION_ORGANIZATIONS,
-      authUser.permissions,
+      permissions,
     ),
     canCreateFacilityLocationOrganizations: hasPermission(
       PERMISSION_CREATE_FACILITY_LOCATION_ORGANIZATIONS,
-      authUser.permissions,
+      permissions,
     ),
 
     // Organizations
     canViewOrganizations: hasPermission(
       PERMISSION_VIEW_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canCreateOrganization: hasPermission(
       PERMISSION_CREATE_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canDeleteOrganization: hasPermission(
       PERMISSION_DELETE_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canManageOrganization: hasPermission(
       PERMISSION_MANAGE_ORGANIZATION,
-      authUser.permissions,
+      permissions,
     ),
     canManageOrganizationUsers: hasPermission(
       PERMISSION_MANAGE_ORGANIZATION_USERS,
-      authUser.permissions,
+      permissions,
     ),
     canListOrganizationUsers: hasPermission(
       PERMISSION_LIST_ORGANIZATION_USERS,
-      authUser.permissions,
+      permissions,
     ),
 
     // Questionnaire
     canWriteQuestionnaire: hasPermission(
       PERMISSION_WRITE_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
     canArchiveQuestionnaire: hasPermission(
       PERMISSION_ARCHIVE_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
     canReadQuestionnaire: hasPermission(
       PERMISSION_READ_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
     canSubmitQuestionnaire: hasPermission(
       PERMISSION_SUBMIT_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
     canManageQuestionnaire: hasPermission(
       PERMISSION_MANAGE_QUESTIONNAIRE,
-      authUser.permissions,
+      permissions,
     ),
 
     // Appointments
     canViewAppointments: hasPermission(
       PERMISSION_LIST_USER_BOOKING,
-      authUser.permissions,
+      permissions,
     ),
     canUpdateAppointment: hasPermission(
       PERMISSION_WRITE_USER_BOOKING,
-      authUser.permissions,
+      permissions,
     ),
     canCreateAppointment: hasPermission(
       PERMISSION_CREATE_APPOINTMENT,
-      authUser.permissions,
+      permissions,
     ),
 
     // Schedules and Availability
     canWriteSchedule: hasPermission(
       PERMISSION_WRITE_USER_SCHEDULE,
-      authUser.permissions,
+      permissions,
     ),
-    canViewSchedule: hasPermission(
-      PERMISSION_LIST_USER_SCHEDULE,
-      authUser.permissions,
-    ),
+    canViewSchedule: hasPermission(PERMISSION_LIST_USER_SCHEDULE, permissions),
 
     // User
-    canCreateUser: hasPermission(PERMISSION_CREATE_USER, authUser.permissions),
-    canListUsers: hasPermission(PERMISSION_LIST_USER, authUser.permissions),
+    canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
+    // Currently listed, but not used in BE
+    canListUsers: hasPermission(PERMISSION_LIST_USER, permissions),
   };
 }

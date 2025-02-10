@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -18,17 +23,27 @@ interface SymptomsListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
-  canAccess: boolean;
 }
 
 export function SymptomsList({
   patientId,
   encounterId,
   facilityId,
-  canAccess,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canSubmitEncounterQuestionnaire,
+    canSubmitPatientQuestionnaireResponses,
+  } = getPermissions(hasPermission, authUser.permissions);
+  const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
+  const canEdit = encounterId
+    ? canSubmitEncounterQuestionnaire
+    : canSubmitPatientQuestionnaireResponses;
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
@@ -67,6 +82,7 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        canEdit={canEdit}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -80,6 +96,7 @@ export function SymptomsList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      canEdit={canEdit}
     >
       <SymptomTable
         symptoms={[
@@ -118,17 +135,19 @@ const SymptomListLayout = ({
   patientId,
   encounterId,
   children,
+  canEdit = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  canEdit?: boolean;
 }) => {
   return (
     <Card className="border-none rounded-sm">
       <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
         <CardTitle>{t("symptoms")}</CardTitle>
-        {facilityId && encounterId && (
+        {facilityId && encounterId && canEdit && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"

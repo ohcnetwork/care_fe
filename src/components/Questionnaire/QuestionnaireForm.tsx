@@ -225,7 +225,11 @@ export function QuestionnaireForm({
         if (q.required) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
-            (v) => v.value !== undefined && v.value !== null && v.value !== "",
+            (v) =>
+              v.value !== undefined &&
+              v.value !== null &&
+              v.value !== "" &&
+              (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
           if (!hasValue) {
@@ -293,7 +297,7 @@ export function QuestionnaireForm({
           method: "POST",
           reference_id: form.questionnaire.id,
           body: {
-            resource_id: encounterId,
+            resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
             results: nonStructuredResponses

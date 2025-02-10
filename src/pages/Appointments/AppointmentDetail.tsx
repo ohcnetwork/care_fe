@@ -86,7 +86,7 @@ export default function AppointmentDetail(props: Props) {
   const { hasPermission } = usePermissions();
   const { canViewAppointments, canUpdateAppointment } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
   const { goBack } = useAppHistory();
 
@@ -413,7 +413,10 @@ const AppointmentActions = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canCreateAppointment } = getPermissions(hasPermission, authUser);
+  const { canCreateAppointment } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());

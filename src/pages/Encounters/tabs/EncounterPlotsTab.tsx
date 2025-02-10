@@ -1,7 +1,9 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -11,8 +13,13 @@ import {
 } from "@/components/Common/Charts/ObservationChart";
 import Loading from "@/components/Common/Loading";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { getPermissions } from "@/common/Permissions";
+
+import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 type QueryParams = {
@@ -22,13 +29,28 @@ type QueryParams = {
 export const EncounterPlotsTab = (props: EncounterTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
-
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
+  const { goBack } = useAppHistory();
+  const canAccess = canViewClinicalData || canViewEncounter;
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
     queryKey: ["plots-config"],
     queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
   });
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error("You do not have permission to view this encounter");
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
 
   if (isLoading || !data) {
     return <Loading />;
@@ -64,6 +86,7 @@ export const EncounterPlotsTab = (props: EncounterTabProps) => {
               encounterId={props.encounter.id}
               codeGroups={tab.groups}
               gridCols={plotColumns}
+              canAccess={canAccess}
             />
           </TabsContent>
         ))}

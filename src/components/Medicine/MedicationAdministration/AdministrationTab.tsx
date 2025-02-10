@@ -21,10 +21,15 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   MedicationAdministration,
   MedicationAdministrationRequest,
@@ -121,6 +126,7 @@ interface MedicationRowProps {
     admin: MedicationAdministration,
   ) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
+  canWrite: boolean;
 }
 
 // Utility Components
@@ -210,6 +216,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
   onAdminister,
   onEditAdministration,
   onDiscontinue,
+  canWrite,
 }) => {
   return (
     <React.Fragment>
@@ -283,7 +290,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                 </div>
               );
             })}
-            {isCurrentSlot && medication.status === "active" && (
+            {isCurrentSlot && medication.status === "active" && canWrite && (
               <Button
                 variant="outline"
                 size="sm"
@@ -300,30 +307,31 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
       <div className="p-4 border-t flex justify-center">
         {ACTIVE_STATUSES.includes(
           medication.status as (typeof ACTIVE_STATUSES)[number],
-        ) && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-40 p-0">
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  onDiscontinue(medication);
-                  // Close the popover after clicking
-                  const button = document.activeElement as HTMLElement;
-                  button?.blur();
-                }}
-              >
-                <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
-                {t("discontinue")}
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
+        ) &&
+          canWrite && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <CareIcon icon="l-ellipsis-h" className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-0">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    onDiscontinue(medication);
+                    // Close the popover after clicking
+                    const button = document.activeElement as HTMLElement;
+                    button?.blur();
+                  }}
+                >
+                  <CareIcon icon="l-ban" className="mr-2 h-4 w-4" />
+                  {t("discontinue")}
+                </Button>
+              </PopoverContent>
+            </Popover>
+          )}
       </div>
     </React.Fragment>
   );
@@ -333,6 +341,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
 }) => {
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
+    getPermissions(hasPermission, authUser.permissions);
+  const canAccess = canViewClinicalData || canViewEncounter;
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
@@ -372,7 +385,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: stoppedMedications, refetch: refetchStopped } = useQuery({
@@ -385,7 +398,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: INACTIVE_STATUSES.join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: administrations, refetch: refetchAdministrations } = useQuery({
@@ -413,7 +426,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         }),
       },
     }),
-    enabled: !!patientId && !!visibleSlots?.length,
+    enabled: !!patientId && !!visibleSlots?.length && canAccess,
   });
 
   // Get last administered date and last administered by for each medication
@@ -600,16 +613,18 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   return (
     <div className="flex flex-col gap-2 m-2">
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-          onClick={() => setIsSheetOpen(true)}
-        >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("administer_medicine")}
-        </Button>
-      </div>
+      {canWriteEncounter && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+            onClick={() => setIsSheetOpen(true)}
+          >
+            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+            {t("administer_medicine")}
+          </Button>
+        </div>
+      )}
 
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <Card className="w-full border-none shadow-none min-w-[640px]">
@@ -694,6 +709,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   onAdminister={handleAdminister}
                   onEditAdministration={handleEditAdministration}
                   onDiscontinue={handleDiscontinue}
+                  canWrite={canWriteEncounter}
                 />
               ))}
             </div>

@@ -31,8 +31,13 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   ALLERGY_CLINICAL_STATUS_STYLES,
   ALLERGY_CRITICALITY_STYLES,
@@ -47,7 +52,6 @@ interface AllergyListProps {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
-  canAccess: boolean;
   encounterStatus?: Encounter["status"];
 }
 
@@ -68,10 +72,21 @@ export function AllergyList({
   facilityId,
   patientId,
   encounterId,
-  canAccess,
   encounterStatus,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canSubmitPatientQuestionnaireResponses,
+    canSubmitEncounterQuestionnaire,
+  } = getPermissions(hasPermission, authUser.permissions);
+  const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
+  const canEdit = encounterId
+    ? canSubmitEncounterQuestionnaire
+    : canSubmitPatientQuestionnaireResponses;
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -115,6 +130,7 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        canEdit={canEdit}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
@@ -233,6 +249,7 @@ export function AllergyList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      canEdit={canEdit}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -303,17 +320,19 @@ const AllergyListLayout = ({
   patientId,
   encounterId,
   children,
+  canEdit = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  canEdit?: boolean;
 }) => {
   return (
     <Card className="border-none rounded-sm">
       <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
         <CardTitle>{t("allergies")}</CardTitle>
-        {facilityId && encounterId && (
+        {facilityId && encounterId && canEdit && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"

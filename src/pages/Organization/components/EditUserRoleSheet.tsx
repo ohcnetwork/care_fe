@@ -127,7 +127,7 @@ export default function EditUserRoleSheet({
   };
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, authUser);
+  const { canCreateUser } = getPermissions(hasPermission, authUser.permissions);
 
   return (
     <>

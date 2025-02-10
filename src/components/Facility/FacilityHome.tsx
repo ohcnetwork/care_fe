@@ -30,6 +30,9 @@ import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -39,6 +42,7 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -99,6 +103,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const authUser = useAuthUser();
+  const { canUpdateFacility } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -170,8 +180,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   if (isLoading || !facilityData) {
     return <Loading />;
   }
-
-  const hasPermissionToEditCoverImage = true;
 
   const coverImageHint = (
     <>
@@ -249,20 +257,23 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          aria-label={t("facility_actions_menu")}
-                          className="bg-white/20 hover:bg-white/40 w-8 h-8"
+                  {canUpdateFacility && (
+                    <div className="flex-shrink-0">
+                      <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            aria-label={t("facility_actions_menu")}
+                            className="bg-white/20 hover:bg-white/40 w-8 h-8"
+                          >
+                            <MoreVertical className="h-4 w-4 text-white" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-48 md:w-56"
                         >
-                          <MoreVertical className="h-4 w-4 text-white" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 md:w-56">
-                        {hasPermissionToEditCoverImage && (
                           <DropdownMenuItem
                             className="cursor-pointer"
                             onClick={() => setEditCoverImage(true)}
@@ -270,24 +281,24 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <Settings className="mr-2 h-4 w-4" />
                             {t("edit_cover_photo")}
                           </DropdownMenuItem>
-                        )}
 
-                        <EditFacilitySheet
-                          facilityId={facilityId}
-                          trigger={
-                            <DropdownMenuItem
-                              className=" cursor-pointer"
-                              onSelect={(e) => {
-                                e.preventDefault();
-                              }}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              {t("update_facility")}
-                            </DropdownMenuItem>
-                          }
-                        />
-                        {/* TODO: get permissions from backend */}
-                        {/* {hasPermissionToDeleteFacility && (
+                          <EditFacilitySheet
+                            facilityId={facilityId}
+                            trigger={
+                              <DropdownMenuItem
+                                className=" cursor-pointer"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                }}
+                              >
+                                <Settings className="mr-2 h-4 w-4" />
+                                {t("update_facility")}
+                              </DropdownMenuItem>
+                            }
+                          />
+
+                          {/* TODO: get permissions from backend */}
+                          {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setOpenDeleteDialog(true)}
@@ -296,13 +307,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             {t("delete_facility")}
                           </DropdownMenuItem>
                         )} */}
-                        <PLUGIN_Component
-                          __name="FacilityHomeActions"
-                          facility={facilityData}
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                          <PLUGIN_Component
+                            __name="FacilityHomeActions"
+                            facility={facilityData}
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

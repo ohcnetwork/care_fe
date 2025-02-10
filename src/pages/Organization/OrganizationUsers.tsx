@@ -58,7 +58,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const authUser = useAuthUser();
   const { canCreateUser, canManageOrganizationUsers } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
 
   if (!id) {

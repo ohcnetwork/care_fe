@@ -40,7 +40,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
   const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, authUser);
+  const { canCreateUser } = getPermissions(hasPermission, authUser.permissions);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
     mutationFn: mutate(routes.deleteUser, {

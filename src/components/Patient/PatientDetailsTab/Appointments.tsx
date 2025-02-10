@@ -37,7 +37,7 @@ export const Appointments = (props: PatientProps) => {
   const { hasPermission } = usePermissions();
   const { canViewAppointments, canCreateAppointment } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
   const { goBack } = useAppHistory();
 

@@ -256,7 +256,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  const { canViewAppointments } = getPermissions(hasPermission, authUser);
+  const { canViewAppointments } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const schedulableUsersQuery = useQuery({
     queryKey: ["schedulable-users", facilityId],

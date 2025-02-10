@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,7 +15,13 @@ import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -63,6 +70,15 @@ export default function MedicationRequestTable({
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canSubmitEncounterQuestionnaire,
+  } = getPermissions(hasPermission, authUser.permissions);
+  const canAccess = canViewClinicalData || canViewEncounter;
+  const { goBack } = useAppHistory();
 
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
@@ -74,7 +90,7 @@ export default function MedicationRequestTable({
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
 
   const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
@@ -89,8 +105,16 @@ export default function MedicationRequestTable({
         ),
       },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && canAccess,
   });
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error("You do not have permission to view this encounter");
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
 
   const medications = showStopped
     ? [
@@ -114,7 +138,7 @@ export default function MedicationRequestTable({
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="bg-gray-200 py-0 w-fit ">
+          <TabsList className="bg-gray-200 py-0 w-fit">
             <TabsTrigger
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -131,7 +155,7 @@ export default function MedicationRequestTable({
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between p-2 gap-2">
+              <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-1">
                   <CareIcon icon="l-search" className="text-lg text-gray-500" />
                   <input
@@ -153,14 +177,16 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
-                    >
-                      <PencilIcon className="mr-2 h-4 w-4" />
-                      {t("edit")}
-                    </Link>
-                  </Button>
+                  {canSubmitEncounterQuestionnaire && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
+                      >
+                        <PencilIcon className="mr-2 h-4 w-4" />
+                        {t("edit")}
+                      </Link>
+                    </Button>
+                  )}
                   <Button asChild variant="outline" size="sm">
                     <Link
                       href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}

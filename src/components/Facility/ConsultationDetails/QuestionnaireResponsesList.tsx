@@ -286,7 +286,7 @@ export default function QuestionnaireResponsesList({
     canViewClinicalData,
     canViewEncounter,
     canViewPatientQuestionnaireResponses,
-  } = getPermissions(hasPermission, authUser);
+  } = getPermissions(hasPermission, authUser.permissions);
   const { goBack } = useAppHistory();
 
   const canAccess = encounter

@@ -28,7 +28,10 @@ export const Demography = (props: PatientProps) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canWritePatient } = getPermissions(hasPermission, authUser);
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
 

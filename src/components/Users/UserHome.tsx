@@ -43,7 +43,10 @@ export default function UserHome(props: UserHomeProps) {
     username = authUser.username;
   }
   const loggedInUser = username === authUser.username;
-  const { canViewSchedule } = getPermissions(hasPermission, authUser);
+  const { canViewSchedule } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const {
     data: userData,

@@ -52,7 +52,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canCreatePatient } = getPermissions(hasPermission, authUser);
+  const { canCreatePatient } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const handleCreatePatient = useCallback(() => {
     const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};

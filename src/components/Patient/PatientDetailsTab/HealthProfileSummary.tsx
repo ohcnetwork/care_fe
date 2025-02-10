@@ -20,15 +20,14 @@ export const HealthProfileSummary = (props: PatientProps) => {
   const { patientId, facilityId } = props;
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canViewClinicalData, canViewEncounter } = getPermissions(
+  const { canViewClinicalData } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
   const { goBack } = useAppHistory();
-  const canAccess = canViewClinicalData || canViewEncounter;
 
   useEffect(() => {
-    if (!canAccess) {
+    if (!canViewClinicalData) {
       toast.error(t("no_permission_to_view_page"));
       goBack(
         facilityId
@@ -37,7 +36,7 @@ export const HealthProfileSummary = (props: PatientProps) => {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
+  }, [canViewClinicalData]);
 
   return (
     <div className="mt-4 px-4 md:px-0" data-test-id="patient-health-profile">
@@ -53,20 +52,20 @@ export const HealthProfileSummary = (props: PatientProps) => {
             <div className="md:col-span-2">
               <MedicationStatementList
                 patientId={patientId}
-                canAccess={canAccess}
+                canAccess={canViewClinicalData}
               />
             </div>
 
             <div className="md:col-span-2">
-              <AllergyList patientId={patientId} canAccess={canAccess} />
+              <AllergyList patientId={patientId} />
             </div>
 
             <div className="md:col-span-2">
-              <SymptomsList patientId={patientId} canAccess={canAccess} />
+              <SymptomsList patientId={patientId} />
             </div>
 
             <div className="md:col-span-2">
-              <DiagnosisList patientId={patientId} canAccess={canAccess} />
+              <DiagnosisList patientId={patientId} />
             </div>
           </div>
         </div>

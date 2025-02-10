@@ -32,12 +32,11 @@ const EncounterHistory = (props: PatientProps) => {
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canListEncounters, canViewPatients } = getPermissions(
+  const { canViewPatients } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
   const { goBack } = useAppHistory();
-  const canAccess = canViewPatients || canListEncounters;
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
@@ -48,16 +47,16 @@ const EncounterHistory = (props: PatientProps) => {
         offset: ((qParams.page ?? 1) - 1) * 5,
       },
     }),
-    enabled: canAccess,
+    enabled: canViewPatients,
   });
 
   useEffect(() => {
-    if (!canAccess) {
+    if (!canViewPatients) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${facilityId}/patient/${patientId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAccess]);
+  }, [canViewPatients]);
 
   return (
     <div className="mt-8">

@@ -215,7 +215,10 @@ export const PatientUsers = (props: PatientProps) => {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const authUser = useAuthUser();
-  const { canWritePatient } = getPermissions(hasPermission, authUser);
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const { data: users } = useQuery({
     queryKey: ["patientUsers", patientId],

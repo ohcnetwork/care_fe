@@ -3,7 +3,6 @@ import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterH
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
-import { UserModel } from "@/components/Users/models";
 
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
@@ -98,7 +97,7 @@ export const BASE_FACILITY_TABS: Tab[] = [
 ];
 
 export function getTabs(
-  authUser: UserModel,
+  permissions: string[],
   hasPermission: HasPermissionFn,
 ): Tabs {
   const {
@@ -108,38 +107,39 @@ export function getTabs(
     canViewPatientQuestionnaireResponses,
     canListEncounters,
     canViewPatients,
-  } = getPermissions(hasPermission, authUser);
+  } = getPermissions(hasPermission, permissions);
+
+  const getTabVisibility = (tab: Tab) => {
+    switch (tab.route) {
+      case "appointments":
+        return { ...tab, visible: canViewAppointments };
+      case "encounters":
+        return { ...tab, visible: canListEncounters || canViewPatients };
+      case "health-profile":
+        return { ...tab, visible: canViewClinicalData };
+      case "files":
+        return { ...tab, visible: canViewEncounter || canViewClinicalData };
+      case "updates":
+        return {
+          ...tab,
+          visible:
+            canViewClinicalData ||
+            canViewEncounter ||
+            canViewPatientQuestionnaireResponses,
+        };
+      default:
+        return tab;
+    }
+  };
 
   return {
-    getPatientTabs: BASE_PATIENT_TABS.map((tab) => {
-      switch (tab.route) {
-        default:
-          return tab;
-      }
-    }).filter((tab) => tab.visible ?? true),
+    getPatientTabs: BASE_PATIENT_TABS.map((tab) =>
+      getTabVisibility(tab),
+    ).filter((tab) => tab.visible ?? true),
 
-    getFacilityTabs: BASE_FACILITY_TABS.map((tab) => {
-      switch (tab.route) {
-        case "appointments":
-          return { ...tab, visible: canViewAppointments };
-        case "encounters":
-          return { ...tab, visible: canListEncounters || canViewPatients };
-        case "health-profile":
-          return { ...tab, visible: canViewClinicalData };
-        case "files":
-          return { ...tab, visible: canViewEncounter || canViewClinicalData };
-        case "updates":
-          return {
-            ...tab,
-            visible:
-              canViewClinicalData ||
-              canViewEncounter ||
-              canViewPatientQuestionnaireResponses,
-          };
-        default:
-          return tab;
-      }
-    }).filter((tab) => tab.visible ?? true),
+    getFacilityTabs: BASE_FACILITY_TABS.map((tab) =>
+      getTabVisibility(tab),
+    ).filter((tab) => tab.visible ?? true),
   };
 }
 

@@ -1,9 +1,13 @@
+import { useEffect } from "react";
+import { toast } from "sonner";
+
 import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
+import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -20,9 +24,19 @@ export const EncounterUpdatesTab = ({
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
+  const { goBack } = useAppHistory();
   const canAccess = canViewClinicalData || canViewEncounter;
+
+  useEffect(() => {
+    if (!canAccess) {
+      toast.error("You do not have permission to view this encounter");
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAccess]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Main Content Area */}
@@ -35,7 +49,6 @@ export const EncounterUpdatesTab = ({
               facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
-              canAccess={canAccess}
               encounterStatus={encounter.status}
             />
           </div>
@@ -46,7 +59,6 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               facilityId={facilityId}
-              canAccess={canAccess}
             />
           </div>
 
@@ -56,7 +68,6 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               facilityId={facilityId}
-              canAccess={canAccess}
             />
           </div>
 

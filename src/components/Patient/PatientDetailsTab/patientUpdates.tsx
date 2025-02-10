@@ -34,9 +34,9 @@ export const Updates = (props: PatientProps) => {
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  const { canViewEncounter, canViewClinicalData } = getPermissions(
+  const { canViewPatientQuestionnaireResponses } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -50,11 +50,11 @@ export const Updates = (props: PatientProps) => {
       },
       pathParams: { patientId },
     }),
-    enabled: canViewEncounter || canViewClinicalData,
+    enabled: canViewPatientQuestionnaireResponses,
   });
 
   useEffect(() => {
-    if (!canViewEncounter && !canViewClinicalData) {
+    if (!canViewPatientQuestionnaireResponses) {
       toast.error(t("no_permission_to_view_page"));
       goBack(
         facilityId
@@ -63,7 +63,7 @@ export const Updates = (props: PatientProps) => {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewEncounter, canViewClinicalData]);
+  }, [canViewPatientQuestionnaireResponses]);
 
   return (
     <div className="mt-4 px-3 md:px-0">

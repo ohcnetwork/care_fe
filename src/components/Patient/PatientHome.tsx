@@ -42,8 +42,14 @@ export const PatientHome = (props: {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { getPatientTabs, getFacilityTabs } = getTabs(authUser, hasPermission);
-  const { canCreateAppointment } = getPermissions(hasPermission, authUser);
+  const { getPatientTabs, getFacilityTabs } = getTabs(
+    authUser.permissions,
+    hasPermission,
+  );
+  const { canCreateAppointment } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],

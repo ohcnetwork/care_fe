@@ -55,7 +55,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
   const { hasPermission } = usePermissions();
   const { canManageFacilityOrganizationUsers, canCreateUser } = getPermissions(
     hasPermission,
-    authUser,
+    authUser.permissions,
   );
 
   if (!id) {
