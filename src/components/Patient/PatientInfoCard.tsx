@@ -12,10 +12,23 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +43,8 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { LocationTree } from "@/components/Location/LocationTree";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -97,7 +112,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="mb-2 flex flex-col text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="w-3 h-3 opacity-50 mt-1"
+                  />
+                </Link>
                 <div className="mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
@@ -111,7 +137,18 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <Link
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
+                  className="font-semibold flex items-center gap-1"
+                  id="patient-details"
+                  data-cy="patient-details-button"
+                >
+                  {patient.name}
+                  <CareIcon
+                    icon="l-external-link-alt"
+                    className="w-4 h-4 opacity-70"
+                  />
+                </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
@@ -120,28 +157,28 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
                   <span className="text-xs text-gray-500 font-medium">
-                    Start Date
+                    {t("start_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.start
                       ? formatDateTime(props.encounter.period.start)
-                      : "Not started"}
+                      : t("not_started")}
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
                   <span className="text-xs text-gray-500 font-medium">
-                    End Date
+                    {t("end_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.end
                       ? formatDateTime(props.encounter.period.end)
-                      : "Ongoing"}
+                      : t("ongoing")}
                   </span>
                 </div>
                 {props.encounter.external_identifier && (
                   <div className="flex flex-col space-y-1 col-span-1">
                     <span className="text-xs text-gray-500 font-medium">
-                      Hospital Identifier
+                      {t("hospital_identifier")}
                     </span>
                     <span className="text-xs">
                       {props.encounter.external_identifier}
@@ -179,7 +216,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverTrigger>
                     <PopoverContent align={"start"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Status History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t("status_history")}
+                        </h4>
                         {encounter.status_history.history.map(
                           (history, index) => (
                             <div
@@ -199,43 +238,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverContent>
                   </Popover>
 
-                  {props.encounter.current_location && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <div>
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Current Location: ${props.encounter.current_location.name}`}
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            {props.encounter.current_location.name}
-                            <ChevronDown className="h-3 w-3 opacity-50" />
-                          </Badge>
-                        </div>
-                      </PopoverTrigger>
-                      <PopoverContent align={"start"} className="w-auto p-2">
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-sm">
-                            Current Location
-                          </h4>
-                          <p className="text-sm text-gray-700">
-                            {props.encounter.current_location.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {props.encounter.current_location.description}
-                          </p>
-                        </div>
-                        <Button variant="outline">
-                          <Link
-                            href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                          >
-                            Move Patient
-                          </Link>
-                        </Button>
-                      </PopoverContent>
-                    </Popover>
-                  )}
                   <Popover>
                     <PopoverTrigger asChild>
                       <div>
@@ -257,7 +259,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverTrigger>
                     <PopoverContent align={"end"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Class History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t(`class_history`)}
+                        </h4>
                         {encounter.encounter_class_history.history.map(
                           (history, index) => (
                             <div
@@ -350,6 +354,82 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       </div>
                     }
                   />
+                  {props.encounter.current_location ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                            title={`Current Location: ${props.encounter.current_location.name}`}
+                          >
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
+                            {props.encounter.current_location.name}
+                            <ChevronDown className="h-3 w-3 opacity-50" />
+                          </Badge>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align={"start"} className="w-auto p-2">
+                        <div className="space-y-2 p-2 items-center">
+                          <div className="flex items-center gap-8 justify-between">
+                            <h4 className="font-medium text-sm">
+                              {t("location")}
+                            </h4>
+
+                            <LocationHistorySheet
+                              history={encounter.location_history}
+                              trigger={
+                                <div>
+                                  <CareIcon
+                                    icon="l-history"
+                                    className="w-4 h-4 text-gray-700"
+                                  />
+                                  <Button
+                                    variant="link"
+                                    className="text-gray-950 underline pl-1 pr-0  font-semibold"
+                                  >
+                                    {t("history")}
+                                  </Button>
+                                </div>
+                              }
+                            />
+                          </div>
+                          <div className="border-b border-gray-200 my-2" />
+                          <LocationTree
+                            location={props.encounter.current_location}
+                          />
+                          <div className="border-b border-dashed border-gray-200 my-2" />
+                          <Button
+                            variant="outline"
+                            className="border-gray-400 w-full"
+                          >
+                            <Link
+                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                              className="text-sm text-gray-950 font-semibold"
+                            >
+                              {t("update_location")}
+                            </Link>
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <Badge variant="outline">
+                      <Link
+                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                        className="flex items-center gap-1 text-gray-950 py-0.5"
+                      >
+                        <CareIcon
+                          icon="l-location-point"
+                          className="h-4 w-4 text-green-600"
+                        />
+                        {t("add_location")}
+                      </Link>
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -364,24 +444,56 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
               data-cy="update-encounter-button"
             >
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="primary">
-                    {t("update")}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={handleMarkAsComplete}>
-                    {t("mark_as_complete")}
-                  </DropdownMenuItem>
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    encounter={encounter}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <AlertDialog>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="primary">
+                      {t("update")}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
+                        className="cursor-pointer text-gray-800"
+                      >
+                        {t("treatment_summary")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        {t("mark_as_complete")}
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      encounter={encounter}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("mark_encounter_as_complete_confirmation")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+
+                    <AlertDialogAction
+                      className={cn(buttonVariants({ variant: "primary" }))}
+                      onClick={handleMarkAsComplete}
+                      data-cy="mark-encounter-as-complete"
+                    >
+                      {t("mark_as_complete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>

@@ -145,14 +145,6 @@ export const EncounterShow = (props: Props) => {
                 )}
             </>
           )} */}
-          <Link
-            href={`/facility/${facilityId}/patient/${encounterData.patient.id}`}
-            className="btn btn-primary m-1 w-full hover:text-white"
-            id="patient-details"
-            data-cy="patient-details-button"
-          >
-            {t("patient_details")}
-          </Link>
         </div>
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">
