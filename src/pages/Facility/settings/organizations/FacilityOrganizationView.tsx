@@ -32,27 +32,8 @@ interface Organization {
   description?: string;
 }
 
-function OrganizationCard({
-  org,
-  facilityId,
-}: {
-  org: Organization;
-  facilityId: string;
-}) {
+function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
   const { t } = useTranslation();
-
-  const { data: subOrgs, isLoading: isLoadingSubOrgs } = useQuery({
-    queryKey: ["facilityOrganization", "list", facilityId, org.id],
-    queryFn: query.debounced(routes.facilityOrganization.list, {
-      pathParams: { facilityId },
-      queryParams: {
-        parent: org.id,
-        limit: 1, // We only need the count
-      },
-    }),
-
-    enabled: !!facilityId && !!org.id,
-  });
 
   return (
     <Card key={org.id}>
@@ -68,7 +49,7 @@ function OrganizationCard({
                 >
                   {org.org_type}
                 </Badge>
-                <Badge variant="secondary" className="font-normal px-2 py-1">
+                {/* <Badge variant="secondary" className="font-normal px-2 py-1">
                   {isLoadingSubOrgs
                     ? t("loading")
                     : t("entity_count_one", {
@@ -78,7 +59,7 @@ function OrganizationCard({
                             ? "Department inside"
                             : "Team inside",
                       })}
-                </Badge>
+                </Badge> */}
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
@@ -124,7 +105,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
 
   return (
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
-      <div className="space-y-6">
+      <div className="space-y-6 mx-auto max-w-4xl">
         <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
           {" "}
           <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">

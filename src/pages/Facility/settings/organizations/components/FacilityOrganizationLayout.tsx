@@ -98,7 +98,7 @@ export default function FacilityOrganizationLayout({
 
   return (
     <>
-      <div className="md:px-6 py-2 flex items-center gap-2">
+      <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
         <button
           onClick={() => goBack()}
           className="mt-1 hover:underline"
@@ -137,6 +137,7 @@ export default function FacilityOrganizationLayout({
             {t(`facility_organization_type__${org.org_type}`)}
           </Badge>
         }
+        className="mx-auto max-w-4xl"
       >
         <div className="mt-2">
           {org.description && (
