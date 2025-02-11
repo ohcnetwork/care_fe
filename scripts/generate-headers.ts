@@ -1,20 +1,27 @@
 import { writeFile } from "fs/promises";
 import path from "path";
 
-const headersPath = path.join(__dirname, "../public/_headers");
+const headers = process.env.HEADERS;
+const header_folder = path.join(__dirname, "..", "public");
 
-async function main() {
-  const headersBase64 = process.env.HEADERS_BASE64;
-
-  if (!headersBase64) {
-    console.warn("HEADERS_BASE64 environment variable is not set.");
-    return;
+async function writeHeaders() {
+  if (!headers) {
+    console.warn("HEADERS environment variable is not set.");
+    process.exit(0);
   }
 
-  const headers = Buffer.from(headersBase64, "base64").toString("utf-8");
-  await writeFile(headersPath, headers, "utf-8");
+  console.log("HEADERS environment variable is set.");
+  const headersPath = path.join(header_folder, "_headers");
+  console.log(`Writing headers to file at path: ${headersPath}`);
 
-  console.log(`Headers written to: '${headersPath}'`);
+  try {
+    await writeFile(headersPath, headers, "utf-8");
+    console.log("Headers written to file successfully.");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error writing headers to file:", error);
+    process.exit(0);
+  }
 }
 
-main();
+writeHeaders();
