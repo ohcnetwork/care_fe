@@ -9,12 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import PaginationComponent from "@/components/Common/Pagination";
@@ -146,22 +141,14 @@ export const Comment = ({
     )}
   >
     <div className="flex items-start gap-3">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex">
-              <Avatar
-                name={`${created_by.first_name} ${created_by.last_name}`}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{formatName(created_by)}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
+      <TooltipComponent content={formatName(created_by)}>
+        <div className="flex">
+          <Avatar
+            name={`${created_by.first_name} ${created_by.last_name}`}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        </div>
+      </TooltipComponent>
       <div className="flex flex-col items-start flex-grow">
         <p className="text-xs space-x-2 mb-1">
           <span className="text-gray-700 font-medium">
