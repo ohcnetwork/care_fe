@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import React from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -13,54 +14,60 @@ interface LocationPathProps {
 
 interface LocationNodeProps {
   location: LocationList;
-  depth: number;
   isLast: boolean;
   datetime?: string;
+  children?: React.ReactNode;
 }
 
 function LocationNode({
   location,
-  depth,
   isLast,
   datetime,
+  children,
 }: LocationNodeProps) {
-  return (
-    <>
-      {location.parent?.id && (
-        <LocationNode
-          location={location.parent}
-          depth={depth - 1}
-          isLast={false}
-          datetime={datetime}
-        />
-      )}
-      <div
-        className="flex items-center text-sm"
-        style={{ paddingLeft: `${depth * 24}px` }}
-      >
-        {depth === 0 ? (
+  if (!location.parent?.id) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center text-sm">
           <span className="w-2 h-2 rounded-full bg-gray-400 mr-2" />
-        ) : (
+          <span
+            className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
+          >
+            {location.name}
+          </span>
+        </div>
+        {children}
+        {isLast && datetime && (
+          <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
+            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <LocationNode location={location.parent} isLast={false} datetime={datetime}>
+      <div className="flex flex-col gap-2 ml-6">
+        <div className="flex items-center text-sm">
           <CareIcon
             icon="l-corner-down-right"
             className="w-4 h-4 mr-2 mb-1 text-gray-400"
           />
-        )}
-        <span
-          className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
-        >
-          {location.name}
-        </span>
-      </div>
-      {isLast && datetime && (
-        <div
-          className="flex items-center text-sm font-normal text-gray-700 italic"
-          style={{ paddingLeft: `${depth * 24 + 24}px` }}
-        >
-          {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+          <span
+            className={isLast ? "font-semibold" : "text-gray-700 font-medium"}
+          >
+            {location.name}
+          </span>
         </div>
-      )}
-    </>
+        {children}
+        {isLast && datetime && (
+          <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
+            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+          </div>
+        )}
+      </div>
+    </LocationNode>
   );
 }
 
@@ -70,12 +77,9 @@ export function LocationTree({
   isLatest,
   showTimeline = false,
 }: LocationPathProps) {
-  const getDepth = (loc: LocationList): number =>
-    loc.parent?.id ? getDepth(loc.parent) + 1 : 0;
-
   return (
     <div
-      className={`relative flex ${showTimeline ? "gap-8 pl-12" : ""} pb-4 pt-0.5`}
+      className={`relative flex ${showTimeline ? "gap-8 pl-12" : ""}  pt-0.5`}
     >
       {showTimeline && (
         <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
@@ -93,13 +97,8 @@ export function LocationTree({
           {!isLatest && <div className="flex-1 w-px bg-gray-200" />}
         </div>
       )}
-      <div className="flex flex-col gap-3">
-        <LocationNode
-          location={location}
-          depth={getDepth(location)}
-          isLast={true}
-          datetime={datetime}
-        />
+      <div className="flex flex-col gap-2">
+        <LocationNode location={location} isLast={true} datetime={datetime} />
       </div>
     </div>
   );
