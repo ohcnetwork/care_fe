@@ -149,23 +149,23 @@ export const Comment = ({
           />
         </div>
       </TooltipComponent>
-      <div className="flex flex-col items-start flex-grow">
-        <p className="text-xs space-x-2 mb-1">
-          <span className="text-gray-700 font-medium">
+      <div className="flex flex-col flex-grow mt-1">
+        <div className="flex items-center justify-between w-full">
+          <span className="text-gray-700 font-medium text-xs md:text-sm">
             {formatName(created_by)}
           </span>
-        </p>
-        <div className="break-words whitespace-pre-wrap">
+          <time
+            className="text-gray-500 text-xs"
+            dateTime={created_date}
+            title={formatDateTime(created_date)}
+          >
+            {relativeTime(created_date)}
+          </time>
+        </div>
+        <div className="break-words whitespace-pre-wrap mt-1">
           <Markdown content={comment} />
         </div>
       </div>
-      <time
-        className="text-gray-500 text-xs"
-        dateTime={created_date}
-        title={formatDateTime(created_date)}
-      >
-        {relativeTime(created_date)}
-      </time>
     </div>
   </div>
 );
