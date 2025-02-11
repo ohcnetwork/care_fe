@@ -148,28 +148,28 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
                   <span className="text-xs text-gray-500 font-medium">
-                    Start Date
+                    {t("start_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.start
                       ? formatDateTime(props.encounter.period.start)
-                      : "Not started"}
+                      : t("not_started")}
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
                   <span className="text-xs text-gray-500 font-medium">
-                    End Date
+                    {t("end_date")}
                   </span>
                   <span className="text-xs">
                     {props.encounter.period.end
                       ? formatDateTime(props.encounter.period.end)
-                      : "Ongoing"}
+                      : t("ongoing")}
                   </span>
                 </div>
                 {props.encounter.external_identifier && (
                   <div className="flex flex-col space-y-1 col-span-1">
                     <span className="text-xs text-gray-500 font-medium">
-                      Hospital Identifier
+                      {t("hospital_identifier")}
                     </span>
                     <span className="text-xs">
                       {props.encounter.external_identifier}
@@ -207,7 +207,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverTrigger>
                     <PopoverContent align={"start"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Status History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t("status_history")}
+                        </h4>
                         {encounter.status_history.history.map(
                           (history, index) => (
                             <div
@@ -227,69 +229,6 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverContent>
                   </Popover>
 
-                  {props.encounter.current_location && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <div>
-                          <Badge
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Current Location: ${props.encounter.current_location.name}`}
-                          >
-                            <CareIcon
-                              icon="l-location-point"
-                              className="h-4 w-4 text-green-600"
-                            />
-                            {props.encounter.current_location.name}
-                            <ChevronDown className="h-3 w-3 opacity-50" />
-                          </Badge>
-                        </div>
-                      </PopoverTrigger>
-                      <PopoverContent align={"start"} className="w-auto p-2">
-                        <div className="space-y-2 p-2 items-center">
-                          <div className="flex items-center gap-8 justify-between">
-                            <h4 className="font-medium text-sm">
-                              {t("location")}
-                            </h4>
-
-                            <LocationHistorySheet
-                              history={encounter.location_history}
-                              trigger={
-                                <div>
-                                  <CareIcon
-                                    icon="l-history"
-                                    className="w-4 h-4 text-gray-700"
-                                  />
-                                  <Button
-                                    variant="link"
-                                    className="text-gray-950 underline pl-1 pr-0  font-semibold"
-                                  >
-                                    {t("history")}
-                                  </Button>
-                                </div>
-                              }
-                            />
-                          </div>
-                          <div className="border-b border-gray-200 my-2" />
-                          <LocationTree
-                            location={props.encounter.current_location}
-                          />
-                          <div className="border-b border-dashed border-gray-200 my-2" />
-                          <Button
-                            variant="outline"
-                            className="border-gray-400 w-full"
-                          >
-                            <Link
-                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                              className="text-sm text-gray-950 font-semibold"
-                            >
-                              {t("update_location")}
-                            </Link>
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  )}
                   <Popover>
                     <PopoverTrigger asChild>
                       <div>
@@ -311,7 +250,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </PopoverTrigger>
                     <PopoverContent align={"end"} className="w-auto p-2">
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Class History</h4>
+                        <h4 className="font-medium text-sm">
+                          {t(`class_history`)}
+                        </h4>
                         {encounter.encounter_class_history.history.map(
                           (history, index) => (
                             <div
@@ -404,6 +345,82 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       </div>
                     }
                   />
+                  {props.encounter.current_location ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                            title={`Current Location: ${props.encounter.current_location.name}`}
+                          >
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
+                            {props.encounter.current_location.name}
+                            <ChevronDown className="h-3 w-3 opacity-50" />
+                          </Badge>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align={"start"} className="w-auto p-2">
+                        <div className="space-y-2 p-2 items-center">
+                          <div className="flex items-center gap-8 justify-between">
+                            <h4 className="font-medium text-sm">
+                              {t("location")}
+                            </h4>
+
+                            <LocationHistorySheet
+                              history={encounter.location_history}
+                              trigger={
+                                <div>
+                                  <CareIcon
+                                    icon="l-history"
+                                    className="w-4 h-4 text-gray-700"
+                                  />
+                                  <Button
+                                    variant="link"
+                                    className="text-gray-950 underline pl-1 pr-0  font-semibold"
+                                  >
+                                    {t("history")}
+                                  </Button>
+                                </div>
+                              }
+                            />
+                          </div>
+                          <div className="border-b border-gray-200 my-2" />
+                          <LocationTree
+                            location={props.encounter.current_location}
+                          />
+                          <div className="border-b border-dashed border-gray-200 my-2" />
+                          <Button
+                            variant="outline"
+                            className="border-gray-400 w-full"
+                          >
+                            <Link
+                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                              className="text-sm text-gray-950 font-semibold"
+                            >
+                              {t("update_location")}
+                            </Link>
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <Badge variant="outline">
+                      <Link
+                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                        className="flex items-center gap-1 text-gray-950 py-0.5"
+                      >
+                        <CareIcon
+                          icon="l-location-point"
+                          className="h-4 w-4 text-green-600"
+                        />
+                        {t("add_location")}
+                      </Link>
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
