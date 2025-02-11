@@ -454,6 +454,14 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
+                        className="cursor-pointer text-gray-800"
+                      >
+                        {t("treatment_summary")}
+                      </Link>
+                    </DropdownMenuItem>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         {t("mark_as_complete")}
