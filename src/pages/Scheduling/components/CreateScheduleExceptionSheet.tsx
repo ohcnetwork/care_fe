@@ -210,7 +210,7 @@ export default function CreateScheduleExceptionSheet({
                     control={form.control}
                     name="valid_from"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel required>Valid From</FormLabel>
                         <DatePicker
                           date={field.value}
@@ -225,7 +225,7 @@ export default function CreateScheduleExceptionSheet({
                     control={form.control}
                     name="valid_to"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel required>Valid Till</FormLabel>
                         <DatePicker
                           date={field.value}
