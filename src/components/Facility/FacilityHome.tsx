@@ -249,10 +249,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
               <div className="absolute right-0 top-0 p-1 text-white">
                 {hasPermissionToEditCoverImage && (
                   <Button
-                    variant="link"
+                    variant="outline_primary"
                     onClick={() => setEditCoverImage(true)}
                     aria-label={t("edit_cover_photo")}
-                    className="text-white"
                   >
                     <CareIcon icon="l-edit" aria-hidden="true" />
                     <span className="underline">{t("edit_cover_photo")}</span>
