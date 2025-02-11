@@ -1,20 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
+import { useTranslation } from "react-i18next";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -32,7 +35,7 @@ interface Props {
 interface NavItem {
   path: string;
   title: string;
-  icon: IconName;
+  value: string;
 }
 
 export default function FacilityOrganizationLayout({
@@ -41,19 +44,24 @@ export default function FacilityOrganizationLayout({
   children,
 }: Props) {
   const path = usePath() || "";
+  const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const navItems: NavItem[] = [
     {
       path: `/departments/${id}`,
-      title: "Departments",
-      icon: "d-hospital",
+      title: "Departments/Teams",
+      value: "departments",
     },
     {
       path: `/departments/${id}/users`,
       title: "Users",
-      icon: "d-people",
+      value: "users",
     },
   ];
+
+  const currentTab =
+    navItems.find((item) => item.path === path)?.value || "departments";
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
@@ -74,7 +82,7 @@ export default function FacilityOrganizationLayout({
       </div>
     );
   }
-  // add loading state
+
   if (!org) {
     return <div>Not found</div>;
   }
@@ -89,55 +97,74 @@ export default function FacilityOrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name} `} breadcrumbs={false}>
-      {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
-      <Breadcrumb className="mt-1">
-        <BreadcrumbList>
-          {/* Org has parent and each parent may have another parent, so we need to show all the parents */}
-
-          {orgParents.reverse().map((parent) => (
-            <>
-              <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`/departments/${parent.id}`}>
-                  {parent.name}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                <BreadcrumbSeparator />
-              </BreadcrumbItem>
-            </>
-          ))}
-          <BreadcrumbItem key={org.id}>
-            <BreadcrumbLink asChild>
+    <>
+      <div className="md:px-6 py-2 flex items-center gap-2">
+        <button
+          onClick={() => goBack()}
+          className="mt-1 hover:underline"
+          aria-label="Go back"
+        >
+          <CareIcon icon="l-arrow-left" className="h-4 w-4 text-gray-600" />
+          <span className="text-sm text-gray-600">Back</span>
+        </button>
+        <span className="text-gray-400 mt-1">|</span>
+        <Breadcrumb className="mt-1">
+          <BreadcrumbList>
+            {orgParents.reverse().map((parent) => (
+              <>
+                <BreadcrumbItem key={parent.id}>
+                  <Link href={`${parent.id}`}>{parent.name}</Link>
+                </BreadcrumbItem>
+                <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                  <BreadcrumbSeparator />
+                </BreadcrumbItem>
+              </>
+            ))}
+            <BreadcrumbItem key={org.id}>
               <Link href={`/departments/${org.id}`}>{org.name}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      {/* Navigation */}
-      <div className="mt-4">
-        <Menubar>
-          {navItems.map((item) => (
-            <MenubarMenu key={item.path}>
-              <MenubarTrigger
-                className={`${
-                  path === item.path
-                    ? "font-medium text-primary-700 bg-gray-100"
-                    : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                }`}
-                asChild
-              >
-                <Link href={item.path} className="cursor-pointer">
-                  <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-          ))}
-        </Menubar>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
-      {/* Page Content */}
-      <div className="mt-4">{children}</div>
-    </Page>
+      <Page
+        title={`${org.name} `}
+        breadcrumbs={false}
+        componentRight={
+          <Badge
+            variant="outline"
+            className="border border-transparent ml-2 text-indigo-800 bg-indigo-100 px-2 py-1 w-max"
+          >
+            {t(`facility_organization_type__${org.org_type}`)}
+          </Badge>
+        }
+      >
+        <div className="mt-2">
+          {org.description && (
+            <p className="text-sm text-gray-500 line-clamp-2">
+              {org.description}
+            </p>
+          )}
+          <Tabs
+            defaultValue={currentTab}
+            className="w-full mt-2"
+            value={currentTab}
+          >
+            <TabsList className="w-full justify-start border-b border-gray-300 bg-transparent p-0 h-auto rounded-none">
+              {navItems.map((item) => (
+                <Link key={item.path} href={item.path}>
+                  <TabsTrigger
+                    value={item.value}
+                    className="border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                  >
+                    {item.title}
+                  </TabsTrigger>
+                </Link>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="mt-4">{children}</div>
+      </Page>
+    </>
   );
 }
