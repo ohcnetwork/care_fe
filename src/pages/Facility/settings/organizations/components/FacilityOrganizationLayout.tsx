@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
@@ -113,7 +114,9 @@ export default function FacilityOrganizationLayout({
             {orgParents.reverse().map((parent) => (
               <>
                 <BreadcrumbItem key={parent.id}>
-                  <Link href={`${parent.id}`}>{parent.name}</Link>
+                  <BreadcrumbLink>
+                    <Link href={`${parent.id}`}>{parent.name}</Link>
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbItem key={`ellipsis-${parent.id}`}>
                   <BreadcrumbSeparator />
@@ -121,7 +124,10 @@ export default function FacilityOrganizationLayout({
               </>
             ))}
             <BreadcrumbItem key={org.id}>
-              <Link href={`/departments/${org.id}`}>{org.name}</Link>
+              <BreadcrumbLink>
+                {" "}
+                <Link href={`/departments/${org.id}`}>{org.name}</Link>
+              </BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
