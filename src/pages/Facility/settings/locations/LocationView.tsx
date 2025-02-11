@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -117,8 +118,8 @@ export default function LocationView({ id, facilityId }: Props) {
       <Breadcrumb className="m-4">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/facility/${facilityId}/settings/locations`}>
-              {t("home")}
+            <BreadcrumbLink asChild>
+              <Link href={`/locations`}>{t("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {breadcrumbs.map((breadcrumb, index) => (
@@ -127,8 +128,8 @@ export default function LocationView({ id, facilityId }: Props) {
                 <span className="font-semibold">{breadcrumb.name}</span>
               ) : (
                 <>
-                  <BreadcrumbLink href={`${breadcrumb.id}`}>
-                    {breadcrumb.name}
+                  <BreadcrumbLink asChild>
+                    <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator />
                 </>
