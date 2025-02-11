@@ -1058,6 +1058,7 @@
   "from_date_must_be_before_to_date": "From date must be before to date",
   "from_user": "from User",
   "fulfilled": "Fulfilled",
+  "full_day_unavailable": "Full Day Unavailable",
   "full_name": "Full Name",
   "full_screen": "Full Screen",
   "gender": "Gender",
