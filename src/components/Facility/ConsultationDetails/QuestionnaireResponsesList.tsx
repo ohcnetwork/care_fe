@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -214,19 +214,33 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
                   }
                 />
               ) : (
-                <h3 className="text-sm font-medium">
-                  {item.questionnaire?.title} {t("filed")}
-                </h3>
+                <Trans
+                  i18nKey="filed"
+                  values={{ title: item.questionnaire?.title }}
+                  components={{ strong: <strong /> }}
+                />
               )}
             </div>
-            <span>{t("at")}</span>
-            <span>{formatDateTime(item.created_date)}</span>
-            <span>{t("by")}</span>
-            <div>
-              {item.created_by?.first_name || ""}{" "}
-              {item.created_by?.last_name || ""}
-              {item.created_by?.user_type && ` (${item.created_by?.user_type})`}
-            </div>
+            <span>
+              <Trans
+                i18nKey="at_time"
+                values={{ time: formatDateTime(item.created_date) }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
+            <span>
+              <Trans
+                i18nKey="by_name"
+                values={{
+                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                    item.created_by?.user_type
+                      ? ` (${item.created_by.user_type})`
+                      : ""
+                  }`,
+                }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
           </div>
         </div>
       </div>
