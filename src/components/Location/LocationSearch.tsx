@@ -44,7 +44,6 @@ export function LocationSearch({
     }),
     enabled: facilityId !== "preview",
   });
-  console.log(locations);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
