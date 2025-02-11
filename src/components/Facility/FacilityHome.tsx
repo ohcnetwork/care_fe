@@ -272,7 +272,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   facilityId={facilityId}
                   trigger={
                     <Button
-                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12"
+                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
                       variant="outline"
                     >
                       <CareIcon icon="l-edit" />
