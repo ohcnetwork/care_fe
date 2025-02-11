@@ -291,7 +291,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           {facilityData.address}
                         </div>
                       </div>
-                      <div className="flex gap-5">
+                      <div className="flex gap-5 [@media(max-width:30rem)]:flex-col">
                         <div className="flex flex-col m-2">
                           <span className="font-medium text-lg">
                             {t("mobile_number")}
