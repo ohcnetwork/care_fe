@@ -118,7 +118,7 @@ const DuplicatePatientDialog = (props: Props) => {
           </div>
         </div>
         <DialogFooter>
-          <div className="mt-4 flex flex-col justify-between sm:flex-row">
+          <div className="mt-4 flex flex-col justify-between sm:flex-row gap-2">
             <Button
               onClick={() => onOpenChange(false)}
               className="gap-1"

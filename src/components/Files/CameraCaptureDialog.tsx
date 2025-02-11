@@ -133,8 +133,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
           )}
         </div>
 
-        {/* buttons for mobile screens */}
-        <div className="m-4 flex justify-evenly sm:hidden">
+        {/* buttons for mobile and tablet screens */}
+        <div className="m-4 flex justify-evenly lg:hidden">
           <div>
             {!previewImage ? (
               <Button
@@ -193,7 +193,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               </>
             )}
           </div>
-          <div className="sm:flex-1">
+          <div>
             <Button
               variant="outline"
               onClick={() => {
@@ -207,15 +207,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </Button>
           </div>
         </div>
-        {/* buttons for laptop screens */}
-        <div className={`${isLaptopScreen ? " " : "hidden"}`}>
-          <div className="m-4 flex lg:hidden">
-            <Button variant="primary" onClick={handleSwitchCamera}>
-              <CareIcon icon="l-camera-change" className="text-lg" />
-              {`${t("switch")} ${t("camera")}`}
-            </Button>
-          </div>
 
+        {/* buttons for laptop screens */}
+        <div className="hidden lg:block">
           <div className="flex justify-end gap-2 p-4">
             <div>
               {!previewImage ? (
@@ -260,7 +254,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 </>
               )}
             </div>
-            <div className="sm:flex-1" />
+            <div className="flex-1" />
             <Button
               variant="outline"
               onClick={() => {
