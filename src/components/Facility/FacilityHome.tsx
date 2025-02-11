@@ -221,12 +221,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <Button variant="link">
                   <Avatar
                     name={facilityData.name}
-                    className="h-20 w-20 rounded-md border-4 border-white shadow-lg"
+                    className="h-28 w-24 rounded-md border-4 border-white shadow-lg"
                   />
                 </Button>
               </div>
 
-              <div className="absolute bottom-0 left-0 translate-x-0 ml-[7rem]">
+              <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="text-white">
@@ -271,9 +271,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
-                    <Button className="cursor-pointer" variant={"secondary"}>
+                    <Button
+                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12"
+                      variant="outline"
+                    >
                       <CareIcon icon="l-edit" />
-                      {t("update_facility")}
+                      {t("edit_facility_details")}
                     </Button>
                   }
                 />
