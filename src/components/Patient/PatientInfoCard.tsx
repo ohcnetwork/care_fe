@@ -130,14 +130,14 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               >
                 <Link
                   href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}`}
-                  className="text-gray-950 font-semibold flex items-start gap-0.5"
+                  className="font-semibold flex items-center gap-1"
                   id="patient-details"
                   data-cy="patient-details-button"
                 >
                   {patient.name}
                   <CareIcon
                     icon="l-external-link-alt"
-                    className="w-3 h-3 opacity-50 mt-1"
+                    className="w-4 h-4 opacity-70"
                   />
                 </Link>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
