@@ -64,7 +64,7 @@ import {
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 

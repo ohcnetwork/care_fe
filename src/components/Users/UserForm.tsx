@@ -271,7 +271,7 @@ export default function UserForm({
 
   useEffect(() => {
     const levels: Organization[] = [];
-    if (org) levels.push(org);
+    if (org && org.org_type === "govt") levels.push(org);
     setSelectedLevels(levels);
   }, [org, organizationId]);
 
