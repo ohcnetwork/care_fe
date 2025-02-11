@@ -164,7 +164,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
                     data-cy="create-encounter-button"
                     className="group relative h-[100px] md:h-[120px] overflow-hidden border-0 bg-gradient-to-br from-emerald-50 to-teal-50 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-start"
                   >
-                    <div className="p-4 md:p-6">
+                    <div className="w-full p-4 md:p-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
                       <div className="relative flex w-full items-center gap-3 md:gap-4">
                         <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
