@@ -9,6 +9,8 @@ import {
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +49,8 @@ interface AllergyListProps {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
+  className?: string;
+  isPrintPreview?: boolean;
   encounterStatus?: Encounter["status"];
 }
 
@@ -67,9 +71,11 @@ export function AllergyList({
   facilityId,
   patientId,
   encounterId,
+  className,
+  isPrintPreview = false,
   encounterStatus,
 }: AllergyListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -125,13 +131,6 @@ export function AllergyList({
   }
 
   function AllergyRow({ allergy }: AllergyRowProps) {
-    const MAX_NOTE_LENGTH = 15;
-    const note = allergy.note || "";
-    const isLongNote = note.length > MAX_NOTE_LENGTH;
-    const displayNote = isLongNote
-      ? `${note.slice(0, MAX_NOTE_LENGTH)}..`
-      : note;
-
     return (
       <TableRow
         className={`rounded-md overflow-hidden bg-gray-50 ${
@@ -177,10 +176,13 @@ export function AllergyList({
           </Badge>
         </TableCell>
         <TableCell className="text-sm text-gray-950">
-          {note && (
+          {allergy.note && (
             <div className="flex items-center gap-2">
-              <span className="text-gray-950 max-w-[200px]">{displayNote}</span>
-              {isLongNote && (
+              {isPrintPreview ? (
+                <span className="text-gray-950 max-w-[200px]">
+                  {allergy.note}
+                </span>
+              ) : (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -193,7 +195,7 @@ export function AllergyList({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-4">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {note}
+                      {allergy.note}
                     </p>
                   </PopoverContent>
                 </Popover>
@@ -220,6 +222,8 @@ export function AllergyList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      className={className}
+      isPrintPreview={isPrintPreview}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -290,15 +294,25 @@ const AllergyListLayout = ({
   patientId,
   encounterId,
   children,
+  className,
+  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  className?: string;
+  isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className="border-none rounded-sm">
-      <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader
+        className={cn(
+          "flex justify-between flex-row",
+          !isPrintPreview && "px-4 pt-4 pb-2 ",
+          isPrintPreview && "px-0 py-2 ",
+        )}
+      >
         <CardTitle>{t("allergies")}</CardTitle>
         {facilityId && encounterId && (
           <Link
@@ -310,7 +324,14 @@ const AllergyListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      <CardContent
+        className={cn(
+          !isPrintPreview && "px-2 pb-2",
+          isPrintPreview && "px-0 py-0",
+        )}
+      >
+        {children}
+      </CardContent>
     </Card>
   );
 };
