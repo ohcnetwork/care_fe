@@ -1,7 +1,14 @@
 import careConfig from "@careConfig";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
 import { getResponseBody } from "@/Utils/request/request";
-import { ApiCallOptions, ApiRoute, HTTPError } from "@/Utils/request/types";
+import {
+  ApiCallOptions,
+  ApiRoute,
+  HTTPError,
+  PaginatedResponse,
+} from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
@@ -113,3 +120,69 @@ const debouncedQuery = <Route extends ApiRoute<unknown, unknown>>(
   };
 };
 query.debounced = debouncedQuery;
+
+/**
+ * Creates a TanStack Query compatible paginated query function.
+ *
+ * This function is useful for fetching paginated data from an API.
+ * It will fetch all pages of data and return a single array of results.
+ *
+ * To disable pagination, set the `maxPages` option to `1`.
+ * Leaving it unset will fetch all pages.
+ *
+ * Example:
+ * ```tsx
+ * const { data, isLoading } = useQuery({
+ *   queryKey: ["patient-search", facilityId, search],
+ *   queryFn: query.paginated(patientsApi.search, {
+ *     pathParams: { facilityId },
+ *     queryParams: { limit: 10, offset: 0, search },
+ *   }),
+ * });
+ * ```
+ */
+const paginatedQuery = <
+  Route extends ApiRoute<PaginatedResponse<unknown>, unknown>,
+>(
+  route: Route,
+  options?: ApiCallOptions<Route> & { pageSize?: number; maxPages?: number },
+) => {
+  return async ({ signal }: { signal: AbortSignal }) => {
+    const items: Route["TRes"]["results"] = [];
+    let hasNextPage = true;
+    let page = 0;
+    let count = 0;
+
+    const pageSize = options?.pageSize ?? RESULTS_PER_PAGE_LIMIT;
+
+    while (hasNextPage) {
+      const res = await query(route, {
+        ...options,
+        queryParams: {
+          limit: pageSize,
+          offset: page * pageSize,
+          ...options?.queryParams,
+        },
+      })({ signal });
+
+      count = res.count;
+      items.push(...res.results);
+
+      if (options?.maxPages && page >= options.maxPages - 1) {
+        hasNextPage = false;
+      }
+
+      if (items.length >= res.count) {
+        hasNextPage = false;
+      }
+
+      page++;
+    }
+
+    return {
+      count,
+      results: items,
+    };
+  };
+};
+query.paginated = paginatedQuery;
