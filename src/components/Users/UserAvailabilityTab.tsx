@@ -46,7 +46,7 @@ import {
   ScheduleException,
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
 type Props = {
