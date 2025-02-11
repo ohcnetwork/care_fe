@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
+import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
+
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
@@ -28,6 +31,8 @@ const getRoutes = (facilityId: string) => ({
   "/location/:id": ({ id }: { id: string }) => (
     <LocationView facilityId={facilityId} id={id} />
   ),
+  "/devices": () => <DevicesList facilityId={facilityId} />,
+  "/devices/create": () => <CreateDevice facilityId={facilityId} />,
   "*": () => <div>404</div>,
 });
 
@@ -56,6 +61,11 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
       value: "locations",
       label: t("locations"),
       href: `${basePath}/locations`,
+    },
+    {
+      value: "devices",
+      label: t("devices"),
+      href: `${basePath}/devices`,
     },
   ];
 
