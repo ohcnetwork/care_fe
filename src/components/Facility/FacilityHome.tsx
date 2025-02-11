@@ -246,15 +246,21 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </div>
                 </div>
               </div>
-              <div className="absolute right-0 top-0 p-1 text-white">
+              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:35rem)]:top-0">
                 {hasPermissionToEditCoverImage && (
                   <Button
-                    variant="outline_primary"
+                    variant="link"
                     onClick={() => setEditCoverImage(true)}
                     aria-label={t("edit_cover_photo")}
                   >
-                    <CareIcon icon="l-edit" aria-hidden="true" />
-                    <span className="underline">{t("edit_cover_photo")}</span>
+                    <CareIcon
+                      icon="l-edit"
+                      className="text-white"
+                      aria-hidden="true"
+                    />
+                    <span className="underline text-white">
+                      {t("edit_cover_photo")}
+                    </span>
                   </Button>
                 )}
               </div>
