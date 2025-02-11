@@ -20,7 +20,7 @@ import locationApi from "@/types/location/locationApi";
 
 interface LocationSearchProps {
   facilityId: string;
-  mode?: "kind" | "location";
+  mode?: "kind" | "location" | "instance";
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
@@ -44,7 +44,7 @@ export function LocationSearch({
     }),
     enabled: facilityId !== "preview",
   });
-
+  console.log(locations);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
