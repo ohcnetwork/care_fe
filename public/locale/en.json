@@ -1281,6 +1281,7 @@
   "mark_as_noshow": "Mark as no-show",
   "mark_as_read": "Mark as Read",
   "mark_as_unread": "Mark as Unread",
+  "mark_encounter_as_complete_confirmation": "Are you sure you would like to mark this encounter as complete?",
   "mark_inactive": "Mark Inactive",
   "mark_resolved": "Mark Resolved",
   "mark_this_transfer_as_complete_question": "Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient",

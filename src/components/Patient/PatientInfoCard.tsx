@@ -12,10 +12,23 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -364,24 +377,48 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
               data-cy="update-encounter-button"
             >
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="primary">
-                    {t("update")}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={handleMarkAsComplete}>
-                    {t("mark_as_complete")}
-                  </DropdownMenuItem>
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    encounter={encounter}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <AlertDialog>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="primary">
+                      {t("update")}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        {t("mark_as_complete")}
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      encounter={encounter}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("mark_encounter_as_complete_confirmation")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+
+                    <AlertDialogAction
+                      className={cn(buttonVariants({ variant: "primary" }))}
+                      onClick={handleMarkAsComplete}
+                      data-cy="mark-encounter-as-complete"
+                    >
+                      {t("mark_as_complete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>

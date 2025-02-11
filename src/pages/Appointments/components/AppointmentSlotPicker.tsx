@@ -18,7 +18,7 @@ import {
   useAvailabilityHeatmap,
 } from "@/pages/Appointments/utils";
 import { TokenSlot } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
