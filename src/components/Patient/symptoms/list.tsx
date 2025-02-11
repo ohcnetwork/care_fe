@@ -47,6 +47,7 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -70,6 +71,7 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -135,7 +137,7 @@ const SymptomListLayout = ({
   isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
+    <Card className={cn("rounded-sm p-2", className)}>
       <CardHeader
         className={cn(
           "flex justify-between flex-row",

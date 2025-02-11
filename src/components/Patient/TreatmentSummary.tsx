@@ -46,7 +46,7 @@ export default function TreatmentSummary({
     <PrintPreview
       title={`${t("treatment_summary")} - ${encounter.patient.name}`}
     >
-      <div className="min-h-screen bg-white py-2 max-w-4xl mx-auto">
+      <div className="min-h-scree py-2 max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex justify-between items-start pb-2 border-b">
@@ -191,7 +191,7 @@ export default function TreatmentSummary({
             <AllergyList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border-none shadow-none"
+              className="border border-black shadow-none"
               isPrintPreview={true}
             />
 
@@ -199,7 +199,7 @@ export default function TreatmentSummary({
             <SymptomsList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border-none shadow-none"
+              className="border border-black shadow-none"
               isPrintPreview={true}
             />
 
@@ -207,12 +207,12 @@ export default function TreatmentSummary({
             <DiagnosisList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border-none shadow-none"
+              className="border border-black shadow-none"
               isPrintPreview={true}
             />
 
             {/* Medications */}
-            <div className="border-none shadow-none space-y-2">
+            <div className="border border-black shadow-none space-y-2 p-2">
               <p className="text-sm font-semibold text-gray-950">
                 {t("medications")}
               </p>
@@ -226,7 +226,7 @@ export default function TreatmentSummary({
           {/* Medication Statements */}
           <MedicationStatementList
             patientId={encounter.patient.id}
-            className="border-none shadow-none"
+            className="border border-black shadow-none"
             isPrintPreview={true}
           />
 

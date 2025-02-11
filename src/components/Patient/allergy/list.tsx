@@ -95,6 +95,7 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -118,6 +119,7 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
@@ -305,7 +307,7 @@ const AllergyListLayout = ({
   isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
+    <Card className={cn("rounded-sm p-2", className)}>
       <CardHeader
         className={cn(
           "flex justify-between flex-row",

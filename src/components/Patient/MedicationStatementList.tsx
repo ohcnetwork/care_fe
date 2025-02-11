@@ -136,7 +136,7 @@ export function MedicationStatementList({
 
   if (isLoading) {
     return (
-      <Card className={cn("border-none rounded-sm", className)}>
+      <Card className={cn("rounded-sm", className)}>
         <CardHeader
           className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
         >
@@ -160,7 +160,7 @@ export function MedicationStatementList({
 
   if (!filteredMedications?.length) {
     return (
-      <Card className={cn("border-none rounded-sm", className)}>
+      <Card className={cn("rounded-sm p-2", className)}>
         <CardHeader
           className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
         >
