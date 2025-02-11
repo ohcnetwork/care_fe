@@ -199,7 +199,6 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
       "eslint --fix",
-      "unimported",
       "git update-index --again"
     ],
     "public/locale/*.json": [
