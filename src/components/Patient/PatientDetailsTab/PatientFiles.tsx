@@ -7,7 +7,6 @@ export const PatientFilesTab = (props: PatientProps) => {
     <FilesTab
       type="patient"
       facilityId={props.facilityId}
-      patientId={props.patientData.id}
       patient={props.patientData}
     />
   );

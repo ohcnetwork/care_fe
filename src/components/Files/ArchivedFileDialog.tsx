@@ -7,12 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { FileUploadModel } from "@/components/Patient/models";
 
@@ -40,18 +35,11 @@ export default function ArchivedFileDialog({
         aria-describedby="file-archive"
       >
         <DialogHeader>
-          <DialogTitle>
-            {t("archived_file")}:{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger className="max-w-[200px] truncate inline-block align-bottom">
-                  {fileName}
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{fileName}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <DialogTitle className="flex flex-row gap-1">
+            {t("archived_file")}:
+            <TooltipComponent content={fileName}>
+              <span className="max-w-[200px] truncate">{fileName}</span>
+            </TooltipComponent>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-2">

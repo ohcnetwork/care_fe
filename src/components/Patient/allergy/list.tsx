@@ -46,7 +46,11 @@ import {
   AllergyIntolerance,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 
 interface AllergyListProps {
   facilityId?: string;
@@ -85,7 +89,8 @@ export function AllergyList({
   } = getPermissions(hasPermission, authUser.permissions);
   const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
   const canEdit = encounterId
-    ? canSubmitEncounterQuestionnaire
+    ? canSubmitEncounterQuestionnaire &&
+      !inactiveEncounterStatus.includes(encounterStatus ?? "")
     : canSubmitPatientQuestionnaireResponses;
 
   const { data: allergies, isLoading } = useQuery({

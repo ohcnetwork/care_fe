@@ -30,6 +30,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import {
   MedicationAdministration,
   MedicationAdministrationRequest,
@@ -95,6 +96,7 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
+  encounterStatus: Encounter["status"];
 }
 
 interface TimeSlotHeaderProps {
@@ -360,12 +362,15 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
+  encounterStatus,
 }) => {
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
     getPermissions(hasPermission, authUser.permissions);
   const canAccess = canViewClinicalData || canViewEncounter;
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounterStatus);
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
@@ -725,7 +730,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   onAdminister={handleAdminister}
                   onEditAdministration={handleEditAdministration}
                   onDiscontinue={handleDiscontinue}
-                  canWrite={canWriteEncounter}
+                  canWrite={canWrite}
                 />
               ))}
             </div>
@@ -778,14 +783,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             )}
           </div>
         </div>
-        <Button
-          variant="outline"
-          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-          onClick={() => setIsSheetOpen(true)}
-        >
-          <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          {t("administer_medicine")}
-        </Button>
+        {canWrite && (
+          <Button
+            variant="outline"
+            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+            onClick={() => setIsSheetOpen(true)}
+          >
+            <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+            {t("administer_medicine")}
+          </Button>
+        )}
       </div>
 
       <div className="mt-4">{content}</div>

@@ -8,7 +8,7 @@ export const EncounterMedicinesTab = (props: EncounterTabProps) => {
       <MedicationRequestTable
         facilityId={props.facilityId}
         patientId={props.patient.id}
-        encounterId={props.encounter.id}
+        encounter={props.encounter}
       />
     </div>
   );

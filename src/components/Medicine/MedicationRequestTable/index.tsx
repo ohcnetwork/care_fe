@@ -22,6 +22,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
@@ -60,12 +61,12 @@ interface Props {
   readonly?: boolean;
   facilityId: string;
   patientId: string;
-  encounterId: string;
+  encounter: Encounter;
 }
 
 export default function MedicationRequestTable({
   patientId,
-  encounterId,
+  encounter,
   facilityId,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,12 +81,16 @@ export default function MedicationRequestTable({
   const canAccess = canViewClinicalData || canViewEncounter;
   const { goBack } = useAppHistory();
 
+  const canWriteCurrentEncounter =
+    canSubmitEncounterQuestionnaire &&
+    encounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
@@ -98,7 +103,7 @@ export default function MedicationRequestTable({
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
-        encounter: encounterId,
+        encounter: encounter.id,
         limit: 100,
         status: ["ended", "completed", "cancelled", "entered_in_error"].join(
           ",",
@@ -177,7 +182,7 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {canSubmitEncounterQuestionnaire && (
+                  {canWriteCurrentEncounter && (
                     <Button
                       asChild
                       variant="outline"
@@ -185,7 +190,7 @@ export default function MedicationRequestTable({
                       className="text-gray-950 hover:text-gray-700 h-9"
                     >
                       <Link
-                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
+                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounter.id}/questionnaire/medication_request`}
                       >
                         <PencilIcon className="mr-2 h-4 w-4" />
                         {t("edit")}
@@ -199,7 +204,7 @@ export default function MedicationRequestTable({
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
                     <Link
-                      href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+                      href={`/facility/${facilityId}/encounter/${encounter.id}/prescriptions/print`}
                     >
                       <CareIcon icon="l-print" className="mr-2" />
                       {t("print")}
@@ -248,7 +253,8 @@ export default function MedicationRequestTable({
           <TabsContent value="administration">
             <AdministrationTab
               patientId={patientId}
-              encounterId={encounterId}
+              encounterId={encounter.id}
+              encounterStatus={encounter.status}
             />
           </TabsContent>
         </Tabs>

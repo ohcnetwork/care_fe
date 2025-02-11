@@ -26,12 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
@@ -39,28 +34,29 @@ import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
 import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
   facilityId: string;
-  patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { patientId, type, encounter } = props;
+  const { patient, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -72,10 +68,26 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
+  const authUser = useAuthUser();
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canWritePatient,
+    canWriteEncounter,
+  } = getPermissions(hasPermission, authUser.permissions);
+  const canAccess =
+    type === "encounter"
+      ? canViewClinicalData || canViewEncounter
+      : canViewClinicalData;
+
+  const canWriteCurrentEncounter =
+    canWriteEncounter &&
+    encounter &&
+    !inactiveEncounterStatus.includes(encounter.status);
 
   const associatingId =
     {
-      patient: patientId,
+      patient: patient?.id,
       encounter: encounter?.id,
     }[type] || "";
 
@@ -109,6 +121,7 @@ export const FilesTab = (props: FilesTabProps) => {
         //file_category: qParams.file_category,
       },
     }),
+    enabled: canAccess,
   });
 
   const fileManager = useFileManager({
@@ -218,18 +231,9 @@ export const FilesTab = (props: FilesTabProps) => {
 
   const editPermission = () => {
     if (type === "encounter") {
-      return (
-        encounter &&
-        ![
-          "completed",
-          "cancelled",
-          "entered_in_error",
-          "discontinued",
-        ].includes(encounter.status) &&
-        hasPermission("can_write_encounter")
-      );
+      return canWriteCurrentEncounter;
     } else if (type === "patient") {
-      return hasPermission("can_write_patient");
+      return canWritePatient;
     }
     return false;
   };
@@ -500,16 +504,16 @@ export const FilesTab = (props: FilesTabProps) => {
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[30%] bg-white rounded-l">
+            <TableHead className="w-[20%] bg-white rounded-l">
               {t("file_name")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("file_type")}
             </TableHead>
             <TableHead className="w-[25%] rounded-y bg-white">
               {t("date")}
             </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-white">
               {t("shared_by")}
             </TableHead>
             <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
@@ -536,24 +540,11 @@ export const FilesTab = (props: FilesTabProps) => {
                       <span className="p-2 rounded-full bg-gray-100 shrink-0">
                         <CareIcon icon={icons[filetype]} className="text-xl" />
                       </span>
-                      {file.name && file.name.length > 20 ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="truncate">
-                              <span className="text-gray-900 truncate block">
-                                {fileName}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white z-40">
-                              <span>{fileName}</span>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <span className="text-gray-900 truncate block">
+                      <TooltipComponent content={fileName}>
+                        <p className="text-gray-900 truncate max-w-[10rem]">
                           {fileName}
-                        </span>
-                      )}
+                        </p>
+                      </TooltipComponent>
                     </div>
                   </TableCell>
                   <TableCell
@@ -570,7 +561,15 @@ export const FilesTab = (props: FilesTabProps) => {
                       file.is_archived ? "bg-white/50" : "bg-white",
                     )}
                   >
-                    {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
+                    <TooltipComponent
+                      content={dayjs(file.created_date).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    >
+                      <span>
+                        {dayjs(file.created_date).format("DD MMM YYYY ")}
+                      </span>
+                    </TooltipComponent>
                   </TableCell>
                   <TableCell
                     className={cn(

@@ -16,6 +16,7 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
@@ -23,12 +24,14 @@ interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  encounterStatus?: Encounter["status"];
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
   facilityId,
+  encounterStatus,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
   const authUser = useAuthUser();
@@ -41,7 +44,8 @@ export function DiagnosisList({
   } = getPermissions(hasPermission, authUser.permissions);
   const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
   const canEdit = encounterId
-    ? canSubmitEncounterQuestionnaire
+    ? canSubmitEncounterQuestionnaire &&
+      !inactiveEncounterStatus.includes(encounterStatus ?? "")
     : canSubmitPatientQuestionnaireResponses;
 
   const { data: diagnoses, isLoading } = useQuery({

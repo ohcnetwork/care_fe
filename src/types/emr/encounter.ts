@@ -165,3 +165,9 @@ export interface EncounterRequest {
 }
 
 export const completedEncounterStatus = ["completed", "discharged"];
+
+export const inactiveEncounterStatus = [
+  ...completedEncounterStatus,
+  "cancelled",
+  "entered_in_error",
+];
