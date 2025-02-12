@@ -212,8 +212,8 @@ export default function TreatmentSummary({
             />
 
             {/* Medications */}
-            <div className="border border-black shadow-none space-y-2 p-2">
-              <p className="text-sm font-semibold text-gray-950">
+            <div className="border border-black shadow-none p-3">
+              <p className="text-sm font-semibold text-gray-950 m-1">
                 {t("medications")}
               </p>
               <MedicationsTable

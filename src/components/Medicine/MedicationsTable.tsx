@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -58,6 +59,13 @@ export const MedicationsTable = ({
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         <Skeleton className="h-[100px] w-full" />
       </div>
+    );
+  }
+  if (!medications?.results.length) {
+    return (
+      <CardContent className="p-2">
+        <p className="text-gray-500">{t("no_medication_recorded")}</p>
+      </CardContent>
     );
   }
   return (
