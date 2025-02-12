@@ -3,6 +3,8 @@ import { t } from "i18next";
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -18,14 +20,18 @@ interface SymptomsListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  className?: string;
+  isPrintPreview?: boolean;
 }
 
 export function SymptomsList({
   patientId,
   encounterId,
   facilityId,
+  className,
+  isPrintPreview = false,
 }: SymptomsListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
+  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
 
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
@@ -77,6 +83,8 @@ export function SymptomsList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      className={className}
+      isPrintPreview={isPrintPreview}
     >
       <SymptomTable
         symptoms={[
@@ -89,6 +97,7 @@ export function SymptomsList({
               )
             : []),
         ]}
+        isPrintPreview={isPrintPreview}
       />
 
       {hasEnteredInErrorRecords && !showEnteredInError && (
@@ -115,15 +124,25 @@ const SymptomListLayout = ({
   patientId,
   encounterId,
   children,
+  className,
+  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  className?: string;
+  isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className="border-none rounded-sm">
-      <CardHeader className="px-4 pt-4 pb-2 flex justify-between flex-row">
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader
+        className={cn(
+          "flex justify-between flex-row",
+          !isPrintPreview && "px-4 pt-4 pb-2",
+          isPrintPreview && "px-0 py-2",
+        )}
+      >
         <CardTitle>{t("symptoms")}</CardTitle>
         {facilityId && encounterId && (
           <Link
@@ -135,7 +154,14 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent className="px-2 pb-2">{children}</CardContent>
+      <CardContent
+        className={cn(
+          isPrintPreview && "px-0 py-0",
+          !isPrintPreview && "px-2 pb-2",
+        )}
+      >
+        {children}
+      </CardContent>
     </Card>
   );
 };

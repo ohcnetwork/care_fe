@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
@@ -28,7 +30,7 @@ const getRoutes = (facilityId: string) => ({
   "/location/:id": ({ id }: { id: string }) => (
     <LocationView facilityId={facilityId} id={id} />
   ),
-  "*": () => <div>404</div>,
+  "*": () => <ErrorPage />,
 });
 
 export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
