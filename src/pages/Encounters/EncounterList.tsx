@@ -213,7 +213,7 @@ export function EncounterList({
   const { t } = useTranslation();
 
   return (
-    <Page title={t("encounters")} hideBack={true}>
+    <Page title={t("encounters")}>
       <div className="space-y-4 mt-2 flex flex-col">
         <div className="rounded-lg border bg-card shadow-sm flex flex-col">
           <div className="flex flex-col">
