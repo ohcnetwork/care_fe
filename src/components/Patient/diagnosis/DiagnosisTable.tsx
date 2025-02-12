@@ -73,9 +73,15 @@ export function DiagnosisTable({
             <TableCell>
               <Badge
                 variant="outline"
-                className={`whitespace-nowrap ${
-                  DIAGNOSIS_CLINICAL_STATUS_STYLES[diagnosis.clinical_status]
-                }`}
+                className={
+                  isPrintPreview
+                    ? ""
+                    : `whitespace-nowrap ${
+                        DIAGNOSIS_CLINICAL_STATUS_STYLES[
+                          diagnosis.clinical_status
+                        ]
+                      }`
+                }
               >
                 {t(diagnosis.clinical_status)}
               </Badge>
@@ -83,11 +89,15 @@ export function DiagnosisTable({
             <TableCell>
               <Badge
                 variant="outline"
-                className={`whitespace-nowrap capitalize ${
-                  DIAGNOSIS_VERIFICATION_STATUS_STYLES[
-                    diagnosis.verification_status
-                  ]
-                }`}
+                className={
+                  isPrintPreview
+                    ? ""
+                    : `whitespace-nowrap capitalize ${
+                        DIAGNOSIS_VERIFICATION_STATUS_STYLES[
+                          diagnosis.verification_status
+                        ]
+                      }`
+                }
               >
                 {t(diagnosis.verification_status)}
               </Badge>

@@ -150,9 +150,11 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap ${
-              ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]
-            }`}
+            className={
+              isPrintPreview
+                ? ""
+                : `whitespace-nowrap ${ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]}`
+            }
           >
             {t(allergy.clinical_status)}
           </Badge>
@@ -160,9 +162,13 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap ${
-              ALLERGY_CRITICALITY_STYLES[allergy.criticality]
-            }`}
+            className={
+              isPrintPreview
+                ? ""
+                : `whitespace-nowrap ${
+                    ALLERGY_CRITICALITY_STYLES[allergy.criticality]
+                  }`
+            }
           >
             {t(allergy.criticality)}
           </Badge>
@@ -170,9 +176,15 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap capitalize ${
-              ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
-            }`}
+            className={
+              isPrintPreview
+                ? ""
+                : `whitespace-nowrap capitalize ${
+                    ALLERGY_VERIFICATION_STATUS_STYLES[
+                      allergy.verification_status
+                    ]
+                  }`
+            }
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -307,7 +319,7 @@ const AllergyListLayout = ({
   isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className={cn("rounded-sm p-2", className)}>
+    <Card className={cn("rounded-sm ", className, isPrintPreview && "p-2")}>
       <CardHeader
         className={cn(
           "flex justify-between flex-row",

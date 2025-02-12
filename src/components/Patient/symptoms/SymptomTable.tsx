@@ -74,9 +74,13 @@ export function SymptomTable({
             <TableCell>
               <Badge
                 variant="outline"
-                className={`whitespace-nowrap ${
-                  SYMPTOM_SEVERITY_STYLES[symptom.severity]
-                }`}
+                className={
+                  isPrintPreview
+                    ? ""
+                    : `whitespace-nowrap ${
+                        SYMPTOM_SEVERITY_STYLES[symptom.severity]
+                      }`
+                }
               >
                 {t(symptom.severity)}
               </Badge>
@@ -84,9 +88,13 @@ export function SymptomTable({
             <TableCell>
               <Badge
                 variant="outline"
-                className={`whitespace-nowrap ${
-                  SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
-                }`}
+                className={
+                  isPrintPreview
+                    ? ""
+                    : `whitespace-nowrap ${
+                        SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
+                      }`
+                }
               >
                 {t(symptom.clinical_status)}
               </Badge>
@@ -94,11 +102,15 @@ export function SymptomTable({
             <TableCell>
               <Badge
                 variant="outline"
-                className={`whitespace-nowrap capitalize ${
-                  SYMPTOM_VERIFICATION_STATUS_STYLES[
-                    symptom.verification_status
-                  ]
-                }`}
+                className={
+                  isPrintPreview
+                    ? ""
+                    : `whitespace-nowrap capitalize ${
+                        SYMPTOM_VERIFICATION_STATUS_STYLES[
+                          symptom.verification_status
+                        ]
+                      }`
+                }
               >
                 {t(symptom.verification_status)}
               </Badge>

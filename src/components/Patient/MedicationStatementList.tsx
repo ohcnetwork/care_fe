@@ -138,7 +138,7 @@ export function MedicationStatementList({
     return (
       <Card className={cn("rounded-sm", className)}>
         <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
+          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px- py-2")}
         >
           <CardTitle>{t("ongoing_medications")}</CardTitle>
         </CardHeader>
@@ -161,13 +161,11 @@ export function MedicationStatementList({
   if (!filteredMedications?.length) {
     return (
       <Card className={cn("rounded-sm p-2", className)}>
-        <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-        >
+        <CardHeader className={cn("px-4 pt-4 pb-2", isPrintPreview && "py-2")}>
           <CardTitle>{t("ongoing_medications")}</CardTitle>
         </CardHeader>
         <CardContent
-          className={cn("px-2 pb-3 pt-2", isPrintPreview && "px-0 py-0")}
+          className={cn("px-2 pb-3 pt-2", isPrintPreview && "px-4 py-0")}
         >
           <p className="text-gray-500">{t("no_ongoing_medications")}</p>
         </CardContent>
