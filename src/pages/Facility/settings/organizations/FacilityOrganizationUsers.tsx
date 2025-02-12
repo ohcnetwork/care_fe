@@ -5,7 +5,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -65,20 +64,6 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
         <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center gap-4">
           <h2 className="text-lg font-semibold">{t("users")}</h2>
           <div className="flex flex-col items-center md:flex-row sm:items-center gap-4 w-full lg:justify-end">
-            <div className="w-full lg:w-1/3">
-              <Input
-                type="text"
-                placeholder={t("search_users")}
-                value={qParams.search || ""}
-                onChange={(e) =>
-                  updateQuery({
-                    search: e.target.value as string,
-                  })
-                }
-                className="w-full"
-                data-cy="search-user"
-              />
-            </div>
             <div className="flex flex-row lg:flex-row justify-between gap-2">
               <AddUserSheet
                 open={openAddUserSheet}
