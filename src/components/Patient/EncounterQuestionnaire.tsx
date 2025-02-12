@@ -25,10 +25,7 @@ export default function EncounterQuestionnaire({
 }: Props) {
   const { goBack } = useAppHistory();
   return (
-    <Page
-      title={t("questionnaire")}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
-    >
+    <Page title={t("questionnaire")}>
       <Card className="mt-2">
         <CardContent className="lg:p-4 p-0">
           <QuestionnaireForm

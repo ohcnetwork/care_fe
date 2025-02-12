@@ -62,12 +62,7 @@ export default function FacilityOrganizationIndex({
 
   if (!tableData?.length) {
     return (
-      <Page
-        title={t("organizations")}
-        breadcrumbs={false}
-        hideBack={true}
-        hideTitleOnPage={true}
-      >
+      <Page title={t("organizations")} hideTitleOnPage={true}>
         <div className="flex justify-center md:justify-end mt-2 mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>

@@ -17,8 +17,9 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 export const PrintPrescription = (props: {
   facilityId: string;
   encounterId: string;
+  patientId: string;
 }) => {
-  const { facilityId, encounterId } = props;
+  const { facilityId, encounterId, patientId } = props;
   const { t } = useTranslation();
 
   const { data: encounter } = useQuery<Encounter>({
@@ -30,12 +31,12 @@ export const PrintPrescription = (props: {
   });
 
   const { data: medications } = useQuery({
-    queryKey: ["medication_requests", encounter?.patient?.id],
+    queryKey: ["medication_requests", patientId],
     queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: encounter?.patient?.id || "" },
+      pathParams: { patientId },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
     }),
-    enabled: !!encounter?.patient?.id,
+    enabled: !!patientId,
   });
 
   if (!medications?.results?.length) {
@@ -60,12 +61,8 @@ export const PrintPrescription = (props: {
 
   return (
     <PrintPreview
-      title={
-        encounter?.patient
-          ? `${t("prescriptions")} - ${encounter.patient.name}`
-          : t("print_prescriptions")
-      }
-      disabled={!(encounter?.patient && medications)}
+      title={`${t("prescriptions")} - ${encounter?.patient.name}`}
+      disabled={!medications}
     >
       <div className="min-h-screen bg-white p-2 max-w-4xl mx-auto">
         <div>
@@ -91,7 +88,7 @@ export const PrintPrescription = (props: {
             <div className="space-y-3">
               <DetailRow
                 label={t("patient")}
-                value={encounter?.patient?.name}
+                value={encounter?.patient.name}
                 isStrong
               />
               <DetailRow
@@ -115,7 +112,7 @@ export const PrintPrescription = (props: {
               />
               <DetailRow
                 label={t("mobile_number")}
-                value={encounter?.patient?.phone_number}
+                value={encounter?.patient.phone_number}
                 isStrong
               />
             </div>
@@ -125,7 +122,7 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable medications={medications.results} />
+          <MedicationsTable patientId={patientId} encounterId={encounterId} />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">
