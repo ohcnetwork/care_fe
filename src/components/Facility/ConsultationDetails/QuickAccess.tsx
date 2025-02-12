@@ -20,10 +20,6 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
   const { t } = useTranslation();
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  const encounterSettings = [
-    { id: "encounter_settings", label: t("encounter_settings") },
-  ];
-
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
@@ -47,32 +43,10 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
         </section>
       )}
 
-      {/* Update Encounter Details */}
-      {encounter.status !== "completed" && (
-        <section className="text-gray-950 space-y-2">
-          <h3 className="text-lg font-medium mb-3">
-            {t("update_encounter_details")}
-          </h3>
-          <div>
-            {encounterSettings.map((item) => (
-              <div key={item.id} className="flex items-center space-x-2 px-4">
-                <Link
-                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-                  className="text-sm text-gray-950 underline font-semibold"
-                >
-                  {item.label}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="w-full border-t border-dashed border-gray-300" />
-        </section>
-      )}
-
       {/* Departments and Teams */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-medium text-gray-950">
+        <div className="items-center justify-between mb-3">
+          <h3 className="text-lg font-medium text-gray-950 mb-1">
             {t("departments_and_teams")}
           </h3>
           <LinkDepartmentsSheet

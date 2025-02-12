@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 
@@ -33,7 +35,7 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
-  "*": () => <div>404</div>,
+  "*": () => <ErrorPage />,
 });
 
 export function SettingsLayout({ facilityId }: SettingsLayoutProps) {

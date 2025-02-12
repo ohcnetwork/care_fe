@@ -55,12 +55,7 @@ export default function FacilityOrganizationIndex({
 
   if (!data?.results?.length) {
     return (
-      <Page
-        title={t("organizations")}
-        breadcrumbs={false}
-        hideBack={true}
-        hideTitleOnPage={true}
-      >
+      <Page title={t("organizations")} hideTitleOnPage={true}>
         <div className="flex justify-center md:justify-end mt-2 mb-4">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
@@ -87,12 +82,7 @@ export default function FacilityOrganizationIndex({
   }
 
   return (
-    <Page
-      title={t("departments")}
-      hideBack={true}
-      hideTitleOnPage={true}
-      breadcrumbs={false}
-    >
+    <Page title={t("departments")} hideTitleOnPage={true}>
       <div className="flex justify-center md:justify-end mt-2 mb-4">
         <CreateFacilityOrganizationSheet facilityId={facilityId} />
       </div>
