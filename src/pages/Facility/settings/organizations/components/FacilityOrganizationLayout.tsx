@@ -117,7 +117,7 @@ export default function FacilityOrganizationLayout({
               <>
                 <BreadcrumbItem key={parent.id}>
                   <BreadcrumbLink>
-                    <Link href={`${parent.id}`}>{parent.name}</Link>
+                    <Link href={parent.id}>{parent.name}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbItem key={`ellipsis-${parent.id}`}>

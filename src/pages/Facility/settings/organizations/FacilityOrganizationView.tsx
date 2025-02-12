@@ -16,6 +16,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
@@ -25,14 +26,12 @@ interface Props {
   facilityId: string;
 }
 
-interface Organization {
-  id: string;
-  name: string;
-  org_type: string;
-  description?: string;
-}
-
-function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
+function OrganizationCard({
+  org,
+}: {
+  org: FacilityOrganization;
+  facilityId: string;
+}) {
   const { t } = useTranslation();
 
   return (
