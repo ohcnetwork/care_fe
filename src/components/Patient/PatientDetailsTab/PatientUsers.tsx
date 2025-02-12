@@ -3,6 +3,8 @@ import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
@@ -16,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -287,7 +289,7 @@ export const PatientUsers = (props: PatientProps) => {
                     <AlertDialogAction
                       data-cy="patient-user-remove-confirm-button"
                       onClick={() => removeUser(user.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className={cn(buttonVariants({ variant: "destructive" }))}
                     >
                       {t("remove")}
                     </AlertDialogAction>
