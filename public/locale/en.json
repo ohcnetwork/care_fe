@@ -2110,6 +2110,8 @@
   "third_party_software_licenses": "Third Party Software Licenses",
   "this_action_is_irreversible": "This action is irreversible. Once a file is archived it cannot be unarchived.",
   "this_file_has_been_archived": "This file has been archived and cannot be unarchived.",
+  "this_will_permanently_remove_the_template": "This will permanently remove the {{data}} and cannot be undone",
+  "thread_already_exists": "Thread with this title already exists",
   "time": "Time",
   "time_slot": "Time Slot",
   "title": "Title",
