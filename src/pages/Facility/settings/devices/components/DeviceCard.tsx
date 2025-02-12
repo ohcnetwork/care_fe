@@ -4,11 +4,9 @@ import { DeviceList } from "@/types/device/device";
 
 interface Props {
   device: DeviceList;
-  onView: (deviceId: string) => void;
-  onLink: (deviceId: string) => void;
 }
 
-export default function DeviceCard({ device, onView, onLink }: Props) {
+export default function DeviceCard({ device }: Props) {
   return (
     <Card>
       <CardContent>

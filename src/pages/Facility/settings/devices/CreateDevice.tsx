@@ -17,7 +17,7 @@ export default function CreateDevice({ facilityId }: Props) {
         <p className="text-muted-foreground">{t("add_device_description")}</p>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 max-w-2xl mx-auto">
         <DeviceForm
           facilityId={facilityId}
           onSuccess={() => {

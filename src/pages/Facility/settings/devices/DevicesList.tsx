@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,24 +14,16 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
-import DeviceSheet from "@/pages/Facility/settings/devices/components/DeviceSheet";
 import deviceApi from "@/types/device/deviceApi";
 
 interface Props {
   facilityId: string;
 }
 
-interface PageQueryParams {
-  device_id: string | null;
-  sheet?: "view" | "link-to-location" | null;
-}
-
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [{ device_id, sheet }, setQueryParams] =
-    useQueryParams<PageQueryParams>();
 
   const limit = 12;
 
@@ -47,39 +39,27 @@ export default function DevicesList({ facilityId }: Props) {
     }),
   });
 
-  const handleAddDevice = () => {
-    navigate(`/facility/${facilityId}/settings/devices/create`);
-  };
-
-  const handleViewDevice = (deviceId: string) => {
-    setQueryParams({ sheet: "view", device_id: deviceId });
-  };
-
-  const handleLinkDevice = (deviceId: string) => {
-    setQueryParams({ sheet: "link-to-location", device_id: deviceId });
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">{t("devices")}</h2>
-          <Button variant="default" onClick={handleAddDevice}>
-            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
-            {t("add_device")}
-          </Button>
-        </div>
-        <div className="w-72">
           <Input
-            placeholder={t("search_by_name")}
+            placeholder={t("search_devices")}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setPage(1);
             }}
-            className="w-full"
+            className="w-72"
           />
         </div>
+
+        <Button variant="primary" asChild>
+          <Link href="/devices/create">
+            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+            {t("add_device")}
+          </Link>
+        </Button>
       </div>
 
       {isLoading ? (
@@ -91,12 +71,7 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data?.results?.length ? (
               data.results.map((device) => (
-                <DeviceCard
-                  key={device.id}
-                  device={device}
-                  onView={handleViewDevice}
-                  onLink={handleLinkDevice}
-                />
+                <DeviceCard key={device.id} device={device} />
               ))
             ) : (
               <Card className="col-span-full">
@@ -120,16 +95,6 @@ export default function DevicesList({ facilityId }: Props) {
           )}
         </div>
       )}
-      <DeviceSheet
-        open={sheet === "view"}
-        onOpenChange={() => setQueryParams({ sheet: null, device_id })}
-        facilityId={facilityId}
-        device={
-          device_id
-            ? data?.results?.find((device) => device.id === device_id)
-            : undefined
-        }
-      />
     </div>
   );
 }

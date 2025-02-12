@@ -6,8 +6,9 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -28,7 +30,7 @@ import {
 import mutate from "@/Utils/request/mutate";
 import {
   ContactPointSystems,
-  ContactPointUses,
+  contactPointSchema,
 } from "@/types/common/contactPoint";
 import {
   DeviceAvailabilityStatuses,
@@ -50,13 +52,7 @@ const formSchema = z.object({
   user_friendly_name: z.string().optional(),
   model_number: z.string().optional(),
   part_number: z.string().optional(),
-  contact: z.array(
-    z.object({
-      system: z.enum(ContactPointSystems),
-      value: z.string(),
-      use: z.enum(ContactPointUses),
-    }),
-  ),
+  contact: z.array(contactPointSchema),
 });
 
 interface Props {
@@ -313,9 +309,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">{t("contact_points")}</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">
+              {t("contact_points")}
+            </h3>
             <Button
               type="button"
               variant="outline"
@@ -324,7 +322,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 append({
                   system: ContactPointSystems[0],
                   value: "",
-                  use: ContactPointUses[0],
+                  use: "work",
                 })
               }
             >
@@ -333,99 +331,86 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </div>
 
           {fields.map((field, index) => (
-            <Card key={field.id}>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name={`contact.${index}.system`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("system")}</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder={t("select_contact_system")}
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ContactPointSystems.map((system) => (
-                              <SelectItem key={system} value={system}>
-                                {t(`contact_system_${system}`)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div
+              key={field.id}
+              className="relative grid gap-1 md:gap-2 grid-cols-[1fr,3fr,auto] py-2"
+            >
+              <FormField
+                control={form.control}
+                name={`contact.${index}.system`}
+                render={({ field }) => (
+                  <FormItem className="space-y-0">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-[42px] md:h-[38px]">
+                          <SelectValue
+                            placeholder={t("select_contact_system")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ContactPointSystems.map((system) => (
+                          <SelectItem key={system} value={system}>
+                            {t(`contact_system_${system}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name={`contact.${index}.value`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("value")}</FormLabel>
-                        <FormControl>
+              <FormField
+                control={form.control}
+                name={`contact.${index}.value`}
+                render={({ field }) => {
+                  const system = form.watch(`contact.${index}.system`);
+                  return (
+                    <FormItem className="space-y-0">
+                      <FormControl>
+                        {system === "phone" ||
+                        system === "fax" ||
+                        system === "sms" ? (
+                          <PhoneInput
+                            {...field}
+                            placeholder={t(
+                              `contact_point_placeholder__${system}`,
+                            )}
+                          />
+                        ) : (
                           <Input
                             {...field}
-                            placeholder={t("enter_contact_value")}
+                            placeholder={t(
+                              `contact_point_placeholder__${system}`,
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name={`contact.${index}.use`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("use")}</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder={t("select_contact_use")}
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ContactPointUses.map((use) => (
-                              <SelectItem key={use} value={use}>
-                                {t(`contact_use_${use}`)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name={`contact.${index}.use`}
+                render={({ field }) => (
+                  <input type="hidden" {...field} value="work" />
+                )}
+              />
 
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => remove(index)}
-                  >
-                    {t("remove")}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => remove(index)}
+                className="h-8 px-2"
+              >
+                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
           ))}
         </div>
 
