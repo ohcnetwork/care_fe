@@ -82,7 +82,7 @@ import {
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface QueryParams {
   practitioner: string | null;

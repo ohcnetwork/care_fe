@@ -15,7 +15,7 @@ import {
   AvailabilityHeatmapResponse,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   const result: {
