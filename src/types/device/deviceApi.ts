@@ -30,6 +30,7 @@ export default {
     path: "/api/v1/facility/{facility_id}/device/{id}/",
     method: HttpMethod.DELETE,
     TRes: Type<void>(),
+    TBody: Type<void>(),
   },
   upsert: {
     path: "/api/v1/facility/{facility_id}/device/upsert/",

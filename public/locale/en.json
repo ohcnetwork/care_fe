@@ -719,6 +719,8 @@
   "delete_account": "Delete account",
   "delete_account_btn": "Yes, delete this account",
   "delete_account_note": "Deleting this account will remove all associated data and cannot be undone.",
+  "delete_device": "Delete Device",
+  "delete_device_confirmation": "Are you sure you want to delete this device? This action cannot be undone.",
   "delete_facility": "Delete Facility",
   "delete_item": "Delete {{name}}",
   "delete_record": "Delete Record",

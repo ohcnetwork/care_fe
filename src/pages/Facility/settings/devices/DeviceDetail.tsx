@@ -1,9 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ContactPoint } from "@/types/common/contactPoint";
 import deviceApi from "@/types/device/deviceApi";
@@ -27,12 +41,23 @@ interface Props {
 
 export default function DeviceDetail({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
     queryFn: query(deviceApi.retrieve, {
       pathParams: { facility_id: facilityId, id: deviceId },
     }),
+  });
+
+  const { mutate: deleteDevice, isPending: isDeleting } = useMutation({
+    mutationFn: mutate(deviceApi.delete, {
+      pathParams: { facility_id: facilityId, id: deviceId },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      navigate(`/facility/${facilityId}/settings/devices`);
+    },
   });
 
   if (isLoading) {
@@ -85,9 +110,35 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
-        <Link href={`/devices/${deviceId}/edit`}>
-          <Button variant="outline">{t("edit")}</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/devices/${deviceId}/edit`}>
+            <Button variant="outline">{t("edit")}</Button>
+          </Link>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">{t("delete")}</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("delete_device_confirmation")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteDevice()}
+                  className={cn(buttonVariants({ variant: "destructive" }))}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? t("deleting") : t("delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
