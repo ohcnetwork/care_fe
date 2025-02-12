@@ -175,8 +175,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
       />
 
       <div className="space-y-4">
-        <div className="flex items-end justify-between">
-          <div className="flex bg-gray-100 rounded-lg p-1 gap-1 max-w-min">
+        <div className="flex items-center md:items-end justify-between gap-1 md:gap-0">
+          <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
