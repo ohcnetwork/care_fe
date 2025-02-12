@@ -42,7 +42,6 @@ export default function UserHome(props: UserHomeProps) {
   if (!username) {
     username = authUser.username;
   }
-  const loggedInUser = username === authUser.username;
   const { canViewSchedule } = getPermissions(
     hasPermission,
     authUser.permissions,
@@ -94,24 +93,11 @@ export default function UserHome(props: UserHomeProps) {
     ? `/facility/${props.facilityId}/users/${username}`
     : `/users/${username}`;
 
-  const usernameCrumb = {
-    [username]: { name: loggedInUser ? "Profile" : username },
-  };
-
-  const hideUsersCrumb = { users: { hide: true } };
-
-  const crumbsReplacements = {
-    ...usernameCrumb,
-    ...(!props.facilityId && hideUsersCrumb),
-  };
-
   return (
     <>
       <Page
         title={formatName(userData) || userData.username || t("manage_user")}
-        crumbsReplacements={crumbsReplacements}
         focusOnLoad={true}
-        backUrl={props.facilityId ? `/users` : "/"}
         hideTitleOnPage
       >
         {

@@ -204,7 +204,7 @@ export default function MedicationRequestTable({
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
                     <Link
-                      href={`/facility/${facilityId}/encounter/${encounter.id}/prescriptions/print`}
+                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounter.id}/prescriptions/print`}
                     >
                       <CareIcon icon="l-print" className="mr-2" />
                       {t("print")}
@@ -225,7 +225,10 @@ export default function MedicationRequestTable({
                 <ScrollArea className="h-[calc(100vh-16rem)]">
                   <div className="min-w-[800px]">
                     <div className="p-2">
-                      <MedicationsTable medications={displayedMedications} />
+                      <MedicationsTable
+                        patientId={patientId}
+                        encounterId={encounter.id}
+                      />
                     </div>
                     {!!stoppedMedications?.results?.length && (
                       <div

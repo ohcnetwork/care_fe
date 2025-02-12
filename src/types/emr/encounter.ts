@@ -117,6 +117,12 @@ export type StatusHistory = {
   history: History[];
 };
 
+export type LocationHistory = {
+  start_datetime: string;
+  location: LocationList;
+  status: string;
+};
+
 export interface Encounter {
   id: string;
   patient: Patient;
@@ -138,6 +144,7 @@ export interface Encounter {
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
   current_location: LocationList;
+  location_history: LocationHistory[];
 }
 
 export interface EncounterEditRequest {
