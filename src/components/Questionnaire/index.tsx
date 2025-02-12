@@ -22,7 +22,6 @@ export function QuestionnaireList() {
     queryKey: ["questionnaires", qParams],
     queryFn: query(questionnaireApi.list, {
       queryParams: {
-        page: qParams.page,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
