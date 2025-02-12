@@ -13,7 +13,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -134,28 +133,6 @@ export default function FacilityOrganizationLayout({
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-    <Page title={`${org.name} `}>
-      {/* Navigation */}
-      <div className="mt-4">
-        <Menubar>
-          {navItems.map((item) => (
-            <MenubarMenu key={item.path}>
-              <MenubarTrigger
-                className={`${
-                  path === item.path
-                    ? "font-medium text-primary-700 bg-gray-100"
-                    : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                }`}
-                asChild
-              >
-                <Link href={item.path} className="cursor-pointer">
-                  <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-          ))}
-        </Menubar>
       </div>
       <Page
         title={org.name}
