@@ -4,6 +4,7 @@ import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -46,7 +47,6 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
@@ -76,7 +76,10 @@ export default function ResourceCreate(props: ResourceProps) {
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
-    referring_facility_contact_number: validators.phoneNumber.required,
+    referring_facility_contact_number: z
+      .string()
+      .min(1, t("field_required"))
+      .refine(isValidPhoneNumber, { message: t("invalid_phone_number") }),
     priority: z.number().default(1),
   });
 

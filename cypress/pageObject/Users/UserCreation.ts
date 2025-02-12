@@ -70,10 +70,7 @@ export class UserCreation {
       { label: "Username", message: "Required" },
       { label: "Password", message: "Required" },
       { label: "Confirm Password", message: "Required" },
-      {
-        label: "Phone Number",
-        message: "Invalid input",
-      },
+      { label: "Phone Number", message: "Required" },
       { label: "State", message: "Required" },
     ]);
     return this;

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -66,7 +67,10 @@ export default function FacilityForm({
     pincode: z.string().refine(validatePincode, t("invalid_pincode")),
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
-    phone_number: validators.phoneNumber.required,
+    phone_number: z
+      .string()
+      .min(1, t("field_required"))
+      .refine(isValidPhoneNumber, { message: t("invalid_phone_number") }),
     latitude: validators.coordinates.latitude.optional(),
     longitude: validators.coordinates.longitude.optional(),
     is_public: z.boolean().default(false),

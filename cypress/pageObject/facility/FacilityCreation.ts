@@ -92,10 +92,7 @@ export class FacilityCreation {
       { label: "Facility Name", message: "Name is required" },
       { label: "Facility Type", message: "Facility type is required" },
       { label: "Address", message: "Address is required" },
-      {
-        label: "Phone Number",
-        message: "Invalid input",
-      },
+      { label: "Phone Number", message: "Required" },
       { label: "Pincode", message: "Invalid Pincode" },
     ]);
   }

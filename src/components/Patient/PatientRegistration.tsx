@@ -56,7 +56,6 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PatientModel } from "@/types/emr/patient";
 import { Organization } from "@/types/organization/organization";
@@ -87,9 +86,15 @@ export default function PatientRegistration(
       z
         .object({
           name: z.string().nonempty(t("name_is_required")),
-          phone_number: validators.phoneNumber.required,
+          phone_number: z
+            .string()
+            .min(1, t("field_required"))
+            .refine(isValidPhoneNumber, { message: t("invalid_phone_number") }),
           same_phone_number: z.boolean(),
-          emergency_phone_number: validators.phoneNumber.required,
+          emergency_phone_number: z
+            .string()
+            .min(1, t("field_required"))
+            .refine(isValidPhoneNumber, { message: t("invalid_phone_number") }),
           gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
           blood_group: z.enum(BLOOD_GROUPS, {
             required_error: t("blood_group_is_required"),
