@@ -86,6 +86,13 @@ const Pagination = ({
       {/* Mobile view */}
       <div className="flex flex-1 justify-between sm:hidden">
         <NavButton
+          id="first-page"
+          tooltip="Jump to first page"
+          children={<CareIcon icon="l-angle-double-left" className="text-lg" />}
+          onClick={() => goToPage(1)}
+          disabled={currentPage === 1}
+        />
+        <NavButton
           id="prev-page"
           tooltip="Previous"
           onClick={() => goToPage(currentPage - 1)}
@@ -93,11 +100,30 @@ const Pagination = ({
           children={<CareIcon icon="l-angle-left" className="text-lg" />}
         />
         <NavButton
+          id={`page-${currentPage}`}
+          key={currentPage}
+          onClick={() => goToPage(currentPage)}
+          selected={currentPage === currentPage}
+          tooltip={`Move to page ${currentPage}`}
+        >
+          {currentPage}
+        </NavButton>
+        <NavButton
           id="next-page"
           tooltip="Next"
           children={<CareIcon icon="l-angle-right" className="text-lg" />}
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage + 1 > totalPage}
+        />
+
+        <NavButton
+          id="last-page"
+          tooltip="Jump to last page"
+          children={
+            <CareIcon icon="l-angle-double-right" className="text-lg" />
+          }
+          onClick={() => goToPage(totalPage)}
+          disabled={totalPage === 0 || currentPage === totalPage}
         />
       </div>
 
