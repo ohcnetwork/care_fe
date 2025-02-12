@@ -11,9 +11,14 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { getPermissions } from "@/common/Permissions";
+
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 
 import { MedicationStatementList } from "./MedicationStatementList";
 
@@ -26,6 +31,12 @@ export default function TreatmentSummary({
   facilityId,
   encounterId,
 }: TreatmentSummaryProps) {
+  const authUser = useAuthUser();
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter } = getPermissions(
+    hasPermission,
+    authUser.permissions,
+  );
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
@@ -226,6 +237,7 @@ export default function TreatmentSummary({
           {/* Medication Statements */}
           <MedicationStatementList
             patientId={encounter.patient.id}
+            canAccess={canViewEncounter}
             className="border-none shadow-none"
             isPrintPreview={true}
           />

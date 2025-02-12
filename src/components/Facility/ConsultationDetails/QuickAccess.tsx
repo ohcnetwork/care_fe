@@ -23,25 +23,23 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      {encounter.status !== "completed" && (
-        <section className="space-y-2 p-2">
-          <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
-          <div className="space-y-3 p-2 font-semibold">
-            {questionnaireOptions.map((option) => (
-              <Link
-                key={option.slug}
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
-                className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
-                data-cy="update-encounter-option"
-              >
-                <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
-                {t(option.title)}
-              </Link>
-            ))}
-          </div>
-          <div className="w-full border-t border-dashed border-gray-300" />
-        </section>
-      )}
+      <section className="space-y-2 p-2">
+        <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
+        <div className="space-y-3 p-2 font-semibold">
+          {questionnaireOptions.map((option) => (
+            <Link
+              key={option.slug}
+              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
+              className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
+              data-cy="update-encounter-option"
+            >
+              <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
+              {t(option.title)}
+            </Link>
+          ))}
+        </div>
+        <div className="w-full border-t border-dashed border-gray-300" />
+      </section>
 
       {/* Departments and Teams */}
       <section>

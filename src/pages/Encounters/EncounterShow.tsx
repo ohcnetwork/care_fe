@@ -21,7 +21,7 @@ import { EncounterFilesTab } from "@/pages/Encounters/tabs/EncounterFilesTab";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/EncounterMedicinesTab";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/EncounterPlotsTab";
 import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab";
-import { Encounter } from "@/types/emr/encounter";
+import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
@@ -56,7 +56,7 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppConsultationTabs();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canListEncounters } = getPermissions(
+  const { canListEncounters, canWriteEncounter } = getPermissions(
     hasPermission,
     authUser.permissions,
   );
@@ -76,6 +76,10 @@ export const EncounterShow = (props: Props) => {
     }),
     enabled: !!encounterId && canListEncounters,
   });
+
+  const canWrite =
+    canWriteEncounter &&
+    !inactiveEncounterStatus.includes(encounterData?.status ?? "");
 
   if (isLoading || !encounterData) {
     return <Loading />;
@@ -150,6 +154,7 @@ export const EncounterShow = (props: Props) => {
               patient={encounterData.patient}
               encounter={encounterData}
               fetchPatientData={() => {}}
+              canWrite={canWrite}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">

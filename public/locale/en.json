@@ -649,6 +649,7 @@
   "create_preset_prerequisite": "To create presets for this bed, you'll need to link the camera to the bed first.",
   "create_resource_request": "Create Request",
   "create_schedule_template": "Create Schedule Template",
+  "create_summaries": "Create Summaries",
   "create_tag": "Create Tag",
   "create_template": "Create Template",
   "create_user": "Create User",
