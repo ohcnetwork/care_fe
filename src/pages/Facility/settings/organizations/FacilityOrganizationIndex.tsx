@@ -148,7 +148,7 @@ export default function FacilityOrganizationIndex({
               isTopLevel
                 ? "bg-white font-bold text-gray-900"
                 : "bg-white font-medium text-gray-900"
-            } flex justify-between items-center pl-[var(--indent)] flex-wrap gap-2`}
+            } flex justify-between lg:flex-row flex-col pl-[var(--indent)] flex-wrap gap-2`}
           >
             <div className="flex items-center">
               {children.length > 0 ? (
@@ -185,7 +185,7 @@ export default function FacilityOrganizationIndex({
               {org.name}
             </div>
             {isTopLevel && (
-              <>
+              <div className="flex justify-between gap-5">
                 {children.length > 0 ? (
                   <>
                     <Button
@@ -197,15 +197,19 @@ export default function FacilityOrganizationIndex({
                         icon={allExpanded ? "l-minus" : "l-plus"}
                         className="h-4 w-4 sm:h-2 sm:w-2"
                       />
-                      {t(allExpanded ? "collapse_all" : "expand_all")}
+                      <span className="hidden sm:inline">
+                        {t(allExpanded ? "collapse_all" : "expand_all")}
+                      </span>
                     </Button>
                     <Button variant="white" size={"sm"} asChild>
                       <Link
                         href={`/departments/${org.id}`}
-                        className="text-gray-900 flex items-center"
+                        className="text-gray-900  flex items-center"
                       >
                         <CareIcon icon="l-eye" className="h-4 w-4" />
-                        {t("see_details")}
+                        <span className="hidden sm:inline">
+                          {t("see_details")}
+                        </span>
                       </Link>
                     </Button>
                   </>
@@ -216,11 +220,13 @@ export default function FacilityOrganizationIndex({
                       className="text-gray-900 flex items-center"
                     >
                       <CareIcon icon="l-eye" className="h-4 w-4" />
-                      {t("see_details")}
+                      <span className="hidden sm:inline">
+                        {t("see_details")}
+                      </span>
                     </Link>
                   </Button>
                 )}
-              </>
+              </div>
             )}
           </TableCell>
           <TableCell className="border-l bg-white font-semibold text-gray-900">
