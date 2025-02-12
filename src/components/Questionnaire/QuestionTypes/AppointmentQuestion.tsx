@@ -27,7 +27,7 @@ import {
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
 interface FollowUpVisitQuestionProps {

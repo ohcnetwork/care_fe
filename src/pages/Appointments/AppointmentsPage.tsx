@@ -82,7 +82,7 @@ import {
   AppointmentStatuses,
   TokenSlot,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface QueryParams {
   practitioner: string | null;
@@ -337,8 +337,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   return (
     <Page
       title={t("appointments")}
-      hideBack={true}
-      breadcrumbs={false}
       options={
         <Tabs
           value={activeTab}

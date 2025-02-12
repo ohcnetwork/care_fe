@@ -23,6 +23,17 @@ export const MEDICATION_STATEMENT_STATUS = [
 export type MedicationStatementStatus =
   (typeof MEDICATION_STATEMENT_STATUS)[number];
 
+export const MEDICATION_STATEMENT_STATUS_STYLES = {
+  active: "bg-green-100 text-green-800 border-green-200",
+  completed: "bg-blue-100 text-blue-800 border-blue-200",
+  stopped: "bg-red-100 text-red-800 border-red-200",
+  on_hold: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  intended: "bg-purple-100 text-purple-800 border-purple-200",
+  not_taken: "bg-gray-100 text-gray-800 border-gray-200",
+  unknown: "bg-gray-100 text-gray-800 border-gray-200",
+  entered_in_error: "bg-red-100 text-red-800 border-red-200",
+} as const;
+
 export type MedicationStatement = {
   readonly id: string;
   status: MedicationStatementStatus;

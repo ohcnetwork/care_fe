@@ -83,29 +83,37 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
   // Validate and notify parent whenever times change
   useEffect(() => {
-    if (
-      !administrationRequest.occurrence_period_start ||
-      !administrationRequest.occurrence_period_end
-    ) {
+    if (!administrationRequest.occurrence_period_start) {
       isValid?.(false);
       return;
     }
 
     const startDate = new Date(administrationRequest.occurrence_period_start);
-    const endDate = new Date(administrationRequest.occurrence_period_end);
-
     const startError = validateDateTime(startDate, true);
-    const endError = validateDateTime(endDate, false);
-
     setStartTimeError(startError);
-    setEndTimeError(endError);
 
-    isValid?.(!startError && !endError);
+    // Only validate end time if status is completed or if end time is provided
+    if (
+      administrationRequest.status === "completed" ||
+      administrationRequest.occurrence_period_end
+    ) {
+      if (!administrationRequest.occurrence_period_end) {
+        isValid?.(false);
+        return;
+      }
+      const endDate = new Date(administrationRequest.occurrence_period_end);
+      const endError = validateDateTime(endDate, false);
+      setEndTimeError(endError);
+      isValid?.(!startError && !endError);
+    } else {
+      setEndTimeError("");
+      isValid?.(!startError);
+    }
   }, [
     administrationRequest.occurrence_period_start,
     administrationRequest.occurrence_period_end,
+    administrationRequest.status,
     isValid,
-    validateDateTime,
   ]);
 
   const handleDateChange = (newTime: string, isStartTime: boolean) => {
@@ -238,9 +246,21 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         <Label>{t("status")}</Label>
         <Select
           value={administrationRequest.status}
-          onValueChange={(value: MedicationAdministrationStatus) =>
-            onChange({ ...administrationRequest, status: value })
-          }
+          onValueChange={(value: MedicationAdministrationStatus) => {
+            const newRequest = { ...administrationRequest, status: value };
+
+            if (value === "in_progress" || value === "not_done") {
+              delete newRequest.occurrence_period_end;
+            } else if (
+              value === "completed" &&
+              !administrationRequest.occurrence_period_end
+            ) {
+              newRequest.occurrence_period_end =
+                administrationRequest.occurrence_period_start;
+            }
+
+            onChange(newRequest);
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder={t("select_status")} />
@@ -275,13 +295,22 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             onValueChange={(newValue) => {
               setIsPastTime(newValue === "yes");
               if (newValue === "no") {
-                // Set both times to current time
                 const now = new Date().toISOString();
-                onChange({
+                const newRequest = {
                   ...administrationRequest,
                   occurrence_period_start: now,
-                  occurrence_period_end: now,
-                });
+                };
+
+                if (
+                  !(
+                    administrationRequest.status === "in_progress" ||
+                    administrationRequest.status === "not_done"
+                  )
+                ) {
+                  newRequest.occurrence_period_end = now;
+                }
+
+                onChange(newRequest);
               }
             }}
             className="flex gap-4"
@@ -370,7 +399,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 disabled={
                   !isPastTime ||
                   (!!administrationRequest.id &&
-                    administrationRequest.status !== "in_progress")
+                    administrationRequest.status !== "in_progress") ||
+                  administrationRequest.status === "in_progress"
                 }
               >
                 <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
@@ -411,7 +441,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             disabled={
               !isPastTime ||
               (!!administrationRequest.id &&
-                administrationRequest.status !== "in_progress")
+                administrationRequest.status !== "in_progress") ||
+              administrationRequest.status === "in_progress"
             }
           />
         </div>

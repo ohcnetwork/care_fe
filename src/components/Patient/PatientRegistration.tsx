@@ -175,7 +175,11 @@ export default function PatientRegistration(
     },
   });
 
-  const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
+  const {
+    mutate: updatePatient,
+    isPending: isUpdatingPatient,
+    isSuccess: isUpdateSuccess,
+  } = useMutation({
     mutationFn: mutate(routes.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
@@ -291,7 +295,7 @@ export default function PatientRegistration(
   useNavigationPrompt(
     form.formState.isDirty &&
       !isCreatingPatient &&
-      !isUpdatingPatient &&
+      !(isUpdatingPatient || isUpdateSuccess) &&
       !showDuplicate,
     t("unsaved_changes"),
   );

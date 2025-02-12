@@ -7,16 +7,15 @@ import { toast } from "sonner";
 
 import Card from "@/CAREUI/display/Card";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import RadioFormField from "@/components/Form/FormFields/RadioFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
@@ -30,6 +29,7 @@ import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import facilityApi from "@/types/facility/facilityApi";
 import { UpdateResourceRequest } from "@/types/resourceRequest/resourceRequest";
 
 interface resourceProps {
@@ -64,6 +64,7 @@ const initialState = {
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
   const [qParams, _] = useQueryParams();
+  const [facilitySearch, setFacilitySearch] = useState("");
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -159,6 +160,21 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       },
     });
 
+  const { data: facilities } = useQuery({
+    queryKey: ["facilities", facilitySearch],
+    queryFn: query.debounced(facilityApi.getAllFacilities, {
+      queryParams: {
+        search_text: facilitySearch,
+        limit: 50,
+      },
+    }),
+  });
+
+  const facilityOptions = facilities?.results.map((facility) => ({
+    label: facility.name,
+    value: facility.id,
+  }));
+
   const handleSubmit = async () => {
     const validForm = validateForm();
 
@@ -190,11 +206,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-    <Page
-      title="Update Request"
-      backUrl={`/facility/${props.facilityId}/resource/${props.id}`}
-      crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
-    >
+    <Page title={t("update_request")}>
       <div className="mt-4">
         <Card className="flex w-full flex-col">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -226,15 +238,17 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             </div>
 
             <div>
-              <FieldLabel>
-                What facility would you like to assign the request to
-              </FieldLabel>
-              <FacilitySelect
-                multiple={false}
-                name="assigned_facility"
-                selected={state.form.assigned_facility}
-                setSelected={(obj) => setFacility(obj, "assigned_facility")}
-                errors={state.errors.assigned_facility}
+              <Label className="text-gray-700 -mt-3 mb-3">
+                {t("facility_assign_request")}
+              </Label>
+              <Autocomplete
+                options={facilityOptions ?? []}
+                placeholder={t("start_typing_to_search")}
+                value={state.form.assigned_facility}
+                onSearch={setFacilitySearch}
+                onChange={(selected) =>
+                  setFacility(selected, "assigned_facility")
+                }
               />
             </div>
 
