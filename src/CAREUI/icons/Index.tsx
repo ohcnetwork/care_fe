@@ -22,7 +22,7 @@ const IconIndex: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl p-4">
-      <PageTitle title="Care Icons" hideBack={true} />
+      <PageTitle title="Care Icons" />
       <input
         type="text"
         placeholder={t("search")}
