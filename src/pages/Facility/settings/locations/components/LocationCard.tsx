@@ -17,6 +17,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,10 +28,11 @@ import { LocationList, getLocationFormLabel } from "@/types/location/location";
 interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
+  onDelete?: (location: LocationList) => void;
   className?: string;
 }
 
-export function LocationCard({ location, onEdit, className }: Props) {
+export function LocationCard({ location, onEdit, onDelete, className }: Props) {
   const { t } = useTranslation();
 
   const getLocationTypeIcon = (form: string) => {
@@ -127,7 +130,10 @@ export function LocationCard({ location, onEdit, className }: Props) {
         </div>
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-          <div className="flex justify-end">
+          <div className="flex justify-between">
+            <Button variant="destructive" onClick={() => onDelete?.(location)}>
+              <CareIcon icon="l-trash" />
+            </Button>
             <Button variant="outline" asChild>
               <Link
                 href={`/location/${location.id}`}
