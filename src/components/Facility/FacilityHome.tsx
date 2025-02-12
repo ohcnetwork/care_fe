@@ -290,12 +290,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           {t("address")}
                         </span>
                         <div className="text-gray-700">
-                          {/* {facilityData.geo_organization &&
-                            renderGeoOrganizations(
-                              facilityData.geo_organization,
-                            ).map((org, index) => (
-                              <span key={index}>{org.value} </span>
-                            ))} */}
                           {facilityData.address}
                         </div>
                       </div>
