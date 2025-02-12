@@ -48,17 +48,6 @@ function OrganizationCard({
                 >
                   {org.org_type}
                 </Badge>
-                {/* <Badge variant="secondary" className="font-normal px-2 py-1">
-                  {isLoadingSubOrgs
-                    ? t("loading")
-                    : t("entity_count_one", {
-                        count: subOrgs?.count ?? 0,
-                        entity:
-                          org.org_type === "dept"
-                            ? "Department inside"
-                            : "Team inside",
-                      })}
-                </Badge> */}
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
