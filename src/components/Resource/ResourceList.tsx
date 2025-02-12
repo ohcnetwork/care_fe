@@ -103,16 +103,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const resources = queryResources?.results || [];
 
   return (
-    <Page
-      title={t("resource")}
-      hideBack={true}
-      crumbsReplacements={{
-        [facilityId]: {
-          name: facilityId || "",
-          uri: `/facility/${facilityId}/settings/general`,
-        },
-      }}
-    >
+    <Page title={t("resource")}>
       <div className="space-y-4 mt-2">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
@@ -167,7 +158,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <div className="hidden md:flex items-center">
+                <div className="items-center">
                   <Tabs
                     value={outgoing ? "outgoing" : "incoming"}
                     className="w-full"
@@ -202,7 +193,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </div>
               </div>
 
-              <div className="hidden md:flex items-center">
+              <div className="items-center">
                 <Tabs
                   value={isActive ? "active" : "completed"}
                   className="w-full"
@@ -237,11 +228,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
             </div>
 
-            <Separator className="hidden md:block" />
+            <Separator />
 
-            <div className="hidden md:block p-4">
+            <div className="p-4 h-auto overflow-hidden">
               <Tabs value={currentStatus} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
+                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
