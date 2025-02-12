@@ -37,6 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import UserSelector from "@/components/Common/UserSelector";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -49,6 +50,7 @@ import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
@@ -60,6 +62,7 @@ export default function ResourceCreate(props: ResourceProps) {
   const { facilityId } = props;
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
+  const [selectedUser, setSelectedUser] = useState<UserBase>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -70,6 +73,7 @@ export default function ResourceCreate(props: ResourceProps) {
         name: z.string(),
       })
       .nullable(),
+    assigned_to: z.string().min(1, { message: t("field_required") }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -103,6 +107,7 @@ export default function ResourceCreate(props: ResourceProps) {
     defaultValues: {
       category: "",
       assigned_facility: null,
+      assigned_to: "",
       emergency: "false" as const,
       title: "",
       reason: "",
@@ -126,6 +131,7 @@ export default function ResourceCreate(props: ResourceProps) {
       category: data.category,
       origin_facility: String(props.facilityId),
       assigned_facility: data.assigned_facility?.id || null,
+      assigned_to: data.assigned_to,
       approving_facility: null,
       emergency: data.emergency === "true",
       title: data.title,
@@ -151,6 +157,11 @@ export default function ResourceCreate(props: ResourceProps) {
     label: facility.name,
     value: facility.id,
   }));
+
+  const handleUserChange = (user: UserBase) => {
+    form.setValue("assigned_to", user.id);
+    setSelectedUser(user);
+  };
 
   const fillMyDetails = () => {
     form.setValue(
@@ -218,9 +229,7 @@ export default function ResourceCreate(props: ResourceProps) {
                     name="assigned_facility"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>
-                          {t("facility_for_care_support")}
-                        </FormLabel>
+                        <FormLabel>{t("facility_for_care_support")}</FormLabel>
                         <FormControl>
                           <Autocomplete
                             options={facilityOptions ?? []}
@@ -281,34 +290,52 @@ export default function ResourceCreate(props: ResourceProps) {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>{t("category")}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("select_category")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {RESOURCE_CATEGORY_CHOICES.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.text}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          {t("category_description")}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <FormField
                   control={form.control}
-                  name="category"
-                  render={({ field }) => (
+                  name="assigned_to"
+                  render={() => (
                     <FormItem>
-                      <FormLabel required>{t("category")}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("select_category")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {RESOURCE_CATEGORY_CHOICES.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.text}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        {t("category_description")}
-                      </FormDescription>
+                      <FormLabel required>{t("assigned_to")}</FormLabel>
+                      <FormControl>
+                        <UserSelector
+                          selected={selectedUser}
+                          onChange={handleUserChange}
+                          placeholder={t("search_users")}
+                          noOptionsMessage={t("no_users_found")}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

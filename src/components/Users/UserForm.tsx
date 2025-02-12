@@ -155,7 +155,7 @@ export default function UserForm({
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
   //const userType = form.watch("user_type");
-  const usernameInput = form.watch("username");
+  const usernameInput = form.watch("username") || "";
   const phoneNumber = form.watch("phone_number");
 
   useEffect(() => {

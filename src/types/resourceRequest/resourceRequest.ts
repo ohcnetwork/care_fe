@@ -32,6 +32,7 @@ export interface CreateResourceRequest {
   referring_facility_contact_name: string;
   referring_facility_contact_number: string;
   approving_facility: string | null;
+  assigned_to: string | null;
   assigned_facility: string | null;
   origin_facility: string;
   related_patient: string;

@@ -164,12 +164,6 @@ const routes = {
     TRes: Type<UserModel>(),
   },
 
-  userList: {
-    path: "/api/v1/users/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<UserModel>>(),
-  },
-
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
