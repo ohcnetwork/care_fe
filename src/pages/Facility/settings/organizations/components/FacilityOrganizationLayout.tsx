@@ -2,8 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -12,14 +10,11 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -47,7 +42,6 @@ export default function FacilityOrganizationLayout({
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
 
   const navItems: NavItem[] = [
     {
@@ -101,22 +95,15 @@ export default function FacilityOrganizationLayout({
   return (
     <>
       <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
-        <Button
-          onClick={() => goBack()}
-          variant="ghost"
-          size="sm"
-          className="gap-2"
-        >
-          <CareIcon icon="l-arrow-left" className="h-4 w-4" />
-          {t("back")}
-        </Button>
-        <span className="text-gray-400">|</span>
         <Breadcrumb>
           <BreadcrumbList>
             {orgParents.reverse().map((parent) => (
               <>
                 <BreadcrumbItem key={parent.id}>
-                  <BreadcrumbLink>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                  >
                     <Link href={parent.id}>{parent.name}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -126,10 +113,9 @@ export default function FacilityOrganizationLayout({
               </>
             ))}
             <BreadcrumbItem key={org.id}>
-              <BreadcrumbLink>
-                {" "}
-                <Link href={`/departments/${org.id}`}>{org.name}</Link>
-              </BreadcrumbLink>
+              <span className="text-sm font-semibold text-gray-900">
+                {org.name}
+              </span>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
