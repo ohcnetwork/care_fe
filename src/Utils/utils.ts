@@ -5,10 +5,6 @@ import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
-import {
-  Organization,
-  OrganizationParent,
-} from "@/types/organization/organization";
 import { Quantity } from "@/types/questionnaire/quantity";
 
 const DATE_FORMAT = "DD/MM/YYYY";
@@ -273,14 +269,19 @@ export const conditionalArrayAttribute = <T>(
   return condition ? attributes : [];
 };
 
-export const stringifyGeoOrganization = (org: Organization) => {
+export const stringifyNestedObject = <
+  T extends { name: string; parent?: Partial<T> },
+>(
+  obj: T,
+  separator = ", ",
+) => {
   const levels: string[] = [];
 
-  let current: OrganizationParent | undefined = org;
+  let current: Partial<T> | undefined = obj;
   while (current?.name) {
     levels.push(current.name);
     current = current.parent;
   }
 
-  return levels.join(", ");
+  return levels.join(separator);
 };

@@ -27,7 +27,7 @@ export function LocationHistorySheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-xl">
+      <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader className="px-1">
           <SheetTitle>{t("location_history")}</SheetTitle>
         </SheetHeader>
