@@ -7,8 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
+import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -23,18 +23,16 @@ interface Props {
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const limit = 12;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["devices", facilityId, page, limit, searchQuery],
+    queryKey: ["devices", facilityId, page, limit],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         offset: (page - 1) * limit,
         limit,
-        name: searchQuery || undefined,
       },
     }),
   });
@@ -43,15 +41,7 @@ export default function DevicesList({ facilityId }: Props) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <Input
-            placeholder={t("search_devices")}
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            className="w-72"
-          />
+          <PageTitle title={t("devices")} />
         </div>
 
         <Button variant="primary" asChild>
@@ -76,9 +66,7 @@ export default function DevicesList({ facilityId }: Props) {
             ) : (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">
-                  {searchQuery
-                    ? t("no_devices_found")
-                    : t("no_devices_available")}
+                  {t("no_devices_available")}
                 </CardContent>
               </Card>
             )}
