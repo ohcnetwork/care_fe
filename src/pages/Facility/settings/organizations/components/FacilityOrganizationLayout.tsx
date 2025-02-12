@@ -3,13 +3,6 @@ import { Link, usePath } from "raviger";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -89,31 +82,7 @@ export default function FacilityOrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name} `} breadcrumbs={false}>
-      {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
-      <Breadcrumb className="mt-1">
-        <BreadcrumbList>
-          {/* Org has parent and each parent may have another parent, so we need to show all the parents */}
-
-          {orgParents.reverse().map((parent) => (
-            <>
-              <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`/departments/${parent.id}`}>
-                  {parent.name}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                <BreadcrumbSeparator />
-              </BreadcrumbItem>
-            </>
-          ))}
-          <BreadcrumbItem key={org.id}>
-            <BreadcrumbLink asChild>
-              <Link href={`/departments/${org.id}`}>{org.name}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <Page title={`${org.name} `}>
       {/* Navigation */}
       <div className="mt-4">
         <Menubar>

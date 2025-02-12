@@ -114,7 +114,7 @@ export default function MedicationRequestTable({
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="bg-gray-200 py-0 w-fit ">
+          <TabsList className="bg-gray-200 py-0 w-fit">
             <TabsTrigger
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -131,7 +131,7 @@ export default function MedicationRequestTable({
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between p-2 gap-2">
+              <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-1">
                   <CareIcon icon="l-search" className="text-lg text-gray-500" />
                   <input
