@@ -83,8 +83,7 @@ const Pagination = ({
 
   return (
     <div className={className}>
-      {/* Mobile view */}
-      <div className="flex flex-1 justify-between sm:hidden">
+      <nav className="relative flex flex-1 items-center justify-between rounded-lg border border-secondary-300 bg-white">
         <NavButton
           id="first-page"
           tooltip="Jump to first page"
@@ -99,63 +98,31 @@ const Pagination = ({
           disabled={currentPage - 1 <= 0}
           children={<CareIcon icon="l-angle-left" className="text-lg" />}
         />
-        <NavButton
-          id={`page-${currentPage}`}
-          key={currentPage}
-          onClick={() => goToPage(currentPage)}
-          selected={true}
-          tooltip={`Move to page ${currentPage}`}
-        >
-          {currentPage}
-        </NavButton>
-        <NavButton
-          id="next-page"
-          tooltip="Next"
-          children={<CareIcon icon="l-angle-right" className="text-lg" />}
-          onClick={() => goToPage(currentPage + 1)}
-          disabled={currentPage + 1 > totalPage}
-        />
 
-        <NavButton
-          id="last-page"
-          tooltip="Jump to last page"
-          children={
-            <CareIcon icon="l-angle-double-right" className="text-lg" />
-          }
-          onClick={() => goToPage(totalPage)}
-          disabled={totalPage === 0 || currentPage === totalPage}
-        />
-      </div>
-
-      {/* Desktop view */}
-      <nav className="relative hidden rounded-lg border border-secondary-300 bg-white sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
-        <NavButton
-          id="first-page"
-          tooltip="Jump to first page"
-          children={<CareIcon icon="l-angle-double-left" className="text-lg" />}
-          onClick={() => goToPage(1)}
-          disabled={currentPage === 1}
-        />
-        <NavButton
-          id="prev-pages"
-          tooltip="Previous"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage - 1 <= 0}
-          children={<CareIcon icon="l-angle-left" className="text-lg" />}
-        />
-
-        {pageNumbers.map((page) => (
+        <div className="sm:hidden">
           <NavButton
-            id={`page-${page}`}
-            key={page}
-            onClick={() => goToPage(page)}
-            selected={currentPage === page}
-            tooltip={`Move to page ${page}`}
+            id={`page-${currentPage}`}
+            key={currentPage}
+            onClick={() => goToPage(currentPage)}
+            selected={true}
+            tooltip={`Move to page ${currentPage}`}
           >
-            {page}
+            {currentPage}
           </NavButton>
-        ))}
-
+        </div>
+        <div className="hidden sm:flex">
+          {pageNumbers.map((page) => (
+            <NavButton
+              id={`page-${page}`}
+              key={page}
+              onClick={() => goToPage(page)}
+              selected={currentPage === page}
+              tooltip={`Move to page ${page}`}
+            >
+              {page}
+            </NavButton>
+          ))}
+        </div>
         <NavButton
           id="next-pages"
           tooltip="Next"
