@@ -1,6 +1,7 @@
 import { ContactPoint } from "@/types/common/contactPoint";
 import { Encounter } from "@/types/emr/encounter";
 import { LocationDetail } from "@/types/location/location";
+import { UserBase } from "@/types/user/user";
 
 export const DeviceStatuses = [
   "active",
@@ -41,6 +42,8 @@ export interface DeviceDetail extends DeviceBase {
   id: string;
   current_encounter: Encounter | undefined;
   current_location: LocationDetail | undefined; // TODO: verify this type
+  created_by: UserBase;
+  updated_by: UserBase;
 }
 
 export interface DeviceList extends DeviceBase {
@@ -48,3 +51,9 @@ export interface DeviceList extends DeviceBase {
 }
 
 export type DeviceWrite = DeviceBase;
+
+export interface DeviceLocationHistory {
+  id: string;
+  location: LocationDetail;
+  start: string; // datetime
+}

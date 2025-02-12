@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +36,8 @@ import query from "@/Utils/request/query";
 import { ContactPoint } from "@/types/common/contactPoint";
 import deviceApi from "@/types/device/deviceApi";
 
+import AssociateLocationSheet from "./components/AssociateLocationSheet";
+
 interface Props {
   facilityId: string;
   deviceId: string;
@@ -42,6 +46,7 @@ interface Props {
 export default function DeviceDetail({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -96,18 +101,47 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
   };
 
   const renderContactInfo = (contact: ContactPoint) => {
+    const getContactLink = (system: string, value: string) => {
+      switch (system) {
+        case "phone":
+        case "fax":
+          return `tel:${value}`;
+        case "email":
+          return `mailto:${value}`;
+        case "url":
+          return value;
+        case "sms":
+          return `sms:${value}`;
+        default:
+          return null;
+      }
+    };
+
+    const link = getContactLink(contact.system, contact.value);
+
     return (
       <div key={`${contact.system}-${contact.value}`} className="space-y-1">
         <p className="text-sm font-medium text-gray-500">
           {t(contact.system)} ({t(contact.use)})
         </p>
-        <p className="text-sm text-gray-900">{contact.value}</p>
+        {link ? (
+          <a
+            href={link}
+            className="text-sm text-primary-600 hover:text-primary-700 hover:underline"
+            target={contact.system === "url" ? "_blank" : undefined}
+            rel={contact.system === "url" ? "noopener noreferrer" : undefined}
+          >
+            {contact.value}
+          </a>
+        ) : (
+          <p className="text-sm text-gray-900">{contact.value}</p>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
         <div className="flex items-center gap-2">
@@ -141,7 +175,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-4">
         <Card>
           <CardHeader>
             <CardTitle>{t("device_information")}</CardTitle>
@@ -162,6 +196,35 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   <p className="mt-1">{device.user_friendly_name}</p>
                 </div>
               )}
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  {t("location")}
+                </h4>
+                <div className="mt-1 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {device.current_location ? (
+                      <>
+                        <Link
+                          href={`/facility/${facilityId}/settings/location/${device.current_location.id}`}
+                          className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                        >
+                          {device.current_location.name}
+                          <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </>
+                    ) : (
+                      <span className="text-gray-500">{t("no_location")}</span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsLocationSheetOpen(true)}
+                  >
+                    {device.current_location ? t("change") : t("add")}
+                  </Button>
+                </div>
+              </div>
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant="secondary"
@@ -185,83 +248,106 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             <Separator />
 
             <div className="space-y-4">
-              {device.manufacturer && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    {t("manufacturer")}
-                  </h4>
-                  <p className="mt-1">{device.manufacturer}</p>
-                </div>
-              )}
-              {device.model_number && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    {t("model_number")}
-                  </h4>
-                  <p className="mt-1">{device.model_number}</p>
-                </div>
-              )}
-              {device.serial_number && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    {t("serial_number")}
-                  </h4>
-                  <p className="mt-1">{device.serial_number}</p>
-                </div>
-              )}
-              {device.part_number && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    {t("part_number")}
-                  </h4>
-                  <p className="mt-1">{device.part_number}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(device.identifier || device.lot_number) && (
+                  <>
+                    {device.identifier && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("identifier")}
+                        </h4>
+                        <p className="mt-1">{device.identifier}</p>
+                      </div>
+                    )}
+                    {device.lot_number && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("lot_number")}
+                        </h4>
+                        <p className="mt-1">{device.lot_number}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("dates_and_identifiers")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {device.identifier && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("identifier")}
-                </h4>
-                <p className="mt-1">{device.identifier}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(device.manufacturer || device.model_number) && (
+                  <>
+                    {device.manufacturer && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("manufacturer")}
+                        </h4>
+                        <p className="mt-1">{device.manufacturer}</p>
+                      </div>
+                    )}
+                    {device.model_number && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("model_number")}
+                        </h4>
+                        <p className="mt-1">{device.model_number}</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
-            {device.lot_number && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("lot_number")}
-                </h4>
-                <p className="mt-1">{device.lot_number}</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(device.serial_number || device.part_number) && (
+                  <>
+                    {device.serial_number && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("serial_number")}
+                        </h4>
+                        <p className="mt-1">{device.serial_number}</p>
+                      </div>
+                    )}
+                    {device.part_number && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("part_number")}
+                        </h4>
+                        <p className="mt-1">{device.part_number}</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
-            {device.manufacturer_date && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("manufacturer_date")}
-                </h4>
-                <p className="mt-1">
-                  {new Date(device.manufacturer_date).toLocaleDateString()}
-                </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(device.manufacturer_date || device.expiration_date) && (
+                  <>
+                    {device.manufacturer_date && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("manufacturer_date")}
+                        </h4>
+                        <p className="mt-1">
+                          {new Date(
+                            device.manufacturer_date,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                    {device.expiration_date && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">
+                          {t("expiration_date")}
+                        </h4>
+                        <p className="mt-1">
+                          {new Date(
+                            device.expiration_date,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
-            {device.expiration_date && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">
-                  {t("expiration_date")}
-                </h4>
-                <p className="mt-1">
-                  {new Date(device.expiration_date).toLocaleDateString()}
-                </p>
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
@@ -281,6 +367,13 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
           </Card>
         )}
       </div>
+
+      <AssociateLocationSheet
+        open={isLocationSheetOpen}
+        onOpenChange={setIsLocationSheetOpen}
+        facilityId={facilityId}
+        deviceId={deviceId}
+      />
     </div>
   );
 }
