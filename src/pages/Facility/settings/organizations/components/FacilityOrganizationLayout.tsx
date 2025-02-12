@@ -94,32 +94,34 @@ export default function FacilityOrganizationLayout({
 
   return (
     <>
-      <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
-        <Breadcrumb>
-          <BreadcrumbList>
-            {orgParents.reverse().map((parent) => (
-              <>
-                <BreadcrumbItem key={parent.id}>
-                  <BreadcrumbLink
-                    asChild
-                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
-                  >
-                    <Link href={parent.id}>{parent.name}</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                  <BreadcrumbSeparator />
-                </BreadcrumbItem>
-              </>
-            ))}
-            <BreadcrumbItem key={org.id}>
-              <span className="text-sm font-semibold text-gray-900">
-                {org.name}
-              </span>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      {orgParents.length > 0 && (
+        <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {orgParents.reverse().map((parent) => (
+                <>
+                  <BreadcrumbItem key={parent.id}>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={parent.id}>{parent.name}</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                    <BreadcrumbSeparator />
+                  </BreadcrumbItem>
+                </>
+              ))}
+              <BreadcrumbItem key={org.id}>
+                <span className="text-sm font-semibold text-gray-900">
+                  {org.name}
+                </span>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
       <Page
         title={org.name}
         componentRight={

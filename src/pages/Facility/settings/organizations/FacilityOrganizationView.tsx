@@ -104,7 +104,6 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6 mx-auto max-w-4xl">
         <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-          {" "}
           <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
             <div className="w-full lg:w-1/3 relative">
               <div className="relative">
