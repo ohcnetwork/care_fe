@@ -20,7 +20,7 @@ import locationApi from "@/types/location/locationApi";
 
 interface LocationSearchProps {
   facilityId: string;
-  mode?: "kind" | "location" | "instance";
+  mode?: "kind" | "instance";
   onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
@@ -56,7 +56,7 @@ export function LocationSearch({
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
-        <Command>
+        <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
             value={search}
