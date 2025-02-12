@@ -12,6 +12,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -51,12 +52,12 @@ export default function FacilityOrganizationLayout({
   const navItems: NavItem[] = [
     {
       path: `/departments/${id}`,
-      title: "Departments/Teams",
+      title: t("departments_or_teams"),
       value: "departments",
     },
     {
       path: `/departments/${id}/users`,
-      title: "Users",
+      title: t("users"),
       value: "users",
     },
   ];
@@ -85,7 +86,7 @@ export default function FacilityOrganizationLayout({
   }
 
   if (!org) {
-    return <div>Not found</div>;
+    return <div>{t("not_found")}</div>;
   }
 
   const orgParents: FacilityOrganizationParent[] = [];
@@ -100,16 +101,17 @@ export default function FacilityOrganizationLayout({
   return (
     <>
       <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
-        <button
+        <Button
           onClick={() => goBack()}
-          className="mt-1 hover:underline"
-          aria-label="Go back"
+          variant="ghost"
+          size="sm"
+          className="gap-2"
         >
-          <CareIcon icon="l-arrow-left" className="h-4 w-4 text-gray-600" />
-          <span className="text-sm text-gray-600">Back</span>
-        </button>
-        <span className="text-gray-400 mt-1">|</span>
-        <Breadcrumb className="mt-1">
+          <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+          {t("back")}
+        </Button>
+        <span className="text-gray-400">|</span>
+        <Breadcrumb>
           <BreadcrumbList>
             {orgParents.reverse().map((parent) => (
               <>
@@ -133,8 +135,7 @@ export default function FacilityOrganizationLayout({
         </Breadcrumb>
       </div>
       <Page
-        title={`${org.name} `}
-        breadcrumbs={false}
+        title={org.name}
         componentRight={
           <Badge
             variant="outline"

@@ -74,13 +74,11 @@ function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
-  const { Pagination } = useFilters({
-    limit: 15,
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
     cacheBlacklist: ["username"],
   });
-  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
 
   const { data: children, isLoading } = useQuery({
     queryKey: [
@@ -88,16 +86,16 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       "list",
       facilityId,
       id,
-      page,
-      limit,
+      qParams.page,
+      resultsPerPage,
       searchQuery,
     ],
     queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId },
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        limit: resultsPerPage,
         name: searchQuery || undefined,
       },
     }),
@@ -120,7 +118,6 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setPage(1); // Reset to first page on search
                   }}
                   className="w-full pl-8"
                 />
@@ -158,9 +155,9 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 </Card>
               )}
             </div>
-            {children && children.count > limit && (
+            {children && children.count > resultsPerPage && (
               <div className="flex justify-center">
-                <Pagination totalCount={children.count} noMargin />
+                <Pagination totalCount={children.count} />
               </div>
             )}
           </div>
