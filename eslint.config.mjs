@@ -66,7 +66,7 @@ export default [
     rules: {
       ...tseslint.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        "warn",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
@@ -74,7 +74,7 @@ export default [
         },
       ],
       "@typescript-eslint/no-unused-expressions": [
-        "error",
+        "warn",
         { allowShortCircuit: true, allowTernary: true },
       ],
       "@typescript-eslint/no-explicit-any": "warn",

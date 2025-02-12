@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useNavigate } from "raviger";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +31,8 @@ export function QuestionnaireList() {
           <h1 className="text-2xl font-bold">Questionnaires</h1>
           <p className="text-gray-600">Manage and view questionnaires</p>
         </div>
-        <Button onClick={() => navigate("/questionnaire/create")}>
-          Create New
+        <Button onClick={() => navigate("/admin/questionnaire/create")}>
+          {t("create_new")}
         </Button>
       </div>
 
@@ -40,16 +41,16 @@ export function QuestionnaireList() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Title
+                {t("title")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Description
+                {t("description")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
+                {t("status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Slug
+                {t("slug")}
               </th>
             </tr>
           </thead>
@@ -57,7 +58,9 @@ export function QuestionnaireList() {
             {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
               <tr
                 key={questionnaire.id}
-                onClick={() => navigate(`/questionnaire/${questionnaire.slug}`)}
+                onClick={() =>
+                  navigate(`/admin/questionnaire/${questionnaire.slug}`)
+                }
                 className="cursor-pointer hover:bg-gray-50"
               >
                 <td className="whitespace-nowrap px-6 py-4">

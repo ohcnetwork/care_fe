@@ -49,6 +49,13 @@ export interface AnswerOption {
   value: string;
   display?: string;
   initialSelected?: boolean;
+  code?: Code;
+}
+
+export interface ObservationType {
+  system: string;
+  code: string;
+  display: string;
 }
 
 export interface Question {
