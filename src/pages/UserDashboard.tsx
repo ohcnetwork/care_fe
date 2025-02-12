@@ -66,7 +66,7 @@ export default function UserDashboard() {
             >
               <Link href="/questionnaire" className="gap-2 text-inherit">
                 <ClipboardList className="h-4 w-4" />
-                {t("questionnaires")}
+                {t("questionnaire", { count: 2 })}
               </Link>
             </Button>
           )}
