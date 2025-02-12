@@ -242,12 +242,7 @@ export default function FacilityOrganizationIndex({
     );
   };
   return (
-    <Page
-      title={t("departments")}
-      hideBack={true}
-      hideTitleOnPage={true}
-      breadcrumbs={false}
-    >
+    <Page title={t("departments")} hideTitleOnPage={true}>
       <h2 className="mb-4 text-black">{t("departments")}</h2>
       <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
         <div className="w-60">
