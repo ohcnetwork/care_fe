@@ -123,7 +123,7 @@ export default function ResourceDetails({
   }
 
   return (
-    <Page title="Request Details">
+    <Page title={t("request_details")}>
       <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
         {/* Action Buttons */}
         <div className="flex items-center justify-between">

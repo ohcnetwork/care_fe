@@ -206,7 +206,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-    <Page title="Update Request">
+    <Page title={t("update_request")}>
       <div className="mt-4">
         <Card className="flex w-full flex-col">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

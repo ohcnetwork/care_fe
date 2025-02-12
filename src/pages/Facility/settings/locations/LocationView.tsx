@@ -118,17 +118,25 @@ export default function LocationView({ id, facilityId }: Props) {
       <Breadcrumb className="m-4">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink
+              asChild
+              className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+            >
               <Link href={`/locations`}>{t("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {breadcrumbs.map((breadcrumb, index) => (
             <BreadcrumbItem key={breadcrumb.id}>
               {index === breadcrumbs.length - 1 ? (
-                <span className="font-semibold">{breadcrumb.name}</span>
+                <span className="font-semibold text-gray-900">
+                  {breadcrumb.name}
+                </span>
               ) : (
                 <>
-                  <BreadcrumbLink asChild>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                  >
                     <Link href={`${breadcrumb.id}`}>{breadcrumb.name}</Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator />
