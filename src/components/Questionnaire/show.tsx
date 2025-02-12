@@ -195,7 +195,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
               />
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className={cn(buttonVariants({ variant: "destructive" }))}
                 onSelect={() => setShowDeleteDialog(true)}
               >
                 <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />

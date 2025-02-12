@@ -11,7 +11,9 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -336,7 +338,9 @@ export function AllergyQuestion({
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
+                        className={cn(
+                          buttonVariants({ variant: "destructive" }),
+                        )}
                         onClick={() => handleRemoveAllergy(index)}
                       >
                         <MinusCircledIcon className="h-4 w-4 mr-2" />
@@ -617,7 +621,7 @@ const AllergyTableRow = ({
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={onRemove}
               >
                 <MinusCircledIcon className="h-4 w-4 mr-2" />

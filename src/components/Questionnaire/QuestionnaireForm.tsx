@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
@@ -402,6 +402,7 @@ export function QuestionnaireForm({
                     );
                   }}
                   disabled={isPending}
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                 >
                   <CareIcon icon="l-times-circle" />
                   <span>Remove</span>

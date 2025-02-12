@@ -289,7 +289,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         {/* TODO: get permissions from backend */}
                         {/* {hasPermissionToDeleteFacility && (
                           <DropdownMenuItem
-                            className="text-destructive"
+                            className={cn(buttonVariants({ variant: "destructive" }))}
                             onClick={() => setOpenDeleteDialog(true)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />

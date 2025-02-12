@@ -10,7 +10,7 @@ import React, { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -268,7 +268,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                   onClick={onRemove}
                 >
                   <MinusCircledIcon className="h-4 w-4 mr-2" />
@@ -386,7 +386,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={onRemove}
               >
                 <MinusCircledIcon className="h-4 w-4 mr-2" />

@@ -5,11 +5,13 @@ import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -785,7 +787,7 @@ function QuestionEditor({
                 e.stopPropagation();
                 onDelete();
               }}
-              className="text-destructive"
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
               Delete

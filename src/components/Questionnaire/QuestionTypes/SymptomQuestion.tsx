@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -126,7 +126,7 @@ function SymptomActionsMenu({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
+          className={cn(buttonVariants({ variant: "destructive" }))}
           onClick={onRemove}
           disabled={verificationStatus === "entered_in_error"}
         >

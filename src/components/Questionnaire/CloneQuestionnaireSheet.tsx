@@ -3,8 +3,10 @@ import { Building, Check, Loader2 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -127,7 +129,11 @@ export default function CloneQuestionnaireSheet({
               }}
               placeholder="Enter a unique slug"
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p className={cn(buttonVariants({ variant: "destructive" }))}>
+                {error}
+              </p>
+            )}
           </div>
 
           {/* Selected Organizations */}
