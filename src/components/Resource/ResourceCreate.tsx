@@ -82,14 +82,6 @@ export default function ResourceCreate(props: ResourceProps) {
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
 
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getAnyFacility, {
-      pathParams: { id: String(facilityId) },
-    }),
-    enabled: !!facilityId,
-  });
-
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
     queryFn: query(routes.patient.getPatient, {
@@ -167,17 +159,7 @@ export default function ResourceCreate(props: ResourceProps) {
   }
 
   return (
-    <Page
-      title={t("create_resource_request")}
-      crumbsReplacements={{
-        [facilityId]: {
-          name: facilityData?.name || "",
-          uri: `/facility/${facilityId}/settings/general`,
-        },
-        resource: { style: "pointer-events-none" },
-      }}
-      backUrl={`/facility/${facilityId}/settings/general`}
-    >
+    <Page title={t("create_resource_request")}>
       <div className="container mx-auto max-w-4xl">
         <Card className="mt-4">
           <Form {...form}>
