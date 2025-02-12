@@ -54,6 +54,8 @@
   "password_reset_success": "पासवर्ड यशस्वीपणे रिसेट झाला",
   "password_sent": "पासवर्ड रिसेट झाला इमेल पाठवला",
   "phone_number": "दूरध्वनी क्रमांक",
+  "questionnaire_one": "प्रश्नावली",
+  "questionnaire_other": "प्रश्नावल्या",
   "register_hospital": "हॉस्पिटलचे नाव नोंदवा",
   "register_page_title": "हॉस्पिटल व्यवस्थापक म्हणून नोंदणी करा",
   "reset": "रीसेट करा",
