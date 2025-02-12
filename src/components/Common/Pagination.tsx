@@ -103,7 +103,7 @@ const Pagination = ({
           id={`page-${currentPage}`}
           key={currentPage}
           onClick={() => goToPage(currentPage)}
-          selected={currentPage === currentPage}
+          selected={true}
           tooltip={`Move to page ${currentPage}`}
         >
           {currentPage}
