@@ -697,6 +697,7 @@
   "delete_account_btn": "Yes, delete this account",
   "delete_account_note": "Deleting this account will remove all associated data and cannot be undone.",
   "delete_facility": "Delete Facility",
+  "delete_facility_confirmation": "Are you sure you want to delete {{name}}? This action cannot be undone.",
   "delete_item": "Delete {{name}}",
   "delete_record": "Delete Record",
   "delete_user": "Delete User",
@@ -2376,5 +2377,6 @@
   "yet_to_be_decided": "Yet to be decided",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out"
+  "zoom_out": "Zoom Out",
+  "facility_deleted_successfully": "{{name}} has been deleted successfully."
 }
