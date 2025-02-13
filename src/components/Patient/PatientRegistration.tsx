@@ -747,10 +747,13 @@ export default function PatientRegistration(
       </div>
       {showDuplicate && (
         <DuplicatePatientDialog
+          open={showDuplicate}
           patientList={duplicatePatients}
           handleOk={handleDialogClose}
-          handleCancel={() => {
-            handleDialogClose("close");
+          onOpenChange={(open) => {
+            if (!open) {
+              handleDialogClose("close");
+            }
           }}
         />
       )}
