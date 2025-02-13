@@ -17,6 +17,41 @@ interface EncounterCardProps {
 
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
+
+  const encounterDetails = [
+    {
+      label: t("facility"),
+      value: (
+        <div className="flex items-center gap-2">{encounter.facility.name}</div>
+      ),
+    },
+    {
+      label: t("start_date"),
+      value: encounter.period.start
+        ? formatDateTime(encounter.period.start)
+        : t("not_started"),
+    },
+    {
+      label: t("priority"),
+      value: (
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-yellow-500" />
+          {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
+        </div>
+      ),
+    },
+    {
+      label: t("end_date"),
+      hide: !encounter.period.end,
+      value: formatDateTime(encounter.period.end),
+    },
+    {
+      label: t("external_id"),
+      hide: !encounter.external_identifier,
+      value: encounter.external_identifier,
+    },
+  ];
+
   return (
     <>
       <div className="pb-6 block relative border-l-2 px-4 border-l-secondary-300">
@@ -56,43 +91,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
             </div>
 
             <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
-              {[
-                {
-                  label: t("facility"),
-                  value: (
-                    <div className="flex items-center gap-2">
-                      {encounter.facility.name}
-                    </div>
-                  ),
-                },
-                {
-                  label: t("start_date"),
-                  value: encounter.period.start
-                    ? formatDateTime(encounter.period.start)
-                    : t("not_started"),
-                },
-                {
-                  label: t("priority"),
-                  value: (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-yellow-500" />
-                      {t(
-                        `encounter_priority__${encounter.priority.toLowerCase()}`,
-                      )}
-                    </div>
-                  ),
-                },
-                {
-                  label: t("end_date"),
-                  hide: !encounter.period.end,
-                  value: formatDateTime(encounter.period.end),
-                },
-                {
-                  label: t("external_id"),
-                  hide: !encounter.external_identifier,
-                  value: encounter.external_identifier,
-                },
-              ]
+              {encounterDetails
                 .filter((f) => !f.hide)
                 .map((field, i) => (
                   <div key={i} className="w-full mx-3 sm:w-auto">
@@ -112,7 +111,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 className="p-2 border border-black"
               >
                 <Eye />
-                {t("View Encounter")}
+                {t("view_encounter")}
               </Button>
             </div>
           </CardContent>
