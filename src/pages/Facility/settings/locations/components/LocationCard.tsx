@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bed,
   Building,
@@ -14,26 +15,58 @@ import {
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import mutate from "@/Utils/request/mutate";
 import { LocationList, getLocationFormLabel } from "@/types/location/location";
+import locationApi from "@/types/location/locationApi";
 
 interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
-  onDelete?: (location: LocationList) => void;
   className?: string;
+  facilityId?: string;
 }
 
-export function LocationCard({ location, onEdit, onDelete, className }: Props) {
+export function LocationCard({
+  location,
+  onEdit,
+  className,
+  facilityId,
+}: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: removeLocation } = useMutation({
+    mutationFn: mutate(locationApi.delete, {
+      pathParams: { facility_id: facilityId, id: location.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations", facilityId],
+      });
+      toast.success("Location removed successfully");
+    },
+  });
 
   const getLocationTypeIcon = (form: string) => {
     switch (form.toLowerCase()) {
@@ -131,9 +164,43 @@ export function LocationCard({ location, onEdit, onDelete, className }: Props) {
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between">
-            <Button variant="destructive" onClick={() => onDelete?.(location)}>
-              <CareIcon icon="l-trash" />
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  className={cn(buttonVariants({ variant: "destructive" }))}
+                >
+                  <CareIcon icon="l-trash" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t("remove")} {location.name}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("are_you_sure_want_to_delete", {
+                      name: location.name,
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() =>
+                      removeLocation({
+                        pathParams: {
+                          facility_id: facilityId,
+                          id: location.id,
+                        },
+                      })
+                    }
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                  >
+                    {t("remove")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button variant="outline" asChild>
               <Link
                 href={`/location/${location.id}`}

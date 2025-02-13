@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -18,13 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { LocationList, getLocationFormLabel } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -43,7 +40,6 @@ export default function LocationView({ id, facilityId }: Props) {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
@@ -96,47 +92,6 @@ export default function LocationView({ id, facilityId }: Props) {
     setIsSheetOpen(false);
     setSelectedLocation(null);
   };
-  const { mutate: removeLocation } = useMutation({
-    mutationFn: ({
-      facilityId,
-      locationId,
-    }: {
-      facilityId: string;
-      locationId: string;
-    }) =>
-      mutate(locationApi.delete, {
-        pathParams: { facility_id: facilityId, id: locationId },
-      })({ facilityId, locationId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "locations",
-          facilityId,
-          id,
-          "children",
-          { page, limit, searchQuery },
-        ],
-      });
-      toast.success("Location removed successfully");
-    },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
-  });
-
-  const handleDeleteLocation = (location: LocationList) => {
-    setSelectedLocation(location);
-    setOpenDeleteDialog(true);
-  };
-  const confirmDelete = () => {
-    if (!selectedLocation) return;
-    removeLocation({ facilityId, locationId: selectedLocation.id });
-    setOpenDeleteDialog(false);
-    setSelectedLocation(null);
-  };
 
   if (!location)
     return (
@@ -160,20 +115,6 @@ export default function LocationView({ id, facilityId }: Props) {
 
   return (
     <>
-      <ConfirmDialog
-        title={t("delete_item", { name: selectedLocation?.name })}
-        description={
-          <span>
-            {t("are_you_sure_want_to_delete", { name: selectedLocation?.name })}
-          </span>
-        }
-        action="Delete"
-        variant="destructive"
-        show={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        onConfirm={confirmDelete}
-        cancelLabel={t("cancel")}
-      />
       <Breadcrumb className="m-4">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -275,7 +216,7 @@ export default function LocationView({ id, facilityId }: Props) {
                       key={childLocation.id}
                       location={childLocation}
                       onEdit={handleEditLocation}
-                      onDelete={handleDeleteLocation}
+                      facilityId={facilityId}
                     />
                   ))
                 ) : (
