@@ -62,10 +62,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
-  const [assignedToUser, setAssignedToUser] = useState<{
-    id: string;
-  } | null>(null);
+  const [assignedToUser, setAssignedToUser] = useState<UserBase>();
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -136,23 +133,16 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         priority: resourceData.priority,
       });
       if (resourceData.assigned_to) {
-        setSelectedUser({
-          id: resourceData.assigned_to.id,
-          first_name: resourceData.assigned_to.first_name || "",
-          last_name: resourceData.assigned_to.last_name || "",
-          username: resourceData.assigned_to.username || "",
-        } as UserBase);
+        setAssignedToUser(resourceData.assigned_to);
       } else {
-        setSelectedUser(undefined);
+        setAssignedToUser(undefined);
       }
     }
   }, [resourceData, form]);
 
-  console.log(form.watch("assigned_to"));
-
   useEffect(() => {
     if (resourceData) {
-      setAssignedToUser(resourceData.assigned_to);
+      setAssignedToUser(resourceData.assigned_to ?? undefined);
     }
   }, [resourceData]);
 
@@ -214,8 +204,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const handleUserChange = (user: UserBase) => {
     form.setValue("assigned_to", user.id);
-    setSelectedUser(user);
-    setAssignedToUser({ id: user.id });
+    setAssignedToUser(user);
   };
 
   const fillMyDetails = () => {
@@ -377,7 +366,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       <FormLabel required>{t("assigned_to")}</FormLabel>
                       <FormControl>
                         <UserSelector
-                          selected={selectedUser}
+                          selected={assignedToUser}
                           onChange={handleUserChange}
                           placeholder={t("search_users")}
                           noOptionsMessage={t("no_users_found")}
