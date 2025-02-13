@@ -55,6 +55,7 @@ import {
   ObservationType,
   Question,
   QuestionType,
+  SUPPORTED_QUESTION_TYPES,
   StructuredQuestionType,
 } from "@/types/questionnaire/question";
 import {
@@ -860,19 +861,11 @@ function QuestionEditor({
                     <SelectValue placeholder="Select question type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="group">Group</SelectItem>
-                    <SelectItem value="boolean">Boolean</SelectItem>
-                    <SelectItem value="decimal">Decimal</SelectItem>
-                    <SelectItem value="integer">Integer</SelectItem>
-                    <SelectItem value="date">Date</SelectItem>
-                    <SelectItem value="dateTime">DateTime</SelectItem>
-                    <SelectItem value="time">Time</SelectItem>
-                    <SelectItem value="string">String</SelectItem>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="url">URL</SelectItem>
-                    <SelectItem value="choice">Choice</SelectItem>
-                    <SelectItem value="quantity">Quantity</SelectItem>
-                    <SelectItem value="structured">Structured</SelectItem>
+                    {SUPPORTED_QUESTION_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

@@ -16,6 +16,23 @@ export type QuestionType =
   | "quantity"
   | "structured";
 
+export const SUPPORTED_QUESTION_TYPES = [
+  { name: "Group", value: "group" },
+  { name: "Display", value: "display" },
+  { name: "Boolean", value: "boolean" },
+  { name: "Decimal", value: "decimal" },
+  { name: "Integer", value: "integer" },
+  { name: "Date", value: "date" },
+  { name: "DateTime", value: "dateTime" },
+  { name: "Time", value: "time" },
+  { name: "String", value: "string" },
+  { name: "Text", value: "text" },
+  { name: "URL", value: "url" },
+  { name: "Choice", value: "choice" },
+  { name: "Quantity", value: "quantity" },
+  { name: "Structured", value: "structured" },
+];
+
 export type StructuredQuestionType =
   | "allergy_intolerance"
   | "medication_request"
