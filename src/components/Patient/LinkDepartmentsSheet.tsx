@@ -4,7 +4,9 @@ import { Building, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -224,7 +226,11 @@ export default function LinkDepartmentsSheet({
                       {isRemoving ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2
+                          className={cn(
+                            buttonVariants({ variant: "destructive" }),
+                          )}
+                        />
                       )}
                     </Button>
                   </div>
