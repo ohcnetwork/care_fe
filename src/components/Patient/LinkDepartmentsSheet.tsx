@@ -4,8 +4,6 @@ import { Building, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
@@ -227,9 +225,7 @@ export default function LinkDepartmentsSheet({
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Trash2
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
+                          className={buttonVariants({ variant: "destructive" })}
                         />
                       )}
                     </Button>
