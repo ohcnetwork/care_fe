@@ -200,24 +200,22 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                 <h4 className="text-sm font-medium text-gray-500">
                   {t("location")}
                 </h4>
-                <div className="mt-1 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {device.current_location ? (
-                      <>
-                        <Link
-                          href={`/facility/${facilityId}/settings/location/${device.current_location.id}`}
-                          className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
-                        >
-                          {device.current_location.name}
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </>
-                    ) : (
-                      <span className="text-gray-500">{t("no_location")}</span>
-                    )}
-                  </div>
+                <div className="mt-1 flex items-center gap-6">
+                  {device.current_location ? (
+                    <>
+                      <Link
+                        href={`/facility/${facilityId}/settings/location/${device.current_location.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                      >
+                        {device.current_location.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">{t("no_location")}</span>
+                  )}
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsLocationSheetOpen(true)}
                   >

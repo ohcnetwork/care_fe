@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 
 import mutate from "@/Utils/request/mutate";
+import { dateQueryString } from "@/Utils/utils";
 import {
   ContactPointSystems,
   contactPointSchema,
@@ -231,7 +232,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacturer_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={dateQueryString(field.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -245,7 +250,11 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={dateQueryString(field.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

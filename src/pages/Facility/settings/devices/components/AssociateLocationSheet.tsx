@@ -69,7 +69,6 @@ export default function AssociateLocationSheet({
         <div className="py-6">
           <LocationSearch
             facilityId={facilityId}
-            mode="kind"
             onSelect={setSelectedLocation}
             value={selectedLocation}
           />
