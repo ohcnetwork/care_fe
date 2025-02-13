@@ -393,7 +393,7 @@
   "are_you_still_watching": "Are you still watching?",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
   "are_you_sure_want_to_delete_this_record": "Are you sure want to delete this record?",
-  "are_you_sure_want_to_remove": "Are you sure you want to remove {{name}} from the patient? This action cannot be undone",
+  "are_you_sure_want_to_remove": "Are you sure you want to remove <strong>{{name}}</strong> from the patient? This action cannot be undone",
   "ari": "ARI - Acute Respiratory illness",
   "arrived": "Arrived",
   "as_needed_prn": "As Needed / PRN",
