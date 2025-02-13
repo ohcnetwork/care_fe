@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -14,8 +15,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -43,6 +42,7 @@ export default function FacilityOrganizationLayout({
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
+
   const navItems: NavItem[] = [
     {
       path: `/departments/${id}`,

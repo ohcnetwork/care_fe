@@ -32,7 +32,6 @@ function OrganizationCard({
   org: FacilityOrganization;
   facilityId: string;
 }) {
-
   const { t } = useTranslation();
 
   return (
