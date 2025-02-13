@@ -2,16 +2,14 @@ import careConfig from "@careConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { Hospital } from "lucide-react";
-import { Edit2, Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
@@ -97,18 +95,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
     }),
-  });
-
-  const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteFacility, {
-      pathParams: { id: facilityId },
-    }),
-    onSuccess: () => {
-      toast.success(
-        t("facility_deleted_successfully", { name: facilityData?.name }),
-      );
-      navigate("/facility");
-    },
   });
 
   const { mutateAsync: deleteAvatar } = useMutation({
@@ -226,46 +212,41 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    
                     <PLUGIN_Component
                       __name="FacilityHomeActions"
                       facility={facilityData}
-                    />  
-                        <AlertDialog>
-                          {/* TODO: add delete facility */}
-                          {/* <AlertDialogTrigger asChild>
-                           
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              {t("delete_facility")}
-                        
-                          </AlertDialogTrigger> */}
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                {t("delete_facility")}
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t("delete_facility_confirmation", {
-                                  name: facilityData?.name,
-                                })}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>
-                                {t("cancel")}
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteFacility()}
-                                className={cn(
-                                  buttonVariants({ variant: "destructive" }),
-                                )}
-                                disabled={isDeleting}
-                              >
-                                {isDeleting ? t("deleting") : t("delete")}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                    />
+                    {/* <AlertDialog>
+                      TODO: add delete facility
+                      <AlertDialogTrigger asChild>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {t("delete_facility")}
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("delete_facility")}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("delete_facility_confirmation", {
+                              name: facilityData?.name,
+                            })}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <div
+                            onClick={() => deleteFacility()}
+                            className={cn(
+                              buttonVariants({ variant: "destructive" }),
+                            )}
+                            // disabled={isDeleting}
+                          >
+                            {isDeleting ? t("deleting") : t("delete")}
+                          </div>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog> */}
                   </div>
                 </div>
               </div>
