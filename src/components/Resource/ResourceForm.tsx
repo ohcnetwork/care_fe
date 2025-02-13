@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, navigate, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -54,15 +54,18 @@ import { UserBase } from "@/types/user/user";
 
 interface ResourceProps {
   facilityId: number;
+  id?: string;
 }
 
-export default function ResourceCreate(props: ResourceProps) {
+export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { goBack } = useAppHistory();
-  const { facilityId } = props;
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
   const [selectedUser, setSelectedUser] = useState<UserBase>();
+  const [assignedToUser, setAssignedToUser] = useState<{
+    id: string;
+  } | null>(null);
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
@@ -94,6 +97,14 @@ export default function ResourceCreate(props: ResourceProps) {
     enabled: !!related_patient,
   });
 
+  const { data: resourceData } = useQuery({
+    queryKey: ["resource_request", id],
+    queryFn: query(routes.getResourceDetails, {
+      pathParams: { id: String(id) },
+    }),
+    enabled: !!id,
+  });
+
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
@@ -109,6 +120,42 @@ export default function ResourceCreate(props: ResourceProps) {
     },
   });
 
+  useEffect(() => {
+    if (resourceData) {
+      form.reset({
+        category: resourceData.category,
+        assigned_facility: resourceData.assigned_facility,
+        assigned_to: resourceData.assigned_to?.id,
+        emergency: resourceData.emergency ? "true" : "false",
+        title: resourceData.title,
+        reason: resourceData.reason,
+        referring_facility_contact_name:
+          resourceData.referring_facility_contact_name,
+        referring_facility_contact_number:
+          resourceData.referring_facility_contact_number,
+        priority: resourceData.priority,
+      });
+      if (resourceData.assigned_to) {
+        setSelectedUser({
+          id: resourceData.assigned_to.id,
+          first_name: resourceData.assigned_to.first_name || "",
+          last_name: resourceData.assigned_to.last_name || "",
+          username: resourceData.assigned_to.username || "",
+        } as UserBase);
+      } else {
+        setSelectedUser(undefined);
+      }
+    }
+  }, [resourceData, form]);
+
+  console.log(form.watch("assigned_to"));
+
+  useEffect(() => {
+    if (resourceData) {
+      setAssignedToUser(resourceData.assigned_to);
+    }
+  }, [resourceData]);
+
   const { mutate: createResource, isPending } = useMutation({
     mutationFn: mutate(routes.createResource),
     onSuccess: (data: ResourceRequest) => {
@@ -117,13 +164,23 @@ export default function ResourceCreate(props: ResourceProps) {
     },
   });
 
+  const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
+    mutationFn: mutate(routes.updateResource, {
+      pathParams: { id: String(id) },
+    }),
+    onSuccess: (data: ResourceRequest) => {
+      toast.success(t("resource_updated_successfully"));
+      navigate(`/facility/${facilityId}/resource/${data.id}`);
+    },
+  });
+
   const onSubmit = (data: ResourceFormValues) => {
-    createResource({
+    const resourcePayload = {
       status: "PENDING",
       category: data.category,
-      origin_facility: String(props.facilityId),
+      origin_facility: String(facilityId),
       assigned_facility: data.assigned_facility?.id || null,
-      assigned_to: data.assigned_to,
+      assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
       title: data.title,
@@ -132,9 +189,14 @@ export default function ResourceCreate(props: ResourceProps) {
       referring_facility_contact_number: data.referring_facility_contact_number,
       related_patient: related_patient,
       priority: data.priority,
-    });
-  };
+    };
 
+    if (id) {
+      updateResource({ ...resourcePayload, id });
+    } else {
+      createResource(resourcePayload);
+    }
+  };
   const { data: facilities } = useQuery({
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
@@ -153,6 +215,7 @@ export default function ResourceCreate(props: ResourceProps) {
   const handleUserChange = (user: UserBase) => {
     form.setValue("assigned_to", user.id);
     setSelectedUser(user);
+    setAssignedToUser({ id: user.id });
   };
 
   const fillMyDetails = () => {
@@ -165,12 +228,14 @@ export default function ResourceCreate(props: ResourceProps) {
     }
   };
 
-  if (isPending) {
+  if (isPending || isUpdatePending) {
     return <Loading />;
   }
 
   return (
-    <Page title={t("create_resource_request")}>
+    <Page
+      title={id ? t("update_resource_request") : t("create_resource_request")}
+    >
       <div className="container mx-auto max-w-4xl">
         <Card className="mt-4">
           <Form {...form}>
