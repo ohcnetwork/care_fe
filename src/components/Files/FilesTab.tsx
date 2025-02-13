@@ -679,9 +679,12 @@ export const FilesTab = (props: FilesTabProps) => {
                 <Button
                   variant="outline_primary"
                   className="flex flex-row items-center"
-                  onClick={() =>
-                    queryClient.invalidateQueries({ queryKey: ["files"] })
-                  }
+                  onClick={async () => {
+                    await queryClient.invalidateQueries({
+                      queryKey: ["files"],
+                    });
+                    toast.success(t("refreshed"));
+                  }}
                 >
                   <CareIcon icon="l-sync" />
                   <span className="ml-2">{t("refresh")}</span>
