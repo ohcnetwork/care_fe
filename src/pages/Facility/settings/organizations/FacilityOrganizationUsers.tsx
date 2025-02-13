@@ -55,8 +55,12 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
         search: searchQuery || undefined,
-        limit: resultsPerPage,
-        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        ...(searchQuery
+          ? {}
+          : {
+              limit: resultsPerPage,
+              offset: ((qParams.page || 1) - 1) * resultsPerPage,
+            }),
       },
     }),
     enabled: !!id,
@@ -193,11 +197,13 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               )}
             </div>
 
-            {users?.count && users.count > resultsPerPage && (
-              <div className="flex justify-center">
-                <Pagination totalCount={users.count} />
-              </div>
-            )}
+            {(filteredUsers || []).length > 0 &&
+              users?.count &&
+              users.count > resultsPerPage && (
+                <div className="flex justify-center">
+                  <Pagination totalCount={users.count} />
+                </div>
+              )}
           </div>
         )}
       </div>
