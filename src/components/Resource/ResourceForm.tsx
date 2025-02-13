@@ -140,12 +140,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   }, [resourceData, form]);
 
-  useEffect(() => {
-    if (resourceData) {
-      setAssignedToUser(resourceData.assigned_to ?? undefined);
-    }
-  }, [resourceData]);
-
   const { mutate: createResource, isPending } = useMutation({
     mutationFn: mutate(routes.createResource),
     onSuccess: (data: ResourceRequest) => {
