@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -9,9 +8,9 @@ import { Button } from "@/components/ui/button";
 
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import query from "@/Utils/request/query";
+import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
+
 import { Encounter } from "@/types/emr/encounter";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuickAccessProps {
   encounter: Encounter;
@@ -19,65 +18,35 @@ interface QuickAccessProps {
 
 export default function QuickAccess({ encounter }: QuickAccessProps) {
   const { t } = useTranslation();
-
-  const { data: response } = useQuery({
-    queryKey: ["questionnaires"],
-    queryFn: query(questionnaireApi.list),
-  });
-
-  const questionnaireList = response?.results || [];
-
-  const encounterSettings = [
-    { id: "encounter_settings", label: t("encounter_settings") },
-  ];
+  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
   return (
     <div className="flex flex-col gap-6">
       {/* Questionnaire Section */}
-      <section className="space-y-2 p-2">
-        <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
-        <div className="space-y-3 p-2 font-semibold">
-          {questionnaireList.map((item) => (
-            <Link
-              className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
-              key={item.id}
-              // className="w-full justify-start gap-2 h-auto py-2"
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${item.slug}`}
-            >
-              <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
-              {item.title}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <div className="w-full border-t border-dashed border-gray-300" />
-
-      {/* Update Encounter Details */}
-      <section className="text-gray-950">
-        <h3 className="text-lg font-medium mb-3">
-          {t("update_encounter_details")}
-        </h3>
-        <div className="space-y-2">
-          {encounterSettings.map((item) => (
-            <div key={item.id} className="flex items-center space-x-2 px-4">
+      {encounter.status !== "completed" && (
+        <section className="space-y-2 p-2">
+          <h3 className="text-lg font-semibold mb-3">{t("questionnaire")}</h3>
+          <div className="space-y-3 p-2 font-semibold">
+            {questionnaireOptions.map((option) => (
               <Link
-                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
-                className="text-sm text-gray-950 underline font-semibold"
+                key={option.slug}
+                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/${option.slug}`}
+                className="flex items-center gap-2 text-sm hover:text-gray-500 text-gray-900"
+                data-cy="update-encounter-option"
               >
-                {item.label}
+                <CareIcon icon="l-file-alt" className="h-4 w-4 text-gray-950" />
+                {t(option.title)}
               </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="w-full border-t border-dashed border-gray-300" />
+            ))}
+          </div>
+          <div className="w-full border-t border-dashed border-gray-300" />
+        </section>
+      )}
 
       {/* Departments and Teams */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-medium text-gray-950">
+        <div className="items-center justify-between mb-3">
+          <h3 className="text-lg font-medium text-gray-950 mb-1">
             {t("departments_and_teams")}
           </h3>
           <LinkDepartmentsSheet

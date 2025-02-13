@@ -33,7 +33,7 @@ export default function Page(props: PageProps) {
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "py-0 md:px-6";
+    if (props.componentRight) padding = "py-0 md:px-6";
     else padding = "px-6 py-0";
   }
 
@@ -43,13 +43,8 @@ export default function Page(props: PageProps) {
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}
-          breadcrumbs={props.breadcrumbs}
-          backUrl={props.backUrl}
-          hideBack={props.hideBack}
           componentRight={props.componentRight}
-          crumbsReplacements={props.crumbsReplacements}
           focusOnLoad={props.focusOnLoad}
-          onBackClick={props.onBackClick}
           isInsidePage={true}
           hideTitleOnPage={props.hideTitleOnPage}
         />

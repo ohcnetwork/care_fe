@@ -1,16 +1,25 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
+import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 
 const consultationRoutes: AppRoutes = {
-  "/facility/:facilityId/encounter/:encounterId/prescriptions/print": ({
-    facilityId,
-    encounterId,
-  }) => <PrintPrescription facilityId={facilityId} encounterId={encounterId} />,
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
+    ({ facilityId, encounterId, patientId }) => (
+      <PrintPrescription
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
+    ({ facilityId, encounterId }) => (
+      <TreatmentSummary facilityId={facilityId} encounterId={encounterId} />
+    ),
   "/facility/:facilityId/encounter/:encounterId/:tab": ({
     facilityId,
     encounterId,
