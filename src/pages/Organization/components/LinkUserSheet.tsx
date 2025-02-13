@@ -20,7 +20,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
@@ -125,7 +124,7 @@ export default function LinkUserSheet({
             organization.
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 w-full overflow-hidden">
           <UserSelector
             selected={selectedUser}
             onChange={handleUserChange}
@@ -136,16 +135,16 @@ export default function LinkUserSheet({
           {selectedUser && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4 space-y-4">
-                <div className="flex items-start gap-4 truncate border-t">
+                <div className="flex items-start gap-4">
                   <Avatar
                     name={`${selectedUser.first_name} ${selectedUser.last_name}`}
                     imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
-                  <div className="flex flex-col flex-1">
-                    <span className="font-medium text-lg">
+                  <div className="grid grid-cols-1 w-full">
+                    <p className="font-medium text-lg truncate">
                       {selectedUser.first_name} {selectedUser.last_name}
-                    </span>
+                    </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
                     </span>
@@ -193,16 +192,14 @@ export default function LinkUserSheet({
                   </SelectContent>
                 </Select>
               </div>
-              <TooltipComponent content="Click here to link the user to the organization">
-                <Button
-                  className="w-full"
-                  onClick={handleAddUser}
-                  disabled={!selectedRole}
-                  data-cy="link-user-button"
-                >
-                  Link to Organization
-                </Button>
-              </TooltipComponent>
+              <Button
+                className="w-full"
+                onClick={handleAddUser}
+                disabled={!selectedRole}
+                data-cy="link-user-button"
+              >
+                Link to Organization
+              </Button>
             </div>
           )}
         </div>

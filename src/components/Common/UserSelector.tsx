@@ -63,7 +63,7 @@ export default function UserSelector({
           className="min-w-60 justify-start"
         >
           {selected ? (
-            <div className="flex items-center gap-2 truncate">
+            <div className="flex items-center gap-2">
               <Avatar
                 imageUrl={selected.profile_picture_url}
                 name={formatName(selected)}
