@@ -3,6 +3,7 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
@@ -28,19 +29,21 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
   });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-3">
       <PageTitle title={t("update_device")} />
-
+      <Separator />
       {isLoading ? (
         <Loading />
       ) : device ? (
-        <DeviceForm
-          facilityId={facilityId}
-          device={device}
-          onSuccess={() => {
-            window.history.back();
-          }}
-        />
+        <div className="pt-4">
+          <DeviceForm
+            facilityId={facilityId}
+            device={device}
+            onSuccess={() => {
+              window.history.back();
+            }}
+          />
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
           <p className="text-muted-foreground">{t("device_not_found")}</p>
