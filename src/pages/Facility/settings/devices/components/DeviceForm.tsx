@@ -45,7 +45,7 @@ const formSchema = z.object({
   status: z.enum(DeviceStatuses),
   availability_status: z.enum(DeviceAvailabilityStatuses),
   manufacturer: z.string().optional(),
-  manufacturer_date: z.string().optional(),
+  manufacture_date: z.string().optional(),
   expiration_date: z.string().optional(),
   lot_number: z.string().optional(),
   serial_number: z.string().optional(),
@@ -67,7 +67,7 @@ const defaultValues: z.infer<typeof formSchema> = {
   status: "active",
   availability_status: "available",
   manufacturer: "",
-  manufacturer_date: "",
+  manufacture_date: "",
   registered_name: "",
   contact: [],
 };
@@ -103,6 +103,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   useEffect(() => {
     if (device) {
       form.reset({ ...device });
+    }
+  }, [device, form]);
+
+  useEffect(() => {
+    if (device?.manufacture_date) {
+      form.setValue(
+        "manufacture_date",
+        dateQueryString(device.manufacture_date),
+      );
+    }
+
+    if (device?.expiration_date) {
+      form.setValue("expiration_date", dateQueryString(device.expiration_date));
     }
   }, [device, form]);
 
@@ -227,16 +240,12 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
 
           <FormField
             control={form.control}
-            name="manufacturer_date"
+            name="manufacture_date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("manufacturer_date")}</FormLabel>
+                <FormLabel>{t("manufacture_date")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={dateQueryString(field.value)}
-                  />
+                  <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -250,11 +259,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("expiration_date")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={dateQueryString(field.value)}
-                  />
+                  <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

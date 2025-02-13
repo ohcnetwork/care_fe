@@ -316,16 +316,16 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(device.manufacturer_date || device.expiration_date) && (
+                {(device.manufacture_date || device.expiration_date) && (
                   <>
-                    {device.manufacturer_date && (
+                    {device.manufacture_date && (
                       <div>
                         <h4 className="text-sm font-medium text-gray-500">
-                          {t("manufacturer_date")}
+                          {t("manufacture_date")}
                         </h4>
                         <p className="mt-1">
                           {new Date(
-                            device.manufacturer_date,
+                            device.manufacture_date,
                           ).toLocaleDateString()}
                         </p>
                       </div>

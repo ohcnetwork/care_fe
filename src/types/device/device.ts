@@ -26,7 +26,7 @@ export interface DeviceBase {
   status: DeviceStatus;
   availability_status: DeviceAvailabilityStatus;
   manufacturer?: string;
-  manufacturer_date?: string; // datetime
+  manufacture_date?: string; // datetime
   expiration_date?: string; // datetime
   lot_number?: string;
   serial_number?: string;
