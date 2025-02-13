@@ -305,6 +305,7 @@ const AvatarEditModal = ({
                     variant="destructive"
                     onClick={deleteAvatar}
                     disabled={isProcessing}
+                    id="delete-button"
                   >
                     {t("delete")}
                   </Button>
