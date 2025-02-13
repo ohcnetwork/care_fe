@@ -247,30 +247,6 @@ export const PatientHome = (props: {
           </div>
         </div>
       </div>
-
-      {/* <ConfirmDialog
-        className="w-full justify-between"
-        title={t("assign_a_volunteer_to", { name: patientData.name })}
-        show={openAssignVolunteerDialog}
-        onClose={() => setOpenAssignVolunteerDialog(false)}
-        description={
-          <div className="mt-6">
-            <UserAutocomplete
-              value={assignedVolunteer as UserBareMinimum}
-              onChange={(user) => setAssignedVolunteer(user.value)}
-              userType={"Volunteer"}
-              name={"assign_volunteer"}
-              error={errors.assignedVolunteer}
-            />
-          </div>
-        }
-        action={
-          assignedVolunteer || !patientData.assigned_to
-            ? t("assign")
-            : t("unassign")
-        }
-        onConfirm={handleAssignedVolunteer}
-      /> */}
     </Page>
   );
 };

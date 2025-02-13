@@ -7,14 +7,26 @@ import {
 } from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
+import { Edit2, Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -26,7 +38,6 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
@@ -96,7 +107,6 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
 
 export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
 
@@ -106,13 +116,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
-  const { mutate: deleteFacility } = useMutation({
+
+  const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
     mutationFn: mutate(routes.deleteFacility, {
       pathParams: { id: facilityId },
     }),
     onSuccess: () => {
       toast.success(
-        t("entity_deleted_successfully", { name: facilityData?.name }),
+        t("facility_deleted_successfully", { name: facilityData?.name }),
       );
       navigate("/facility");
     },
@@ -184,26 +195,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   return (
     <div>
-      <ConfirmDialog
-        title={t("delete_item", { name: facilityData?.name })}
-        description={
-          <span>
-            {t("are_you_sure_want_to_delete", { name: facilityData?.name })}
-          </span>
-        }
-        action="Delete"
-        variant="destructive"
-        show={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        onConfirm={() => deleteFacility()}
-      />
       <AvatarEditModal
         title={t("edit_cover_photo")}
         open={editCoverImage}
         imageUrl={facilityData?.read_cover_image_url}
         handleUpload={handleCoverImageUpload}
         handleDelete={handleCoverImageDelete}
-        onClose={() => setEditCoverImage(false)}
+        onOpenChange={(open) => setEditCoverImage(open)}
         hint={coverImageHint}
       />
       <div className="container mx-auto p-6">
@@ -267,7 +265,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             className="cursor-pointer"
                             onClick={() => setEditCoverImage(true)}
                           >
-                            <Settings className="mr-2 h-4 w-4" />
+                            <Edit2 className="mr-2 h-4 w-4" />
                             {t("edit_cover_photo")}
                           </DropdownMenuItem>
                         )}
@@ -276,7 +274,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           facilityId={facilityId}
                           trigger={
                             <DropdownMenuItem
-                              className=" cursor-pointer"
+                              className="cursor-pointer"
                               onSelect={(e) => {
                                 e.preventDefault();
                               }}
@@ -286,16 +284,45 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             </DropdownMenuItem>
                           }
                         />
-                        {/* TODO: get permissions from backend */}
-                        {/* {hasPermissionToDeleteFacility && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setOpenDeleteDialog(true)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t("delete_facility")}
-                          </DropdownMenuItem>
-                        )} */}
+                        <AlertDialog>
+                          {/* TODO: add delete facility */}
+                          {/* <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                              className="cursor-pointer text-danger-500"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("delete_facility")}
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger> */}
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {t("delete_facility")}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t("delete_facility_confirmation", {
+                                  name: facilityData?.name,
+                                })}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                {t("cancel")}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteFacility()}
+                                className={cn(
+                                  buttonVariants({ variant: "destructive" }),
+                                )}
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? t("deleting") : t("delete")}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
                         <PLUGIN_Component
                           __name="FacilityHomeActions"
                           facility={facilityData}
