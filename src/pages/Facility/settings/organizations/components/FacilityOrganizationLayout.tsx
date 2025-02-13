@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -46,17 +43,15 @@ export default function FacilityOrganizationLayout({
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
-
   const navItems: NavItem[] = [
     {
       path: `/departments/${id}`,
-      title: "Departments/Teams",
+      title: t("departments_or_teams"),
       value: "departments",
     },
     {
       path: `/departments/${id}/users`,
-      title: "Users",
+      title: t("users"),
       value: "users",
     },
   ];
@@ -85,7 +80,7 @@ export default function FacilityOrganizationLayout({
   }
 
   if (!org) {
-    return <div>Not found</div>;
+    return <div>{t("not_found")}</div>;
   }
 
   const orgParents: FacilityOrganizationParent[] = [];
@@ -99,42 +94,36 @@ export default function FacilityOrganizationLayout({
 
   return (
     <>
-      <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
-        <button
-          onClick={() => goBack()}
-          className="mt-1 hover:underline"
-          aria-label="Go back"
-        >
-          <CareIcon icon="l-arrow-left" className="h-4 w-4 text-gray-600" />
-          <span className="text-sm text-gray-600">Back</span>
-        </button>
-        <span className="text-gray-400 mt-1">|</span>
-        <Breadcrumb className="mt-1">
-          <BreadcrumbList>
-            {orgParents.reverse().map((parent) => (
-              <>
-                <BreadcrumbItem key={parent.id}>
-                  <BreadcrumbLink>
-                    <Link href={`${parent.id}`}>{parent.name}</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                  <BreadcrumbSeparator />
-                </BreadcrumbItem>
-              </>
-            ))}
-            <BreadcrumbItem key={org.id}>
-              <BreadcrumbLink>
-                {" "}
-                <Link href={`/departments/${org.id}`}>{org.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      {orgParents.length > 0 && (
+        <div className="md:px-6 py-2 flex items-center gap-2 mx-auto max-w-4xl">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {orgParents.reverse().map((parent) => (
+                <>
+                  <BreadcrumbItem key={parent.id}>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={parent.id}>{parent.name}</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                    <BreadcrumbSeparator />
+                  </BreadcrumbItem>
+                </>
+              ))}
+              <BreadcrumbItem key={org.id}>
+                <span className="text-sm font-semibold text-gray-900">
+                  {org.name}
+                </span>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
       <Page
-        title={`${org.name} `}
-        breadcrumbs={false}
+        title={org.name}
         componentRight={
           <Badge
             variant="outline"

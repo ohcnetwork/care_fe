@@ -76,19 +76,11 @@ export default function ResourceCreate(props: ResourceProps) {
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
-    referring_facility_contact_number: validators.phoneNumber.required,
+    referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
-
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(routes.getAnyFacility, {
-      pathParams: { id: String(facilityId) },
-    }),
-    enabled: !!facilityId,
-  });
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
@@ -167,17 +159,7 @@ export default function ResourceCreate(props: ResourceProps) {
   }
 
   return (
-    <Page
-      title={t("create_resource_request")}
-      crumbsReplacements={{
-        [facilityId]: {
-          name: facilityData?.name || "",
-          uri: `/facility/${facilityId}/settings/general`,
-        },
-        resource: { style: "pointer-events-none" },
-      }}
-      backUrl={`/facility/${facilityId}/settings/general`}
-    >
+    <Page title={t("create_resource_request")}>
       <div className="container mx-auto max-w-4xl">
         <Card className="mt-4">
           <Form {...form}>

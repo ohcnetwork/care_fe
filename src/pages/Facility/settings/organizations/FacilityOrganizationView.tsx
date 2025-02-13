@@ -16,6 +16,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
@@ -25,14 +26,13 @@ interface Props {
   facilityId: string;
 }
 
-interface Organization {
-  id: string;
-  name: string;
-  org_type: string;
-  description?: string;
-}
+function OrganizationCard({
+  org,
+}: {
+  org: FacilityOrganization;
+  facilityId: string;
+}) {
 
-function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
   const { t } = useTranslation();
 
   return (
@@ -49,17 +49,6 @@ function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
                 >
                   {org.org_type}
                 </Badge>
-                {/* <Badge variant="secondary" className="font-normal px-2 py-1">
-                  {isLoadingSubOrgs
-                    ? t("loading")
-                    : t("entity_count_one", {
-                        count: subOrgs?.count ?? 0,
-                        entity:
-                          org.org_type === "dept"
-                            ? "Department inside"
-                            : "Team inside",
-                      })}
-                </Badge> */}
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
@@ -74,13 +63,11 @@ function OrganizationCard({ org }: { org: Organization; facilityId: string }) {
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
-  const { Pagination } = useFilters({
-    limit: 15,
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
     cacheBlacklist: ["username"],
   });
-  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
 
   const { data: children, isLoading } = useQuery({
     queryKey: [
@@ -88,16 +75,16 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       "list",
       facilityId,
       id,
-      page,
-      limit,
+      qParams.page,
+      resultsPerPage,
       searchQuery,
     ],
     queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId },
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        limit: resultsPerPage,
         name: searchQuery || undefined,
       },
     }),
@@ -107,7 +94,6 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6 mx-auto max-w-4xl">
         <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-          {" "}
           <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
             <div className="w-full lg:w-1/3 relative">
               <div className="relative">
@@ -120,7 +106,6 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setPage(1); // Reset to first page on search
                   }}
                   className="w-full pl-8"
                 />
@@ -158,9 +143,9 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 </Card>
               )}
             </div>
-            {children && children.count > limit && (
+            {children && children.count > resultsPerPage && (
               <div className="flex justify-center">
-                <Pagination totalCount={children.count} noMargin />
+                <Pagination totalCount={children.count} />
               </div>
             )}
           </div>
