@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -69,7 +70,11 @@ export default function UserSelector({
                 name={formatName(selected)}
                 className="size-6 rounded-full"
               />
-              <span>{formatName(selected)}</span>
+              <TooltipComponent content={formatName(selected)} side="bottom">
+                <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
+                  {formatName(selected)}
+                </p>
+              </TooltipComponent>
             </div>
           ) : (
             <span>{placeholder || t("select_user")}</span>

@@ -66,9 +66,9 @@ export default function FacilityForm({
     pincode: z.string().refine(validatePincode, t("invalid_pincode")),
     geo_organization: z.string().min(1, t("field_required")),
     address: z.string().min(1, t("address_is_required")),
-    phone_number: validators.phoneNumber.required,
-    latitude: validators.coordinates.latitude.optional(),
-    longitude: validators.coordinates.longitude.optional(),
+    phone_number: validators().phoneNumber.required,
+    latitude: validators().coordinates.latitude.optional(),
+    longitude: validators().coordinates.longitude.optional(),
     is_public: z.boolean().default(false),
   });
 
