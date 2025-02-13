@@ -1,13 +1,10 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -55,8 +52,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 import {
-  AnswerOption,
-  EnableWhen,
   ObservationType,
   Question,
   QuestionType,
@@ -68,7 +63,6 @@ import {
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { TERMINOLOGY_SYSTEMS } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { CodingEditor } from "./CodingEditor";
@@ -713,6 +707,13 @@ function QuestionEditor({
     new Set(),
   );
 
+  const { data: response } = useQuery({
+    queryKey: ["valuesets"],
+    queryFn: query(valuesetApi.list),
+  });
+
+  const valuesets = response?.results || [];
+
   const updateField = <K extends keyof Question>(
     field: K,
     value: Question[K],
@@ -1061,33 +1062,27 @@ function QuestionEditor({
                     </p>
                   </div>
                   <Select
-                    value={question.answer_value_set ?? "custom"}
+                    value={question.answer_value_set ? "valueset" : "custom"}
                     onValueChange={(val: string) =>
                       updateField(
                         "answer_value_set",
-                        val === "custom" ? undefined : val,
+                        val === "custom" ? undefined : "valueset",
                       )
                     }
                   >
                     <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select a value set" />
+                      <SelectValue placeholder={t("select_a_value_set")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="custom">Custom Options</SelectItem>
-                      <SelectItem value="system-yes-no">Yes/No</SelectItem>
-                      <SelectItem value="system-severity">
-                        Severity Levels
+                      <SelectItem value="custom">
+                        {t("custom_options")}
                       </SelectItem>
-                      <SelectItem value="system-frequency">
-                        Frequency
-                      </SelectItem>
-                      <SelectItem value="system-duration">Duration</SelectItem>
+                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </CardHeader>
 
-                {(!question.answer_value_set ||
-                  question.answer_value_set === "custom") && (
+                {!question.answer_value_set ? (
                   <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
                       <div
@@ -1162,6 +1157,30 @@ function QuestionEditor({
                       <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
                       Add Option
                     </Button>
+                  </CardContent>
+                ) : (
+                  <CardContent className="space-y-4">
+                    <Select
+                      value={
+                        question.answer_value_set === "valueset"
+                          ? undefined
+                          : question.answer_value_set
+                      }
+                      onValueChange={(val: string) =>
+                        updateField("answer_value_set", val)
+                      }
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder={t("select_a_value_set")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {valuesets.map((valueset) => (
+                          <SelectItem key={valueset.id} value={valueset.slug}>
+                            {valueset.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </CardContent>
                 )}
               </Card>
