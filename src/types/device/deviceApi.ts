@@ -1,12 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import {
-  DeviceDetail,
-  DeviceList,
-  DeviceLocationHistory,
-  DeviceWrite,
-} from "./device";
+import { DeviceDetail, DeviceList, DeviceWrite } from "./device";
 
 export default {
   list: {
@@ -48,10 +43,5 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
-  },
-  locationHistory: {
-    path: "/api/v1/facility/{facility_id}/device/{id}/location_history/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<DeviceLocationHistory>>(),
   },
 };
