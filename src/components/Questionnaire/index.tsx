@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useNavigate } from "raviger";
 
 import { Badge } from "@/components/ui/badge";
@@ -6,15 +7,25 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
+import useFilters from "@/hooks/useFilters";
+
 import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 export function QuestionnaireList() {
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+  });
   const navigate = useNavigate();
   const { data: response, isLoading } = useQuery({
-    queryKey: ["questionnaires"],
-    queryFn: query(questionnaireApi.list),
+    queryKey: ["questionnaires", qParams],
+    queryFn: query(questionnaireApi.list, {
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+      },
+    }),
   });
 
   if (isLoading) {
@@ -27,11 +38,11 @@ export function QuestionnaireList() {
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Questionnaires</h1>
-          <p className="text-gray-600">Manage and view questionnaires</p>
+          <h1 className="text-2xl font-bold">{t("questionnaires")}</h1>
+          <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
         </div>
         <Button onClick={() => navigate("/questionnaire/create")}>
-          Create New
+          {t("create_new")}
         </Button>
       </div>
 
@@ -40,16 +51,16 @@ export function QuestionnaireList() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Title
+                {t("title")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Description
+                {t("description")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
+                {t("status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Slug
+                {t("slug")}
               </th>
             </tr>
           </thead>
@@ -89,6 +100,7 @@ export function QuestionnaireList() {
           </tbody>
         </table>
       </div>
+      <Pagination totalCount={response?.count ?? 0} />
     </div>
   );
 }
