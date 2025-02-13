@@ -87,9 +87,9 @@ export default function PatientRegistration(
       z
         .object({
           name: z.string().nonempty(t("name_is_required")),
-          phone_number: validators.phoneNumber.required,
+          phone_number: validators().phoneNumber.required,
           same_phone_number: z.boolean(),
-          emergency_phone_number: validators.phoneNumber.required,
+          emergency_phone_number: validators().phoneNumber.required,
           gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
           blood_group: z.enum(BLOOD_GROUPS, {
             required_error: t("blood_group_is_required"),
@@ -120,7 +120,10 @@ export default function PatientRegistration(
             .min(100000, t("pincode_must_be_6_digits"))
             .max(999999, t("pincode_must_be_6_digits")),
           nationality: z.string().nonempty(t("nationality_is_required")),
-          geo_organization: z.string().uuid().optional(),
+          geo_organization: z
+            .string()
+            .uuid({ message: t("geo_organization_is_required") })
+            .optional(),
         })
         .refine(
           (data) => (data.age_or_dob === "dob" ? !!data.date_of_birth : true),
@@ -552,7 +555,7 @@ export default function PatientRegistration(
                                 "age",
                                 e.target.value
                                   ? Number(e.target.value)
-                                  : (undefined as unknown as number), // intentionally setting to undefined, when the value is empty to avoid 0 in the input field
+                                  : (null as unknown as number),
                               )
                             }
                             data-cy="age-input"
@@ -561,10 +564,16 @@ export default function PatientRegistration(
 
                         <FormMessage />
                         {form.getValues("age") && (
-                          <div className="text-violet-600 text-sm font-bold">
-                            {t("year_of_birth")}:{" "}
-                            {new Date().getFullYear() -
-                              Number(form.getValues("age"))}
+                          <div className="text-sm font-bold">
+                            {Number(form.getValues("age")) <= 0 ? (
+                              <span className="text-red-600">Invalid age</span>
+                            ) : (
+                              <span className="text-violet-600">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() -
+                                  Number(form.getValues("age"))}
+                              </span>
+                            )}
                           </div>
                         )}
                       </FormItem>
