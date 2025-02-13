@@ -64,9 +64,13 @@ function MedicationRow({
       <TableCell>
         <Badge
           variant="outline"
-          className={`whitespace-nowrap capitalize ${
-            MEDICATION_STATEMENT_STATUS_STYLES[statement.status]
-          }`}
+          className={
+            isPrintPreview
+              ? ""
+              : `whitespace-nowrap capitalize ${
+                  MEDICATION_STATEMENT_STATUS_STYLES[statement.status]
+                }`
+          }
         >
           {statement.status}
         </Badge>
