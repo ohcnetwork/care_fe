@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -89,6 +89,30 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   );
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // state variable used to toggle drop-down
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
+
+  // function that toggles the dropdown
+  const toggleSearchDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  useEffect(() => {
+    // this closes the drop-down if clicked outside of the search bar
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchDropdownRef.current &&
+        !searchDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false); // Close the dropdown if clicked outside
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const {
     data: initialQuestionnaire,
@@ -441,12 +465,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           )}
                         </div>
 
-                        <Command className="rounded-lg border shadow-md">
-                          <CommandInput
-                            placeholder="Search organizations..."
-                            onValueChange={setOrgSearchQuery}
-                          />
-                          <CommandList>
+                        <Command
+                          className="rounded-lg border shadow-md"
+                          ref={searchDropdownRef}
+                        >
+                          <div onClick={toggleSearchDropdown}>
+                            <CommandInput
+                              placeholder="Search organizations..."
+                              onValueChange={setOrgSearchQuery}
+                            />
+                          </div>
+                          <CommandList
+                            className={`${isDropdownOpen ? "" : "hidden"}`}
+                          >
                             <CommandEmpty>No organizations found.</CommandEmpty>
                             <CommandGroup>
                               {isLoadingOrganizations ? (
