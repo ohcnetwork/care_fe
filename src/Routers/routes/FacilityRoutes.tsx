@@ -1,7 +1,7 @@
 import { Redirect } from "raviger";
 
 import FacilityUsers from "@/components/Facility/FacilityUsers";
-import ResourceCreate from "@/components/Resource/ResourceCreate";
+import ResourceCreate from "@/components/Resource/ResourceForm";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { FacilityOverview } from "@/pages/Facility/overview";
