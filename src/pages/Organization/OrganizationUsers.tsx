@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -55,7 +56,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       name: key === "username" ? value : "",
       phone_number:
         key === "phone_number"
-          ? value.length >= 13 || value === ""
+          ? isValidPhoneNumber(value)
             ? value
             : undefined
           : undefined,
