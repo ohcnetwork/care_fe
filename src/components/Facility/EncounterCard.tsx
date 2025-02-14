@@ -18,51 +18,19 @@ interface EncounterCardProps {
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
 
-  const encounterDetails = [
-    {
-      label: t("facility"),
-      value: (
-        <div className="flex items-center gap-2">{encounter.facility.name}</div>
-      ),
-    },
-    {
-      label: t("start_date"),
-      value: encounter.period.start
-        ? formatDateTime(encounter.period.start)
-        : t("not_started"),
-    },
-    {
-      label: t("priority"),
-      value: (
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-yellow-500" />
-          {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
-        </div>
-      ),
-    },
-    {
-      label: t("end_date"),
-      hide: !encounter.period.end,
-      value: formatDateTime(encounter.period.end),
-    },
-    {
-      label: t("external_id"),
-      hide: !encounter.external_identifier,
-      value: encounter.external_identifier,
-    },
-  ];
-
   return (
     <>
-      <div className="pb-6 block relative border-l-2 px-4 border-l-secondary-300">
-        <div className="absolute -left-[12px] top-0 bg-white">
+      <div className="flex gap-2">
+        <div className="relative flex flex-col items-center">
           {completedEncounterStatus.includes(encounter.status) ? (
             <BadgeCheck className="w-5 h-5 text-teal-300" />
           ) : (
             <CircleDashed className="w-5 h-5 text-purple-400" />
           )}
+          {/* Vertical Line */}
+          <div className="w-[2px] h-full bg-secondary-300"></div>
         </div>
-        <Card>
+        <Card className="flex-1">
           <CardContent className="p-4 sm:p-2 space-y-4">
             <div className="flex flex-wrap gap-2 sm:gap-4">
               <Badge
@@ -91,14 +59,47 @@ export const EncounterCard = (props: EncounterCardProps) => {
             </div>
 
             <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
-              {encounterDetails
-                .filter((f) => !f.hide)
-                .map((field, i) => (
-                  <div key={i} className="w-full mx-3 sm:w-auto">
-                    <div className="text-gray-600">{field.label}</div>
-                    <div className="font-bold">{field.value}</div>
+              <div className="w-full mx-3 sm:w-auto">
+                <div className="text-gray-600">{t("facility")}</div>
+                <div className="font-bold flex items-center gap-2">
+                  {encounter.facility.name}
+                </div>
+              </div>
+
+              <div className="w-full mx-3 sm:w-auto">
+                <div className="text-gray-600">{t("start_date")}</div>
+                <div className="font-bold">
+                  {encounter.period.start
+                    ? formatDateTime(encounter.period.start)
+                    : t("not_started")}
+                </div>
+              </div>
+
+              <div className="w-full mx-3 sm:w-auto">
+                <div className="text-gray-600">{t("priority")}</div>
+                <div className="font-bold flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-yellow-500" />
+                  {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
+                </div>
+              </div>
+
+              {encounter.period.end && (
+                <div className="w-full mx-3 sm:w-auto">
+                  <div className="text-gray-600">{t("end_date")}</div>
+                  <div className="font-bold">
+                    {formatDateTime(encounter.period.end)}
                   </div>
-                ))}
+                </div>
+              )}
+
+              {encounter.external_identifier && (
+                <div className="w-full mx-3 sm:w-auto">
+                  <div className="text-gray-600">{t("external_id")}</div>
+                  <div className="font-bold">
+                    {encounter.external_identifier}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="w-full py-2 bg-gray-100 px-2">
               <Button
