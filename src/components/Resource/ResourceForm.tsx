@@ -107,7 +107,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
-      status: "",
+      status: "pending",
       category: "",
       assigned_facility: null,
       assigned_to: "",
