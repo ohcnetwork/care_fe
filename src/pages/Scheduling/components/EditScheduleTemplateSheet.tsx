@@ -47,7 +47,7 @@ import {
   ScheduleAvailabilityCreateRequest,
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 export default function EditScheduleTemplateSheet({
   template,

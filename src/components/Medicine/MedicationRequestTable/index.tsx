@@ -114,7 +114,7 @@ export default function MedicationRequestTable({
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="bg-gray-200 py-0 w-fit ">
+          <TabsList className="bg-gray-200 py-0 w-fit">
             <TabsTrigger
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -131,7 +131,7 @@ export default function MedicationRequestTable({
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between p-2 gap-2">
+              <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-1">
                   <CareIcon icon="l-search" className="text-lg text-gray-500" />
                   <input
@@ -173,7 +173,7 @@ export default function MedicationRequestTable({
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
                     <Link
-                      href={`/facility/${facilityId}/encounter/${encounterId}/prescriptions/print`}
+                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/prescriptions/print`}
                     >
                       <CareIcon icon="l-print" className="mr-2" />
                       {t("print")}
@@ -194,7 +194,10 @@ export default function MedicationRequestTable({
                 <ScrollArea className="h-[calc(100vh-16rem)]">
                   <div className="min-w-[800px]">
                     <div className="p-2">
-                      <MedicationsTable medications={displayedMedications} />
+                      <MedicationsTable
+                        patientId={patientId}
+                        encounterId={encounterId}
+                      />
                     </div>
                     {!!stoppedMedications?.results?.length && (
                       <div

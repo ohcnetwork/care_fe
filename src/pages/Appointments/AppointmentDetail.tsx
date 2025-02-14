@@ -57,14 +57,13 @@ import {
   stringifyGeoOrganization,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -135,17 +134,9 @@ export default function AppointmentDetail(props: Props) {
   }
 
   const { patient } = appointment;
-  const appointmentDate = formatAppointmentSlotTime(appointment);
 
   return (
-    <Page
-      title={t("appointment_details")}
-      crumbsReplacements={{
-        [facility.id!]: { name: facility.name },
-        [patient.id]: { name: patient.name },
-        [appointment.id]: { name: `Appointment on ${appointmentDate}` },
-      }}
-    >
+    <Page title={t("appointment_details")}>
       <div className="container mx-auto p-6 max-w-7xl">
         <div
           className={cn(

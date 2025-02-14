@@ -15,7 +15,7 @@ import Loading from "@/components/Common/Loading";
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
 import { ScheduleException } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   items?: ScheduleException[];
