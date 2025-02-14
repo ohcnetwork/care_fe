@@ -120,7 +120,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
         <div className="flex items-center gap-4">
           <CareIcon
             icon="l-sync"
-            className={cn("care-l-sync text-2xl", isUpdating && "animate-spin")}
+            className={cn("text-2xl", isUpdating && "animate-spin")}
           />
           <span className="mr-4 flex flex-col">
             <p className="font-semibold">Software Update</p>
