@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -92,12 +92,16 @@ export default function MedicationRequestTable({
     enabled: !!patientId,
   });
 
-  const medications = showStopped
-    ? [
-        ...(activeMedications?.results || []),
-        ...(stoppedMedications?.results || []),
-      ]
-    : activeMedications?.results || [];
+  const medications = useMemo(
+    () =>
+      showStopped
+        ? [
+            ...(activeMedications?.results || []),
+            ...(stoppedMedications?.results || []),
+          ]
+        : activeMedications?.results || [],
+    [showStopped, activeMedications, stoppedMedications],
+  );
 
   const displayedMedications = medications.filter(
     (med: MedicationRequestRead) => {
@@ -194,10 +198,7 @@ export default function MedicationRequestTable({
                 <ScrollArea className="h-[calc(100vh-16rem)]">
                   <div className="min-w-[800px]">
                     <div className="p-2">
-                      <MedicationsTable
-                        patientId={patientId}
-                        encounterId={encounterId}
-                      />
+                      <MedicationsTable medications={displayedMedications} />
                     </div>
                     {!!stoppedMedications?.results?.length && (
                       <div

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
 import api from "@/Utils/request/api";
@@ -30,7 +31,7 @@ export const PrintPrescription = (props: {
     }),
   });
 
-  const { data: medications } = useQuery({
+  const { data: medications, isLoading: medicationLoading } = useQuery({
     queryKey: ["medication_requests", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -38,6 +39,8 @@ export const PrintPrescription = (props: {
     }),
     enabled: !!patientId,
   });
+
+  if (medicationLoading) return <Loading />;
 
   if (!medications?.results?.length) {
     return (
@@ -122,7 +125,10 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable patientId={patientId} encounterId={encounterId} />
+          <MedicationsTable
+            medications={medications?.results ?? []}
+            isPrintPreview={true}
+          />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">
