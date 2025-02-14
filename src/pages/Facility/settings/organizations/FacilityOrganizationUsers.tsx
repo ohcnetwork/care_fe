@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+//import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,19 +29,24 @@ interface Props {
   facilityId: string;
 }
 
+interface SheetState {
+  sheet: string;
+  username: string;
+}
+
 export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
-  const [sheetParams, setSheetParams] = useQueryParams<{
-    sheet: string;
-    username: string;
-  }>();
+  const [sheetState, setSheetState] = useState<SheetState>({
+    sheet: "",
+    username: "",
+  });
   const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 12,
   });
   const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
 
-  const openAddUserSheet = sheetParams.sheet === "add";
-  const openLinkUserSheet = sheetParams.sheet === "link";
+  const openAddUserSheet = sheetState.sheet === "add";
+  const openLinkUserSheet = sheetState.sheet === "link";
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: [
@@ -88,10 +93,10 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
-                setSheetParams({ sheet: open ? "add" : "", username: "" });
+                setSheetState({ sheet: open ? "add" : "", username: "" });
               }}
               onUserCreated={(user) => {
-                setSheetParams({ sheet: "link", username: user.username });
+                setSheetState({ sheet: "link", username: user.username });
               }}
             />
             <LinkFacilityUserSheet
@@ -99,9 +104,9 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               organizationId={id}
               open={openLinkUserSheet}
               setOpen={(open) => {
-                setSheetParams({ sheet: open ? "link" : "", username: "" });
+                setSheetState({ sheet: open ? "link" : "", username: "" });
               }}
-              preSelectedUsername={sheetParams.username}
+              preSelectedUsername={sheetState.username}
             />
           </div>
         </div>
