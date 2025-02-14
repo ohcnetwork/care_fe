@@ -64,17 +64,19 @@ export const ResourceRequests = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight">
           {t("resource_requests")}
         </h2>
-        <Button
-          variant="outline_primary"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,
-            )
-          }
-        >
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("create_resource_request")}
-        </Button>
+        {facilityId && (
+          <Button
+            variant="outline_primary"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,
+              )
+            }
+          >
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("create_resource_request")}
+          </Button>
+        )}
       </div>
 
       <div className="rounded-lg border bg-white">
