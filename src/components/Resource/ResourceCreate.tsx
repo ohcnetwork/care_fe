@@ -76,7 +76,7 @@ export default function ResourceCreate(props: ResourceProps) {
     referring_facility_contact_name: z
       .string()
       .min(1, { message: t("field_required") }),
-    referring_facility_contact_number: validators.phoneNumber.required,
+    referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
   });
 
