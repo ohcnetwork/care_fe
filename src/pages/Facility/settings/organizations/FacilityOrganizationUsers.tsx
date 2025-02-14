@@ -54,27 +54,12 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
     queryFn: query.debounced(routes.facilityOrganization.listUsers, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
-        search: searchQuery || undefined,
-        ...(searchQuery
-          ? {}
-          : {
-              limit: resultsPerPage,
-              offset: ((qParams.page || 1) - 1) * resultsPerPage,
-            }),
+        search_text: searchQuery || undefined,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!id,
-  });
-
-  const filteredUsers = users?.results?.filter((userRole) => {
-    if (!searchQuery) return true;
-
-    const searchLower = searchQuery.toLowerCase();
-    const fullName =
-      `${userRole.user.first_name} ${userRole.user.last_name}`.toLowerCase();
-    const username = userRole.user.username.toLowerCase();
-
-    return fullName.includes(searchLower) || username.includes(searchLower);
   });
 
   if (!id) {
@@ -128,14 +113,14 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-              {!filteredUsers?.length ? (
+              {!users?.results?.length ? (
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {t("no_users_found")}
                   </CardContent>
                 </Card>
               ) : (
-                filteredUsers?.map((userRole: OrganizationUserRole) => (
+                users.results.map((userRole: OrganizationUserRole) => (
                   <Card key={userRole.id} className="h-full">
                     <CardContent className="p-4 sm:p-6 flex flex-col h-full">
                       <div className="flex items-start gap-3">
@@ -197,7 +182,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               )}
             </div>
 
-            {(filteredUsers || []).length > 0 &&
+            {(users?.results || []).length > 0 &&
               users?.count &&
               users.count > resultsPerPage && (
                 <div className="flex justify-center">
