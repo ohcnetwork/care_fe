@@ -53,7 +53,6 @@ import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
