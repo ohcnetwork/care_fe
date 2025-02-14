@@ -69,8 +69,8 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
   return (
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center flex-col md:flex-row sm:items-center gap-4 w-full lg:justify-between">
-          <div className="relative">
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-4 w-full justify-between">
+          <div className="relative w-full md:w-auto">
             <CareIcon
               icon="l-search"
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4"
@@ -84,7 +84,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               className="w-full pl-8"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full md:w-auto justify-end">
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
@@ -122,7 +122,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               ) : (
                 users.results.map((userRole: OrganizationUserRole) => (
                   <Card key={userRole.id} className="h-full">
-                    <CardContent className="p-4 sm:p-6 flex flex-col h-full">
+                    <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
                       <div className="flex items-start gap-3">
                         <Avatar
                           name={`${userRole.user.first_name} ${userRole.user.last_name}`}
