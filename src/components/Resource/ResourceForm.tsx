@@ -42,6 +42,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
@@ -66,6 +67,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
+    status: z.string().min(1, { message: t("field_required") }),
     category: z.string().min(1, { message: t("field_required") }),
     assigned_facility: z
       .object({
@@ -105,6 +107,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
+      status: "",
       category: "",
       assigned_facility: null,
       assigned_to: "",
@@ -120,6 +123,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   useEffect(() => {
     if (resourceData) {
       form.reset({
+        status: resourceData.status,
         category: resourceData.category,
         assigned_facility: resourceData.assigned_facility,
         assigned_to: resourceData.assigned_to?.id,
@@ -160,7 +164,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
-      status: "PENDING",
+      status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
       assigned_facility: data.assigned_facility?.id || null,
@@ -320,6 +324,35 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>{t("status")}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("select_status")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {RESOURCE_STATUS_CHOICES.map((option, index) => (
+                              <SelectItem key={index} value={option.text}>
+                                {t(`resource_status__${option.text}`)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="category"
@@ -332,7 +365,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={t("select_category")} />
+                              <SelectValue
+                                placeholder={t("category_description")}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -343,35 +378,30 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormDescription>
-                          {t("category_description")}
-                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="assigned_to"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel required>{t("assigned_to")}</FormLabel>
+                        <FormControl>
+                          <UserSelector
+                            selected={assignedToUser}
+                            onChange={handleUserChange}
+                            placeholder={t("search_users")}
+                            noOptionsMessage={t("no_users_found")}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="assigned_to"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel required>{t("assigned_to")}</FormLabel>
-                      <FormControl>
-                        <UserSelector
-                          selected={assignedToUser}
-                          onChange={handleUserChange}
-                          placeholder={t("search_users")}
-                          noOptionsMessage={t("no_users_found")}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
-
               <Separator />
 
               <div className="space-y-6">
