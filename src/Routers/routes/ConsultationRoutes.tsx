@@ -1,6 +1,5 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
-import FileUploadPage from "@/components/Patient/FileUploadPage";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -72,18 +71,6 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
-    facilityId,
-    patientId,
-    id,
-  }) => (
-    <FileUploadPage
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={id}
-      type="encounter"
-    />
-  ),
 };
 
 export default consultationRoutes;

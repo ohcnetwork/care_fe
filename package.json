@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "2.13.0",
+  "version": "3.0.0",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
