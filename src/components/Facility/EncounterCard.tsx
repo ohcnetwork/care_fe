@@ -9,8 +9,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import { formatDateTime } from "@/Utils/utils";
@@ -23,11 +21,10 @@ interface EncounterCardProps {
 
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewEncounter } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    encounter.permissions,
   );
   return (
     <>

@@ -21,8 +21,6 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
@@ -97,6 +95,7 @@ interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
   encounterStatus: Encounter["status"];
+  encounterPermissions: Encounter["permissions"];
 }
 
 interface TimeSlotHeaderProps {
@@ -363,11 +362,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
   encounterStatus,
+  encounterPermissions,
 }) => {
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
-    getPermissions(hasPermission, authUser.permissions);
+    getPermissions(hasPermission, encounterPermissions);
   const canAccess = canViewClinicalData || canViewEncounter;
   const canWrite =
     canWriteEncounter && !inactiveEncounterStatus.includes(encounterStatus);

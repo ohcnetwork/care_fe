@@ -8,7 +8,6 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -20,11 +19,10 @@ export const EncounterUpdatesTab = ({
   encounter,
   patient,
 }: EncounterTabProps) => {
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    encounter.permissions,
   );
   const { goBack } = useAppHistory();
   const canAccess = canViewClinicalData || canViewEncounter;

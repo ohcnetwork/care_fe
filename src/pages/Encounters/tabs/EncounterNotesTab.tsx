@@ -326,10 +326,9 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
-    getPermissions(hasPermission, authUser.permissions);
+    getPermissions(hasPermission, encounter.permissions);
   const canAccess = canViewClinicalData || canViewEncounter;
   const canWriteCurrentEncounter =
     canWriteEncounter &&

@@ -145,6 +145,7 @@ export interface Encounter {
   organizations: FacilityOrganization[];
   current_location: LocationList;
   location_history: LocationHistory[];
+  permissions: string[];
 }
 
 export interface EncounterEditRequest {

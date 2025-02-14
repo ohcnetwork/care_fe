@@ -16,7 +16,6 @@ import { AdministrationTab } from "@/components/Medicine/MedicationAdministratio
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -71,13 +70,12 @@ export default function MedicationRequestTable({
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(hasPermission, encounter.permissions);
   const canAccess = canViewClinicalData || canViewEncounter;
   const { goBack } = useAppHistory();
 
@@ -258,6 +256,7 @@ export default function MedicationRequestTable({
               patientId={patientId}
               encounterId={encounter.id}
               encounterStatus={encounter.status}
+              encounterPermissions={encounter.permissions}
             />
           </TabsContent>
         </Tabs>

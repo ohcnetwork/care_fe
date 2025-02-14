@@ -80,7 +80,6 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
 
-  console.log(authUser.permissions);
   const {
     canViewAppointments,
     canListEncounters,

@@ -74,7 +74,10 @@ export const FilesTab = (props: FilesTabProps) => {
     canViewEncounter,
     canWritePatient,
     canWriteEncounter,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? authUser.permissions,
+  );
   const canAccess =
     type === "encounter"
       ? canViewClinicalData || canViewEncounter

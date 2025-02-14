@@ -14,7 +14,6 @@ import {
 import Loading from "@/components/Common/Loading";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { getPermissions } from "@/common/Permissions";
@@ -29,11 +28,10 @@ type QueryParams = {
 export const EncounterPlotsTab = (props: EncounterTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewClinicalData, canViewEncounter } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    props.encounter.permissions,
   );
   const { goBack } = useAppHistory();
   const canAccess = canViewClinicalData || canViewEncounter;
