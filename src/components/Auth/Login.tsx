@@ -504,7 +504,7 @@ const Login = (props: LoginProps) => {
                           )}
                         </div>
 
-                        {isCaptchaEnabled && (
+                        {isCaptchaEnabled && reCaptchaSiteKey && (
                           <div className="py-4">
                             <ReCaptcha
                               sitekey={reCaptchaSiteKey}

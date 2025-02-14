@@ -8,6 +8,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
+import { formatDisplayName } from "@/Utils/utils";
 import { getOrgLabel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
@@ -22,7 +23,7 @@ export default function UserDashboard() {
       <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
-            name={user.first_name}
+            name={formatDisplayName(user)}
             imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
