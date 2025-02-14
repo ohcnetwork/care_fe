@@ -19,28 +19,43 @@ interface UpdatableAppProps {
 export const checkForUpdate = async () => {
   const appVersion = localStorage.getItem(APP_VERSION_KEY);
 
-  const res = await fetch(META_URL, {
-    headers: {
-      "Cache-Control": "no-cache",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
+  try {
+    const res = await fetch(META_URL, {
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
 
-  if (res.status !== 200) {
-    console.error(
-      `Skipped checking for updates. Failed to fetch '${META_URL}'.`,
-    );
+    if (!res.ok) {
+      console.error(
+        `Skipped checking for updates. Failed to fetch '${META_URL}' with status ${res.status}`,
+      );
+      return;
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      console.error(
+        `Skipped checking for updates. Expected JSON but got ${contentType}`,
+      );
+      return;
+    }
+
+    const meta = await res.json();
+    if (!meta?.version) {
+      console.error("Skipped checking for updates. Invalid meta data format");
+      return;
+    }
+
+    if (appVersion !== meta.version) {
+      console.info("App can be updated.");
+      return meta.version as string;
+    }
+  } catch (error) {
+    console.error("Failed to check for updates:", error);
     return;
-  }
-
-  const meta = await res.json();
-
-  if (appVersion !== meta.version) {
-    // Trigger an update if key: 'app-version' not present in localStorage
-    // or does not match with metaVersion.
-    console.info("App can be updated.");
-    return meta.version as string;
   }
 };
 
