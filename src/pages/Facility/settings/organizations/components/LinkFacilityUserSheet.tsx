@@ -125,7 +125,7 @@ export default function LinkFacilityUserSheet({
             Search for a user and assign a role to add them to the facility.
           </SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4 min-h-full">
+        <div className="space-y-6 py-4 min-h-full w-full overflow-hidden">
           <UserSelector
             selected={selectedUser}
             onChange={handleUserChange}
@@ -136,16 +136,16 @@ export default function LinkFacilityUserSheet({
           {selectedUser && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4 space-y-4">
-                <div className="flex flex-wrap items-start gap-4">
+                <div className="flex items-center gap-4">
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
                     name={formatName(selectedUser)}
                     className="h-12 w-12"
                   />
-                  <div className="flex flex-col truncate">
-                    <span className="font-medium text-lg">
+                  <div className="grid grid-cols-1 w-full">
+                    <p className="font-medium text-lg truncate">
                       {selectedUser.first_name} {selectedUser.last_name}
-                    </span>
+                    </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
                     </span>
