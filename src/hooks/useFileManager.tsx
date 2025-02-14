@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
-import { StateInterface } from "@/components/Files/FileUpload";
+import { StateInterface } from "@/components/Common/FilePreviewDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import {

@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import { StateInterface } from "@/components/Files/FileUpload";
 import { FileUploadModel } from "@/components/Patient/models";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
@@ -39,6 +38,19 @@ export const zoom_values = [
   "scale-175",
   "scale-200",
 ];
+
+export interface StateInterface {
+  open: boolean;
+  isImage: boolean;
+  name: string;
+  extension: string;
+  zoom: number;
+  isZoomInDisabled: boolean;
+  isZoomOutDisabled: boolean;
+  rotation: number;
+  id?: string;
+  associating_id?: string;
+}
 
 type FilePreviewProps = {
   title?: ReactNode;
