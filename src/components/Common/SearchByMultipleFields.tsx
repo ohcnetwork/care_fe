@@ -47,6 +47,7 @@ interface SearchByMultipleFieldsProps {
   clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
+  autoFocus?: boolean;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -90,6 +91,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   clearSearch,
   onFieldChange,
   enableOptionButtons = true,
+  autoFocus = false,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
@@ -176,10 +178,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [focusedIndex, open, handleOptionChange, options]);
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (autoFocus && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [selectedOptionIndex]);
+  }, [selectedOptionIndex, autoFocus]);
 
   useEffect(() => {
     if (selectedOption.value !== searchValue) {

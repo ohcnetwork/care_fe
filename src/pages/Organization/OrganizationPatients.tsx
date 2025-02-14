@@ -65,10 +65,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   }, []);
 
   const handleFieldChange = () => {
-    updateQuery({
-      name: undefined,
-      phone_number: undefined,
-    });
+    updateQuery({ name: undefined, phone_number: undefined });
   };
 
   const { data: patients, isFetching } = useQuery({
@@ -117,6 +114,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
           )}
           onSearch={handleSearch}
           onFieldChange={handleFieldChange}
+          autoFocus={false}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
