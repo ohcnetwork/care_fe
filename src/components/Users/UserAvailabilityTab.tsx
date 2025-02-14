@@ -183,7 +183,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               className={cn(
                 view === "schedule" && "shadow",
                 "hover:bg-white",
-                "text-xs md:text-sm",
+                "text-xs sm:text-sm",
                 "px-2 md:px-4",
               )}
             >
@@ -195,7 +195,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               className={cn(
                 view === "exceptions" && "shadow",
                 "hover:bg-white",
-                "text-xs md:text-sm",
+                "text-xs sm:text-sm",
                 "px-2 md:px-4",
               )}
             >
