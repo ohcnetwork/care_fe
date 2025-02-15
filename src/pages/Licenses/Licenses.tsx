@@ -12,29 +12,28 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
-import { LicensesSbom } from "@/types/license";
+import { LicensesSbom, PackageType } from "@/types/license";
 
 const sbomUrlMap = {
   frontend: "/sbom/care_fe-sbom.json",
   backend: "/sbom/care-sbom.json",
 };
 
-function getPackageUrl(pkgName: string, purl: string) {
-  if (purl) {
-    switch (true) {
-      case purl.startsWith("pkg:pypi/"):
-        return `https://pypi.org/project/${pkgName}`;
-      case purl.startsWith("pkg:npm/"):
-        return `https://www.npmjs.com/package/${pkgName}`;
-      case purl.startsWith("pkg:github/"):
-        return `https://github.com/${pkgName}`;
-      case purl.startsWith("pkg:githubactions/"):
-        return `https://github.com/actions/${pkgName}`;
-      default:
-        return purl;
-    }
-  }
-  return purl;
+function getPackageUrl(pkgName: string, purl: string | undefined): string {
+  if (!purl || !pkgName) return "";
+
+  const urlMap: Record<PackageType, string> = {
+    pypi: `https://pypi.org/project/${pkgName}`,
+    npm: `https://www.npmjs.com/package/${pkgName}`,
+    github: `https://github.com/${pkgName}`,
+    githubactions: `https://github.com/actions/${pkgName}`,
+  };
+
+  const pkgtype = Object.keys(urlMap).find((key) =>
+    purl.startsWith(`pkg:${key}/`),
+  );
+
+  return pkgtype ? urlMap[pkgtype as PackageType] : purl;
 }
 
 export const LicensesPage = () => {
