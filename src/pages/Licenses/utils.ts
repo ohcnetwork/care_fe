@@ -3,9 +3,7 @@ import { LicensesSbom, PackageType } from "@/types/license";
 export const getPackageUrl = (
   pkgName: LicensesSbom["sbom"]["packages"][number]["name"],
   purl: LicensesSbom["sbom"]["packages"][number]["externalRefs"][number]["referenceLocator"],
-): string => {
-  if (!purl || !pkgName) return "";
-
+): URL => {
   const urlMap: Record<PackageType, string> = {
     pypi: `https://pypi.org/project/${pkgName}`,
     npm: `https://www.npmjs.com/package/${pkgName}`,
@@ -17,5 +15,5 @@ export const getPackageUrl = (
     purl.startsWith(`pkg:${key}/`),
   );
 
-  return pkgType ? urlMap[pkgType as PackageType] : purl;
+  return pkgType ? new URL(urlMap[pkgType as PackageType]) : new URL(purl);
 };
