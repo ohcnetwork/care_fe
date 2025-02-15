@@ -29,11 +29,11 @@ function getPackageUrl(pkgName: string, purl: string): string {
     githubactions: `https://github.com/actions/${pkgName}`,
   };
 
-  const pkgtype = Object.keys(urlMap).find((key) =>
+  const pkgType = Object.keys(urlMap).find((key) =>
     purl.startsWith(`pkg:${key}/`),
   );
 
-  return pkgtype ? urlMap[pkgtype as PackageType] : purl;
+  return pkgType ? urlMap[pkgType as PackageType] : purl;
 }
 
 export const LicensesPage = () => {
