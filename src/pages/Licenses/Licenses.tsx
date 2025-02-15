@@ -5,15 +5,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
 import { LicensesSbom, PackageType } from "@/types/license";
@@ -42,7 +38,6 @@ function getPackageUrl(pkgName: string, purl: string): string {
 
 export const LicensesPage = () => {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const [tab, setTab] = useState<"frontend" | "backend">("frontend");
 
   const { data, isLoading } = useQuery<LicensesSbom>({
@@ -52,10 +47,6 @@ export const LicensesPage = () => {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 md:p-8 lg:p-10">
-      <Button variant="outline" className="mb-4" onClick={() => goBack()}>
-        <CareIcon icon="l-arrow-left" className="text-lg" />
-        {t("back")}
-      </Button>
       <h1 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">
         {t("licenses_title")}
       </h1>
