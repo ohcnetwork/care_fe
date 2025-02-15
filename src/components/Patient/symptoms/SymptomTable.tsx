@@ -145,11 +145,13 @@ export function SymptomTable({
             </TableCell>
             <TableCell className="last:rounded-r-md">
               <div className="flex items-center gap-2">
-                <Avatar
-                  name={symptom.created_by.username}
-                  className="w-4 h-4"
-                  imageUrl={symptom.created_by.profile_picture_url}
-                />
+                {!isPrintPreview && (
+                  <Avatar
+                    name={symptom.created_by.username}
+                    className="w-4 h-4"
+                    imageUrl={symptom.created_by.profile_picture_url}
+                  />
+                )}
                 <span className="text-sm">{symptom.created_by.username}</span>
               </div>
             </TableCell>

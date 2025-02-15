@@ -219,11 +219,13 @@ export function AllergyList({
         </TableCell>
         <TableCell className="last:rounded-r-md">
           <div className="flex items-center gap-2">
-            <Avatar
-              name={allergy.created_by.username}
-              className="w-4 h-4"
-              imageUrl={allergy.created_by.profile_picture_url}
-            />
+            {!isPrintPreview && (
+              <Avatar
+                name={allergy.created_by.username}
+                className="w-4 h-4"
+                imageUrl={allergy.created_by.profile_picture_url}
+              />
+            )}
             <span className="text-sm">{formatName(allergy.created_by)}</span>
           </div>
         </TableCell>
