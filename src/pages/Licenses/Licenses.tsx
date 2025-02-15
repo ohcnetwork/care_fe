@@ -124,7 +124,7 @@ const SbomPackage = ({
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-primary-dark block text-primary"
-        href={`${getPackageUrl(pkg.name, pkg.externalRefs?.[0].referenceLocator)}`}
+        href={`${getPackageUrl(pkg.name, pkg.externalRefs[0].referenceLocator)}`}
       >
         <strong className="text-lg">{`${pkg.name} v${pkg.versionInfo}`}</strong>
       </a>
