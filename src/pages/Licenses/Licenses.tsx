@@ -12,29 +12,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
-import { LicensesSbom, PackageType } from "@/types/license";
+import { getPackageUrl } from "@/pages/Licenses/utils";
+import { LicensesSbom } from "@/types/license";
 
 const sbomUrlMap = {
   frontend: "/sbom/care_fe-sbom.json",
   backend: "/sbom/care-sbom.json",
 };
-
-function getPackageUrl(pkgName: string, purl: string): string {
-  if (!purl || !pkgName) return "";
-
-  const urlMap: Record<PackageType, string> = {
-    pypi: `https://pypi.org/project/${pkgName}`,
-    npm: `https://www.npmjs.com/package/${pkgName}`,
-    github: `https://github.com/${pkgName}`,
-    githubactions: `https://github.com/actions/${pkgName}`,
-  };
-
-  const pkgType = Object.keys(urlMap).find((key) =>
-    purl.startsWith(`pkg:${key}/`),
-  );
-
-  return pkgType ? urlMap[pkgType as PackageType] : purl;
-}
 
 export const LicensesPage = () => {
   const { t } = useTranslation();
