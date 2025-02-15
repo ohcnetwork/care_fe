@@ -618,10 +618,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <Loading />
       </div>
     );
-  } else if (!medications?.length) {
+  } else if (
+    !activeMedications?.results?.length &&
+    !stoppedMedications?.results?.length
+  ) {
     content = (
       <EmptyState
-        message={t("no_active_medications")}
+        message={t("no_medications")}
         description={t("no_medications_to_administer")}
       />
     );

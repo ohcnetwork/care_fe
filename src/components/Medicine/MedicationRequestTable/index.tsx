@@ -196,9 +196,10 @@ export default function MedicationRequestTable({
                 <div className="min-h-[200px] flex items-center justify-center">
                   <Loading />
                 </div>
-              ) : !medications.length ? (
-                <EmptyState />
-              ) : !displayedMedications.length ? (
+              ) : !activeMedications?.results?.length &&
+                !stoppedMedications?.results?.length ? (
+                <EmptyState message={t("no_medications")} />
+              ) : searchQuery && !displayedMedications.length ? (
                 <EmptyState searching searchQuery={searchQuery} />
               ) : (
                 <ScrollArea className="h-[calc(100vh-16rem)]">
