@@ -5,8 +5,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +18,24 @@ const sbomUrlMap = {
   frontend: "/sbom/care_fe-sbom.json",
   backend: "/sbom/care-sbom.json",
 };
+
+function getPackageUrl(pkgName: string, purl: string) {
+  if (purl) {
+    switch (true) {
+      case purl.startsWith("pkg:pypi/"):
+        return `https://pypi.org/project/${pkgName}`;
+      case purl.startsWith("pkg:npm/"):
+        return `https://www.npmjs.com/package/${pkgName}`;
+      case purl.startsWith("pkg:github/"):
+        return `https://github.com/${pkgName}`;
+      case purl.startsWith("pkg:githubactions/"):
+        return `https://github.com/actions/${pkgName}`;
+      default:
+        return purl;
+    }
+  }
+  return purl;
+}
 
 export const LicensesPage = () => {
   const { t } = useTranslation();
@@ -102,7 +118,6 @@ const SbomPackage = ({
 }: {
   pkg: LicensesSbom["sbom"]["packages"][number];
 }) => {
-  const [showExternalRefs, setShowExternalRefs] = useState(false);
   const { t } = useTranslation();
   return (
     <div className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg">
@@ -110,6 +125,7 @@ const SbomPackage = ({
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-primary-dark block text-primary"
+        href={`${getPackageUrl(pkg.name, pkg.externalRefs?.[0].referenceLocator)}`}
       >
         <strong className="text-lg">{`${pkg.name} v${pkg.versionInfo}`}</strong>
       </a>
@@ -127,31 +143,6 @@ const SbomPackage = ({
           </a>
         </p>
       )}
-      <div>
-        <h4
-          className="block cursor-pointer font-semibold text-primary"
-          onClick={() => setShowExternalRefs(!showExternalRefs)}
-        >
-          <CareIcon icon="l-info-circle" />
-        </h4>
-        {showExternalRefs && (
-          <ul className="list-inside list-disc pl-4 text-xs">
-            {pkg.externalRefs.map((ref, idx) => (
-              <li key={idx}>
-                <a
-                  href={ref.referenceLocator}
-                  className="hover:text-primary-dark block break-words text-primary"
-                >
-                  {ref.referenceLocator}
-                </a>
-                {ref.referenceCategory && (
-                  <p>{t("category") + ": " + ref.referenceCategory}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
     </div>
   );
 };
