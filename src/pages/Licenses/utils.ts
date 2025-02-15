@@ -1,6 +1,9 @@
-import { PackageType } from "@/types/license";
+import { LicensesSbom, PackageType } from "@/types/license";
 
-export const getPackageUrl = (pkgName: string, purl: string): string => {
+export const getPackageUrl = (
+  pkgName: LicensesSbom["sbom"]["packages"][number]["name"],
+  purl: LicensesSbom["sbom"]["packages"][number]["externalRefs"][number]["referenceLocator"],
+): string => {
   if (!purl || !pkgName) return "";
 
   const urlMap: Record<PackageType, string> = {
