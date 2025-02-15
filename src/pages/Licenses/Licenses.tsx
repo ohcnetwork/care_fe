@@ -19,7 +19,7 @@ const sbomUrlMap = {
   backend: "/sbom/care-sbom.json",
 };
 
-function getPackageUrl(pkgName: string, purl: string | undefined): string {
+function getPackageUrl(pkgName: string, purl: string): string {
   if (!purl || !pkgName) return "";
 
   const urlMap: Record<PackageType, string> = {
