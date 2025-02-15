@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 
+import { cn } from "@/lib/utils";
+
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
@@ -187,48 +191,57 @@ export default function TreatmentSummary({
 
           {/* Medical Information */}
           <div className="space-y-6">
+            <hr className="border border-dashed border-black"></hr>
             {/* Allergies */}
             <AllergyList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border border-black shadow-none"
+              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
+            <hr className="border border-dashed border-black"></hr>
 
             {/* Symptoms */}
             <SymptomsList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border border-black shadow-none"
+              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
+            <hr className="border border-dashed border-black"></hr>
 
             {/* Diagnoses */}
             <DiagnosisList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              className="border border-black shadow-none"
+              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
+            <hr className="border border-dashed border-black"></hr>
 
             {/* Medications */}
-            <div className="border border-black shadow-none p-3">
-              <p className="text-sm font-semibold text-gray-950 m-1">
-                {t("medications")}
-              </p>
-              <MedicationsTable
-                patientId={encounter.patient.id}
-                encounterId={encounterId}
-              />
-            </div>
+            <Card className={cn("rounded-sm")}>
+              <CardHeader className={cn("px-3 pt-4 pb-2")}>
+                <CardTitle>{t("medications")}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                <MedicationsTable
+                  patientId={encounter.patient.id}
+                  encounterId={encounterId}
+                />
+              </CardContent>
+            </Card>
           </div>
+
+          <hr className="border border-dashed border-black"></hr>
 
           {/* Medication Statements */}
           <MedicationStatementList
             patientId={encounter.patient.id}
-            className="border border-black shadow-none"
+            // className="border border-black shadow-none"
             isPrintPreview={true}
           />
+          <hr className="border border-dashed border-black"></hr>
 
           {/* Questionnaire Responses Section */}
           <div>
