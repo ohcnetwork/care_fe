@@ -104,9 +104,6 @@ export const isAppleDevice = _isAppleDevice();
  *
  * @deprecated Use `cn` from `@/lib/utils` instead.
  */
-export const classNames = (...classes: (string | boolean | undefined)[]) => {
-  return classes.filter(Boolean).join(" ");
-};
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
