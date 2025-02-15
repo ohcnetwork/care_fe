@@ -125,10 +125,7 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable
-            medications={medications?.results ?? []}
-            isPrintPreview={true}
-          />
+          <MedicationsTable medications={medications?.results ?? []} />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">

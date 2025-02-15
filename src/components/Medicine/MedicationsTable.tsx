@@ -37,14 +37,12 @@ export function getFrequencyDisplay(
 }
 
 interface MedicationsTableProps {
-  isPrintPreview?: boolean;
   patientId?: string;
   encounterId?: string;
   medications?: MedicationRequestRead[];
 }
 
 export const MedicationsTable = ({
-  isPrintPreview = false,
   medications,
   patientId,
   encounterId,
@@ -57,7 +55,7 @@ export const MedicationsTable = ({
       pathParams: { patientId },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
     }),
-    enabled: isPrintPreview && !medications && !!patientId,
+    enabled: !medications && !!patientId,
   });
 
   if (isLoading) {
@@ -68,10 +66,9 @@ export const MedicationsTable = ({
     );
   }
 
-  const displayedMedications =
-    isPrintPreview && !medications
-      ? (allMedications?.results ?? [])
-      : medications;
+  const displayedMedications = !medications
+    ? (allMedications?.results ?? [])
+    : medications;
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>

@@ -173,10 +173,10 @@ export default function MedicationRequestTable({
                   <Button
                     variant="outline"
                     disabled={
-                      [
-                        ...(activeMedications?.results || []),
-                        ...(stoppedMedications?.results || []),
-                      ].length == 0
+                      !(
+                        activeMedications?.results?.length ||
+                        stoppedMedications?.results?.length
+                      )
                     }
                     onClick={() =>
                       navigate(

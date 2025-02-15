@@ -217,7 +217,6 @@ export default function TreatmentSummary({
                 {t("medications")}
               </p>
               <MedicationsTable
-                isPrintPreview={true}
                 patientId={encounter.patient.id}
                 encounterId={encounterId}
               />
