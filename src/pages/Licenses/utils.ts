@@ -8,7 +8,7 @@ export const getPackageUrl = (
     pypi: `https://pypi.org/project/${pkgName}`,
     npm: `https://www.npmjs.com/package/${pkgName}`,
     github: `https://github.com/${pkgName}`,
-    githubactions: `https://github.com/actions/${pkgName}`,
+    githubactions: `https://github.com/${pkgName}`,
   };
 
   const pkgType = Object.keys(urlMap).find((key) =>
