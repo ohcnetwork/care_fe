@@ -62,6 +62,8 @@ export function AppSidebar({
   }, [user?.organizations, organizationId]);
 
   React.useEffect(() => {
+    setSelectedFacility(null);
+
     if (!user?.facilities || !facilityId || !facilitySidebar) return;
 
     const facility = user.facilities.find((f) => f.id === facilityId);
