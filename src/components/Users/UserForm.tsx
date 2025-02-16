@@ -145,7 +145,7 @@ export default function UserForm({
         last_name: userData.last_name,
         email: userData.email,
         phone_number: userData.phone_number || "",
-        gender: userData.gender,
+        gender: userData.gender || undefined,
       };
       form.reset(formData);
     }
