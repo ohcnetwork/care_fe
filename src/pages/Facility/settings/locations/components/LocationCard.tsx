@@ -44,7 +44,7 @@ interface Props {
   location: LocationList;
   onEdit?: (location: LocationList) => void;
   className?: string;
-  facilityId?: string;
+  facilityId: string;
 }
 
 export function LocationCard({
