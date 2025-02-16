@@ -89,7 +89,7 @@ const AvatarEditModal = ({
   const stopCamera = useCallback(() => {
     const stream = webRef.current?.video?.srcObject as MediaStream;
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop()); // Stop all media tracks
+      stream.getTracks().forEach((track) => track.stop());
     }
     setIsCameraOpen(false);
   }, []);
