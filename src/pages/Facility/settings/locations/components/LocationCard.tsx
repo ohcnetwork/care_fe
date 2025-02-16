@@ -164,43 +164,45 @@ export function LocationCard({
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  className={cn(buttonVariants({ variant: "destructive" }))}
-                >
-                  <CareIcon icon="l-trash" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("remove")} {location.name}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("are_you_sure_want_to_delete", {
-                      name: location.name,
-                    })}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      removeLocation({
-                        pathParams: {
-                          facility_id: facilityId,
-                          id: location.id,
-                        },
-                      })
-                    }
+            {!location.has_children && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
-                    {t("remove")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <CareIcon icon="l-trash" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("remove")} {location.name}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("are_you_sure_want_to_delete", {
+                        name: location.name,
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        removeLocation({
+                          pathParams: {
+                            facility_id: facilityId,
+                            id: location.id,
+                          },
+                        })
+                      }
+                      className={cn(buttonVariants({ variant: "destructive" }))}
+                    >
+                      {t("remove")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <Button variant="outline" asChild>
               <Link
                 href={`/location/${location.id}`}
