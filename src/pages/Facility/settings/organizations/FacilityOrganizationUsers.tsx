@@ -89,6 +89,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
             />
           </div>
         </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {users?.results?.length === 0 ? (
             <Card className="col-span-full">
