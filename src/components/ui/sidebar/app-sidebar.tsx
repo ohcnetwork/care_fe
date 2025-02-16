@@ -85,7 +85,7 @@ export function AppSidebar({
             selectedOrganization={selectedOrganization}
           />
         )}
-        {selectedFacility && hasFacilities && (
+        {facilityId && selectedFacility && hasFacilities && (
           <FacilitySwitcher
             facilities={user?.facilities || []}
             selectedFacility={selectedFacility}
