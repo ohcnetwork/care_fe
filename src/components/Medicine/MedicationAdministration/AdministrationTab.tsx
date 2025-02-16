@@ -21,7 +21,6 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -29,6 +28,7 @@ import {
   MedicationAdministration,
   MedicationAdministrationRequest,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
+import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
 import {
   ACTIVE_MEDICATION_STATUSES,
   INACTIVE_MEDICATION_STATUSES,
@@ -411,7 +411,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const { data: administrations, refetch: refetchAdministrations } = useQuery({
     queryKey: ["medication_administrations", patientId, visibleSlots],
-    queryFn: query(routes.medicationAdministration.list, {
+    queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
