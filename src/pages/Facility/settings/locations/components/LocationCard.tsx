@@ -64,7 +64,7 @@ export function LocationCard({
       queryClient.invalidateQueries({
         queryKey: ["locations", facilityId],
       });
-      toast.success("Location removed successfully");
+      toast.success(t("location_removed_successfully"));
     },
   });
 
