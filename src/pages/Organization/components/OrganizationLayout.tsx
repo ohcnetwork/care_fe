@@ -5,13 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
@@ -113,31 +106,7 @@ export default function OrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name}`} breadcrumbs={false}>
-      {/* Since we have links to all parent organizations, we can show the breadcrumb here */}
-      <Breadcrumb className="mt-1">
-        <BreadcrumbList>
-          {/* Org has parent and each parent may have another parent, so we need to show all the parents */}
-
-          {orgParents.reverse().map((parent) => (
-            <>
-              <BreadcrumbItem key={parent.id}>
-                <BreadcrumbLink href={`${baseUrl}/${parent.id}`}>
-                  {parent.name}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                <BreadcrumbSeparator />
-              </BreadcrumbItem>
-            </>
-          ))}
-          <BreadcrumbItem key={org.id}>
-            <BreadcrumbLink asChild>
-              <Link href={`${baseUrl}/${id}`}>{org.name}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <Page title={`${org.name}`}>
       {/* Navigation */}
       <div className="mt-4">
         <Menubar className="w-full h-full overflow-x-auto">

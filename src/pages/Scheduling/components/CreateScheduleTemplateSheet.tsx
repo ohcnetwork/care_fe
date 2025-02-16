@@ -44,7 +44,7 @@ import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { getSlotsPerSession, getTokenDuration } from "@/pages/Scheduling/utils";
 import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   facilityId: string;
