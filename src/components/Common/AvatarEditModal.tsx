@@ -86,7 +86,13 @@ const AvatarEditModal = ({
       setSelectedFile(myFile);
     });
   };
-
+  const stopCamera = useCallback(() => {
+    const stream = webRef.current?.video?.srcObject as MediaStream;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop()); // Stop all media tracks
+    }
+    setIsCameraOpen(false);
+  }, []);
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
@@ -407,7 +413,7 @@ const AvatarEditModal = ({
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
-                    webRef.current.stopCamera();
+                    stopCamera();
                   }}
                   disabled={isProcessing}
                 >
