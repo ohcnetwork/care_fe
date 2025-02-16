@@ -1,6 +1,7 @@
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { Link, usePathParams } from "raviger";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Sidebar,
@@ -40,6 +41,7 @@ export function AppSidebar({
   sidebarFor = SidebarFor.FACILITY,
   ...props
 }: AppSidebarProps) {
+  const { t } = useTranslation();
   const exactMatch = usePathParams("/facility/:facilityId");
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityId = exactMatch?.facilityId || subpathMatch?.facilityId;
@@ -105,7 +107,7 @@ export function AppSidebar({
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight text-gray-900">
                     <span className="truncate font-semibold">
-                      View Dashboard
+                      {t("view_dashboard")}
                     </span>
                   </div>
                 </Link>
