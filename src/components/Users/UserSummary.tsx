@@ -92,6 +92,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
     <>
       {showDeleteDialog && (
         <UserDeleteDialog
+          show={showDeleteDialog}
           name={userData.username}
           handleOk={handleSubmit}
           handleCancel={() => {
@@ -99,6 +100,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
           }}
         />
       )}
+
       <EditUserSheet
         existingUsername={userData.username}
         open={showEditUserSheet}
