@@ -24,13 +24,13 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import {
   MEDICATION_STATEMENT_STATUS_STYLES,
   MedicationStatementRead,
 } from "@/types/emr/medicationStatement";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 
 interface MedicationStatementListProps {
   patientId: string;
@@ -129,7 +129,7 @@ export function MedicationStatementList({
 
   const { data: medications, isLoading } = useQuery({
     queryKey: ["medication_statements", patientId],
-    queryFn: query(routes.medicationStatement.list, {
+    queryFn: query(medicationStatementApi.list, {
       pathParams: { patientId },
     }),
   });
