@@ -78,7 +78,7 @@ export function SymptomTable({
                   SYMPTOM_SEVERITY_STYLES[symptom.severity]
                 }`}
               >
-                {t(symptom.severity)}
+                {symptom.severity ? t(symptom.severity) : "-"}
               </Badge>
             </TableCell>
             <TableCell>
