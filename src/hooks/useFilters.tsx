@@ -2,12 +2,14 @@ import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
 import FiltersCache from "@/Utils/FiltersCache";
-import { classNames, humanizeStrings } from "@/Utils/utils";
+import { humanizeStrings } from "@/Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 
@@ -222,7 +224,7 @@ export default function useFilters({
     }
     return (
       <div
-        className={classNames(
+        className={cn(
           "flex w-full justify-center",
           totalCount > limit ? "visible" : "invisible",
           !noMargin && "mt-4",

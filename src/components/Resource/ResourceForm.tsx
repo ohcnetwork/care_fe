@@ -48,6 +48,7 @@ import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { mergeAutocompleteOptions } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import facilityApi from "@/types/facility/facilityApi";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
@@ -274,7 +275,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                           </FormLabel>
                           <FormControl>
                             <Autocomplete
-                              options={facilityOptions ?? []}
+                              options={mergeAutocompleteOptions(
+                                facilityOptions ?? [],
+                                field.value
+                                  ? {
+                                      label: field.value.name,
+                                      value: field.value.id,
+                                    }
+                                  : undefined,
+                              )}
                               value={field.value?.id ?? ""}
                               placeholder={t("start_typing_to_search")}
                               onSearch={setFacilitySearch}
