@@ -22,7 +22,7 @@ import { useView } from "@/Utils/useView";
 
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: ["username"],
   });
@@ -38,8 +38,8 @@ export default function FacilityUsers(props: { facilityId: string }) {
       pathParams: { facility_id: facilityId },
       queryParams: {
         username: qParams.username,
-        limit: qParams.limit,
-        offset: (qParams.page - 1) * qParams.limit,
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,
