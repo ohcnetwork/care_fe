@@ -92,4 +92,6 @@ export interface MedicationAdministrationRead {
     dose?: DosageQuantity;
     rate?: Quantity;
   };
+  created_by: UserBareMinimum;
+  updated_by: UserBareMinimum;
 }
