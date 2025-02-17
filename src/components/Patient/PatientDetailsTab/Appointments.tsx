@@ -21,7 +21,6 @@ import { Avatar } from "@/components/Common/Avatar";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -33,11 +32,10 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewAppointments, canCreateAppointment } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
   const { goBack } = useAppHistory();
 

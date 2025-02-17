@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
@@ -26,11 +24,10 @@ import {
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);

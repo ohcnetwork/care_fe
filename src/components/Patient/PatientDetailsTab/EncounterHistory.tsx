@@ -16,7 +16,6 @@ import { EncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -25,16 +24,15 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { patientId, facilityId } = props;
+  const { patientId, facilityId, patientData } = props;
 
   const { t } = useTranslation();
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canViewPatients } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
   const { goBack } = useAppHistory();
 

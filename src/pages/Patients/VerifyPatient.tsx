@@ -88,6 +88,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
       toast.error(t("no_permission_to_view_page"));
       goBack("/");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPerformActions]);
 
   return (

@@ -34,7 +34,6 @@ import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { FileUploadModel } from "@/components/Patient/models";
 
-import useAuthUser from "@/hooks/useAuthUser";
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
@@ -68,7 +67,6 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
-  const authUser = useAuthUser();
   const {
     canViewClinicalData,
     canViewEncounter,
@@ -76,7 +74,7 @@ export const FilesTab = (props: FilesTabProps) => {
     canWriteEncounter,
   } = getPermissions(
     hasPermission,
-    encounter?.permissions ?? authUser.permissions,
+    encounter?.permissions ?? patient?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"

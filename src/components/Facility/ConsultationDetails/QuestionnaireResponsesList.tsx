@@ -15,7 +15,6 @@ import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
@@ -25,6 +24,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
+import { Patient } from "@/types/emr/newPatient";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -32,6 +32,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  patientData?: Patient;
   facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
@@ -295,16 +296,19 @@ export default function QuestionnaireResponsesList({
   facilityId,
   isPrintPreview = false,
   onlyUnstructured,
+  patientData,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
     canViewEncounter,
     canViewPatientQuestionnaireResponses,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? patientData?.permissions ?? [],
+  );
   const { goBack } = useAppHistory();
 
   const canAccess = encounter

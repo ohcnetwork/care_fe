@@ -15,7 +15,6 @@ import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
@@ -29,14 +28,13 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
-  const { facilityId, patientId } = props;
+  const { facilityId, patientId, patientData } = props;
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
   const { canViewPatientQuestionnaireResponses } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();

@@ -8,7 +8,6 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -17,12 +16,11 @@ import { usePermissions } from "@/context/PermissionContext";
 import { PatientProps } from ".";
 
 export const HealthProfileSummary = (props: PatientProps) => {
-  const { patientId, facilityId } = props;
-  const authUser = useAuthUser();
+  const { patientId, facilityId, patientData } = props;
   const { hasPermission } = usePermissions();
   const { canViewClinicalData } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
   const { goBack } = useAppHistory();
 

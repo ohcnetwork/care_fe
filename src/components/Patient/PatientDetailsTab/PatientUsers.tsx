@@ -38,8 +38,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
@@ -211,13 +209,12 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 }
 
 export const PatientUsers = (props: PatientProps) => {
-  const { patientId } = props;
+  const { patientId, patientData } = props;
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const authUser = useAuthUser();
   const { canWritePatient } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    patientData.permissions,
   );
 
   const { data: users } = useQuery({
