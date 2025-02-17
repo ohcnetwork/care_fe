@@ -67,15 +67,8 @@ export function AppSidebar({
       return;
     }
 
-    const facility = user.facilities.find((f) => f.id === facilityId);
-    if (!facility) {
-      setSelectedFacility(null);
-      return;
-    }
-
-    if (facility) {
-      setSelectedFacility(facility);
-    }
+    const facility = user.facilities.find((f) => f.id === facilityId) || null;
+    setSelectedFacility(facility);
   }, [facilityId, user?.facilities, facilitySidebar]);
 
   const hasFacilities = user?.facilities && user.facilities.length > 0;
@@ -95,7 +88,7 @@ export function AppSidebar({
             selectedOrganization={selectedOrganization}
           />
         )}
-        {selectedFacility && hasFacilities && (
+        {facilityId && selectedFacility && hasFacilities && (
           <FacilitySwitcher
             facilities={user?.facilities || []}
             selectedFacility={selectedFacility}
