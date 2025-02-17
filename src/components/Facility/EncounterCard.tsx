@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import { formatDateTime } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
@@ -21,14 +22,22 @@ export const EncounterCard = (props: EncounterCardProps) => {
   return (
     <>
       <div className="flex gap-2">
-        <div className="relative flex flex-col items-center">
+        <div className="flex flex-col items-center">
           {completedEncounterStatus.includes(encounter.status) ? (
-            <BadgeCheck className="w-5 h-5 text-teal-300" />
+            <div className="p-1 rounded-full border border-teal-600 bg-green-100">
+              <BadgeCheck className="w-5 h-5 text-teal-600" />
+            </div>
           ) : (
-            <CircleDashed className="w-5 h-5 text-purple-400" />
+            <div className="p-1 rounded-full border border-indigo-800 bg-purple-100">
+              <CircleDashed className="w-5 h-5 text-purple-400" />
+            </div>
           )}
-          {/* Vertical Line */}
-          <div className="w-[2px] h-full bg-secondary-300"></div>
+          <div className="h-full">
+            <Separator
+              orientation="vertical"
+              className="h-full bg-secondary-300"
+            />
+          </div>
         </div>
         <Card className="flex-1">
           <CardContent className="p-4 sm:p-2 space-y-4">
@@ -43,7 +52,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 )}
               >
                 {completedEncounterStatus.includes(encounter.status) ? (
-                  <BadgeCheck className="w-4 h-4 text-teal-700 " />
+                  <BadgeCheck className="w-4 h-4 text-teal-700" />
                 ) : (
                   <CircleDashed className="w-4 h-4 text-indigo-800" />
                 )}
