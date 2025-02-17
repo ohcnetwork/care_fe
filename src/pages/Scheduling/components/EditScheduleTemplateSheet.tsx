@@ -422,6 +422,7 @@ const AvailabilityEditor = ({
               <AlertDialogDescription>
                 <Alert variant="destructive" className="mt-4">
                   <AlertTitle>{t("warning")}</AlertTitle>
+                  {/* lint */}
                   <AlertDescription>
                     {t("this_will_permanently_remove_the_template", {
                       data: "session",
