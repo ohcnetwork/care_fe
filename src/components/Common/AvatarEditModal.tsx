@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -187,6 +188,9 @@ const AvatarEditModal = ({
       <DialogContent className="md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Edit avatar descriptionr
+          </DialogDescription>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
