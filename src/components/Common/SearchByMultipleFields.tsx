@@ -47,7 +47,6 @@ interface SearchByMultipleFieldsProps {
   clearSearch?: { value: boolean; params?: string[] };
   enableOptionButtons?: boolean;
   onFieldChange?: (options: SearchOption) => void;
-  autoFocus?: boolean;
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
@@ -91,7 +90,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   clearSearch,
   onFieldChange,
   enableOptionButtons = true,
-  autoFocus = false,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
@@ -178,12 +176,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [focusedIndex, open, handleOptionChange, options]);
 
   useEffect(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [selectedOptionIndex, autoFocus]);
-
-  useEffect(() => {
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
@@ -241,7 +233,15 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         className="flex items-center rounded-t-lg"
       >
         {!isSingleOption && (
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover
+            open={open}
+            onOpenChange={(open) => {
+              setOpen(open);
+              if (open) {
+                inputRef.current?.focus();
+              }
+            }}
+          >
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
