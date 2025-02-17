@@ -481,6 +481,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
 
+                  <PLUGIN_Component
+                    __name="PatientInfoCardMarkAsComplete"
+                    encounter={encounter}
+                  />
+
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
 
