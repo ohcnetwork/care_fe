@@ -69,15 +69,15 @@ export const EncounterCard = (props: EncounterCardProps) => {
 
             <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
               <div className="w-full mx-3 sm:w-auto">
-                <div className="text-gray-600">{t("facility")}</div>
-                <div className="font-bold flex items-center gap-2">
+                <div className="text-gray-600 text-sm">{t("facility")}</div>
+                <div className="font-semibold text-base flex items-center gap-2">
                   {encounter.facility.name}
                 </div>
               </div>
 
               <div className="w-full mx-3 sm:w-auto">
-                <div className="text-gray-600">{t("start_date")}</div>
-                <div className="font-bold">
+                <div className="text-gray-600 text-sm">{t("start_date")}</div>
+                <div className="font-semibold text-base">
                   {encounter.period.start
                     ? formatDateTime(encounter.period.start)
                     : t("not_started")}
@@ -85,8 +85,8 @@ export const EncounterCard = (props: EncounterCardProps) => {
               </div>
 
               <div className="w-full mx-3 sm:w-auto">
-                <div className="text-gray-600">{t("priority")}</div>
-                <div className="font-bold flex items-center gap-2">
+                <div className="text-gray-600 text-sm">{t("priority")}</div>
+                <div className="font-semibold text-base flex items-center gap-2">
                   <Clock className="w-4 h-4 text-yellow-500" />
                   {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
                 </div>
@@ -94,8 +94,8 @@ export const EncounterCard = (props: EncounterCardProps) => {
 
               {encounter.period.end && (
                 <div className="w-full mx-3 sm:w-auto">
-                  <div className="text-gray-600">{t("end_date")}</div>
-                  <div className="font-bold">
+                  <div className="text-gray-600 text-sm">{t("end_date")}</div>
+                  <div className="font-semibold text-base">
                     {formatDateTime(encounter.period.end)}
                   </div>
                 </div>
@@ -103,8 +103,10 @@ export const EncounterCard = (props: EncounterCardProps) => {
 
               {encounter.external_identifier && (
                 <div className="w-full mx-3 sm:w-auto">
-                  <div className="text-gray-600">{t("external_id")}</div>
-                  <div className="font-bold">
+                  <div className="text-gray-600 text-sm">
+                    {t("external_id")}
+                  </div>
+                  <div className="font-semibold text-base">
                     {encounter.external_identifier}
                   </div>
                 </div>
