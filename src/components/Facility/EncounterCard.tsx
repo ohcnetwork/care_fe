@@ -1,6 +1,6 @@
 import { t } from "i18next";
 import { BadgeCheck, BedSingle, CircleDashed, Clock, Eye } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 
 import { cn } from "@/lib/utils";
 
@@ -102,17 +102,14 @@ export const EncounterCard = (props: EncounterCardProps) => {
               )}
             </div>
             <div className="w-full py-2 bg-gray-100 px-2">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`,
-                  )
-                }
-                className="p-2 border border-black"
-              >
-                <Eye />
-                {t("view_encounter")}
+              <Button variant="outline" className="p-2 border border-black">
+                <Link
+                  href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>{t("view_encounter")}</span>
+                </Link>
               </Button>
             </div>
           </CardContent>
