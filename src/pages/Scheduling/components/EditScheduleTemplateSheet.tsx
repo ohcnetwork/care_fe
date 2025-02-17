@@ -288,7 +288,7 @@ const ScheduleTemplateEditor = ({
                       <AlertTitle>{t("warning")}</AlertTitle>
                       <AlertDescription>
                         {t("this_will_permanently_remove_the_template", {
-                          data: "scheduled teplate",
+                          data: "scheduled template",
                         })}
                       </AlertDescription>
                     </Alert>
@@ -424,7 +424,7 @@ const AvailabilityEditor = ({
                   <AlertTitle>{t("warning")}</AlertTitle>
                   <AlertDescription>
                     {t("this_will_permanently_remove_the_template", {
-                      data: "available session",
+                      data: "session",
                     })}
                   </AlertDescription>
                 </Alert>
