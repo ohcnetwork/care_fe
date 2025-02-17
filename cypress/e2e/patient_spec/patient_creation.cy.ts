@@ -106,7 +106,7 @@ describe("Patient Management", () => {
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("GHC Trikaripur");
+      facilityCreation.selectFacility("GHC payyanur");
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -134,7 +134,7 @@ describe("Patient Management", () => {
   });
 
   it("Search patient with phone number and create a new encounter", () => {
-    facilityCreation.selectFacility("GHC Trikaripur");
+    facilityCreation.selectFacility("GHC payyanur");
     patientCreation
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
@@ -167,7 +167,7 @@ describe("Patient Management", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("GHC Trikaripur");
+    facilityCreation.selectFacility("GHC payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()

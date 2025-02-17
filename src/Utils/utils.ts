@@ -241,3 +241,12 @@ export const stringifyGeoOrganization = (org: Organization) => {
 
   return levels.join(", ");
 };
+
+export const mergeAutocompleteOptions = (
+  options: { label: string; value: string }[],
+  value?: { label: string; value: string },
+) => {
+  if (!value) return options;
+  if (options.find((o) => o.value === value.value)) return options;
+  return [value, ...options];
+};
