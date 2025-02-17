@@ -21,8 +21,6 @@ import {
   patientTabs,
 } from "@/components/Patient/PatientDetailsTab";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -40,16 +38,7 @@ export const PatientHome = (props: {
   const { facilityId, id, page } = props;
 
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { getPatientTabs, getFacilityTabs } = getTabs(
-    authUser.permissions,
-    hasPermission,
-  );
-  const { canCreateAppointment } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
 
   const { data: patientData, isLoading } = useQuery<Patient>({
     queryKey: ["patient", id],
@@ -60,6 +49,15 @@ export const PatientHome = (props: {
     }),
     enabled: !!id,
   });
+
+  const { getPatientTabs, getFacilityTabs } = getTabs(
+    patientData?.permissions ?? [],
+    hasPermission,
+  );
+  const { canCreateAppointment } = getPermissions(
+    hasPermission,
+    patientData?.permissions ?? [],
+  );
 
   if (isLoading) {
     return <Loading />;

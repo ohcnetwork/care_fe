@@ -41,8 +41,6 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 import { FACILITY_FEATURE_TYPES } from "@/common/constants";
 
@@ -114,11 +112,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const authUser = useAuthUser();
-  const { canUpdateFacility } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
 
   const { data: facilityData, isLoading } = useQuery<FacilityData>({
     queryKey: ["facility", facilityId],
@@ -126,6 +119,11 @@ export const FacilityHome = ({ facilityId }: Props) => {
       pathParams: { id: facilityId },
     }),
   });
+
+  const { canUpdateFacility } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
     mutationFn: mutate(routes.deleteFacility, {
