@@ -2,7 +2,9 @@ import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { classNames, keysOf } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
+
+import { keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelectorLogin = () => {
@@ -32,7 +34,7 @@ export const LanguageSelectorLogin = () => {
           <button
             key={e}
             onClick={() => handleLanguage(e)}
-            className={classNames(
+            className={cn(
               "text-primary-400 hover:text-primary-600",
               (i18n.language === e ||
                 (i18n.language === "en-US" && e === "en")) &&
