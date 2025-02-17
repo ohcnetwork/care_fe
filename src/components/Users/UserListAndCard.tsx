@@ -76,9 +76,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
   const { t } = useTranslation();
 
   return (
-    <Card key={user.id} className="h-full">
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex flex-col h-full gap-4">
+    <Card key={user.id} className="h-full flex flex-col">
+      <CardContent className="p-4 sm:p-6 flex flex-col flex-grow">
+        <div className="flex flex-col flex-grow  gap-4">
           <div className="flex gap-4">
             <Avatar
               name={user.username ?? ""}
@@ -93,7 +93,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
                   {user.first_name} {user.last_name}
                 </h1>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-500 truncate">
+                  <span className="text-sm text-gray-500 truncate  whitespace-nowrap">
                     {user.username}
                   </span>
                   <UserStatusIndicator user={user} />
@@ -116,7 +116,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
               </div>
             </div>
           </div>
-          <div className="mt-auto pt-2">{GetDetailsButton(user.username)}</div>
+          <div className="mt-auto pt-2 justify-end">
+            {GetDetailsButton(user.username)}
+          </div>
         </div>
       </CardContent>
     </Card>
