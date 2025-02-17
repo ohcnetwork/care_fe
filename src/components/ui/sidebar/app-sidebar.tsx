@@ -62,11 +62,17 @@ export function AppSidebar({
   }, [user?.organizations, organizationId]);
 
   React.useEffect(() => {
-    setSelectedFacility(null);
-
-    if (!user?.facilities || !facilityId || !facilitySidebar) return;
+    if (!user?.facilities || !facilityId || !facilitySidebar) {
+      setSelectedFacility(null);
+      return;
+    }
 
     const facility = user.facilities.find((f) => f.id === facilityId);
+    if (!facility) {
+      setSelectedFacility(null);
+      return;
+    }
+
     if (facility) {
       setSelectedFacility(facility);
     }
@@ -89,7 +95,7 @@ export function AppSidebar({
             selectedOrganization={selectedOrganization}
           />
         )}
-        {facilityId && selectedFacility && hasFacilities && (
+        {selectedFacility && hasFacilities && (
           <FacilitySwitcher
             facilities={user?.facilities || []}
             selectedFacility={selectedFacility}
