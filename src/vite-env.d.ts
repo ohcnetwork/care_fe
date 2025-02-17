@@ -19,11 +19,7 @@ interface ImportMetaEnv {
   readonly REACT_CUSTOM_LOGO_ALT?: string;
   readonly REACT_CUSTOM_DESCRIPTION?: string;
   readonly REACT_GMAPS_API_KEY?: string;
-  readonly REACT_GOV_DATA_API_KEY?: string;
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
-  readonly REACT_WARTIME_SHIFTING?: string;
-  readonly REACT_STILL_WATCHING_IDLE_TIMEOUT?: string;
-  readonly REACT_STILL_WATCHING_PROMPT_DURATION?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
