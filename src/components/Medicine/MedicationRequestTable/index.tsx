@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -178,16 +178,15 @@ export default function MedicationRequestTable({
                         stoppedMedications?.results?.length
                       )
                     }
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/prescriptions/print`,
-                      )
-                    }
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
-                    <CareIcon icon="l-print" className="mr-2" />
-                    {t("print")}
+                    <Link
+                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/prescriptions/print`}
+                    >
+                      <CareIcon icon="l-print" className="mr-2" />
+                      {t("print")}
+                    </Link>
                   </Button>
                 </div>
               </div>
