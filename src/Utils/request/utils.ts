@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import { QueryParams, RequestOptions } from "@/Utils/request/types";
+import { QueryParams } from "@/Utils/request/types";
 
 export function makeUrl(
   path: string,
@@ -64,27 +64,27 @@ export function getAuthorizationHeader() {
   return null;
 }
 
-export function mergeRequestOptions<TData>(
-  options: RequestOptions<TData>,
-  overrides: RequestOptions<TData>,
-): RequestOptions<TData> {
-  return {
-    ...options,
-    ...overrides,
+export async function getResponseBody<TData>(res: Response): Promise<TData> {
+  if (!(res.headers.get("content-length") !== "0")) {
+    return null as TData;
+  }
 
-    query: { ...options.query, ...overrides.query },
-    body: (options.body || overrides.body) && {
-      ...(options.body ?? {}),
-      ...(overrides.body ?? {}),
-    },
-    pathParams: { ...options.pathParams, ...overrides.pathParams },
+  const isJson = res.headers.get("content-type")?.includes("application/json");
+  const isImage = res.headers.get("content-type")?.includes("image");
 
-    onResponse: (res) => {
-      options.onResponse?.(res);
-      overrides.onResponse?.(res);
-    },
-    silent: overrides.silent ?? options.silent,
-  };
+  if (isImage) {
+    return (await res.blob()) as TData;
+  }
+
+  if (!isJson) {
+    return (await res.text()) as TData;
+  }
+
+  try {
+    return await res.json();
+  } catch {
+    return (await res.text()) as TData;
+  }
 }
 
 export function handleUploadPercentage(

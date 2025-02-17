@@ -31,6 +31,10 @@ export type PatientInfoCardActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientInfoCardMarkAsCompleteComponentType = React.FC<{
+  encounter: Encounter;
+}>;
+
 export type FacilityHomeActionsComponentType = React.FC<{
   facility: FacilityData;
   className?: string;
@@ -53,6 +57,7 @@ export type SupportedPluginComponents = {
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  PatientInfoCardMarkAsComplete: PatientInfoCardMarkAsCompleteComponentType;
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
