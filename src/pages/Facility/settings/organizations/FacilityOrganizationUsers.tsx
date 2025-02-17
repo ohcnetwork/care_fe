@@ -28,37 +28,28 @@ interface Props {
   facilityId: string;
 }
 
-interface SheetState {
-  sheet: string;
-  username: string;
-}
-
 export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
-  const [sheetState, setSheetState] = useState<SheetState>({
+  const [sheetState, setSheetState] = useState<{
+    sheet: string;
+    username: string;
+  }>({
     sheet: "",
     username: "",
   });
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
   });
-  const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
 
   const openAddUserSheet = sheetState.sheet === "add";
   const openLinkUserSheet = sheetState.sheet === "link";
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: [
-      "facilityOrganizationUsers",
-      facilityId,
-      id,
-      searchQuery,
-      qParams,
-    ],
+    queryKey: ["facilityOrganizationUsers", facilityId, id, qParams],
     queryFn: query.debounced(routes.facilityOrganization.listUsers, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
-        search_text: searchQuery || undefined,
+        search_text: qParams.search || undefined,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
@@ -81,9 +72,9 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
             />
             <Input
               placeholder={t("search_by_user_name")}
-              value={searchQuery}
+              value={qParams.search || ""}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                updateQuery({ search: e.target.value || undefined });
               }}
               className="w-full pl-8"
             />
