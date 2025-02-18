@@ -154,6 +154,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           })
                         }
                         className="w-full border-none shadow-none"
+                        autoFocus
                       />
                     </div>
                   </PopoverContent>
