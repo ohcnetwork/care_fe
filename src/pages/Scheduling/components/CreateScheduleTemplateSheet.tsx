@@ -3,14 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
 import { ArrowRightIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
-
-import { cn } from "@/lib/utils";
 
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -18,19 +15,7 @@ import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -250,9 +235,6 @@ export default function CreateScheduleTemplateSheet({
     );
   };
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
-
   return (
     <Sheet
       open={qParams.sheet === "create_template"}
@@ -369,75 +351,21 @@ export default function CreateScheduleTemplateSheet({
                           {form.watch(`availabilities.${index}.name`)}
                         </span>
                       </div>
-                      <AlertDialog
-                        open={openDialog}
-                        onOpenChange={(open) => {
-                          setOpenDialog(open);
-                          if (!open) setRemoveIndex(null);
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="text-gray-600 hover:text-gray-900"
+                        onClick={() => {
+                          const availabilities =
+                            form.getValues("availabilities");
+                          availabilities.splice(index, 1);
+                          form.setValue("availabilities", availabilities);
                         }}
                       >
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setRemoveIndex(index);
-                              setOpenDialog(true);
-                            }}
-                          >
-                            <CareIcon icon="l-trash" className="text-base" />
-                            <span className="ml-2">{t("remove")}</span>
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {t("are_you_sure")}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              <Alert variant="destructive" className="mt-4">
-                                <AlertTitle>{t("warning")}</AlertTitle>
-                                <AlertDescription>
-                                  {t(
-                                    "this_will_permanently_remove_the_session_and_cannot_be_undone",
-                                  )}
-                                </AlertDescription>
-                              </Alert>
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel
-                              onClick={() => {
-                                setOpenDialog(false);
-                                setRemoveIndex(null);
-                              }}
-                            >
-                              {t("cancel")}
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              className={cn(
-                                buttonVariants({ variant: "destructive" }),
-                              )}
-                              onClick={() => {
-                                const availabilities =
-                                  form.getValues("availabilities");
-                                if (removeIndex !== null) {
-                                  availabilities.splice(removeIndex, 1);
-                                  form.setValue(
-                                    "availabilities",
-                                    availabilities,
-                                  );
-                                }
-                                setOpenDialog(false);
-                                setRemoveIndex(null);
-                              }}
-                            >
-                              {t("confirm")}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        <CareIcon icon="l-trash" className="text-base" />
+                        <span className="ml-2">{t("remove")}</span>
+                      </Button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4">
