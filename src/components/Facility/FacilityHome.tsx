@@ -328,7 +328,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           facilityData.geo_organization,
                         ).map((item, index) => (
                           <div key={index} className="flex flex-col">
-                            <span className="font-semibold text-lg">
+                            <span className="font-semibold text-lg truncate">
                               {item.label}
                             </span>
                             <span className="text-gray-800 truncate">
