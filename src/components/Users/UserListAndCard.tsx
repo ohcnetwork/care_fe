@@ -1,3 +1,4 @@
+import { TFunction } from "i18next";
 import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -15,10 +16,11 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
-const GetDetailsButton = (username: string) => {
-  const { t } = useTranslation();
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
-
+const getDetailsButton = (
+  username: string,
+  t: TFunction,
+  facilityId: string,
+) => {
   return (
     <div>
       <Button id={`see-details-${username}`} variant="outline" size="sm">
@@ -72,7 +74,7 @@ export const UserStatusIndicator = ({
 };
 const UserCard = ({ user }: { user: UserBase }) => {
   const { t } = useTranslation();
-
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   return (
     <Card key={user.id} className="h-full">
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
@@ -117,7 +119,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
         </div>
 
         <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
-          {GetDetailsButton(user.username)}
+          {getDetailsButton(user.username, t, facilityId)}
         </div>
       </CardContent>
     </Card>
@@ -144,6 +146,8 @@ const UserListHeader = () => {
 };
 
 const UserListRow = ({ user }: { user: UserBase }) => {
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+  const { t } = useTranslation();
   return (
     <tr
       key={`usr_${user.id}`}
@@ -182,7 +186,9 @@ const UserListRow = ({ user }: { user: UserBase }) => {
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
         {formatPhoneNumberIntl(user.phone_number)}
       </td>
-      <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
+      <td className="px-4 py-4">
+        {getDetailsButton(user.username, t, facilityId)}
+      </td>
     </tr>
   );
 };
