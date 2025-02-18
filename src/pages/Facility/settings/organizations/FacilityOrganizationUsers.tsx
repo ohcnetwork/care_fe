@@ -1,18 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
-import {
-  CardGridSkeleton,
-  CardListSkeleton,
-} from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
+
+import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -29,19 +29,30 @@ interface Props {
 }
 
 export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
-  const [qParams, setQueryParams] = useQueryParams<{
+  const [sheetState, setSheetState] = useState<{
     sheet: string;
     username: string;
-  }>();
+  }>({
+    sheet: "",
+    username: "",
+  });
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
+  });
   const { t } = useTranslation();
 
-  const openAddUserSheet = qParams.sheet === "add";
-  const openLinkUserSheet = qParams.sheet === "link";
+  const openAddUserSheet = sheetState.sheet === "add";
+  const openLinkUserSheet = sheetState.sheet === "link";
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["facilityOrganizationUsers", facilityId, id],
-    queryFn: query(routes.facilityOrganization.listUsers, {
+    queryKey: ["facilityOrganizationUsers", facilityId, id, qParams],
+    queryFn: query.debounced(routes.facilityOrganization.listUsers, {
       pathParams: { facilityId, organizationId: id },
+      queryParams: {
+        search_text: qParams.search || undefined,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+      },
     }),
     enabled: !!id,
   });
@@ -50,32 +61,32 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
     return null;
   }
 
-  if (isLoadingUsers) {
-    return (
-      <FacilityOrganizationLayout id={id} facilityId={facilityId}>
-        <div className="grid gap-4">
-          <CardListSkeleton count={1} />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <CardGridSkeleton count={6} />
-          </div>
-        </div>
-      </FacilityOrganizationLayout>
-    );
-  }
-
   return (
     <FacilityOrganizationLayout id={id} facilityId={facilityId}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("users")}</h2>
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-4 w-full justify-between">
+          <div className="relative w-full md:w-auto">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4"
+            />
+            <Input
+              placeholder={t("search_by_user_name")}
+              value={qParams.search || ""}
+              onChange={(e) => {
+                updateQuery({ search: e.target.value || undefined });
+              }}
+              className="w-full pl-8"
+            />
+          </div>
+          <div className="flex gap-2 w-full md:w-auto justify-end">
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
-                setQueryParams({ sheet: open ? "add" : "", username: "" });
+                setSheetState({ sheet: open ? "add" : "", username: "" });
               }}
               onUserCreated={(user) => {
-                setQueryParams({ sheet: "link", username: user.username });
+                setSheetState({ sheet: "link", username: user.username });
               }}
             />
             <LinkFacilityUserSheet
@@ -83,88 +94,98 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
               organizationId={id}
               open={openLinkUserSheet}
               setOpen={(open) => {
-                setQueryParams({ sheet: open ? "link" : "", username: "" });
+                setSheetState({ sheet: open ? "link" : "", username: "" });
               }}
-              preSelectedUsername={qParams.username}
+              preSelectedUsername={sheetState.username}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-          {users?.results?.length === 0 ? (
-            <Card className="col-span-full">
-              <CardContent className="p-6 text-center text-gray-500">
-                {t("no_users_found")}
-              </CardContent>
-            </Card>
-          ) : (
-            users?.results?.map((userRole: OrganizationUserRole) => (
-              <Card key={userRole.id} className="h-full">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col h-full gap-4">
-                    <div className="flex gap-4">
-                      <Avatar
-                        name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                        imageUrl={userRole.user.profile_picture_url}
-                        className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
-                      />
+        {isLoadingUsers ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+            <CardGridSkeleton count={6} />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+              {!users?.results?.length ? (
+                <Card className="col-span-full">
+                  <CardContent className="p-6 text-center text-gray-500">
+                    {t("no_users_found")}
+                  </CardContent>
+                </Card>
+              ) : (
+                users.results.map((userRole: OrganizationUserRole) => (
+                  <Card key={userRole.id} className="h-full">
+                    <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
+                      <div className="flex items-start gap-3">
+                        <Avatar
+                          name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                          imageUrl={userRole.user.profile_picture_url}
+                          className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+                        />
 
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <div className="flex flex-col gap-1">
-                          <h1 className="text-base font-bold break-words pr-2">
-                            {userRole.user.first_name} {userRole.user.last_name}
-                          </h1>
-                          <span className="text-sm text-gray-500">
-                            <span className="mr-2 break-words">
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-start justify-between">
+                              <h1 className="text-base font-bold break-words pr-2">
+                                {userRole.user.first_name}{" "}
+                                {userRole.user.last_name}
+                              </h1>
+                              <span className="text-sm text-gray-500">
+                                <UserStatusIndicator user={userRole.user} />
+                              </span>
+                            </div>
+                            <span className="text-sm text-gray-500 mr-2 break-words">
                               {userRole.user.username}
                             </span>
-                            <UserStatusIndicator user={userRole.user} />
-                          </span>
+                          </div>
+                          <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <div className="text-gray-500">{t("role")}</div>
+                              <div className="font-medium truncate">
+                                {userRole.role.name}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-gray-500">
+                                {t("phone_number")}
+                              </div>
+                              <div className="font-medium truncate">
+                                {userRole.user.phone_number}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-gray-500">{t("role")}</div>
-                        <div className="font-medium truncate">
-                          {userRole.role.name}
-                        </div>
+                      <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
+                        <EditFacilityUserRoleSheet
+                          facilityId={facilityId}
+                          organizationId={id}
+                          userRole={userRole}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <span>{t("see_details")}</span>
+                            </Button>
+                          }
+                        />
                       </div>
-                      <div>
-                        <div className="text-gray-500">{t("phone_number")}</div>
-                        <div className="font-medium truncate">
-                          {userRole.user.phone_number}
-                        </div>
-                      </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
 
-                    <div className="mt-auto pt-2">
-                      <EditFacilityUserRoleSheet
-                        facilityId={facilityId}
-                        organizationId={id}
-                        userRole={userRole}
-                        trigger={
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="w-full gap-2"
-                          >
-                            <CareIcon
-                              icon="l-arrow-up-right"
-                              className="h-4 w-4"
-                            />
-                            <span>{t("more_details")}</span>
-                          </Button>
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+            {(users?.results || []).length > 0 &&
+              users?.count &&
+              users.count > resultsPerPage && (
+                <div className="flex justify-center">
+                  <Pagination totalCount={users.count} />
+                </div>
+              )}
+          </div>
+        )}
       </div>
     </FacilityOrganizationLayout>
   );

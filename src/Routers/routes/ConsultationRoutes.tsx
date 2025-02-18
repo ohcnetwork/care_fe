@@ -1,6 +1,5 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
-import FileUploadPage from "@/components/Patient/FileUploadPage";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -29,6 +28,19 @@ const consultationRoutes: AppRoutes = {
       facilityId={facilityId}
       encounterId={encounterId}
       tab={tab}
+    />
+  ),
+  "/facility/:facilityId/encounter/:encounterId/:tab/:subPage": ({
+    facilityId,
+    encounterId,
+    tab,
+    subPage,
+  }) => (
+    <EncounterShow
+      facilityId={facilityId}
+      encounterId={encounterId}
+      tab={tab}
+      subPage={subPage}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -72,18 +84,6 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
-    facilityId,
-    patientId,
-    id,
-  }) => (
-    <FileUploadPage
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={id}
-      type="encounter"
-    />
-  ),
 };
 
 export default consultationRoutes;
