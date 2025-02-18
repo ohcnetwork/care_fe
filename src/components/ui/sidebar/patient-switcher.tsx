@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import {
   Select,
   SelectContent,
@@ -12,8 +14,6 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
-
-import { classNames } from "@/Utils/utils";
 
 interface PatientSwitcherProps {
   className?: string;
@@ -30,12 +30,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
   }
 
   return (
-    <div
-      className={classNames(
-        "mx-2 mt-4 mb-2 flex flex-wrap flex-row",
-        className,
-      )}
-    >
+    <div className={cn("mx-2 mt-4 mb-2 flex flex-wrap flex-row", className)}>
       <Select
         disabled={patientUserContext.patients?.length === 0}
         value={

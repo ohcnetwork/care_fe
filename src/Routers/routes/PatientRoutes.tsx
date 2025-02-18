@@ -1,4 +1,3 @@
-import FileUploadPage from "@/components/Patient/FileUploadPage";
 import {
   facilityPatientTabs,
   patientTabs,
@@ -44,16 +43,6 @@ const PatientRoutes: AppRoutes = {
   }, {}),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
     <PatientRegistration facilityId={facilityId} patientId={id} />
-  ),
-  "/facility/:facilityId/patient/:patientId/files": ({
-    facilityId,
-    patientId,
-  }) => (
-    <FileUploadPage
-      facilityId={facilityId}
-      patientId={patientId}
-      type="patient"
-    />
   ),
 };
 

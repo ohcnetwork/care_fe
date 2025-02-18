@@ -3,5 +3,11 @@ import { FilesTab } from "@/components/Files/FilesTab";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 export const EncounterFilesTab = (props: EncounterTabProps) => {
-  return <FilesTab type="encounter" encounter={props.encounter} />;
+  return (
+    <FilesTab
+      type="encounter"
+      encounter={props.encounter}
+      subPage={props.subPage}
+    />
+  );
 };

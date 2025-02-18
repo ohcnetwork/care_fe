@@ -122,12 +122,9 @@ export function MedicineAdminSheet({
   const formRef = useRef<HTMLFormElement>(null);
 
   const { mutate: upsertAdministrations, isPending } = useMutation({
-    mutationFn: mutate(
-      medicationAdministrationApi.upsertMedicationAdministration,
-      {
-        pathParams: { patientId },
-      },
-    ),
+    mutationFn: mutate(medicationAdministrationApi.upsert, {
+      pathParams: { patientId },
+    }),
     onSuccess: () => {
       toast.success(t("medication_administration_saved"));
       handleClose();
