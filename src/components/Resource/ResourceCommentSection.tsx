@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
 import { Textarea } from "@/components/ui/textarea";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import PaginationComponent from "@/components/Common/Pagination";
@@ -18,7 +20,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, relativeTime } from "@/Utils/utils";
+import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { CommentModel } from "@/types/resourceRequest/resourceRequest";
 
 const CommentSection = (props: { id: string }) => {
@@ -91,11 +93,13 @@ const CommentSection = (props: { id: string }) => {
                 </div>
               ) : (
                 <ul>
-                  {resourceComments?.results?.map((comment) => (
-                    <li key={comment.id} className="w-full">
-                      <Comment {...comment} />
-                    </li>
-                  ))}
+                  {resourceComments?.results
+                    ? [...resourceComments.results].reverse().map((comment) => (
+                        <li key={comment.id} className="w-full">
+                          <Comment {...comment} />
+                        </li>
+                      ))
+                    : null}
                   <div className="flex w-full items-center justify-center">
                     <div
                       className={cn(
@@ -130,23 +134,37 @@ export const Comment = ({
   created_by,
   created_date,
 }: CommentModel) => (
-  <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
-    <div className="w-full">
-      <p className="break-words whitespace-pre-wrap">
-        {comment.replace(/\n+/g, "\n")}
-      </p>
-    </div>
-    <div className="flex w-full items-center">
-      <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
-        <Avatar
-          name={`${created_by.first_name} ${created_by.last_name}`}
-          className="h-8 w-8 "
-        />
-        <span className="pl-2 text-sm text-secondary-700">
-          {formatName(created_by)}
-        </span>
+  <div
+    className={cn(
+      "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800",
+    )}
+  >
+    <div className="flex items-start gap-3">
+      <TooltipComponent content={formatName(created_by)}>
+        <div className="flex">
+          <Avatar
+            name={`${created_by.first_name} ${created_by.last_name}`}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        </div>
+      </TooltipComponent>
+      <div className="flex flex-col flex-grow mt-1">
+        <div className="flex items-center justify-between w-full">
+          <span className="text-gray-700 font-medium text-xs md:text-sm">
+            {formatName(created_by)}
+          </span>
+          <time
+            className="text-gray-500 text-xs"
+            dateTime={created_date}
+            title={formatDateTime(created_date)}
+          >
+            {relativeTime(created_date)}
+          </time>
+        </div>
+        <div className="break-words whitespace-pre-wrap mt-1">
+          <Markdown content={comment} />
+        </div>
       </div>
-      <div className="text-xs">{relativeTime(created_date)}</div>
     </div>
   </div>
 );
