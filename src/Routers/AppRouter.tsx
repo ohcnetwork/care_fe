@@ -4,7 +4,7 @@ import { Redirect, useRedirect, useRoutes } from "raviger";
 import IconIndex from "@/CAREUI/icons/Index";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
@@ -25,7 +25,7 @@ import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
 import OrganizationRoutes from "./routes/OrganizationRoutes";
-import QuestionnaireRoutes from "./routes/questionnaireRoutes";
+import AdminRoutes from "./routes/adminRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
@@ -55,7 +55,6 @@ const Routes: AppRoutes = {
   ...ScheduleRoutes,
   ...UserRoutes,
   ...OrganizationRoutes,
-  ...QuestionnaireRoutes,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,
@@ -67,6 +66,10 @@ const Routes: AppRoutes = {
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   "/login": () => <Redirect to="/" />,
+};
+
+const AdminRouter: AppRoutes = {
+  ...AdminRoutes,
 };
 
 export default function AppRouter() {
@@ -81,7 +84,13 @@ export default function AppRouter() {
     ...routes,
   };
 
-  const pages = useRoutes(routes) || <ErrorPage />;
+  const appPages = useRoutes(routes);
+  const adminPages = useRoutes(AdminRouter);
+
+  const sidebarFor = appPages ? SidebarFor.FACILITY : SidebarFor.ADMIN;
+
+  const pages = appPages || adminPages || <ErrorPage />;
+
   const user = useAuthUser();
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
@@ -92,7 +101,9 @@ export default function AppRouter() {
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
       >
-        {shouldShowSidebar && <AppSidebar user={user} />}
+        {shouldShowSidebar && (
+          <AppSidebar user={user} sidebarFor={sidebarFor} />
+        )}
         <main
           id="pages"
           className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"

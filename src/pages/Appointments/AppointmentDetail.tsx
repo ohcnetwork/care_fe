@@ -54,7 +54,7 @@ import {
   formatName,
   getReadableDuration,
   saveElementAsImage,
-  stringifyGeoOrganization,
+  stringifyNestedObject,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { FacilityData } from "@/types/facility/facility";
@@ -321,7 +321,7 @@ const AppointmentDetails = ({
                 {appointment.patient.address || t("no_address_provided")}
               </p>
               <p className="text-gray-600">
-                {stringifyGeoOrganization(appointment.patient.geo_organization)}
+                {stringifyNestedObject(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
