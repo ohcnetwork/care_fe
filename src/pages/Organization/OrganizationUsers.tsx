@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -152,7 +153,11 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                               {t("phone_number")}
                             </div>
                             <div className="font-medium truncate">
-                              {userRole.user.phone_number ?? "-"}
+                              {userRole.user.phone_number
+                                ? formatPhoneNumberIntl(
+                                    userRole.user.phone_number,
+                                  )
+                                : "-"}
                             </div>
                           </div>
                         </div>
@@ -169,7 +174,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                           </Button>
                         }
                       />
-                      <Button variant="outline" size="sm">
+                      <Button asChild variant="outline" size="sm">
                         <Link href={`/users/${userRole.user.username}`}>
                           <CareIcon
                             icon="l-arrow-up-right"

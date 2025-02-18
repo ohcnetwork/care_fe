@@ -23,7 +23,12 @@ const getDetailsButton = (
 ) => {
   return (
     <div>
-      <Button id={`see-details-${username}`} variant="outline" size="sm">
+      <Button
+        asChild
+        id={`see-details-${username}`}
+        variant="outline"
+        size="sm"
+      >
         <Link href={`/facility/${facilityId}/users/${username}`}>
           <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
           <span>{t("see_details")}</span>
@@ -111,7 +116,9 @@ const UserCard = ({ user }: { user: UserBase }) => {
               <div>
                 <div className="text-gray-500">{t("phone_number")}</div>
                 <div className="font-medium truncate">
-                  {user.phone_number ?? "-"}
+                  {user.phone_number
+                    ? formatPhoneNumberIntl(user.phone_number)
+                    : "-"}
                 </div>
               </div>
             </div>
@@ -157,7 +164,6 @@ const UserListRow = ({ user }: { user: UserBase }) => {
       <td className="px-4 py-4 lg:pr-20">
         <div className="flex items-center gap-3">
           <Avatar
-            // TO do: adjust for facility users.
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
@@ -184,7 +190,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.user_type}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
-        {formatPhoneNumberIntl(user.phone_number)}
+        {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
       </td>
       <td className="px-4 py-4">
         {getDetailsButton(user.username, t, facilityId)}
