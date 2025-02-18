@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -36,6 +36,25 @@ interface Props {
   facilityId: string;
 }
 
+function buildLocationHierarchy(locations: LocationListType[]) {
+  const childrenMap = new Map<string, LocationListType[]>();
+  const topLevelLocations: LocationListType[] = [];
+
+  locations.forEach((location) => {
+    if (!location.parent || Object.keys(location.parent).length === 0) {
+      topLevelLocations.push(location);
+    } else {
+      const parentId = location.parent.id;
+      if (!childrenMap.has(parentId)) {
+        childrenMap.set(parentId, []);
+      }
+      childrenMap.get(parentId)?.push(location);
+    }
+  });
+
+  return { childrenMap, topLevelLocations };
+}
+
 export default function LocationList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,6 +79,29 @@ export default function LocationList({ facilityId }: Props) {
   });
 
   const tableData = data?.results || [];
+  const { childrenMap, topLevelLocations } = useMemo(
+    () => buildLocationHierarchy(tableData),
+    [tableData],
+  );
+
+  const getChildren = useCallback(
+    (parentId: string) => {
+      const children = childrenMap.get(parentId) || [];
+      if (!searchQuery) return children;
+
+      return children.filter((loc) =>
+        loc.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    },
+    [childrenMap, searchQuery],
+  );
+
+  const filteredTopLevelLocations = useMemo(() => {
+    if (!searchQuery) return topLevelLocations;
+    return topLevelLocations.filter((loc) =>
+      loc.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [topLevelLocations, searchQuery]);
 
   const handleAddLocation = () => {
     setSelectedLocation(null);
@@ -78,16 +120,6 @@ export default function LocationList({ facilityId }: Props) {
 
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const getChildren = (parentId: string) => {
-    return tableData.filter((loc) => {
-      const isChild = loc.parent?.id === parentId;
-      const matchesSearch =
-        !searchQuery ||
-        loc.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return isChild && matchesSearch;
-    });
   };
 
   const LocationRow = ({
@@ -267,25 +299,16 @@ export default function LocationList({ facilityId }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableData
-            .filter((loc) => {
-              const isParent =
-                !loc.parent || Object.keys(loc.parent).length === 0;
-              const matchesSearch =
-                !searchQuery ||
-                loc.name.toLowerCase().includes(searchQuery.toLowerCase());
-              return isParent && matchesSearch;
-            })
-            .map((location) => (
-              <LocationRow
-                key={location.id}
-                location={location}
-                expandedRows={expandedRows}
-                toggleRow={toggleRow}
-                getChildren={getChildren}
-                indent={1}
-              />
-            ))}
+          {filteredTopLevelLocations.map((location) => (
+            <LocationRow
+              key={location.id}
+              location={location}
+              expandedRows={expandedRows}
+              toggleRow={toggleRow}
+              getChildren={getChildren}
+              indent={1}
+            />
+          ))}
         </TableBody>
       </Table>
     );
