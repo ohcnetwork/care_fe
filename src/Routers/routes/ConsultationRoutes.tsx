@@ -30,6 +30,19 @@ const consultationRoutes: AppRoutes = {
       tab={tab}
     />
   ),
+  "/facility/:facilityId/encounter/:encounterId/:tab/:subPage": ({
+    facilityId,
+    encounterId,
+    tab,
+    subPage,
+  }) => (
+    <EncounterShow
+      facilityId={facilityId}
+      encounterId={encounterId}
+      tab={tab}
+      subPage={subPage}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
