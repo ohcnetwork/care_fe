@@ -188,66 +188,74 @@ export default function FacilityOrganizationIndex({
                   )}
                 </Button>
               )}
+              <CareIcon
+                icon={isTopLevel ? "l-building" : "l-users-alt"}
+                className="mr-2"
+              />
               {org.name}
             </div>
-            {isTopLevel && (
-              <div className="flex gap-5 justify-between">
-                {children.length > 0 && (
-                  <div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Button
-                            variant="white"
-                            size={isMobile ? "xs" : "sm"}
-                            onClick={toggleAllChildren}
-                          >
-                            <CareIcon
-                              icon={allExpanded ? "l-minus" : "l-plus"}
-                              className="h-4 w-4 sm:h-2 sm:w-2"
-                            />
-                            <span className="hidden sm:inline">
-                              {t(allExpanded ? "collapse_all" : "expand_all")}
-                            </span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t(allExpanded ? "collapse_all" : "expand_all")}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                )}
-                <div className="ml-auto">
+
+            <div className="flex justify-between gap-5">
+              {isTopLevel && children.length > 0 && (
+                <div>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
                         <Button
                           variant="white"
                           size={isMobile ? "xs" : "sm"}
-                          asChild
+                          onClick={toggleAllChildren}
                         >
-                          <Link
-                            href={`/departments/${org.id}`}
-                            className="text-gray-900 flex items-center"
-                          >
-                            <CareIcon icon="l-eye" className="h-4 w-4" />
-                            <span className="hidden sm:inline">
-                              {t("see_details")}
-                            </span>
-                          </Link>
+                          <CareIcon
+                            icon={allExpanded ? "l-minus" : "l-plus"}
+                            className="h-4 w-4 sm:h-2 sm:w-2"
+                          />
+                          <span className="hidden sm:inline">
+                            {t(allExpanded ? "collapse_all" : "expand_all")}
+                          </span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>{t("see_details")}</TooltipContent>
+                      <TooltipContent>
+                        {t(allExpanded ? "collapse_all" : "expand_all")}
+                      </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
+              )}
+              <div className="ml-auto">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="white"
+                        size={isMobile ? "xs" : "sm"}
+                        asChild
+                      >
+                        <Link
+                          href={`/departments/${org.id}`}
+                          className="text-gray-900 flex items-center"
+                        >
+                          <CareIcon
+                            icon={isMobile ? "l-arrow-up-right" : "l-eye"}
+                            className="h-4 w-4"
+                          />
+                          <span className="hidden sm:inline">
+                            {t("see_details")}
+                          </span>
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("see_details")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-            )}
+            </div>
           </TableCell>
-          <TableCell className="border-l bg-white font-semibold text-gray-900">
-            {org.org_type}
-          </TableCell>
+          {!isMobile && (
+            <TableCell className="border-l bg-white font-semibold text-gray-900">
+              {t(`facility_organization_type__${org.org_type}`)}
+            </TableCell>
+          )}
         </TableRow>
         {expandedRows[org.id] &&
           children.map((child) => (
@@ -265,31 +273,32 @@ export default function FacilityOrganizationIndex({
   };
   return (
     <Page title={t("departments")} hideTitleOnPage={true}>
-      <h2 className="mb-4 text-black">{t("departments")}</h2>
-      <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
-        <div className="w-60">
+      <h3 className="mb-4 text-black">{t("departments")}</h3>
+      <div className="flex justify-between items-center mb-4 gap-5 lg:flex-row flex-col-reverse ">
+        <div className="lg:w-3/4 w-full">
           <Input
             className="px-2 placeholder:text-xs placeholder:text-gray-500"
             placeholder={t("filter_by_department_or_team_name")}
           ></Input>
         </div>
-        <div className="flex md:justify-end">
+        <div className="flex lg:justify-end w-full">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
       </div>
-      <div className="flex-col sm:flex-row items-center flex gap-3 text-blue-800 text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
-        <div className="p-2 bg-blue-100 rounded-sm">
+      <div className="flex-row items-center flex gap-3 text-blue-800 text-xs sm:text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
+        <div className="sm:p-2 p-1 bg-blue-100 rounded-sm">
           <CareIcon icon="l-info-circle" className="h-6 w-6 text-blue-900" />
         </div>
         <div className="">
           <p className="">
             {t("click")}{" "}
-            <span className="font-semibold">{t("add_department_or_team")}</span>{" "}
+            <span className="font-semibold">{t("add_department_team")}</span>{" "}
             {t("to_create_new_one")}
           </p>
           <p className="">
             {t("click")}{" "}
             <span className="font-semibold">{t("see_details")}</span>{" "}
+            <CareIcon icon="l-arrow-up-right"></CareIcon>{" "}
             {t("to_manage_create_more")}
           </p>
         </div>
@@ -300,9 +309,11 @@ export default function FacilityOrganizationIndex({
             <TableHead className="w-[80%] border text-gray-700  bg-gray-200">
               {t("name")}
             </TableHead>
-            <TableHead className="bg-gray-200 text-gray-700">
-              {t("category")}
-            </TableHead>
+            {!isMobile && (
+              <TableHead className="bg-gray-200 text-gray-700">
+                {t("category")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
