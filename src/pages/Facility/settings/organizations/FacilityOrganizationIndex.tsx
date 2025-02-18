@@ -236,7 +236,7 @@ export default function FacilityOrganizationIndex({
                           className="text-gray-900 flex items-center"
                         >
                           <CareIcon
-                            icon={isMobile ? "l-arrow-up-right" : "l-eye"}
+                            icon="l-arrow-up-right"
                             className="h-4 w-4"
                           />
                           <span className="hidden sm:inline">
