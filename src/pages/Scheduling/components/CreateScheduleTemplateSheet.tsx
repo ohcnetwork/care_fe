@@ -400,10 +400,7 @@ export default function CreateScheduleTemplateSheet({
                                 <AlertTitle>{t("warning")}</AlertTitle>
                                 <AlertDescription>
                                   {t(
-                                    "this_will_permanently_remove_the_template",
-                                    {
-                                      data: "session",
-                                    },
+                                    "this_will_permanently_remove_the_session_and_cannot_be_undone",
                                   )}
                                 </AlertDescription>
                               </Alert>

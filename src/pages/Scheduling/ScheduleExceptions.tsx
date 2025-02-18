@@ -140,9 +140,9 @@ const ScheduleExceptionItem = (
                 <Alert variant="destructive" className="mt-4">
                   <AlertTitle>{t("warning")}</AlertTitle>
                   <AlertDescription>
-                    {t("this_will_permanently_remove_the_template", {
-                      data: "exception",
-                    })}
+                    {t(
+                      "this_will_permanently_remove_the_exception_and_cannot_be_undone",
+                    )}
                   </AlertDescription>
                 </Alert>
               </AlertDialogDescription>
