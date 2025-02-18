@@ -1,5 +1,16 @@
 import { t } from "i18next";
-import { BadgeCheck, BedSingle, CircleDashed, Clock, Eye } from "lucide-react";
+import {
+  Ambulance,
+  BadgeCheck,
+  BedDouble,
+  Building2,
+  CircleDashed,
+  Clock,
+  Eye,
+  Home,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
 import { Link } from "raviger";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +29,17 @@ interface EncounterCardProps {
 
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
+
+  const encounterIcons = {
+    imp: BedDouble,
+    amb: Ambulance,
+    obsenc: Stethoscope,
+    emer: Building2,
+    vr: MonitorSmartphone,
+    hh: Home,
+  } as const;
+
+  const Icon = encounterIcons[encounter.encounter_class];
 
   return (
     <>
@@ -62,7 +84,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 variant="outline"
                 className="inline-flex items-center gap-2 py-1 bg-gray-100 text-gray-800 border-gray-200"
               >
-                <BedSingle />
+                {Icon && <Icon />}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
             </div>
