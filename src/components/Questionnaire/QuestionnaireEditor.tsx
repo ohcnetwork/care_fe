@@ -53,7 +53,6 @@ import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
-  ObservationType,
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
@@ -94,7 +93,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   );
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
-  const [observation, setObservation] = useState<ObservationType | undefined>();
 
   const {
     data: initialQuestionnaire,

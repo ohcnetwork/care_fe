@@ -143,6 +143,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
                     toast.success("Code verified successfully");
                   }
                 } catch (error) {
+                  console.error(error);
                   toast.error("Failed to verify code");
                 }
               }}

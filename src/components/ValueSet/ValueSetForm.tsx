@@ -133,7 +133,7 @@ function ConceptFields({
         toast.success("Code verified successfully");
       }
     },
-    onError: (error, { index }) => {
+    onError: () => {
       toast.error("Failed to verify code");
     },
   });

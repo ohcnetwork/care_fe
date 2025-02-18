@@ -73,7 +73,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
     mutationFn: mutate(valuesetApi.update, {
       pathParams: { slug: slug! },
     }),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: () => {
       toast.success("ValueSet updated successfully");
       navigate(`/admin/valuesets`);
     },
