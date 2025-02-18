@@ -52,6 +52,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 import {
+  EnableWhen,
   ObservationType,
   Question,
   QuestionType,
@@ -1257,6 +1258,234 @@ function QuestionEditor({
               </div>
             </div>
           )}
+
+          <div className="space-y-4">
+            <Label>Enable When Conditions</Label>
+            <div className="space-y-2">
+              {(question.enable_when || []).length > 0 && (
+                <div>
+                  <Label className="text-xs">Enable Behavior</Label>
+                  <Select
+                    value={question.enable_behavior ?? "all"}
+                    onValueChange={(val: "all" | "any") =>
+                      updateField("enable_behavior", val)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        All conditions must be met
+                      </SelectItem>
+                      <SelectItem value="any">
+                        Any condition must be met
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {(question.enable_when || []).map((condition, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                >
+                  <div>
+                    <Label className="text-xs">Question</Label>
+                    <Input
+                      value={condition.question}
+                      onChange={(e) => {
+                        const newConditions = [...(question.enable_when || [])];
+                        newConditions[idx] = {
+                          ...condition,
+                          question: e.target.value,
+                        };
+                        updateField("enable_when", newConditions);
+                      }}
+                      placeholder="Question Link ID"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Operator</Label>
+                    <Select
+                      value={condition.operator}
+                      onValueChange={(
+                        val:
+                          | "equals"
+                          | "not_equals"
+                          | "exists"
+                          | "greater"
+                          | "less"
+                          | "greater_or_equals"
+                          | "less_or_equals",
+                      ) => {
+                        const newConditions = [...(question.enable_when || [])];
+
+                        switch (val) {
+                          case "greater":
+                          case "less":
+                          case "greater_or_equals":
+                          case "less_or_equals":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: 0,
+                            };
+                            break;
+                          case "exists":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: true,
+                            };
+                            break;
+                          case "equals":
+                          case "not_equals":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: "",
+                            };
+                            break;
+                        }
+
+                        updateField("enable_when", newConditions);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="not_equals">Not Equals</SelectItem>
+                        <SelectItem value="greater">Greater Than</SelectItem>
+                        <SelectItem value="less">Less Than</SelectItem>
+                        <SelectItem value="greater_or_equals">
+                          Greater Than or Equal
+                        </SelectItem>
+                        <SelectItem value="less_or_equals">
+                          Less Than or Equal
+                        </SelectItem>
+                        <SelectItem value="exists">Exists</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label className="text-xs">Answer</Label>
+                      {condition.operator === "exists" ? (
+                        <Select
+                          value={condition.answer ? "true" : "false"}
+                          onValueChange={(val: "true" | "false") => {
+                            const newConditions = [
+                              ...(question.enable_when || []),
+                            ];
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: "exists" as const,
+                              answer: val === "true",
+                            };
+                            updateField("enable_when", newConditions);
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">True</SelectItem>
+                            <SelectItem value="false">False</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          value={condition.answer?.toString() ?? ""}
+                          type={
+                            [
+                              "greater",
+                              "less",
+                              "greater_or_equals",
+                              "less_or_equals",
+                            ].includes(condition.operator)
+                              ? "number"
+                              : "text"
+                          }
+                          onChange={(e) => {
+                            const newConditions = [
+                              ...(question.enable_when || []),
+                            ];
+                            const value = e.target.value;
+                            let newCondition;
+
+                            if (
+                              [
+                                "greater",
+                                "less",
+                                "greater_or_equals",
+                                "less_or_equals",
+                              ].includes(condition.operator)
+                            ) {
+                              newCondition = {
+                                question: condition.question,
+                                operator: condition.operator as
+                                  | "greater"
+                                  | "less"
+                                  | "greater_or_equals"
+                                  | "less_or_equals",
+                                answer: Number(value),
+                              };
+                            } else {
+                              newCondition = {
+                                question: condition.question,
+                                operator: condition.operator as
+                                  | "equals"
+                                  | "not_equals",
+                                answer: value,
+                              };
+                            }
+
+                            newConditions[idx] = newCondition;
+                            updateField("enable_when", newConditions);
+                          }}
+                          placeholder="Answer value"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-5"
+                      onClick={() => {
+                        const newConditions = question.enable_when?.filter(
+                          (_, i) => i !== idx,
+                        );
+                        updateField("enable_when", newConditions);
+                      }}
+                    >
+                      <CareIcon icon="l-times" className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newCondition: EnableWhen = {
+                    question: "",
+                    operator: "equals",
+                    answer: "",
+                  };
+                  updateField("enable_when", [
+                    ...(question.enable_when || []),
+                    newCondition,
+                  ]);
+                }}
+              >
+                <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                Add Condition
+              </Button>
+            </div>
+          </div>
         </div>
       </CollapsibleContent>
     </Collapsible>
