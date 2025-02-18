@@ -214,7 +214,7 @@ export function EncounterList({
 
   return (
     <Page title={t("encounters")}>
-      <div className="space-y-4 mt-2 flex flex-col">
+      <div className="space-y-4 mt-2 flex flex-col px-6">
         <div className="rounded-lg border bg-card shadow-sm flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
