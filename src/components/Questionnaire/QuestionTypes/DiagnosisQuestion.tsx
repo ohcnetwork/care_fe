@@ -102,6 +102,7 @@ export function DiagnosisQuestion({
         limit: 100,
       },
     }),
+    enabled: encounterId !== "preview",
   });
 
   useEffect(() => {

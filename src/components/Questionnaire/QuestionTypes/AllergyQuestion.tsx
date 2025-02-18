@@ -121,6 +121,7 @@ export function AllergyQuestion({
         limit: 100,
       },
     }),
+    enabled: patientId !== "preview",
   });
 
   useEffect(() => {

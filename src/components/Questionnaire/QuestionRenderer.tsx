@@ -79,7 +79,7 @@ export function QuestionRenderer({
             updateQuestionnaireResponseCB={onResponseChange}
             errors={errors}
             clearError={clearError}
-            disabled={disabled}
+            disabled={disabled || encounterId === "preview"}
             activeGroupId={activeGroupId}
             patientId={patientId}
           />

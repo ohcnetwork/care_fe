@@ -100,6 +100,7 @@ export function MedicationRequestQuestion({
         limit: 100,
       },
     }),
+    enabled: encounterId !== "preview",
   });
 
   useEffect(() => {

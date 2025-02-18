@@ -296,6 +296,7 @@ export function SymptomQuestion({
         encounter: encounterId,
       },
     }),
+    enabled: encounterId !== "preview",
   });
 
   useEffect(() => {

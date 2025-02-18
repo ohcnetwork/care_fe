@@ -115,6 +115,7 @@ export function MedicationStatementQuestion({
         encounter: encounterId,
       },
     }),
+    enabled: encounterId !== "preview",
   });
 
   useEffect(() => {
