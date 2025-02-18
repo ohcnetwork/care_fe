@@ -61,8 +61,8 @@ export function QuestionnaireList() {
           <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
         </div>
 
-        <div className="flex items-center justify-between mt-8">
-          <div className="flex md:flex-row flex-col items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-2">
+          <div className="flex lg:flex-row flex-col items-center gap-4">
             <Tabs
               defaultValue="active"
               value={qParams.status || "active"}
@@ -95,7 +95,7 @@ export function QuestionnaireList() {
             </div>
           </div>
 
-          <div className="flex items-center self-start">
+          <div className="flex items-center md:self-start">
             <Button onClick={() => navigate("/admin/questionnaire/create")}>
               <PlusIcon className="w-4 h-4" />
               {t("create_questionnaire")}
@@ -104,8 +104,8 @@ export function QuestionnaireList() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg bg-white shadow">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 ">
           <thead className="bg-gray-100  text-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium tracking-wider ">

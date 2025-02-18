@@ -3,6 +3,8 @@ import { t } from "i18next";
 import {
   ChevronDown,
   ChevronUp,
+  ChevronsDownUp,
+  ChevronsUpDown,
   SquarePenIcon,
   Tags,
   ViewIcon,
@@ -101,6 +103,11 @@ interface Organization {
   id: string;
   name: string;
   description?: string;
+}
+
+interface StylingMetadata {
+  classes?: string;
+  containerClasses?: string;
 }
 
 interface OrganizationResponse {
@@ -504,6 +511,95 @@ function QuestionnaireProperties({
   );
 }
 
+const LAYOUT_OPTIONS = [
+  {
+    id: "full-width",
+    value: "grid grid-cols-1",
+    label: "Full Width",
+    preview: (
+      <div className="space-y-1 w-full">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "equal-split",
+    value: "grid grid-cols-2",
+    label: "Equal Split",
+    preview: (
+      <div className="w-full grid grid-cols-2 gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "wide-start",
+    value: "grid grid-cols-[2fr,1fr]",
+    label: "Wide Start",
+    preview: (
+      <div className="w-full grid grid-cols-[2fr,1fr] gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "wide-end",
+    value: "grid grid-cols-[1fr,2fr]",
+    label: "Wide End",
+    preview: (
+      <div className="w-full grid grid-cols-[1fr,2fr] gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+] as const;
+
+interface LayoutOptionProps {
+  option: (typeof LAYOUT_OPTIONS)[number];
+  isSelected: boolean;
+  questionId: string;
+}
+
+function LayoutOptionCard({
+  option,
+  isSelected,
+  questionId,
+}: LayoutOptionProps) {
+  const optionId = `${questionId}-${option.id}`;
+  return (
+    <div className="space-y-2">
+      <RadioGroupItem
+        value={option.value}
+        id={optionId}
+        className="peer sr-only"
+      />
+      <Label
+        htmlFor={optionId}
+        className={cn(
+          "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50",
+          "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          isSelected && "border-primary",
+        )}
+      >
+        {option.preview}
+        <span className="block w-full text-center text-sm font-medium mt-2">
+          {option.label}
+        </span>
+      </Label>
+    </div>
+  );
+}
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -866,14 +962,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between border-b">
+              <Card className="border-none bg-transparent shadow-none">
+                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
                   <div>
-                    <CardTitle>Questions</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {questionnaire.questions?.length || 0} question
-                      {questionnaire.questions?.length !== 1 ? "s" : ""}
-                    </p>
+                    <CardTitle>
+                      <p className="text-sm text-gray-700 font-medium mt-1">
+                        {questionnaire.questions?.length || 0} Question
+                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                      </p>
+                    </CardTitle>
                   </div>
                   <Button
                     variant="outline"
@@ -899,18 +996,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     Add Question
                   </Button>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-0">
                   <div className="space-y-6">
                     {questionnaire.questions.map((question, index) => (
                       <div
                         key={question.id}
                         id={`question-${question.id}`}
-                        className="relative"
+                        className="relative bg-white rounded-lg shadow-md"
                       >
-                        <div className="absolute -left-4 top-4 font-medium text-gray-500">
-                          {index + 1}.
-                        </div>
+                        <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                         <QuestionEditor
+                          index={index}
                           key={question.id}
                           question={question}
                           onChange={(updatedQuestion) => {
@@ -1019,6 +1115,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  index: number;
   question: Question;
   onChange: (updated: Question) => void;
   onDelete: () => void;
@@ -1044,6 +1141,7 @@ function QuestionEditor({
   onMoveDown,
   isFirst,
   isLast,
+  index,
 }: QuestionEditorProps) {
   const {
     text,
@@ -1064,6 +1162,10 @@ function QuestionEditor({
     queryKey: ["valuesets"],
     queryFn: query(valuesetApi.list),
   });
+
+  useEffect(() => {
+    console.log("styling_metadata", question.styling_metadata);
+  }, [question.styling_metadata]);
 
   const valuesets = response?.results || [];
 
@@ -1095,31 +1197,30 @@ function QuestionEditor({
     <Collapsible
       open={isExpanded}
       onOpenChange={onToggleExpand}
-      className={`rounded-lg border bg-card text-card-foreground shadow-sm ${
-        depth > 0 ? "border-l-4 border-l-primary/20" : ""
-      }`}
+      className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
-      <div className="flex items-center p-4">
+      <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
-            <div className="font-medium text-left">
-              {text || "Untitled Question"}
+            <div className="font-semibold text-left">
+              {index + 1}. {text || "Untitled Question"}
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
-              {required && <Badge>Required</Badge>}
-              {repeats && <Badge variant="outline">Repeatable</Badge>}
+              {required && <Badge variant="secondary">Required</Badge>}
+              {repeats && <Badge variant="secondary">Repeatable</Badge>}
               {type === "group" && questions && questions.length > 0 && (
-                <Badge variant="outline">
+                <Badge variant="secondary">
                   {questions.length} sub-questions
                 </Badge>
               )}
             </div>
           </div>
-          <CareIcon
-            icon={isExpanded ? "l-angle-up" : "l-angle-down"}
-            className="h-4 w-4 text-gray-500"
-          />
+          {isExpanded ? (
+            <ChevronsDownUp className="h-4 w-4 text-gray-500" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+          )}
         </CollapsibleTrigger>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -1166,7 +1267,7 @@ function QuestionEditor({
       </div>
 
       <CollapsibleContent>
-        <div className="p-4 pt-0 space-y-4">
+        <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
               <Label>Question Text</Label>
@@ -1365,34 +1466,45 @@ function QuestionEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Styling Classes</Label>
-              <Input
-                value={question.styling_metadata?.classes || ""}
-                onChange={(e) =>
-                  updateField("styling_metadata", {
-                    ...question.styling_metadata,
-                    classes: e.target.value,
-                  })
-                }
-                placeholder="CSS classes (space-separated)"
-              />
+          {type === "group" && (
+            <div className="space-y-4">
+              <div className="border rounded-lg bg-gray-100 p-4">
+                <h3 className="text-sm font-medium mb-2">
+                  Group Layout Options
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Choose the layout style that best fits your sub-questions from
+                  the available options.
+                </p>
+                <RadioGroup
+                  value={
+                    question.styling_metadata?.containerClasses ||
+                    LAYOUT_OPTIONS[0].value
+                  }
+                  onValueChange={(val) => {
+                    updateField("styling_metadata", {
+                      ...question.styling_metadata,
+                      containerClasses: val,
+                    });
+                  }}
+                  className="grid grid-cols-4 gap-4"
+                >
+                  {LAYOUT_OPTIONS.map((option) => {
+                    const currentLayout =
+                      question.styling_metadata?.containerClasses;
+                    return (
+                      <LayoutOptionCard
+                        key={option.id}
+                        option={option}
+                        isSelected={currentLayout === option.value}
+                        questionId={getQuestionPath()}
+                      />
+                    );
+                  })}
+                </RadioGroup>
+              </div>
             </div>
-            <div>
-              <Label>Container Classes</Label>
-              <Input
-                value={question.styling_metadata?.containerClasses || ""}
-                onChange={(e) =>
-                  updateField("styling_metadata", {
-                    ...question.styling_metadata,
-                    containerClasses: e.target.value,
-                  })
-                }
-                placeholder="Container CSS classes"
-              />
-            </div>
-          </div>
+          )}
 
           {type === "choice" && (
             <div className="space-y-4">
@@ -1533,12 +1645,17 @@ function QuestionEditor({
           )}
 
           {type === "group" && (
-            <div>
+            <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
-                <Label>Sub-Questions</Label>
+                <Label className="text-gray-950 font-semibold">
+                  {question.questions?.length || 0} Sub-Question
+                  {question.questions?.length !== 1 ? "s " : " "}
+                  (for the "{text}" Group)
+                </Label>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
+                  className="underline text-gray-950 font-semibold"
                   onClick={() => {
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
@@ -1556,55 +1673,62 @@ function QuestionEditor({
                     );
                   }}
                 >
-                  <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                  <CareIcon icon="l-plus" className="h-4 w-4" />
                   Add Sub-Question
                 </Button>
               </div>
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
-                  <QuestionEditor
+                  <div
                     key={subQuestion.id}
-                    question={subQuestion}
-                    onChange={(updated) => {
-                      const newQuestions = [...(questions || [])];
-                      newQuestions[idx] = updated;
-                      updateField("questions", newQuestions);
-                    }}
-                    onDelete={() => {
-                      const newQuestions = questions?.filter(
-                        (_, i) => i !== idx,
-                      );
-                      updateField("questions", newQuestions);
-                    }}
-                    isExpanded={expandedSubQuestions.has(subQuestion.id)}
-                    onToggleExpand={() =>
-                      toggleSubQuestionExpanded(subQuestion.id)
-                    }
-                    depth={depth + 1}
-                    parentId={getQuestionPath()}
-                    onMoveUp={() => {
-                      if (idx > 0) {
+                    id={`question-${subQuestion.id}`}
+                    className="relative bg-white rounded-lg shadow-md"
+                  >
+                    <QuestionEditor
+                      index={idx}
+                      key={subQuestion.id}
+                      question={subQuestion}
+                      onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
-                        [newQuestions[idx - 1], newQuestions[idx]] = [
-                          newQuestions[idx],
-                          newQuestions[idx - 1],
-                        ];
+                        newQuestions[idx] = updated;
                         updateField("questions", newQuestions);
-                      }
-                    }}
-                    onMoveDown={() => {
-                      if (idx < (questions?.length || 0) - 1) {
-                        const newQuestions = [...(questions || [])];
-                        [newQuestions[idx], newQuestions[idx + 1]] = [
-                          newQuestions[idx + 1],
-                          newQuestions[idx],
-                        ];
+                      }}
+                      onDelete={() => {
+                        const newQuestions = questions?.filter(
+                          (_, i) => i !== idx,
+                        );
                         updateField("questions", newQuestions);
+                      }}
+                      isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                      onToggleExpand={() =>
+                        toggleSubQuestionExpanded(subQuestion.id)
                       }
-                    }}
-                    isFirst={idx === 0}
-                    isLast={idx === (questions?.length || 0) - 1}
-                  />
+                      depth={depth + 1}
+                      parentId={getQuestionPath()}
+                      onMoveUp={() => {
+                        if (idx > 0) {
+                          const newQuestions = [...(questions || [])];
+                          [newQuestions[idx - 1], newQuestions[idx]] = [
+                            newQuestions[idx],
+                            newQuestions[idx - 1],
+                          ];
+                          updateField("questions", newQuestions);
+                        }
+                      }}
+                      onMoveDown={() => {
+                        if (idx < (questions?.length || 0) - 1) {
+                          const newQuestions = [...(questions || [])];
+                          [newQuestions[idx], newQuestions[idx + 1]] = [
+                            newQuestions[idx + 1],
+                            newQuestions[idx],
+                          ];
+                          updateField("questions", newQuestions);
+                        }
+                      }}
+                      isFirst={idx === 0}
+                      isLast={idx === (questions?.length || 0) - 1}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
