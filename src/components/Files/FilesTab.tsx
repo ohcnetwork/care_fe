@@ -669,43 +669,43 @@ export const FilesTab = (props: FilesTabProps) => {
             </Link>
           </TabsTrigger>
         </TabsList>
-        <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between mt-2">
-          <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
-            <FilterButton />
-          </div>
-          <div className="flex flex-row gap-2">
-            {subPage === "discharge_summary" && (
-              <>
-                <Button
-                  variant="outline_primary"
-                  className="flex flex-row items-center"
-                  onClick={async () => {
-                    await queryClient.invalidateQueries({
-                      queryKey: ["files"],
-                    });
-                    toast.success(t("refreshed"));
-                  }}
-                >
-                  <CareIcon icon="l-sync" />
-                  <span className="ml-2">{t("refresh")}</span>
-                </Button>
-                <Button
-                  variant="primary"
-                  className="flex flex-row items-center"
-                  onClick={() => generateDischargeSummary()}
-                  disabled={isGenerating}
-                >
-                  <CareIcon icon="l-file-medical" />
-                  <span className="ml-2">
-                    {isGenerating
-                      ? t("generating")
-                      : t("generate_discharge_summary")}
-                  </span>
-                </Button>
-              </>
-            )}
-            <FileUploadButtons />
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-2">
+          <FilterButton />
+          {subPage === "discharge_summary" && (
+            <>
+              <Button
+                variant="outline_primary"
+                className="flex flex-row items-center"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" />
+                <span className="ml-2">{t("refresh")}</span>
+              </Button>
+            </>
+          )}
+          {subPage === "discharge_summary" && (
+            <>
+              <Button
+                variant="primary"
+                className="flex flex-row items-center"
+                onClick={() => generateDischargeSummary()}
+                disabled={isGenerating}
+              >
+                <CareIcon icon="l-file-medical" className="hidden md:block" />
+                <span>
+                  {isGenerating
+                    ? t("generating")
+                    : t("generate_discharge_summary")}
+                </span>
+              </Button>
+            </>
+          )}
+          <FileUploadButtons />
         </div>
         <FilterBadges />
         {fileCategories.map((category) => (
