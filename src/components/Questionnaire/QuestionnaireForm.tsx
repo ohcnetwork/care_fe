@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -527,15 +528,11 @@ export function QuestionnaireForm({
           setFormState={setQuestionnaireForms}
         />
 
-        {/* Add a Preview of the QuestionnaireForm */}
-        {import.meta.env.DEV && (
-          <div className="p-4 space-y-6 max-w-4xl">
-            <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-            <pre className="text-sm text-gray-500">
-              {JSON.stringify(questionnaireForms, null, 2)}
-            </pre>
-          </div>
-        )}
+        <DebugPreview
+          data={questionnaireForms}
+          title="QuestionnaireForm"
+          className="p-4 space-y-6 max-w-4xl"
+        />
       </div>
     </div>
   );

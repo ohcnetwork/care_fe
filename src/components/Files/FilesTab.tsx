@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
+import { Link } from "raviger";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -25,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -46,7 +48,9 @@ import useFilters from "@/hooks/useFilters";
 import { FILE_EXTENSIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { usePermissions } from "@/context/PermissionContext";
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
@@ -57,10 +61,11 @@ export interface FilesTabProps {
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
+  subPage?: string;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { patientId, type, encounter } = props;
+  const { patientId, type, encounter, subPage = "all" } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -72,6 +77,7 @@ export const FilesTab = (props: FilesTabProps) => {
     useState<FileUploadModel | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
+  const queryClient = useQueryClient();
 
   const associatingId =
     {
@@ -81,22 +87,30 @@ export const FilesTab = (props: FilesTabProps) => {
 
   const fileCategories = [
     { value: "all", label: "All" },
-    { value: "imaging", label: "Imaging" },
-    { value: "lab_reports", label: "Lab Reports" },
-    { value: "documents", label: "Documents" },
     { value: "audio", label: "Audio" },
+    { value: "xray", label: "X-Ray" },
+    { value: "identity_proof", label: "Identity Proof" },
+    { value: "unspecified", label: "Unspecified" },
+    { value: "discharge_summary", label: "Discharge Summary" },
   ] as const;
 
-  const handleTabChange = (value: (typeof fileCategories)[number]["value"]) => {
-    updateQuery({ file_category: value === "all" ? undefined : value });
-  };
+  const { mutate: generateDischargeSummary, isPending: isGenerating } =
+    useMutation<{ detail: string }, HTTPError>({
+      mutationFn: mutate(routes.encounter.generateDischargeSummary, {
+        pathParams: { encounterId: encounter?.id || "" },
+      }),
+      onSuccess: (response) => {
+        toast.success(response.detail);
+        refetch();
+      },
+    });
 
   const {
     data: files,
     isLoading: filesLoading,
     refetch,
   } = useQuery({
-    queryKey: ["files", type, associatingId, qParams],
+    queryKey: ["files", type, associatingId, qParams, subPage],
     queryFn: query(routes.viewUpload, {
       queryParams: {
         file_type: type,
@@ -106,7 +120,7 @@ export const FilesTab = (props: FilesTabProps) => {
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
-        //file_category: qParams.file_category,
+        ...(subPage !== "all" && { file_category: subPage }),
       },
     }),
   });
@@ -636,17 +650,61 @@ export const FilesTab = (props: FilesTabProps) => {
         fileUpload={fileUpload}
         associatingId={associatingId}
       />
-      <Tabs
-        defaultValue="all"
-        value={qParams.file_category || "all"}
-        onValueChange={(value) =>
-          handleTabChange(value as (typeof fileCategories)[number]["value"])
-        }
-      >
-        <div className="mx-2 flex flex-col flex-wrap gap-3 sm:flex-row justify-between">
-          <div className="flex sm:flex-row flex-wrap flex-col gap-4 sm:items-center">
-            <FilterButton />
-          </div>
+      <Tabs defaultValue={subPage}>
+        <TabsList className="grid w-auto grid-cols-2 w-fit">
+          <TabsTrigger value="all" asChild>
+            <Link
+              className="text-gray-600"
+              href={`/facility/${encounter?.facility.id}/encounter/${encounter?.id}/files/all`}
+            >
+              {t("all")}
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="discharge_summary" asChild>
+            <Link
+              className="text-gray-600"
+              href={`/facility/${encounter?.facility.id}/encounter/${encounter?.id}/files/discharge_summary`}
+            >
+              {t("discharge_summary")}
+            </Link>
+          </TabsTrigger>
+        </TabsList>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
+          <FilterButton />
+          {subPage === "discharge_summary" && (
+            <>
+              <Button
+                variant="outline_primary"
+                className="flex flex-row items-center"
+                onClick={async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["files"],
+                  });
+                  toast.success(t("refreshed"));
+                }}
+              >
+                <CareIcon icon="l-sync" />
+                <span className="ml-2">{t("refresh")}</span>
+              </Button>
+            </>
+          )}
+          {subPage === "discharge_summary" && (
+            <>
+              <Button
+                variant="primary"
+                className="flex flex-row items-center"
+                onClick={() => generateDischargeSummary()}
+                disabled={isGenerating}
+              >
+                <CareIcon icon="l-file-medical" className="hidden sm:block" />
+                <span>
+                  {isGenerating
+                    ? t("generating")
+                    : t("generate_discharge_summary")}
+                </span>
+              </Button>
+            </>
+          )}
           <FileUploadButtons />
         </div>
         <FilterBadges />
