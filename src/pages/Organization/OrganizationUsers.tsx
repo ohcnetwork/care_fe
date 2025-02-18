@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
