@@ -31,7 +31,7 @@ export default function Page(props: PageProps) {
   //   };
   // }, [props.collapseSidebar]);
 
-  let padding = !props.noImplicitPadding ? "md:px-6 py-0" : "";
+  let padding = "md:px-6 py-0";
 
   return (
     <div className={cn(padding, props.className)} ref={props.ref}>
