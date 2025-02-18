@@ -1,4 +1,4 @@
-import { TFunction } from "i18next";
+import { t } from "i18next";
 import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -16,11 +16,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
-const getDetailsButton = (
-  username: string,
-  t: TFunction,
-  facilityId: string,
-) => {
+const getDetailsButton = (username: string, facilityId: string) => {
   return (
     <div>
       <Button
@@ -78,7 +74,6 @@ export const UserStatusIndicator = ({
   );
 };
 const UserCard = ({ user }: { user: UserBase }) => {
-  const { t } = useTranslation();
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   return (
     <Card key={user.id} className="h-full">
@@ -126,7 +121,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
         </div>
 
         <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
-          {getDetailsButton(user.username, t, facilityId)}
+          {getDetailsButton(user.username, facilityId)}
         </div>
       </CardContent>
     </Card>
@@ -139,7 +134,6 @@ export const UserGrid = ({ users }: { users?: UserBase[] }) => (
 );
 
 const UserListHeader = () => {
-  const { t } = useTranslation();
   return (
     <thead>
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
@@ -154,7 +148,6 @@ const UserListHeader = () => {
 
 const UserListRow = ({ user }: { user: UserBase }) => {
   const { facilityId } = usePathParams("/facility/:facilityId/*")!;
-  const { t } = useTranslation();
   return (
     <tr
       key={`usr_${user.id}`}
@@ -193,7 +186,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
       </td>
       <td className="px-4 py-4">
-        {getDetailsButton(user.username, t, facilityId)}
+        {getDetailsButton(user.username, facilityId)}
       </td>
     </tr>
   );
