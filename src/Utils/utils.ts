@@ -5,11 +5,6 @@ import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
 import { Patient } from "@/types/emr/newPatient";
 import { PatientModel } from "@/types/emr/patient";
-import {
-  Organization,
-  OrganizationParent,
-} from "@/types/organization/organization";
-import { Quantity } from "@/types/questionnaire/quantity";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -93,21 +88,6 @@ function _isAppleDevice() {
  */
 export const isAppleDevice = _isAppleDevice();
 
-/**
- * Conditionally concatenate classes. An alternate replacement for `clsx`.
- *
- * **Example Usage:**
- * ```tsx
- * <div className={classNames("md:flex", true && "p-0", false && "p-10")} />
- * // "md:flex p-0"
- * ```
- *
- * @deprecated Use `cn` from `@/lib/utils` instead.
- */
-export const classNames = (...classes: (string | boolean | undefined)[]) => {
-  return classes.filter(Boolean).join(" ");
-};
-
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return user.last_login
     ? dayjs().subtract(5, "minutes").isBefore(user.last_login)
@@ -158,20 +138,6 @@ export const formatPatientAge = (
   return `${day}${suffixes.day}`;
 };
 
-export const mergeQueryOptions = <T extends object>(
-  selected: T[],
-  queryOptions: T[],
-  compareBy: (obj: T) => T[keyof T],
-) => {
-  if (!selected.length) return queryOptions;
-  return [
-    ...selected,
-    ...queryOptions.filter(
-      (option) => !selected.find((s) => compareBy(s) === compareBy(option)),
-    ),
-  ];
-};
-
 /**
  * A utility method to format an array of string to human readable format.
  *
@@ -210,12 +176,6 @@ export const getMonthStartAndEnd = (date: Date) => {
     start: new Date(date.getFullYear(), date.getMonth(), 1),
     end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
   };
-};
-
-export const displayQuantity = (quantity?: Quantity) => {
-  if (!quantity) return "N/A";
-
-  return [quantity.value ?? "N/A", quantity.unit].join(" ");
 };
 
 /**
@@ -273,14 +233,28 @@ export const conditionalArrayAttribute = <T>(
   return condition ? attributes : [];
 };
 
-export const stringifyGeoOrganization = (org: Organization) => {
+export const stringifyNestedObject = <
+  T extends { name: string; parent?: Partial<T> },
+>(
+  obj: T,
+  separator = ", ",
+) => {
   const levels: string[] = [];
 
-  let current: OrganizationParent | undefined = org;
+  let current: Partial<T> | undefined = obj;
   while (current?.name) {
     levels.push(current.name);
     current = current.parent;
   }
 
-  return levels.join(", ");
+  return levels.join(separator);
+};
+
+export const mergeAutocompleteOptions = (
+  options: { label: string; value: string }[],
+  value?: { label: string; value: string },
+) => {
+  if (!value) return options;
+  if (options.find((o) => o.value === value.value)) return options;
+  return [value, ...options];
 };

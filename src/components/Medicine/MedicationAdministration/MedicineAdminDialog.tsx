@@ -50,12 +50,9 @@ export const MedicineAdminDialog = ({
   }, [initialRequest]);
 
   const { mutate: upsertAdministration, isPending } = useMutation({
-    mutationFn: mutate(
-      medicationAdministrationApi.upsertMedicationAdministration,
-      {
-        pathParams: { patientId: patientId },
-      },
-    ),
+    mutationFn: mutate(medicationAdministrationApi.upsert, {
+      pathParams: { patientId: patientId },
+    }),
     onSuccess: () => {
       onOpenChange(false);
       toast.success(t("medication_administration_saved"));
