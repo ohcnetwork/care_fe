@@ -332,12 +332,14 @@ export default function LocationList({ facilityId }: Props) {
                       <span>{t("list")}</span>
                     </div>
                   </TabsTrigger>
+                  {/* Map view will be added later
                   <TabsTrigger value="map" id="location-map-view">
                     <div className="flex items-center gap-1">
                       <CareIcon icon="l-map" className="text-lg" />
                       <span>{t("map")}</span>
                     </div>
                   </TabsTrigger>
+                  */}
                 </TabsList>
               </Tabs>
             </div>
@@ -412,13 +414,16 @@ export default function LocationList({ facilityId }: Props) {
             </div>
           )}
 
-          {activeTab === "list" ? (
-            renderListView()
-          ) : (
+          {
+            activeTab === "list"
+              ? renderListView()
+              : /* Map view will be added later
             <div className="h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
               <p className="text-gray-500">{t("map_view_coming_soon")}</p>
             </div>
-          )}
+            */
+                renderListView() // Default to list view for now
+          }
 
           <LocationSheet
             open={isSheetOpen}
