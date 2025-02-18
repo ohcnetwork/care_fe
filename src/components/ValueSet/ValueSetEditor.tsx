@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { toast } from "sonner";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -18,33 +18,6 @@ import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
   slug?: string; // If provided, we're editing an existing valueset
-}
-
-function FormSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="space-y-4">
-        <Skeleton className="h-[200px] w-full" />
-        <Skeleton className="h-[200px] w-full" />
-      </div>
-    </div>
-  );
 }
 
 export function ValueSetEditor({ slug }: ValueSetEditorProps) {
@@ -99,7 +72,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
       </h1>
 
       {slug && isLoading ? (
-        <FormSkeleton />
+        <FormSkeleton rows={10} />
       ) : (
         <ValueSetForm
           initialData={existingValueset}
