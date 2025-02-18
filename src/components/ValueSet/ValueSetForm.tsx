@@ -29,6 +29,7 @@ import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
   ValuesetFormType,
+  ValuesetLookupResponse,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
@@ -93,12 +94,6 @@ interface ValueSetFormProps {
   isSubmitting?: boolean;
 }
 
-interface LookupVariables {
-  system: string;
-  code: string;
-  index: number;
-}
-
 function ConceptFields({
   nestIndex,
   type,
@@ -114,22 +109,26 @@ function ConceptFields({
   });
 
   const lookupMutation = useMutation({
-    mutationFn: async ({ system, code, index }: LookupVariables) => {
-      const response = await mutate<typeof valuesetApi.lookup>(
-        valuesetApi.lookup,
-      )({
-        system,
-        code,
-      });
-      return { response, index };
-    },
-    onSuccess: ({ response, index }) => {
+    mutationFn: mutate(valuesetApi.lookup, {
+      silent: true, // Suppress default error handling since we have custom handling
+    }),
+    onSuccess: (response: ValuesetLookupResponse) => {
       if (response.metadata) {
-        parentForm.setValue(
-          `compose.${type}.${nestIndex}.concept.${index}.display`,
-          response.metadata.display,
-          { shouldValidate: true },
+        const concepts = parentForm.getValues(
+          `compose.${type}.${nestIndex}.concept`,
         );
+
+        const conceptIndex = concepts?.findIndex(
+          (concept) => concept.code === response.metadata.code,
+        );
+
+        if (conceptIndex && conceptIndex !== -1) {
+          parentForm.setValue(
+            `compose.${type}.${nestIndex}.concept.${conceptIndex}.display`,
+            response.metadata.display,
+            { shouldValidate: true },
+          );
+        }
         toast.success("Code verified successfully");
       }
     },
@@ -149,11 +148,7 @@ function ConceptFields({
       return;
     }
 
-    lookupMutation.mutate({
-      system,
-      code,
-      index,
-    });
+    lookupMutation.mutate({ system, code });
   };
 
   return (

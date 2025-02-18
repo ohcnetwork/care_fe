@@ -197,7 +197,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleSave = () => {
     if (id) {
-      console.log("Update Questionnaire", questionnaire);
       updateQuestionnaire(questionnaire);
     } else {
       createQuestionnaire({
@@ -707,12 +706,12 @@ function QuestionEditor({
     new Set(),
   );
 
-  const { data: response } = useQuery({
+  const { data: valuesetResponse } = useQuery({
     queryKey: ["valuesets"],
     queryFn: query(valuesetApi.list),
   });
 
-  const valuesets = response?.results || [];
+  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,

@@ -57,11 +57,11 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
       pathParams: { slug: slug! },
     }),
     enabled: !!slug,
-  }) as { data: ValuesetBase | undefined; isLoading: boolean };
+  });
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: mutate<typeof valuesetApi.create>(valuesetApi.create),
+    mutationFn: mutate(valuesetApi.create),
     onSuccess: (data: ValuesetBase) => {
       toast.success("ValueSet created successfully");
       navigate(`/valuesets/${data.slug}`);

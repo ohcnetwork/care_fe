@@ -1,4 +1,5 @@
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,7 +18,10 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/questionnaire/code";
-import { TERMINOLOGY_SYSTEMS } from "@/types/valueset/valueset";
+import {
+  TERMINOLOGY_SYSTEMS,
+  ValuesetLookupResponse,
+} from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CodingEditorProps {
@@ -26,6 +30,23 @@ interface CodingEditorProps {
 }
 
 export function CodingEditor({ code, onChange }: CodingEditorProps) {
+  const { mutate: verifyCode, isPending } = useMutation({
+    mutationFn: mutate(valuesetApi.lookup),
+    onSuccess: (response: ValuesetLookupResponse) => {
+      if (response.metadata && code) {
+        onChange({
+          ...code,
+          display: response.metadata.display,
+        });
+        toast.success("Code verified successfully");
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Failed to verify code");
+    },
+  });
+
   if (!code) {
     return (
       <div>
@@ -121,31 +142,17 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
               type="button"
               variant="outline"
               size="icon"
-              onClick={async () => {
+              disabled={isPending}
+              onClick={() => {
                 if (!code.system || !code.code) {
                   toast.error("Please select a system and enter a code first");
                   return;
                 }
 
-                try {
-                  const response = await mutate<typeof valuesetApi.lookup>(
-                    valuesetApi.lookup,
-                  )({
-                    system: code.system,
-                    code: code.code,
-                  });
-
-                  if (response.metadata) {
-                    onChange({
-                      ...code,
-                      display: response.metadata.display,
-                    });
-                    toast.success("Code verified successfully");
-                  }
-                } catch (error) {
-                  console.error(error);
-                  toast.error("Failed to verify code");
-                }
+                verifyCode({
+                  system: code.system,
+                  code: code.code,
+                });
               }}
             >
               <UpdateIcon className="h-4 w-4" />
