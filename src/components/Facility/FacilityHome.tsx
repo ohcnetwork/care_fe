@@ -194,7 +194,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <Button variant="link">
                   <Avatar
                     name={facilityData.name}
-                    className="h-28 w-24 rounded-md border-4 border-white shadow-lg"
+                    className="h-24 w-24 rounded-md border-4 border-white shadow-lg"
                   />
                 </Button>
               </div>
@@ -288,32 +288,34 @@ export const FacilityHome = ({ facilityId }: Props) => {
               <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
                 <Card className="basis-1/2">
                   <CardContent>
-                    <div className="flex flex-col gap-4 m-2">
-                      <div className="flex flex-col m-2">
-                        <span className="font-medium text-lg">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                      <div className="col-span-1 sm:col-span-2 flex flex-col">
+                        <span className="font-semibold text-lg">
                           {t("address")}
                         </span>
-                        <div className="text-gray-700">
+                        <span className="text-gray-700 truncate">
                           {facilityData.address}
-                        </div>
+                        </span>
                       </div>
-                      <div className="flex gap-5 [@media(max-width:30rem)]:flex-col">
-                        <div className="flex flex-col m-2">
-                          <span className="font-medium text-lg">
-                            {t("mobile_number")}
-                          </span>
-                          <div>
-                            <ContactLink
-                              tel={String(facilityData?.phone_number)}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col mt-2">
-                          <span className="font-medium text-lg">
-                            {t("location_details")}
-                          </span>
-                          <div>{/* Add Location Link Here */}</div>
-                        </div>
+
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {t("mobile_number")}
+                        </span>
+                        <span className="text-gray-800 truncate">
+                          <ContactLink
+                            tel={String(facilityData?.phone_number)}
+                          />
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {t("location_details")}
+                        </span>
+                        <span className="text-gray-800 truncate">
+                          {/* Add Location Link Here */}
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -329,7 +331,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <span className="font-semibold text-lg">
                               {item.label}
                             </span>
-                            <span className="text-gray-800">{item.value}</span>
+                            <span className="text-gray-800 truncate">
+                              {item.value}
+                            </span>
                           </div>
                         ))}
                     </div>
