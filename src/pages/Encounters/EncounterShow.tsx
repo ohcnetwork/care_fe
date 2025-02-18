@@ -30,6 +30,7 @@ export interface EncounterTabProps {
   facilityId: string;
   encounter: Encounter;
   patient: Patient;
+  subPage?: string;
 }
 
 const defaultTabs = {
@@ -48,10 +49,11 @@ interface Props {
   encounterId: string;
   facilityId: string;
   tab?: string;
+  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId } = props;
+  const { facilityId, encounterId, subPage } = props;
   const { t } = useTranslation();
   const pluginTabs = useCareAppConsultationTabs();
   const authUser = useAuthUser();
@@ -88,6 +90,7 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
+    subPage: subPage,
     facilityId,
   };
 
