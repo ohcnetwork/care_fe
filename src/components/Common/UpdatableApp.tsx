@@ -1,11 +1,11 @@
 import { Popover, Transition } from "@headlessui/react";
 import { ReactNode, useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-
-import { classNames } from "@/Utils/utils";
 
 const META_URL = "/build-meta.json";
 const APP_VERSION_KEY = "app-version";
@@ -120,10 +120,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
         <div className="flex items-center gap-4">
           <CareIcon
             icon="l-sync"
-            className={classNames(
-              "care-l-sync text-2xl",
-              isUpdating && "animate-spin",
-            )}
+            className={cn("text-2xl", isUpdating && "animate-spin")}
           />
           <span className="mr-4 flex flex-col">
             <p className="font-semibold">Software Update</p>
