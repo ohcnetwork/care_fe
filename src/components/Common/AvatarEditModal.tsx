@@ -12,18 +12,22 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-
-import DialogModal from "@/components/Common/Dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 interface Props {
   title: string;
   open: boolean;
+  onOpenChange: (open: boolean) => void;
   imageUrl?: string;
   handleUpload: (file: File, onError: () => void) => Promise<void>;
   handleDelete: (onError: () => void) => Promise<void>;
-  onClose?: () => void;
   hint?: React.ReactNode;
 }
 
@@ -48,10 +52,10 @@ type IVideoConstraint =
 const AvatarEditModal = ({
   title,
   open,
+  onOpenChange,
   imageUrl,
   handleUpload,
   handleDelete,
-  onClose,
   hint,
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -91,7 +95,7 @@ const AvatarEditModal = ({
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
-    onClose?.();
+    onOpenChange(false);
   };
 
   useEffect(() => {
@@ -179,246 +183,246 @@ const AvatarEditModal = ({
   const hintMessage = hint || defaultHint;
 
   return (
-    <DialogModal
-      show={open}
-      onClose={closeModal}
-      title={title}
-      className="md:max-w-4xl"
-    >
-      <div className="flex h-full w-full items-center justify-center overflow-y-auto">
-        <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
-          {!isCameraOpen ? (
-            <>
-              {preview || imageUrl ? (
-                <>
-                  <div className="flex flex-1 items-center justify-center rounded-lg">
-                    <img
-                      src={preview || imageUrl}
-                      alt="cover-photo"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <p className="text-center font-medium text-secondary-700">
-                    {hintMessage}
-                  </p>
-                </>
-              ) : (
-                <div
-                  onDragOver={onDragOver}
-                  onDragLeave={onDragLeave}
-                  onDrop={onDrop}
-                  className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
-                    isDragging
-                      ? "border-primary-800 bg-primary-100"
-                      : dragProps.dragOver
-                        ? "border-primary-500"
-                        : "border-secondary-500"
-                  } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
-                >
-                  <svg
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                    className={`h-12 w-12 stroke-[2px] ${
+    <Dialog open={open} onOpenChange={closeModal}>
+      <DialogContent className="md:max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl">{title}</DialogTitle>
+        </DialogHeader>
+        <div className="flex h-full w-full items-center justify-center overflow-y-auto">
+          <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
+            {!isCameraOpen ? (
+              <>
+                {preview || imageUrl ? (
+                  <>
+                    <div className="flex flex-1 items-center justify-center rounded-lg">
+                      <img
+                        src={preview || imageUrl}
+                        alt="cover-photo"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <p className="text-center font-medium text-secondary-700">
+                      {hintMessage}
+                    </p>
+                  </>
+                ) : (
+                  <div
+                    onDragOver={onDragOver}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}
+                    className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
                       isDragging
-                        ? "text-green-500"
+                        ? "border-primary-800 bg-primary-100"
                         : dragProps.dragOver
-                          ? "text-primary-500"
+                          ? "border-primary-500"
+                          : "border-secondary-500"
+                    } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
+                  >
+                    <svg
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
+                      className={`h-12 w-12 stroke-[2px] ${
+                        isDragging
+                          ? "text-green-500"
+                          : dragProps.dragOver
+                            ? "text-primary-500"
+                            : "text-secondary-600"
+                      } ${
+                        dragProps.fileDropError !== ""
+                          ? "text-red-500"
                           : "text-secondary-600"
-                    } ${
-                      dragProps.fileDropError !== ""
-                        ? "text-red-500"
-                        : "text-secondary-600"
-                    }`}
-                  >
-                    <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
-                  </svg>
-                  <p
-                    className={`text-sm ${
-                      dragProps.dragOver
-                        ? "text-primary-500"
-                        : "text-secondary-700"
-                    } ${
-                      dragProps.fileDropError !== ""
-                        ? "text-red-500"
-                        : "text-secondary-700"
-                    } text-center`}
-                  >
-                    {dragProps.fileDropError !== ""
-                      ? dragProps.fileDropError
-                      : `${t("drag_drop_image_to_upload")}`}
-                  </p>
-                  <p className="mt-4 text-center font-medium text-secondary-700">
-                    {t("no_image_found")}. {hintMessage}
-                  </p>
-                </div>
-              )}
+                      }`}
+                    >
+                      <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
+                    </svg>
+                    <p
+                      className={`text-sm ${
+                        dragProps.dragOver
+                          ? "text-primary-500"
+                          : "text-secondary-700"
+                      } ${
+                        dragProps.fileDropError !== ""
+                          ? "text-red-500"
+                          : "text-secondary-700"
+                      } text-center`}
+                    >
+                      {dragProps.fileDropError !== ""
+                        ? dragProps.fileDropError
+                        : `${t("drag_drop_image_to_upload")}`}
+                    </p>
+                    <p className="mt-4 text-center font-medium text-secondary-700">
+                      {t("no_image_found")}. {hintMessage}
+                    </p>
+                  </div>
+                )}
 
-              <div className="flex flex-col gap-2 pt-4 sm:flex-row">
-                <div>
+                <div className="flex flex-col gap-2 pt-4 sm:flex-row">
+                  <div>
+                    <Button
+                      id="upload-cover-image"
+                      variant="primary"
+                      className="w-full"
+                      asChild
+                    >
+                      <label className="cursor-pointer">
+                        <CareIcon
+                          icon="l-cloud-upload"
+                          className="text-lg mr-1"
+                        />
+                        {t("upload_an_image")}
+                        <input
+                          title="changeFile"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={onSelectFile}
+                        />
+                      </label>
+                    </Button>
+                  </div>
                   <Button
-                    id="upload-cover-image"
                     variant="primary"
-                    className="w-full"
-                    asChild
+                    onClick={() => {
+                      setConstraint(() => VideoConstraints.user);
+                      setIsCameraOpen(true);
+                    }}
                   >
-                    <label className="cursor-pointer">
-                      <CareIcon
-                        icon="l-cloud-upload"
-                        className="text-lg mr-1"
-                      />
-                      {t("upload_an_image")}
-                      <input
-                        title="changeFile"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={onSelectFile}
-                      />
-                    </label>
+                    {`${t("open_camera")}`}
                   </Button>
-                </div>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    setConstraint(() => VideoConstraints.user);
-                    setIsCameraOpen(true);
-                  }}
-                >
-                  {`${t("open")} ${t("camera")}`}
-                </Button>
-                <div className="sm:flex-1" />
-                <Button
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closeModal();
-                    dragProps.setFileDropError("");
-                  }}
-                  disabled={isProcessing}
-                >
-                  {t("cancel")}
-                </Button>
-                {imageUrl && (
+                  <div className="sm:flex-1" />
                   <Button
-                    variant="destructive"
-                    onClick={deleteAvatar}
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeModal();
+                      dragProps.setFileDropError("");
+                    }}
                     disabled={isProcessing}
                   >
-                    {t("delete")}
+                    {t("cancel")}
                   </Button>
-                )}
-                <Button
-                  id="save-cover-image"
-                  variant="outline"
-                  onClick={uploadAvatar}
-                  disabled={isProcessing || !selectedFile}
-                >
-                  {isProcessing ? (
-                    <CareIcon
-                      icon="l-spinner"
-                      className="animate-spin text-lg"
-                    />
-                  ) : (
-                    <CareIcon icon="l-save" className="text-lg" />
-                  )}
-                  <span>
-                    {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
-                  </span>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-1 items-center justify-center">
-                {!previewImage ? (
-                  <>
-                    <Webcam
-                      audio={false}
-                      height={720}
-                      screenshotFormat="image/jpeg"
-                      width={1280}
-                      ref={webRef}
-                      videoConstraints={constraint}
-                      onUserMediaError={(_e) => {
-                        setIsCameraOpen(false);
-                        toast.warning(t("camera_permission_denied"));
-                      }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <img src={previewImage} />
-                  </>
-                )}
-              </div>
-              {/* buttons for mobile screens */}
-              <div className="flex flex-col gap-2 pt-4 sm:flex-row">
-                {!previewImage ? (
-                  <>
-                    <Button variant="primary" onClick={handleSwitchCamera}>
-                      <CareIcon icon="l-camera-change" className="text-lg" />
-                      {`${t("switch")} ${t("camera")}`}
-                    </Button>
+                  {imageUrl && (
                     <Button
-                      variant="primary"
-                      onClick={() => {
-                        captureImage();
-                      }}
-                    >
-                      <CareIcon icon="l-capture" className="text-lg" />
-                      {t("capture")}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="primary"
-                      onClick={() => {
-                        setPreviewImage(null);
-                      }}
-                    >
-                      {t("retake")}
-                    </Button>
-                    <Button
-                      variant="primary"
+                      variant="destructive"
+                      onClick={deleteAvatar}
                       disabled={isProcessing}
-                      onClick={uploadAvatar}
                     >
-                      {isCaptureImgBeingUploaded ? (
-                        <>
-                          <CareIcon
-                            icon="l-spinner"
-                            className="animate-spin text-lg"
-                          />
-                          {`${t("submitting")}...`}
-                        </>
-                      ) : (
-                        <> {t("submit")}</>
-                      )}
+                      {t("delete")}
                     </Button>
-                  </>
-                )}
-                <div className="sm:flex-1"></div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setPreviewImage(null);
-                    setIsCameraOpen(false);
-                    webRef.current.stopCamera();
-                  }}
-                  disabled={isProcessing}
-                >
-                  {t("close")}
-                </Button>
-              </div>
-            </>
-          )}
+                  )}
+                  <Button
+                    id="save-cover-image"
+                    variant="outline"
+                    onClick={uploadAvatar}
+                    disabled={isProcessing || !selectedFile}
+                  >
+                    {isProcessing ? (
+                      <CareIcon
+                        icon="l-spinner"
+                        className="animate-spin text-lg"
+                      />
+                    ) : (
+                      <CareIcon icon="l-save" className="text-lg" />
+                    )}
+                    <span>
+                      {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
+                    </span>
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-1 items-center justify-center">
+                  {!previewImage ? (
+                    <>
+                      <Webcam
+                        audio={false}
+                        height={720}
+                        screenshotFormat="image/jpeg"
+                        width={1280}
+                        ref={webRef}
+                        videoConstraints={constraint}
+                        onUserMediaError={(_e) => {
+                          setIsCameraOpen(false);
+                          toast.warning(t("camera_permission_denied"));
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <img src={previewImage} />
+                    </>
+                  )}
+                </div>
+                {/* buttons for mobile screens */}
+                <div className="flex flex-col gap-2 pt-4 sm:flex-row">
+                  {!previewImage ? (
+                    <>
+                      <Button variant="primary" onClick={handleSwitchCamera}>
+                        <CareIcon icon="l-camera-change" className="text-lg" />
+                        {`${t("switch")} ${t("camera")}`}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          captureImage();
+                        }}
+                      >
+                        <CareIcon icon="l-capture" className="text-lg" />
+                        {t("capture")}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          setPreviewImage(null);
+                        }}
+                      >
+                        {t("retake")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        disabled={isProcessing}
+                        onClick={uploadAvatar}
+                      >
+                        {isCaptureImgBeingUploaded ? (
+                          <>
+                            <CareIcon
+                              icon="l-spinner"
+                              className="animate-spin text-lg"
+                            />
+                            {`${t("submitting")}...`}
+                          </>
+                        ) : (
+                          <> {t("submit")}</>
+                        )}
+                      </Button>
+                    </>
+                  )}
+                  <div className="sm:flex-1"></div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setPreviewImage(null);
+                      setIsCameraOpen(false);
+                      webRef.current.stopCamera();
+                    }}
+                    disabled={isProcessing}
+                  >
+                    {t("close")}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </DialogModal>
+      </DialogContent>
+    </Dialog>
   );
 };
 
