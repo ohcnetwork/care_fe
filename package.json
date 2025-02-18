@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
@@ -180,8 +180,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.34.6",
-    "@rollup/rollup-linux-x64-gnu": "4.34.6"
+    "@rollup/rollup-linux-arm64-gnu": "4.34.8",
+    "@rollup/rollup-linux-x64-gnu": "4.34.8"
   },
   "browserslist": {
     "production": [

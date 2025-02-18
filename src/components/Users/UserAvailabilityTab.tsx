@@ -182,9 +182,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               onClick={() => setQParams({ tab: "schedule" })}
               className={cn(
                 view === "schedule" && "shadow",
-                "hover:bg-white",
-                "text-xs sm:text-sm",
-                "px-2 md:px-4",
+                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
               {t("schedule")}
@@ -194,9 +192,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow",
-                "hover:bg-white",
-                "text-xs sm:text-sm",
-                "px-2 md:px-4",
+                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
               )}
             >
               {t("exceptions")}

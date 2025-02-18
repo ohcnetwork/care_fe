@@ -48,7 +48,7 @@ function LocationNode({
 
   return (
     <LocationNode location={location.parent} isLast={false} datetime={datetime}>
-      <div className="flex flex-col gap-2 ml-6">
+      <div className="flex flex-col gap-2 ml-2">
         <div className="flex items-center text-sm">
           <CareIcon
             icon="l-corner-down-right"

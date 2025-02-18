@@ -1,4 +1,4 @@
-import { ChevronRight, ClipboardList, LogOut, Settings } from "lucide-react";
+import { ChevronRight, LogOut, Settings, User2Icon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -65,9 +65,9 @@ export default function UserDashboard() {
               className="w-full sm:w-auto"
               asChild
             >
-              <Link href="/questionnaire" className="gap-2 text-inherit">
-                <ClipboardList className="h-4 w-4" />
-                {t("questionnaire", { count: 2 })}
+              <Link href="/admin/questionnaire" className="gap-2 text-inherit">
+                <User2Icon className="h-4 w-4" />
+                {t("admin_dashboard")}
               </Link>
             </Button>
           )}

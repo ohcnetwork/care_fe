@@ -64,7 +64,7 @@ export default function CloneQuestionnaireSheet({
       silent: true,
     }),
     onSuccess: async (data: QuestionnaireDetail) => {
-      navigate(`/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}`);
       setOpen(false);
     },
     onError: (error: any) => {
