@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -382,8 +382,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     return slots;
   }, [endSlotDate, endSlotIndex]);
 
+  const queryClient = useQueryClient();
+
   // Queries
-  const { data: activeMedications, refetch: refetchActive } = useQuery({
+  const { data: activeMedications } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -396,7 +398,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     enabled: !!patientId,
   });
 
-  const { data: stoppedMedications, refetch: refetchStopped } = useQuery({
+  const { data: stoppedMedications } = useQuery({
     queryKey: ["medication_requests_stopped", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -409,7 +411,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     enabled: !!patientId,
   });
 
-  const { data: administrations, refetch: refetchAdministrations } = useQuery({
+  const { data: administrations } = useQuery({
     queryKey: ["medication_administrations", patientId, visibleSlots],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
@@ -518,8 +520,12 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
     }),
     onSuccess: () => {
-      refetchActive();
-      refetchStopped();
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_active"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_stopped"],
+      });
     },
   });
 
@@ -787,7 +793,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             if (!open) {
               setAdministrationRequest(null);
               setSelectedMedication(null);
-              refetchAdministrations();
+              queryClient.invalidateQueries({
+                queryKey: ["medication_administrations"],
+              });
             }
           }}
           medication={selectedMedication}
@@ -807,7 +815,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         onOpenChange={(open) => {
           setIsSheetOpen(open);
           if (!open) {
-            refetchAdministrations();
+            queryClient.invalidateQueries({
+              queryKey: ["medication_administrations"],
+            });
           }
         }}
         medications={medications}
