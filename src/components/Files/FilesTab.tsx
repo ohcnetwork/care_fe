@@ -669,7 +669,7 @@ export const FilesTab = (props: FilesTabProps) => {
             </Link>
           </TabsTrigger>
         </TabsList>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
           {subPage === "discharge_summary" && (
             <>
@@ -696,7 +696,7 @@ export const FilesTab = (props: FilesTabProps) => {
                 onClick={() => generateDischargeSummary()}
                 disabled={isGenerating}
               >
-                <CareIcon icon="l-file-medical" className="hidden md:block" />
+                <CareIcon icon="l-file-medical" className="hidden sm:block" />
                 <span>
                   {isGenerating
                     ? t("generating")
