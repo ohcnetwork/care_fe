@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -65,16 +65,13 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         {facilityId && (
-          <Button
-            variant="outline_primary"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/resource/new?related_patient=${patientData.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("create_resource_request")}
+          <Button variant="outline_primary" asChild>
+            <Link
+              href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("create_resource_request")}
+            </Link>
           </Button>
         )}
       </div>
@@ -111,17 +108,13 @@ export const ResourceRequests = (props: PatientProps) => {
                   <TableCell>{formatDateTime(request.created_date)}</TableCell>
                   <TableCell>{formatDateTime(request.modified_date)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${request.origin_facility.id}/resource/${request.id}`,
-                        )
-                      }
-                    >
-                      <CareIcon icon="l-eye" className="mr-2" />
-                      {t("view")}
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+                      >
+                        <CareIcon icon="l-eye" className="mr-2" />
+                        {t("view")}
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>
