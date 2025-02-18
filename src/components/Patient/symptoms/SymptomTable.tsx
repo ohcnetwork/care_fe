@@ -72,18 +72,18 @@ export function SymptomTable({
               {symptom.code.display}
             </TableCell>
             <TableCell>
-              <Badge
-                variant="outline"
-                className={
-                  isPrintPreview
-                    ? ""
-                    : `whitespace-nowrap ${
-                        SYMPTOM_SEVERITY_STYLES[symptom.severity]
-                      }`
-                }
-              >
-                {t(symptom.severity)}
-              </Badge>
+              {symptom.severity ? (
+                <Badge
+                  variant="outline"
+                  className={`whitespace-nowrap ${
+                    SYMPTOM_SEVERITY_STYLES[symptom.severity]
+                  }`}
+                >
+                  {t(symptom.severity)}
+                </Badge>
+              ) : (
+                "-"
+              )}
             </TableCell>
             <TableCell>
               <Badge
