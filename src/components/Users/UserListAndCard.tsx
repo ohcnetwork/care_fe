@@ -16,24 +16,6 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
 
-const getDetailsButton = (username: string, facilityId: string) => {
-  return (
-    <div>
-      <Button
-        asChild
-        id={`see-details-${username}`}
-        variant="outline"
-        size="sm"
-      >
-        <Link href={`/facility/${facilityId}/users/${username}`}>
-          <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
-          <span>{t("see_details")}</span>
-        </Link>
-      </Button>
-    </div>
-  );
-};
-
 export const UserStatusIndicator = ({
   user,
   addPadding = false,
@@ -121,7 +103,17 @@ const UserCard = ({ user }: { user: UserBase }) => {
         </div>
 
         <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
-          {getDetailsButton(user.username, facilityId)}
+          <Button
+            asChild
+            id={`see-details-${user.username}`}
+            variant="outline"
+            size="sm"
+          >
+            <Link href={`/facility/${facilityId}/users/${user.username}`}>
+              <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+              <span>{t("see_details")}</span>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -186,7 +178,17 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
       </td>
       <td className="px-4 py-4">
-        {getDetailsButton(user.username, facilityId)}
+        <Button
+          asChild
+          id={`see-details-${user.username}`}
+          variant="outline"
+          size="sm"
+        >
+          <Link href={`/facility/${facilityId}/users/${user.username}`}>
+            <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+            <span>{t("see_details")}</span>
+          </Link>
+        </Button>
       </td>
     </tr>
   );
