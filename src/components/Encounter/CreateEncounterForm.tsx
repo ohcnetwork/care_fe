@@ -154,7 +154,9 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      navigate(`/facility/${facilityId}/encounter/${data.id}/updates`);
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+      );
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };

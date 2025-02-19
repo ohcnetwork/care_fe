@@ -92,7 +92,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
         </div>
 
         <Link
-          href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
+          href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
           className={cn(
             buttonVariants({ variant: "secondary" }),
             "mt-2 shadow-none border border-secondary-300",
@@ -100,7 +100,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
           )}
         >
           <CareIcon icon="l-plus-circle" />
-          {t("View Encounter")}
+          {t("view_encounter")}
         </Link>
       </div>
     </>
