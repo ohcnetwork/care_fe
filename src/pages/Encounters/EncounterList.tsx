@@ -222,8 +222,9 @@ export function EncounterList({
         >
           {isLoading
             ? t("loading")
-            : t("entity_count_one", {
+            : t("entity_count", {
                 count: queryEncounters?.count ?? 0,
+                entity: "Encounter",
               })}
         </Badge>
       }
