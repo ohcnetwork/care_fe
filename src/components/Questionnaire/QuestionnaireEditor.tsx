@@ -154,7 +154,7 @@ function StatusSelector({
   onChange: (value: QuestionStatus) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-fit">
       <Label htmlFor="status">{t("status")}</Label>
       <RadioGroup
         value={value}
@@ -817,7 +817,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="space-y-4 max-w-sm">
+            <div className="space-y-4 md:w-60">
               <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
                 <CardHeader className="p-0">
                   <CardTitle>{t("navigation")}</CardTitle>
