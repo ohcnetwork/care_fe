@@ -8,6 +8,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
       type="encounter"
       facilityId={props.facilityId}
       encounter={props.encounter}
+      subPage={props.subPage}
     />
   );
 };
