@@ -19,6 +19,27 @@ const consultationRoutes: AppRoutes = {
     ({ facilityId, encounterId }) => (
       <TreatmentSummary facilityId={facilityId} encounterId={encounterId} />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
+    ({ facilityId, encounterId, patientId }) => (
+      <EncounterQuestionnaire
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
+    ({ facilityId, encounterId, slug, patientId }) => (
+      <EncounterQuestionnaire
+        facilityId={facilityId}
+        encounterId={encounterId}
+        questionnaireSlug={slug}
+        patientId={patientId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
+    ({ patientId, id }) => (
+      <QuestionnaireResponseView responseId={id} patientId={patientId} />
+    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/:tab": ({
     facilityId,
     patientId,
@@ -62,27 +83,6 @@ const consultationRoutes: AppRoutes = {
       subjectType="patient"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
-    ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
-    ({ facilityId, encounterId, slug, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        questionnaireSlug={slug}
-        patientId={patientId}
-      />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
-    ({ patientId, id }) => (
-      <QuestionnaireResponseView responseId={id} patientId={patientId} />
-    ),
 };
 
 export default consultationRoutes;

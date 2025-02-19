@@ -82,6 +82,8 @@ export const EncounterShow = (props: Props) => {
     facilityId,
   };
 
+  console.log(encounterTabProps);
+
   if (!props.tab) {
     return <ErrorPage />;
   }
