@@ -126,11 +126,7 @@ const MessageItem = ({ message }: { message: Message }) => {
           isCurrentUser ? "flex-row-reverse" : "flex-row",
         )}
       >
-        <TooltipComponent
-          content={message.created_by.username}
-          side="top"
-          sideOffset={4}
-        >
+        <TooltipComponent content={message.created_by.username}>
           <Link
             href={`/facility/${facilityId}/users/${message.created_by.username}`}
           >

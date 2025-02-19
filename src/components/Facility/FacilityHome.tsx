@@ -225,10 +225,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
                       <div className="min-w-0">
-                        <TooltipComponent
-                          content={facilityData?.name}
-                          side="top"
-                        >
+                        <TooltipComponent content={facilityData?.name}>
                           <h1 className="text-sm md:text-3xl text-white md:font-bold">
                             {facilityData?.name}
                           </h1>
