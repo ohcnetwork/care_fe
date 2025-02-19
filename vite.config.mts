@@ -210,7 +210,8 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
       reactScan({
-        enable: env.ENABLE_REACT_SCAN === "true",
+        enable:
+          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
       }),
       checker({
         typescript: true,
