@@ -261,6 +261,7 @@ export function EncounterList({
                         onFieldChange={handleFieldChange}
                         onSearch={handleSearch}
                         className="w-full border-none shadow-none"
+                        autoFocus
                       />
                     </div>
                   </PopoverContent>
