@@ -651,7 +651,7 @@ export const FilesTab = (props: FilesTabProps) => {
       />
       <Tabs defaultValue={subPage}>
         {type === "encounter" && (
-          <TabsList className="grid w-auto grid-cols-2 w-fit">
+          <TabsList className="grid w-auto grid-cols-2 sm:w-fit">
             <TabsTrigger value="all" asChild>
               <Link
                 className="text-gray-600"
@@ -670,7 +670,7 @@ export const FilesTab = (props: FilesTabProps) => {
             </TabsTrigger>
           </TabsList>
         )}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
           {type === "encounter" && subPage === "discharge_summary" && (
             <>
