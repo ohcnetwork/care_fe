@@ -14,7 +14,6 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.verifyAndClickElement('[data-cy="update-encounter-button"]', "Update");
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
       "Update Encounter",
@@ -76,10 +75,10 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.verifyAndClickElement(
-      '[data-cy="patient-details-button"]',
-      "Patient Details",
-    );
+    cy.get('[data-cy="patient-details-button"]')
+      .filter(":visible")
+      .first()
+      .click();
     return this;
   }
 

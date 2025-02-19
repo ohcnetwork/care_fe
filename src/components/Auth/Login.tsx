@@ -504,7 +504,7 @@ const Login = (props: LoginProps) => {
                           )}
                         </div>
 
-                        {isCaptchaEnabled && (
+                        {isCaptchaEnabled && reCaptchaSiteKey && (
                           <div className="py-4">
                             <ReCaptcha
                               sitekey={reCaptchaSiteKey}
@@ -626,6 +626,7 @@ const Login = (props: LoginProps) => {
                             name="otp"
                             type="text"
                             value={otp}
+                            autoComplete="one-time-code"
                             onChange={(e) => {
                               setOtp(e.target.value);
                               setOtpValidationError("");

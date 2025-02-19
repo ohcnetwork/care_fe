@@ -17,8 +17,6 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { MedicationAdministration } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
@@ -116,11 +114,6 @@ const routes = {
     TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
   },
 
-  token_verify: {
-    path: "/api/v1/auth/token/verify/",
-    method: "POST",
-  },
-
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
@@ -164,12 +157,6 @@ const routes = {
     TRes: Type<UserModel>(),
   },
 
-  userList: {
-    path: "/api/v1/users/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<UserModel>>(),
-  },
-
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
@@ -182,20 +169,6 @@ const routes = {
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
-  },
-
-  // Facility Endpoints
-
-  getPermittedFacilities: {
-    path: "/api/v1/facility/",
-    TRes: Type<PaginatedResponse<FacilityModel>>(),
-  },
-
-  createFacility: {
-    path: "/api/v1/facility/",
-    method: "POST",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
   },
 
   getPermittedFacility: {
@@ -222,11 +195,6 @@ const routes = {
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
     TBody: Type<void>(),
-  },
-
-  getFacilityUsers: {
-    path: "/api/v1/facility/{facility_id}/get_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
   getScheduleAbleFacilityUser: {
@@ -337,11 +305,6 @@ const routes = {
     path: "/api/v1/resource/{id}/",
     method: "GET",
     TRes: Type<ResourceRequest>(),
-  },
-  downloadResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
@@ -562,6 +525,11 @@ const routes = {
       TRes: Type<Encounter>(),
       TBody: Type<{ organization: string }>(),
     },
+    generateDischargeSummary: {
+      path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
+      method: "POST",
+      TRes: Type<{ detail: string }>(),
+    },
   },
 
   // New Patient Routes
@@ -648,22 +616,6 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
-    },
-  },
-
-  medicationStatement: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/statement/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationStatement>>(),
-    },
-  },
-
-  medicationAdministration: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/administration/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationAdministration>>(),
     },
   },
 } as const;
