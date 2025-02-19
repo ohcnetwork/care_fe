@@ -49,6 +49,7 @@
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
     "@fontsource/figtree": "^5.1.1",
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^4.0.0",
@@ -114,7 +115,7 @@
     "react-phone-number-input": "^3.4.11",
     "react-webcam": "^7.2.0",
     "recharts": "^2.15.0",
-    "sonner": "^1.7.2",
+    "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.0",
     "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",
