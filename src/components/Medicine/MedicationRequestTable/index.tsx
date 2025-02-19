@@ -113,7 +113,7 @@ export default function MedicationRequestTable({
       const medicationName = med.medication?.display?.toLowerCase() || "";
       return medicationName.includes(searchTerm);
     });
-  }, [searchQuery, activeMedications, stoppedMedications]);
+  }, [searchQuery, activeMedications, stoppedMedications, medications]);
 
   const isLoading = loadingActive || loadingStopped;
 

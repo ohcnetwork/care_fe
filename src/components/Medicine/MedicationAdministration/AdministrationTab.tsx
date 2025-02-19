@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -361,7 +361,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     Math.floor(currentDate.getHours() / 6),
   );
   // Calculate visible slots based on end slot
-  const visibleSlots = React.useMemo(() => {
+  const visibleSlots = useMemo(() => {
     const slots = [];
     let currentIndex = endSlotIndex;
     let currentDate = new Date(endSlotDate);
@@ -440,7 +440,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   // Get last administered date and last administered by for each medication
-  const lastAdministeredDetails = React.useMemo(() => {
+  const lastAdministeredDetails = useMemo(() => {
     return administrations?.results?.reduce<{
       dates: Record<string, string>;
       performers: Record<string, string>;
@@ -475,7 +475,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   };
 
   // Calculate if we can go back further based on the earliest slot and authored date
-  const canGoBack = React.useMemo(() => {
+  const canGoBack = useMemo(() => {
     const medications = showStopped
       ? [
           ...(activeMedications?.results || []),
@@ -502,7 +502,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<MedicationAdministrationRequest | null>(null);
 
   // Calculate last modified date
-  const lastModifiedDate = React.useMemo(() => {
+  const lastModifiedDate = useMemo(() => {
     if (!administrations?.results?.length) return null;
 
     const sortedAdmins = [...administrations.results].sort(
@@ -530,7 +530,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   // Handlers
-  const handlePreviousSlot = React.useCallback(() => {
+  const handlePreviousSlot = useCallback(() => {
     if (!canGoBack) return;
 
     const newEndSlotIndex = endSlotIndex - 1;
@@ -544,7 +544,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex, canGoBack]);
 
-  const handleNextSlot = React.useCallback(() => {
+  const handleNextSlot = useCallback(() => {
     const newEndSlotIndex = endSlotIndex + 1;
     if (newEndSlotIndex > 3) {
       setEndSlotIndex(0);
@@ -556,7 +556,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex]);
 
-  const handleAdminister = React.useCallback(
+  const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
       setAdministrationRequest(
         createMedicationAdministrationRequest(medication, encounterId),
@@ -567,7 +567,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [encounterId],
   );
 
-  const handleEditAdministration = React.useCallback(
+  const handleEditAdministration = useCallback(
     (medication: MedicationRequestRead, admin: MedicationAdministration) => {
       setAdministrationRequest({
         id: admin.id,
@@ -586,7 +586,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [],
   );
 
-  const handleDiscontinue = React.useCallback(
+  const handleDiscontinue = useCallback(
     (medication: MedicationRequestRead) => {
       discontinueMedication({
         datapoints: [
