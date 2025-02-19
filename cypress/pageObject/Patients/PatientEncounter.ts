@@ -14,7 +14,6 @@ export class PatientEncounter {
   }
 
   clickUpdateEncounter() {
-    cy.verifyAndClickElement('[data-cy="update-encounter-button"]', "Update");
     cy.verifyAndClickElement(
       '[data-cy="update-encounter-option"]',
       "Update Encounter",
