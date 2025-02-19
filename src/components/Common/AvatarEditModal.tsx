@@ -189,7 +189,7 @@ const AvatarEditModal = ({
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
           <DialogDescription className="sr-only">
-            Edit avatar descriptionr
+            {t("edit_avatar")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">

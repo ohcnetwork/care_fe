@@ -76,7 +76,7 @@ export default function EditScheduleTemplateSheet({
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
-            edit shedule template sheet
+            {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
         <div className="overflow-auto -mx-6 px-6 pb-16">

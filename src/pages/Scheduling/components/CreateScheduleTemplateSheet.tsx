@@ -254,7 +254,7 @@ export default function CreateScheduleTemplateSheet({
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
-            create shedule template sheet
+            {t("create_schedule_template")}
           </SheetDescription>
         </SheetHeader>
 

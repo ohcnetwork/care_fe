@@ -1,4 +1,3 @@
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   useInfiniteQuery,
   useMutation,
@@ -526,11 +525,9 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       <Sheet open={isThreadsExpanded} onOpenChange={setIsThreadsExpanded}>
         <SheetContent side="left" className="w-[100%] sm:w-[380px] p-0">
           <SheetDescription className="sr-only">
-            EncounterNote sidebar sheet
+            {t("encounter_notes__all_discussions_sidebar")}
           </SheetDescription>
-          <VisuallyHidden>
-            <SheetTitle>EncounterNote</SheetTitle>
-          </VisuallyHidden>
+          <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
