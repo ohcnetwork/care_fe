@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
@@ -44,16 +45,17 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 import {
-  AnswerOption,
   EnableWhen,
   Question,
   QuestionType,
+  SUPPORTED_QUESTION_TYPES,
   StructuredQuestionType,
 } from "@/types/questionnaire/question";
 import {
@@ -62,7 +64,9 @@ import {
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import valuesetApi from "@/types/valueset/valuesetApi";
 
+import { CodingEditor } from "./CodingEditor";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
@@ -117,7 +121,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.create),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
-      navigate(`/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
       toast.error("Failed to create questionnaire");
@@ -203,7 +207,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleCancel = () => {
-    navigate(id ? `/questionnaire/${id}` : "/questionnaire");
+    navigate(id ? `/admin/questionnaire/${id}` : "/admin/questionnaire");
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
@@ -632,6 +636,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </Card>
             </div>
           </div>
+          <DebugPreview
+            data={questionnaire}
+            title="Questionnaire"
+            className="mt-4"
+          />
         </TabsContent>
 
         <TabsContent value="preview">
@@ -690,11 +699,19 @@ function QuestionEditor({
     repeats,
     answer_option,
     questions,
+    code,
   } = question;
 
   const [expandedSubQuestions, setExpandedSubQuestions] = useState<Set<string>>(
     new Set(),
   );
+
+  const { data: valuesetResponse } = useQuery({
+    queryKey: ["valuesets"],
+    queryFn: query(valuesetApi.list),
+  });
+
+  const valuesets = valuesetResponse?.results || [];
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -824,136 +841,173 @@ function QuestionEditor({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Type</Label>
-              <Select
-                value={type}
-                onValueChange={(val: QuestionType) => {
-                  if (val !== "group") {
-                    updateField("type", val, { questions: [] });
-                  } else {
-                    updateField("type", val);
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select question type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="group">Group</SelectItem>
-                  <SelectItem value="boolean">Boolean</SelectItem>
-                  <SelectItem value="decimal">Decimal</SelectItem>
-                  <SelectItem value="integer">Integer</SelectItem>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="dateTime">DateTime</SelectItem>
-                  <SelectItem value="time">Time</SelectItem>
-                  <SelectItem value="string">String</SelectItem>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="url">URL</SelectItem>
-                  <SelectItem value="choice">Choice</SelectItem>
-                  <SelectItem value="quantity">Quantity</SelectItem>
-                  <SelectItem value="structured">Structured</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {type === "structured" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Structured Type</Label>
+                <Label>Type</Label>
                 <Select
-                  value={structured_type ?? "allergy_intolerance"}
-                  onValueChange={(val: StructuredQuestionType) =>
-                    updateField("structured_type", val)
-                  }
+                  value={type}
+                  onValueChange={(val: QuestionType) => {
+                    if (val !== "group") {
+                      updateField("type", val, { questions: [] });
+                    } else {
+                      updateField("type", val);
+                    }
+                  }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select structured type" />
+                    <SelectValue placeholder="Select question type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {STRUCTURED_QUESTION_TYPES.map((type) => (
+                    {SUPPORTED_QUESTION_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                        {type.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {type === "structured" && (
+                <div>
+                  <Label>Structured Type</Label>
+                  <Select
+                    value={structured_type ?? "allergy_intolerance"}
+                    onValueChange={(val: StructuredQuestionType) =>
+                      updateField("structured_type", val)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select structured type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STRUCTURED_QUESTION_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {type !== "structured" && type !== "group" && (
+              <CodingEditor
+                code={code}
+                onChange={(newCode) => updateField("code", newCode)}
+              />
             )}
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={required ?? false}
-                onCheckedChange={(val) => updateField("required", val)}
-                id={`required-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`required-${getQuestionPath()}`}>Required</Label>
+          <div className="space-y-6">
+            <div className="border rounded-lg bg-gray-100 p-4">
+              <h3 className="text-sm font-medium mb-2">Question Settings</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Configure the basic behavior: mark as required, allow multiple
+                entries, or set as read only.
+              </p>
+              <div className="">
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={required ?? false}
+                      onCheckedChange={(val) => updateField("required", val)}
+                      id={`required-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`required-${getQuestionPath()}`}>
+                      Required
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={repeats ?? false}
+                      onCheckedChange={(val) => updateField("repeats", val)}
+                      id={`repeats-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`repeats-${getQuestionPath()}`}>
+                      Repeatable
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={question.read_only ?? false}
+                      onCheckedChange={(val) => updateField("read_only", val)}
+                      id={`read_only-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`read_only-${getQuestionPath()}`}>
+                      Read Only
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={repeats ?? false}
-                onCheckedChange={(val) => updateField("repeats", val)}
-                id={`repeats-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`repeats-${getQuestionPath()}`}>Repeatable</Label>
-            </div>
+            <div className="border rounded-lg bg-gray-100 p-4">
+              <h3 className="text-sm font-medium mb-2">
+                Data Collection Details
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Specify key collection info: time, performer, body site, and
+                method.
+              </p>
+              <div className="">
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={question.collect_time ?? false}
+                      onCheckedChange={(val) =>
+                        updateField("collect_time", val)
+                      }
+                      id={`collect_time-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`collect_time-${getQuestionPath()}`}>
+                      Collect Time
+                    </Label>
+                  </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={question.collect_time ?? false}
-                onCheckedChange={(val) => updateField("collect_time", val)}
-                id={`collect_time-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`collect_time-${getQuestionPath()}`}>
-                Collect Time
-              </Label>
-            </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={question.collect_performer ?? false}
+                      onCheckedChange={(val) =>
+                        updateField("collect_performer", val)
+                      }
+                      id={`collect_performer-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
+                      Collect Performer
+                    </Label>
+                  </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={question.collect_performer ?? false}
-                onCheckedChange={(val) => updateField("collect_performer", val)}
-                id={`collect_performer-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
-                Collect Performer
-              </Label>
-            </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={question.collect_body_site ?? false}
+                      onCheckedChange={(val) =>
+                        updateField("collect_body_site", val)
+                      }
+                      id={`collect_body_site-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
+                      Collect Body Site
+                    </Label>
+                  </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={question.collect_body_site ?? false}
-                onCheckedChange={(val) => updateField("collect_body_site", val)}
-                id={`collect_body_site-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
-                Collect Body Site
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={question.collect_method ?? false}
-                onCheckedChange={(val) => updateField("collect_method", val)}
-                id={`collect_method-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`collect_method-${getQuestionPath()}`}>
-                Collect Method
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={question.read_only ?? false}
-                onCheckedChange={(val) => updateField("read_only", val)}
-                id={`read_only-${getQuestionPath()}`}
-              />
-              <Label htmlFor={`read_only-${getQuestionPath()}`}>
-                Read Only
-              </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={question.collect_method ?? false}
+                      onCheckedChange={(val) =>
+                        updateField("collect_method", val)
+                      }
+                      id={`collect_method-${getQuestionPath()}`}
+                    />
+                    <Label htmlFor={`collect_method-${getQuestionPath()}`}>
+                      Collect Method
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -988,329 +1042,139 @@ function QuestionEditor({
 
           {type === "choice" && (
             <div className="space-y-4">
-              <div>
-                <Label>Answer Options</Label>
-                <div className="flex items-center gap-2 mb-2">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div>
+                    <CardTitle className="text-base font-medium">
+                      Answer Options
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Define possible answers for this question
+                    </p>
+                  </div>
                   <Select
-                    value={question.answer_value_set ?? "custom"}
+                    value={question.answer_value_set ? "valueset" : "custom"}
                     onValueChange={(val: string) =>
                       updateField(
                         "answer_value_set",
-                        val === "custom" ? undefined : val,
+                        val === "custom" ? undefined : "valueset",
                       )
                     }
                   >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select a value set (optional)" />
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder={t("select_a_value_set")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="custom">Custom Options</SelectItem>
-                      <SelectItem value="system-yes-no">Yes/No</SelectItem>
-                      <SelectItem value="system-severity">
-                        Severity Levels
+                      <SelectItem value="custom">
+                        {t("custom_options")}
                       </SelectItem>
-                      <SelectItem value="system-frequency">
-                        Frequency
-                      </SelectItem>
-                      <SelectItem value="system-duration">Duration</SelectItem>
+                      <SelectItem value="valueset">{t("value_set")}</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-                {(!question.answer_value_set ||
-                  question.answer_value_set === "custom") && (
-                  <div className="space-y-2">
+                </CardHeader>
+
+                {!question.answer_value_set ? (
+                  <CardContent className="space-y-4">
                     {(answer_option || []).map((opt, idx) => (
-                      <div key={idx} className="grid grid-cols-2 gap-2">
-                        <Input
-                          value={opt.value}
-                          onChange={(e) => {
-                            const newOptions = [...(answer_option || [])];
-                            newOptions[idx] = { ...opt, value: e.target.value };
-                            updateField("answer_option", newOptions);
-                          }}
-                          placeholder="Option value"
-                        />
-                        <div className="flex gap-2">
-                          <Input
-                            value={opt.display || ""}
-                            onChange={(e) => {
-                              const newOptions = [...(answer_option || [])];
-                              newOptions[idx] = {
-                                ...opt,
-                                display: e.target.value,
-                              };
-                              updateField("answer_option", newOptions);
-                            }}
-                            placeholder="Display text (optional)"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              const newOptions = answer_option?.filter(
-                                (_, i) => i !== idx,
-                              );
-                              updateField("answer_option", newOptions);
-                            }}
-                          >
-                            <CareIcon icon="l-times" className="h-4 w-4" />
-                          </Button>
+                      <div
+                        key={idx}
+                        className="space-y-4 pb-4 border-b last:border-0 last:pb-0"
+                      >
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Value</Label>
+                            <Input
+                              value={opt.value}
+                              onChange={(e) => {
+                                const newOptions = answer_option
+                                  ? [...answer_option]
+                                  : [];
+                                newOptions[idx] = {
+                                  ...opt,
+                                  value: e.target.value,
+                                };
+                                updateField("answer_option", newOptions);
+                              }}
+                              placeholder="Option value"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <Label>Display Text</Label>
+                              <Input
+                                value={opt.display || ""}
+                                onChange={(e) => {
+                                  const newOptions = answer_option
+                                    ? [...answer_option]
+                                    : [];
+                                  newOptions[idx] = {
+                                    ...opt,
+                                    display: e.target.value,
+                                  };
+                                  updateField("answer_option", newOptions);
+                                }}
+                                placeholder="Display text (optional)"
+                              />
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="mt-8"
+                              onClick={() => {
+                                const newOptions = answer_option?.filter(
+                                  (_, i) => i !== idx,
+                                );
+                                updateField("answer_option", newOptions);
+                              }}
+                            >
+                              <CareIcon icon="l-times" className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
+
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newOption: AnswerOption = { value: "" };
-                        updateField("answer_option", [
-                          ...(answer_option || []),
-                          newOption,
-                        ]);
+                        const newOption = { value: "" };
+                        const newOptions = answer_option
+                          ? [...answer_option, newOption]
+                          : [newOption];
+                        updateField("answer_option", newOptions);
                       }}
                     >
                       <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
                       Add Option
                     </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <Label>Enable When Conditions</Label>
-                <div className="space-y-2">
-                  {(question.enable_when || []).length > 0 && (
-                    <div>
-                      <Label className="text-xs">Enable Behavior</Label>
-                      <Select
-                        value={question.enable_behavior ?? "all"}
-                        onValueChange={(val: "all" | "any") =>
-                          updateField("enable_behavior", val)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">
-                            All conditions must be met
-                          </SelectItem>
-                          <SelectItem value="any">
-                            Any condition must be met
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  {(question.enable_when || []).map((condition, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                  </CardContent>
+                ) : (
+                  <CardContent className="space-y-4">
+                    <Select
+                      value={
+                        question.answer_value_set === "valueset"
+                          ? undefined
+                          : question.answer_value_set
+                      }
+                      onValueChange={(val: string) =>
+                        updateField("answer_value_set", val)
+                      }
                     >
-                      <div>
-                        <Label className="text-xs">Question</Label>
-                        <Input
-                          value={condition.question}
-                          onChange={(e) => {
-                            const newConditions = [
-                              ...(question.enable_when || []),
-                            ];
-                            newConditions[idx] = {
-                              ...condition,
-                              question: e.target.value,
-                            };
-                            updateField("enable_when", newConditions);
-                          }}
-                          placeholder="Question Link ID"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Operator</Label>
-                        <Select
-                          value={condition.operator}
-                          onValueChange={(
-                            val:
-                              | "equals"
-                              | "not_equals"
-                              | "exists"
-                              | "greater"
-                              | "less"
-                              | "greater_or_equals"
-                              | "less_or_equals",
-                          ) => {
-                            const newConditions = [
-                              ...(question.enable_when || []),
-                            ];
-
-                            switch (val) {
-                              case "greater":
-                              case "less":
-                              case "greater_or_equals":
-                              case "less_or_equals":
-                                newConditions[idx] = {
-                                  question: condition.question,
-                                  operator: val,
-                                  answer: 0,
-                                };
-                                break;
-                              case "exists":
-                                newConditions[idx] = {
-                                  question: condition.question,
-                                  operator: val,
-                                  answer: true,
-                                };
-                                break;
-                              case "equals":
-                              case "not_equals":
-                                newConditions[idx] = {
-                                  question: condition.question,
-                                  operator: val,
-                                  answer: "",
-                                };
-                                break;
-                            }
-
-                            updateField("enable_when", newConditions);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="equals">Equals</SelectItem>
-                            <SelectItem value="not_equals">
-                              Not Equals
-                            </SelectItem>
-                            <SelectItem value="greater">
-                              Greater Than
-                            </SelectItem>
-                            <SelectItem value="less">Less Than</SelectItem>
-                            <SelectItem value="greater_or_equals">
-                              Greater Than or Equal
-                            </SelectItem>
-                            <SelectItem value="less_or_equals">
-                              Less Than or Equal
-                            </SelectItem>
-                            <SelectItem value="exists">Exists</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Label className="text-xs">Answer</Label>
-                          {condition.operator === "exists" ? (
-                            <Select
-                              value={condition.answer ? "true" : "false"}
-                              onValueChange={(val: "true" | "false") => {
-                                const newConditions = [
-                                  ...(question.enable_when || []),
-                                ];
-                                newConditions[idx] = {
-                                  question: condition.question,
-                                  operator: "exists" as const,
-                                  answer: val === "true",
-                                };
-                                updateField("enable_when", newConditions);
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="true">True</SelectItem>
-                                <SelectItem value="false">False</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input
-                              value={condition.answer?.toString() ?? ""}
-                              type={
-                                [
-                                  "greater",
-                                  "less",
-                                  "greater_or_equals",
-                                  "less_or_equals",
-                                ].includes(condition.operator)
-                                  ? "number"
-                                  : "text"
-                              }
-                              onChange={(e) => {
-                                const newConditions = [
-                                  ...(question.enable_when || []),
-                                ];
-                                const value = e.target.value;
-                                let newCondition;
-
-                                if (
-                                  [
-                                    "greater",
-                                    "less",
-                                    "greater_or_equals",
-                                    "less_or_equals",
-                                  ].includes(condition.operator)
-                                ) {
-                                  newCondition = {
-                                    question: condition.question,
-                                    operator: condition.operator as
-                                      | "greater"
-                                      | "less"
-                                      | "greater_or_equals"
-                                      | "less_or_equals",
-                                    answer: Number(value),
-                                  };
-                                } else {
-                                  newCondition = {
-                                    question: condition.question,
-                                    operator: condition.operator as
-                                      | "equals"
-                                      | "not_equals",
-                                    answer: value,
-                                  };
-                                }
-
-                                newConditions[idx] = newCondition;
-                                updateField("enable_when", newConditions);
-                              }}
-                              placeholder="Answer value"
-                            />
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="mt-5"
-                          onClick={() => {
-                            const newConditions = question.enable_when?.filter(
-                              (_, i) => i !== idx,
-                            );
-                            updateField("enable_when", newConditions);
-                          }}
-                        >
-                          <CareIcon icon="l-times" className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newCondition: EnableWhen = {
-                        question: "",
-                        operator: "equals",
-                        answer: "",
-                      };
-                      updateField("enable_when", [
-                        ...(question.enable_when || []),
-                        newCondition,
-                      ]);
-                    }}
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                    Add Condition
-                  </Button>
-                </div>
-              </div>
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder={t("select_a_value_set")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {valuesets.map((valueset) => (
+                          <SelectItem key={valueset.id} value={valueset.slug}>
+                            {valueset.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                )}
+              </Card>
             </div>
           )}
 
@@ -1391,6 +1255,234 @@ function QuestionEditor({
               </div>
             </div>
           )}
+
+          <div className="space-y-4">
+            <Label>Enable When Conditions</Label>
+            <div className="space-y-2">
+              {(question.enable_when || []).length > 0 && (
+                <div>
+                  <Label className="text-xs">Enable Behavior</Label>
+                  <Select
+                    value={question.enable_behavior ?? "all"}
+                    onValueChange={(val: "all" | "any") =>
+                      updateField("enable_behavior", val)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        All conditions must be met
+                      </SelectItem>
+                      <SelectItem value="any">
+                        Any condition must be met
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {(question.enable_when || []).map((condition, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-[2fr,1fr,2fr] gap-2 items-start"
+                >
+                  <div>
+                    <Label className="text-xs">Question</Label>
+                    <Input
+                      value={condition.question}
+                      onChange={(e) => {
+                        const newConditions = [...(question.enable_when || [])];
+                        newConditions[idx] = {
+                          ...condition,
+                          question: e.target.value,
+                        };
+                        updateField("enable_when", newConditions);
+                      }}
+                      placeholder="Question Link ID"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Operator</Label>
+                    <Select
+                      value={condition.operator}
+                      onValueChange={(
+                        val:
+                          | "equals"
+                          | "not_equals"
+                          | "exists"
+                          | "greater"
+                          | "less"
+                          | "greater_or_equals"
+                          | "less_or_equals",
+                      ) => {
+                        const newConditions = [...(question.enable_when || [])];
+
+                        switch (val) {
+                          case "greater":
+                          case "less":
+                          case "greater_or_equals":
+                          case "less_or_equals":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: 0,
+                            };
+                            break;
+                          case "exists":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: true,
+                            };
+                            break;
+                          case "equals":
+                          case "not_equals":
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: val,
+                              answer: "",
+                            };
+                            break;
+                        }
+
+                        updateField("enable_when", newConditions);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="not_equals">Not Equals</SelectItem>
+                        <SelectItem value="greater">Greater Than</SelectItem>
+                        <SelectItem value="less">Less Than</SelectItem>
+                        <SelectItem value="greater_or_equals">
+                          Greater Than or Equal
+                        </SelectItem>
+                        <SelectItem value="less_or_equals">
+                          Less Than or Equal
+                        </SelectItem>
+                        <SelectItem value="exists">Exists</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label className="text-xs">Answer</Label>
+                      {condition.operator === "exists" ? (
+                        <Select
+                          value={condition.answer ? "true" : "false"}
+                          onValueChange={(val: "true" | "false") => {
+                            const newConditions = [
+                              ...(question.enable_when || []),
+                            ];
+                            newConditions[idx] = {
+                              question: condition.question,
+                              operator: "exists" as const,
+                              answer: val === "true",
+                            };
+                            updateField("enable_when", newConditions);
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">True</SelectItem>
+                            <SelectItem value="false">False</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          value={condition.answer?.toString() ?? ""}
+                          type={
+                            [
+                              "greater",
+                              "less",
+                              "greater_or_equals",
+                              "less_or_equals",
+                            ].includes(condition.operator)
+                              ? "number"
+                              : "text"
+                          }
+                          onChange={(e) => {
+                            const newConditions = [
+                              ...(question.enable_when || []),
+                            ];
+                            const value = e.target.value;
+                            let newCondition;
+
+                            if (
+                              [
+                                "greater",
+                                "less",
+                                "greater_or_equals",
+                                "less_or_equals",
+                              ].includes(condition.operator)
+                            ) {
+                              newCondition = {
+                                question: condition.question,
+                                operator: condition.operator as
+                                  | "greater"
+                                  | "less"
+                                  | "greater_or_equals"
+                                  | "less_or_equals",
+                                answer: Number(value),
+                              };
+                            } else {
+                              newCondition = {
+                                question: condition.question,
+                                operator: condition.operator as
+                                  | "equals"
+                                  | "not_equals",
+                                answer: value,
+                              };
+                            }
+
+                            newConditions[idx] = newCondition;
+                            updateField("enable_when", newConditions);
+                          }}
+                          placeholder="Answer value"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-5"
+                      onClick={() => {
+                        const newConditions = question.enable_when?.filter(
+                          (_, i) => i !== idx,
+                        );
+                        updateField("enable_when", newConditions);
+                      }}
+                    >
+                      <CareIcon icon="l-times" className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newCondition: EnableWhen = {
+                    question: "",
+                    operator: "equals",
+                    answer: "",
+                  };
+                  updateField("enable_when", [
+                    ...(question.enable_when || []),
+                    newCondition,
+                  ]);
+                }}
+              >
+                <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                Add Condition
+              </Button>
+            </div>
+          </div>
         </div>
       </CollapsibleContent>
     </Collapsible>
