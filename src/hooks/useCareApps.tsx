@@ -1,5 +1,6 @@
-import { createContext, useContext } from "react";
+import { Suspense, createContext, useContext } from "react";
 
+import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { PluginManifest } from "@/pluginTypes";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
@@ -22,11 +23,29 @@ export const useCareApps = () => {
 //   return navItems;
 // };
 
-export const useCareAppConsultationTabs = () => {
+const withSuspense = (Component: React.ComponentType<EncounterTabProps>) => {
+  // eslint-disable-next-line react/display-name
+  return (props: EncounterTabProps) => {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Component {...props} />
+      </Suspense>
+    );
+  };
+};
+
+export const useCareAppEncounterTabs = () => {
   const careApps = useCareApps();
 
   return careApps.reduce((acc, app) => {
-    return { ...acc, ...(app.encounterTabs ?? {}) };
+    const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
+      (acc, [key, Component]) => {
+        return { ...acc, [key]: withSuspense(Component) };
+      },
+      {},
+    );
+
+    return { ...acc, ...appTabs };
   }, {});
 };
 

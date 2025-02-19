@@ -113,7 +113,6 @@ export const EncounterCard = (props: EncounterCardProps) => {
                   {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
                 </div>
               </div>
-
               {encounter.period.end && (
                 <div className="w-full mx-3 sm:w-auto">
                   <div className="text-gray-600 text-sm">{t("end_date")}</div>
@@ -137,7 +136,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
             <div className="w-full py-2 bg-gray-100 px-2">
               <Button variant="outline" className="p-2 border border-black">
                 <Link
-                  href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
+                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
                   className="flex items-center gap-2"
                 >
                   <Eye className="w-4 h-4" />
