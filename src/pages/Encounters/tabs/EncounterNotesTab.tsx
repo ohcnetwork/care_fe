@@ -727,7 +727,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               {!canWriteCurrentEncounter && (
                 <p className="text-sm text-gray-500 mt-4">
                   {t("encounter_notes__cannot_start_discussion_old_encounter", {
-                    encounterStatus: encounter.status,
+                    encounterStatus: t(`encounter_status__${encounter.status}`),
                   })}
                 </p>
               )}

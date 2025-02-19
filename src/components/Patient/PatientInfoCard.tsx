@@ -50,7 +50,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
 import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
@@ -230,9 +230,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           variant="outline"
                           title={`Encounter Status: ${t(`encounter_status__${props.encounter.status}`)}`}
                         >
-                          {completedEncounterStatus.includes(
-                            props.encounter.status,
-                          ) ? (
+                          {canWrite ? (
                             <CircleCheck
                               className="w-4 h-4 text-green-300"
                               fill="green"
@@ -455,7 +453,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) && (
+          {canWrite && (
             <div
               className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
               data-cy="update-encounter-button"

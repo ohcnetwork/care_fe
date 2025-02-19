@@ -21,7 +21,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import { BaseFacility } from "@/types/facility/facility";
 
 import AddFacilitySheet from "./components/AddFacilitySheet";
-import EditFacilitySheet from "./components/EditFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
 
@@ -109,85 +108,61 @@ export default function OrganizationFacilities({
                   </CardContent>
                 </Card>
               ) : (
-                facilities?.results?.map((facility: BaseFacility) => {
-                  const { canUpdateFacility } = getPermissions(
-                    hasPermission,
-                    facility.permissions,
-                  );
-                  return (
-                    <Card
-                      key={facility.id}
-                      className="h-full hover:border-primary/50 transition-colors overflow-hidden"
-                    >
-                      <div className="relative h-48 bg-gray-100">
-                        {facility.read_cover_image_url ? (
-                          <img
-                            src={facility.read_cover_image_url}
-                            alt={facility.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center overflow-hidden">
-                            <Avatar name={facility.name} />
-                          </div>
-                        )}
-                      </div>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col h-full">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="text-md font-medium text-gray-900">
-                                {facility.name}
-                              </h3>
-                              <div className="font-medium">
-                                {facility.facility_type}
-                              </div>
+                facilities?.results?.map((facility: BaseFacility) => (
+                  <Card
+                    key={facility.id}
+                    className="h-full hover:border-primary/50 transition-colors overflow-hidden"
+                  >
+                    <div className="relative h-48 bg-gray-100">
+                      {facility.read_cover_image_url ? (
+                        <img
+                          src={facility.read_cover_image_url}
+                          alt={facility.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                          <Avatar name={facility.name} />
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex flex-col h-full">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="text-md font-medium text-gray-900">
+                              {facility.name}
+                            </h3>
+                            <div className="font-medium">
+                              {facility.facility_type}
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                      <CardFooter className="flex justify-between">
-                        <div className="flex items-center pl-7">
-                          {canUpdateFacility && (
-                            <EditFacilitySheet
-                              organizationId={id}
-                              facilityId={facility.id}
-                              trigger={
-                                <Button
-                                  variant="link"
-                                  size="icon"
-                                  className="text-primary"
-                                >
-                                  <CareIcon icon="l-edit" className="h-4 w-4" />
-                                  <span className="">{t("edit_facility")}</span>
-                                </Button>
-                              }
-                            />
-                          )}
-                        </div>
-                        <div>
-                          <Button
-                            variant="link"
-                            size="icon"
-                            className="text-primary"
-                            asChild
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-end">
+                      <div>
+                        <Button
+                          variant="link"
+                          size="icon"
+                          className="text-primary"
+                          asChild
+                        >
+                          <Link
+                            href={`/facility/${facility.id}/settings/general`}
+                            className="text-sm w-full hover:underline"
                           >
-                            <Link
-                              href={`/facility/${facility.id}/settings/general`}
-                              className="text-sm w-full hover:underline"
-                            >
-                              {t("view_facility")}
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="h-4 w-4"
-                              />
-                            </Link>
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  );
-                })
+                            {t("view_facility")}
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="h-4 w-4"
+                            />
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))
               )}
             </div>
             <Pagination totalCount={facilities?.count ?? 0} />
