@@ -156,12 +156,6 @@ export default function CreateEncounterForm({
       onSuccess?.();
       navigate(`/facility/${facilityId}/encounter/${data.id}/updates`);
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {

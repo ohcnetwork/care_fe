@@ -94,11 +94,9 @@ export function QuestionnaireForm({
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },
-    onError: (error) => {
-      const errorData = error.cause;
-      if (errorData?.results) {
-        handleSubmissionError(errorData.results as ValidationErrorResponse[]);
-      }
+    onError: (error: any) => {
+      const errorData = error.cause.results as ValidationErrorResponse[];
+      handleSubmissionError(errorData);
       toast.error(t("questionnaire_submission_failed"));
     },
   });

@@ -91,9 +91,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       }),
     });
 
-  if (facilityError) {
-    toast.error(t("error_fetching_facility_data"));
-  }
+  useEffect(() => {
+    if (facilityError) {
+      toast.error(t("error_fetching_facility_data"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facilityError]);
 
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", facilityId, staffId],
@@ -103,9 +106,12 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     enabled: !!facilityId && !!staffId,
   });
 
-  if (userError) {
-    toast.error(t("error_fetching_user_data"));
-  }
+  useEffect(() => {
+    if (userError) {
+      toast.error(t("error_fetching_user_data"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userError]);
 
   const slotsQuery = useQuery<{ results: TokenSlot[] }>({
     queryKey: ["slots", facilityId, staffId, selectedDate],
@@ -123,17 +129,21 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     enabled: !!selectedDate && !!tokenData.token,
   });
 
-  if (slotsQuery.error) {
-    if (
-      slotsQuery.error.cause?.errors &&
-      Array.isArray(slotsQuery.error.cause.errors) &&
-      slotsQuery.error.cause.errors[0][0] === "Resource is not schedulable"
-    ) {
-      toast.error(t("user_not_available_for_appointments"));
-    } else {
-      toast.error(t("error_fetching_slots_data"));
+  useEffect(() => {
+    if (slotsQuery.error) {
+      const errorData = slotsQuery.error.cause as { errors: { msg: string }[] };
+      if (
+        errorData.errors &&
+        Array.isArray(errorData.errors) &&
+        errorData.errors[0].msg === "Resource is not schedulable"
+      ) {
+        toast.error(t("user_not_available_for_appointments"));
+      } else {
+        toast.error(t("error_fetching_slots_data"));
+      }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotsQuery.error]);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({

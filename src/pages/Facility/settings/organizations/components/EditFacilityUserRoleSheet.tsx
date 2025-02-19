@@ -81,12 +81,6 @@ export default function EditUserRoleSheet({
       toast.success(t("user_role_update_success"));
       setOpen(false);
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
   });
 
   const { mutate: removeRole } = useMutation({
@@ -104,12 +98,6 @@ export default function EditUserRoleSheet({
       });
       toast.success(t("user_removed_success"));
       setOpen(false);
-    },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
     },
   });
 

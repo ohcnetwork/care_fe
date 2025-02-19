@@ -75,12 +75,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
       setSelectedUser(undefined);
       setSelectedRole("");
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
   });
 
   const handleAddUser = () => {
@@ -225,12 +219,6 @@ export const PatientUsers = (props: PatientProps) => {
         queryKey: ["patientUsers", patientId],
       });
       toast.success("User removed successfully");
-    },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
     },
   });
 

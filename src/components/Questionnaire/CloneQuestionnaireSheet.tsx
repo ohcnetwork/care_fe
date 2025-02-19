@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Building, Check, Loader2 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export default function CloneQuestionnaireSheet({
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { t } = useTranslation();
 
   const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
     useQuery({
@@ -67,11 +69,11 @@ export default function CloneQuestionnaireSheet({
       navigate(`/questionnaire/${data.slug}`);
       setOpen(false);
     },
-    onError: (error: any) => {
-      if (error.response?.status === 400) {
-        setError("This slug is already in use. Please choose a different one.");
+    onError: (error) => {
+      if (error.status === 400) {
+        setError(t("error_slug_already_in_use"));
       } else {
-        setError("Failed to clone questionnaire. Please try again.");
+        setError(t("error_failed_to_clone_questionnaire"));
       }
     },
   });

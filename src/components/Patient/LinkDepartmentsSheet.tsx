@@ -117,12 +117,6 @@ export default function LinkDepartmentsSheet({
       setOpen(false);
       onUpdate?.();
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
   });
 
   const { mutate: removeOrganization, isPending: isRemoving } = useMutation({
@@ -148,12 +142,6 @@ export default function LinkDepartmentsSheet({
       queryClient.invalidateQueries({ queryKey });
       toast.success("Organization removed successfully");
       onUpdate?.();
-    },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
     },
   });
 

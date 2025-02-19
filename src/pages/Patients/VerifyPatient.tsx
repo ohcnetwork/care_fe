@@ -3,7 +3,6 @@ import { AlertCircle, CalendarIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -42,12 +41,6 @@ export default function VerifyPatient(props: { facilityId: string }) {
     isError,
   } = useMutation({
     mutationFn: mutate(routes.patient.search_retrieve),
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
   });
 
   const { data: encounters } = useQuery<PaginatedResponse<Encounter>>({
