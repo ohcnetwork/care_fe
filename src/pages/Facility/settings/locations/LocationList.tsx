@@ -84,24 +84,37 @@ export default function LocationList({ facilityId }: Props) {
     [tableData],
   );
 
-  const getChildren = useCallback(
-    (parentId: string) => {
-      const children = childrenMap.get(parentId) || [];
-      if (!searchQuery) return children;
+  const matchesSearch = (name: string) =>
+    name.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return children.filter((loc) =>
-        loc.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const hasMatchingChildren = useCallback(
+    (parentId: string): boolean => {
+      const children = childrenMap.get(parentId) || [];
+      return children.some(
+        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
       );
     },
     [childrenMap, searchQuery],
   );
 
+  const getChildren = useCallback(
+    (parentId: string) => {
+      const children = childrenMap.get(parentId) || [];
+      if (!searchQuery) return children;
+
+      return children.filter(
+        (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
+      );
+    },
+    [childrenMap, searchQuery, hasMatchingChildren],
+  );
+
   const filteredTopLevelLocations = useMemo(() => {
     if (!searchQuery) return topLevelLocations;
-    return topLevelLocations.filter((loc) =>
-      loc.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    return topLevelLocations.filter(
+      (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
     );
-  }, [topLevelLocations, searchQuery]);
+  }, [topLevelLocations, searchQuery, hasMatchingChildren]);
 
   const handleAddLocation = () => {
     setSelectedLocation(null);
@@ -176,7 +189,7 @@ export default function LocationList({ facilityId }: Props) {
             } flex justify-between lg:flex-row flex-col pl-[var(--indent)] flex-wrap gap-2`}
           >
             <div className="flex items-center">
-              {children.length > 0 ? (
+              {isTopLevel || children.length > 0 ? (
                 <Button
                   size="icon"
                   variant="link"
@@ -206,7 +219,7 @@ export default function LocationList({ facilityId }: Props) {
                       variant="white"
                       size={isMobile ? "xs" : "sm"}
                       onClick={toggleAllChildren}
-                      className="opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity gap-2"
+                      className="gap-2"
                     >
                       <CareIcon
                         icon={allExpanded ? "l-minus" : "l-plus"}
@@ -224,23 +237,17 @@ export default function LocationList({ facilityId }: Props) {
                     variant="white"
                     size={isMobile ? "xs" : "sm"}
                     onClick={() => handleEditLocation(location)}
-                    className="opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <PenLine className="h-4 w-4" />
                     <span className="hidden lg:inline">{t("edit")}</span>
                   </Button>
 
-                  <Button
-                    variant="white"
-                    size={isMobile ? "xs" : "sm"}
-                    asChild
-                    className="opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
+                  <Button variant="white" size={isMobile ? "xs" : "sm"} asChild>
                     <Link
                       href={`/location/${location.id}`}
                       className="text-gray-900 flex items-center"
                     >
-                      <CareIcon icon="l-eye" className="h-4 w-4" />
+                      <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
                       <span className="hidden lg:inline">
                         {t("see_details")}
                       </span>
@@ -375,10 +382,6 @@ export default function LocationList({ facilityId }: Props) {
                 </div>
                 <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
                   <div className="flex flex-wrap items-baseline">
-                    <span className="inline-block mr-1">{t("click")}</span>
-                    <span className="inline-block font-semibold mr-1">
-                      {t("add_location")}
-                    </span>
                     <span className="inline-block">
                       {t("to_add_main_location")}.
                     </span>
