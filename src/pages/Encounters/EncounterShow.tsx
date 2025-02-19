@@ -42,14 +42,15 @@ const defaultTabs = {
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  encounterId: string;
   facilityId: string;
+  patientId: string;
+  encounterId: string;
   tab?: string;
   subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId, subPage } = props;
+  const { facilityId, encounterId, patientId, subPage } = props;
   const { t } = useTranslation();
   const pluginTabs = useCareAppEncounterTabs();
 
@@ -62,7 +63,10 @@ export const EncounterShow = (props: Props) => {
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: { facility: facilityId },
+      queryParams: {
+        facility: facilityId,
+        patient: patientId,
+      },
     }),
     enabled: !!encounterId,
   });
@@ -167,7 +171,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/encounter/${encounterData.id}/${tab}`}
+                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
