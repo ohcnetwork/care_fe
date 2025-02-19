@@ -103,14 +103,17 @@ export default function MedicationRequestTable({
     [showStopped, activeMedications, stoppedMedications],
   );
 
-  const displayedMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
+  const displayedMedications = useMemo(() => {
+    if (!searchQuery.trim()) return medications;
+    const searchTerm = searchQuery.toLowerCase().trim();
+    return [
+      ...(activeMedications?.results || []),
+      ...(stoppedMedications?.results || []),
+    ].filter((med: MedicationRequestRead) => {
       const medicationName = med.medication?.display?.toLowerCase() || "";
       return medicationName.includes(searchTerm);
-    },
-  );
+    });
+  }, [searchQuery, activeMedications, stoppedMedications]);
 
   const isLoading = loadingActive || loadingStopped;
 
@@ -206,22 +209,23 @@ export default function MedicationRequestTable({
                     <div className="p-2">
                       <MedicationsTable medications={displayedMedications} />
                     </div>
-                    {!!stoppedMedications?.results?.length && (
-                      <div
-                        className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                        onClick={() => setShowStopped(!showStopped)}
-                      >
-                        <CareIcon
-                          icon={showStopped ? "l-eye-slash" : "l-eye"}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm underline">
-                          {showStopped ? t("hide") : t("show")}{" "}
-                          {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                          {t("prescriptions")}
-                        </span>
-                      </div>
-                    )}
+                    {!!stoppedMedications?.results?.length &&
+                      !searchQuery.trim() && (
+                        <div
+                          className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                          onClick={() => setShowStopped(!showStopped)}
+                        >
+                          <CareIcon
+                            icon={showStopped ? "l-eye-slash" : "l-eye"}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm underline">
+                            {showStopped ? t("hide") : t("show")}{" "}
+                            {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                            {t("prescriptions")}
+                          </span>
+                        </div>
+                      )}
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>

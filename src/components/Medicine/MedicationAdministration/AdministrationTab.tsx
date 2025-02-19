@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -608,14 +608,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       ]
     : activeMedications?.results || [];
 
-  const filteredMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
+  const filteredMedications = useMemo(() => {
+    if (!searchQuery.trim()) return medications;
+    const searchTerm = searchQuery.toLowerCase().trim();
+    return [
+      ...(activeMedications?.results || []),
+      ...(stoppedMedications?.results || []),
+    ].filter((med: MedicationRequestRead) => {
       const medicationName = med.medication?.display?.toLowerCase() || "";
       return medicationName.includes(searchTerm);
-    },
-  );
+    });
+  }, [searchQuery, activeMedications, stoppedMedications, medications]);
 
   let content;
   if (!activeMedications || !stoppedMedications) {
@@ -726,7 +729,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             </div>
           </div>
 
-          {stoppedMedications?.results?.length > 0 && (
+          {stoppedMedications?.results?.length > 0 && !searchQuery.trim() && (
             <div
               className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
               onClick={() => setShowStopped(!showStopped)}
