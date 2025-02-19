@@ -24,6 +24,7 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
+import LocationRoutes from "./routes/LocationRoutes";
 import OrganizationRoutes from "./routes/OrganizationRoutes";
 import AdminRoutes from "./routes/adminRoutes";
 
@@ -50,6 +51,7 @@ const Routes: AppRoutes = {
   // ...AssetRoutes,
   ...ConsultationRoutes,
   ...FacilityRoutes,
+  ...LocationRoutes,
   ...PatientRoutes,
   ...ResourceRoutes,
   ...ScheduleRoutes,
