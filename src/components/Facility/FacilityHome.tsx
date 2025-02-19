@@ -1,10 +1,4 @@
 import careConfig from "@careConfig";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { Edit2, Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
@@ -35,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Markdown } from "@/components/ui/markdown";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
@@ -230,20 +225,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
                       />
                       <div className="min-w-0">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <h1 className="text-sm md:text-3xl text-white md:font-bold">
-                                {facilityData?.name}
-                              </h1>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-sm text-white bg-black rounded-md p-2">
-                                {facilityData?.name}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <TooltipComponent
+                          content={facilityData?.name}
+                          side="top"
+                        >
+                          <h1 className="text-sm md:text-3xl text-white md:font-bold">
+                            {facilityData?.name}
+                          </h1>
+                        </TooltipComponent>
                       </div>
                     </div>
                   </div>
