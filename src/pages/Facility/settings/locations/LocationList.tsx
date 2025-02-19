@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { Link } from "raviger";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -65,17 +65,37 @@ export default function LocationList({ facilityId }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
   const { data, isLoading } = useQuery({
-    queryKey: ["locations", facilityId, searchQuery],
+    queryKey: ["locations", facilityId],
     queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: {
-        name: searchQuery || undefined,
-      },
+      queryParams: {},
     }),
     enabled: !!facilityId,
   });
 
-  const tableData = data?.results || [];
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return data?.results || [];
+
+    const allLocations = data?.results || [];
+    const matchesSearch = (name: string) =>
+      name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const hasMatchingDescendant = (locationId: string): boolean => {
+      const children = allLocations.filter(
+        (loc) => loc.parent?.id === locationId,
+      );
+      return children.some(
+        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
+      );
+    };
+
+    return allLocations.filter(
+      (location) =>
+        matchesSearch(location.name) || hasMatchingDescendant(location.id),
+    );
+  }, [data?.results, searchQuery]);
+
+  const tableData = filteredData;
   const { childrenMap, topLevelLocations } = useMemo(
     () => buildLocationHierarchy(tableData),
     [tableData],
@@ -131,6 +151,41 @@ export default function LocationList({ facilityId }: Props) {
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setExpandedRows({});
+      return;
+    }
+
+    const allLocations = data?.results || [];
+    const matchesSearch = (name: string) =>
+      name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const hasMatchingDescendant = (locationId: string): boolean => {
+      const children = allLocations.filter(
+        (loc) => loc.parent?.id === locationId,
+      );
+      return children.some(
+        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
+      );
+    };
+
+    const newExpandedRows: Record<string, boolean> = {};
+    allLocations.forEach((location) => {
+      if (matchesSearch(location.name) || hasMatchingDescendant(location.id)) {
+        let currentLoc = location;
+        while (currentLoc.parent?.id) {
+          newExpandedRows[currentLoc.parent.id] = true;
+          currentLoc = allLocations.find(
+            (loc) => loc.id === currentLoc.parent?.id,
+          )!;
+        }
+      }
+    });
+
+    setExpandedRows(newExpandedRows);
+  }, [searchQuery, data?.results]);
 
   const LocationRow = ({
     location,
