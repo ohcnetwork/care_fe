@@ -471,7 +471,9 @@ function QuestionnaireProperties({
         />
 
         <div className="space-y-2">
-          <Label>{t("organizations")}</Label>
+          <Label>
+            {t("organizations")} <span className="text-red-500">*</span>
+          </Label>
           <OrganizationSelector
             id={id}
             organizations={organizations}
