@@ -39,12 +39,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
@@ -77,16 +72,9 @@ const threadTemplates = [
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
-      </TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs text-sm">{content}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
+  <TooltipComponent content={content}>
+    <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
+  </TooltipComponent>
 );
 
 // Thread item component
@@ -138,26 +126,23 @@ const MessageItem = ({ message }: { message: Message }) => {
           isCurrentUser ? "flex-row-reverse" : "flex-row",
         )}
       >
-        <TooltipProvider>
-          <Tooltip>
-            <Link
-              href={`/facility/${facilityId}/users/${message.created_by.username}`}
-            >
-              <TooltipTrigger asChild>
-                <div className="flex pr-2">
-                  <Avatar
-                    name={message.created_by.username}
-                    imageUrl={message.created_by.profile_picture_url}
-                    className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
-                  />
-                </div>
-              </TooltipTrigger>
-            </Link>
-            <TooltipContent>
-              <p>{message.created_by.username}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <TooltipComponent
+          content={message.created_by.username}
+          side="top"
+          sideOffset={4}
+        >
+          <Link
+            href={`/facility/${facilityId}/users/${message.created_by.username}`}
+          >
+            <div className="flex pr-2">
+              <Avatar
+                name={message.created_by.username}
+                imageUrl={message.created_by.profile_picture_url}
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+              />
+            </div>
+          </Link>
+        </TooltipComponent>
 
         <div
           className={cn(
@@ -584,27 +569,19 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       ?.title
                   }
                 </h2>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                      <Users className="h-4 w-4" />
-                      <span>
-                        {new Set(messages.map((m) => m.created_by.id)).size}
-                      </span>
-                      <MessageSquare className="h-4 w-4 ml-3" />
-                      <span>{totalMessages}</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {t("participants")}:{" "}
+                <TooltipComponent
+                  content={`${t("participants")}: ${new Set(messages.map((m) => m.created_by.id)).size}
+                  ${t("messages")}: ${totalMessages}`}
+                >
+                  <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <Users className="h-4 w-4" />
+                    <span>
                       {new Set(messages.map((m) => m.created_by.id)).size}
-                    </p>
-                    <p>
-                      {t("messages")}: {totalMessages}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
+                    </span>
+                    <MessageSquare className="h-4 w-4 ml-3" />
+                    <span>{totalMessages}</span>
+                  </div>
+                </TooltipComponent>
               </div>
             ) : (
               <div className="text-center text-sm font-medium text-gray-500">
