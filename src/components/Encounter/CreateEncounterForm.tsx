@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   Ambulance,
   BedDouble,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -74,7 +75,9 @@ const encounterFormSchema = z.object({
     "use_as_directed",
     "urgent",
   ] as const),
-  organizations: z.array(z.string()),
+  organizations: z.array(z.string()).min(1, {
+    message: "At least one department is required",
+  }),
 });
 
 const encounterClasses = [
@@ -134,6 +137,9 @@ export default function CreateEncounterForm({
   onSuccess,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [errors, setErrors] = useState<
+    FieldErrors<z.infer<typeof encounterFormSchema>> | undefined
+  >(undefined);
   const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof encounterFormSchema>>({
@@ -184,6 +190,7 @@ export default function CreateEncounterForm({
         setIsOpen(open);
         if (!open) {
           form.reset();
+          setErrors(undefined);
         }
       }}
     >
@@ -209,7 +216,7 @@ export default function CreateEncounterForm({
         </SheetHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit, setErrors)}
             className="mt-4 space-y-6"
           >
             <FormField
@@ -328,12 +335,14 @@ export default function CreateEncounterForm({
               }}
             />
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isPending || form.watch("organizations").length === 0}
-            >
-              {isPending ? "Creating..." : "Create Encounter"}
+            {errors && (
+              <div className="text-red-500 text-xs">
+                {errors.organizations?.message}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Creating..." : t("create_encounter")}
             </Button>
           </form>
         </Form>
