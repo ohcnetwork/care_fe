@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Trans } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -43,12 +44,10 @@ export default function FacilityOrganizationIndex({
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
-  const LIMIT = 1000;
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
-    queryFn: query(routes.facilityOrganization.list, {
+    queryFn: query.paginated(routes.facilityOrganization.list, {
       pathParams: { facilityId },
-      queryParams: { limit: LIMIT },
     }),
     enabled: !!facilityId,
   });
@@ -290,17 +289,20 @@ export default function FacilityOrganizationIndex({
           <CareIcon icon="l-info-circle" className="h-6 w-6 text-blue-900" />
         </div>
         <div className="">
-          <p className="">
-            {t("click")}{" "}
-            <span className="font-semibold">{t("add_department_team")}</span>{" "}
-            {t("to_create_new_one")}
-          </p>
-          <p className="">
-            {t("click")}{" "}
-            <span className="font-semibold">{t("see_details")}</span>{" "}
-            <CareIcon icon="l-arrow-up-right"></CareIcon>{" "}
-            {t("to_manage_create_more")}
-          </p>
+          <Trans
+            i18nKey="click_add_create_new"
+            components={{
+              strong: <strong className="font-semibold" />,
+            }}
+          />
+          <br></br>
+          <Trans
+            i18nKey="click_create_users"
+            components={{
+              strong: <strong className="font-semibold" />,
+              CareIcon: <CareIcon icon="l-arrow-up-right"></CareIcon>,
+            }}
+          />
         </div>
       </div>
       <Table className="border rounded-lg w-full overflow-hidden">
