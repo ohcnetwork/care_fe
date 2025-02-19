@@ -178,7 +178,15 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+        }
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -320,7 +328,11 @@ export default function CreateEncounterForm({
               }}
             />
 
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isPending || form.watch("organizations").length === 0}
+            >
               {isPending ? "Creating..." : "Create Encounter"}
             </Button>
           </form>
