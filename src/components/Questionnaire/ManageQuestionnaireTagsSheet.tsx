@@ -64,7 +64,7 @@ export default function ManageQuestionnaireTagsSheet({
 
   const { data: availableTags, isLoading } = useQuery({
     queryKey: ["questionnaire_tags", searchQuery],
-    queryFn: query(questionnaireApi.tags.list, {
+    queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: searchQuery !== "" ? { name: searchQuery } : undefined,
     }),
     enabled: open,
