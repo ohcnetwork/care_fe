@@ -8,7 +8,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
-import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
+import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -51,7 +51,7 @@ interface Props {
 export const EncounterShow = (props: Props) => {
   const { facilityId, encounterId, subPage } = props;
   const { t } = useTranslation();
-  const pluginTabs = useCareAppConsultationTabs();
+  const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
@@ -62,9 +62,7 @@ export const EncounterShow = (props: Props) => {
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: {
-        facility: facilityId,
-      },
+      queryParams: { facility: facilityId },
     }),
     enabled: !!encounterId,
   });
