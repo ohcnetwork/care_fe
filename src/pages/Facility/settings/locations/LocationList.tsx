@@ -64,14 +64,11 @@ export default function LocationList({ facilityId }: Props) {
   const [activeTab, setActiveTab] = useView("locations", "list");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
-  const LIMIT = 1000;
-
   const { data, isLoading } = useQuery({
     queryKey: ["locations", facilityId, searchQuery],
-    queryFn: query(locationApi.list, {
+    queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        limit: LIMIT,
         name: searchQuery || undefined,
       },
     }),
@@ -294,30 +291,32 @@ export default function LocationList({ facilityId }: Props) {
     }
 
     return (
-      <Table className="border rounded-lg w-full overflow-hidden">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
-              {t("name")}
-            </TableHead>
-            <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
-              {t("location_form")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTopLevelLocations.map((location) => (
-            <LocationRow
-              key={location.id}
-              location={location}
-              expandedRows={expandedRows}
-              toggleRow={toggleRow}
-              getChildren={getChildren}
-              indent={1}
-            />
-          ))}
-        </TableBody>
-      </Table>
+      <div className="space-y-4">
+        <Table className="border rounded-lg w-full overflow-hidden">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+                {t("name")}
+              </TableHead>
+              <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
+                {t("location_form")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredTopLevelLocations.map((location) => (
+              <LocationRow
+                key={location.id}
+                location={location}
+                expandedRows={expandedRows}
+                toggleRow={toggleRow}
+                getChildren={getChildren}
+                indent={1}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     );
   };
 
@@ -382,17 +381,20 @@ export default function LocationList({ facilityId }: Props) {
                 </div>
                 <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
                   <div className="flex flex-wrap items-baseline">
+                    <span className="inline-block mr-1">{t("click")}</span>
+                    <span className="inline-block font-semibold mr-1">
+                      {t("add_location")}
+                    </span>
                     <span className="inline-block">
                       {t("to_add_main_location")}.
                     </span>
                   </div>
                   {/* Desktop view text */}
                   <div className="hidden lg:flex flex-wrap items-baseline">
-                    <span className="inline-block mr-1">
-                      {t("hover_focus_reveal")}
-                    </span>
+                    <span className="inline-block mr-1">{t("click")}</span>
                     <span className="inline-block font-semibold mr-1">
                       {t("see_details")}
+                      <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
                     </span>
                     <span className="inline-block break-words">
                       {t("open_manage_sub_locations")}
@@ -401,13 +403,15 @@ export default function LocationList({ facilityId }: Props) {
                   {/* Mobile and Tablet view text */}
                   <div className="flex lg:hidden flex-wrap items-baseline">
                     <span className="inline-block break-words">
-                      {t("click_on")}{" "}
+                      {t("click")}{" "}
                       <span className="inline-flex items-center gap-1">
                         "<PenLine className="h-4 w-4" />"
                       </span>{" "}
                       {t("to_edit")},{" "}
                       <span className="inline-flex items-center gap-1">
-                        "<CareIcon icon="l-eye" className="h-4 w-4" />"
+                        "
+                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                        "
                       </span>{" "}
                       {t("open_manage_sub_locations")}
                     </span>
