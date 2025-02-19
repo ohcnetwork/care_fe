@@ -27,7 +27,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       href: `/facility/${facilityId}/users/${user?.username}/availability`,
     },
     {
-      title: t("Encounters"),
+      title: t("encounters"),
       description: t("manage_facility_users"),
       icon: Users,
       href: `/facility/${facilityId}/encounters`,

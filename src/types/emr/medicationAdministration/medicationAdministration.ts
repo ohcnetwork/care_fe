@@ -11,7 +11,6 @@ export const MEDICATION_ADMINISTRATION_STATUS = [
   "stopped",
   "in_progress",
   "on_hold",
-  "unknown",
   "cancelled",
 ] as const;
 
@@ -93,4 +92,6 @@ export interface MedicationAdministrationRead {
     dose?: DosageQuantity;
     rate?: Quantity;
   };
+  created_by: UserBareMinimum;
+  updated_by: UserBareMinimum;
 }

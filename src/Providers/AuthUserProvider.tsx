@@ -49,6 +49,7 @@ export default function AuthUserProvider({
     queryFn: query(routes.token_refresh, {
       body: { refresh: refreshToken || "" },
     }),
+    refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
     enabled: !!refreshToken && !!user,
   });

@@ -26,6 +26,7 @@ export interface EncounterTabProps {
   facilityId: string;
   encounter: Encounter;
   patient: Patient;
+  subPage?: string;
 }
 
 const defaultTabs = {
@@ -44,10 +45,11 @@ interface Props {
   encounterId: string;
   facilityId: string;
   tab?: string;
+  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId } = props;
+  const { facilityId, encounterId, subPage } = props;
   const { t } = useTranslation();
   const pluginTabs = useCareAppConsultationTabs();
 
@@ -74,6 +76,7 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
+    subPage: subPage,
     facilityId,
   };
 
@@ -97,21 +100,7 @@ export const EncounterShow = (props: Props) => {
   return (
     <div>
       <nav className="relative flex flex-wrap items-start justify-between">
-        <PageTitle
-          title={t("encounter")}
-          crumbsReplacements={{
-            [encounterId]: { name: encounterData.patient.name },
-            consultation: {
-              name: "Consultation",
-              uri: `/facility/${facilityId}/patient/${encounterData.patient.id}/consultation/${encounterId}/update`,
-            },
-            [encounterId]: {
-              name: encounterData.status,
-            },
-          }}
-          breadcrumbs={true}
-          backUrl="/patients"
-        />
+        <PageTitle title={t("encounter")} />
         <div
           className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
           id="consultationpage-header"
@@ -145,14 +134,6 @@ export const EncounterShow = (props: Props) => {
                 )}
             </>
           )} */}
-          <Link
-            href={`/facility/${facilityId}/patient/${encounterData.patient.id}`}
-            className="btn btn-primary m-1 w-full hover:text-white"
-            id="patient-details"
-            data-cy="patient-details-button"
-          >
-            {t("patient_details")}
-          </Link>
         </div>
       </nav>
       <div className="mt-4 xl:mt-0 w-full border-b-2 border-secondary-200">

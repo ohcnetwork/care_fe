@@ -45,6 +45,7 @@ export interface LocationDetail extends LocationBase {
 export interface LocationList extends LocationBase {
   id: string;
   has_children: boolean;
+  parent?: LocationList;
 }
 
 export interface LocationWrite extends LocationBase {

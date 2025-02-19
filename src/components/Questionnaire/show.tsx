@@ -2,6 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -103,7 +105,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
       pathParams: { id },
     }),
     onSuccess: () => {
-      navigate("/questionnaire");
+      navigate("/admin/questionnaire");
     },
   });
 
@@ -147,11 +149,14 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
           <p className="text-gray-600">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate("/questionnaire")}>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin/questionnaire")}
+          >
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Back to List
           </Button>
-          <Button onClick={() => navigate(`/questionnaire/${id}/edit`)}>
+          <Button onClick={() => navigate(`/admin/questionnaire/${id}/edit`)}>
             <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
             Edit
           </Button>
@@ -218,7 +223,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                   disabled={isPending}
                 >
                   {isPending ? "Deleting..." : "Delete"}

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -62,7 +63,7 @@ export default function CreateFacilityOrganizationSheet({
       queryClient.invalidateQueries({
         queryKey: ["getCurrentUser"],
       });
-      toast.success("Organization created successfully");
+      toast.success(t("organization_created_successfully"));
       setOpen(false);
       setName("");
       setDescription("");
@@ -72,7 +73,7 @@ export default function CreateFacilityOrganizationSheet({
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      toast.error("Please enter an organization name");
+      toast.error(t("please_enter_organization_name"));
       return;
     }
 
@@ -87,16 +88,16 @@ export default function CreateFacilityOrganizationSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="primary_gradient">
+        <Button>
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-          Create Department/Team
+          {t("add_department_team")}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Create Department/Team</SheetTitle>
+          <SheetTitle>{t("create_department_team")}</SheetTitle>
           <SheetDescription>
-            Create a new department/team in this facility.
+            {t("create_department_team_description")}
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
@@ -105,18 +106,18 @@ export default function CreateFacilityOrganizationSheet({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter department/team name"
+              placeholder={t("enter_department_team_name")}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Type</label>
+            <label className="text-sm font-medium">{t(`type`)}</label>
             <Select
               value={orgType}
               onValueChange={(value: OrgType) => setOrgType(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select organization type" />
+                <SelectValue placeholder={t("select_organization_type")} />
               </SelectTrigger>
               <SelectContent>
                 {ORG_TYPES.map((type) => (
@@ -133,7 +134,7 @@ export default function CreateFacilityOrganizationSheet({
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter department/team description (optional)"
+              placeholder={t("enter_department_team_description")}
             />
           </div>
 
@@ -142,7 +143,7 @@ export default function CreateFacilityOrganizationSheet({
             onClick={handleSubmit}
             disabled={isPending || !name.trim()}
           >
-            {isPending ? "Creating..." : "Create Organization"}
+            {isPending ? t("creating") : t("create_organization")}
           </Button>
         </div>
       </SheetContent>

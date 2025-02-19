@@ -73,7 +73,7 @@ const MedicineListItem = ({
         <Checkbox
           checked={isSelected}
           onCheckedChange={onSelect}
-          className="mt-1"
+          className="mt-1 mr-6 border-gray-800 h-5 w-5"
           aria-label="Select for administration"
         />
       </div>
@@ -122,12 +122,9 @@ export function MedicineAdminSheet({
   const formRef = useRef<HTMLFormElement>(null);
 
   const { mutate: upsertAdministrations, isPending } = useMutation({
-    mutationFn: mutate(
-      medicationAdministrationApi.upsertMedicationAdministration,
-      {
-        pathParams: { patientId },
-      },
-    ),
+    mutationFn: mutate(medicationAdministrationApi.upsert, {
+      pathParams: { patientId },
+    }),
     onSuccess: () => {
       toast.success(t("medication_administration_saved"));
       handleClose();
