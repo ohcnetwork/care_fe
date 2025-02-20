@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -92,28 +92,23 @@ export default function MedicationRequestTable({
     enabled: !!patientId,
   });
 
-  const medications = useMemo(
-    () =>
-      showStopped
-        ? [
-            ...(activeMedications?.results || []),
-            ...(stoppedMedications?.results || []),
-          ]
-        : activeMedications?.results || [],
-    [showStopped, activeMedications, stoppedMedications],
-  );
+  const medications = showStopped
+    ? [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ]
+    : activeMedications?.results || [];
 
-  const displayedMedications = useMemo(() => {
-    if (!searchQuery.trim()) return medications;
-    const searchTerm = searchQuery.toLowerCase().trim();
-    return [
-      ...(activeMedications?.results || []),
-      ...(stoppedMedications?.results || []),
-    ].filter((med: MedicationRequestRead) => {
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    });
-  }, [searchQuery, activeMedications, stoppedMedications, medications]);
+  const displayedMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   const isLoading = loadingActive || loadingStopped;
 

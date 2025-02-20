@@ -608,17 +608,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       ]
     : activeMedications?.results || [];
 
-  const filteredMedications = useMemo(() => {
-    if (!searchQuery.trim()) return medications;
-    const searchTerm = searchQuery.toLowerCase().trim();
-    return [
-      ...(activeMedications?.results || []),
-      ...(stoppedMedications?.results || []),
-    ].filter((med: MedicationRequestRead) => {
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    });
-  }, [searchQuery, activeMedications, stoppedMedications, medications]);
+  const filteredMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   let content;
   if (!activeMedications || !stoppedMedications) {
