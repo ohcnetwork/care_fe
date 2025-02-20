@@ -16,10 +16,10 @@ const LabelValue = ({
   id?: string;
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-sm text-gray-500">{label}</span>
-    <span id={`view-${id}`} className="text-sm">
+    <p className="text-sm text-gray-500 truncate">{label}</p>
+    <p id={`view-${id}`} className="text-sm truncate">
       {value || "-"}
-    </span>
+    </p>
   </div>
 );
 
@@ -38,14 +38,14 @@ export const Badge = ({
   return (
     <div className="relative mb-4">
       <div className="mt-1 h-1 w-6 bg-blue-600 mb-1" />
-      <span
+      <div
         className={`
           inline-flex items-center rounded-full text-base font-semibold
          ${textColor} ${className}
         `}
       >
         {text}
-      </span>
+      </div>
     </div>
   );
 };
