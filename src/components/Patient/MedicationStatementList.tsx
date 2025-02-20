@@ -199,7 +199,9 @@ export function MedicationStatementList({
         className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
       >
         <CardTitle>
-          {t("ongoing_medications")} ({filteredMedications.length})
+          {t("ongoing_medications")} (
+          {isPrintPreview ? medications?.count : filteredMedications.length} ??
+          {""})
         </CardTitle>
       </CardHeader>
       <CardContent className={cn("px-2 pb-2", isPrintPreview && "px-0 py-0")}>
