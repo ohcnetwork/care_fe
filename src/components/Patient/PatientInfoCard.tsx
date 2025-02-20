@@ -464,7 +464,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/files/discharge_summary`}
+                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
                         className="cursor-pointer text-gray-800"
                       >
                         {t("discharge_summary")}
