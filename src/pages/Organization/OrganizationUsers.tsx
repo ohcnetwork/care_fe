@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 import { Avatar } from "@/components/Common/Avatar";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
@@ -30,19 +32,62 @@ interface Props {
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["search"],
+    cacheBlacklist: ["name", "phone_number"],
   });
   const { t } = useTranslation();
+
+  const searchOptions = [
+    {
+      key: "username",
+      type: "text" as const,
+      placeholder: "Search by username",
+      value: qParams.name || "",
+    },
+    {
+      key: "phone_number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+    },
+  ];
+
+  const handleSearch = useCallback((key: string, value: string) => {
+    const searchParams = {
+      name: key === "username" ? value : "",
+      phone_number:
+        key === "phone_number"
+          ? isValidPhoneNumber(value)
+            ? value
+            : undefined
+          : undefined,
+    };
+    updateQuery(searchParams);
+  }, []);
+
+  const handleFieldChange = () => {
+    updateQuery({
+      name: undefined,
+      phone_number: undefined,
+    });
+  };
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
 
   const { data: users, isFetching: isFetchingUsers } = useQuery({
-    queryKey: ["organizationUsers", id, qParams.search, qParams.page],
+    queryKey: [
+      "organizationUsers",
+      id,
+      qParams.name,
+      qParams.phone_number,
+      qParams.page,
+    ],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
       queryParams: {
-        username: qParams.search,
+        username: qParams.name,
+        phone_number: qParams.phone_number,
+        page: qParams.page,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -88,16 +133,16 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Input
-            type="text"
-            placeholder="Search users..."
-            value={qParams.search || ""}
-            onChange={(e) =>
-              updateQuery({
-                search: e.target.value as string,
-              })
-            }
-            className="max-w-sm"
+          <SearchByMultipleFields
+            id="user-search"
+            options={searchOptions}
+            initialOptionIndex={Math.max(
+              searchOptions.findIndex((option) => option.value !== ""),
+              0,
+            )}
+            onSearch={handleSearch}
+            onFieldChange={handleFieldChange}
+            className="w-full"
             data-cy="search-user"
           />
         </div>
