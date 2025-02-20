@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
-import { FieldErrors, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -76,7 +76,7 @@ const encounterFormSchema = z.object({
     "urgent",
   ] as const),
   organizations: z.array(z.string()).min(1, {
-    message: "At least one department is required",
+    message: t("at_least_one_department_is_required"),
   }),
 });
 
@@ -137,9 +137,6 @@ export default function CreateEncounterForm({
   onSuccess,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [errors, setErrors] = useState<
-    FieldErrors<z.infer<typeof encounterFormSchema>> | undefined
-  >(undefined);
   const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof encounterFormSchema>>({
@@ -192,7 +189,6 @@ export default function CreateEncounterForm({
         setIsOpen(open);
         if (!open) {
           form.reset();
-          setErrors(undefined);
         }
       }}
     >
@@ -218,7 +214,7 @@ export default function CreateEncounterForm({
         </SheetHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit, setErrors)}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-6"
           >
             <FormField
@@ -329,19 +325,22 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-
-            <FacilityOrganizationSelector
-              facilityId={facilityId}
-              onChange={(value) => {
-                form.setValue("organizations", [value]);
-              }}
+            <FormField
+              control={form.control}
+              name="organizations"
+              render={({ field }) => (
+                <FormItem>
+                  <FacilityOrganizationSelector
+                    facilityId={facilityId}
+                    value={field.value[0]}
+                    onChange={(value) => {
+                      form.setValue("organizations", [value]);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-
-            {errors && (
-              <div className="text-red-500 text-xs">
-                {errors.organizations?.message}
-              </div>
-            )}
 
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? "Creating..." : t("create_encounter")}
