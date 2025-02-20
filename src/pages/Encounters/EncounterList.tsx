@@ -721,7 +721,7 @@ export function EncounterList({
                       </div>
                       <Separator className="my-2" />
                       <Link
-                        href={`/facility/${facilityId}/encounter/${encounter.id}/updates`}
+                        href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
                         className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
                       >
                         View Details
