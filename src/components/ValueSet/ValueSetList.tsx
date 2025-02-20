@@ -5,6 +5,14 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
 
@@ -40,7 +48,6 @@ export function ValueSetList() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
-          <p className="text-gray-600">{t("manage_valuesets")}</p>
         </div>
         <Button asChild>
           <Link href="/admin/valuesets/create">
@@ -51,41 +58,41 @@ export function ValueSetList() {
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+        <Table className="min-w-full divide-y divide-gray-200">
+          <TableHeader className="bg-gray-50">
+            <TableRow>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("name")}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("slug")}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("status")}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("description")}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("system")}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 {t("actions")}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-200 bg-white">
             {valuesets.map((valueset) => (
-              <tr key={valueset.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4">
+              <TableRow key={valueset.id} className="hover:bg-gray-50">
+                <TableCell className="whitespace-nowrap px-6 py-4">
                   <div className="text-sm font-medium text-gray-900">
                     {valueset.name}
                   </div>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {valueset.slug}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-6 py-4">
                   <Badge
                     className={
                       {
@@ -100,16 +107,14 @@ export function ValueSetList() {
                   >
                     {t(valueset.status)}
                   </Badge>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="max-w-md truncate text-sm text-gray-900">
-                    {valueset.description}
-                  </div>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                </TableCell>
+                <TableCell className="px-6 py-4 truncate text-sm text-gray-900 break-words whitespace-normal">
+                  {valueset.description}
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {valueset.is_system_defined ? t("yes") : t("no")}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
                     <Button
                       variant="primary"
@@ -121,11 +126,11 @@ export function ValueSetList() {
                       {t("edit")}
                     </Button>
                   )}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination totalCount={response?.count ?? 0} />
     </div>

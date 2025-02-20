@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ interface ValueSetEditorProps {
 
 export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
     queryKey: ["valueset", slug],
@@ -48,6 +48,7 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
     onSuccess: () => {
       toast.success("ValueSet updated successfully");
       navigate(`/admin/valuesets`);
+      queryClient.invalidateQueries({ queryKey: ["valueset"] });
     },
   });
 
