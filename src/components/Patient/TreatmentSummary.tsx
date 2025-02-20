@@ -191,14 +191,12 @@ export default function TreatmentSummary({
 
           {/* Medical Information */}
           <div className="space-y-6">
-            <hr className="border border-dashed border-black"></hr>
             {/* Allergies */}
             <AllergyList
               patientId={encounter.patient.id}
               encounterId={encounterId}
               isPrintPreview={true}
             />
-            <hr className="border border-dashed border-black"></hr>
 
             {/* Symptoms */}
             <SymptomsList
@@ -206,7 +204,6 @@ export default function TreatmentSummary({
               encounterId={encounterId}
               isPrintPreview={true}
             />
-            <hr className="border border-dashed border-black"></hr>
 
             {/* Diagnoses */}
             <DiagnosisList
@@ -234,7 +231,6 @@ export default function TreatmentSummary({
             patientId={encounter.patient.id}
             isPrintPreview={true}
           />
-          <hr className="border border-dashed border-black"></hr>
 
           {/* Questionnaire Responses Section */}
           <div>
