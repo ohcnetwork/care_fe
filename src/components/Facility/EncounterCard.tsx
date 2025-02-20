@@ -1,16 +1,5 @@
 import { t } from "i18next";
-import {
-  Ambulance,
-  BadgeCheck,
-  BedDouble,
-  Building2,
-  CircleDashed,
-  Clock,
-  Eye,
-  Home,
-  MonitorSmartphone,
-  Stethoscope,
-} from "lucide-react";
+import { BadgeCheck, CircleDashed, Clock, Eye } from "lucide-react";
 import { Link } from "raviger";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
+import { encounterIcons } from "@/common/constants";
 
 import { formatDateTime } from "@/Utils/utils";
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
@@ -29,15 +20,6 @@ interface EncounterCardProps {
 
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter } = props;
-
-  const encounterIcons = {
-    imp: BedDouble,
-    amb: Ambulance,
-    obsenc: Stethoscope,
-    emer: Building2,
-    vr: MonitorSmartphone,
-    hh: Home,
-  } as const;
 
   const Icon = encounterIcons[encounter.encounter_class];
 
