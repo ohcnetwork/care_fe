@@ -33,13 +33,13 @@ export default function FacilityUsers(props: { facilityId: string }) {
   let usersList: JSX.Element = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
-    queryKey: ["facilityUsers", facilityId, qParams],
+    queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         username: qParams.username,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,
