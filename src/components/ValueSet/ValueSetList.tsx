@@ -8,15 +8,25 @@ import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
+import useFilters from "@/hooks/useFilters";
+
 import query from "@/Utils/request/query";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 export function ValueSetList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+  });
   const { data: response, isLoading } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+    queryKey: ["valuesets", qParams],
+    queryFn: query(valuesetApi.list, {
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+      },
+    }),
   });
 
   if (isLoading) {
@@ -113,6 +123,7 @@ export function ValueSetList() {
           </tbody>
         </table>
       </div>
+      <Pagination totalCount={response?.count ?? 0} />
     </div>
   );
 }
