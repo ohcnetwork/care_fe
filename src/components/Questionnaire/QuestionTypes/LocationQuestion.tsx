@@ -79,7 +79,7 @@ export function LocationQuestion({
             Select Location
           </label>
           <LocationSearch
-            mode="kind"
+            mode="instance"
             facilityId={facilityId}
             onSelect={handleLocationSelect}
             disabled={disabled}
