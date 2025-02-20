@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -113,7 +114,7 @@ function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
 
 export function MedicationStatementList({
   patientId,
-  className,
+  className = "",
   isPrintPreview = false,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
@@ -128,27 +129,12 @@ export function MedicationStatementList({
 
   if (isLoading) {
     return (
-      <Card
-        className={cn(
-          "rounded-sm",
-          className,
-          isPrintPreview && "border-none shadow-none",
-        )}
+      <MedicationStatementListLayout
+        className={className}
+        isPrintPreview={isPrintPreview}
       >
-        <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-        >
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent
-          className={cn(
-            !isPrintPreview && "px-2 pb-2",
-            isPrintPreview && "px-0 py-0",
-          )}
-        >
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </Card>
+        <Skeleton className="h-[100px] w-full" />
+      </MedicationStatementListLayout>
     );
   }
 
@@ -163,144 +149,160 @@ export function MedicationStatementList({
 
   if (!filteredMedications?.length) {
     return (
-      <Card
-        className={cn(
-          "rounded-sm",
-          className,
-          isPrintPreview && "border-none shadow-none",
-        )}
+      <MedicationStatementListLayout
+        className={className}
+        isPrintPreview={isPrintPreview}
       >
-        <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-        >
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent
-          className={cn(
-            !isPrintPreview && "px-2 pb-2",
-            isPrintPreview && "px-0 py-0",
-          )}
-        >
-          <p className="text-gray-500">{t("no_ongoing_medications")}</p>
-        </CardContent>
-      </Card>
+        <p className="text-gray-500">{t("no_ongoing_medications")}</p>
+      </MedicationStatementListLayout>
     );
   }
 
   return (
+    <MedicationStatementListLayout
+      medicationsCount={
+        isPrintPreview ? medications?.count : filteredMedications.length
+      }
+      className={className}
+      isPrintPreview={isPrintPreview}
+    >
+      {isPrintPreview ? (
+        <PrintTable
+          headers={[
+            { key: "medication", title: t("medication") },
+            { key: "dosage", title: t("dosage") },
+            { key: "status", title: t("status") },
+            {
+              key: "medication_taken_between",
+              title: t("medication_taken_between"),
+            },
+            { key: "reason", title: t("reason") },
+            { key: "notes", title: t("notes") },
+            { key: "logged_by", title: t("logged_by") },
+          ]}
+          rows={medications?.results.map((medication) => ({
+            medication:
+              medication.medication.display ?? medication.medication.code,
+            dosage: medication.dosage_text,
+            status: medication.status,
+            medication_taken_between: [
+              medication.effective_period?.start,
+              medication.effective_period?.end,
+            ]
+              .map((date) => formatDateTime(date))
+              .join(" - "),
+            reason: medication.reason,
+            notes: medication.note,
+            logged_by: formatName(medication.created_by),
+          }))}
+        />
+      ) : (
+        <>
+          <Table className="border-separate border-spacing-y-0.5">
+            <TableHeader>
+              <TableRow className="rounded-md overflow-hidden bg-gray-100">
+                <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
+                  {t("medication")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("dosage")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("status")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("medication_taken_between")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("reason")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("notes")}
+                </TableHead>
+                <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+                  {t("logged_by")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[
+                ...filteredMedications.filter(
+                  (medication) => medication.status !== "entered_in_error",
+                ),
+                ...(showEnteredInError
+                  ? filteredMedications.filter(
+                      (medication) => medication.status === "entered_in_error",
+                    )
+                  : []),
+              ].map((statement) => (
+                <MedicationRow
+                  key={statement.id}
+                  statement={statement}
+                  isEnteredInError={statement.status === "entered_in_error"}
+                />
+              ))}
+            </TableBody>
+          </Table>
+          {hasEnteredInErrorRecords && !showEnteredInError && (
+            <>
+              <div className="border-b border-dashed border-gray-200 my-2" />
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setShowEnteredInError(true)}
+                  className="text-xs underline text-gray-500"
+                >
+                  {t("view_all")}
+                </Button>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </MedicationStatementListLayout>
+  );
+}
+
+const MedicationStatementListLayout = ({
+  children,
+  className,
+  isPrintPreview = false,
+  medicationsCount,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  isPrintPreview?: boolean;
+  medicationsCount?: number | undefined;
+}) => {
+  return (
     <Card
       className={cn(
-        "rounded-sm",
+        "rounded-sm ",
         className,
-        isPrintPreview && "border-none shadow-none",
+        isPrintPreview && "shadow-none border-none",
       )}
     >
       <CardHeader
-        className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
+        className={cn(
+          "flex justify-between flex-row",
+          !isPrintPreview && "px-4 pt-4 pb-2",
+          isPrintPreview && "px-0 py-2 ",
+        )}
       >
         <CardTitle>
-          {t("ongoing_medications")} (
-          {isPrintPreview ? medications?.count : filteredMedications.length} ??
-          {""})
+          {" "}
+          {t("ongoing_medications")} ({medicationsCount && medicationsCount})
         </CardTitle>
       </CardHeader>
-      <CardContent className={cn("px-2 pb-2", isPrintPreview && "px-0 py-0")}>
-        {isPrintPreview ? (
-          <PrintTable
-            headers={[
-              { key: "medication", title: t("medication") },
-              { key: "dosage", title: t("dosage") },
-              { key: "status", title: t("status") },
-              {
-                key: "medication_taken_between",
-                title: t("medication_taken_between"),
-              },
-              { key: "reason", title: t("reason") },
-              { key: "notes", title: t("notes") },
-              { key: "logged_by", title: t("logged_by") },
-            ]}
-            rows={medications?.results.map((medication) => ({
-              medication:
-                medication.medication.display ?? medication.medication.code,
-              dosage: medication.dosage_text,
-              status: medication.status,
-              medication_taken_between: [
-                medication.effective_period?.start,
-                medication.effective_period?.end,
-              ]
-                .map((date) => formatDateTime(date))
-                .join(" - "),
-              reason: medication.reason,
-              notes: medication.note,
-              logged_by: formatName(medication.created_by),
-            }))}
-          />
-        ) : (
-          <>
-            <Table className="border-separate border-spacing-y-0.5">
-              <TableHeader>
-                <TableRow className="rounded-md overflow-hidden bg-gray-100">
-                  <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
-                    {t("medication")}
-                  </TableHead>
-                  <TableHead className="h-auto py-1 px-2 text-gray-600">
-                    {t("dosage")}
-                  </TableHead>
-                  <TableHead className="h-auto py-1 px-2 text-gray-600">
-                    {t("status")}
-                  </TableHead>
-                  <TableHead className="h-auto py-1 px-2 text-gray-600">
-                    {t("medication_taken_between")}
-                  </TableHead>
-                  <TableHead className="h-auto py-1 px-2 text-gray-600">
-                    {t("reason")}
-                  </TableHead>
-                  <TableHead className="h-auto py-1 px-2 text-gray-600">
-                    {t("notes")}
-                  </TableHead>
-                  <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-                    {t("logged_by")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[
-                  ...filteredMedications.filter(
-                    (medication) => medication.status !== "entered_in_error",
-                  ),
-                  ...(showEnteredInError
-                    ? filteredMedications.filter(
-                        (medication) =>
-                          medication.status === "entered_in_error",
-                      )
-                    : []),
-                ].map((statement) => (
-                  <MedicationRow
-                    key={statement.id}
-                    statement={statement}
-                    isEnteredInError={statement.status === "entered_in_error"}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-            {hasEnteredInErrorRecords && !showEnteredInError && (
-              <>
-                <div className="border-b border-dashed border-gray-200 my-2" />
-                <div className="flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    onClick={() => setShowEnteredInError(true)}
-                    className="text-xs underline text-gray-500"
-                  >
-                    {t("view_all")}
-                  </Button>
-                </div>
-              </>
-            )}
-          </>
+      <CardContent
+        className={cn(
+          !isPrintPreview && "px-2 pb-2",
+          isPrintPreview && "px-0 py-0",
         )}
+      >
+        {children}
       </CardContent>
     </Card>
   );
-}
+};
