@@ -489,7 +489,7 @@ export function ValueSetForm({
         </div>
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t("saving") : t("save_valuset")}
+          {isSubmitting ? t("saving") : t("save_valueset")}
         </Button>
       </form>
     </Form>

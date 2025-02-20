@@ -2342,7 +2342,7 @@
   "valid_to": "Valid Till",
   "valid_year_of_birth": "Please enter a valid year of birth (YYYY)",
   "value_set": "Value Set",
-  "save_valuset":"Save ValueSet",
+  "save_valueset":"Save ValueSet",
   "valuesets": "Valuesets",
   "vehicle_preference": "Vehicle preference",
   "vendor_name": "Vendor Name",
