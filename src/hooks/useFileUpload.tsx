@@ -363,8 +363,8 @@ export default function useFileUpload(
   const Dialogues = (
     <>
       <CameraCaptureDialog
-        show={cameraModalOpen}
-        onHide={() => setCameraModalOpen(false)}
+        open={cameraModalOpen}
+        onOpenChange={(open) => setCameraModalOpen(open)}
         onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
         }}
