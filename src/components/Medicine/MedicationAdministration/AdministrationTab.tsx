@@ -260,7 +260,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                   className={`flex font-medium items-center gap-2 rounded-md p-2 mb-2 cursor-pointer justify-between border ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
-                  <div className="flex flex-col md:flex-row items-center gap-1">
+                  <div className="flex flex-col flex-wrap md:flex-row items-center gap-1">
                     <div>
                       <CareIcon
                         icon="l-check-circle"
