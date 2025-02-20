@@ -93,7 +93,7 @@ export function ValueSetList() {
                         : "bg-red-100 text-red-800 hover:bg-red-200"
                     }
                   >
-                    {valueset.status}
+                    {t(valueset.status)}
                   </Badge>
                 </td>
                 <td className="px-6 py-4">
@@ -107,12 +107,11 @@ export function ValueSetList() {
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
                     <Button
-                      variant="ghost"
+                      variant="primary"
                       size="sm"
                       onClick={() =>
                         navigate(`/admin/valuesets/${valueset.slug}/edit`)
                       }
-                      className="hover:bg-primary/5"
                     >
                       {t("edit")}
                     </Button>

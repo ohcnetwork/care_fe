@@ -9,7 +9,6 @@ import query from "@/Utils/request/query";
 import {
   CreateValuesetModel,
   UpdateValuesetModel,
-  ValuesetBase,
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
@@ -35,9 +34,9 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: mutate(valuesetApi.create),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: () => {
       toast.success("ValueSet created successfully");
-      navigate(`/valuesets/${data.slug}`);
+      navigate(`/admin/valuesets`);
     },
   });
 
