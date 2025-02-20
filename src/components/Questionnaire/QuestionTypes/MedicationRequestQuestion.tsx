@@ -88,6 +88,7 @@ export function MedicationRequestQuestion({
   patientId,
   encounterId,
 }: MedicationRequestQuestionProps) {
+  const isPreview = patientId === "preview";
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
@@ -100,7 +101,7 @@ export function MedicationRequestQuestion({
         limit: 100,
       },
     }),
-    enabled: encounterId !== "preview",
+    enabled: !isPreview,
   });
 
   useEffect(() => {

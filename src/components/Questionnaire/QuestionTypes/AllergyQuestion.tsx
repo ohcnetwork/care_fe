@@ -109,6 +109,7 @@ export function AllergyQuestion({
   disabled,
   patientId,
 }: AllergyQuestionProps) {
+  const isPreview = patientId === "preview";
   const allergies =
     (questionnaireResponse.values?.[0]?.value as AllergyIntoleranceRequest[]) ||
     [];
@@ -121,7 +122,7 @@ export function AllergyQuestion({
         limit: 100,
       },
     }),
-    enabled: patientId !== "preview",
+    enabled: !isPreview,
   });
 
   useEffect(() => {

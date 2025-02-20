@@ -284,6 +284,7 @@ export function SymptomQuestion({
   disabled,
   encounterId,
 }: SymptomQuestionProps) {
+  const isPreview = patientId === "preview";
   const symptoms =
     (questionnaireResponse.values?.[0]?.value as SymptomRequest[]) || [];
 
@@ -296,7 +297,7 @@ export function SymptomQuestion({
         encounter: encounterId,
       },
     }),
-    enabled: encounterId !== "preview",
+    enabled: !isPreview,
   });
 
   useEffect(() => {
