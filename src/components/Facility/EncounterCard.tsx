@@ -66,7 +66,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 variant="outline"
                 className="inline-flex items-center gap-2 py-1 bg-gray-100 text-gray-800 border-gray-200"
               >
-                {Icon && <Icon />}
+                {Icon}
                 {t(`encounter_class__${encounter.encounter_class}`)}
               </Badge>
             </div>

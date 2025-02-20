@@ -3,7 +3,6 @@ import {
   BedDouble,
   Building2,
   Home,
-  LucideIcon,
   MonitorSmartphone,
   Stethoscope,
 } from "lucide-react";
@@ -367,13 +366,13 @@ export const FILE_EXTENSIONS = {
   DOCUMENT: ["pdf", "docx"],
 } as const;
 export const encounterIcons = {
-  imp: BedDouble,
-  amb: Ambulance,
-  obsenc: Stethoscope,
-  emer: Building2,
-  vr: MonitorSmartphone,
-  hh: Home,
-} as const satisfies Record<EncounterClass, LucideIcon>;
+  imp: <BedDouble />,
+  amb: <Ambulance />,
+  obsenc: <Stethoscope />,
+  emer: <Building2 />,
+  vr: <MonitorSmartphone />,
+  hh: <Home />,
+} as const satisfies Record<EncounterClass, React.ReactNode>;
 
 export const PREVIEWABLE_FILE_EXTENSIONS = [
   "html",
