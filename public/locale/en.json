@@ -419,6 +419,7 @@
   "assigned_facility": "Facility assigned",
   "assigned_to": "Assigned to",
   "assigned_volunteer": "Assigned Volunteer",
+  "at_least_one_department_is_required": "At least one department is required",
   "at_time": "at <strong>{{time}}</strong>",
   "atypical_presentation_details": "Atypical presentation details",
   "audio__allow_permission": "Please allow microphone permission in site settings",
