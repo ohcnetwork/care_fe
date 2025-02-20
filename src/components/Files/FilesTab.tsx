@@ -655,7 +655,7 @@ export const FilesTab = (props: FilesTabProps) => {
           <TabsTrigger value="all" asChild>
             <Link
               className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/encounter/${encounter?.id}/files/all`}
+              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
             >
               {t("all")}
             </Link>
@@ -663,7 +663,7 @@ export const FilesTab = (props: FilesTabProps) => {
           <TabsTrigger value="discharge_summary" asChild>
             <Link
               className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/encounter/${encounter?.id}/files/discharge_summary`}
+              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
             >
               {t("discharge_summary")}
             </Link>

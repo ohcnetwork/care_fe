@@ -101,7 +101,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
 
         {canViewEncounter && (
           <Link
-            href={`/facility/${encounter.facility.id}/encounter/${encounter.id}/updates`}
+            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
             className={cn(
               buttonVariants({ variant: "secondary" }),
               "mt-2 shadow-none border border-secondary-300",

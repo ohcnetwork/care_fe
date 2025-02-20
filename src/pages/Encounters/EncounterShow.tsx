@@ -9,7 +9,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
+import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -46,22 +46,23 @@ const defaultTabs = {
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  encounterId: string;
   facilityId: string;
+  patientId: string;
+  encounterId: string;
   tab?: string;
   subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId, subPage } = props;
+  const { facilityId, encounterId, patientId, subPage } = props;
   const { t } = useTranslation();
-  const pluginTabs = useCareAppConsultationTabs();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canListEncounters, canWriteEncounter } = getPermissions(
     hasPermission,
     authUser.permissions,
   );
+  const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
@@ -74,6 +75,7 @@ export const EncounterShow = (props: Props) => {
       pathParams: { id: encounterId },
       queryParams: {
         facility: facilityId,
+        patient: patientId,
       },
     }),
     enabled: !!encounterId && canListEncounters,
@@ -184,7 +186,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/encounter/${encounterData.id}/${tab}`}
+                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
