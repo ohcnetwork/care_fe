@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { AdminNav } from "@/components/ui/sidebar/admin-nav";
 import { FacilityNav } from "@/components/ui/sidebar/facility-nav";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility-switcher";
 import {
@@ -34,6 +35,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export enum SidebarFor {
   FACILITY = "facility",
   PATIENT = "patient",
+  ADMIN = "admin",
 }
 
 export function AppSidebar({
@@ -52,6 +54,7 @@ export function AppSidebar({
 
   const facilitySidebar = sidebarFor === SidebarFor.FACILITY;
   const patientSidebar = sidebarFor === SidebarFor.PATIENT;
+  const adminSidebar = sidebarFor === SidebarFor.ADMIN;
 
   const [selectedFacility, setSelectedFacility] =
     React.useState<UserFacilityModel | null>(null);
@@ -126,6 +129,7 @@ export function AppSidebar({
           <OrgNav organizations={user?.organizations || []} />
         )}
         {patientSidebar && <PatientNav />}
+        {adminSidebar && <AdminNav />}
       </SidebarContent>
 
       <SidebarFooter>
