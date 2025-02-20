@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 
@@ -47,8 +47,14 @@ export function LocationQuestion({
   });
 
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
-    encounter?.current_location || null,
+    null,
   );
+
+  useEffect(() => {
+    if (encounter?.current_location) {
+      setSelectedLocation(encounter.current_location);
+    }
+  }, [encounter]);
 
   const values =
     (questionnaireResponse.values?.[0]
