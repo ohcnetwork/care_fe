@@ -1,6 +1,6 @@
 {
   "name": "care_fe",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
@@ -174,7 +174,7 @@
     "unimported": "^1.31.0",
     "uuid": "^11.0.2",
     "vite": "^5.4.10",
-    "vite-plugin-checker": "^0.8.0",
+    "vite-plugin-checker": "^0.9.0",
     "vite-plugin-pwa": "^0.21.0",
     "vite-plugin-static-copy": "^2.0.0",
     "zod": "^3.23.8"
