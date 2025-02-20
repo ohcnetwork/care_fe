@@ -15,17 +15,16 @@ import { usePluginRoutes } from "@/hooks/useCareApps";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
+import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
-
-import OrganizationRoutes from "./routes/OrganizationRoutes";
-import AdminRoutes from "./routes/adminRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
@@ -106,7 +105,7 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          className="flex-1 overflow-hidden bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
         >
           <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
             <div className="flex items-center">
