@@ -90,10 +90,9 @@ export function ValueSetList() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`);
-                    }}
+                    onClick={() =>
+                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                    }
                     className="hover:bg-primary/5"
                   >
                     {t("edit")}
