@@ -1,3 +1,6 @@
+import { Suspense, lazy } from "react";
+
+import Loading from "@/components/Common/Loading";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
@@ -5,6 +8,9 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+
+const ExcalidrawPage = lazy(() => import("@/components/Files/ExcalidrawPage"));
+const ExcalidrawView = lazy(() => import("@/components/Files/ExcalidrawView"));
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
@@ -27,6 +33,20 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings": ({
+    encounterId,
+  }) => (
+    <Suspense fallback={<Loading />}>
+      <ExcalidrawPage associatingId={encounterId} fileType="encounter" />
+    </Suspense>
+  ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
+    ({ drawingId }) => (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawView drawingId={drawingId} />
+      </Suspense>
+    ),
+
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (
       <EncounterQuestionnaire

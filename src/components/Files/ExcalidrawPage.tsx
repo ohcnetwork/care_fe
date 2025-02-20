@@ -2,6 +2,7 @@ import { Excalidraw } from "@excalidraw/excalidraw";
 import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,7 @@ import { debounce } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 import { CreateFileResponse } from "@/components/Patient/models";
@@ -19,16 +21,22 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 type Props = {
-  patientId: string;
+  associatingId: string;
+  fileType: string;
   drawingId?: string;
 };
 
-export default function ExcalidrawPage({ patientId, drawingId }: Props) {
+export default function ExcalidrawPage({
+  associatingId,
+  drawingId,
+  fileType,
+}: Props) {
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],
   );
   const [name, setName] = useState("");
   const [id, setId] = useState(drawingId);
+  const [isDirty, setIsDirty] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["file", id],
@@ -37,7 +45,11 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
     }),
     enabled: !!id,
   });
-  console.log(data);
+
+  useEffect(() => {
+    setIsDirty(!!elements?.length);
+  }, [elements?.length]);
+
   useEffect(() => {
     if (!data) {
       return;
@@ -87,11 +99,11 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
       let response: CreateFileResponse | null = null;
       if (!id) {
         response = await createUpload({
-          original_name: name,
+          original_name: `${name}.excalidraw`,
           name: name,
-          file_type: "patient",
+          file_type: fileType,
           file_category: "unspecified",
-          associating_id: patientId,
+          associating_id: associatingId,
           mime_type: "text/plain",
         });
         signedUrl = response.signed_url;
@@ -117,6 +129,7 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
         return;
       } else {
         toast.success(t("file_success__upload_complete"));
+        navigate(`drawings/${response!.id}`);
       }
     } catch (error) {
       console.error("Error in Step 1 (createUpload):", error);
@@ -128,14 +141,14 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)]">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
       <div className="flex flex-row justify-between items-center p-2">
         <div className="flex flex-row items-center">
           <div className="rounded-full bg-primary-100 px-5 py-4">
             <CareIcon icon="l-pen" className="text-lg text-primary-500" />
           </div>
           <div className="m-4">
-            <input
+            <Input
               type="text"
               value={name}
               placeholder="Enter the File Name"
@@ -143,12 +156,14 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
             />
           </div>
         </div>
-        <Button className="ml-auto" onClick={handleSave}>
-          {t("save")}
-        </Button>
+        {isDirty && (
+          <Button className="ml-auto" onClick={handleSave}>
+            {t("save")}
+          </Button>
+        )}
       </div>
 
-      <div className="flex-grow p-2">
+      <div className="flex-grow h-[calc(100vh-10rem)] -m-2">
         <Excalidraw
           UIOptions={{
             canvasActions: {
@@ -158,7 +173,6 @@ export default function ExcalidrawPage({ patientId, drawingId }: Props) {
             },
           }}
           initialData={{
-            elements: elements,
             appState: { theme: "light" },
           }}
           onChange={debounce(async (elements) => {

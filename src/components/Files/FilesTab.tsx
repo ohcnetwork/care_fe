@@ -123,8 +123,6 @@ export const FilesTab = (props: FilesTabProps) => {
     }),
   });
 
-  console.log("facilityId", props.facilityId);
-  console.log("PatientId", props.patientId);
   const fileManager = useFileManager({
     type: type,
     onArchive: refetch,
@@ -279,11 +277,17 @@ export const FilesTab = (props: FilesTabProps) => {
             {file.extension === ".excalidraw" && (
               <Button
                 variant="secondary"
-                onClick={() =>
-                  navigate(
-                    `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${file.id}`,
-                  )
-                }
+                onClick={() => {
+                  if (type === "encounter") {
+                    navigate(
+                      `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${file.id}`,
+                    );
+                  } else {
+                    navigate(
+                      `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${file.id}`,
+                    );
+                  }
+                }}
               >
                 <span className="flex flex-row items-center gap-1">
                   <CareIcon icon="l-eye" />
@@ -458,11 +462,17 @@ export const FilesTab = (props: FilesTabProps) => {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() =>
-                navigate(
-                  `/facility/${props.facilityId}/patient/${props.patientId}/drawings`,
-                )
-              }
+              onClick={() => {
+                if (type === "encounter") {
+                  navigate(
+                    `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings`,
+                  );
+                } else {
+                  navigate(
+                    `/facility/${props.facilityId}/patient/${props.patientId}/drawings`,
+                  );
+                }
+              }}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
             >
               <CareIcon icon="l-pen" />
@@ -561,7 +571,6 @@ export const FilesTab = (props: FilesTabProps) => {
             files.results.map((file) => {
               const filetype = getFileType(file);
               const fileName = file.name ? file.name + file.extension : "";
-              console.log("fileName", file.extension);
               return (
                 <TableRow
                   key={file.id}
