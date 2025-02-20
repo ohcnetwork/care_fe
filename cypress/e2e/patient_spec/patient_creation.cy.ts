@@ -152,6 +152,7 @@ describe("Patient Management", () => {
       .selectEncounterType(ENCOUNTER_TYPE)
       .selectEncounterStatus(ENCOUNTER_STATUS)
       .selectEncounterPriority(ENCOUNTER_PRIORITY)
+      .selectOrganization(ORGANIZATION_NAME)
       .clickSubmitEncounter()
       .assertEncounterCreationSuccess();
 
