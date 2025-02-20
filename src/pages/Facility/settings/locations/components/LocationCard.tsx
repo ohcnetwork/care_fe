@@ -167,9 +167,7 @@ export function LocationCard({
             {!location.has_children && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button
-                    className={cn(buttonVariants({ variant: "destructive" }))}
-                  >
+                  <Button className={cn(buttonVariants({ variant: "white" }))}>
                     <CareIcon icon="l-trash" />
                   </Button>
                 </AlertDialogTrigger>
