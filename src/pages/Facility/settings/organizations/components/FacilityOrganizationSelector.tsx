@@ -127,6 +127,7 @@ export default function FacilityOrganizationSelector(
         <div className="flex-1 flex items-center gap-2">
           <div className="flex-1">
             <Autocomplete
+              data-cy="facility-organization"
               value={selectedLevels[level]?.id}
               options={getOrganizationOptions(orgList)}
               onChange={(value) => handleLevelChange(value, level)}
