@@ -137,7 +137,13 @@ const SymptomListLayout = ({
   isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className={cn("rounded-sm ", className, isPrintPreview && "p-2")}>
+    <Card
+      className={cn(
+        "rounded-sm ",
+        className,
+        isPrintPreview && "shadow-none border-none",
+      )}
+    >
       <CardHeader
         className={cn(
           "flex justify-between flex-row",

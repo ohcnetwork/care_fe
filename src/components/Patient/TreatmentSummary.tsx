@@ -196,7 +196,6 @@ export default function TreatmentSummary({
             <AllergyList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
             <hr className="border border-dashed border-black"></hr>
@@ -205,7 +204,6 @@ export default function TreatmentSummary({
             <SymptomsList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
             <hr className="border border-dashed border-black"></hr>
@@ -214,10 +212,8 @@ export default function TreatmentSummary({
             <DiagnosisList
               patientId={encounter.patient.id}
               encounterId={encounterId}
-              // className="border border-black shadow-none"
               isPrintPreview={true}
             />
-            <hr className="border border-dashed border-black"></hr>
 
             {/* Medications */}
             <Card className={cn("rounded-sm")}>
@@ -233,12 +229,9 @@ export default function TreatmentSummary({
             </Card>
           </div>
 
-          <hr className="border border-dashed border-black"></hr>
-
           {/* Medication Statements */}
           <MedicationStatementList
             patientId={encounter.patient.id}
-            // className="border border-black shadow-none"
             isPrintPreview={true}
           />
           <hr className="border border-dashed border-black"></hr>

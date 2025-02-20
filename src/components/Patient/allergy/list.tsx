@@ -76,7 +76,7 @@ export function AllergyList({
   isPrintPreview = false,
   encounterStatus,
 }: AllergyListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -139,8 +139,6 @@ export function AllergyList({
         className={cn(
           "rounded-md overflow-hidden bg-gray-50",
           allergy.verification_status === "entered_in_error" && "opacity-50",
-          isPrintPreview &&
-            "bg-transparent hover:bg-transparent divide-x divide-black",
         )}
       >
         <TableCell className="first:rounded-l-md">
@@ -152,11 +150,7 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={
-              isPrintPreview
-                ? ""
-                : `whitespace-nowrap ${ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]}`
-            }
+            className={`whitespace-nowrap ${ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]}`}
           >
             {t(allergy.clinical_status)}
           </Badge>
@@ -164,13 +158,9 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={
-              isPrintPreview
-                ? ""
-                : `whitespace-nowrap ${
-                    ALLERGY_CRITICALITY_STYLES[allergy.criticality]
-                  }`
-            }
+            className={`whitespace-nowrap ${
+              ALLERGY_CRITICALITY_STYLES[allergy.criticality]
+            }`}
           >
             {t(allergy.criticality)}
           </Badge>
@@ -178,15 +168,9 @@ export function AllergyList({
         <TableCell>
           <Badge
             variant="outline"
-            className={
-              isPrintPreview
-                ? ""
-                : `whitespace-nowrap capitalize ${
-                    ALLERGY_VERIFICATION_STATUS_STYLES[
-                      allergy.verification_status
-                    ]
-                  }`
-            }
+            className={`whitespace-nowrap capitalize ${
+              ALLERGY_VERIFICATION_STATUS_STYLES[allergy.verification_status]
+            }`}
           >
             {t(allergy.verification_status)}
           </Badge>
@@ -194,40 +178,33 @@ export function AllergyList({
         <TableCell className="text-sm text-gray-950">
           {allergy.note && (
             <div className="flex items-center gap-2">
-              {isPrintPreview ? (
-                <span className="text-gray-950 max-w-[200px]">
-                  {allergy.note}
-                </span>
-              ) : (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs shrink-0"
-                    >
-                      {t("see_note")}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {allergy.note}
-                    </p>
-                  </PopoverContent>
-                </Popover>
-              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {allergy.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </TableCell>
         <TableCell className="last:rounded-r-md">
           <div className="flex items-center gap-2">
-            {!isPrintPreview && (
-              <Avatar
-                name={allergy.created_by.username}
-                className="w-4 h-4"
-                imageUrl={allergy.created_by.profile_picture_url}
-              />
-            )}
+            <Avatar
+              name={allergy.created_by.username}
+              className="w-4 h-4"
+              imageUrl={allergy.created_by.profile_picture_url}
+            />
+
             <span className="text-sm">{formatName(allergy.created_by)}</span>
           </div>
         </TableCell>
@@ -264,20 +241,9 @@ export function AllergyList({
         />
       ) : (
         <>
-          <Table
-            className={cn(
-              "border-spacing-y-0.5",
-              isPrintPreview ? "border-collapse" : "border-separate",
-            )}
-          >
+          <Table className="border-spacing-y-0.5 border-separate">
             <TableHeader>
-              <TableRow
-                className={cn(
-                  "rounded-md overflow-hidden bg-gray-100",
-                  isPrintPreview &&
-                    "bg-transparent hover:bg-transparent divide-x divide-black border-b-black",
-                )}
-              >
+              <TableRow className="rounded-md overflow-hidden bg-gray-100">
                 <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
                 <TableHead className="h-auto py-1 pl-2 pr-2 text-gray-600">
                   {t("allergen")}
@@ -369,7 +335,7 @@ const AllergyListLayout = ({
       <CardHeader
         className={cn(
           "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2 ",
+          !isPrintPreview && "px-4 pt-4 pb-2",
           isPrintPreview && "px-0 py-2 ",
         )}
       >
