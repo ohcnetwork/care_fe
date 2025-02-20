@@ -41,7 +41,7 @@ export function QuestionnaireList() {
           <h1 className="text-2xl font-bold">{t("questionnaires")}</h1>
           <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
         </div>
-        <Button onClick={() => navigate("/questionnaire/create")}>
+        <Button onClick={() => navigate("/admin/questionnaire/create")}>
           {t("create_new")}
         </Button>
       </div>
@@ -68,7 +68,9 @@ export function QuestionnaireList() {
             {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
               <tr
                 key={questionnaire.id}
-                onClick={() => navigate(`/questionnaire/${questionnaire.slug}`)}
+                onClick={() =>
+                  navigate(`/admin/questionnaire/${questionnaire.slug}`)
+                }
                 className="cursor-pointer hover:bg-gray-50"
               >
                 <td className="whitespace-nowrap px-6 py-4">

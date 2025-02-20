@@ -42,11 +42,7 @@ import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import {
-  BLOOD_GROUP_CHOICES, // DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
-  GENDER_TYPES, // OCCUPATION_TYPES,
-  //RATION_CARD_CATEGORY, // SOCIOECONOMIC_STATUS_CHOICES ,
-} from "@/common/constants";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES } from "@/common/constants";
 import { GENDERS } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 
