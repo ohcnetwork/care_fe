@@ -639,6 +639,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const queryClient = useQueryClient();
+  const [titlerror, setTitlerror] = useState("");
+  const [slugError, setSlugError] = useState("");
+  const [OrgError, setOrgError] = useState("");
 
   const {
     data: initialQuestionnaire,
@@ -763,6 +766,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleSave = () => {
+    if (!questionnaire.title.trim()) {
+      console.log("Title is required");
+      setTitlerror("Title is required");
+      return;
+    }
+    if (questionnaire.slug.trim().length < 5) {
+      console.log("Slug is required(min 5 characters)");
+      setSlugError("Slug is required(min 5 characters)");
+      return;
+    }
+    if (!selectedOrgIds.length) {
+      console.log("Organizations are required");
+      setOrgError("Organizations are required");
+      return;
+    }
+    setTitlerror("");
+    setSlugError("");
+    setOrgError("");
     if (id) {
       updateQuestionnaire(questionnaire);
     } else {
@@ -943,6 +964,108 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               </div>
             </div>
 
+                  <div>
+                    <Label>Organizations</Label>
+                    {id ? (
+                      <ManageQuestionnaireOrganizationsSheet
+                        questionnaireId={id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
+                            <Building className="mr-2 h-4 w-4" />
+                            Manage Organizations
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOrgIds.length > 0 ? (
+                            availableOrganizations?.results
+                              .filter((org) => selectedOrgIds.includes(org.id))
+                              .map((org) => (
+                                <Badge
+                                  key={org.id}
+                                  variant="secondary"
+                                  className="flex items-center gap-1"
+                                >
+                                  {org.name}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                    onClick={() =>
+                                      handleToggleOrganization(org.id)
+                                    }
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </Badge>
+                              ))
+                          ) : (
+                            <>
+                              <p className="text-sm text-gray-500">
+                                No organizations selected
+                              </p>
+                              {OrgError && (
+                                <p className="text-sm text-red-500">
+                                  {OrgError}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        <Command className="rounded-lg border shadow-md">
+                          <CommandInput
+                            placeholder="Search organizations..."
+                            onValueChange={setOrgSearchQuery}
+                          />
+                          <CommandList>
+                            <CommandEmpty>No organizations found.</CommandEmpty>
+                            <CommandGroup>
+                              {isLoadingOrganizations ? (
+                                <div className="flex items-center justify-center py-6">
+                                  <Loader2 className="h-6 w-6 animate-spin" />
+                                </div>
+                              ) : (
+                                availableOrganizations?.results.map((org) => (
+                                  <CommandItem
+                                    key={org.id}
+                                    value={org.id}
+                                    onSelect={() => {
+                                      handleToggleOrganization(org.id);
+                                      setOrgError("");
+                                    }}
+                                  >
+                                    <div className="flex flex-1 items-center gap-2">
+                                      <Building className="h-4 w-4" />
+                                      <span>{org.name}</span>
+                                      {org.description && (
+                                        <span className="text-xs text-gray-500">
+                                          - {org.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {selectedOrgIds.includes(org.id) && (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </CommandItem>
+                                ))
+                              )}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
             <div className="space-y-4 flex-1">
               <Card>
                 <CardHeader>
@@ -954,25 +1077,32 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     <Input
                       id="title"
                       value={questionnaire.title}
-                      onChange={(e) =>
-                        updateQuestionnaireField("title", e.target.value)
-                      }
+                      onChange={(e) => {
+                        if (titlerror) setTitlerror("");
+                        updateQuestionnaireField("title", e.target.value);
+                      }}
                     />
+                    {titlerror && (
+                      <p className="text-sm text-red-500 mt-1">{titlerror}</p>
+                    )}
                   </div>
-
                   <div>
                     <Label htmlFor="slug">{t("slug")}</Label>
                     <Input
                       id="slug"
                       value={questionnaire.slug}
-                      onChange={(e) =>
-                        updateQuestionnaireField("slug", e.target.value)
-                      }
+                      onChange={(e) => {
+                        if (slugError) setSlugError("");
+                        updateQuestionnaireField("slug", e.target.value);
+                      }}
                       placeholder="unique-identifier-for-questionnaire"
                       className="font-mono"
                     />
                     <p className="text-sm text-gray-500 mt-1">
                       A unique URL-friendly identifier for this questionnaire
+                      {slugError && (
+                        <p className="text-sm text-red-500 mt-1">{slugError}</p>
+                      )}
                     </p>
                   </div>
 
