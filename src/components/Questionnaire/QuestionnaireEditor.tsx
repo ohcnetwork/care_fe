@@ -737,7 +737,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const handleSave = () => {
     if (id) {
-      console.log("Update Questionnaire", questionnaire);
       updateQuestionnaire(questionnaire);
     } else {
       createQuestionnaire({
