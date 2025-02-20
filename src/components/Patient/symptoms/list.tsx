@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import PrintTable from "@/components/Common/PrintTable";
+
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -31,7 +34,7 @@ export function SymptomsList({
   className,
   isPrintPreview = false,
 }: SymptomsListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
@@ -90,33 +93,56 @@ export function SymptomsList({
       className={className}
       isPrintPreview={isPrintPreview}
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-        isPrintPreview={isPrintPreview}
-      />
-
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+      {isPrintPreview ? (
+        <PrintTable
+          headers={[
+            { key: "symptom", title: t("symptom") },
+            { key: "severity", title: t("severity") },
+            { key: "status", title: t("status") },
+            { key: "verification", title: t("verification") },
+            { key: "notes", title: t("notes") },
+            { key: "logged_by", title: t("logged_by") },
+          ]}
+          rows={symptoms?.results?.map((symptom) => ({
+            symptom: symptom.code.display,
+            severity: t(symptom.severity),
+            status: t(symptom.clinical_status),
+            verification: t(symptom.verification_status),
+            notes: symptom.note,
+            logged_by: formatName(symptom.created_by),
+          }))}
+        />
+      ) : (
         <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center ">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-500 text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
+          <SymptomTable
+            symptoms={[
+              ...filteredSymptoms.filter(
+                (symptom) => symptom.verification_status !== "entered_in_error",
+              ),
+              ...(showEnteredInError
+                ? filteredSymptoms.filter(
+                    (symptom) =>
+                      symptom.verification_status === "entered_in_error",
+                  )
+                : []),
+            ]}
+          />
+
+          {hasEnteredInErrorRecords && !showEnteredInError && (
+            <>
+              <div className="border-b border-dashed border-gray-200 my-2" />
+              <div className="flex justify-center ">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setShowEnteredInError(true)}
+                  className="text-xs underline text-gray-950"
+                >
+                  {t("view_all")}
+                </Button>
+              </div>
+            </>
+          )}
         </>
       )}
     </SymptomListLayout>

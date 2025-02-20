@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import PrintTable from "@/components/Common/PrintTable";
+
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 
 import { DiagnosisTable } from "./DiagnosisTable";
@@ -31,7 +34,7 @@ export function DiagnosisList({
   className,
   isPrintPreview = false,
 }: DiagnosisListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: diagnoses, isLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
@@ -91,34 +94,60 @@ export function DiagnosisList({
       className={className}
       isPrintPreview={isPrintPreview}
     >
-      <DiagnosisTable
-        diagnoses={[
-          ...filteredDiagnoses.filter(
-            (diagnosis) => diagnosis.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredDiagnoses.filter(
-                (diagnosis) =>
-                  diagnosis.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-        isPrintPreview={isPrintPreview}
-      />
+      {isPrintPreview ? (
+        <PrintTable
+          headers={[
+            { key: "diagnosis", title: t("diagnosis") },
 
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+            { key: "status", title: t("status") },
+            { key: "verification", title: t("verification") },
+            { key: "onset", title: t("onset") },
+            { key: "notes", title: t("notes") },
+            { key: "logged_by", title: t("logged_by") },
+          ]}
+          rows={diagnoses?.results.map((diagnosis) => ({
+            diagnosis: diagnosis.code.display,
+            status: t(diagnosis.clinical_status),
+            verification: t(diagnosis.verification_status),
+            onset: diagnosis.onset?.onset_datetime
+              ? new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
+              : undefined,
+            notes: diagnosis.note,
+            logged_by: formatName(diagnosis.created_by),
+          }))}
+        />
+      ) : (
         <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
+          <DiagnosisTable
+            diagnoses={[
+              ...filteredDiagnoses.filter(
+                (diagnosis) =>
+                  diagnosis.verification_status !== "entered_in_error",
+              ),
+              ...(showEnteredInError
+                ? filteredDiagnoses.filter(
+                    (diagnosis) =>
+                      diagnosis.verification_status === "entered_in_error",
+                  )
+                : []),
+            ]}
+          />
+
+          {hasEnteredInErrorRecords && !showEnteredInError && (
+            <>
+              <div className="border-b border-dashed border-gray-200 my-2" />
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setShowEnteredInError(true)}
+                  className="text-xs underline text-gray-950"
+                >
+                  {t("view_all")}
+                </Button>
+              </div>
+            </>
+          )}
         </>
       )}
     </DiagnosisListLayout>
