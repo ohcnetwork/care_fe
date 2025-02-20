@@ -117,7 +117,7 @@ export function MedicationStatementList({
   isPrintPreview = false,
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
     queryKey: ["medication_statements", patientId],

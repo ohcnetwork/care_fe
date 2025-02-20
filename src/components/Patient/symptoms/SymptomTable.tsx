@@ -111,15 +111,9 @@ export function SymptomTable({
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className={
-                      isPrintPreview
-                        ? ""
-                        : `whitespace-nowrap ${
-                            SYMPTOM_CLINICAL_STATUS_STYLES[
-                              symptom.clinical_status
-                            ]
-                          }`
-                    }
+                    className={`whitespace-nowrap ${
+                      SYMPTOM_CLINICAL_STATUS_STYLES[symptom.clinical_status]
+                    }`}
                   >
                     {t(symptom.clinical_status)}
                   </Badge>
@@ -127,15 +121,11 @@ export function SymptomTable({
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className={
-                      isPrintPreview
-                        ? ""
-                        : `whitespace-nowrap capitalize ${
-                            SYMPTOM_VERIFICATION_STATUS_STYLES[
-                              symptom.verification_status
-                            ]
-                          }`
-                    }
+                    className={`whitespace-nowrap capitalize ${
+                      SYMPTOM_VERIFICATION_STATUS_STYLES[
+                        symptom.verification_status
+                      ]
+                    }`}
                   >
                     {t(symptom.verification_status)}
                   </Badge>
@@ -143,26 +133,22 @@ export function SymptomTable({
                 <TableCell className="max-w-[200px]">
                   {symptom.note ? (
                     <div className="flex items-center gap-2">
-                      {isPrintPreview ? (
-                        <span className="text-gray-950">{symptom.note}</span>
-                      ) : (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-xs shrink-0"
-                            >
-                              {t("see_note")}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 p-4">
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                              {symptom.note}
-                            </p>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs shrink-0"
+                          >
+                            {t("see_note")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {symptom.note}
+                          </p>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   ) : (
                     "-"
@@ -170,13 +156,12 @@ export function SymptomTable({
                 </TableCell>
                 <TableCell className="last:rounded-r-md">
                   <div className="flex items-center gap-2">
-                    {!isPrintPreview && (
-                      <Avatar
-                        name={symptom.created_by.username}
-                        className="w-4 h-4"
-                        imageUrl={symptom.created_by.profile_picture_url}
-                      />
-                    )}
+                    <Avatar
+                      name={symptom.created_by.username}
+                      className="w-4 h-4"
+                      imageUrl={symptom.created_by.profile_picture_url}
+                    />
+
                     <span className="text-sm">
                       {symptom.created_by.username}
                     </span>
