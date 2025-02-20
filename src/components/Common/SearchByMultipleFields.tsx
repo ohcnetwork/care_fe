@@ -195,6 +195,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               value={searchValue}
               onChange={(value) => setSearchValue(value)}
               className={inputClassName}
+              autoFocus={autoFocus}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
