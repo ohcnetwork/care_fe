@@ -21,9 +21,9 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
           />
           <div className="grid grid-cols-1 self-center">
             <div className="flex flex-row items-center gap-3">
-              <p className="text-xl font-bold truncate" id="users-name">
+              <h1 className="text-xl font-bold truncate" id="users-name">
                 {formatName(userData)}
-              </p>
+              </h1>
               <div className="min-width-50 shrink-0 text-sm text-secondary-600">
                 <UserStatusIndicator
                   user={userData}
