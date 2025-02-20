@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
-import { ArrowRightIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -439,7 +438,7 @@ export default function CreateScheduleTemplateSheet({
                           control={form.control}
                           name={`availabilities.${index}.start_time`}
                           render={({ field }) => (
-                            <FormItem className="flex flex-col flex-grow">
+                            <FormItem className="flex flex-col w-full">
                               <FormLabel required>{t("start_time")}</FormLabel>
                               <FormControl>
                                 <Input type="time" {...field} />
@@ -449,13 +448,11 @@ export default function CreateScheduleTemplateSheet({
                           )}
                         />
 
-                        <ArrowRightIcon className="size-4 mt-8" />
-
                         <FormField
                           control={form.control}
                           name={`availabilities.${index}.end_time`}
                           render={({ field }) => (
-                            <FormItem className="flex flex-col flex-grow">
+                            <FormItem className="flex flex-col w-full mt-2">
                               <FormLabel required>{t("end_time")}</FormLabel>
                               <FormControl>
                                 <Input type="time" {...field} />
