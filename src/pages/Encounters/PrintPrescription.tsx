@@ -31,18 +31,23 @@ export const PrintPrescription = (props: {
     }),
   });
 
-  const { data: medications, isLoading: medicationLoading } = useQuery({
-    queryKey: ["medication_requests", patientId],
+  const { data: activeMedications, isLoading: medicationLoading } = useQuery({
+    queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId },
-      queryParams: { encounter: encounterId, limit: 50, offset: 0 },
+      pathParams: { patientId: patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 50,
+        offset: 0,
+        status: ["active", "on-hold", "draft", "unknown"].join(","),
+      },
     }),
     enabled: !!patientId,
   });
 
   if (medicationLoading) return <Loading />;
 
-  if (!medications?.results?.length) {
+  if (!activeMedications?.results?.length) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         {t("no_medications_found_for_this_encounter")}
@@ -51,7 +56,7 @@ export const PrintPrescription = (props: {
   }
 
   // Group medications by prescriber
-  const medicationsByPrescriber = medications.results.reduce<
+  const medicationsByPrescriber = activeMedications.results.reduce<
     Record<string, MedicationRequestRead[]>
   >((acc, med) => {
     const prescriberId = med.created_by.id.toString();
@@ -65,7 +70,7 @@ export const PrintPrescription = (props: {
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${encounter?.patient.name}`}
-      disabled={!medications}
+      disabled={!activeMedications?.results?.length}
     >
       <div className="min-h-screen bg-white p-2 max-w-4xl mx-auto">
         <div>
@@ -125,7 +130,7 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable medications={medications?.results ?? []} />
+          <MedicationsTable medications={activeMedications?.results ?? []} />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">

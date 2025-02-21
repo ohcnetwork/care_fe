@@ -170,12 +170,7 @@ export default function MedicationRequestTable({
                   </Button>
                   <Button
                     variant="outline"
-                    disabled={
-                      !(
-                        activeMedications?.results?.length ||
-                        stoppedMedications?.results?.length
-                      )
-                    }
+                    disabled={!activeMedications?.results?.length}
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
