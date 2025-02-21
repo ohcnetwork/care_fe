@@ -76,7 +76,7 @@ export default function ManageQuestionnaireTagsSheet({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire", questionnaire.slug],
+        queryKey: ["questionnaireDetail", questionnaire.slug],
       });
       toast.success("Tags updated successfully");
       setOpen(false);
@@ -296,7 +296,7 @@ export default function ManageQuestionnaireTagsSheet({
           </Collapsible>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
           <div className="flex w-full justify-end gap-4">
             <Button
               variant="outline"
