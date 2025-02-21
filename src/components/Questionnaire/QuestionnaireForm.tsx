@@ -463,63 +463,67 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div
-          key={`${questionnaireForms.length}`}
-          className="flex gap-4 items-center m-4 max-w-4xl"
-        >
-          <QuestionnaireSearch
-            subjectType={subjectType}
-            onSelect={(selected) => {
-              if (
-                questionnaireForms.some(
-                  (form) => form.questionnaire.id === selected.id,
-                )
-              ) {
-                return;
-              }
-
-              setQuestionnaireForms((prev) => [
-                ...prev,
-                {
-                  questionnaire: selected,
-                  responses: initializeResponses(selected.questions),
-                  errors: [],
-                },
-              ]);
-            }}
-            disabled={isPending}
-          />
-        </div>
-
-        {/* Submit and Cancel Buttons */}
-        {questionnaireForms.length > 0 && (
-          <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
+        {encounterId !== "preview" && (
+          <>
+            <div
+              key={`${questionnaireForms.length}`}
+              className="flex gap-4 items-center m-4 max-w-4xl"
             >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isPending || hasErrors}
-              className="relative"
-            >
-              {isPending ? (
-                <>
-                  <span className="opacity-0">{t("submit")}</span>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
-                  </div>
-                </>
-              ) : (
-                t("submit")
-              )}
-            </Button>
-          </div>
+              <QuestionnaireSearch
+                subjectType={subjectType}
+                onSelect={(selected) => {
+                  if (
+                    questionnaireForms.some(
+                      (form) => form.questionnaire.id === selected.id,
+                    )
+                  ) {
+                    return;
+                  }
+
+                  setQuestionnaireForms((prev) => [
+                    ...prev,
+                    {
+                      questionnaire: selected,
+                      responses: initializeResponses(selected.questions),
+                      errors: [],
+                    },
+                  ]);
+                }}
+                disabled={isPending}
+              />
+            </div>
+
+            {/* Submit and Cancel Buttons */}
+            {questionnaireForms.length > 0 && (
+              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isPending}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={isPending || hasErrors}
+                  className="relative"
+                >
+                  {isPending ? (
+                    <>
+                      <span className="opacity-0">{t("submit")}</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                      </div>
+                    </>
+                  ) : (
+                    t("submit")
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         <PLUGIN_Component

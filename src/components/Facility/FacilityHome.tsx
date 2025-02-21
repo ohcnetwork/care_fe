@@ -110,24 +110,29 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const handleCoverImageUpload = async (file: File, onError: () => void) => {
+  const handleCoverImageUpload = async (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     const formData = new FormData();
     formData.append("cover_image", file);
     const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
       { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
+          setEditCoverImage(false);
           await sleep(1000);
           queryClient.invalidateQueries({
             queryKey: ["facility", facilityId],
           });
           toast.success(t("cover_image_updated"));
-          setEditCoverImage(false);
+          onSuccess();
         } else {
           onError();
         }
@@ -138,9 +143,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-  const handleCoverImageDelete = async (onError: () => void) => {
+  const handleCoverImageDelete = async (
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     try {
       await deleteAvatar();
+      onSuccess();
     } catch {
       onError();
     }

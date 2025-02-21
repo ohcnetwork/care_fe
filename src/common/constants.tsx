@@ -1,4 +1,15 @@
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
+
 import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { EncounterClass } from "@/types/emr/encounter";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 
@@ -354,6 +365,14 @@ export const FILE_EXTENSIONS = {
   PRESENTATION: ["pptx"],
   DOCUMENT: ["pdf", "docx"],
 } as const;
+export const encounterIcons = {
+  imp: <BedDouble />,
+  amb: <Ambulance />,
+  obsenc: <Stethoscope />,
+  emer: <Building2 />,
+  vr: <MonitorSmartphone />,
+  hh: <Home />,
+} as const satisfies Record<EncounterClass, React.ReactNode>;
 
 export const PREVIEWABLE_FILE_EXTENSIONS = [
   "html",
