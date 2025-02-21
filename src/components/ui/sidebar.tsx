@@ -204,7 +204,7 @@ const Sidebar = React.forwardRef<
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetDescription className="sr-only">
-            {t("sidebar_provides_navigation_to_different_sections")}
+            {t("sidebar_description")}
           </SheetDescription>
           <SheetContent
             data-sidebar="sidebar"

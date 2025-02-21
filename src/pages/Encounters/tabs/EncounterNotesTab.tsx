@@ -525,7 +525,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       <Sheet open={isThreadsExpanded} onOpenChange={setIsThreadsExpanded}>
         <SheetContent side="left" className="w-[100%] sm:w-[380px] p-0">
           <SheetDescription className="sr-only">
-            {t("encounter_notes__all_discussions_sidebar")}
+            {t("encounter_notes__all_discussions_description")}
           </SheetDescription>
           <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
