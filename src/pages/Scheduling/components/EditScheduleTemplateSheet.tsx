@@ -140,7 +140,7 @@ const ScheduleTemplateEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
   const templateFormSchema = z
     .object({
@@ -266,8 +266,8 @@ const ScheduleTemplateEditor = ({
 
           <div className="flex justify-end gap-2">
             <AlertDialog
-              open={isDialogOpen}
-              onOpenChange={(open) => setDialogOpen(open)}
+              open={isAlertDialogOpen}
+              onOpenChange={(open) => setIsAlertDialogOpen(open)}
             >
               <AlertDialogTrigger asChild>
                 <Button
@@ -295,14 +295,16 @@ const ScheduleTemplateEditor = ({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setDialogOpen(false)}>
+                  <AlertDialogCancel
+                    onClick={() => setIsAlertDialogOpen(false)}
+                  >
                     {t("cancel")}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     className={cn(buttonVariants({ variant: "destructive" }))}
                     onClick={() => {
                       deleteTemplate();
-                      setDialogOpen(false);
+                      setIsAlertDialogOpen(false);
                     }}
                   >
                     {isDeleting ? (
@@ -343,7 +345,7 @@ const AvailabilityEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [openDialog, setOpenDialog] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
@@ -407,14 +409,14 @@ const AvailabilityEditor = ({
         </div>
 
         <AlertDialog
-          open={openDialog}
-          onOpenChange={(open) => setOpenDialog(open)}
+          open={isAlertDialogOpen}
+          onOpenChange={(open) => setIsAlertDialogOpen(open)}
         >
           <AlertDialogTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setOpenDialog(true)}
+              onClick={() => setIsAlertDialogOpen(true)}
               disabled={isDeleting}
             >
               <CareIcon icon="l-trash" className="text-lg" />
@@ -435,14 +437,14 @@ const AvailabilityEditor = ({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setOpenDialog(false)}>
+              <AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>
                 {t("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={() => {
                   deleteAvailability();
-                  setOpenDialog(false);
+                  setIsAlertDialogOpen(false);
                 }}
               >
                 {isDeleting ? (
