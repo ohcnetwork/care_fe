@@ -23,6 +23,11 @@ interface Props {
   facilityId: string;
 }
 
+function createSearchMatcher(query: string) {
+  const normalizedQuery = query.toLowerCase();
+  return (name: string) => name.toLowerCase().includes(normalizedQuery);
+}
+
 function buildLocationHierarchy(locations: LocationListType[]) {
   const childrenMap = new Map<string, LocationListType[]>();
   const topLevelLocations: LocationListType[] = [];
@@ -64,15 +69,15 @@ export default function LocationList({ facilityId }: Props) {
     if (!searchQuery) return data?.results || [];
 
     const allLocations = data?.results || [];
-    const matchesSearch = (name: string) =>
-      name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = createSearchMatcher(searchQuery);
 
     const hasMatchingDescendant = (locationId: string): boolean => {
       const children = allLocations.filter(
         (loc) => loc.parent?.id === locationId,
       );
       return children.some(
-        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
+        (child: LocationListType) =>
+          matchesSearch(child.name) || hasMatchingDescendant(child.id),
       );
     };
 
@@ -83,37 +88,38 @@ export default function LocationList({ facilityId }: Props) {
   }, [data?.results, searchQuery]);
 
   const tableData = filteredData;
-  const { childrenMap, topLevelLocations } = useMemo(
-    () => buildLocationHierarchy(tableData),
-    [tableData],
-  );
+  const { childrenMap, topLevelLocations } = buildLocationHierarchy(tableData);
 
-  const matchesSearch = (name: string) =>
-    name.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesSearch = useMemo(
+    () => createSearchMatcher(searchQuery),
+    [searchQuery],
+  );
 
   const hasMatchingChildren = (parentId: string): boolean => {
     const children = childrenMap.get(parentId) || [];
     return children.some(
-      (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
+      (child: LocationListType) =>
+        matchesSearch(child.name) || hasMatchingChildren(child.id),
     );
   };
 
-  const getChildren = (parentId: string) => {
+  const getChildren = (parentId: string): LocationListType[] => {
     const children = childrenMap.get(parentId) || [];
     if (!searchQuery) return children;
 
     return children.filter(
-      (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
+      (loc: LocationListType) =>
+        matchesSearch(loc.name) || hasMatchingChildren(loc.id),
     );
   };
 
   const filteredTopLevelLocations = useMemo(() => {
     if (!searchQuery) return topLevelLocations;
     return topLevelLocations.filter(
-      (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
+      (loc: LocationListType) =>
+        matchesSearch(loc.name) || hasMatchingChildren(loc.id),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topLevelLocations, searchQuery]);
+  }, [topLevelLocations, searchQuery, matchesSearch, hasMatchingChildren]);
 
   const handleAddLocation = () => {
     setSelectedLocation(null);
@@ -149,15 +155,15 @@ export default function LocationList({ facilityId }: Props) {
     }
 
     const allLocations = data?.results || [];
-    const matchesSearch = (name: string) =>
-      name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = createSearchMatcher(searchQuery);
 
     const hasMatchingDescendant = (locationId: string): boolean => {
       const children = allLocations.filter(
         (loc) => loc.parent?.id === locationId,
       );
       return children.some(
-        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
+        (child: LocationListType) =>
+          matchesSearch(child.name) || hasMatchingDescendant(child.id),
       );
     };
 
