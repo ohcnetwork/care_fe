@@ -35,7 +35,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <div className="container mx-auto p-6 space-y-8">
         {/* Welcome Header */}
         <div className="bg-white rounded-lg p-6 shadow-sm">

@@ -5,6 +5,14 @@ import { useNavigate } from "raviger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
 
@@ -98,44 +106,44 @@ export function QuestionnaireList() {
 
   const RenderTable = () => (
     <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+      <Table className="min-w-full divide-y divide-gray-200">
+        <TableHeader className="bg-gray-50">
+          <TableRow>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               {t("title")}
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               {t("description")}
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               {t("status")}
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            </TableHead>
+            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               {t("slug")}
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white">
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-gray-200 bg-white">
           {questionnaireList?.length > 0 ? (
             questionnaireList.map((questionnaire: QuestionnaireDetail) => (
-              <tr
+              <TableRow
                 key={questionnaire.id}
                 onClick={() =>
                   navigate(`/admin/questionnaire/${questionnaire.slug}`)
                 }
                 className="cursor-pointer hover:bg-gray-50"
               >
-                <td className="whitespace-nowrap px-6 py-4">
+                <TableCell className="whitespace-nowrap px-6 py-4">
                   <div className="text-sm font-medium text-gray-900">
                     {questionnaire.title}
                   </div>
-                </td>
-                <td className="px-6 py-4">
+                </TableCell>
+                <TableCell className="px-6 py-4">
                   <div className="max-w-md truncate text-sm text-gray-900">
                     {questionnaire.description}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap">
                   <Badge
                     className={
                       questionnaire.status === "active"
@@ -145,21 +153,21 @@ export function QuestionnaireList() {
                   >
                     {questionnaire.status}
                   </Badge>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {questionnaire.slug}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))
           ) : (
-            <tr>
-              <td colSpan={4} className="text-center py-4">
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-4">
                 {t("no_questionnaires_found")}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 
