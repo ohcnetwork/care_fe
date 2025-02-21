@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatDisplayName, formatName } from "@/Utils/utils";
+import { TooltipComponent } from "@/src/components/ui/tooltip";
 import { UserBase } from "@/types/user/user";
 
 import { UserStatusIndicator } from "./UserListAndCard";
@@ -17,13 +18,15 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
           <Avatar
             imageUrl={userData?.profile_picture_url}
             name={formatDisplayName(userData)}
-            className="h-20 w-20 md:mr-2 lg:mr-3 lg:h-16 lg:w-16"
+            className="h-20 w-20 md:mr-2 lg:mr-3 lg:h-16 lg:w-16 shrink-0"
           />
           <div className="grid grid-cols-1 self-center">
             <div className="flex flex-row items-center gap-3">
-              <h1 className="text-xl font-bold truncate" id="users-name">
-                {formatName(userData)}
-              </h1>
+              <TooltipComponent content={formatName(userData)} side="top">
+                <h1 className="text-xl font-bold truncate" id="users-name">
+                  {formatName(userData)}
+                </h1>
+              </TooltipComponent>
               <div className="min-width-50 shrink-0 text-sm text-secondary-600">
                 <UserStatusIndicator
                   user={userData}
@@ -32,13 +35,14 @@ export default function UserBanner({ userData }: { userData: UserBase }) {
                 />
               </div>
             </div>
-
-            <p
-              id="username"
-              className="text-sm font-light leading-relaxed text-secondary-600 truncate"
-            >
-              {userData.username}
-            </p>
+            <TooltipComponent content={userData.username} side="bottom">
+              <p
+                id="username"
+                className="text-sm font-light leading-relaxed text-secondary-600 truncate"
+              >
+                {userData.username}
+              </p>
+            </TooltipComponent>
           </div>
         </div>
       </div>
