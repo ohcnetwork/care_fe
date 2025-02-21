@@ -103,7 +103,22 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const resources = queryResources?.results || [];
 
   return (
-    <Page title={t("resource")}>
+    <Page
+      title={t("resource")}
+      componentRight={
+        <Badge
+          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
+          variant="outline"
+        >
+          {isLoading
+            ? t("loading")
+            : t("entity_count", {
+                count: queryResources?.count ?? 0,
+                entity: "Resource",
+              })}
+        </Badge>
+      }
+    >
       <div className="space-y-4 mt-2">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
