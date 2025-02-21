@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, parse } from "date-fns";
-import { ArrowRightIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { ArrowRightIcon, Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -305,7 +305,11 @@ const ScheduleTemplateEditor = ({
                       setDialogOpen(false);
                     }}
                   >
-                    {t("confirm")}
+                    {isDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      t("confirm")
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -441,7 +445,11 @@ const AvailabilityEditor = ({
                   setOpenDialog(false);
                 }}
               >
-                {t("confirm")}
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { BanIcon, PrinterIcon } from "lucide-react";
+import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -380,7 +380,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
-  const { mutate: cancelAppointment } = useMutation({
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
         facility_id: facilityId,
@@ -545,7 +545,11 @@ const AppointmentActions = ({
               onClick={() => cancelAppointment({ reason: "cancelled" })}
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -576,7 +580,11 @@ const AppointmentActions = ({
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
               className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
