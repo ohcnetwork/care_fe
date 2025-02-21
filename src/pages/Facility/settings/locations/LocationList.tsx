@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { Link } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -104,34 +104,29 @@ export default function LocationList({ facilityId }: Props) {
   const matchesSearch = (name: string) =>
     name.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const hasMatchingChildren = useCallback(
-    (parentId: string): boolean => {
-      const children = childrenMap.get(parentId) || [];
-      return children.some(
-        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
-      );
-    },
-    [childrenMap, searchQuery],
-  );
+  const hasMatchingChildren = (parentId: string): boolean => {
+    const children = childrenMap.get(parentId) || [];
+    return children.some(
+      (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
+    );
+  };
 
-  const getChildren = useCallback(
-    (parentId: string) => {
-      const children = childrenMap.get(parentId) || [];
-      if (!searchQuery) return children;
+  const getChildren = (parentId: string) => {
+    const children = childrenMap.get(parentId) || [];
+    if (!searchQuery) return children;
 
-      return children.filter(
-        (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
-      );
-    },
-    [childrenMap, searchQuery, hasMatchingChildren],
-  );
+    return children.filter(
+      (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
+    );
+  };
 
   const filteredTopLevelLocations = useMemo(() => {
     if (!searchQuery) return topLevelLocations;
     return topLevelLocations.filter(
       (loc) => matchesSearch(loc.name) || hasMatchingChildren(loc.id),
     );
-  }, [topLevelLocations, searchQuery, hasMatchingChildren]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topLevelLocations, searchQuery]);
 
   const handleAddLocation = () => {
     setSelectedLocation(null);
@@ -149,7 +144,15 @@ export default function LocationList({ facilityId }: Props) {
   };
 
   const toggleRow = (id: string) => {
-    setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+    const newExpandedRows = { ...expandedRows };
+    newExpandedRows[id] = !newExpandedRows[id];
+    const children = getChildren(id);
+    children.forEach((child) => {
+      if (!child.has_children) {
+        newExpandedRows[child.id] = !newExpandedRows[child.id];
+      }
+    });
+    setExpandedRows(newExpandedRows);
   };
 
   useEffect(() => {
@@ -246,6 +249,7 @@ export default function LocationList({ facilityId }: Props) {
                   size="icon"
                   variant="link"
                   onClick={() => toggleRow(location.id)}
+                  disabled={children.length === 0}
                 >
                   {isExpanded ? (
                     <CareIcon icon="l-angle-down" className="h-5 w-5" />
@@ -435,41 +439,43 @@ export default function LocationList({ facilityId }: Props) {
                   />
                 </div>
                 <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
-                  <div className="flex flex-wrap items-baseline">
-                    <span className="inline-block mr-1">{t("click")}</span>
-                    <span className="inline-block font-semibold mr-1">
-                      {t("add_location")}
-                    </span>
-                    <span className="inline-block">
-                      {t("to_add_main_location")}.
-                    </span>
+                  <div className="flex flex-wrap items-center">
+                    <Trans
+                      i18nKey="click_add_main_location"
+                      components={{
+                        strong: <strong className="font-semibold mx-1" />,
+                      }}
+                    />
                   </div>
                   {/* Desktop view text */}
-                  <div className="hidden lg:flex flex-wrap items-baseline">
-                    <span className="inline-block mr-1">{t("click")}</span>
-                    <span className="inline-block font-semibold mr-1">
-                      {t("see_details")}
-                      <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                    </span>
-                    <span className="inline-block break-words">
-                      {t("open_manage_sub_locations")}
-                    </span>
+                  <div className="hidden lg:flex items-center">
+                    <Trans
+                      i18nKey="click_manage_sub_locations"
+                      components={{
+                        ArrowIcon: (
+                          <CareIcon
+                            icon="l-arrow-up-right"
+                            className="h-4 w-4 mr-1"
+                          />
+                        ),
+                        strong: <strong className="font-semibold ml-1" />,
+                      }}
+                    />
                   </div>
                   {/* Mobile and Tablet view text */}
-                  <div className="flex lg:hidden flex-wrap items-baseline">
-                    <span className="inline-block break-words">
-                      {t("click")}{" "}
-                      <span className="inline-flex items-center gap-1">
-                        "<PenLine className="h-4 w-4" />"
-                      </span>{" "}
-                      {t("to_edit")},{" "}
-                      <span className="inline-flex items-center gap-1">
-                        "
-                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                        "
-                      </span>{" "}
-                      {t("open_manage_sub_locations")}
-                    </span>
+                  <div className="lg:hidden flex flex-nowrap items-center">
+                    <Trans
+                      i18nKey="click_manage_sub_locations_mobile"
+                      components={{
+                        ArrowIcon: (
+                          <CareIcon
+                            icon="l-arrow-up-right"
+                            className="h-4 w-4 mx-1"
+                          />
+                        ),
+                        PenLine: <PenLine className="h-4 w-4 mx-1" />,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
