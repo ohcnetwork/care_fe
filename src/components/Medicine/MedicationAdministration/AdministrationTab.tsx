@@ -741,7 +741,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   return (
     <div className="flex flex-col gap-2 mt-4 mx-2">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-center items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-1">
           <div className="flex items-center gap-2 flex-1">
             <CareIcon icon="l-search" className="text-lg text-gray-500" />
