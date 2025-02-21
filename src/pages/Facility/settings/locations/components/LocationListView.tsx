@@ -5,7 +5,17 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -24,7 +34,7 @@ interface LocationRowProps {
   >;
 }
 
-export function LocationRow({
+function LocationRow({
   location,
   expandedRows,
   toggleRow,
@@ -159,5 +169,78 @@ export function LocationRow({
           />
         ))}
     </>
+  );
+}
+
+interface LocationListViewProps {
+  isLoading: boolean;
+  tableData: LocationListType[];
+  searchQuery: string;
+  filteredTopLevelLocations: LocationListType[];
+  expandedRows: Record<string, boolean>;
+  toggleRow: (id: string) => void;
+  getChildren: (parentId: string) => LocationListType[];
+  handleEditLocation: (location: LocationListType) => void;
+  setExpandedRows: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
+}
+
+export function LocationListView({
+  isLoading,
+  tableData,
+  searchQuery,
+  filteredTopLevelLocations,
+  expandedRows,
+  toggleRow,
+  getChildren,
+  handleEditLocation,
+  setExpandedRows,
+}: LocationListViewProps) {
+  const { t } = useTranslation();
+
+  if (isLoading) {
+    return <TableSkeleton count={6} />;
+  }
+
+  if (!tableData?.length) {
+    return (
+      <Card className="col-span-full">
+        <CardContent className="p-6 text-center text-gray-500">
+          {searchQuery ? t("no_locations_found") : t("no_locations_available")}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Table className="border rounded-lg w-full overflow-hidden">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+              {t("name")}
+            </TableHead>
+            <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
+              {t("location_form")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredTopLevelLocations.map((location) => (
+            <LocationRow
+              key={location.id}
+              location={location}
+              expandedRows={expandedRows}
+              toggleRow={toggleRow}
+              getChildren={getChildren}
+              indent={1}
+              onEdit={handleEditLocation}
+              setExpandedRows={setExpandedRows}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

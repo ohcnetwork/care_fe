@@ -6,19 +6,10 @@ import { Trans, useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -26,7 +17,7 @@ import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
-import { LocationRow } from "./components/LocationRow";
+import { LocationListView } from "./components/LocationListView";
 
 interface Props {
   facilityId: string;
@@ -190,55 +181,6 @@ export default function LocationList({ facilityId }: Props) {
     setExpandedRows(newExpandedRows);
   }, [searchQuery, data?.results]);
 
-  const renderListView = () => {
-    if (isLoading) {
-      return <TableSkeleton count={6} />;
-    }
-
-    if (!tableData?.length) {
-      return (
-        <Card className="col-span-full">
-          <CardContent className="p-6 text-center text-gray-500">
-            {searchQuery
-              ? t("no_locations_found")
-              : t("no_locations_available")}
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        <Table className="border rounded-lg w-full overflow-hidden">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
-                {t("name")}
-              </TableHead>
-              <TableHead className="hidden sm:table-cell bg-gray-200 text-gray-700">
-                {t("location_form")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTopLevelLocations.map((location) => (
-              <LocationRow
-                key={location.id}
-                location={location}
-                expandedRows={expandedRows}
-                toggleRow={toggleRow}
-                getChildren={getChildren}
-                indent={1}
-                onEdit={handleEditLocation}
-                setExpandedRows={setExpandedRows}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  };
-
   return (
     <Page title={t("locations")} hideTitleOnPage={true} className="p-0">
       <div className="md:px-6 space-y-6">
@@ -342,16 +284,18 @@ export default function LocationList({ facilityId }: Props) {
             </div>
           )}
 
-          {
-            activeTab === "list"
-              ? renderListView()
-              : /* Map view will be added later
-            <div className="h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">{t("map_view_coming_soon")}</p>
-            </div>
-            */
-                renderListView() // Default to list view for now
-          }
+          {/* Map view will be added later, for now always show list view */}
+          <LocationListView
+            isLoading={isLoading}
+            tableData={tableData}
+            searchQuery={searchQuery}
+            filteredTopLevelLocations={filteredTopLevelLocations}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            getChildren={getChildren}
+            handleEditLocation={handleEditLocation}
+            setExpandedRows={setExpandedRows}
+          />
 
           <LocationSheet
             open={isSheetOpen}
