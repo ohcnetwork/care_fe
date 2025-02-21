@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -218,7 +219,7 @@ const AvatarEditModal = ({
                       <img
                         src={
                           preview && preview.startsWith("blob:")
-                            ? preview
+                            ? DOMPurify.sanitize(preview)
                             : imageUrl
                         }
                         alt="cover-photo"
