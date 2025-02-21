@@ -216,7 +216,11 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg">
                       <img
-                        src={preview && preview.startsWith('blob:') ? preview : imageUrl}
+                        src={
+                          preview && preview.startsWith("blob:")
+                            ? preview
+                            : imageUrl
+                        }
                         alt="cover-photo"
                         className="h-full w-full object-cover"
                       />
