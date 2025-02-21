@@ -1,6 +1,6 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -18,50 +18,24 @@ import { CreateFileResponse } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 
 type Props = {
   associatingId: string;
   fileType: string;
-  drawingId?: string;
 };
 
-export default function ExcalidrawPage({
-  associatingId,
-  drawingId,
-  fileType,
-}: Props) {
+export default function ExcalidrawEditor({ associatingId, fileType }: Props) {
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
-    drawingId ? null : [],
+    [],
   );
   const [name, setName] = useState("");
-  const [id, setId] = useState(drawingId);
+  const [id, setId] = useState("");
   const [isDirty, setIsDirty] = useState(false);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["file", id],
-    queryFn: query(routes.retrieveUpload, {
-      pathParams: { id: id || "" },
-    }),
-    enabled: !!id,
-  });
 
   useEffect(() => {
     setIsDirty(!!elements?.length);
   }, [elements?.length]);
 
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-    setName(data.name!);
-    const fetchData = async () => {
-      const response = await fetch(data.read_signed_url!);
-      const json = await response.json();
-      setElements(json.elements);
-    };
-    fetchData();
-  }, [data]);
   const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
     useMutation({
       mutationFn: mutate(routes.markUploadCompleted, {
@@ -78,14 +52,14 @@ export default function ExcalidrawPage({
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error("Please enter a name for the drawing.");
+      toast.error(t("please_enter_a_name_for_the_drawing"));
       return;
     }
 
     const obj = {
       type: "excalidraw",
       version: "2",
-      source: "https://care.ohc.network.com",
+      source: window.location.origin,
       elements: elements,
       appState: {},
       files: {},
@@ -93,9 +67,9 @@ export default function ExcalidrawPage({
 
     try {
       const file = new File([JSON.stringify(obj)], `${name}.excalidraw`, {
-        type: "text/plain",
+        type: "application/vnd.excalidraw",
       });
-      let signedUrl = data?.read_signed_url || "";
+      let signedUrl = "";
       let response: CreateFileResponse | null = null;
       if (!id) {
         response = await createUpload({
@@ -118,7 +92,7 @@ export default function ExcalidrawPage({
       });
 
       if (!upload.ok) {
-        toast.error("Error uploading file");
+        toast.error(t("error_uploading_file"));
 
         return;
       }
@@ -131,12 +105,12 @@ export default function ExcalidrawPage({
         toast.success(t("file_success__upload_complete"));
         navigate(`drawings/${response!.id}`);
       }
-    } catch (error) {
-      console.error("Error in Step 1 (createUpload):", error);
+    } catch {
+      toast.error(t("error_in_createUpload"));
     }
   };
 
-  if (isLoading || elements === null) {
+  if (elements === null) {
     return <Loading />;
   }
 
@@ -151,7 +125,7 @@ export default function ExcalidrawPage({
             <Input
               type="text"
               value={name}
-              placeholder="Enter the File Name"
+              placeholder={t("enter_the_file_name")}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
@@ -175,7 +149,7 @@ export default function ExcalidrawPage({
           initialData={{
             appState: { theme: "light" },
           }}
-          onChange={debounce(async (elements) => {
+          onChange={debounce((elements) => {
             setElements(elements);
           }, 100)}
         />

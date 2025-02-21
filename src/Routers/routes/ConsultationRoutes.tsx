@@ -9,7 +9,9 @@ import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 
-const ExcalidrawPage = lazy(() => import("@/components/Files/ExcalidrawPage"));
+const ExcalidrawEditor = lazy(
+  () => import("@/components/Files/ExcalidrawEditor"),
+);
 const ExcalidrawView = lazy(() => import("@/components/Files/ExcalidrawView"));
 
 const consultationRoutes: AppRoutes = {
@@ -37,7 +39,7 @@ const consultationRoutes: AppRoutes = {
     encounterId,
   }) => (
     <Suspense fallback={<Loading />}>
-      <ExcalidrawPage associatingId={encounterId} fileType="encounter" />
+      <ExcalidrawEditor associatingId={encounterId} fileType="encounter" />
     </Suspense>
   ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
