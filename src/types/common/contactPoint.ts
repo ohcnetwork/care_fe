@@ -28,13 +28,13 @@ export const contactPointSchema = z.discriminatedUnion("system", [
   // Phone numbers
   z.object({
     system: z.literal("phone"),
-    value: validators.phoneNumber.required,
+    value: validators().phoneNumber.required,
     use: z.enum(ContactPointUses),
   }),
   // Fax numbers (also using phone validation since they follow same format)
   z.object({
     system: z.literal("fax"),
-    value: validators.phoneNumber.required,
+    value: validators().phoneNumber.required,
     use: z.enum(ContactPointUses),
   }),
   // Email addresses
@@ -52,7 +52,7 @@ export const contactPointSchema = z.discriminatedUnion("system", [
   // SMS (also using phone validation)
   z.object({
     system: z.literal("sms"),
-    value: validators.phoneNumber.required,
+    value: validators().phoneNumber.required,
     use: z.enum(ContactPointUses),
   }),
   // Pager (typically numeric, but can vary)
