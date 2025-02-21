@@ -38,7 +38,7 @@ export default function ArchivedFileDialog({
           <DialogTitle>
             {t("archived_file")}:{" "}
             <TooltipComponent content={fileName}>
-              <span className="max-w-[200px] truncate inline-block align-bottom">
+              <span className="max-w-sm truncate inline-block align-bottom">
                 {fileName}
               </span>
             </TooltipComponent>
