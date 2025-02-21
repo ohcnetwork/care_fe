@@ -194,7 +194,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <div className="sm:px-4 px-8 inline-flex rounded-md">
                   <Avatar
                     name={facilityData.name}
-                    className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-md border-4 border-white shadow-lg"
+                    className="size-16 sm:size-20 md:size-24 rounded-md border-4 border-white shadow-lg"
                   />
                 </div>
               </div>
