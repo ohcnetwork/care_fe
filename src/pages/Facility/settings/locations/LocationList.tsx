@@ -463,7 +463,7 @@ export default function LocationList({ facilityId }: Props) {
                     />
                   </div>
                   {/* Mobile and Tablet view text */}
-                  <div className="lg:hidden flex flex-nowrap items-center">
+                  <div className="lg:hidden flex flex-wrap items-center">
                     <Trans
                       i18nKey="click_manage_sub_locations_mobile"
                       components={{
