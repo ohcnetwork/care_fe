@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -280,8 +280,8 @@ export default function ManageQuestionnaireTagsSheet({
           </ScrollArea>
         </div>
 
-        <SheetFooter className=" bottom-0 left-0 right-0 p-4 border-t bg-background">
-          <div className="flex w-full justify-end gap-4">
+        <SheetFooter className=" bottom-0 left-0 right-0 p-4 border-t">
+          <div className="flex w-full justify-end gap-4 bg-gray-100">
             <Button
               variant="outline"
               onClick={() => {

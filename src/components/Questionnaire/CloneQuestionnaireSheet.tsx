@@ -197,7 +197,7 @@ export default function CloneQuestionnaireSheet({
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
           <div className="flex w-full justify-end gap-4">
             <Button
               variant="outline"

@@ -64,7 +64,6 @@ import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
-  ObservationType,
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
@@ -104,11 +103,6 @@ interface Organization {
   id: string;
   name: string;
   description?: string;
-}
-
-interface StylingMetadata {
-  classes?: string;
-  containerClasses?: string;
 }
 
 interface OrganizationResponse {
@@ -451,7 +445,6 @@ function QuestionnaireProperties({
   id,
   organizations,
   organizationSelection,
-  tags,
   tagSelection,
 }: QuestionnairePropertiesProps) {
   return (
@@ -613,7 +606,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
-  const [observation, setObservation] = useState<ObservationType | undefined>();
 
   const {
     data: initialQuestionnaire,
@@ -627,7 +619,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     enabled: !!id,
   });
 
-  const { data: organizations, isLoading: isLoadingOrganizations } = useQuery({
+  const { data: organizations } = useQuery({
     queryKey: ["questionnaire", id, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
       pathParams: { id: id! },
