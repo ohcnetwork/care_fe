@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 
-import { cn } from "@/lib/utils";
-
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -213,14 +211,15 @@ export default function TreatmentSummary({
             />
 
             {/* Medications */}
-            <Card className={cn("rounded-sm")}>
-              <CardHeader className={cn("px-3 pt-4 pb-2")}>
+            <Card className="rounded-sm border-none shadow-none">
+              <CardHeader className="pt-4 pb-2 flex justify-between flex-row px-0 py-2">
                 <CardTitle>{t("medications")}</CardTitle>
               </CardHeader>
-              <CardContent className="p-3 pt-0">
+              <CardContent className="px-0 py-0">
                 <MedicationsTable
                   patientId={encounter.patient.id}
                   encounterId={encounterId}
+                  isPrintPreview={true}
                 />
               </CardContent>
             </Card>
