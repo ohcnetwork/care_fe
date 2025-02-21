@@ -176,9 +176,13 @@ export default function LocationList({ facilityId }: Props) {
         let currentLoc = location;
         while (currentLoc.parent?.id) {
           newExpandedRows[currentLoc.parent.id] = true;
-          currentLoc = allLocations.find(
+          const parentLoc = allLocations.find(
             (loc) => loc.id === currentLoc.parent?.id,
-          )!;
+          );
+          if (!parentLoc) {
+            break;
+          }
+          currentLoc = parentLoc;
         }
       }
     });
