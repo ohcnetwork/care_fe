@@ -94,6 +94,7 @@ export function MedicationStatementQuestion({
   encounterId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
+  const isPreview = patientId === "preview";
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null
@@ -115,6 +116,7 @@ export function MedicationStatementQuestion({
         encounter: encounterId,
       },
     }),
+    enabled: !isPreview,
   });
 
   useEffect(() => {

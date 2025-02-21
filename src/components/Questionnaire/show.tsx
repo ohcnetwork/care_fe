@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Tags } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 
@@ -94,7 +95,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["questionnaire", id],
+    queryKey: ["questionnaireDetail", id],
     queryFn: query(questionnaireApi.detail, {
       pathParams: { id },
     }),
@@ -182,7 +183,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
                 questionnaire={questionnaire}
                 trigger={
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <CareIcon icon="l-tag" className="mr-2 h-4 w-4" />
+                    <Tags className="mr-2 h-4 w-4" />
                     Manage Tags
                   </DropdownMenuItem>
                 }

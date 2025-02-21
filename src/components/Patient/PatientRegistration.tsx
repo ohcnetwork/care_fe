@@ -726,7 +726,7 @@ export default function PatientRegistration(
               <Button
                 variant={"secondary"}
                 type="button"
-                onClick={() => goBack()}
+                onClick={() => goBack(`/facility/${facilityId}/patients`)}
               >
                 {t("cancel")}
               </Button>
