@@ -130,8 +130,8 @@ const AvatarEditModal = ({
           openCamera.getTracks().forEach((track) => track.stop());
         }
       }
-    } catch (error: any) {
-      toast.error("Failed to stop camera: ", error);
+    } catch {
+      toast.error("Failed to stop camera");
     } finally {
       setIsCameraOpen(false);
     }
