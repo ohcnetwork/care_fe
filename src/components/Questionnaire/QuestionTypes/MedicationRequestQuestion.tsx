@@ -202,6 +202,7 @@ export function MedicationRequestQuestion({
             <AlertDialogAction
               onClick={confirmRemoveMedication}
               className={cn(buttonVariants({ variant: "destructive" }))}
+              data-cy="confirm-remove-medication"
             >
               {t("remove")}
             </AlertDialogAction>
@@ -317,6 +318,7 @@ export function MedicationRequestQuestion({
                                       medication.status === "entered_in_error"
                                     }
                                     className="h-8 w-8"
+                                    data-cy="medication-remove"
                                   >
                                     <MinusCircledIcon className="h-4 w-4" />
                                   </Button>
@@ -619,7 +621,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           }}
           disabled={disabled || isReadOnly}
         >
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger className="h-9 text-sm" data-cy="frequency">
             <SelectValue placeholder={t("select_frequency")} />
           </SelectTrigger>
           <SelectContent>
@@ -879,6 +881,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onClick={onRemove}
           disabled={disabled}
           className="h-8 w-8"
+          data-cy="medication-remove"
         >
           <MinusCircledIcon className="h-4 w-4" />
         </Button>

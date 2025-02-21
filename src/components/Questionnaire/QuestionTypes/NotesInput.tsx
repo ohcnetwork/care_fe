@@ -38,6 +38,7 @@ export function NotesInput({
             size="sm"
             className="h-full w-28 text-sm font-normal text-gray-700 hover:text-gray-900"
             disabled={disabled}
+            data-cy="notes"
           >
             {hasNotes ? (
               <div className="w-1.5 h-1.5 rounded-full bg-orange-400 " />
@@ -54,6 +55,7 @@ export function NotesInput({
             className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
             placeholder="Add notes..."
             disabled={disabled}
+            data-cy="notes-textarea"
           />
         </PopoverContent>
       </Popover>

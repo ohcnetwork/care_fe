@@ -158,6 +158,7 @@ export default function MedicationRequestTable({
                     variant="outline"
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
+                    data-cy="edit-prescription"
                   >
                     <Link
                       href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
