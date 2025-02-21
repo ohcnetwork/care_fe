@@ -22,23 +22,25 @@ export const FacilityMapsLink = ({
   longitude: string;
 }) => {
   const { t } = useTranslation();
-  if (isValidLatitude(latitude) && isValidLongitude(longitude)) {
-    const href = isAndroidDevice
-      ? `geo:0,0?q=${latitude},${longitude}`
-      : `https://maps.google.com/?q=${latitude},${longitude}`;
-    const target = isAndroidDevice ? "_self" : "_blank";
-    return (
-      <Link
-        className="text-primary flex items-center gap-1 w-max"
-        href={href}
-        target={target}
-        rel="noreferrer"
-      >
-        {t("show_on_maps")}
-        <SquareArrowOutUpRight className="h-3 w-3" />
-      </Link>
-    );
-  } else {
+
+  if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
     return null;
   }
+
+  const href = isAndroidDevice
+    ? `geo:0,0?q=${latitude},${longitude}`
+    : `https://maps.google.com/?q=${latitude},${longitude}`;
+  const target = isAndroidDevice ? "_self" : "_blank";
+
+  return (
+    <Link
+      className="text-primary flex items-center gap-1 w-max"
+      href={href}
+      target={target}
+      rel="noreferrer"
+    >
+      {t("show_on_maps")}
+      <SquareArrowOutUpRight className="h-3 w-3" />
+    </Link>
+  );
 };
