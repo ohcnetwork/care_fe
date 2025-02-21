@@ -67,8 +67,10 @@ const AvatarEditModal = ({
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [devices, setDevices] = useState<any>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
+    undefined,
+  );
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<Webcam>(null);
