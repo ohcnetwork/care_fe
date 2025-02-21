@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
-import { TooltipComponent } from "@/src/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
+
 import { UserBase } from "@/types/user/user";
 
 interface UserViewDetailsProps {

@@ -1,7 +1,8 @@
+import { TooltipComponent } from "@/components/ui/tooltip";
+
 import { Avatar } from "@/components/Common/Avatar";
 
 import { formatDisplayName, formatName } from "@/Utils/utils";
-import { TooltipComponent } from "@/src/components/ui/tooltip";
 import { UserBase } from "@/types/user/user";
 
 import { UserStatusIndicator } from "./UserListAndCard";
