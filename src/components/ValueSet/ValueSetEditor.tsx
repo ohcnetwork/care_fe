@@ -49,7 +49,6 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
       toast.success("ValueSet updated successfully");
       queryClient.removeQueries({ queryKey: ["valueset", slug] });
       navigate(`/admin/valuesets`);
-      queryClient.invalidateQueries({ queryKey: ["valueset"] });
     },
   });
 
