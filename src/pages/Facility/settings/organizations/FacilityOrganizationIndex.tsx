@@ -93,7 +93,15 @@ export default function FacilityOrganizationIndex({
     );
   }
   const toggleRow = (id: string) => {
-    setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+    const newExpandedRows = { ...expandedRows };
+    newExpandedRows[id] = !newExpandedRows[id];
+    const children = getChildren(id);
+    children.forEach((child) => {
+      if (!child.has_children) {
+        newExpandedRows[child.id] = !newExpandedRows[child.id];
+      }
+    });
+    setExpandedRows(newExpandedRows);
   };
   const getChildren = (parentId: string) => {
     return tableData.filter((org) => org.parent?.id === parentId);
@@ -156,11 +164,12 @@ export default function FacilityOrganizationIndex({
             } flex justify-between lg:flex-row flex-col pl-[var(--indent)] flex-wrap gap-2`}
           >
             <div className="flex items-center">
-              {children.length > 0 ? (
+              {isTopLevel || children.length > 0 ? (
                 <Button
                   size={"icon"}
                   variant={"link"}
                   onClick={() => toggleRow(org.id)}
+                  disabled={children.length === 0}
                 >
                   {expandedRows[org.id] ? (
                     <CareIcon icon="l-angle-down" className="h-5 w-5" />
@@ -168,24 +177,11 @@ export default function FacilityOrganizationIndex({
                     <CareIcon icon="l-angle-right" className="h-5 w-5" />
                   )}
                 </Button>
-              ) : org.parent && Object.keys(org.parent).length > 0 ? (
+              ) : (
                 <CareIcon
                   icon="l-corner-down-right-alt"
                   className="h-4 w-4 text-gray-400 ml-4 mr-2"
                 />
-              ) : (
-                <Button
-                  size={"icon"}
-                  variant={"link"}
-                  onClick={() => toggleRow(org.id)}
-                  className="px-0"
-                >
-                  {expandedRows[org.id] ? (
-                    <CareIcon icon="l-angle-down" className="h-5 w-5" />
-                  ) : (
-                    <CareIcon icon="l-angle-right" className="h-5 w-5" />
-                  )}
-                </Button>
               )}
               <CareIcon
                 icon={isTopLevel ? "l-building" : "l-users-alt"}
@@ -284,25 +280,40 @@ export default function FacilityOrganizationIndex({
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
         </div>
       </div>
-      <div className="flex-row items-center flex gap-3 text-blue-800 text-xs sm:text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
+      <div className="items-center flex gap-3 text-blue-800 text-xs sm:text-sm border-2 rounded-lg border-blue-200 bg-blue-50 p-4 mb-4">
         <div className="sm:p-2 p-1 bg-blue-100 rounded-sm">
           <CareIcon icon="l-info-circle" className="h-6 w-6 text-blue-900" />
         </div>
-        <div className="">
-          <Trans
-            i18nKey="click_add_create_new"
-            components={{
-              strong: <strong className="font-semibold" />,
-            }}
-          />
-          <br></br>
-          <Trans
-            i18nKey="click_create_users"
-            components={{
-              strong: <strong className="font-semibold" />,
-              CareIcon: <CareIcon icon="l-arrow-up-right"></CareIcon>,
-            }}
-          />
+        <div className="flex-1 space-y-2 text-xs md:text-sm text-blue-800">
+          <div className="flex flex-wrap items-center">
+            <Trans
+              i18nKey="click_add_department_team"
+              components={{
+                strong: <strong className="font-semibold mx-0.5" />,
+              }}
+            />
+          </div>
+          <div className="hidden lg:flex flex-wrap items-center">
+            <Trans
+              i18nKey="click_manage_create_users"
+              components={{
+                strong: <strong className="font-semibold ml-1" />,
+                CareIcon: (
+                  <CareIcon icon="l-arrow-up-right" className="h-4 w-4 mr-1" />
+                ),
+              }}
+            />
+          </div>
+          <div className="flex flex-wrap lg:hidden items-center">
+            <Trans
+              i18nKey="click_manage_create_users_mobile"
+              components={{
+                CareIcon: (
+                  <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                ),
+              }}
+            />
+          </div>
         </div>
       </div>
       <Table className="border rounded-lg w-full overflow-hidden">
