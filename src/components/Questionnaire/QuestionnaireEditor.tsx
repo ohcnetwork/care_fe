@@ -1,10 +1,20 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  SquarePenIcon,
+  Tags,
+  ViewIcon,
+} from "lucide-react";
 import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -34,6 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -64,10 +75,13 @@ import {
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
+import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
+import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
 import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
@@ -85,6 +99,503 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "location_association", label: "Location Association" },
 ] as const;
 
+interface Organization {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface OrganizationResponse {
+  results: Organization[];
+}
+
+interface TagResponse {
+  results: QuestionnaireTagModel[];
+}
+
+interface QuestionnairePropertiesProps {
+  questionnaire: QuestionnaireDetail;
+  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
+    field: K,
+    value: QuestionnaireDetail[K],
+  ) => void;
+  id?: string;
+  organizations?: OrganizationResponse;
+  organizationSelection: {
+    selectedIds: string[];
+    onToggle: (orgId: string) => void;
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    available?: OrganizationResponse;
+    isLoading?: boolean;
+  };
+  tags?: QuestionnaireTagModel[];
+  tagSelection: {
+    selectedIds: string[];
+    onToggle: (tagId: string) => void;
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    available?: TagResponse;
+    isLoading?: boolean;
+  };
+}
+
+function StatusSelector({
+  value,
+  onChange,
+}: {
+  value: QuestionStatus;
+  onChange: (value: QuestionStatus) => void;
+}) {
+  return (
+    <div className="space-y-2 w-fit">
+      <Label htmlFor="status">{t("status")}</Label>
+      <RadioGroup
+        value={value}
+        onValueChange={onChange}
+        className="flex items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:text-primary-500 [&>div:has([data-state=checked])]:bg-primary-200"
+      >
+        {["active", "draft", "retired"].map((status) => (
+          <div
+            key={status}
+            className={cn(
+              "flex items-center px-2 py-1 space-x-2",
+              status === "active" && "rounded-l-md",
+              status === "retired" && "rounded-r-md",
+            )}
+          >
+            <RadioGroupItem value={status} id={`status-${status}`} />
+            <Label
+              htmlFor={`status-${status}`}
+              className="text-sm font-normal text-gray-950"
+            >
+              {t(status)}
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
+function SubjectTypeSelector({
+  value,
+  onChange,
+}: {
+  value: SubjectType;
+  onChange: (value: SubjectType) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="subject_type">{t("subject_type")}</Label>
+      <RadioGroup
+        value={value}
+        onValueChange={onChange}
+        className="flex w-fit items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:bg-primary-200"
+      >
+        {[
+          { value: "patient", label: "patient" },
+          { value: "encounter", label: "encounter" },
+        ].map((type) => (
+          <div
+            key={type.value}
+            className={cn(
+              "flex items-center px-2 py-1 space-x-2",
+              type.value === "patient" && "rounded-l-md",
+              type.value === "encounter" && "rounded-r-md",
+            )}
+          >
+            <RadioGroupItem
+              value={type.value}
+              id={`subject-type-${type.value}`}
+            />
+            <Label
+              htmlFor={`subject-type-${type.value}`}
+              className="text-sm font-normal text-gray-950"
+            >
+              {t(type.label)}
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
+function OrganizationSelector({
+  id,
+  organizations,
+  selection,
+}: {
+  id?: string;
+  organizations?: OrganizationResponse;
+  selection: QuestionnairePropertiesProps["organizationSelection"];
+}) {
+  if (id) {
+    return (
+      <>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {organizations?.results.map((org) => (
+            <Badge
+              key={org.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              <Building className="h-3 w-3" />
+              {org.name}
+            </Badge>
+          ))}
+          {(!organizations?.results || organizations.results.length === 0) && (
+            <p className="text-sm text-gray-500">
+              {t("no_organizations_selected")}
+            </p>
+          )}
+        </div>
+        <ManageQuestionnaireOrganizationsSheet
+          questionnaireId={id}
+          trigger={
+            <Button variant="outline" className="w-full justify-start">
+              <Building className="mr-2 h-4 w-4" />
+              {t("manage_organizations")}
+            </Button>
+          }
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {selection.selectedIds.length > 0 ? (
+          selection.available?.results
+            .filter((org) => selection.selectedIds.includes(org.id))
+            .map((org) => (
+              <Badge
+                key={org.id}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                {org.name}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  onClick={() => selection.onToggle(org.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))
+        ) : (
+          <p className="text-sm text-gray-500">
+            {t("no_organizations_selected")}
+          </p>
+        )}
+      </div>
+
+      <Command className="rounded-lg border shadow-md">
+        <CommandInput
+          placeholder={t("search_organizations")}
+          onValueChange={selection.setSearchQuery}
+        />
+        <CommandList>
+          <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
+          <CommandGroup>
+            {selection.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : (
+              selection.available?.results.map((org) => (
+                <CommandItem
+                  key={org.id}
+                  value={org.id}
+                  onSelect={() => selection.onToggle(org.id)}
+                >
+                  <div className="flex flex-1 items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span>{org.name}</span>
+                    {org.description && (
+                      <span className="text-xs text-gray-500">
+                        - {org.description}
+                      </span>
+                    )}
+                  </div>
+                  {selection.selectedIds.includes(org.id) && (
+                    <Check className="h-4 w-4" />
+                  )}
+                </CommandItem>
+              ))
+            )}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </div>
+  );
+}
+
+function TagSelector({
+  id,
+  selection,
+  questionnaire,
+}: {
+  id?: string;
+  selection: QuestionnairePropertiesProps["tagSelection"];
+  questionnaire: QuestionnaireDetail;
+}) {
+  if (id) {
+    return (
+      <>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {questionnaire.tags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              <Building className="h-3 w-3" />
+              {tag.name}
+            </Badge>
+          ))}
+          {questionnaire.tags.length === 0 && (
+            <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
+          )}
+        </div>
+        <ManageQuestionnaireTagsSheet
+          questionnaire={questionnaire}
+          trigger={
+            <Button variant="outline" className="w-full justify-start">
+              <Tags className="mr-2 h-4 w-4" />
+              {t("manage_tags")}
+            </Button>
+          }
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {selection.selectedIds.length > 0 ? (
+          selection.available?.results
+            .filter((tag) => selection.selectedIds.includes(tag.id))
+            .map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                {tag.name}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  onClick={() => selection.onToggle(tag.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))
+        ) : (
+          <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
+        )}
+      </div>
+
+      <Command className="rounded-lg border shadow-md">
+        <CommandInput
+          placeholder={t("search_tags")}
+          onValueChange={selection.setSearchQuery}
+        />
+        <CommandList>
+          <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
+          <CommandGroup>
+            {selection.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : (
+              selection.available?.results.map((tag) => (
+                <CommandItem
+                  key={tag.id}
+                  value={tag.id}
+                  onSelect={() => selection.onToggle(tag.id)}
+                >
+                  <div className="flex flex-1 items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span>{tag.name}</span>
+                  </div>
+                  {selection.selectedIds.includes(tag.id) && (
+                    <Check className="h-4 w-4" />
+                  )}
+                </CommandItem>
+              ))
+            )}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </div>
+  );
+}
+
+function QuestionnaireProperties({
+  questionnaire,
+  updateQuestionnaireField,
+  id,
+  organizations,
+  organizationSelection,
+  tagSelection,
+}: QuestionnairePropertiesProps) {
+  return (
+    <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
+      <CardHeader className="p-0">
+        <CardTitle>{t("properties")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6 p-0">
+        <StatusSelector
+          value={questionnaire.status}
+          onChange={(val) => updateQuestionnaireField("status", val)}
+        />
+
+        <SubjectTypeSelector
+          value={questionnaire.subject_type}
+          onChange={(val) => updateQuestionnaireField("subject_type", val)}
+        />
+
+        <div className="space-y-2">
+          <Label>
+            {t("organizations")} <span className="text-red-500">*</span>
+          </Label>
+          <OrganizationSelector
+            id={id}
+            organizations={organizations}
+            selection={organizationSelection}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>{t("tags")}</Label>
+          <TagSelector
+            id={id}
+            selection={tagSelection}
+            questionnaire={questionnaire}
+          />
+        </div>
+        <CloneQuestionnaireSheet
+          questionnaire={questionnaire}
+          trigger={
+            <Button variant="outline" className="w-full justify-start">
+              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+              Clone Questionnaire
+            </Button>
+          }
+        />
+
+        <div className="space-y-2">
+          <Label htmlFor="version">{t("version")}</Label>
+          <Input
+            id="version"
+            value={questionnaire.version || "0.0.1"}
+            disabled={true}
+            onChange={(e) =>
+              updateQuestionnaireField("version", e.target.value)
+            }
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const LAYOUT_OPTIONS = [
+  {
+    id: "full-width",
+    value: "grid grid-cols-1",
+    label: "Full Width",
+    preview: (
+      <div className="space-y-1 w-full">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "equal-split",
+    value: "grid grid-cols-2",
+    label: "Equal Split",
+    preview: (
+      <div className="w-full grid grid-cols-2 gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "wide-start",
+    value: "grid grid-cols-[2fr,1fr]",
+    label: "Wide Start",
+    preview: (
+      <div className="w-full grid grid-cols-[2fr,1fr] gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+  {
+    id: "wide-end",
+    value: "grid grid-cols-[1fr,2fr]",
+    label: "Wide End",
+    preview: (
+      <div className="w-full grid grid-cols-[1fr,2fr] gap-1">
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-gray-200 rounded" />
+      </div>
+    ),
+  },
+] as const;
+
+interface LayoutOptionProps {
+  option: (typeof LAYOUT_OPTIONS)[number];
+  isSelected: boolean;
+  questionId: string;
+}
+
+function LayoutOptionCard({
+  option,
+  isSelected,
+  questionId,
+}: LayoutOptionProps) {
+  const optionId = `${questionId}-${option.id}`;
+  return (
+    <div className="space-y-2">
+      <RadioGroupItem
+        value={option.value}
+        id={optionId}
+        className="peer sr-only"
+      />
+      <Label
+        htmlFor={optionId}
+        className={cn(
+          "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50",
+          "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          isSelected && "border-primary",
+        )}
+      >
+        {option.preview}
+        <span className="block w-full text-center text-sm font-medium mt-2">
+          {option.label}
+        </span>
+      </Label>
+    </div>
+  );
+}
+
 export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -92,7 +603,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     new Set(),
   );
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
 
   const {
     data: initialQuestionnaire,
@@ -106,16 +619,35 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     enabled: !!id,
   });
 
-  const { data: availableOrganizations, isLoading: isLoadingOrganizations } =
-    useQuery({
-      queryKey: ["organizations", orgSearchQuery],
-      queryFn: query(organizationApi.list, {
-        queryParams: {
-          org_type: "role",
-          name: orgSearchQuery || undefined,
-        },
-      }),
-    });
+  const { data: organizations } = useQuery({
+    queryKey: ["questionnaire", id, "organizations"],
+    queryFn: query(questionnaireApi.getOrganizations, {
+      pathParams: { id: id! },
+    }),
+    enabled: !!id,
+  });
+
+  const {
+    data: availableOrganizations,
+    isLoading: isLoadingAvailableOrganizations,
+  } = useQuery({
+    queryKey: ["organizations", orgSearchQuery],
+    queryFn: query(organizationApi.list, {
+      queryParams: {
+        org_type: "role",
+        name: orgSearchQuery || undefined,
+      },
+    }),
+  });
+
+  const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
+    queryKey: ["tags", tagSearchQuery],
+    queryFn: query(questionnaireApi.tags.list, {
+      queryParams: {
+        name: tagSearchQuery || undefined,
+      },
+    }),
+  });
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
@@ -230,12 +762,22 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     );
   };
 
+  const handleToggleTag = (tagId: string) => {
+    setSelectedTagIds((current) =>
+      current.includes(tagId)
+        ? current.filter((id) => id !== tagId)
+        : [...current, tagId],
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">
-            {id ? "Edit Questionnaire" : "Create Questionnaire"}
+            {id
+              ? t("edit") + " " + questionnaire.title
+              : "Create Questionnaire"}
           </h1>
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
@@ -256,18 +798,24 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
       >
         <TabsList className="mb-4">
-          <TabsTrigger value="edit">Edit</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="edit">
+            <ViewIcon className="w-4 h-4 mr-2" />
+            Edit form
+          </TabsTrigger>
+          <TabsTrigger value="preview">
+            <SquarePenIcon className="w-4 h-4 mr-2" />
+            Preview form
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="edit">
-          <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Navigation</CardTitle>
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="space-y-4 md:w-60">
+              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
+                <CardHeader className="p-0">
+                  <CardTitle>{t("navigation")}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <nav className="space-y-1">
                     {questionnaire.questions.map((question, index) => {
                       const hasSubQuestions =
@@ -286,7 +834,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 toggleQuestionExpanded(question.id);
                               }
                             }}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent flex items-center gap-2 ${
+                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
                               expandedQuestions.has(question.id)
                                 ? "bg-accent"
                                 : ""
@@ -298,9 +846,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             <span className="flex-1 truncate">
                               {question.text || "Untitled Question"}
                             </span>
-                            <Badge variant="secondary" className="text-xs">
-                              {question.type}
-                            </Badge>
                           </button>
                           {hasSubQuestions && question.questions && (
                             <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
@@ -327,12 +872,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                     <span className="flex-1 truncate">
                                       {subQuestion.text || "Untitled Question"}
                                     </span>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {subQuestion.type}
-                                    </Badge>
                                   </button>
                                 ),
                               )}
@@ -344,154 +883,34 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </nav>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Properties</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={questionnaire.status}
-                      onValueChange={(val: QuestionStatus) =>
-                        updateQuestionnaireField("status", val)
-                      }
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="retired">Retired</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="version">Version</Label>
-                    <Input
-                      id="version"
-                      value={questionnaire.version || ""}
-                      onChange={(e) =>
-                        updateQuestionnaireField("version", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="subject_type">Subject Type</Label>
-                    <Select
-                      value={questionnaire.subject_type}
-                      onValueChange={(val: SubjectType) =>
-                        updateQuestionnaireField("subject_type", val)
-                      }
-                    >
-                      <SelectTrigger id="subject_type">
-                        <SelectValue placeholder="Select subject type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="encounter">Encounter</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Organizations</Label>
-                    {id ? (
-                      <ManageQuestionnaireOrganizationsSheet
-                        questionnaireId={id}
-                        trigger={
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                          >
-                            <Building className="mr-2 h-4 w-4" />
-                            Manage Organizations
-                          </Button>
-                        }
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="flex flex-wrap gap-2">
-                          {selectedOrgIds.length > 0 ? (
-                            availableOrganizations?.results
-                              .filter((org) => selectedOrgIds.includes(org.id))
-                              .map((org) => (
-                                <Badge
-                                  key={org.id}
-                                  variant="secondary"
-                                  className="flex items-center gap-1"
-                                >
-                                  {org.name}
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-4 w-4 p-0 hover:bg-transparent"
-                                    onClick={() =>
-                                      handleToggleOrganization(org.id)
-                                    }
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </Badge>
-                              ))
-                          ) : (
-                            <p className="text-sm text-gray-500">
-                              No organizations selected
-                            </p>
-                          )}
-                        </div>
-
-                        <Command className="rounded-lg border shadow-md">
-                          <CommandInput
-                            placeholder="Search organizations..."
-                            onValueChange={setOrgSearchQuery}
-                          />
-                          <CommandList>
-                            <CommandEmpty>No organizations found.</CommandEmpty>
-                            <CommandGroup>
-                              {isLoadingOrganizations ? (
-                                <div className="flex items-center justify-center py-6">
-                                  <Loader2 className="h-6 w-6 animate-spin" />
-                                </div>
-                              ) : (
-                                availableOrganizations?.results.map((org) => (
-                                  <CommandItem
-                                    key={org.id}
-                                    value={org.id}
-                                    onSelect={() =>
-                                      handleToggleOrganization(org.id)
-                                    }
-                                  >
-                                    <div className="flex flex-1 items-center gap-2">
-                                      <Building className="h-4 w-4" />
-                                      <span>{org.name}</span>
-                                      {org.description && (
-                                        <span className="text-xs text-gray-500">
-                                          - {org.description}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {selectedOrgIds.includes(org.id) && (
-                                      <Check className="h-4 w-4" />
-                                    )}
-                                  </CommandItem>
-                                ))
-                              )}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-4 max-w-sm lg:hidden">
+                <QuestionnaireProperties
+                  questionnaire={questionnaire}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedIds: selectedOrgIds,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                  }}
+                  tags={questionnaire.tags}
+                  tagSelection={{
+                    selectedIds: selectedTagIds,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: availableTags,
+                    isLoading: isLoadingAvailableTags,
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 flex-1">
               <Card>
                 <CardHeader>
                   <CardTitle>Basic Information</CardTitle>
@@ -537,14 +956,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between border-b">
+              <Card className="border-none bg-transparent shadow-none">
+                <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
                   <div>
-                    <CardTitle>Questions</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {questionnaire.questions?.length || 0} question
-                      {questionnaire.questions?.length !== 1 ? "s" : ""}
-                    </p>
+                    <CardTitle>
+                      <p className="text-sm text-gray-700 font-medium mt-1">
+                        {questionnaire.questions?.length || 0} Question
+                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                      </p>
+                    </CardTitle>
                   </div>
                   <Button
                     variant="outline"
@@ -570,18 +990,17 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     Add Question
                   </Button>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-0">
                   <div className="space-y-6">
                     {questionnaire.questions.map((question, index) => (
                       <div
                         key={question.id}
                         id={`question-${question.id}`}
-                        className="relative"
+                        className="relative bg-white rounded-lg shadow-md"
                       >
-                        <div className="absolute -left-4 top-4 font-medium text-gray-500">
-                          {index + 1}.
-                        </div>
+                        <div className="absolute -left-4 top-4 font-medium text-gray-500"></div>
                         <QuestionEditor
+                          index={index}
                           key={question.id}
                           question={question}
                           onChange={(updatedQuestion) => {
@@ -635,6 +1054,31 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </CardContent>
               </Card>
             </div>
+            <div className="space-y-4 max-w-sm hidden lg:block">
+              <QuestionnaireProperties
+                questionnaire={questionnaire}
+                updateQuestionnaireField={updateQuestionnaireField}
+                id={id}
+                organizations={organizations}
+                organizationSelection={{
+                  selectedIds: selectedOrgIds,
+                  onToggle: handleToggleOrganization,
+                  searchQuery: orgSearchQuery,
+                  setSearchQuery: setOrgSearchQuery,
+                  available: availableOrganizations,
+                  isLoading: isLoadingAvailableOrganizations,
+                }}
+                tags={questionnaire.tags}
+                tagSelection={{
+                  selectedIds: selectedTagIds,
+                  onToggle: handleToggleTag,
+                  searchQuery: tagSearchQuery,
+                  setSearchQuery: setTagSearchQuery,
+                  available: availableTags,
+                  isLoading: isLoadingAvailableTags,
+                }}
+              />
+            </div>
           </div>
           <DebugPreview
             data={questionnaire}
@@ -665,6 +1109,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 }
 
 interface QuestionEditorProps {
+  index: number;
   question: Question;
   onChange: (updated: Question) => void;
   onDelete: () => void;
@@ -690,6 +1135,7 @@ function QuestionEditor({
   onMoveDown,
   isFirst,
   isLast,
+  index,
 }: QuestionEditorProps) {
   const {
     text,
@@ -741,31 +1187,30 @@ function QuestionEditor({
     <Collapsible
       open={isExpanded}
       onOpenChange={onToggleExpand}
-      className={`rounded-lg border bg-card text-card-foreground shadow-sm ${
-        depth > 0 ? "border-l-4 border-l-primary/20" : ""
-      }`}
+      className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
-      <div className="flex items-center p-4">
+      <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
-            <div className="font-medium text-left">
-              {text || "Untitled Question"}
+            <div className="font-semibold text-left">
+              {index + 1}. {text || "Untitled Question"}
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
-              {required && <Badge>Required</Badge>}
-              {repeats && <Badge variant="outline">Repeatable</Badge>}
+              {required && <Badge variant="secondary">Required</Badge>}
+              {repeats && <Badge variant="secondary">Repeatable</Badge>}
               {type === "group" && questions && questions.length > 0 && (
-                <Badge variant="outline">
+                <Badge variant="secondary">
                   {questions.length} sub-questions
                 </Badge>
               )}
             </div>
           </div>
-          <CareIcon
-            icon={isExpanded ? "l-angle-up" : "l-angle-down"}
-            className="h-4 w-4 text-gray-500"
-          />
+          {isExpanded ? (
+            <ChevronsDownUp className="h-4 w-4 text-gray-500" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+          )}
         </CollapsibleTrigger>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -812,7 +1257,7 @@ function QuestionEditor({
       </div>
 
       <CollapsibleContent>
-        <div className="p-4 pt-0 space-y-4">
+        <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
               <Label>Question Text</Label>
@@ -1011,34 +1456,45 @@ function QuestionEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Styling Classes</Label>
-              <Input
-                value={question.styling_metadata?.classes || ""}
-                onChange={(e) =>
-                  updateField("styling_metadata", {
-                    ...question.styling_metadata,
-                    classes: e.target.value,
-                  })
-                }
-                placeholder="CSS classes (space-separated)"
-              />
+          {type === "group" && (
+            <div className="space-y-4">
+              <div className="border rounded-lg bg-gray-100 p-4">
+                <h3 className="text-sm font-medium mb-2">
+                  Group Layout Options
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Choose the layout style that best fits your sub-questions from
+                  the available options.
+                </p>
+                <RadioGroup
+                  value={
+                    question.styling_metadata?.containerClasses ||
+                    LAYOUT_OPTIONS[0].value
+                  }
+                  onValueChange={(val) => {
+                    updateField("styling_metadata", {
+                      ...question.styling_metadata,
+                      containerClasses: val,
+                    });
+                  }}
+                  className="grid grid-cols-4 gap-4"
+                >
+                  {LAYOUT_OPTIONS.map((option) => {
+                    const currentLayout =
+                      question.styling_metadata?.containerClasses;
+                    return (
+                      <LayoutOptionCard
+                        key={option.id}
+                        option={option}
+                        isSelected={currentLayout === option.value}
+                        questionId={getQuestionPath()}
+                      />
+                    );
+                  })}
+                </RadioGroup>
+              </div>
             </div>
-            <div>
-              <Label>Container Classes</Label>
-              <Input
-                value={question.styling_metadata?.containerClasses || ""}
-                onChange={(e) =>
-                  updateField("styling_metadata", {
-                    ...question.styling_metadata,
-                    containerClasses: e.target.value,
-                  })
-                }
-                placeholder="Container CSS classes"
-              />
-            </div>
-          </div>
+          )}
 
           {type === "choice" && (
             <div className="space-y-4">
@@ -1179,12 +1635,17 @@ function QuestionEditor({
           )}
 
           {type === "group" && (
-            <div>
+            <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
-                <Label>Sub-Questions</Label>
+                <Label className="text-gray-950 font-semibold">
+                  {question.questions?.length || 0} Sub-Question
+                  {question.questions?.length !== 1 ? "s " : " "}
+                  (for the "{text}" Group)
+                </Label>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
+                  className="underline text-gray-950 font-semibold"
                   onClick={() => {
                     const newQuestion: Question = {
                       id: crypto.randomUUID(),
@@ -1202,55 +1663,62 @@ function QuestionEditor({
                     );
                   }}
                 >
-                  <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
+                  <CareIcon icon="l-plus" className="h-4 w-4" />
                   Add Sub-Question
                 </Button>
               </div>
               <div className="space-y-4">
                 {(questions || []).map((subQuestion, idx) => (
-                  <QuestionEditor
+                  <div
                     key={subQuestion.id}
-                    question={subQuestion}
-                    onChange={(updated) => {
-                      const newQuestions = [...(questions || [])];
-                      newQuestions[idx] = updated;
-                      updateField("questions", newQuestions);
-                    }}
-                    onDelete={() => {
-                      const newQuestions = questions?.filter(
-                        (_, i) => i !== idx,
-                      );
-                      updateField("questions", newQuestions);
-                    }}
-                    isExpanded={expandedSubQuestions.has(subQuestion.id)}
-                    onToggleExpand={() =>
-                      toggleSubQuestionExpanded(subQuestion.id)
-                    }
-                    depth={depth + 1}
-                    parentId={getQuestionPath()}
-                    onMoveUp={() => {
-                      if (idx > 0) {
+                    id={`question-${subQuestion.id}`}
+                    className="relative bg-white rounded-lg shadow-md"
+                  >
+                    <QuestionEditor
+                      index={idx}
+                      key={subQuestion.id}
+                      question={subQuestion}
+                      onChange={(updated) => {
                         const newQuestions = [...(questions || [])];
-                        [newQuestions[idx - 1], newQuestions[idx]] = [
-                          newQuestions[idx],
-                          newQuestions[idx - 1],
-                        ];
+                        newQuestions[idx] = updated;
                         updateField("questions", newQuestions);
-                      }
-                    }}
-                    onMoveDown={() => {
-                      if (idx < (questions?.length || 0) - 1) {
-                        const newQuestions = [...(questions || [])];
-                        [newQuestions[idx], newQuestions[idx + 1]] = [
-                          newQuestions[idx + 1],
-                          newQuestions[idx],
-                        ];
+                      }}
+                      onDelete={() => {
+                        const newQuestions = questions?.filter(
+                          (_, i) => i !== idx,
+                        );
                         updateField("questions", newQuestions);
+                      }}
+                      isExpanded={expandedSubQuestions.has(subQuestion.id)}
+                      onToggleExpand={() =>
+                        toggleSubQuestionExpanded(subQuestion.id)
                       }
-                    }}
-                    isFirst={idx === 0}
-                    isLast={idx === (questions?.length || 0) - 1}
-                  />
+                      depth={depth + 1}
+                      parentId={getQuestionPath()}
+                      onMoveUp={() => {
+                        if (idx > 0) {
+                          const newQuestions = [...(questions || [])];
+                          [newQuestions[idx - 1], newQuestions[idx]] = [
+                            newQuestions[idx],
+                            newQuestions[idx - 1],
+                          ];
+                          updateField("questions", newQuestions);
+                        }
+                      }}
+                      onMoveDown={() => {
+                        if (idx < (questions?.length || 0) - 1) {
+                          const newQuestions = [...(questions || [])];
+                          [newQuestions[idx], newQuestions[idx + 1]] = [
+                            newQuestions[idx + 1],
+                            newQuestions[idx],
+                          ];
+                          updateField("questions", newQuestions);
+                        }
+                      }}
+                      isFirst={idx === 0}
+                      isLast={idx === (questions?.length || 0) - 1}
+                    />
+                  </div>
                 ))}
               </div>
             </div>

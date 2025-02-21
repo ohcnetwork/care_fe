@@ -472,7 +472,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   return (
     <div className="flex h-[calc(100vh-12rem)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r bg-background">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -575,7 +575,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       <div className="flex-1 min-w-0">
         <div className="flex flex-col h-full pb-[60px] lg:pb-0">
           {/* Header */}
-          <div className="p-4 border-b bg-background sticky top-0 z-10">
+          <div className="p-4 border-b sticky top-0 z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -653,7 +653,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                     </div>
                   </ScrollArea>
                   {/* Message Input */}
-                  <div className="border-t bg-background p-4 sticky bottom-0">
+                  <div className="border-t p-4 sticky bottom-0">
                     <form onSubmit={handleSendMessage}>
                       <div className="flex gap-2">
                         <Textarea
