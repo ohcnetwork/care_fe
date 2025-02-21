@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
   ChevronDown,
@@ -639,6 +639,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const queryClient = useQueryClient();
 
   const {
     data: initialQuestionnaire,
@@ -686,6 +687,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.create),
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
+      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
@@ -699,6 +701,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }),
     onSuccess: () => {
       toast.success("Questionnaire updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
     onError: (_error) => {
       toast.error("Failed to update questionnaire");
