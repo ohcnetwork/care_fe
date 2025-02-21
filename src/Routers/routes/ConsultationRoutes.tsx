@@ -1,6 +1,5 @@
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
-import FileUploadPage from "@/components/Patient/FileUploadPage";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -20,37 +19,6 @@ const consultationRoutes: AppRoutes = {
     ({ facilityId, encounterId }) => (
       <TreatmentSummary facilityId={facilityId} encounterId={encounterId} />
     ),
-  "/facility/:facilityId/encounter/:encounterId/:tab": ({
-    facilityId,
-    encounterId,
-    tab,
-  }) => (
-    <EncounterShow
-      facilityId={facilityId}
-      encounterId={encounterId}
-      tab={tab}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/consultation": ({
-    facilityId,
-    patientId,
-  }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
-      questionnaireSlug="encounter"
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/questionnaire": ({
-    facilityId,
-    patientId,
-  }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
-      subjectType="patient"
-    />
-  ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
@@ -72,16 +40,47 @@ const consultationRoutes: AppRoutes = {
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounterId/:id/files/": ({
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/:tab": ({
     facilityId,
     patientId,
-    id,
+    encounterId,
+    tab,
   }) => (
-    <FileUploadPage
+    <EncounterShow
       facilityId={facilityId}
       patientId={patientId}
-      encounterId={id}
-      type="encounter"
+      encounterId={encounterId}
+      tab={tab}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/:tab/:subPage":
+    ({ facilityId, encounterId, patientId, tab, subPage }) => (
+      <EncounterShow
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
+        tab={tab}
+        subPage={subPage}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation": ({
+    facilityId,
+    patientId,
+  }) => (
+    <EncounterQuestionnaire
+      facilityId={facilityId}
+      patientId={patientId}
+      questionnaireSlug="encounter"
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/questionnaire": ({
+    facilityId,
+    patientId,
+  }) => (
+    <EncounterQuestionnaire
+      facilityId={facilityId}
+      patientId={patientId}
+      subjectType="patient"
     />
   ),
 };

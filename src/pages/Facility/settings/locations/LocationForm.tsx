@@ -207,7 +207,7 @@ export default function LocationForm({
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="max-h-[46vh]">
                     {LocationFormOptions.map((option) => (
                       <SelectItem key={option} value={option}>
                         {t(`location_form__${option}`)}

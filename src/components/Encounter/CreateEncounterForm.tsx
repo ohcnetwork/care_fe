@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   Ambulance,
   BedDouble,
@@ -74,7 +75,9 @@ const encounterFormSchema = z.object({
     "use_as_directed",
     "urgent",
   ] as const),
-  organizations: z.array(z.string()),
+  organizations: z.array(z.string()).min(1, {
+    message: t("at_least_one_department_is_required"),
+  }),
 });
 
 const encounterClasses = [
@@ -154,7 +157,9 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      navigate(`/facility/${facilityId}/encounter/${data.id}/updates`);
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+      );
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string[] } };
@@ -178,7 +183,15 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+        }
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -312,16 +325,25 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-
-            <FacilityOrganizationSelector
-              facilityId={facilityId}
-              onChange={(value) => {
-                form.setValue("organizations", [value]);
-              }}
+            <FormField
+              control={form.control}
+              name="organizations"
+              render={({ field }) => (
+                <FormItem>
+                  <FacilityOrganizationSelector
+                    facilityId={facilityId}
+                    value={field.value[0]}
+                    onChange={(value) => {
+                      form.setValue("organizations", [value]);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Encounter"}
+              {isPending ? "Creating..." : t("create_encounter")}
             </Button>
           </form>
         </Form>

@@ -8,7 +8,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
-import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
+import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -26,6 +26,7 @@ export interface EncounterTabProps {
   facilityId: string;
   encounter: Encounter;
   patient: Patient;
+  subPage?: string;
 }
 
 const defaultTabs = {
@@ -41,15 +42,17 @@ const defaultTabs = {
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  encounterId: string;
   facilityId: string;
+  patientId: string;
+  encounterId: string;
   tab?: string;
+  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId } = props;
+  const { facilityId, encounterId, patientId, subPage } = props;
   const { t } = useTranslation();
-  const pluginTabs = useCareAppConsultationTabs();
+  const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
@@ -62,6 +65,7 @@ export const EncounterShow = (props: Props) => {
       pathParams: { id: encounterId },
       queryParams: {
         facility: facilityId,
+        patient: patientId,
       },
     }),
     enabled: !!encounterId,
@@ -74,6 +78,7 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
+    subPage: subPage,
     facilityId,
   };
 
@@ -166,7 +171,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/encounter/${encounterData.id}/${tab}`}
+                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
