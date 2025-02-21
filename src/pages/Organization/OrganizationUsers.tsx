@@ -102,7 +102,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="justify-between items-center flex flex-wrap">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
             <EntityBadge
               title={t("users")}
@@ -111,7 +111,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               translationParams={{ entity: "User" }}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="gap-2 flex flex-wrap mt-2">
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {

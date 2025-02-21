@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   Ambulance,
   BedDouble,
@@ -12,6 +13,7 @@ import {
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -74,7 +76,9 @@ const encounterFormSchema = z.object({
     "use_as_directed",
     "urgent",
   ] as const),
-  organizations: z.array(z.string()),
+  organizations: z.array(z.string()).min(1, {
+    message: t("at_least_one_department_is_required"),
+  }),
 });
 
 const encounterClasses = [
@@ -135,6 +139,7 @@ export default function CreateEncounterForm({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof encounterFormSchema>>({
     resolver: zodResolver(encounterFormSchema),
@@ -158,12 +163,6 @@ export default function CreateEncounterForm({
         `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
       );
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
-    },
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
@@ -180,7 +179,15 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          form.reset();
+        }
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -188,17 +195,15 @@ export default function CreateEncounterForm({
             className="h-14 w-full justify-start text-lg"
           >
             <Stethoscope className="mr-4 size-6" />
-            Create Encounter
+            {t("create_encounter")}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Initiate Patient Encounter</SheetTitle>
+          <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
-            Begin a new clinical encounter for {patientName}. Select the
-            appropriate encounter type, status, and priority to ensure proper
-            documentation and care delivery.
+            {t("begin_clinical_encounter", { patientName })}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -211,7 +216,9 @@ export default function CreateEncounterForm({
               name="encounter_class"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel className="text-base">Type of Encounter</FormLabel>
+                  <FormLabel className="text-base">
+                    {t("type_of_encounter")}
+                  </FormLabel>
                   <div className="grid grid-cols-2 gap-3">
                     {encounterClasses.map(
                       ({ value, label, icon: Icon, description }) => (
@@ -228,7 +235,7 @@ export default function CreateEncounterForm({
                           <div className="flex flex-col items-center text-center">
                             <Icon className="size-6" />
                             <div className="text-sm font-bold">{label}</div>
-                            <div className="text-wrap text-xs text-center text-xs text-gray-500">
+                            <div className="text-wrap text-center text-xs text-gray-500">
                               {description}
                             </div>
                           </div>
@@ -247,7 +254,7 @@ export default function CreateEncounterForm({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>{t("status")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -314,16 +321,25 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-
-            <FacilityOrganizationSelector
-              facilityId={facilityId}
-              onChange={(value) => {
-                form.setValue("organizations", [value]);
-              }}
+            <FormField
+              control={form.control}
+              name="organizations"
+              render={({ field }) => (
+                <FormItem>
+                  <FacilityOrganizationSelector
+                    facilityId={facilityId}
+                    value={field.value[0]}
+                    onChange={(value) => {
+                      form.setValue("organizations", [value]);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Encounter"}
+              {isPending ? t("creating") : t("create_encounter")}
             </Button>
           </form>
         </Form>
