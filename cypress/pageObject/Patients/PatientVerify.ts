@@ -49,6 +49,11 @@ class PatientVerify {
     return this;
   }
 
+  selectOrganization(organization: string) {
+    cy.clickAndSelectOption('[data-cy="facility-organization"]', organization);
+    return this;
+  }
+
   clickSubmitEncounter() {
     cy.clickSubmitButton("Create Encounter");
     return this;
