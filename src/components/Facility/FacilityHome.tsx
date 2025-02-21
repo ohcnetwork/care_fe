@@ -191,12 +191,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
               <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
-                <Button variant="link">
+                <div className="px-4 inline-flex rounded-md [&_svg]:size-4">
                   <Avatar
                     name={facilityData.name}
                     className="h-24 w-24 rounded-md border-4 border-white shadow-lg"
                   />
-                </Button>
+                </div>
               </div>
 
               <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
