@@ -72,8 +72,8 @@ export const LoginHeader = () => {
     <header className="w-full">
       <div className="flex justify-end items-center">
         <Button
-          variant="ghost"
-          className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+          variant="primary"
+          className="text-sm font-medium hover:bg-gray-100 hover:text-black rounded-full px-6"
           onClick={() => navigate("/login?mode=patient")}
         >
           {t("sign_in")}

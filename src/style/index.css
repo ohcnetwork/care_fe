@@ -1330,3 +1330,45 @@ input[type="number"] {
         --sidebar-ring:  217.2 91.2% 59.8%;
     }
 }
+
+
+.landing-hero{
+    background: linear-gradient(to bottom, rgb(255, 255, 255),rgba(174, 234, 201, 0.651), rgba(16, 77, 45, 0.64)), url('/images/wave_scene_square.png');
+    background-size: cover;
+    background-position: center;
+    animation: alternate-reverse 30s linear infinite herobg;
+  }
+  
+  .landing-hero::before{
+    content: '';
+    position: absolute;
+    top: 60px;
+    bottom: 0;
+    right: 0px;
+    width: 200px;
+    z-index: 2;
+    background: url('/images/wave_long_2.png');
+    background-position: top right;
+    transition: 0.2s;
+    animation: 120s linear infinite wave alternate-reverse;
+    -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.101));
+
+    
+  }
+  
+  .landing-hero::after{
+    content: '';
+    position: absolute;
+    top: 60px;
+    bottom: 0;
+    right: 10px;
+    width: 200px;
+    z-index: 1;
+    background: url('/images/wave_long.png');
+    opacity: 0.5;
+    background-position: bottom right;
+    animation: 120s linear infinite wave_2 alternate-reverse;
+    -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
+  }
+
+  

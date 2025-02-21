@@ -103,7 +103,7 @@ export function LandingPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center pt-24">
+      <main className="landing-hero flex-1 flex flex-col items-center pt-24">
         {/* Logo Section */}
         {stateLogo && stateLogo.dark && (
           <div className="mb-2">
