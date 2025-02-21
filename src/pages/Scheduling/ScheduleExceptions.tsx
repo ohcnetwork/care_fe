@@ -77,7 +77,7 @@ const ScheduleExceptionItem = (
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.delete, {
@@ -128,8 +128,8 @@ const ScheduleExceptionItem = (
           </div>
         </div>
         <AlertDialog
-          open={isAlertDialogOpen}
-          onOpenChange={setIsAlertDialogOpen}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
         >
           <AlertDialogTrigger asChild>
             <Button variant="secondary" size="sm" disabled={isPending}>
@@ -152,14 +152,14 @@ const ScheduleExceptionItem = (
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>
+              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
                 {t("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={() => {
                   deleteException();
-                  setIsAlertDialogOpen(false);
+                  setIsDeleteDialogOpen(false);
                 }}
               >
                 {isPending ? (
