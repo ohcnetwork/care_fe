@@ -94,6 +94,8 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
     : false;
 };
 
+export const isAndroidDevice = /android/i.test(navigator.userAgent);
+
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",
