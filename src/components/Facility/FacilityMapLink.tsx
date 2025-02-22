@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,7 @@ export const FacilityMapsLink = ({
 
   const href = isAndroidDevice
     ? `geo:${latitude},${longitude}`
-    : `https://maps.google.com/?q=${latitude},${longitude}`;
+    : `${careConfig.mapUrl}${latitude},${longitude}`;
   const target = isAndroidDevice ? "_self" : "_blank";
 
   return (
@@ -39,9 +40,7 @@ export const FacilityMapsLink = ({
       target={target}
       rel="noreferrer"
     >
-      <div>{isAndroidDevice ? "android" : "other"}</div>
       {t("show_on_maps")}
-
       <SquareArrowOutUpRight className="h-3 w-3" />
     </Link>
   );

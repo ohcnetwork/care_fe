@@ -33,6 +33,8 @@ interface ImportMetaEnv {
   readonly REACT_ENABLE_ABDM?: string;
   readonly REACT_ENABLE_SCRIBE?: string;
   readonly REACT_DEFAULT_COUNTRY?: string;
+
+  readonly REACT_MAP_URL?: string;
 }
 
 interface ImportMeta {
