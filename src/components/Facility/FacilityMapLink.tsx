@@ -26,6 +26,7 @@ export const FacilityMapsLink = ({
   if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
     return null;
   }
+  console.log(isAndroidDevice);
 
   const href = isAndroidDevice
     ? `geo:0,0?q=${latitude},${longitude}`
