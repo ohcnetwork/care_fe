@@ -1371,4 +1371,10 @@ input[type="number"] {
     -webkit-filter: drop-shadow(-30px 10px 10px rgba(34, 34, 34, 0.116));
   }
 
+  @media (max-width: 768px) {
+    .landing-hero::before,
+    .landing-hero::after {
+      display: none;
+    }
+  }
   

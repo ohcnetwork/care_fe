@@ -59,12 +59,10 @@ export function LandingPage() {
     }
   };
 
-  // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const searchContainer = document.querySelector("[data-search-container]");
-
       if (!searchContainer?.contains(target)) {
         setIsOpen(false);
       }
@@ -96,39 +94,48 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
       {/* Header */}
-      <div className="w-full p-4">
+      <div className="w-full p-4 shadow-md bg-white">
         <LoginHeader />
       </div>
 
-      {/* Main Content */}
-      <main className="landing-hero flex-1 flex flex-col items-center pt-24">
-        {/* Logo Section */}
+      {/* Hero Section */}
+      <main className="landing-hero flex-1 flex flex-col items-center pt-24 text-center z-100">
         {stateLogo && stateLogo.dark && (
-          <div className="mb-2">
-            <img src={stateLogo.dark} alt="Logo" className="h-28 w-auto" />
+          <div className="mb-2 animate-fade-in">
+            <img
+              src={stateLogo.dark}
+              alt="Logo"
+              className="h-28 w-auto drop-shadow-lg"
+            />
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           {(customLogo || mainLogo) && (
-            <>
-              <img
-                src={customLogo?.dark ?? mainLogo?.dark}
-                alt="Logo"
-                className="h-20 w-auto"
-              />
-            </>
+            <img
+              src={customLogo?.dark ?? mainLogo?.dark}
+              alt="Logo"
+              className="h-20 w-auto drop-shadow-lg"
+            />
           )}
         </div>
+
+        <h1 className="text-2xl md:text-4xl font-bold text-green-900 mb-3 md:mb-4">
+          Find the Best Care Facilities
+        </h1>
+        <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 max-w-sm md:max-w-lg">
+          Search from a list of verified healthcare organizations to get the
+          best care for your needs.
+        </p>
 
         {/* Search Section */}
         <div className="w-full max-w-[584px] mx-auto space-y-6 px-6">
           <div className="relative" data-search-container>
-            <div className="rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow bg-white">
               <div className="flex items-center px-4 h-12">
-                <CareIcon icon="l-search" className="h-5 w-5 text-gray-400" />
+                <CareIcon icon="l-search" className="h-5 w-5 text-green-800" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -139,8 +146,8 @@ export function LandingPage() {
                   }
                   onChange={handleSearchChange}
                   onClick={handleInputClick}
-                  placeholder="Search..."
-                  className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-500 cursor-pointer shadow-none ring-0"
+                  placeholder="Search for an organization..."
+                  className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-green-800 cursor-pointer shadow-none ring-0"
                 />
                 {(searchQuery || selectedOrganization) && (
                   <button
@@ -173,9 +180,9 @@ export function LandingPage() {
                         <CommandItem
                           key={organization.id}
                           value={organization.name.toLowerCase()}
-                          onSelect={() => {
-                            handleOrganizationSelect(organization.name);
-                          }}
+                          onSelect={() =>
+                            handleOrganizationSelect(organization.name)
+                          }
                           className="cursor-pointer"
                         >
                           {organization.name}
@@ -188,11 +195,10 @@ export function LandingPage() {
             )}
           </div>
 
-          {/* Search Button */}
           <div className="flex justify-center">
             <Button
               variant="primary"
-              className="px-6 h-10"
+              className="px-6 h-10 bg-green-700 hover:bg-green-900 text-white shadow-green-100 shadow-md hover:shadow-none"
               onClick={handleSearch}
               disabled={!selectedOrganization}
             >
