@@ -42,6 +42,11 @@ export function OrganizationSwitcher({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              tooltip={
+                selectedOrganization
+                  ? t("my_organizations")
+                  : t("select_organization")
+              }
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Globe className="size-4" />
