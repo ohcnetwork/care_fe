@@ -43,7 +43,6 @@ export function ValueSetList() {
           <Card
             key={valueset.id}
             className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow hover:shadow-lg"
-            onClick={() => navigate(`/admin/valuesets/${valueset.slug}/edit`)}
           >
             <CardContent className="p-6 relative">
               <div className="absolute top-4 right-4">
@@ -98,7 +97,7 @@ export function ValueSetList() {
               {!valueset.is_system_defined && (
                 <div className="mt-4 flex justify-end">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() =>
                       navigate(`/admin/valuesets/${valueset.slug}/edit`)
@@ -170,7 +169,7 @@ export function ValueSetList() {
                   </Badge>
                 </TableCell>
                 <TableCell className="px-6 py-4">
-                  <div className="max-w-md truncate text-sm text-gray-900">
+                  <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
                     {valueset.description}
                   </div>
                 </TableCell>
@@ -180,7 +179,7 @@ export function ValueSetList() {
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() =>
                         navigate(`/admin/valuesets/${valueset.slug}/edit`)
