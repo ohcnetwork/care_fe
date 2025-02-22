@@ -633,6 +633,7 @@ const Login = (props: LoginProps) => {
                             }}
                             maxLength={5}
                             placeholder="Enter 5-digit OTP"
+                            autoFocus
                           />
                           {otpValidationError && (
                             <p className="text-sm text-red-500">

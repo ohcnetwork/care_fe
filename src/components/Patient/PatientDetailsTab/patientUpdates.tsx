@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -22,7 +21,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
-  const { facilityId, patientId } = props;
+  const { patientId } = props;
   const { t } = useTranslation();
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
@@ -42,14 +41,6 @@ export const Updates = (props: PatientProps) => {
     <div className="mt-4 px-3 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold leading-tight">{t("updates")}</h2>
-        <Button asChild variant="outline_primary">
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/questionnaire`}
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("add_patient_updates")}
-          </Link>
-        </Button>
       </div>
       <div className="flex w-full flex-col gap-4">
         <div className="flex flex-col gap-4">
@@ -92,20 +83,11 @@ export const Updates = (props: PatientProps) => {
                             <div className="mt-1 text-sm text-gray-500">
                               by {update.created_by?.first_name || ""}{" "}
                               {update.created_by?.last_name || ""}
-                              {` (${update.created_by?.user_type})`}
+                              {update.created_by?.user_type &&
+                                ` (${update.created_by?.user_type})`}
                             </div>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            navigate(
-                              `/facility/${facilityId}/patient/${patientId}/encounter/${update.encounter}/questionnaire_response/${update.id}`,
-                            );
-                          }}
-                        >
-                          {t("view")}
-                        </Button>
                       </Card>
                     </li>
                   ))}
