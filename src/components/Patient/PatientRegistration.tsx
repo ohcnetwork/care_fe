@@ -262,26 +262,32 @@ export default function PatientRegistration(
         patientQuery.data.geo_organization as unknown as Organization,
       ]);
       form.reset({
-        ...patientQuery.data,
+        name: patientQuery.data.name || "",
+        phone_number: patientQuery.data.phone_number || "",
+        emergency_phone_number: patientQuery.data.emergency_phone_number || "",
         same_phone_number:
           patientQuery.data.phone_number ===
           patientQuery.data.emergency_phone_number,
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
+        gender: patientQuery.data.gender as (typeof GENDERS)[number],
+        blood_group: patientQuery.data.blood_group,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        date_of_birth: patientQuery.data.date_of_birth || undefined,
         age:
           !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
             ? new Date().getFullYear() - patientQuery.data.year_of_birth
             : undefined,
-        date_of_birth: patientQuery.data.date_of_birth
-          ? patientQuery.data.date_of_birth
-          : undefined,
+        address: patientQuery.data.address || "",
+        permanent_address: patientQuery.data.permanent_address || "",
+        pincode: patientQuery.data.pincode || undefined,
+        nationality: patientQuery.data.nationality || "India",
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
       } as unknown as z.infer<typeof formSchema>);
     }
-  }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [patientQuery.data]);
 
   const showDuplicate =
     !patientPhoneSearch.isLoading &&
@@ -733,7 +739,11 @@ export default function PatientRegistration(
               <Button
                 type="submit"
                 variant="primary"
-                disabled={isCreatingPatient || isUpdatingPatient}
+                disabled={
+                  isCreatingPatient ||
+                  isUpdatingPatient ||
+                  !form.formState.isDirty
+                }
               >
                 {patientId ? t("save") : t("save_and_continue")}
               </Button>
