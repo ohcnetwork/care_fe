@@ -282,7 +282,7 @@ export const FilesTab = (props: FilesTabProps) => {
             {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="secondary">
+                  <Button variant="secondary" data-cy="file-options-button">
                     <CareIcon icon="l-ellipsis-h" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -395,6 +395,7 @@ export const FilesTab = (props: FilesTabProps) => {
           <Button
             variant="outline_primary"
             className="flex flex-row items-center"
+            data-cy="add-files-button"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>
@@ -437,6 +438,7 @@ export const FilesTab = (props: FilesTabProps) => {
               variant="ghost"
               onClick={() => fileUpload.handleAudioCapture()}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="record-audio-button"
             >
               <CareIcon icon="l-microphone" />
               <span>{t("record")}</span>
@@ -539,6 +541,7 @@ export const FilesTab = (props: FilesTabProps) => {
                 <TableRow
                   key={file.id}
                   className={cn("shadow rounded-md overflow-hidden group")}
+                  data-cy={fileName}
                 >
                   <TableCell
                     className={cn(
@@ -603,7 +606,10 @@ export const FilesTab = (props: FilesTabProps) => {
                     {file.is_archived ? (
                       getArchivedMessage(file)
                     ) : (
-                      <DetailButtons file={file} />
+                      <DetailButtons
+                        file={file}
+                        data-cy={fileName + "-details-button"}
+                      />
                     )}
                   </TableCell>
                 </TableRow>

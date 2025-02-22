@@ -386,6 +386,7 @@ export default function useFileUpload(
     <input
       {...props}
       id="file_upload_patient"
+      data-cy="upload-files-input"
       title={t("change_file")}
       onChange={onFileChange}
       type="file"

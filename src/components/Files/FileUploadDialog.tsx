@@ -182,6 +182,7 @@ export default function FileUploadDialog({
             disabled={fileUpload.uploading}
             className="w-full"
             id="upload_file_button"
+            data-cy="upload-files-button"
           >
             <CareIcon icon="l-check" className="mr-1" />
             {t("upload")}
