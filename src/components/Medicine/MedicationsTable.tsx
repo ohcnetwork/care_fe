@@ -76,6 +76,7 @@ export const MedicationsTable = ({
     <PrintTable
       headers={[
         { key: "medicine", title: t("medicine") },
+        { key: "status", title: t("status") },
         { key: "dosage", title: t("dosage") },
         { key: "frequency", title: t("frequency") },
         { key: "duration", title: t("duration") },
@@ -90,6 +91,7 @@ export const MedicationsTable = ({
         const notes = medication.note;
         return {
           medicine: medication.medication?.display,
+          status: t(medication.status),
           dosage: dosage,
           frequency: instruction?.as_needed_boolean
             ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`

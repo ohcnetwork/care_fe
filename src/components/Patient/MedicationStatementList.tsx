@@ -291,8 +291,8 @@ const MedicationStatementListLayout = ({
         )}
       >
         <CardTitle>
-          {" "}
-          {t("ongoing_medications")} ({medicationsCount && medicationsCount})
+          {t("ongoing_medications")}{" "}
+          {medicationsCount ? `(${medicationsCount})` : ""}
         </CardTitle>
       </CardHeader>
       <CardContent

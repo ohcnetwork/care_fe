@@ -27,11 +27,12 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray border-b-gray">
-            {headers.map(({ key, title }, index) => (
+            {headers.map(({ key, title, width }, index) => (
               <TableHead
                 className={cn(
                   index == 0 && "first:rounded-l-md",
-                  "h-auto py-1 pl-2 pr-2 text-black text-center",
+                  "h-auto py-1 pl-2 pr-2 text-black text-center ",
+                  width && `w-${width}`,
                 )}
                 key={key}
               >
@@ -49,7 +50,7 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
               >
                 {headers.map(({ key }) => (
                   <TableCell
-                    className="max-w-[200px] break-words whitespace-normal text-center"
+                    className="break-words whitespace-normal text-center"
                     key={key}
                   >
                     {row[key] || "-"}
