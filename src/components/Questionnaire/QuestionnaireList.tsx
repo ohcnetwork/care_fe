@@ -52,7 +52,7 @@ export function QuestionnaireList() {
   const questionnaireList = response?.results || [];
 
   const RenderCard = () => (
-    <div className="xl:hidden space-y-4 px-4">
+    <div className="xl:hidden space-y-4">
       {questionnaireList?.length > 0 ? (
         questionnaireList.map((questionnaire: QuestionnaireDetail) => (
           <Card
@@ -158,7 +158,7 @@ export function QuestionnaireList() {
                 </TableCell>
                 <TableCell className="px-6 py-2">
                   <div className="flex items-center justify-between space-x-4">
-                    <div className="max-w-md truncate text-sm text-gray-900">
+                    <div className="truncate text-sm text-gray-900 break-words whitespace-normal">
                       {questionnaire.description}
                     </div>
                     <Button

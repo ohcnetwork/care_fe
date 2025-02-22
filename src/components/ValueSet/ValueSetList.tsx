@@ -3,6 +3,8 @@ import { PlusIcon } from "lucide-react";
 import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -103,6 +105,7 @@ export function ValueSetList() {
                     }
                     className="hover:bg-primary/5"
                   >
+                    <CareIcon icon="l-edit" />
                     {t("edit")}
                   </Button>
                 </div>
@@ -184,6 +187,7 @@ export function ValueSetList() {
                       }
                       className="hover:bg-primary/5"
                     >
+                      <CareIcon icon="l-edit" />
                       {t("edit")}
                     </Button>
                   )}
