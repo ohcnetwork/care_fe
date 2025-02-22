@@ -26,7 +26,6 @@ export const FacilityMapsLink = ({
   if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
     return null;
   }
-  console.log(isAndroidDevice);
 
   const href = isAndroidDevice
     ? `geo:0,0?q=${latitude},${longitude}`
@@ -40,7 +39,9 @@ export const FacilityMapsLink = ({
       target={target}
       rel="noreferrer"
     >
+      <div>{isAndroidDevice ? "android" : "other"}</div>
       {t("show_on_maps")}
+
       <SquareArrowOutUpRight className="h-3 w-3" />
     </Link>
   );
