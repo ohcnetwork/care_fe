@@ -55,8 +55,6 @@ describe("Patient Files", () => {
   const filePaths = (fileNames: string[]) =>
     fileNames.map((file) => `cypress/fixtures/${file}`);
 
-  // Tests for single and multiple file uploads, rename, download and archive
-
   it("Add a new patient file", () => {
     patientFiles
       .clickAddFilesButton()
@@ -165,6 +163,4 @@ describe("Patient Files", () => {
       .clickViewFile(newFileDisplayName)
       .verifyArchiveReason(archiveReason);
   });
-
-  // Cypress test for Convert to PDF
 });

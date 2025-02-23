@@ -295,6 +295,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-download-button"
                     >
                       <CareIcon icon="l-arrow-circle-down" className="mr-1" />
                       <span>{t("download")}</span>
@@ -308,6 +309,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-archive-option"
                     >
                       <CareIcon icon="l-archive-alt" className="mr-1" />
                       <span>{t("archive")}</span>
@@ -319,6 +321,7 @@ export const FilesTab = (props: FilesTabProps) => {
                       onClick={() => fileManager.editFile(file, associatingId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
+                      data-cy="file-rename-button"
                     >
                       <CareIcon icon="l-pen" className="mr-1" />
                       <span>{t("rename")}</span>
@@ -337,7 +340,11 @@ export const FilesTab = (props: FilesTabProps) => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="text-sm text-secondary-800">
+          <Button
+            variant="secondary"
+            className="text-sm text-secondary-800"
+            data-cy="files-filter-button"
+          >
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
               <span>{t("filter")}</span>
@@ -353,6 +360,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "false" });
             }}
+            data-cy="active-files-button"
           >
             <span>{t("active_files")}</span>
           </DropdownMenuItem>
@@ -361,6 +369,7 @@ export const FilesTab = (props: FilesTabProps) => {
             onClick={() => {
               updateQuery({ is_archived: "true" });
             }}
+            data-cy="archived-files-button"
           >
             <span>{t("archived_files")}</span>
           </DropdownMenuItem>
@@ -377,6 +386,7 @@ export const FilesTab = (props: FilesTabProps) => {
           variant="secondary"
           className="cursor-pointer border border-gray-300 bg-white"
           onClick={() => updateQuery({ is_archived: undefined })}
+          data-cy="filter-badge"
         >
           {t(
             qParams.is_archived === "false" ? "active_files" : "archived_files",

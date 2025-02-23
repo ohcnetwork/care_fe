@@ -171,17 +171,19 @@ export class PatientFiles {
   }
 
   clickDownloadFile() {
-    cy.get("button").contains("Download").click();
+    cy.verifyAndClickElement('[data-cy="download-button"]', "Download");
     return this;
   }
 
   clickRenameOption() {
-    cy.contains("Rename").click();
+    cy.verifyAndClickElement('[data-cy="rename-button"]', "Rename");
     return this;
   }
 
   fillNewFileName(newFileName: string) {
-    cy.get("input").clear().type(newFileName);
+    cy.typeIntoField('[data-cy="edit-file-input"]', newFileName, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
@@ -191,12 +193,15 @@ export class PatientFiles {
   }
 
   clickArchiveOption() {
+    cy.verifyAndClickElement('[data-cy="file-archive-option"]', "Archive");
     cy.contains("button", "Archive").should("be.enabled").click();
     return this;
   }
 
   fillArchiveReason(archiveReason: string) {
-    cy.get("textarea").clear().type(archiveReason);
+    cy.typeIntoField('[data-cy="archive-reason-textarea"]', archiveReason, {
+      clearBeforeTyping: true,
+    });
     return this;
   }
 
@@ -208,28 +213,31 @@ export class PatientFiles {
   }
 
   verifyArchiveReason(reason: string) {
-    cy.contains(reason).should("be.visible");
+    cy.verifyContentPresence('[data-cy="archive-reason"]', [reason]);
     return this;
   }
 
   filterActiveFiles() {
     this.interceptFilterRequest();
-    cy.contains("button", "Filter").click();
-    cy.contains("Active Files").click();
+    cy.verifyAndClickElement('[data-cy="filter-button"]', "Filter");
+    cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
     return this;
   }
 
   filterArchivedFiles() {
     this.interceptFilterRequest();
-    cy.contains("button", "Filter").click();
-    cy.contains("Archived Files").click();
+    cy.verifyAndClickElement('[data-cy="filter-button"]', "Filter");
+    cy.verifyAndClickElement(
+      '[data-cy="archived-files-button"]',
+      "Archived Files",
+    );
     this.verifyFilterApiCall();
     return this;
   }
 
   removeFilter() {
-    cy.contains("Active Files").click();
+    cy.verifyAndClickElement('[data-cy="filter-badge"]', "Active Files");
     this.verifyFilterApiCall();
     return this;
   }

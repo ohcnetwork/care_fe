@@ -56,7 +56,7 @@ export default function ArchivedFileDialog({
         </DialogHeader>
         <div className="space-y-2">
           <div className="flex flex-col gap-1 bg-gray-100 p-4 rounded-md">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500" data-cy="archived-reason">
               {t("archived_reason")}:
             </span>
             <span>{file?.archive_reason}</span>
