@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { Loader } from "lucide-react";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -66,7 +67,7 @@ export default function TreatmentSummary({
     }),
   });
 
-  const { data: allergies } = useQuery({
+  const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
@@ -82,7 +83,7 @@ export default function TreatmentSummary({
     }),
   });
 
-  const { data: symptoms } = useQuery({
+  const { data: symptoms, isLoading: symptomsLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
@@ -90,7 +91,7 @@ export default function TreatmentSummary({
     }),
   });
 
-  const { data: diagnoses } = useQuery({
+  const { data: diagnoses, isLoading: diagnosesLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
@@ -98,24 +99,45 @@ export default function TreatmentSummary({
     }),
   });
 
-  const { data: medications } = useQuery({
+  const { data: medications, isLoading: medicationsLoading } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
     }),
   });
-  const { data: medicationStatement } = useQuery({
-    queryKey: ["medication_statements", patientId],
-    queryFn: query(medicationStatementApi.list, {
-      pathParams: { patientId },
-    }),
-  });
+  const { data: medicationStatement, isLoading: medicationStatementLoading } =
+    useQuery({
+      queryKey: ["medication_statements", patientId],
+      queryFn: query(medicationStatementApi.list, {
+        pathParams: { patientId },
+      }),
+    });
+
   if (!encounter) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         {t("no_patient_record_found")}
       </div>
+    );
+  }
+
+  const isLoading =
+    allergiesLoading ||
+    diagnosesLoading ||
+    symptomsLoading ||
+    medicationsLoading ||
+    medicationStatementLoading;
+
+  if (isLoading) {
+    return (
+      <PrintPreview
+        title={`${t("treatment_summary")} - ${encounter.patient.name}`}
+      >
+        <div className="flex items-center justify-center h-full">
+          <Loader />
+        </div>
+      </PrintPreview>
     );
   }
 
