@@ -39,7 +39,7 @@ export const FacilityMapsLink = ({
       target={target}
       rel="noreferrer"
     >
-      {t("show_on_maps")}
+      {t("show_on_map")}
       <SquareArrowOutUpRight className="h-3 w-3" />
     </Link>
   );
