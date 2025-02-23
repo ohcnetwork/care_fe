@@ -119,7 +119,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         </Badge>
       }
     >
-      <div className="space-y-4 mt-2">
+      <div className="space-y-4 mt-2 px-6">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">

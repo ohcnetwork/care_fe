@@ -26,8 +26,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   imageUrl?: string;
-  handleUpload: (file: File, onError: () => void) => Promise<void>;
-  handleDelete: (onError: () => void) => Promise<void>;
+  handleUpload: (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => Promise<void>;
+  handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
 }
 
@@ -62,8 +66,8 @@ const AvatarEditModal = ({
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const webRef = useRef<Webcam>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -81,16 +85,35 @@ const AvatarEditModal = ({
   }, []);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const myFile = new File([blob], "image.png", {
-        type: blob.type,
-      });
-      setSelectedFile(myFile);
+    if (webRef.current) {
+      setPreviewImage(webRef.current.getScreenshot());
+    }
+    const canvas = webRef.current?.getCanvas();
+    canvas?.toBlob((blob) => {
+      if (blob) {
+        const myFile = new File([blob], "image.png", {
+          type: blob.type,
+        });
+        setSelectedFile(myFile);
+      } else {
+        toast.error(t("failed_to_capture_image"));
+      }
     });
   };
-
+  const stopCamera = useCallback(() => {
+    try {
+      if (webRef.current) {
+        const openCamera = webRef.current?.video?.srcObject as MediaStream;
+        if (openCamera) {
+          openCamera.getTracks().forEach((track) => track.stop());
+        }
+      }
+    } catch {
+      toast.error("Failed to stop camera");
+    } finally {
+      setIsCameraOpen(false);
+    }
+  }, []);
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
@@ -128,24 +151,36 @@ const AvatarEditModal = ({
 
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
-      await handleUpload(selectedFile, () => {
-        setSelectedFile(undefined);
-        setPreview(undefined);
-        setPreviewImage(null);
-        setIsCaptureImgBeingUploaded(false);
-        setIsProcessing(false);
-      });
+      await handleUpload(
+        selectedFile,
+        () => {
+          setPreview(undefined);
+        },
+        () => {
+          setPreview(undefined);
+          setPreviewImage(null);
+          setIsCaptureImgBeingUploaded(false);
+          setIsProcessing(false);
+        },
+      );
     } finally {
+      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
+      setSelectedFile(undefined);
     }
   };
 
   const deleteAvatar = async () => {
     setIsProcessing(true);
-    await handleDelete(() => {
-      setIsProcessing(false);
-    });
+    await handleDelete(
+      () => {
+        setIsProcessing(false);
+        setPreview(undefined);
+        setPreviewImage(null);
+      },
+      () => setIsProcessing(false),
+    );
   };
 
   const dragProps = useDragAndDrop();
@@ -410,7 +445,7 @@ const AvatarEditModal = ({
                     onClick={() => {
                       setPreviewImage(null);
                       setIsCameraOpen(false);
-                      webRef.current.stopCamera();
+                      stopCamera();
                     }}
                     disabled={isProcessing}
                   >
