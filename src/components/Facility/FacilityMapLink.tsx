@@ -2,8 +2,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { getMapUrl } from "@/Utils/map";
-import { isAndroidDevice } from "@/Utils/utils";
+import { getMapUrl, isAndroidDevice } from "@/Utils/utils";
 
 const isValidLatitude = (latitude: string) => {
   const lat = parseFloat(latitude.trim());

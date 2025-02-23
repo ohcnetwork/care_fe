@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
 
@@ -95,6 +96,12 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
 };
 
 export const isAndroidDevice = /android/i.test(navigator.userAgent);
+
+export const getMapUrl = (latitude: string, longitude: string) => {
+  return careConfig.mapUrl
+    .replace("{lat}", latitude)
+    .replace("{long}", longitude);
+};
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
