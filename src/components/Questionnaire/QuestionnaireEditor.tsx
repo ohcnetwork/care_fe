@@ -820,7 +820,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
-            <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
