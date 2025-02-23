@@ -398,44 +398,45 @@ export default function TreatmentSummary({
                 <EmptyState message={t("no_medication_recorded")} />
               )}
             </SectionLayout>
-          </div>
 
-          {/* Medication Statements */}
-          <SectionLayout title={t("ongoing_medications")}>
-            {medicationStatement?.results.length ? (
-              <PrintTable
-                headers={[
-                  { key: "medication", title: t("medication") },
-                  { key: "dosage", title: t("dosage") },
-                  { key: "status", title: t("status") },
-                  {
-                    key: "medication_taken_between",
-                    title: t("medication_taken_between"),
-                  },
-                  { key: "reason", title: t("reason") },
-                  { key: "notes", title: t("notes") },
-                  { key: "logged_by", title: t("logged_by") },
-                ]}
-                rows={medicationStatement?.results.map((medication) => ({
-                  medication:
-                    medication.medication.display ?? medication.medication.code,
-                  dosage: medication.dosage_text,
-                  status: medication.status,
-                  medication_taken_between: [
-                    medication.effective_period?.start,
-                    medication.effective_period?.end,
-                  ]
-                    .map((date) => formatDateTime(date))
-                    .join(" - "),
-                  reason: medication.reason,
-                  notes: medication.note,
-                  logged_by: formatName(medication.created_by),
-                }))}
-              />
-            ) : (
-              <EmptyState message={t("no_ongoing_medications")} />
-            )}
-          </SectionLayout>
+            {/* Medication Statements */}
+            <SectionLayout title={t("ongoing_medications")}>
+              {medicationStatement?.results.length ? (
+                <PrintTable
+                  headers={[
+                    { key: "medication", title: t("medication") },
+                    { key: "dosage", title: t("dosage") },
+                    { key: "status", title: t("status") },
+                    {
+                      key: "medication_taken_between",
+                      title: t("medication_taken_between"),
+                    },
+                    { key: "reason", title: t("reason") },
+                    { key: "notes", title: t("notes") },
+                    { key: "logged_by", title: t("logged_by") },
+                  ]}
+                  rows={medicationStatement?.results.map((medication) => ({
+                    medication:
+                      medication.medication.display ??
+                      medication.medication.code,
+                    dosage: medication.dosage_text,
+                    status: medication.status,
+                    medication_taken_between: [
+                      medication.effective_period?.start,
+                      medication.effective_period?.end,
+                    ]
+                      .map((date) => formatDateTime(date))
+                      .join(" - "),
+                    reason: medication.reason,
+                    notes: medication.note,
+                    logged_by: formatName(medication.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_ongoing_medications")} />
+              )}
+            </SectionLayout>
+          </div>
 
           {/* Questionnaire Responses Section */}
           <div>

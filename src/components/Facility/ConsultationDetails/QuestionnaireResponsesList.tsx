@@ -211,7 +211,7 @@ function ResponseCard({
     <Card
       className={cn(
         "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
-        isPrintPreview && "shadow-none rounded-sm",
+        isPrintPreview && "shadow-none",
       )}
     >
       <div className="flex items-start justify-between">
@@ -328,7 +328,12 @@ export default function QuestionnaireResponsesList({
         ) : (
           <div>
             {questionnarieResponses?.results?.length === 0 ? (
-              <Card className="p-6">
+              <Card
+                className={cn(
+                  "p-6",
+                  isPrintPreview && "shadow-none border-gray",
+                )}
+              >
                 <div className="text-lg font-medium text-gray-500">
                   {t("no_questionnaire_responses")}
                 </div>
