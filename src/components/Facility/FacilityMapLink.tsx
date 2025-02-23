@@ -1,8 +1,8 @@
-import careConfig from "@careConfig";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { getMapUrl } from "@/Utils/map";
 import { isAndroidDevice } from "@/Utils/utils";
 
 const isValidLatitude = (latitude: string) => {
@@ -30,7 +30,7 @@ export const FacilityMapsLink = ({
 
   const href = isAndroidDevice
     ? `geo:${latitude},${longitude}`
-    : `${careConfig.mapUrl}${latitude},${longitude}`;
+    : getMapUrl(latitude, longitude);
   const target = isAndroidDevice ? "_self" : "_blank";
 
   return (

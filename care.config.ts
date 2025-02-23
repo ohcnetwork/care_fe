@@ -55,7 +55,9 @@ const careConfig = {
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
 
-  mapUrl: env.REACT_MAP_URL || "https://maps.google.com/?q=",
+  mapUrl:
+    env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
+    "https://maps.google.com/?q={lat},{long}",
 
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
