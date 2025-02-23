@@ -353,13 +353,13 @@ export default function TreatmentSummary({
                   }))}
                 />
               ) : (
-                <EmptyState message={t("no_symptoms_recorded")} />
+                <EmptyState message={t("no_diagnoses_recorded")} />
               )}
             </SectionLayout>
 
             {/* Medications */}
             <SectionLayout title={t("medications")}>
-              {!medications?.results.length ? (
+              {medications?.results.length ? (
                 <PrintTable
                   headers={[
                     { key: "medicine", title: t("medicine") },
@@ -402,7 +402,7 @@ export default function TreatmentSummary({
 
           {/* Medication Statements */}
           <SectionLayout title={t("ongoing_medications")}>
-            {!medications?.results.length ? (
+            {medicationStatement?.results.length ? (
               <PrintTable
                 headers={[
                   { key: "medication", title: t("medication") },
