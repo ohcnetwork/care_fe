@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
-import PrintTable from "@/components/Common/PrintTable";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -51,7 +50,7 @@ interface AllergyListProps {
   patientId: string;
   encounterId?: string;
   className?: string;
-  isPrintPreview?: boolean;
+
   encounterStatus?: Encounter["status"];
 }
 
@@ -73,7 +72,6 @@ export function AllergyList({
   patientId,
   encounterId,
   className,
-  isPrintPreview = false,
   encounterStatus,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
@@ -96,7 +94,6 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
-        className={className}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -120,7 +117,6 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
-        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
@@ -136,21 +132,24 @@ export function AllergyList({
   function AllergyRow({ allergy }: AllergyRowProps) {
     return (
       <TableRow
-        className={cn(
-          "rounded-md overflow-hidden bg-gray-50",
-          allergy.verification_status === "entered_in_error" && "opacity-50",
-        )}
+        className={`rounded-md overflow-hidden bg-gray-50 ${
+          allergy.verification_status === "entered_in_error" ? "opacity-50" : ""
+        }`}
       >
         <TableCell className="first:rounded-l-md">
           <div className="flex items-center">
             {CATEGORY_ICONS[allergy.category ?? ""]}
           </div>
         </TableCell>
-        <TableCell className="font-medium">{allergy.code.display}</TableCell>
+        <TableCell className="font-medium pl-0 ">
+          {allergy.code.display}
+        </TableCell>
         <TableCell>
           <Badge
             variant="outline"
-            className={`whitespace-nowrap ${ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]}`}
+            className={`whitespace-nowrap ${
+              ALLERGY_CLINICAL_STATUS_STYLES[allergy.clinical_status]
+            }`}
           >
             {t(allergy.clinical_status)}
           </Badge>
@@ -204,7 +203,6 @@ export function AllergyList({
               className="w-4 h-4"
               imageUrl={allergy.created_by.profile_picture_url}
             />
-
             <span className="text-sm">{formatName(allergy.created_by)}</span>
           </div>
         </TableCell>
@@ -218,91 +216,65 @@ export function AllergyList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
-      isPrintPreview={isPrintPreview}
     >
-      {isPrintPreview ? (
-        <PrintTable
-          headers={[
-            { key: "allergen", title: t("allergen") },
-            { key: "status", title: t("status") },
-            { key: "criticality", title: t("criticality") },
-            { key: "verification", title: t("verification") },
-            { key: "notes", title: t("notes") },
-            { key: "logged_by", title: t("logged_by") },
-          ]}
-          rows={allergies?.results.map((allergy) => ({
-            allergen: allergy.code.display,
-            status: t(allergy.clinical_status),
-            criticality: t(allergy.criticality),
-            verification: t(allergy.verification_status),
-            notes: allergy.note,
-            logged_by: formatName(allergy.created_by),
-          }))}
-        />
-      ) : (
-        <>
-          <Table className="border-spacing-y-0.5 border-separate">
-            <TableHeader>
-              <TableRow className="rounded-md overflow-hidden bg-gray-100">
-                <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
-                <TableHead className="h-auto py-1 pl-2 pr-2 text-gray-600">
-                  {t("allergen")}
-                </TableHead>
-                <TableHead className="h-auto py-1 px-2 text-gray-600">
-                  {t("status")}
-                </TableHead>
-                <TableHead className="h-auto py-1 px-2 text-gray-600">
-                  {t("criticality")}
-                </TableHead>
-                <TableHead className="h-auto py-1 px-2 text-gray-600">
-                  {t("verification")}
-                </TableHead>
-                <TableHead className="h-auto py-1 px-2 text-gray-600">
-                  {t("notes")}
-                </TableHead>
-                <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-                  {t("logged_by")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {/* Valid entries */}
-              {filteredAllergies
-                .filter(
-                  (allergy) =>
-                    allergy.verification_status !== "entered_in_error",
-                )
-                .map((allergy) => (
-                  <AllergyRow key={allergy.id} allergy={allergy} />
-                ))}
+      <Table className="border-separate border-spacing-y-0.5">
+        <TableHeader>
+          <TableRow className="rounded-md overflow-hidden bg-gray-100">
+            <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
+            <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
+              {t("allergen")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("status")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("criticality")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("verification")}
+            </TableHead>
+            <TableHead className="h-auto py-1 px-2 text-gray-600">
+              {t("notes")}
+            </TableHead>
+            <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+              {t("logged_by")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {/* Valid entries */}
+          {filteredAllergies
+            .filter(
+              (allergy) => allergy.verification_status !== "entered_in_error",
+            )
+            .map((allergy) => (
+              <AllergyRow key={allergy.id} allergy={allergy} />
+            ))}
 
-              {/* Entered in error entries */}
-              {showEnteredInError &&
-                filteredAllergies
-                  .filter(
-                    (allergy) =>
-                      allergy.verification_status === "entered_in_error",
-                  )
-                  .map((allergy) => (
-                    <AllergyRow key={allergy.id} allergy={allergy} />
-                  ))}
-            </TableBody>
-          </Table>
-          {hasEnteredInErrorRecords && !showEnteredInError && (
-            <>
-              <div className="border-b border-dashed border-gray-200 my-2" />
-              <div className="flex justify-center">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={() => setShowEnteredInError(true)}
-                  className="text-xs underline text-gray-950"
-                >
-                  {t("view_all")}
-                </Button>
-              </div>
-            </>
-          )}
+          {/* Entered in error entries */}
+          {showEnteredInError &&
+            filteredAllergies
+              .filter(
+                (allergy) => allergy.verification_status === "entered_in_error",
+              )
+              .map((allergy) => (
+                <AllergyRow key={allergy.id} allergy={allergy} />
+              ))}
+        </TableBody>
+      </Table>
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowEnteredInError(true)}
+              className="text-xs underline text-gray-950"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
         </>
       )}
     </AllergyListLayout>
@@ -315,30 +287,16 @@ const AllergyListLayout = ({
   encounterId,
   children,
   className,
-  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
   className?: string;
-  isPrintPreview?: boolean;
 }) => {
   return (
-    <Card
-      className={cn(
-        "rounded-sm ",
-        className,
-        isPrintPreview && "shadow-none border-none",
-      )}
-    >
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2",
-          isPrintPreview && "px-0 py-2 ",
-        )}
-      >
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("allergies")}</CardTitle>
         {facilityId && encounterId && (
           <Link
@@ -350,14 +308,7 @@ const AllergyListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          !isPrintPreview && "px-2 pb-2",
-          isPrintPreview && "px-0 py-0",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

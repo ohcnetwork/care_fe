@@ -211,7 +211,7 @@ function ResponseCard({
     <Card
       className={cn(
         "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
-        isPrintPreview && "shadow-none",
+        isPrintPreview && "shadow-none rounded-sm",
       )}
     >
       <div className="flex items-start justify-between">

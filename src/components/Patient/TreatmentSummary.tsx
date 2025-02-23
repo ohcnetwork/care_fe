@@ -7,26 +7,56 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
-import { AllergyList } from "@/components/Patient/allergy/list";
-import { DiagnosisList } from "@/components/Patient/diagnosis/list";
-import { SymptomsList } from "@/components/Patient/symptoms/list";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
-
-import { MedicationStatementList } from "./MedicationStatementList";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { completedEncounterStatus } from "@/types/emr/encounter";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface TreatmentSummaryProps {
   facilityId: string;
   encounterId: string;
+
+  patientId: string;
 }
 
+const SectionLayout = ({
+  children,
+  title,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Card className="rounded-sm shadow-none border-none">
+      <CardHeader className="flex justify-between flex-row px-0 py-2 ">
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-0 py-0">{children}</CardContent>
+    </Card>
+  );
+};
+
+const EmptyState = ({ message }: { message: string }) => {
+  return (
+    <CardContent className="px-2 pb-3 pt-2">
+      <p className="text-gray-500">{message}</p>
+    </CardContent>
+  );
+};
 export default function TreatmentSummary({
   facilityId,
   encounterId,
+  patientId,
 }: TreatmentSummaryProps) {
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -36,6 +66,51 @@ export default function TreatmentSummary({
     }),
   });
 
+  const { data: allergies } = useQuery({
+    queryKey: ["allergies", patientId, encounterId],
+    queryFn: query(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: (
+          encounter?.status
+            ? completedEncounterStatus.includes(encounter.status)
+            : false
+        )
+          ? encounterId
+          : undefined,
+      },
+    }),
+  });
+
+  const { data: symptoms } = useQuery({
+    queryKey: ["symptoms", patientId, encounterId],
+    queryFn: query(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: encounterId ? { encounter: encounterId } : undefined,
+    }),
+  });
+
+  const { data: diagnoses } = useQuery({
+    queryKey: ["diagnosis", patientId, encounterId],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: encounterId ? { encounter: encounterId } : undefined,
+    }),
+  });
+
+  const { data: medications } = useQuery({
+    queryKey: ["medication_requests", patientId, encounterId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: { encounter: encounterId, limit: 50, offset: 0 },
+    }),
+  });
+  const { data: medicationStatement } = useQuery({
+    queryKey: ["medication_statements", patientId],
+    queryFn: query(medicationStatementApi.list, {
+      pathParams: { patientId },
+    }),
+  });
   if (!encounter) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
@@ -199,46 +274,168 @@ export default function TreatmentSummary({
           {/* Medical Information */}
           <div className="space-y-6">
             {/* Allergies */}
-            <AllergyList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              isPrintPreview={true}
-            />
+            <SectionLayout title={t("allergies")}>
+              {allergies?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "allergen", title: t("allergen") },
+                    { key: "status", title: t("status") },
+                    { key: "criticality", title: t("criticality") },
+                    { key: "verification", title: t("verification") },
+                    { key: "notes", title: t("notes") },
+                    { key: "logged_by", title: t("logged_by") },
+                  ]}
+                  rows={allergies?.results.map((allergy) => ({
+                    allergen: allergy.code.display,
+                    status: t(allergy.clinical_status),
+                    criticality: t(allergy.criticality),
+                    verification: t(allergy.verification_status),
+                    notes: allergy.note,
+                    logged_by: formatName(allergy.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_allergies_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Symptoms */}
-            <SymptomsList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              isPrintPreview={true}
-            />
+
+            <SectionLayout title={t("symptoms")}>
+              {symptoms?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "symptom", title: t("symptom") },
+                    { key: "severity", title: t("severity") },
+                    { key: "status", title: t("status") },
+                    { key: "verification", title: t("verification") },
+                    { key: "notes", title: t("notes") },
+                    { key: "logged_by", title: t("logged_by") },
+                  ]}
+                  rows={symptoms?.results?.map((symptom) => ({
+                    symptom: symptom.code.display,
+                    severity: t(symptom.severity),
+                    status: t(symptom.clinical_status),
+                    verification: t(symptom.verification_status),
+                    notes: symptom.note,
+                    logged_by: formatName(symptom.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_symptoms_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Diagnoses */}
-            <DiagnosisList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              isPrintPreview={true}
-            />
+            <SectionLayout title={t("diagnoses")}>
+              {diagnoses?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "diagnosis", title: t("diagnosis") },
+
+                    { key: "status", title: t("status") },
+                    { key: "verification", title: t("verification") },
+                    { key: "onset", title: t("onset") },
+                    { key: "notes", title: t("notes") },
+                    { key: "logged_by", title: t("logged_by") },
+                  ]}
+                  rows={diagnoses?.results.map((diagnosis) => ({
+                    diagnosis: diagnosis.code.display,
+                    status: t(diagnosis.clinical_status),
+                    verification: t(diagnosis.verification_status),
+                    onset: diagnosis.onset?.onset_datetime
+                      ? new Date(
+                          diagnosis.onset.onset_datetime,
+                        ).toLocaleDateString()
+                      : undefined,
+                    notes: diagnosis.note,
+                    logged_by: formatName(diagnosis.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_symptoms_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Medications */}
-            <Card className="rounded-sm border-none shadow-none">
-              <CardHeader className="pt-4 pb-2 flex justify-between flex-row px-0 py-2">
-                <CardTitle>{t("medications")}</CardTitle>
-              </CardHeader>
-              <CardContent className="px-0 py-0">
-                <MedicationsTable
-                  patientId={encounter.patient.id}
-                  encounterId={encounterId}
-                  isPrintPreview={true}
+            <SectionLayout title={t("medications")}>
+              {!medications?.results.length ? (
+                <PrintTable
+                  headers={[
+                    { key: "medicine", title: t("medicine") },
+                    { key: "status", title: t("status") },
+                    { key: "dosage", title: t("dosage") },
+                    { key: "frequency", title: t("frequency") },
+                    { key: "duration", title: t("duration") },
+                    { key: "instructions", title: t("instructions") },
+                  ]}
+                  rows={medications?.results.map((medication) => {
+                    const instruction = medication.dosage_instruction[0];
+                    const frequency = getFrequencyDisplay(instruction?.timing);
+                    const dosage = formatDosage(instruction);
+                    const duration =
+                      instruction?.timing?.repeat?.bounds_duration;
+                    const remarks = formatSig(instruction);
+                    const notes = medication.note;
+                    return {
+                      medicine: medication.medication?.display,
+                      status: t(medication.status),
+                      dosage: dosage,
+                      frequency: instruction?.as_needed_boolean
+                        ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
+                        : (frequency?.meaning ?? "-") +
+                          (instruction?.additional_instruction?.[0]?.display
+                            ? `, ${instruction.additional_instruction[0].display}`
+                            : ""),
+                      duration: duration
+                        ? `${duration.value} ${duration.unit}`
+                        : "-",
+                      instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+                    };
+                  })}
                 />
-              </CardContent>
-            </Card>
+              ) : (
+                <EmptyState message={t("no_medication_recorded")} />
+              )}
+            </SectionLayout>
           </div>
 
           {/* Medication Statements */}
-          <MedicationStatementList
-            patientId={encounter.patient.id}
-            isPrintPreview={true}
-          />
+          <SectionLayout title={t("ongoing_medications")}>
+            {!medications?.results.length ? (
+              <PrintTable
+                headers={[
+                  { key: "medication", title: t("medication") },
+                  { key: "dosage", title: t("dosage") },
+                  { key: "status", title: t("status") },
+                  {
+                    key: "medication_taken_between",
+                    title: t("medication_taken_between"),
+                  },
+                  { key: "reason", title: t("reason") },
+                  { key: "notes", title: t("notes") },
+                  { key: "logged_by", title: t("logged_by") },
+                ]}
+                rows={medicationStatement?.results.map((medication) => ({
+                  medication:
+                    medication.medication.display ?? medication.medication.code,
+                  dosage: medication.dosage_text,
+                  status: medication.status,
+                  medication_taken_between: [
+                    medication.effective_period?.start,
+                    medication.effective_period?.end,
+                  ]
+                    .map((date) => formatDateTime(date))
+                    .join(" - "),
+                  reason: medication.reason,
+                  notes: medication.note,
+                  logged_by: formatName(medication.created_by),
+                }))}
+              />
+            ) : (
+              <EmptyState message={t("no_ongoing_medications")} />
+            )}
+          </SectionLayout>
 
           {/* Questionnaire Responses Section */}
           <div>

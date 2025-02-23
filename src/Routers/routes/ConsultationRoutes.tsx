@@ -16,8 +16,12 @@ const consultationRoutes: AppRoutes = {
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ facilityId, encounterId }) => (
-      <TreatmentSummary facilityId={facilityId} encounterId={encounterId} />
+    ({ facilityId, encounterId, patientId }) => (
+      <TreatmentSummary
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+      />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (

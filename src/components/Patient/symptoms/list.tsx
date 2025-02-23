@@ -11,10 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import PrintTable from "@/components/Common/PrintTable";
-
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -24,7 +21,6 @@ interface SymptomsListProps {
   encounterId?: string;
   facilityId?: string;
   className?: string;
-  isPrintPreview?: boolean;
 }
 
 export function SymptomsList({
@@ -32,7 +28,6 @@ export function SymptomsList({
   encounterId,
   facilityId,
   className,
-  isPrintPreview = false,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -50,8 +45,6 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
-        className={className}
-        isPrintPreview={isPrintPreview}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -75,8 +68,6 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
-        className={className}
-        isPrintPreview={isPrintPreview}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -91,58 +82,33 @@ export function SymptomsList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
-      isPrintPreview={isPrintPreview}
     >
-      {isPrintPreview ? (
-        <PrintTable
-          headers={[
-            { key: "symptom", title: t("symptom") },
-            { key: "severity", title: t("severity") },
-            { key: "status", title: t("status") },
-            { key: "verification", title: t("verification") },
-            { key: "notes", title: t("notes") },
-            { key: "logged_by", title: t("logged_by") },
-          ]}
-          rows={symptoms?.results?.map((symptom) => ({
-            symptom: symptom.code.display,
-            severity: t(symptom.severity),
-            status: t(symptom.clinical_status),
-            verification: t(symptom.verification_status),
-            notes: symptom.note,
-            logged_by: formatName(symptom.created_by),
-          }))}
-        />
-      ) : (
-        <>
-          <SymptomTable
-            symptoms={[
-              ...filteredSymptoms.filter(
-                (symptom) => symptom.verification_status !== "entered_in_error",
-              ),
-              ...(showEnteredInError
-                ? filteredSymptoms.filter(
-                    (symptom) =>
-                      symptom.verification_status === "entered_in_error",
-                  )
-                : []),
-            ]}
-          />
+      <SymptomTable
+        symptoms={[
+          ...filteredSymptoms.filter(
+            (symptom) => symptom.verification_status !== "entered_in_error",
+          ),
+          ...(showEnteredInError
+            ? filteredSymptoms.filter(
+                (symptom) => symptom.verification_status === "entered_in_error",
+              )
+            : []),
+        ]}
+      />
 
-          {hasEnteredInErrorRecords && !showEnteredInError && (
-            <>
-              <div className="border-b border-dashed border-gray-200 my-2" />
-              <div className="flex justify-center ">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={() => setShowEnteredInError(true)}
-                  className="text-xs underline text-gray-950"
-                >
-                  {t("view_all")}
-                </Button>
-              </div>
-            </>
-          )}
+      {hasEnteredInErrorRecords && !showEnteredInError && (
+        <>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="flex justify-center ">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowEnteredInError(true)}
+              className="text-xs underline text-gray-500 text-gray-950"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
         </>
       )}
     </SymptomListLayout>
@@ -155,30 +121,16 @@ const SymptomListLayout = ({
   encounterId,
   children,
   className,
-  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
   className?: string;
-  isPrintPreview?: boolean;
 }) => {
   return (
-    <Card
-      className={cn(
-        "rounded-sm ",
-        className,
-        isPrintPreview && "shadow-none border-none",
-      )}
-    >
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2",
-          isPrintPreview && "px-0 py-2",
-        )}
-      >
+    <Card className={cn("border-none rounded-sm", className)}>
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("symptoms")}</CardTitle>
         {facilityId && encounterId && (
           <Link
@@ -190,14 +142,7 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          isPrintPreview && "px-0 py-0",
-          !isPrintPreview && "px-2 pb-2",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

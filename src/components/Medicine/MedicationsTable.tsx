@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import PrintTable from "@/components/Common/PrintTable";
 import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
 import query from "@/Utils/request/query";
@@ -40,13 +39,11 @@ export function getFrequencyDisplay(
 interface MedicationsTableProps {
   patientId: string;
   encounterId: string;
-  isPrintPreview?: boolean;
 }
 
 export const MedicationsTable = ({
   patientId,
   encounterId,
-  isPrintPreview = false,
 }: MedicationsTableProps) => {
   const { t } = useTranslation();
 
@@ -72,39 +69,7 @@ export const MedicationsTable = ({
     );
   }
 
-  return isPrintPreview ? (
-    <PrintTable
-      headers={[
-        { key: "medicine", title: t("medicine") },
-        { key: "status", title: t("status") },
-        { key: "dosage", title: t("dosage") },
-        { key: "frequency", title: t("frequency") },
-        { key: "duration", title: t("duration") },
-        { key: "instructions", title: t("instructions") },
-      ]}
-      rows={medications?.results.map((medication) => {
-        const instruction = medication.dosage_instruction[0];
-        const frequency = getFrequencyDisplay(instruction?.timing);
-        const dosage = formatDosage(instruction);
-        const duration = instruction?.timing?.repeat?.bounds_duration;
-        const remarks = formatSig(instruction);
-        const notes = medication.note;
-        return {
-          medicine: medication.medication?.display,
-          status: t(medication.status),
-          dosage: dosage,
-          frequency: instruction?.as_needed_boolean
-            ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-            : (frequency?.meaning ?? "-") +
-              (instruction?.additional_instruction?.[0]?.display
-                ? `, ${instruction.additional_instruction[0].display}`
-                : ""),
-          duration: duration ? `${duration.value} ${duration.unit}` : "-",
-          instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
-        };
-      })}
-    />
-  ) : (
+  return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
