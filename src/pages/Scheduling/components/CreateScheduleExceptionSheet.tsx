@@ -265,6 +265,7 @@ export default function CreateScheduleExceptionSheet({
                         <FormControl>
                           <Input
                             type="time"
+                            step="60"
                             {...field}
                             disabled={unavailableAllDay}
                           />
@@ -283,6 +284,7 @@ export default function CreateScheduleExceptionSheet({
                         <FormControl>
                           <Input
                             type="time"
+                            step="60"
                             {...field}
                             disabled={unavailableAllDay}
                           />
