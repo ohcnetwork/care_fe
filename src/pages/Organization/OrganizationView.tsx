@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -31,6 +31,10 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 12; // 3x4 grid
+  useEffect(() => {
+    setSearchQuery("");
+    setPage(1);
+  }, [id]);
 
   const { data: children, isFetching } = useQuery({
     queryKey: ["organization", id, "children", page, limit, searchQuery],
