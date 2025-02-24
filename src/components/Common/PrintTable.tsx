@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import { cn } from "@/lib/utils";
 
 import {
@@ -10,7 +12,6 @@ import {
 } from "@/components/ui/table";
 
 type HeaderRow = {
-  title: string;
   key: string;
   width?: number;
 };
@@ -27,7 +28,7 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray border-b-gray">
-            {headers.map(({ key, title, width }, index) => (
+            {headers.map(({ key, width }, index) => (
               <TableHead
                 className={cn(
                   index == 0 && "first:rounded-l-md",
@@ -36,7 +37,7 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
                 )}
                 key={key}
               >
-                {title}
+                {t(key)}
               </TableHead>
             ))}
           </TableRow>
