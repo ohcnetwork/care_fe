@@ -2,7 +2,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { getMapUrl } from "@/Utils/utils";
+import { getMapUrl, isAndroidDevice } from "@/Utils/utils";
 
 const isValidLatitude = (latitude: string) => {
   const lat = parseFloat(latitude.trim());
@@ -26,12 +26,13 @@ export const FacilityMapsLink = ({
   if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
     return null;
   }
+  const target = isAndroidDevice ? "_self" : "_blank";
 
   return (
     <Link
       className="text-primary flex items-center gap-1 w-max"
       href={getMapUrl(latitude, longitude)}
-      target="_blank"
+      target={target}
       rel="noreferrer"
     >
       {t("show_on_map")}
