@@ -16,10 +16,10 @@ type HeaderRow = {
   width?: number;
 };
 
-type tableRowType = Record<string, string | undefined>;
+type TableRowType = Record<string, string | undefined>;
 interface GenericTableProps {
   headers: HeaderRow[];
-  rows: tableRowType[] | undefined;
+  rows: TableRowType[] | undefined;
 }
 
 export default function PrintTable({ headers, rows }: GenericTableProps) {
