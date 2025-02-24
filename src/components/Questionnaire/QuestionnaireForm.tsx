@@ -462,7 +462,6 @@ export function QuestionnaireForm({
         ))}
 
         {/* Search and Add Questionnaire */}
-
         {encounterId !== "preview" && (
           <>
             <div
@@ -494,16 +493,19 @@ export function QuestionnaireForm({
             </div>
 
             {/* Submit and Cancel Buttons */}
-            {questionnaireForms.length > 0 && (
-              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  disabled={isPending}
-                >
-                  {t("cancel")}
-                </Button>
+            <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+              {/* Always visible Cancel button */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isPending}
+              >
+                {t("cancel")}
+              </Button>
+
+              {/* Conditionally visible Submit button */}
+              {questionnaireForms.length > 0 && (
                 <Button
                   type="submit"
                   onClick={handleSubmit}
@@ -521,8 +523,8 @@ export function QuestionnaireForm({
                     t("submit")
                   )}
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
 
