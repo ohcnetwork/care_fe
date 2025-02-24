@@ -31,7 +31,7 @@ export const FacilityMapsLink = ({
     <Link
       className="text-primary flex items-center gap-1 w-max"
       href={getMapUrl(latitude, longitude)}
-      target="_blan_blankkc"
+      target="_blank"
       rel="noreferrer"
     >
       {t("show_on_map")}
