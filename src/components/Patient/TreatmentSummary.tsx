@@ -331,6 +331,7 @@ export default function TreatmentSummary({
                     { key: "severity" },
                     { key: "status" },
                     { key: "verification" },
+                    { key: "onset" },
                     { key: "notes" },
                     { key: "logged_by" },
                   ]}
@@ -339,6 +340,11 @@ export default function TreatmentSummary({
                     severity: t(symptom.severity),
                     status: t(symptom.clinical_status),
                     verification: t(symptom.verification_status),
+                    onset: symptom.onset?.onset_datetime
+                      ? new Date(
+                          symptom.onset.onset_datetime,
+                        ).toLocaleDateString()
+                      : "-",
                     notes: symptom.note,
                     logged_by: formatName(symptom.created_by),
                   }))}
@@ -354,7 +360,6 @@ export default function TreatmentSummary({
                 <PrintTable
                   headers={[
                     { key: "diagnosis" },
-
                     { key: "status" },
                     { key: "verification" },
                     { key: "onset" },
