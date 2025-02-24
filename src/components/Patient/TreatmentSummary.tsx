@@ -8,6 +8,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import Loading from "@/components/Common/Loading";
 import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -59,7 +60,7 @@ export default function TreatmentSummary({
   encounterId,
   patientId,
 }: TreatmentSummaryProps) {
-  const { data: encounter } = useQuery({
+  const { data: encounter, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
       pathParams: { id: encounterId },
@@ -69,7 +70,7 @@ export default function TreatmentSummary({
 
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
-    queryFn: query(allergyIntoleranceApi.getAllergy, {
+    queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
         encounter: (
@@ -85,7 +86,7 @@ export default function TreatmentSummary({
 
   const { data: symptoms, isLoading: symptomsLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
-    queryFn: query(symptomApi.listSymptoms, {
+    queryFn: query.paginated(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
@@ -93,7 +94,7 @@ export default function TreatmentSummary({
 
   const { data: diagnoses, isLoading: diagnosesLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
-    queryFn: query(diagnosisApi.listDiagnosis, {
+    queryFn: query.paginated(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
@@ -101,7 +102,7 @@ export default function TreatmentSummary({
 
   const { data: medications, isLoading: medicationsLoading } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: { encounter: encounterId, limit: 50, offset: 0 },
     }),
@@ -109,10 +110,14 @@ export default function TreatmentSummary({
   const { data: medicationStatement, isLoading: medicationStatementLoading } =
     useQuery({
       queryKey: ["medication_statements", patientId],
-      queryFn: query(medicationStatementApi.list, {
+      queryFn: query.paginated(medicationStatementApi.list, {
         pathParams: { patientId },
       }),
     });
+
+  if (encounterLoading) {
+    return <Loading />;
+  }
 
   if (!encounter) {
     return (
@@ -123,6 +128,7 @@ export default function TreatmentSummary({
   }
 
   const isLoading =
+    encounterLoading ||
     allergiesLoading ||
     diagnosesLoading ||
     symptomsLoading ||
