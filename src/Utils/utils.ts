@@ -98,9 +98,11 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
 export const isAndroidDevice = /android/i.test(navigator.userAgent);
 
 export const getMapUrl = (latitude: string, longitude: string) => {
-  return careConfig.mapFallbackUrlTemplate
-    .replace("{lat}", latitude)
-    .replace("{long}", longitude);
+  return isAndroidDevice
+    ? `geo:${latitude},${longitude}`
+    : careConfig.mapFallbackUrlTemplate
+        .replace("{lat}", latitude)
+        .replace("{long}", longitude);
 };
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
