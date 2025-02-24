@@ -8,6 +8,8 @@ import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm"
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import EncounterInfoCard from "@/pages/Encounters/EncounterInfoCard";
+
 interface Props {
   facilityId: string;
   patientId: string;
@@ -26,6 +28,9 @@ export default function EncounterQuestionnaire({
   const { goBack } = useAppHistory();
   return (
     <Page title={t("questionnaire")}>
+      {encounterId && (
+        <EncounterInfoCard encounterId={encounterId} facilityId={facilityId} />
+      )}
       <Card className="mt-2">
         <CardContent className="lg:p-4 p-0">
           <QuestionnaireForm
