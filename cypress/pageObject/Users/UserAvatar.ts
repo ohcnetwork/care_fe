@@ -17,7 +17,7 @@ export class UserAvatar {
   }
 
   clickChangeAvatarButton() {
-    cy.verifyAndClickElement('button[id="change-avatar"]', "Change Avatar");
+    cy.verifyAndClickElement('[data-cy="change-avatar"]', "Change Avatar");
     return this;
   }
 
@@ -30,7 +30,7 @@ export class UserAvatar {
   }
 
   clickSaveAvatarButton() {
-    cy.verifyAndClickElement('button[id="save-cover-image"]', "Save");
+    cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
     return this;
   }
 
@@ -48,7 +48,7 @@ export class UserAvatar {
   }
 
   clickDeleteAvatarButton() {
-    cy.verifyAndClickElement('button[id="delete-button"]', "Delete");
+    cy.verifyAndClickElement('[data-cy="delete-avatar"]', "Delete");
     return this;
   }
 
