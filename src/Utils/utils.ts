@@ -98,7 +98,7 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
 export const isAndroidDevice = /android/i.test(navigator.userAgent);
 
 export const getMapUrl = (latitude: string, longitude: string) => {
-  return careConfig.mapUrl
+  return careConfig.mapFallbackUrlTemplate
     .replace("{lat}", latitude)
     .replace("{long}", longitude);
 };
