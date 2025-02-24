@@ -2,7 +2,7 @@ import { useLocationChange } from "raviger";
 import { ReactNode, createContext, useState } from "react";
 
 export const HistoryContext = createContext<string[]>([]);
-// eslint-disable-next-line @typescript-eslint/no-empty-function
+
 export const ResetHistoryContext = createContext(() => {});
 
 export default function HistoryAPIProvider(props: { children: ReactNode }) {

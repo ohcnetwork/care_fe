@@ -110,24 +110,29 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const handleCoverImageUpload = async (file: File, onError: () => void) => {
+  const handleCoverImageUpload = async (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     const formData = new FormData();
     formData.append("cover_image", file);
     const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
       { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
+          setEditCoverImage(false);
           await sleep(1000);
           queryClient.invalidateQueries({
             queryKey: ["facility", facilityId],
           });
           toast.success(t("cover_image_updated"));
-          setEditCoverImage(false);
+          onSuccess();
         } else {
           onError();
         }
@@ -138,9 +143,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-  const handleCoverImageDelete = async (onError: () => void) => {
+  const handleCoverImageDelete = async (
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     try {
       await deleteAvatar();
+      onSuccess();
     } catch {
       onError();
     }
@@ -191,12 +200,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
               <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
-                <Button variant="link">
+                <div className="sm:px-4 px-8 inline-flex rounded-md">
                   <Avatar
                     name={facilityData.name}
-                    className="h-24 w-24 rounded-md border-4 border-white shadow-lg"
+                    className="size-16 sm:size-20 md:size-24 rounded-md border-4 border-white shadow-lg"
                   />
-                </Button>
+                </div>
               </div>
 
               <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
