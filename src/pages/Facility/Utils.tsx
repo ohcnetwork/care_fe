@@ -12,11 +12,14 @@ export const FeatureBadge = ({ featureId }: { featureId: number }) => {
     return <></>;
   }
   const variantStyles = {
-    green: "bg-green-100 text-green-800 hover:bg-green-100",
-    blue: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-    amber: "bg-amber-100 text-amber-800 hover:bg-amber-100",
-    orange: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-    teal: "bg-teal-100 text-teal-800 hover:bg-teal-100",
+    blue: "bg-blue-100 text-blue-800",
+    orange: "bg-orange-100 text-orange-800",
+    teal: "bg-teal-100 text-teal-800",
+    yellow: "bg-yellow-100 text-yellow-800",
+    pink: "bg-pink-100 text-pink-800",
+    red: "bg-red-100 text-red-800",
+    indigo: "bg-indigo-100 text-indigo-800",
+    purple: "bg-purple-100 text-purple-800",
   };
 
   return (
