@@ -20,7 +20,6 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { LocationList as LocationListType } from "@/types/location/location";
-import { getLocationFormLabel } from "@/types/location/location";
 
 interface LocationRowProps {
   location: LocationListType;
@@ -154,7 +153,7 @@ function LocationRow({
           )}
         </TableCell>
         <TableCell className="hidden sm:table-cell border-l bg-white font-semibold text-gray-900">
-          {getLocationFormLabel(location.form)}
+          {t(`location_form__${location.form}`)}
         </TableCell>
       </TableRow>
       {isExpanded &&
