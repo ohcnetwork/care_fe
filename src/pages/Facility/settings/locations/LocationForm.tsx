@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -34,35 +35,10 @@ import {
   locationFormOptions,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  description: z.string().optional(),
-  status: z.enum(["active", "inactive", "unknown"] as const),
-  operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
-  form: z.enum([
-    "si",
-    "bu",
-    "wi",
-    "wa",
-    "lvl",
-    "co",
-    "ro",
-    "bd",
-    "ve",
-    "ho",
-    "ca",
-    "rd",
-    "area",
-    "jdn",
-    "vi",
-  ] as const),
-  parent: z.string().optional().nullable(),
-  organizations: z.array(z.string()).default([]),
-  availability_status: z.enum(["available", "unavailable"] as const),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import {
+  BatchRequestBody,
+  BatchSubmissionResult,
+} from "@/types/questionnaire/batch";
 
 interface Props {
   facilityId: string;
@@ -70,17 +46,6 @@ interface Props {
   locationId?: string;
   parentId?: string;
 }
-
-const defaultValues: FormValues = {
-  name: "",
-  description: "",
-  status: "active",
-  operational_status: "O",
-  form: "ro",
-  parent: null,
-  organizations: [],
-  availability_status: "available",
-};
 
 export default function LocationForm({
   facilityId,
@@ -98,6 +63,53 @@ export default function LocationForm({
     }),
     enabled: !!locationId,
   });
+  const formSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    description: z.string().optional(),
+    status: z.enum(["active", "inactive", "unknown"] as const),
+    operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
+    form: z.enum([
+      "si",
+      "bu",
+      "wi",
+      "wa",
+      "lvl",
+      "co",
+      "ro",
+      "bd",
+      "ve",
+      "ho",
+      "ca",
+      "rd",
+      "area",
+      "jdn",
+      "vi",
+    ] as const),
+    parent: z.string().optional().nullable(),
+
+    beds_count: z
+      .string()
+
+      .refine((val) => val === undefined || Number(val) >= 1, {
+        message: t("bed_count_validation_error"),
+      }),
+    organizations: z.array(z.string()).default([]),
+    availability_status: z.enum(["available", "unavailable"] as const),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const defaultValues: FormValues = {
+    name: "",
+    description: "",
+    status: "active",
+    operational_status: "O",
+    form: "ro",
+    beds_count: "1",
+    parent: null,
+    organizations: [],
+    availability_status: "available",
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -140,11 +152,55 @@ export default function LocationForm({
     },
   });
 
+  const { mutate: submitBatch } = useMutation({
+    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    onSuccess: (data: { results: BatchSubmissionResult[] }) => {
+      toast.success(
+        t("bed_created_notification", { count: data.results.length }),
+      );
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+      onSuccess?.();
+    },
+
+    // onError: () => {
+    //   toast.error(t("submission_failed"));
+    // },
+  });
+
   function onSubmit(values: FormValues) {
+    if (
+      values.form === "bd" &&
+      !location?.id &&
+      Number(values.beds_count) > 1
+    ) {
+      const data: LocationWrite = {
+        ...values,
+        mode: "instance",
+        description: values.description || "",
+        organizations: values.organizations,
+        parent: values.parent || undefined,
+      };
+
+      const batchRequest: BatchRequestBody = {
+        requests: Array.from(
+          { length: Number(values.beds_count) },
+          (_, index) => ({
+            url: `/api/v1/facility/${facilityId}/location/`,
+            method: "POST",
+            reference_id: `Location`,
+            body: {
+              ...data,
+              name: `${values.name} ${index + 1}`,
+            },
+          }),
+        ),
+      };
+      submitBatch(batchRequest);
+      return;
+    }
     const locationData: LocationWrite = {
       ...values,
-      // Mode = instance only for beds
-      mode: values.form === "bd" ? "instance" : "kind",
+      mode: "kind",
       description: values.description || "",
       organizations: values.organizations,
       parent: values.parent || undefined,
@@ -195,7 +251,22 @@ export default function LocationForm({
             </FormItem>
           )}
         />
-
+        {form.watch("form") === "bd" &&
+          form.watch("beds_count") &&
+          !isNaN(Number(form.watch("beds_count"))) &&
+          Number(form.watch("beds_count")) > 1 &&
+          form.watch("name")?.trim() !== "" && (
+            <span className="text-sm text-gray-500">
+              {Array.from(
+                { length: Number(form.watch("beds_count")) },
+                (_, index) => (
+                  <span key={index}>
+                    {form.watch("name")}-{index + 1},{" "}
+                  </span>
+                ),
+              )}
+            </span>
+          )}
         <FormField
           control={form.control}
           name="description"
@@ -239,6 +310,20 @@ export default function LocationForm({
               </FormItem>
             )}
           />
+
+          {form.watch("form") === "bd" && (
+            <FormField
+              control={form.control}
+              name="beds_count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("total_number_of_beds")}</FormLabel>
+                  <Input {...field} type="number" />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
