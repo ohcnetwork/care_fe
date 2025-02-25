@@ -32,6 +32,7 @@ interface LocationRowProps {
   setExpandedRows: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
+  displayExpandAll?: boolean;
 }
 
 function LocationRow({
@@ -42,6 +43,7 @@ function LocationRow({
   indent,
   onEdit,
   setExpandedRows,
+  displayExpandAll = true,
 }: LocationRowProps) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -110,7 +112,7 @@ function LocationRow({
           {isTopLevel && (
             <div className="flex justify-between items-center gap-2">
               <div className="flex-1">
-                {children.length > 0 && (
+                {children.length > 0 && displayExpandAll && (
                   <Button
                     variant="white"
                     size={isMobile ? "xs" : "sm"}
@@ -237,6 +239,7 @@ export function LocationListView({
               indent={1}
               onEdit={handleEditLocation}
               setExpandedRows={setExpandedRows}
+              displayExpandAll={searchQuery ? false : true}
             />
           ))}
         </TableBody>

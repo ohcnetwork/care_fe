@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -55,6 +55,10 @@ export default function LocationList({ facilityId }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useView("locations", "list");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [{ childrenMap, topLevelLocations }, setLocationHierarchy] = useState<{
+    childrenMap: Map<string, LocationListType[]>;
+    topLevelLocations: LocationListType[];
+  }>({ childrenMap: new Map(), topLevelLocations: [] });
 
   const { data, isLoading } = useQuery({
     queryKey: ["locations", facilityId],
@@ -65,43 +69,44 @@ export default function LocationList({ facilityId }: Props) {
     enabled: !!facilityId,
   });
 
+  useEffect(() => {
+    setLocationHierarchy(buildLocationHierarchy(data?.results || []));
+  }, [data?.results]);
+
   const filteredData = useMemo(() => {
     if (!searchQuery) return data?.results || [];
 
-    const allLocations = data?.results || [];
     const matchesSearch = createSearchMatcher(searchQuery);
 
     const hasMatchingDescendant = (locationId: string): boolean => {
-      const children = allLocations.filter(
-        (loc) => loc.parent?.id === locationId,
-      );
+      const children = childrenMap.get(locationId) || [];
       return children.some(
         (child: LocationListType) =>
           matchesSearch(child.name) || hasMatchingDescendant(child.id),
       );
     };
 
-    return allLocations.filter(
+    return data?.results?.filter(
       (location) =>
         matchesSearch(location.name) || hasMatchingDescendant(location.id),
     );
-  }, [data?.results, searchQuery]);
-
-  const tableData = filteredData;
-  const { childrenMap, topLevelLocations } = buildLocationHierarchy(tableData);
+  }, [data?.results, searchQuery, childrenMap]);
 
   const matchesSearch = useMemo(
     () => createSearchMatcher(searchQuery),
     [searchQuery],
   );
 
-  const hasMatchingChildren = (parentId: string): boolean => {
-    const children = childrenMap.get(parentId) || [];
-    return children.some(
-      (child: LocationListType) =>
-        matchesSearch(child.name) || hasMatchingChildren(child.id),
-    );
-  };
+  const hasMatchingChildren = useCallback(
+    (parentId: string): boolean => {
+      const children = childrenMap.get(parentId) || [];
+      return children.some(
+        (child: LocationListType) =>
+          matchesSearch(child.name) || hasMatchingChildren(child.id),
+      );
+    },
+    [childrenMap, matchesSearch],
+  );
 
   const getChildren = (parentId: string): LocationListType[] => {
     const children = childrenMap.get(parentId) || [];
@@ -293,7 +298,7 @@ export default function LocationList({ facilityId }: Props) {
           {/* Map view will be added later, for now always show list view */}
           <LocationListView
             isLoading={isLoading}
-            tableData={tableData}
+            tableData={filteredData || []}
             searchQuery={searchQuery}
             filteredTopLevelLocations={filteredTopLevelLocations}
             expandedRows={expandedRows}
