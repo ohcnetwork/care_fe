@@ -26,8 +26,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   imageUrl?: string;
-  handleUpload: (file: File, onError: () => void) => Promise<void>;
-  handleDelete: (onError: () => void) => Promise<void>;
+  handleUpload: (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => Promise<void>;
+  handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
 }
 
@@ -147,24 +151,36 @@ const AvatarEditModal = ({
 
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
-      await handleUpload(selectedFile, () => {
-        setSelectedFile(undefined);
-        setPreview(undefined);
-        setPreviewImage(null);
-        setIsCaptureImgBeingUploaded(false);
-        setIsProcessing(false);
-      });
+      await handleUpload(
+        selectedFile,
+        () => {
+          setPreview(undefined);
+        },
+        () => {
+          setPreview(undefined);
+          setPreviewImage(null);
+          setIsCaptureImgBeingUploaded(false);
+          setIsProcessing(false);
+        },
+      );
     } finally {
+      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
+      setSelectedFile(undefined);
     }
   };
 
   const deleteAvatar = async () => {
     setIsProcessing(true);
-    await handleDelete(() => {
-      setIsProcessing(false);
-    });
+    await handleDelete(
+      () => {
+        setIsProcessing(false);
+        setPreview(undefined);
+        setPreviewImage(null);
+      },
+      () => setIsProcessing(false),
+    );
   };
 
   const dragProps = useDragAndDrop();
