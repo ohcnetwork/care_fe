@@ -1537,6 +1537,7 @@
   "no_log_update_delta": "No changes since previous log update",
   "no_log_updates": "No log updates found",
   "no_medical_history_available": "No Medical History Available",
+  "no_medication_recorded": "No Medication Recorded",
   "no_medications": "No Medications",
   "no_medications_found_for_this_encounter": "No medications found for this encounter.",
   "no_medications_to_administer": "No medications to administer",
