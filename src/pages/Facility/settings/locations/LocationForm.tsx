@@ -297,7 +297,6 @@ export default function LocationForm({
                     {...field}
                     type="number"
                     min={1}
-                    {...field}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
                   <FormMessage />
