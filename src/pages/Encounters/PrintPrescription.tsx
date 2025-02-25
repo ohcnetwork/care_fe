@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 
 import api from "@/Utils/request/api";
@@ -30,16 +31,23 @@ export const PrintPrescription = (props: {
     }),
   });
 
-  const { data: medications } = useQuery({
-    queryKey: ["medication_requests", patientId],
+  const { data: activeMedications, isLoading: medicationLoading } = useQuery({
+    queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId },
-      queryParams: { encounter: encounterId, limit: 50, offset: 0 },
+      pathParams: { patientId: patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 50,
+        offset: 0,
+        status: ["active", "on-hold", "draft", "unknown"].join(","),
+      },
     }),
     enabled: !!patientId,
   });
 
-  if (!medications?.results?.length) {
+  if (medicationLoading) return <Loading />;
+
+  if (!activeMedications?.results?.length) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
         {t("no_medications_found_for_this_encounter")}
@@ -48,7 +56,7 @@ export const PrintPrescription = (props: {
   }
 
   // Group medications by prescriber
-  const medicationsByPrescriber = medications.results.reduce<
+  const medicationsByPrescriber = activeMedications.results.reduce<
     Record<string, MedicationRequestRead[]>
   >((acc, med) => {
     const prescriberId = med.created_by.id.toString();
@@ -62,13 +70,18 @@ export const PrintPrescription = (props: {
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${encounter?.patient.name}`}
-      disabled={!medications}
+      disabled={!activeMedications?.results?.length}
     >
-      <div className="min-h-screen bg-white p-2 max-w-4xl mx-auto">
+      <div className="min-h-screen bg-white md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b">
-            <div>
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Care Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+            />
+            <div className="text-center sm:text-left sm:order-1">
               <h1 className="text-3xl font-semibold">
                 {encounter?.facility?.name}
               </h1>
@@ -76,15 +89,10 @@ export const PrintPrescription = (props: {
                 {t("medicine_prescription")}
               </h2>
             </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain"
-            />
           </div>
 
           {/* Patient Details */}
-          <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
             <div className="space-y-3">
               <DetailRow
                 label={t("patient")}
@@ -122,7 +130,7 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable patientId={patientId} encounterId={encounterId} />
+          <MedicationsTable medications={activeMedications?.results ?? []} />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">
@@ -141,7 +149,7 @@ export const PrintPrescription = (props: {
           </div>
 
           {/* Footer */}
-          <div className="mt-8 space-y-1 pt-2 text-[10px] text-gray-500 flex justify-between">
+          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
             <p>
               {t("generated_on")} {format(new Date(), "PPP 'at' p")}
             </p>

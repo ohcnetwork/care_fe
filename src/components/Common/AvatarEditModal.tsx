@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -26,8 +27,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   imageUrl?: string;
-  handleUpload: (file: File, onError: () => void) => Promise<void>;
-  handleDelete: (onError: () => void) => Promise<void>;
+  handleUpload: (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => Promise<void>;
+  handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
 }
 
@@ -62,8 +67,8 @@ const AvatarEditModal = ({
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const webRef = useRef<Webcam>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -81,16 +86,35 @@ const AvatarEditModal = ({
   }, []);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const myFile = new File([blob], "image.png", {
-        type: blob.type,
-      });
-      setSelectedFile(myFile);
+    if (webRef.current) {
+      setPreviewImage(webRef.current.getScreenshot());
+    }
+    const canvas = webRef.current?.getCanvas();
+    canvas?.toBlob((blob) => {
+      if (blob) {
+        const myFile = new File([blob], "image.png", {
+          type: blob.type,
+        });
+        setSelectedFile(myFile);
+      } else {
+        toast.error(t("failed_to_capture_image"));
+      }
     });
   };
-
+  const stopCamera = useCallback(() => {
+    try {
+      if (webRef.current) {
+        const openCamera = webRef.current?.video?.srcObject as MediaStream;
+        if (openCamera) {
+          openCamera.getTracks().forEach((track) => track.stop());
+        }
+      }
+    } catch {
+      toast.error("Failed to stop camera");
+    } finally {
+      setIsCameraOpen(false);
+    }
+  }, []);
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
@@ -112,11 +136,12 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (!isImageFile(e.target.files[0])) {
+    const file = e.target.files[0];
+    if (!isImageFile(file)) {
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
-    setSelectedFile(e.target.files[0]);
+    setSelectedFile(file);
   };
 
   const uploadAvatar = async () => {
@@ -128,24 +153,36 @@ const AvatarEditModal = ({
 
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
-      await handleUpload(selectedFile, () => {
-        setSelectedFile(undefined);
-        setPreview(undefined);
-        setPreviewImage(null);
-        setIsCaptureImgBeingUploaded(false);
-        setIsProcessing(false);
-      });
+      await handleUpload(
+        selectedFile,
+        () => {
+          setPreview(undefined);
+        },
+        () => {
+          setPreview(undefined);
+          setPreviewImage(null);
+          setIsCaptureImgBeingUploaded(false);
+          setIsProcessing(false);
+        },
+      );
     } finally {
+      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
+      setSelectedFile(undefined);
     }
   };
 
   const deleteAvatar = async () => {
     setIsProcessing(true);
-    await handleDelete(() => {
-      setIsProcessing(false);
-    });
+    await handleDelete(
+      () => {
+        setIsProcessing(false);
+        setPreview(undefined);
+        setPreviewImage(null);
+      },
+      () => setIsProcessing(false),
+    );
   };
 
   const dragProps = useDragAndDrop();
@@ -196,7 +233,11 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg">
                       <img
-                        src={preview || imageUrl}
+                        src={
+                          preview && preview.startsWith("blob:")
+                            ? DOMPurify.sanitize(preview)
+                            : imageUrl
+                        }
                         alt="cover-photo"
                         className="h-full w-full object-cover"
                       />
@@ -410,7 +451,7 @@ const AvatarEditModal = ({
                     onClick={() => {
                       setPreviewImage(null);
                       setIsCameraOpen(false);
-                      webRef.current.stopCamera();
+                      stopCamera();
                     }}
                     disabled={isProcessing}
                   >

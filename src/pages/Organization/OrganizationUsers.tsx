@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -102,7 +104,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="justify-between items-center flex flex-wrap">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
             <EntityBadge
               title={t("users")}
@@ -111,7 +113,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
               translationParams={{ entity: "User" }}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="gap-2 flex flex-wrap mt-2">
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
@@ -161,66 +163,71 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             ) : (
               users?.results?.map((userRole) => (
                 <Card key={userRole.id} className="h-full">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col h-full gap-4">
-                      <div className="flex gap-4">
-                        <Avatar
-                          name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                          imageUrl={userRole.user.profile_picture_url}
-                          className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex flex-col gap-1">
+                  <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
+                    <div className="flex items-start gap-3">
+                      <Avatar
+                        name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                        imageUrl={userRole.user.profile_picture_url}
+                        className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+                      />
+
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-start justify-between">
                             <h1 className="text-base font-bold break-words pr-2">
                               {userRole.user.first_name}{" "}
                               {userRole.user.last_name}
                             </h1>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm text-gray-500 truncate">
-                                {userRole.user.username}
-                              </span>
+                            <span className="text-sm text-gray-500">
                               <UserStatusIndicator user={userRole.user} />
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500 mr-2 break-words">
+                            {userRole.user.username}
+                          </span>
+                        </div>
+                        <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <div className="text-gray-500">{t("role")}</div>
+                            <div className="font-medium truncate">
+                              {userRole.role.name ?? "-"}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">
+                              {t("phone_number")}
+                            </div>
+                            <div className="font-medium truncate">
+                              {userRole.user.phone_number
+                                ? formatPhoneNumberIntl(
+                                    userRole.user.phone_number,
+                                  )
+                                : "-"}
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-500">{t("role")}</div>
-                          <div className="font-medium truncate">
-                            {userRole.role.name}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500">
-                            {t("phone_number")}
-                          </div>
-                          <div className="font-medium truncate">
-                            {userRole.user.phone_number}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-auto pt-2">
-                        <EditUserRoleSheet
-                          organizationId={id}
-                          userRole={userRole}
-                          trigger={
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="w-full gap-2"
-                            >
-                              <CareIcon
-                                icon="l-arrow-up-right"
-                                className="h-4 w-4"
-                              />
-                              <span>{t("more_details")}</span>
-                            </Button>
-                          }
-                        />
-                      </div>
+                    <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+                      <EditUserRoleSheet
+                        organizationId={id}
+                        userRole={userRole}
+                        trigger={
+                          <Button variant="outline" size="sm">
+                            <span>{t("edit_role")}</span>
+                          </Button>
+                        }
+                      />
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/users/${userRole.user.username}`}>
+                          <CareIcon
+                            icon="l-arrow-up-right"
+                            className="text-lg mr-1"
+                          />
+                          <span>{t("see_details")}</span>
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
