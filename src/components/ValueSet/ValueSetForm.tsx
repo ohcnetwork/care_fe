@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -340,6 +341,59 @@ function RuleFields({
   );
 }
 
+const valuesetFormSchema = z.object({
+  name: z.string().min(1, t("field_required")),
+  slug: z.string().min(1, t("field_required")),
+  description: z.string(),
+  status: z.enum(["active", "draft", "retired", "unknown"]),
+  is_system_defined: z.boolean(),
+  compose: z.object({
+    include: z.array(
+      z.object({
+        system: z.string(),
+        concept: z
+          .array(
+            z.object({
+              code: z.string(),
+              display: z.string(),
+            }),
+          )
+          .optional(),
+        filter: z
+          .array(
+            z.object({
+              property: z.string(),
+              op: z.string(),
+              value: z.string(),
+            }),
+          )
+          .optional(),
+      }),
+    ),
+    exclude: z.array(
+      z.object({
+        system: z.string(),
+        concept: z
+          .array(
+            z.object({
+              code: z.string(),
+              display: z.string(),
+            }),
+          )
+          .optional(),
+        filter: z
+          .array(
+            z.object({
+              property: z.string(),
+              op: z.string(),
+              value: z.string(),
+            }),
+          )
+          .optional(),
+      }),
+    ),
+  }),
+});
 export function ValueSetForm({
   initialData,
   onSubmit,
@@ -347,59 +401,6 @@ export function ValueSetForm({
 }: ValueSetFormProps) {
   const { t } = useTranslation();
 
-  const valuesetFormSchema = z.object({
-    name: z.string().min(1, t("field_required")),
-    slug: z.string().min(1, t("field_required")),
-    description: z.string(),
-    status: z.enum(["active", "draft", "retired", "unknown"]),
-    is_system_defined: z.boolean(),
-    compose: z.object({
-      include: z.array(
-        z.object({
-          system: z.string(),
-          concept: z
-            .array(
-              z.object({
-                code: z.string(),
-                display: z.string(),
-              }),
-            )
-            .optional(),
-          filter: z
-            .array(
-              z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
-              }),
-            )
-            .optional(),
-        }),
-      ),
-      exclude: z.array(
-        z.object({
-          system: z.string(),
-          concept: z
-            .array(
-              z.object({
-                code: z.string(),
-                display: z.string(),
-              }),
-            )
-            .optional(),
-          filter: z
-            .array(
-              z.object({
-                property: z.string(),
-                op: z.string(),
-                value: z.string(),
-              }),
-            )
-            .optional(),
-        }),
-      ),
-    }),
-  });
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
