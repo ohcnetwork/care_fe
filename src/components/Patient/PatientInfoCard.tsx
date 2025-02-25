@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { LocationFormSheet } from "@/components/Location/LocationFormSheet";
 import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 
@@ -402,32 +403,38 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          <Button
-                            variant="outline"
-                            className="border-gray-400 w-full"
-                          >
-                            <Link
-                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                              className="text-sm text-gray-950 font-semibold"
-                            >
-                              {t("update_location")}
-                            </Link>
-                          </Button>
+                          <LocationFormSheet
+                            facilityId={props.encounter.facility.id}
+                            encounterId={props.encounter.id}
+                            trigger={
+                              <Button
+                                variant="outline"
+                                className="border-gray-400 w-full"
+                              >
+                                {t("update_location")}
+                              </Button>
+                            }
+                            history={encounter.location_history}
+                          />
                         </div>
                       </PopoverContent>
                     </Popover>
                   ) : (
                     <Badge variant="outline">
-                      <Link
-                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                        className="flex items-center gap-1 text-gray-950 py-0.5"
-                      >
-                        <CareIcon
-                          icon="l-location-point"
-                          className="h-4 w-4 text-green-600"
-                        />
-                        {t("add_location")}
-                      </Link>
+                      <LocationFormSheet
+                        facilityId={props.encounter.facility.id}
+                        encounterId={props.encounter.id}
+                        trigger={
+                          <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                            <CareIcon
+                              icon="l-location-point"
+                              className="h-4 w-4 text-green-600"
+                            />
+                            {t("add_location")}
+                          </div>
+                        }
+                        history={encounter.location_history}
+                      />
                     </Badge>
                   )}
                 </div>

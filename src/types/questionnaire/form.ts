@@ -4,7 +4,6 @@ import { EncounterEditRequest } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { LocationAssociationQuestion } from "@/types/location/association";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
@@ -28,7 +27,6 @@ export type ResponseValue =
   | RV<"allergy_intolerance", AllergyIntoleranceRequest[]>
   | RV<"medication_request", MedicationRequest[]>
   | RV<"medication_statement", MedicationStatementRequest[]>
-  | RV<"location_association", LocationAssociationQuestion[]>
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
   | RV<"encounter", EncounterEditRequest[]>

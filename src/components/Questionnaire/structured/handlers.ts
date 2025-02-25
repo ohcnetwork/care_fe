@@ -3,8 +3,6 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
-import { LocationAssociationQuestion } from "@/types/location/association";
-import locationApi from "@/types/location/locationApi";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
@@ -157,39 +155,6 @@ export const structuredHandlers: {
           reference_id: "appointment",
         },
       ];
-    },
-  },
-  location_association: {
-    getRequests: (
-      locationAssociations: LocationAssociationQuestion[],
-      { facilityId, encounterId },
-    ) => {
-      if (!locationAssociations.length) {
-        return [];
-      }
-
-      if (!facilityId) {
-        throw new Error(
-          "Cannot create location association without a facility",
-        );
-      }
-
-      return locationAssociations.map((locationAssociation) => {
-        return {
-          url: locationApi.createAssociation.path
-            .replace("{facility_external_id}", facilityId)
-            .replace("{location_external_id}", locationAssociation.location),
-          method: locationApi.createAssociation.method,
-          body: {
-            encounter: encounterId,
-            start_datetime: locationAssociation.start_datetime,
-            end_datetime: locationAssociation.end_datetime,
-            status: locationAssociation.status,
-            meta: locationAssociation.meta,
-          },
-          reference_id: `location_association_${locationAssociation}`,
-        };
-      });
     },
   },
 };
