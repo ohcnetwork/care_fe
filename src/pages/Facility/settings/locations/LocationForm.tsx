@@ -143,9 +143,9 @@ export default function LocationForm({
       onSuccess?.();
     },
 
-    // onError: () => {
-    //   toast.error(t("submission_failed"));
-    // },
+    onError: () => {
+      toast.error(t("beds_creation_failed"));
+    },
   });
 
   function onSubmit(values: FormValues) {
@@ -163,7 +163,7 @@ export default function LocationForm({
           { length: Number(values.beds_count) },
           (_, index) => ({
             url: `/api/v1/facility/${facilityId}/location/`,
-            method: "POST",
+            method: "PST",
             reference_id: `Location`,
             body: {
               ...data,
@@ -296,6 +296,7 @@ export default function LocationForm({
                   <Input
                     {...field}
                     type="number"
+                    min={1}
                     {...field}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />

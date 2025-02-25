@@ -471,6 +471,7 @@
   "bed_count_validation_error": "Number of beds must be greater than 0",
   "bed_created_notification_one": "{{count}} Bed created successfully",
   "bed_created_notification_other": "{{count}} Beds created successfully",
+  "beds_creation_failed":"Failed to create beds",
   "bed_history": "Bed History",
   "bed_not_linked_to_camera": "This bed has not been linked to this camera.",
   "bed_search_placeholder": "Search by beds name",
