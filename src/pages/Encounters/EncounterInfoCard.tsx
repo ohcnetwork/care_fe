@@ -59,7 +59,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex flex-wrap items-center gap-2 mt-4">
         <Badge
           className="gap-1 rounded-sm py-1 px-2"
           variant="primary"
@@ -92,14 +92,16 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               : t("ongoing")}
           </span>
         </Badge>
-        <Badge
-          variant="secondary"
-          className="gap-1 bg-blue-100 border-blue-200 text-blue-900 rounded-sm py-1 px-2"
-          title={t("op_number")}
-        >
-          {t("op_number")}:{" "}
-          <span className="font-medium">{encounter.external_identifier}</span>
-        </Badge>
+        {encounter.external_identifier && (
+          <Badge
+            variant="secondary"
+            className="gap-1 bg-blue-100 border-blue-200 text-blue-900 rounded-sm py-1 px-2"
+            title={t("ip_op_obs_emr_number")}
+          >
+            {t("ip_op_obs_emr_number")}:{" "}
+            <span className="font-medium">{encounter.external_identifier}</span>
+          </Badge>
+        )}
         <Badge
           className="capitalize gap-1  py-1 px-2"
           variant="secondary"
