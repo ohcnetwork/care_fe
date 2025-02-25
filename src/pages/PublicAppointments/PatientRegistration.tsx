@@ -362,6 +362,19 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
+                        {form.getValues("year_of_birth") && (
+                          <div className="text-sm font-bold">
+                            {Number(form.getValues("year_of_birth")) <= 0 ? (
+                              <span className="text-red-600">Invalid age</span>
+                            ) : (
+                              <span className="text-violet-600">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() -
+                                  Number(form.getValues("year_of_birth"))}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
