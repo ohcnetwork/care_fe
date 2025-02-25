@@ -19,15 +19,25 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
+import useFilters from "@/hooks/useFilters";
+
 import query from "@/Utils/request/query";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
 export function ValueSetList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+  });
   const { data: response, isLoading } = useQuery({
-    queryKey: ["valuesets"],
-    queryFn: query(valuesetApi.list),
+    queryKey: ["valuesets", qParams],
+    queryFn: query(valuesetApi.list, {
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+      },
+    }),
   });
 
   if (isLoading) {
@@ -160,12 +170,17 @@ export function ValueSetList() {
                 <TableCell className="whitespace-nowrap px-6 py-4">
                   <Badge
                     className={
-                      valueset.status === "active"
-                        ? "bg-green-100 text-green-800 hover:bg-green-200"
-                        : "bg-red-100 text-red-800 hover:bg-red-200"
+                      {
+                        active:
+                          "bg-green-100 text-green-800 hover:bg-green-200",
+                        draft:
+                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                      }[valueset.status]
                     }
                   >
-                    {valueset.status}
+                    {t(valueset.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-6 py-4">
@@ -176,6 +191,7 @@ export function ValueSetList() {
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {valueset.is_system_defined ? t("yes") : t("no")}
                 </TableCell>
+                <TableCell className="whitespace-nowrap px-6 py-4 text-sm"></TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
                     <Button
@@ -184,7 +200,6 @@ export function ValueSetList() {
                       onClick={() =>
                         navigate(`/admin/valuesets/${valueset.slug}/edit`)
                       }
-                      className="hover:bg-primary/5"
                     >
                       <CareIcon icon="l-edit" />
                       {t("edit")}
@@ -221,6 +236,7 @@ export function ValueSetList() {
       </div>
       <RenderTable />
       <RenderCard />
+      <Pagination totalCount={response?.count ?? 0} />
     </div>
   );
 }
