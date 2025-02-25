@@ -7,6 +7,7 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
     <FilesTab
       type="encounter"
       encounter={props.encounter}
+      patientId={props.patient.id}
       subPage={props.subPage}
     />
   );
