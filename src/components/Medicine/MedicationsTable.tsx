@@ -43,7 +43,9 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   if (!medications?.length) {
     return (
       <CardContent className="p-2">
-        <p className="text-gray-500">{t("no_medication_recorded")}</p>
+        <p className="text-gray-500 w-full flex justify-center mb-3">
+          {t("no_active_medication_recorded")}
+        </p>
       </CardContent>
     );
   }
