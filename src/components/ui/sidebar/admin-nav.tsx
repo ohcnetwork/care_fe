@@ -13,7 +13,7 @@ function generateAdminLinks(t: TFunction) {
   const baseUrl = "/admin";
   const links: NavigationLink[] = [
     {
-      name: t("questionnaire"),
+      name: t("questionnaire_one"),
       url: `${baseUrl}/questionnaire`,
       icon: "d-book-open",
     },
