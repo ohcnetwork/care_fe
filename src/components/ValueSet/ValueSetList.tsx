@@ -52,18 +52,22 @@ export function ValueSetList() {
         valuesets.map((valueset) => (
           <Card
             key={valueset.id}
-            className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow hover:shadow-lg"
+            className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
           >
             <CardContent className="p-6 relative">
               <div className="absolute top-4 right-4">
                 <Badge
                   className={
-                    valueset.status === "active"
-                      ? "bg-green-100 text-green-800 px-3 py-1 rounded-full"
-                      : "bg-red-100 text-red-800 hover:bg-red-200"
+                    {
+                      active: "bg-green-100 text-green-800 hover:bg-green-200",
+                      draft:
+                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                      unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                    }[valueset.status]
                   }
                 >
-                  {valueset.status}
+                  {t(valueset.status)}
                 </Badge>
               </div>
 
@@ -191,7 +195,6 @@ export function ValueSetList() {
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {valueset.is_system_defined ? t("yes") : t("no")}
                 </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm"></TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
                   {!valueset.is_system_defined && (
                     <Button
@@ -225,7 +228,6 @@ export function ValueSetList() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
-          <p className="text-gray-600">{t("manage_valuesets")}</p>
         </div>
         <Button asChild>
           <Link href="/admin/valuesets/create">

@@ -66,12 +66,15 @@ export function QuestionnaireList() {
               <div className="absolute top-4 right-4">
                 <Badge
                   className={
-                    questionnaire.status === "active"
-                      ? "bg-green-100 text-green-800 px-3 py-1 rounded-full"
-                      : ""
+                    {
+                      active: "bg-green-100 text-green-800 hover:bg-green-200",
+                      draft:
+                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                    }[questionnaire.status]
                   }
                 >
-                  {questionnaire.status}
+                  {t(questionnaire.status)}
                 </Badge>
               </div>
 
