@@ -46,8 +46,7 @@ export default function FacilityOrganizationSelector(
       pathParams: { facilityId },
       queryParams: {
         parent: "",
-        search_text: facilityOrgSearch,
-        limit: 14,
+        name: facilityOrgSearch,
       },
     }),
   });
@@ -59,8 +58,7 @@ export default function FacilityOrganizationSelector(
         pathParams: { facilityId },
         queryParams: {
           parent: level.id,
-          search_text: facilityOrgSearch,
-          limit: 14,
+          name: facilityOrgSearch,
         },
       }),
       enabled: !!level.id,
