@@ -41,12 +41,6 @@ import {
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
 
-interface Props {
-  facilityId: string;
-  onSuccess?: () => void;
-  locationId?: string;
-  parentId?: string;
-}
 const formSchema = z.object({
   name: z.string().min(1, { message: t("field_required") }),
   description: z.string().optional(),
@@ -63,6 +57,12 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+interface Props {
+  facilityId: string;
+  onSuccess?: () => void;
+  locationId?: string;
+  parentId?: string;
+}
 
 const defaultValues: FormValues = {
   name: "",
