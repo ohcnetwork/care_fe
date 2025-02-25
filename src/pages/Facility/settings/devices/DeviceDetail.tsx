@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDate } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -121,9 +122,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
 
     return (
       <div key={`${contact.system}-${contact.value}`} className="space-y-1">
-        <p className="text-sm font-medium text-gray-500">
-          {t(contact.system)} ({t(contact.use)})
-        </p>
+        <p className="text-sm font-medium text-gray-500">{t(contact.system)}</p>
         {link ? (
           <a
             href={link}
@@ -204,7 +203,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   {device.current_location ? (
                     <>
                       <Link
-                        href={`/facility/${facilityId}/settings/location/${device.current_location.id}`}
+                        href={`/location/${device.current_location.id}`}
                         className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
                       >
                         {device.current_location.name}
@@ -324,9 +323,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                           {t("manufacture_date")}
                         </h4>
                         <p className="mt-1">
-                          {new Date(
-                            device.manufacture_date,
-                          ).toLocaleDateString()}
+                          {formatDate(device.manufacture_date, "dd/MM/yyyy")}
                         </p>
                       </div>
                     )}
@@ -336,9 +333,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                           {t("expiration_date")}
                         </h4>
                         <p className="mt-1">
-                          {new Date(
-                            device.expiration_date,
-                          ).toLocaleDateString()}
+                          {formatDate(device.expiration_date, "dd/MM/yyyy")}
                         </p>
                       </div>
                     )}

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isBefore, startOfTomorrow } from "date-fns";
 import { t } from "i18next";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -40,21 +41,38 @@ import {
 } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
-const formSchema = z.object({
-  identifier: z.string().optional(),
-  status: z.enum(DeviceStatuses),
-  availability_status: z.enum(DeviceAvailabilityStatuses),
-  manufacturer: z.string().optional(),
-  manufacture_date: z.string().optional(),
-  expiration_date: z.string().optional(),
-  lot_number: z.string().optional(),
-  serial_number: z.string().optional(),
-  registered_name: z.string().min(1, { message: t("required") }),
-  user_friendly_name: z.string().optional(),
-  model_number: z.string().optional(),
-  part_number: z.string().optional(),
-  contact: z.array(contactPointSchema),
-});
+const formSchema = z
+  .object({
+    identifier: z.string().optional(),
+    status: z.enum(DeviceStatuses),
+    availability_status: z.enum(DeviceAvailabilityStatuses),
+    manufacturer: z.string().optional(),
+    manufacture_date: z
+      .string()
+      .optional()
+      .refine(
+        (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+        t("manufacture_date_cannot_be_in_future"),
+      ),
+    expiration_date: z.string().optional(),
+    lot_number: z.string().optional(),
+    serial_number: z.string().optional(),
+    registered_name: z.string().min(1, { message: t("required") }),
+    user_friendly_name: z.string().optional(),
+    model_number: z.string().optional(),
+    part_number: z.string().optional(),
+    contact: z.array(contactPointSchema),
+  })
+  .refine(
+    (data) => {
+      if (!data.expiration_date || !data.manufacture_date) return true;
+      return new Date(data.expiration_date) > new Date(data.manufacture_date);
+    },
+    {
+      message: t("expiration_date_must_be_after_manufacture_date"),
+      path: ["expiration_date"],
+    },
+  );
 
 interface Props {
   facilityId: string;
@@ -63,11 +81,11 @@ interface Props {
 }
 
 const defaultValues: z.infer<typeof formSchema> = {
-  identifier: "",
+  identifier: undefined,
   status: "active",
   availability_status: "available",
-  manufacturer: "",
-  manufacture_date: "",
+  manufacturer: undefined,
+  manufacture_date: undefined,
   registered_name: "",
   contact: [],
 };
@@ -102,7 +120,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
 
   useEffect(() => {
     if (device) {
-      form.reset({ ...device });
+      form.reset({
+        ...device,
+        user_friendly_name: device.user_friendly_name || undefined,
+        identifier: device.identifier || undefined,
+        manufacturer: device.manufacturer || undefined,
+        manufacture_date: device.manufacture_date || undefined,
+        expiration_date: device.expiration_date || undefined,
+        lot_number: device.lot_number || undefined,
+        serial_number: device.serial_number || undefined,
+        model_number: device.model_number || undefined,
+        part_number: device.part_number || undefined,
+        contact: Array.isArray(device.contact) ? device.contact : [],
+      });
     }
   }, [device, form]);
 
