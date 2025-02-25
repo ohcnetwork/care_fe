@@ -52,25 +52,8 @@ const formSchema = z.object({
   description: z.string().optional(),
   status: z.enum(["active", "inactive", "unknown"] as const),
   operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
-  form: z.enum([
-    "si",
-    "bu",
-    "wi",
-    "wa",
-    "lvl",
-    "co",
-    "ro",
-    "bd",
-    "ve",
-    "ho",
-    "ca",
-    "rd",
-    "area",
-    "jdn",
-    "vi",
-  ] as const),
+  form: z.enum(LocationFormOptions),
   parent: z.string().optional().nullable(),
-
   beds_count: z
     .number()
     .min(1, t("number_min_error", { min: 1 }))
@@ -78,6 +61,20 @@ const formSchema = z.object({
   organizations: z.array(z.string()).default([]),
   availability_status: z.enum(["available", "unavailable"] as const),
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
+const defaultValues: FormValues = {
+  name: "",
+  description: "",
+  status: "active",
+  operational_status: "O",
+  form: "ro",
+  beds_count: 1,
+  parent: null,
+  organizations: [],
+  availability_status: "available",
+};
 export default function LocationForm({
   facilityId,
   onSuccess,
@@ -96,20 +93,6 @@ export default function LocationForm({
   });
 
   const isEditMode = !!location?.id;
-
-  type FormValues = z.infer<typeof formSchema>;
-
-  const defaultValues: FormValues = {
-    name: "",
-    description: "",
-    status: "active",
-    operational_status: "O",
-    form: "ro",
-    beds_count: 1,
-    parent: null,
-    organizations: [],
-    availability_status: "available",
-  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
