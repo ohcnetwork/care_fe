@@ -63,6 +63,9 @@ export default function LocationForm({
     }),
     enabled: !!locationId,
   });
+
+  const isEditMode = !!location?.id;
+
   const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     description: z.string().optional(),
@@ -89,7 +92,7 @@ export default function LocationForm({
 
     beds_count: z
       .string()
-
+      .optional()
       .refine((val) => val === undefined || Number(val) >= 1, {
         message: t("bed_count_validation_error"),
       }),
@@ -143,9 +146,7 @@ export default function LocationForm({
           pathParams: { facility_id: facilityId },
         }),
     onSuccess: () => {
-      toast.success(
-        location?.id ? t("location_updated") : t("location_created"),
-      );
+      toast.success(isEditMode ? t("location_updated") : t("location_created"));
       queryClient.invalidateQueries({ queryKey: ["locations"] });
 
       onSuccess?.();
@@ -168,11 +169,7 @@ export default function LocationForm({
   });
 
   function onSubmit(values: FormValues) {
-    if (
-      values.form === "bd" &&
-      !location?.id &&
-      Number(values.beds_count) > 1
-    ) {
+    if (values.form === "bd" && !isEditMode && Number(values.beds_count) > 1) {
       const data: LocationWrite = {
         ...values,
         mode: "instance",
@@ -311,7 +308,7 @@ export default function LocationForm({
             )}
           />
 
-          {form.watch("form") === "bd" && (
+          {form.watch("form") === "bd" && !isEditMode && (
             <FormField
               control={form.control}
               name="beds_count"
@@ -378,9 +375,9 @@ export default function LocationForm({
 
         <Button type="submit" disabled={isPending}>
           {isPending ? (
-            <>{location?.id ? t("updating") : t("creating")}</>
+            <>{isEditMode ? t("updating") : t("creating")}</>
           ) : (
-            <>{location?.id ? t("update") : t("create")}</>
+            <>{isEditMode ? t("update") : t("create")}</>
           )}
         </Button>
       </form>
