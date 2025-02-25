@@ -91,11 +91,9 @@ export default function LocationForm({
     parent: z.string().optional().nullable(),
 
     beds_count: z
-      .string()
-      .optional()
-      .refine((val) => val === undefined || Number(val) >= 1, {
-        message: t("bed_count_validation_error"),
-      }),
+      .number()
+      .min(1, t("number_min_error", { min: 1 }))
+      .optional(),
     organizations: z.array(z.string()).default([]),
     availability_status: z.enum(["available", "unavailable"] as const),
   });
@@ -108,7 +106,7 @@ export default function LocationForm({
     status: "active",
     operational_status: "O",
     form: "ro",
-    beds_count: "1",
+    beds_count: 1,
     parent: null,
     organizations: [],
     availability_status: "available",
@@ -169,7 +167,7 @@ export default function LocationForm({
   });
 
   function onSubmit(values: FormValues) {
-    if (values.form === "bd" && !isEditMode && Number(values.beds_count) > 1) {
+    if (values.form === "bd" && !isEditMode && (values.beds_count ?? 0) > 1) {
       const data: LocationWrite = {
         ...values,
         mode: "instance",
@@ -249,16 +247,14 @@ export default function LocationForm({
           )}
         />
         {form.watch("form") === "bd" &&
-          form.watch("beds_count") &&
-          !isNaN(Number(form.watch("beds_count"))) &&
-          Number(form.watch("beds_count")) > 1 &&
+          (form.watch("beds_count") ?? 0) > 1 &&
           form.watch("name")?.trim() !== "" && (
             <span className="text-sm text-gray-500">
               {Array.from(
                 { length: Number(form.watch("beds_count")) },
                 (_, index) => (
                   <span key={index}>
-                    {form.watch("name")}-{index + 1},{" "}
+                    {form.watch("name")}-{index + 1}{" "}
                   </span>
                 ),
               )}
@@ -315,7 +311,12 @@ export default function LocationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("total_number_of_beds")}</FormLabel>
-                  <Input {...field} type="number" />
+                  <Input
+                    {...field}
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
