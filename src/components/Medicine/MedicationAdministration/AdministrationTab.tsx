@@ -1,14 +1,15 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -361,7 +362,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     Math.floor(currentDate.getHours() / 6),
   );
   // Calculate visible slots based on end slot
-  const visibleSlots = React.useMemo(() => {
+  const visibleSlots = useMemo(() => {
     const slots = [];
     let currentIndex = endSlotIndex;
     let currentDate = new Date(endSlotDate);
@@ -382,8 +383,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     return slots;
   }, [endSlotDate, endSlotIndex]);
 
+  const queryClient = useQueryClient();
+
   // Queries
-  const { data: activeMedications, refetch: refetchActive } = useQuery({
+  const { data: activeMedications } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -396,7 +399,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     enabled: !!patientId,
   });
 
-  const { data: stoppedMedications, refetch: refetchStopped } = useQuery({
+  const { data: stoppedMedications } = useQuery({
     queryKey: ["medication_requests_stopped", patientId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -409,7 +412,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     enabled: !!patientId,
   });
 
-  const { data: administrations, refetch: refetchAdministrations } = useQuery({
+  const { data: administrations } = useQuery({
     queryKey: ["medication_administrations", patientId, visibleSlots],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
@@ -438,7 +441,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   // Get last administered date and last administered by for each medication
-  const lastAdministeredDetails = React.useMemo(() => {
+  const lastAdministeredDetails = useMemo(() => {
     return administrations?.results?.reduce<{
       dates: Record<string, string>;
       performers: Record<string, string>;
@@ -473,7 +476,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   };
 
   // Calculate if we can go back further based on the earliest slot and authored date
-  const canGoBack = React.useMemo(() => {
+  const canGoBack = useMemo(() => {
     const medications = showStopped
       ? [
           ...(activeMedications?.results || []),
@@ -500,7 +503,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<MedicationAdministrationRequest | null>(null);
 
   // Calculate last modified date
-  const lastModifiedDate = React.useMemo(() => {
+  const lastModifiedDate = useMemo(() => {
     if (!administrations?.results?.length) return null;
 
     const sortedAdmins = [...administrations.results].sort(
@@ -518,13 +521,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
     }),
     onSuccess: () => {
-      refetchActive();
-      refetchStopped();
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_active"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["medication_requests_stopped"],
+      });
     },
   });
 
   // Handlers
-  const handlePreviousSlot = React.useCallback(() => {
+  const handlePreviousSlot = useCallback(() => {
     if (!canGoBack) return;
 
     const newEndSlotIndex = endSlotIndex - 1;
@@ -538,7 +545,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex, canGoBack]);
 
-  const handleNextSlot = React.useCallback(() => {
+  const handleNextSlot = useCallback(() => {
     const newEndSlotIndex = endSlotIndex + 1;
     if (newEndSlotIndex > 3) {
       setEndSlotIndex(0);
@@ -550,7 +557,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     }
   }, [endSlotDate, endSlotIndex]);
 
-  const handleAdminister = React.useCallback(
+  const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
       setAdministrationRequest(
         createMedicationAdministrationRequest(medication, encounterId),
@@ -561,7 +568,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [encounterId],
   );
 
-  const handleEditAdministration = React.useCallback(
+  const handleEditAdministration = useCallback(
     (medication: MedicationRequestRead, admin: MedicationAdministration) => {
       setAdministrationRequest({
         id: admin.id,
@@ -580,7 +587,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [],
   );
 
-  const handleDiscontinue = React.useCallback(
+  const handleDiscontinue = useCallback(
     (medication: MedicationRequestRead) => {
       discontinueMedication({
         datapoints: [
@@ -602,14 +609,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       ]
     : activeMedications?.results || [];
 
-  const filteredMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    },
-  );
+  const filteredMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   let content;
   if (!activeMedications || !stoppedMedications) {
@@ -618,10 +627,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <Loading />
       </div>
     );
-  } else if (!medications?.length) {
+  } else if (
+    !activeMedications?.results?.length &&
+    !stoppedMedications?.results?.length
+  ) {
     content = (
       <EmptyState
-        message={t("no_active_medications")}
+        message={t("no_medications")}
         description={t("no_medications_to_administer")}
       />
     );
@@ -717,7 +729,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             </div>
           </div>
 
-          {stoppedMedications?.results?.length > 0 && (
+          {stoppedMedications?.results?.length > 0 && !searchQuery.trim() && (
             <div
               className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
               onClick={() => setShowStopped(!showStopped)}
@@ -745,8 +757,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <div className="flex items-center gap-2 flex-1">
           <div className="flex items-center gap-2 flex-1">
             <CareIcon icon="l-search" className="text-lg text-gray-500" />
-            <input
-              type="text"
+            <Input
               placeholder={t("search_medications")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -784,7 +795,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             if (!open) {
               setAdministrationRequest(null);
               setSelectedMedication(null);
-              refetchAdministrations();
+              queryClient.invalidateQueries({
+                queryKey: ["medication_administrations"],
+              });
             }
           }}
           medication={selectedMedication}
@@ -804,7 +817,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         onOpenChange={(open) => {
           setIsSheetOpen(open);
           if (!open) {
-            refetchAdministrations();
+            queryClient.invalidateQueries({
+              queryKey: ["medication_administrations"],
+            });
           }
         }}
         medications={medications}
