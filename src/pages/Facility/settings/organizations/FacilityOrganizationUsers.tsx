@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -152,24 +154,40 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                                 {t("phone_number")}
                               </div>
                               <div className="font-medium truncate">
-                                {userRole.user.phone_number}
+                                {userRole.user.phone_number
+                                  ? formatPhoneNumberIntl(
+                                      userRole.user.phone_number,
+                                    )
+                                  : "-"}
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
+                      <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
                         <EditFacilityUserRoleSheet
                           facilityId={facilityId}
                           organizationId={id}
                           userRole={userRole}
                           trigger={
                             <Button variant="outline" size="sm">
-                              <span>{t("see_details")}</span>
+                              <span>{t("edit_role")}</span>
                             </Button>
                           }
                         />
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/facility/${facilityId}/users/${userRole.user.username}`}
+                            basePath="/"
+                          >
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="text-lg mr-1"
+                            />
+                            <span>{t("see_details")}</span>
+                          </Link>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
