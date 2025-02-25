@@ -163,7 +163,7 @@ export default function LocationForm({
           { length: Number(values.beds_count) },
           (_, index) => ({
             url: `/api/v1/facility/${facilityId}/location/`,
-            method: "PST",
+            method: "POST",
             reference_id: `Location`,
             body: {
               ...data,
