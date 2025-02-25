@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -46,7 +47,37 @@ interface Props {
   locationId?: string;
   parentId?: string;
 }
+const formSchema = z.object({
+  name: z.string().min(1, { message: t("field_required") }),
+  description: z.string().optional(),
+  status: z.enum(["active", "inactive", "unknown"] as const),
+  operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
+  form: z.enum([
+    "si",
+    "bu",
+    "wi",
+    "wa",
+    "lvl",
+    "co",
+    "ro",
+    "bd",
+    "ve",
+    "ho",
+    "ca",
+    "rd",
+    "area",
+    "jdn",
+    "vi",
+  ] as const),
+  parent: z.string().optional().nullable(),
 
+  beds_count: z
+    .number()
+    .min(1, t("number_min_error", { min: 1 }))
+    .optional(),
+  organizations: z.array(z.string()).default([]),
+  availability_status: z.enum(["available", "unavailable"] as const),
+});
 export default function LocationForm({
   facilityId,
   onSuccess,
@@ -65,38 +96,6 @@ export default function LocationForm({
   });
 
   const isEditMode = !!location?.id;
-
-  const formSchema = z.object({
-    name: z.string().min(1, { message: "Name is required" }),
-    description: z.string().optional(),
-    status: z.enum(["active", "inactive", "unknown"] as const),
-    operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
-    form: z.enum([
-      "si",
-      "bu",
-      "wi",
-      "wa",
-      "lvl",
-      "co",
-      "ro",
-      "bd",
-      "ve",
-      "ho",
-      "ca",
-      "rd",
-      "area",
-      "jdn",
-      "vi",
-    ] as const),
-    parent: z.string().optional().nullable(),
-
-    beds_count: z
-      .number()
-      .min(1, t("number_min_error", { min: 1 }))
-      .optional(),
-    organizations: z.array(z.string()).default([]),
-    availability_status: z.enum(["available", "unavailable"] as const),
-  });
 
   type FormValues = z.infer<typeof formSchema>;
 
