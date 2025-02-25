@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -135,11 +136,12 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (!isImageFile(e.target.files[0])) {
+    const file = e.target.files[0];
+    if (!isImageFile(file)) {
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
-    setSelectedFile(e.target.files[0]);
+    setSelectedFile(file);
   };
 
   const uploadAvatar = async () => {
@@ -231,7 +233,11 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg">
                       <img
-                        src={preview || imageUrl}
+                        src={
+                          preview && preview.startsWith("blob:")
+                            ? DOMPurify.sanitize(preview)
+                            : imageUrl
+                        }
                         alt="cover-photo"
                         className="h-full w-full object-cover"
                       />

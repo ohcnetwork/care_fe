@@ -29,10 +29,10 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
+  LocationFormOptions,
   LocationWrite,
   OperationalStatus,
   Status,
-  locationFormOptions,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import {
@@ -292,9 +292,9 @@ export default function LocationForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="max-h-[46vh]">
-                    {locationFormOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                    {LocationFormOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {t(`location_form__${option}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>

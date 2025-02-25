@@ -26,7 +26,7 @@ export interface ValuesetBase {
   name: string;
   description: string;
   compose: ValuesetCompose;
-  status: "active" | "inactive";
+  status: "active" | "draft" | "retired" | "unknown";
   is_system_defined: boolean;
   created_by: string | null;
   updated_by: string | null;
