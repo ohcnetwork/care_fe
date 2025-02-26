@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { LocationList, getLocationFormLabel } from "@/types/location/location";
+import { LocationList } from "@/types/location/location";
 
 interface Props {
   location: LocationList;
@@ -83,7 +83,7 @@ export function LocationCard({ location, onEdit, className }: Props) {
                 {location.name}
               </h3>
               <p className="text-sm text-gray-500">
-                {getLocationFormLabel(location.form)}
+                {t(`location_form__${location.form}`)}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
