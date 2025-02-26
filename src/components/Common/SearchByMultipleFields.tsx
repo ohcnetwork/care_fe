@@ -102,14 +102,17 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
-  const isSingleOption = options.length == 1;
+  const [hasInputBeenFocused, setHasInputBeenFocused] = useState(false);
+  const isSingleOption = options.length === 1;
 
   useEffect(() => {
     if (clearSearch?.value) {
       setSearchValue("");
-      inputRef.current?.focus();
+      if (hasInputBeenFocused) {
+        inputRef.current?.focus();
+      }
     }
-  }, [clearSearch?.value]);
+  }, [clearSearch?.value, hasInputBeenFocused]);
 
   const handleOptionChange = useCallback(
     (index: number) => {
@@ -118,13 +121,22 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       setSearchValue(option.value || "");
       setFocusedIndex(options.findIndex((op) => op.key === option.key));
       setOpen(false);
-      inputRef.current?.focus();
+      setHasInputBeenFocused(true);
       setError(false);
       onSearch(option.key, option.value);
       onFieldChange?.(options[index]);
+      if (hasInputBeenFocused) {
+        inputRef.current?.focus();
+      }
     },
-    [onSearch],
+    [onSearch, onFieldChange, options, hasInputBeenFocused],
   );
+
+  useEffect(() => {
+    if (hasInputBeenFocused) {
+      inputRef.current?.focus();
+    }
+  }, [selectedOption, hasInputBeenFocused]);
 
   const unselectedOptions = useMemo(
     () => options.filter((option) => option.key !== selectedOption.key),
@@ -142,6 +154,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         e.stopPropagation();
+        setHasInputBeenFocused(true);
         inputRef.current?.focus();
         setOpen(true);
       }
@@ -175,13 +188,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex, open, handleOptionChange, options]);
+  }, [focusedIndex, open, handleOptionChange, options, unselectedOptions]);
 
   useEffect(() => {
     if (selectedOption.value !== searchValue) {
       onSearch(selectedOption.key, searchValue);
     }
-  }, [searchValue]);
+  }, [searchValue, onSearch, selectedOption]);
 
   const renderSearchInput = useMemo(() => {
     switch (selectedOption.type) {
@@ -195,6 +208,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               value={searchValue}
               onChange={(value) => setSearchValue(value)}
               className={inputClassName}
+              onFocus={() => setHasInputBeenFocused(true)}
+              autoFocus={true}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
           </div>
@@ -209,6 +224,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               ref={inputRef}
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
+              onFocus={() => setHasInputBeenFocused(true)}
               className={cn(
                 "flex-grow border-none shadow-none focus-visible:ring-0",
                 inputClassName,
@@ -218,13 +234,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           </div>
         );
     }
-  }, [selectedOption, searchValue, t, inputClassName, open]);
+  }, [selectedOption, searchValue, inputClassName, open, id, isSingleOption]);
 
   useEffect(() => {
-    if (autoFocus) {
+    if (autoFocus && hasInputBeenFocused) {
       inputRef.current?.focus();
     }
-  }, [autoFocus, open, selectedOptionIndex]);
+  }, [autoFocus, hasInputBeenFocused]);
 
   return (
     <div
@@ -247,7 +263,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                 variant="ghost"
                 className="focus:ring-0 px-2 ml-1"
                 size="sm"
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  setOpen(true);
+                  setHasInputBeenFocused(true);
+                }}
               >
                 <CareIcon icon="l-search" className="mr-2 text-base" />
               </Button>
@@ -370,7 +389,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
-            inputRef.current?.focus();
+            if (hasInputBeenFocused) {
+              inputRef.current?.focus();
+            }
           }}
         >
           <CareIcon icon="l-times" className="mr-2 h-4 w-4" />
