@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,9 +8,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
@@ -30,11 +30,35 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [resetVersion, setResetVersion] = useState(0);
   const limit = 12; // 3x4 grid
+
   useEffect(() => {
     setSearchQuery("");
     setPage(1);
+    setResetVersion((prev) => prev + 1);
   }, [id]);
+
+  const searchOptions = [
+    {
+      key: "name",
+      type: "text" as const,
+      placeholder: "Search by name",
+      value: searchQuery || "",
+    },
+  ];
+
+  const handleSearch = useCallback((key: string, value: string) => {
+    if (key === "name") {
+      setSearchQuery(value);
+      setPage(1);
+    }
+  }, []);
+
+  const handleFieldChange = useCallback(() => {
+    setSearchQuery("");
+    setPage(1);
+  }, []);
 
   const { data: children, isFetching } = useQuery({
     queryKey: ["organization", id, "children", page, limit, searchQuery],
@@ -66,13 +90,13 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
             />
           </div>
           <div className="w-72">
-            <Input
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to first page on search
-              }}
+            <SearchByMultipleFields
+              id="organization-search"
+              key={`${id}-${resetVersion}`}
+              options={searchOptions}
+              initialOptionIndex={0}
+              onSearch={handleSearch}
+              onFieldChange={handleFieldChange}
               className="w-full"
             />
           </div>
