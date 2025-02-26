@@ -2690,5 +2690,9 @@
   "your_facilities": "Your Facilities",
   "your_organizations": "Your Organizations",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out"
+  "zoom_out": "Zoom Out",
+  "at_least_one_organization_is_required" : "At least one organization is required",
+  "title_is_required" : "Title is required",
+  "slug_is_required_min_5_characters" : "Slug is required (min 5 characters)",
+  "slug_can_only_contain_letters_numbers_hyphens_and_underscores" : "Slug can only contain letters, numbers, hyphens, and underscores"
 }

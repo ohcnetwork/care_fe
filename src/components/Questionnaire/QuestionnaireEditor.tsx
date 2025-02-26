@@ -13,6 +13,7 @@ import { Building, Check, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 
@@ -637,11 +638,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
-  const [tagSearchQuery, setTagSearchQuery] = useState("");
-  const queryClient = useQueryClient();
   const [titlerror, setTitlerror] = useState("");
   const [slugError, setSlugError] = useState("");
   const [OrgError, setOrgError] = useState("");
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const queryClient = useQueryClient();
+  const [isLoadingOrganizations, _setIsLoadingOrganizations] = useState(false);
 
   const {
     data: initialQuestionnaire,
@@ -765,30 +767,52 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setQuestionnaire((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
+  const QuestionnaireSchema = z.object({
+    title: z.string().min(1, t("title_is_required")),
+    slug: z
+      .string()
+      .min(5, t("slug_is_required_min_5_characters"))
+      .regex(
+        /^[-\w]+$/,
+        t("slug_can_only_contain_letters_numbers_hyphens_and_underscores"),
+      ),
+    organizations: z
+      .array(z.string())
+      .nonempty(t("at_least_one_organization_is_required")),
+  });
+
   const handleSave = () => {
-    if (!questionnaire.title.trim()) {
-      console.log("Title is required");
-      setTitlerror("Title is required");
+    const updatedQuestionnaire = {
+      ...questionnaire,
+      organizations: selectedOrgIds.length > 0 ? selectedOrgIds : [],
+    };
+
+    const validationResult =
+      QuestionnaireSchema.safeParse(updatedQuestionnaire);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.flatten();
+
+      setTitlerror(errors.fieldErrors.title?.[0] || "");
+      setSlugError(errors.fieldErrors.slug?.[0] || "");
+
+      if (errors.fieldErrors.organizations) {
+        setOrgError(
+          errors.fieldErrors.organizations[0] ||
+            t("at_least_one_organization_is_required"),
+        );
+      } else {
+        setOrgError("");
+      }
+
       return;
     }
-    if (questionnaire.slug.trim().length < 5) {
-      console.log("Slug is required(min 5 characters)");
-      setSlugError("Slug is required(min 5 characters)");
-      return;
-    }
-    if (!selectedOrgIds.length) {
-      console.log("Organizations are required");
-      setOrgError("Organizations are required");
-      return;
-    }
-    setTitlerror("");
-    setSlugError("");
-    setOrgError("");
+
     if (id) {
-      updateQuestionnaire(questionnaire);
+      updateQuestionnaire(updatedQuestionnaire);
     } else {
       createQuestionnaire({
-        ...questionnaire,
+        ...updatedQuestionnaire,
         organizations: selectedOrgIds,
       });
     }
