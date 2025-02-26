@@ -84,9 +84,9 @@ export function LocationQuestion({
     );
   };
 
-  const handleLocationSelect = (location: LocationList) => {
+  const handleLocationSelect = (location: LocationList | null) => {
     setSelectedLocation(location);
-    handleUpdateAssociation({ location: location.id });
+    handleUpdateAssociation({ location: location?.id });
   };
 
   return (
