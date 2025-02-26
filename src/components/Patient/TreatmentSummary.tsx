@@ -66,6 +66,7 @@ export default function TreatmentSummary({
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
+    enabled: !!encounterId && !!facilityId,
   });
 
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
@@ -80,6 +81,7 @@ export default function TreatmentSummary({
         )
           ? encounterId
           : undefined,
+        pageSize: 100,
       },
     }),
   });
@@ -88,31 +90,36 @@ export default function TreatmentSummary({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query.paginated(symptomApi.listSymptoms, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: { encounter: encounterId, pageSize: 100 },
     }),
+    enabled: !!patientId && !!encounterId,
   });
 
   const { data: diagnoses, isLoading: diagnosesLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query.paginated(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: { encounter: encounterId, pageSize: 100 },
     }),
+    enabled: !!patientId && !!encounterId,
   });
 
   const { data: medications, isLoading: medicationsLoading } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId, limit: 50, offset: 0 },
+      queryParams: { encounter: encounterId, pageSize: 100 },
     }),
+    enabled: !!encounterId,
   });
   const { data: medicationStatement, isLoading: medicationStatementLoading } =
     useQuery({
       queryKey: ["medication_statements", patientId],
       queryFn: query.paginated(medicationStatementApi.list, {
         pathParams: { patientId },
+        queryParams: { pageSize: 100 },
       }),
+      enabled: !!patientId,
     });
 
   if (encounterLoading) {

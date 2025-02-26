@@ -34,13 +34,13 @@ export function getFrequencyDisplay(
 }
 
 interface MedicationsTableProps {
-  medications?: MedicationRequestRead[];
+  medications: MedicationRequestRead[];
 }
 
 export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   const { t } = useTranslation();
 
-  if (!medications?.length) {
+  if (!medications.length) {
     return (
       <CardContent className="p-2">
         <p className="text-gray-500 w-full flex justify-center mb-3">
@@ -63,7 +63,7 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {medications?.map((medication) => {
+          {medications.map((medication) => {
             const instruction = medication.dosage_instruction[0];
             const frequency = getFrequencyDisplay(instruction?.timing);
             const dosage = formatDosage(instruction);
