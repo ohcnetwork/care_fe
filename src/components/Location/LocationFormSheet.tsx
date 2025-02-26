@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -46,6 +46,14 @@ interface LocationState extends LocationHistory {
   displayStatus: LocationAssociationStatus;
 }
 
+interface ValidationError {
+  message: string;
+  field: "start_datetime" | "end_datetime";
+}
+
+// Omit id field for creation
+type LocationAssociationCreate = Omit<LocationAssociationUpdate, "id">;
+
 export function LocationFormSheet({
   trigger,
   history,
@@ -82,6 +90,52 @@ export function LocationFormSheet({
     );
   }, [history]);
 
+  function validateTimes(
+    status: LocationAssociationStatus,
+    startTime: string,
+    endTime?: string,
+  ): ValidationError | null {
+    const now = new Date();
+    const start = parseISO(startTime);
+
+    if (!startTime) {
+      return { message: t("start_time_required"), field: "start_datetime" };
+    }
+
+    if (status !== "active" && !endTime) {
+      return { message: t("end_time_required"), field: "end_datetime" };
+    }
+
+    if (endTime) {
+      const end = parseISO(endTime);
+      if (isBefore(end, start)) {
+        return {
+          message: t("start_time_must_be_before_end_time"),
+          field: "end_datetime",
+        };
+      }
+    }
+
+    if (
+      (status === "planned" || status === "reserved") &&
+      isBefore(start, now)
+    ) {
+      return {
+        message: t("planned_reserved_cannot_be_in_past"),
+        field: "start_datetime",
+      };
+    }
+
+    if (status === "active" && isAfter(start, now)) {
+      return {
+        message: t("active_location_cannot_be_in_future"),
+        field: "start_datetime",
+      };
+    }
+
+    return null;
+  }
+
   const handleLocationUpdate = (updatedLocation: LocationState) => {
     setLocations((prevLocations) =>
       prevLocations.map((loc) =>
@@ -103,29 +157,52 @@ export function LocationFormSheet({
   );
 
   const updateAssociation = useMutation({
-    mutationFn: (location: LocationAssociationUpdate) =>
-      mutate(locationApi.updateAssociation, {
+    mutationFn: (location: LocationAssociationUpdate) => {
+      const validationError = validateTimes(
+        location.status,
+        location.start_datetime,
+        location.end_datetime,
+      );
+
+      if (validationError) {
+        throw new Error(validationError.message);
+      }
+
+      return mutate(locationApi.updateAssociation, {
         pathParams: {
           facility_external_id: facilityId,
           location_external_id: location.location,
           external_id: location.id,
         },
-      })(location),
+      })(location);
+    },
     onSuccess: () => {
-      toast.success("Location association updated successfully");
+      toast.success(t("location_association_updated_successfully"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounterId] });
     },
   });
 
   const { mutate: createAssociation, isPending } = useMutation({
-    mutationFn: mutate(locationApi.createAssociation, {
-      pathParams: {
-        facility_external_id: facilityId,
-        location_external_id: selectedLocation?.id,
-      },
-    }),
+    mutationFn: (data: LocationAssociationCreate) => {
+      const validationError = validateTimes(
+        data.status,
+        data.start_datetime,
+        data.end_datetime,
+      );
+
+      if (validationError) {
+        throw new Error(validationError.message);
+      }
+
+      return mutate(locationApi.createAssociation, {
+        pathParams: {
+          facility_external_id: facilityId,
+          location_external_id: selectedLocation?.id,
+        },
+      })(data);
+    },
     onSuccess: () => {
-      toast.success("Location association created successfully");
+      toast.success(t("location_association_created_successfully"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounterId] });
       setNewLocation(initialState);
       setSelectedLocation(null);
@@ -182,11 +259,13 @@ export function LocationFormSheet({
           </Button>
         </div>
       </div>
-      <div className="rounded-md bg-muted/50 p-1 text-sm">
-        {stringifyNestedObject(location.location)}
-      </div>
+      <Badge variant="secondary" className="text-xs bg-blue-200">
+        {stringifyNestedObject(location.location, " < ")}
+      </Badge>
       <div className="flex flex-row flex-wrap gap-2">
-        {(location.status === "planned" || location.status === "reserved") && (
+        {(location.status === "active" ||
+          location.status === "planned" ||
+          location.status === "reserved") && (
           <div className="flex flex-col gap-2">
             <label className="text-sm text-muted-foreground">
               {t("start_time")}
@@ -349,14 +428,14 @@ export function LocationFormSheet({
                       </div>
                     )}
                     <Button
-                      onClick={() =>
+                      onClick={() => {
                         createAssociation({
                           ...newLocation,
                           status:
                             newLocation.status as LocationAssociationStatus,
                           location: selectedLocation.id,
-                        })
-                      }
+                        });
+                      }}
                       className="w-full"
                       disabled={isPending}
                     >
