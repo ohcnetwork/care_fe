@@ -64,11 +64,16 @@ export const PrintPrescription = (props: {
       title={`${t("prescriptions")} - ${encounter?.patient.name}`}
       disabled={!medications}
     >
-      <div className="min-h-screen bg-white p-2 max-w-4xl mx-auto">
+      <div className="min-h-screen bg-white md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b">
-            <div>
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Care Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+            />
+            <div className="text-center sm:text-left sm:order-1">
               <h1 className="text-3xl font-semibold">
                 {encounter?.facility?.name}
               </h1>
@@ -76,15 +81,10 @@ export const PrintPrescription = (props: {
                 {t("medicine_prescription")}
               </h2>
             </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain"
-            />
           </div>
 
           {/* Patient Details */}
-          <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
             <div className="space-y-3">
               <DetailRow
                 label={t("patient")}
@@ -141,7 +141,7 @@ export const PrintPrescription = (props: {
           </div>
 
           {/* Footer */}
-          <div className="mt-8 space-y-1 pt-2 text-[10px] text-gray-500 flex justify-between">
+          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
             <p>
               {t("generated_on")} {format(new Date(), "PPP 'at' p")}
             </p>

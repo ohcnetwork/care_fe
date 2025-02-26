@@ -374,6 +374,7 @@ function RuleFields({
                 )}
               />
               <Button
+                className="mt-5"
                 type="button"
                 variant="ghost"
                 size="icon"

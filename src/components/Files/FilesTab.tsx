@@ -53,7 +53,7 @@ import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
+  facilityId?: string;
   encounter?: Encounter;
   patient?: Patient;
   subPage?: string;
@@ -651,27 +651,29 @@ export const FilesTab = (props: FilesTabProps) => {
         associatingId={associatingId}
       />
       <Tabs defaultValue={subPage}>
-        <TabsList className="grid w-auto grid-cols-2 w-fit">
-          <TabsTrigger value="all" asChild>
-            <Link
-              className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
-            >
-              {t("all")}
-            </Link>
-          </TabsTrigger>
-          <TabsTrigger value="discharge_summary" asChild>
-            <Link
-              className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
-            >
-              {t("discharge_summary")}
-            </Link>
-          </TabsTrigger>
-        </TabsList>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
+        {type === "encounter" && (
+          <TabsList className="grid w-auto grid-cols-2 sm:w-fit">
+            <TabsTrigger value="all" asChild>
+              <Link
+                className="text-gray-600"
+                href={`/facility/${encounter?.facility.id}/patient/${patient?.id}/encounter/${encounter?.id}/files/all`}
+              >
+                {t("all")}
+              </Link>
+            </TabsTrigger>
+            <TabsTrigger value="discharge_summary" asChild>
+              <Link
+                className="text-gray-600"
+                href={`/facility/${encounter?.facility.id}/patient/${patient?.id}/encounter/${encounter?.id}/files/discharge_summary`}
+              >
+                {t("discharge_summary")}
+              </Link>
+            </TabsTrigger>
+          </TabsList>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
-          {subPage === "discharge_summary" && (
+          {type === "encounter" && subPage === "discharge_summary" && (
             <>
               <Button
                 variant="outline_primary"
@@ -686,10 +688,6 @@ export const FilesTab = (props: FilesTabProps) => {
                 <CareIcon icon="l-sync" />
                 <span className="ml-2">{t("refresh")}</span>
               </Button>
-            </>
-          )}
-          {subPage === "discharge_summary" && (
-            <>
               <Button
                 variant="primary"
                 className="flex flex-row items-center"
