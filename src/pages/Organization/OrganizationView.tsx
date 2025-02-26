@@ -30,13 +30,11 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [resetVersion, setResetVersion] = useState(0);
   const limit = 12; // 3x4 grid
 
   useEffect(() => {
     setSearchQuery("");
     setPage(1);
-    setResetVersion((prev) => prev + 1);
   }, [id]);
 
   const searchOptions = [
@@ -92,7 +90,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
           <div className="w-72">
             <SearchByMultipleFields
               id="organization-search"
-              key={`${id}-${resetVersion}`}
+              key={id}
               options={searchOptions}
               initialOptionIndex={0}
               onSearch={handleSearch}
