@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import Pagination from "@/components/Common/Pagination";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -28,46 +29,54 @@ interface Props {
 export default function OrganizationView({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
 
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
-
-  useEffect(() => {
-    setSearchQuery("");
-    setPage(1);
-  }, [id]);
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12, // 3x4 grid
+    cacheBlacklist: ["name"],
+  });
 
   const searchOptions = [
     {
       key: "name",
       type: "text" as const,
       placeholder: "Search by name",
-      value: searchQuery || "",
+      value: qParams.name || "",
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    if (key === "name") {
-      setSearchQuery(value);
-      setPage(1);
-    }
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "name" ? value : "",
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = useCallback(() => {
-    setSearchQuery("");
-    setPage(1);
-  }, []);
+    updateQuery({
+      name: undefined,
+    });
+  }, [updateQuery]);
 
   const { data: children, isFetching } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, searchQuery],
+    queryKey: [
+      "organization",
+      id,
+      "children",
+      qParams.page,
+      resultsPerPage,
+      qParams.name,
+    ],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
-        name: searchQuery || undefined,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        limit: resultsPerPage,
+        name: qParams.name || undefined,
       },
     }),
+    enabled: !!id,
   });
 
   // Hack for the sidebar to work
@@ -153,21 +162,16 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               ) : (
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
-                    {searchQuery
+                    {qParams.name
                       ? t("no_organizations_found")
                       : t("no_sub_organizations_found")}
                   </CardContent>
                 </Card>
               )}
             </div>
-            {children && children.count > limit && (
+            {children && children.count > 0 && (
               <div className="flex justify-center">
-                <Pagination
-                  data={{ totalCount: children.count }}
-                  onChange={(page, _) => setPage(page)}
-                  defaultPerPage={limit}
-                  cPage={page}
-                />
+                <Pagination totalCount={children.count || 0} />
               </div>
             )}
           </div>
