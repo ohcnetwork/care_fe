@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -11,11 +11,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
+import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import type { FacilityData } from "@/types/facility/facility";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
+import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import { LocationListView } from "./components/LocationListView";
 
@@ -49,6 +52,7 @@ function buildLocationHierarchy(locations: LocationListType[]) {
 
 export default function LocationList({ facilityId }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] =
     useState<LocationListType | null>(null);
@@ -59,6 +63,13 @@ export default function LocationList({ facilityId }: Props) {
     childrenMap: Map<string, LocationListType[]>;
     topLevelLocations: LocationListType[];
   }>({ childrenMap: new Map(), topLevelLocations: [] });
+
+  const { data: facilityData } = useQuery<FacilityData>({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.facility.show, {
+      pathParams: { id: facilityId },
+    }),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["locations", facilityId],
@@ -77,20 +88,48 @@ export default function LocationList({ facilityId }: Props) {
     if (!searchQuery) return data?.results || [];
 
     const matchesSearch = createSearchMatcher(searchQuery);
+    const matchedLocations = new Set<string>();
 
-    const hasMatchingDescendant = (locationId: string): boolean => {
-      const children = childrenMap.get(locationId) || [];
-      return children.some(
-        (child: LocationListType) =>
-          matchesSearch(child.name) || hasMatchingDescendant(child.id),
-      );
+    // Helper function to add all children of a location
+    const addAllChildren = (locationId: string) => {
+      const children =
+        data?.results?.filter((loc) => loc.parent?.id === locationId) || [];
+      children.forEach((child) => {
+        matchedLocations.add(child.id);
+        // Recursively add all descendants
+        addAllChildren(child.id);
+      });
     };
 
-    return data?.results?.filter(
-      (location) =>
-        matchesSearch(location.name) || hasMatchingDescendant(location.id),
+    // First pass: Find direct matches and their children
+    data?.results?.forEach((location) => {
+      if (matchesSearch(location.name)) {
+        matchedLocations.add(location.id);
+        // If this location matches, add all its children
+        addAllChildren(location.id);
+      }
+    });
+
+    // Second pass: Add parent chain for any matched location
+    data?.results?.forEach((location) => {
+      if (matchedLocations.has(location.id)) {
+        let current = location;
+        while (current.parent?.id) {
+          matchedLocations.add(current.parent.id);
+          const parent = data?.results?.find(
+            (loc) => loc.id === current.parent?.id,
+          );
+          if (!parent) break;
+          current = parent;
+        }
+      }
+    });
+
+    return (
+      data?.results?.filter((location) => matchedLocations.has(location.id)) ||
+      []
     );
-  }, [data?.results, searchQuery, childrenMap]);
+  }, [data?.results, searchQuery]);
 
   const matchesSearch = useMemo(
     () => createSearchMatcher(searchQuery),
@@ -139,6 +178,7 @@ export default function LocationList({ facilityId }: Props) {
   const handleSheetClose = () => {
     setIsSheetOpen(false);
     setSelectedLocation(null);
+    queryClient.invalidateQueries({ queryKey: ["locations", facilityId] });
   };
 
   const toggleRow = (id: string) => {
@@ -192,10 +232,72 @@ export default function LocationList({ facilityId }: Props) {
     setExpandedRows(newExpandedRows);
   }, [searchQuery, data?.results]);
 
+  const renderListView = () => (
+    <>
+      <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
+        <div className="flex gap-3">
+          <div className="p-2 bg-blue-100 rounded-sm shrink-0 self-center">
+            <CareIcon icon="l-info-circle" className="h-5 w-5 text-blue-900" />
+          </div>
+          <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
+            <div className="flex flex-wrap items-center">
+              <Trans
+                i18nKey="click_add_main_location"
+                components={{
+                  strong: <strong className="font-semibold mx-1" />,
+                }}
+              />
+            </div>
+            <div className="hidden lg:flex items-center">
+              <Trans
+                i18nKey="click_manage_sub_locations"
+                components={{
+                  ArrowIcon: (
+                    <CareIcon
+                      icon="l-arrow-up-right"
+                      className="h-4 w-4 mr-1"
+                    />
+                  ),
+                  strong: <strong className="font-semibold ml-1" />,
+                }}
+              />
+            </div>
+            <div className="lg:hidden flex flex-wrap items-center">
+              <Trans
+                i18nKey="click_manage_sub_locations_mobile"
+                components={{
+                  ArrowIcon: (
+                    <CareIcon
+                      icon="l-arrow-up-right"
+                      className="h-4 w-4 mx-1"
+                    />
+                  ),
+                  PenLine: <PenLine className="h-4 w-4 mx-1" />,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <LocationListView
+        isLoading={isLoading}
+        tableData={filteredData || []}
+        searchQuery={searchQuery}
+        filteredTopLevelLocations={filteredTopLevelLocations}
+        expandedRows={expandedRows}
+        toggleRow={toggleRow}
+        getChildren={getChildren}
+        handleEditLocation={handleEditLocation}
+        setExpandedRows={setExpandedRows}
+      />
+    </>
+  );
+
   return (
     <Page title={t("locations")} hideTitleOnPage={true} className="p-0">
-      <div className="md:px-6 space-y-6">
-        <h2 className="text-black">{t("locations")}</h2>
+      <div className="space-y-4">
+        <h3 className="text-black">{t("locations")}</h3>
         <div className="space-y-4">
           <div className="flex flex-col lg:flex-row gap-2">
             <div className="flex items-center justify-between w-full">
@@ -210,14 +312,12 @@ export default function LocationList({ facilityId }: Props) {
                       <span>{t("list")}</span>
                     </div>
                   </TabsTrigger>
-                  {/* Map view will be added later
                   <TabsTrigger value="map" id="location-map-view">
                     <div className="flex items-center gap-1">
                       <CareIcon icon="l-map" className="text-lg" />
                       <span>{t("map")}</span>
                     </div>
                   </TabsTrigger>
-                  */}
                 </TabsList>
               </Tabs>
             </div>
@@ -242,71 +342,15 @@ export default function LocationList({ facilityId }: Props) {
             </div>
           </div>
 
-          {activeTab === "list" && (
-            <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-              <div className="flex gap-3">
-                <div className="p-2 bg-blue-100 rounded-sm shrink-0 self-center">
-                  <CareIcon
-                    icon="l-info-circle"
-                    className="h-5 w-5 text-blue-900"
-                  />
-                </div>
-                <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
-                  <div className="flex flex-wrap items-center">
-                    <Trans
-                      i18nKey="click_add_main_location"
-                      components={{
-                        strong: <strong className="font-semibold mx-1" />,
-                      }}
-                    />
-                  </div>
-                  {/* Desktop view text */}
-                  <div className="hidden lg:flex items-center">
-                    <Trans
-                      i18nKey="click_manage_sub_locations"
-                      components={{
-                        ArrowIcon: (
-                          <CareIcon
-                            icon="l-arrow-up-right"
-                            className="h-4 w-4 mr-1"
-                          />
-                        ),
-                        strong: <strong className="font-semibold ml-1" />,
-                      }}
-                    />
-                  </div>
-                  {/* Mobile and Tablet view text */}
-                  <div className="lg:hidden flex flex-wrap items-center">
-                    <Trans
-                      i18nKey="click_manage_sub_locations_mobile"
-                      components={{
-                        ArrowIcon: (
-                          <CareIcon
-                            icon="l-arrow-up-right"
-                            className="h-4 w-4 mx-1"
-                          />
-                        ),
-                        PenLine: <PenLine className="h-4 w-4 mx-1" />,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+          {activeTab === "list" ? (
+            renderListView()
+          ) : (
+            <LocationMap
+              locations={filteredData || []}
+              onLocationClick={handleEditLocation}
+              facilityName={facilityData?.name || t("facility")}
+            />
           )}
-
-          {/* Map view will be added later, for now always show list view */}
-          <LocationListView
-            isLoading={isLoading}
-            tableData={filteredData || []}
-            searchQuery={searchQuery}
-            filteredTopLevelLocations={filteredTopLevelLocations}
-            expandedRows={expandedRows}
-            toggleRow={toggleRow}
-            getChildren={getChildren}
-            handleEditLocation={handleEditLocation}
-            setExpandedRows={setExpandedRows}
-          />
 
           <LocationSheet
             open={isSheetOpen}
