@@ -99,7 +99,7 @@ const CustomNode = ({ data }: NodeProps) => {
                 onClick={handleToggle}
               >
                 <span className="text-sm mr-2 text-gray-600">
-                  {data.childCount} {t("levels_inside")}
+                  {data.childCount} {t("level_inside")}
                 </span>
                 {data.isExpanded ? (
                   <ChevronDown className="h-4 w-4 text-gray-600" />
