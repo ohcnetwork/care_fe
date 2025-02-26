@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PenLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,12 +13,12 @@ import Page from "@/components/Common/Page";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import type { FacilityData } from "@/types/facility/facility";
 import { LocationList as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
+import { LocationInfoCard } from "./components/LocationInfoCard";
 import { LocationListView } from "./components/LocationListView";
 
 interface Props {
@@ -64,7 +63,7 @@ export default function LocationList({ facilityId }: Props) {
     topLevelLocations: LocationListType[];
   }>({ childrenMap: new Map(), topLevelLocations: [] });
 
-  const { data: facilityData } = useQuery<FacilityData>({
+  const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
@@ -232,68 +231,6 @@ export default function LocationList({ facilityId }: Props) {
     setExpandedRows(newExpandedRows);
   }, [searchQuery, data?.results]);
 
-  const renderListView = () => (
-    <>
-      <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-        <div className="flex gap-3">
-          <div className="p-2 bg-blue-100 rounded-sm shrink-0 self-center">
-            <CareIcon icon="l-info-circle" className="h-5 w-5 text-blue-900" />
-          </div>
-          <div className="min-w-0 space-y-2 text-xs md:text-sm text-blue-800">
-            <div className="flex flex-wrap items-center">
-              <Trans
-                i18nKey="click_add_main_location"
-                components={{
-                  strong: <strong className="font-semibold mx-1" />,
-                }}
-              />
-            </div>
-            <div className="hidden lg:flex items-center">
-              <Trans
-                i18nKey="click_manage_sub_locations"
-                components={{
-                  ArrowIcon: (
-                    <CareIcon
-                      icon="l-arrow-up-right"
-                      className="h-4 w-4 mr-1"
-                    />
-                  ),
-                  strong: <strong className="font-semibold ml-1" />,
-                }}
-              />
-            </div>
-            <div className="lg:hidden flex flex-wrap items-center">
-              <Trans
-                i18nKey="click_manage_sub_locations_mobile"
-                components={{
-                  ArrowIcon: (
-                    <CareIcon
-                      icon="l-arrow-up-right"
-                      className="h-4 w-4 mx-1"
-                    />
-                  ),
-                  PenLine: <PenLine className="h-4 w-4 mx-1" />,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <LocationListView
-        isLoading={isLoading}
-        tableData={filteredData || []}
-        searchQuery={searchQuery}
-        filteredTopLevelLocations={filteredTopLevelLocations}
-        expandedRows={expandedRows}
-        toggleRow={toggleRow}
-        getChildren={getChildren}
-        handleEditLocation={handleEditLocation}
-        setExpandedRows={setExpandedRows}
-      />
-    </>
-  );
-
   return (
     <Page title={t("locations")} hideTitleOnPage={true} className="p-0">
       <div className="space-y-4">
@@ -343,7 +280,20 @@ export default function LocationList({ facilityId }: Props) {
           </div>
 
           {activeTab === "list" ? (
-            renderListView()
+            <>
+              <LocationInfoCard />
+              <LocationListView
+                isLoading={isLoading}
+                tableData={filteredData || []}
+                searchQuery={searchQuery}
+                filteredTopLevelLocations={filteredTopLevelLocations}
+                expandedRows={expandedRows}
+                toggleRow={toggleRow}
+                getChildren={getChildren}
+                handleEditLocation={handleEditLocation}
+                setExpandedRows={setExpandedRows}
+              />
+            </>
           ) : (
             <LocationMap
               locations={filteredData || []}

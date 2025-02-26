@@ -72,7 +72,7 @@ export const LocationFormOptions = [
   "vi",
 ] as const;
 
-export const LocationTypeIcons: Record<string, LucideIcon> = {
+export const LocationTypeIcons = {
   bd: Bed, // bed
   wa: Hospital, // ward
   lvl: Building2, // level/floor
@@ -88,4 +88,4 @@ export const LocationTypeIcons: Record<string, LucideIcon> = {
   area: Map, // area
   jdn: Map, // garden
   vi: Eye, // virtual
-} as const;
+} as const satisfies Record<LocationForm, LucideIcon>;
