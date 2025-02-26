@@ -100,7 +100,7 @@ const CountrySelect = ({
 }: CountrySelectProps) => {
   const { t } = useTranslation();
   const [filteredCountries, setFilteredCountries] = React.useState(countryList);
-  const handleSearch = (query: string) => {
+  const handleScroll = (query: string) => {
     const filtered = countryList.filter(({ label }) =>
       label.toLowerCase().includes(query.toLowerCase()),
     );
@@ -132,7 +132,7 @@ const CountrySelect = ({
           <CommandInput
             placeholder={t("search_country")}
             className="outline-none border-none ring-0 shadow-none"
-            onValueChange={handleSearch}
+            onValueChange={handleScroll}
           />
           <CommandList>
             <ScrollArea className="h-72">
