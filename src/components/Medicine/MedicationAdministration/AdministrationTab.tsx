@@ -258,15 +258,30 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               return (
                 <div
                   key={admin.id}
-                  className={`flex font-medium items-center gap-2 rounded-md p-2 mb-2 cursor-pointer justify-between border ${colorClass}`}
+                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border ${colorClass}`}
                   onClick={() => onEditAdministration(medication, admin)}
                 >
-                  <div className="flex flex-col md:flex-row items-center gap-1">
+                  <div className="flex justify-between">
                     <div>
                       <CareIcon
                         icon="l-check-circle"
-                        className="h-3 w-3 self-center"
+                        className="h-4 w-4 self-center"
                       />
+                    </div>
+                    <div>
+                      {admin.note && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-4 w-4 hover:${colorClass} p-0`}
+                        >
+                          <CareIcon icon="l-notes" className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <span>
                       {new Date(
                         admin.occurrence_period_start,
                       ).toLocaleTimeString("en-US", {
@@ -274,11 +289,11 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                         minute: "2-digit",
                         hour12: true,
                       })}
-                    </div>
-                    <div>
-                      {admin.occurrence_period_end && (
-                        <>
-                          {"- "}
+                    </span>
+                    {admin.occurrence_period_end && (
+                      <>
+                        <span>{"-"}</span>
+                        <span>
                           {new Date(
                             admin.occurrence_period_end,
                           ).toLocaleTimeString("en-US", {
@@ -286,19 +301,10 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
                             minute: "2-digit",
                             hour12: true,
                           })}
-                        </>
-                      )}
-                    </div>
+                        </span>
+                      </>
+                    )}
                   </div>
-                  {admin.note && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`h-4 w-4 hover:${colorClass} p-0`}
-                    >
-                      <CareIcon icon="l-notes" className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               );
             })}

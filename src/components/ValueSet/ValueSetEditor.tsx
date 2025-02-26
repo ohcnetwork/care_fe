@@ -9,7 +9,6 @@ import query from "@/Utils/request/query";
 import {
   CreateValuesetModel,
   UpdateValuesetModel,
-  ValuesetBase,
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
@@ -22,7 +21,6 @@ interface ValueSetEditorProps {
 
 export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   const navigate = useNavigate();
-
   const queryClient = useQueryClient();
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
@@ -36,9 +34,9 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: mutate(valuesetApi.create),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: () => {
       toast.success("ValueSet created successfully");
-      navigate(`/valuesets/${data.slug}`);
+      navigate(`/admin/valuesets`);
     },
   });
 
