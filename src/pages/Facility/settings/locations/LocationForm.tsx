@@ -149,15 +149,15 @@ export default function LocationForm({
   });
 
   function onSubmit(values: FormValues) {
-    if (values.form === "bd" && !isEditMode && (values.beds_count ?? 0) > 1) {
-      const data: LocationWrite = {
-        ...values,
-        mode: "instance",
-        description: values.description || "",
-        organizations: values.organizations,
-        parent: values.parent || undefined,
-      };
+    const data: LocationWrite = {
+      ...values,
+      mode: values.form === "bd" ? "instance" : "kind",
+      description: values.description || "",
+      organizations: values.organizations,
+      parent: values.parent || undefined,
+    };
 
+    if (values.form === "bd" && !isEditMode && (values.beds_count ?? 0) > 1) {
       const batchRequest: BatchRequestBody = {
         requests: Array.from(
           { length: Number(values.beds_count) },
@@ -175,19 +175,12 @@ export default function LocationForm({
       submitBatch(batchRequest);
       return;
     }
-    const locationData: LocationWrite = {
-      ...values,
-      mode: "kind",
-      description: values.description || "",
-      organizations: values.organizations,
-      parent: values.parent || undefined,
-    };
 
     if (location?.id) {
-      locationData.id = location.id;
+      data.id = location.id;
     }
 
-    submitForm(locationData);
+    submitForm(data);
   }
 
   const statusOptions: { value: Status; label: string }[] = [
@@ -228,20 +221,6 @@ export default function LocationForm({
             </FormItem>
           )}
         />
-        {form.watch("form") === "bd" &&
-          (form.watch("beds_count") ?? 0) > 1 &&
-          form.watch("name")?.trim() !== "" && (
-            <span className="text-sm text-gray-500">
-              {Array.from(
-                { length: Number(form.watch("beds_count")) },
-                (_, index) => (
-                  <span key={index}>
-                    {form.watch("name")}-{index + 1}{" "}
-                  </span>
-                ),
-              )}
-            </span>
-          )}
         <FormField
           control={form.control}
           name="description"
@@ -296,7 +275,6 @@ export default function LocationForm({
                   <Input
                     {...field}
                     type="number"
-                    min={1}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
                   <FormMessage />
