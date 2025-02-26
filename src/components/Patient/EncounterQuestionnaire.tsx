@@ -47,7 +47,7 @@ export default function EncounterQuestionnaire({
               patient={encounter.patient}
               encounter={encounter}
               fetchPatientData={() => {}}
-              disabled={true}
+              disableButtons={true}
             />
 
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">

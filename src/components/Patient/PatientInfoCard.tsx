@@ -59,11 +59,11 @@ export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
-  disabled?: boolean;
+  disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter, disabled = false } = props;
+  const { patient, encounter, disableButtons = false } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -325,7 +325,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     )
                   }
 
-                  {!disabled ? (
+                  {!disableButtons ? (
                     <LinkDepartmentsSheet
                       entityType="encounter"
                       entityId={encounter.id}
@@ -402,7 +402,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           <LocationTree
                             location={props.encounter.current_location}
                           />
-                          {!disabled && (
+                          {!disableButtons && (
                             <>
                               <div className="border-b border-dashed border-gray-200 my-2" />
                               <Button
@@ -445,7 +445,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           id="consultation-buttons"
         >
           {!completedEncounterStatus.includes(encounter.status) &&
-            !disabled && (
+            !disableButtons && (
               <div
                 className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
                 data-cy="update-encounter-button"
@@ -528,7 +528,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
         key={org.id}
         className={cn(
           "capitalize gap-1 py-1 px-2 hover:bg-secondary-100",
-          !disabled && "cursor-pointer ",
+          !disableButtons && "cursor-pointer ",
         )}
         variant="outline"
         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
