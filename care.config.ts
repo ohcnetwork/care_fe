@@ -57,7 +57,7 @@ const careConfig = {
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
-    "https://maps.google.com/?q={lat},{long}",
+    "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
 
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
