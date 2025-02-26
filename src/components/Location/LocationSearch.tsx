@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Command,
@@ -33,6 +34,7 @@ export function LocationSearch({
   disabled,
   value,
 }: LocationSearchProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -60,6 +62,7 @@ export function LocationSearch({
           <CommandInput
             placeholder="Search locations..."
             value={search}
+            className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
           <CommandEmpty>No locations found.</CommandEmpty>
@@ -73,7 +76,15 @@ export function LocationSearch({
                   setOpen(false);
                 }}
               >
-                {location.name}
+                <span>{location.name}</span>
+                <span className="text-xs text-gray-500">
+                  {t(`location_form__${location.form}`)}
+                  {" in "}
+                  {formatLocationParent(location)}
+                </span>
+                <span className="text-xs text-gray-500 ml-auto">
+                  {t(`location_status__${location.status}`)}
+                </span>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -82,3 +93,12 @@ export function LocationSearch({
     </Popover>
   );
 }
+
+const formatLocationParent = (location: LocationList) => {
+  const parents: string[] = [];
+  while (location.parent?.name) {
+    parents.push(location.parent?.name);
+    location = location.parent;
+  }
+  return parents.reverse().join(" > ");
+};
