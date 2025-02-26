@@ -81,8 +81,8 @@ export default function TreatmentSummary({
         )
           ? encounterId
           : undefined,
-        pageSize: 100,
       },
+      pageSize: 100,
     }),
   });
 
@@ -90,7 +90,8 @@ export default function TreatmentSummary({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query.paginated(symptomApi.listSymptoms, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId, pageSize: 100 },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
   });
@@ -99,7 +100,8 @@ export default function TreatmentSummary({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query.paginated(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId, pageSize: 100 },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
   });
@@ -108,7 +110,8 @@ export default function TreatmentSummary({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId, pageSize: 100 },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
     }),
     enabled: !!encounterId,
   });
@@ -117,7 +120,7 @@ export default function TreatmentSummary({
       queryKey: ["medication_statements", patientId],
       queryFn: query.paginated(medicationStatementApi.list, {
         pathParams: { patientId },
-        queryParams: { pageSize: 100 },
+        pageSize: 100,
       }),
       enabled: !!patientId,
     });
