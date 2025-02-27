@@ -20,6 +20,7 @@ import { EncounterUpdatesTab } from "@/pages/Encounters/tabs/EncounterUpdatesTab
 import { Encounter } from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 
+import { EncounterDrawingsTab } from "./tabs/EncounterDrawingsTab";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
@@ -27,6 +28,7 @@ export interface EncounterTabProps {
   encounter: Encounter;
   patient: Patient;
   subPage?: string;
+  drawingId?: string;
 }
 
 const defaultTabs = {
@@ -36,6 +38,7 @@ const defaultTabs = {
   medicines: EncounterMedicinesTab,
   files: EncounterFilesTab,
   notes: EncounterNotesTab,
+  drawing: EncounterDrawingsTab,
   // nursing: EncounterNursingTab,
   // neurological_monitoring: EncounterNeurologicalMonitoringTab,
   // pressure_sore: EncounterPressureSoreTab,
@@ -47,6 +50,7 @@ interface Props {
   encounterId: string;
   tab?: string;
   subPage?: string;
+  drawingId?: string;
 }
 
 export const EncounterShow = (props: Props) => {

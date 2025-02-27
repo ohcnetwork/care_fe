@@ -14,9 +14,8 @@ import { EncounterList } from "@/pages/Encounters/EncounterList";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const ExcalidrawEditor = lazy(
-  () => import("@/components/Files/ExcalidrawEditor"),
+  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
 );
-const ExcalidrawView = lazy(() => import("@/components/Files/ExcalidrawView"));
 
 const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients": ({ facilityId }) => (
@@ -55,17 +54,7 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id/drawings": ({ id }) => {
     return (
       <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor associatingId={id} fileType="patient" />
-      </Suspense>
-    );
-  },
-
-  "/facility/:facilityId/patient/:patientId/drawings/:drawingId": ({
-    drawingId,
-  }) => {
-    return (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawView drawingId={drawingId} />
+        <ExcalidrawEditor associatingId={id} associating_type="patient" />
       </Suspense>
     );
   },

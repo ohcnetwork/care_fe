@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -81,7 +80,10 @@ export const FilesTab = (props: FilesTabProps) => {
   const queryClient = useQueryClient();
 
   const associatingId =
-    { patient: patientId, encounter: encounter?.id }[type] || "";
+    {
+      patient: patientId,
+      encounter: encounter?.id,
+    }[type] || "";
 
   const fileCategories = [
     { value: "all", label: "All" },
@@ -132,7 +134,10 @@ export const FilesTab = (props: FilesTabProps) => {
         .filter((file) => !file.is_archived)
         .slice()
         .reverse()
-        .map((file) => ({ ...file, associating_id: associatingId })) || [],
+        .map((file) => ({
+          ...file,
+          associating_id: associatingId,
+        })) || [],
   });
 
   const fileUpload = useFileUpload({
@@ -267,27 +272,6 @@ export const FilesTab = (props: FilesTabProps) => {
               <Button
                 variant="secondary"
                 onClick={() => fileManager.viewFile(file, associatingId)}
-              >
-                <span className="flex flex-row items-center gap-1">
-                  <CareIcon icon="l-eye" />
-                  {t("view")}
-                </span>
-              </Button>
-            )}
-            {file.extension === ".excalidraw" && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  if (type === "encounter") {
-                    navigate(
-                      `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${file.id}`,
-                    );
-                  } else {
-                    navigate(
-                      `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${file.id}`,
-                    );
-                  }
-                }}
               >
                 <span className="flex flex-row items-center gap-1">
                   <CareIcon icon="l-eye" />
@@ -458,27 +442,6 @@ export const FilesTab = (props: FilesTabProps) => {
               <span>{t("record")}</span>
             </Button>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                if (type === "encounter") {
-                  navigate(
-                    `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings`,
-                  );
-                } else {
-                  navigate(
-                    `/facility/${props.facilityId}/patient/${props.patientId}/drawings`,
-                  );
-                }
-              }}
-              className="flex flex-row justify-stretch items-center w-full text-primary-900"
-            >
-              <CareIcon icon="l-pen" />
-              <span>{t("add_drawings")}</span>
-            </Button>
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -571,6 +534,7 @@ export const FilesTab = (props: FilesTabProps) => {
             files.results.map((file) => {
               const filetype = getFileType(file);
               const fileName = file.name ? file.name + file.extension : "";
+
               return (
                 <TableRow
                   key={file.id}

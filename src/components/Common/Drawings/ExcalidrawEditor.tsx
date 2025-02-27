@@ -1,6 +1,6 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -14,100 +14,79 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
-import { CreateFileResponse } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import {
+  MetaArtifactResponse,
+  MetaArtifactUpsertRequest,
+} from "@/types/metaAritifact/metaArtifact";
+import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 type Props = {
   associatingId: string;
-  fileType: string;
+  drawingId?: string;
+  associating_type: "patient" | "encounter";
 };
 
-export default function ExcalidrawEditor({ associatingId, fileType }: Props) {
+export default function ExcalidrawEditor({
+  associatingId,
+  associating_type,
+  drawingId,
+}: Props) {
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
-    [],
+    drawingId ? null : [],
   );
   const [name, setName] = useState("");
-  const [id, setId] = useState("");
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     setIsDirty(!!elements?.length);
   }, [elements?.length]);
 
-  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
-    useMutation({
-      mutationFn: mutate(routes.markUploadCompleted, {
-        pathParams: { id: id || "" },
-      }),
-    });
-
-  const { mutateAsync: createUpload } = useMutation({
-    mutationFn: mutate(routes.createUpload),
-    onSuccess: (response: CreateFileResponse) => {
-      setId(response.id);
+  const { mutate: metaArtifactRequest } = useMutation({
+    mutationFn: mutate(metaArtifactApi.upsert),
+    onSuccess: (response: MetaArtifactResponse[]) => {
+      if (!drawingId) {
+        navigate(`drawings/${response[0].id}`);
+      }
     },
   });
+
+  const { data } = useQuery({
+    queryKey: ["drawingId", drawingId, associatingId],
+    queryFn: query(metaArtifactApi.retrieve, {
+      pathParams: { external_id: drawingId || "" },
+    }),
+    enabled: !!drawingId,
+  });
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    setName(data.name);
+    setElements(data.object_value.elements);
+  }, [data]);
 
   const handleSave = async () => {
     if (!name.trim()) {
       toast.error(t("please_enter_a_name_for_the_drawing"));
       return;
     }
-
-    const obj = {
-      type: "excalidraw",
-      version: "2",
-      source: window.location.origin,
-      elements: elements,
-      appState: {},
-      files: {},
-    };
-
-    try {
-      const file = new File([JSON.stringify(obj)], `${name}.excalidraw`, {
-        type: "application/vnd.excalidraw",
-      });
-      let signedUrl = "";
-      let response: CreateFileResponse | null = null;
-      if (!id) {
-        response = await createUpload({
-          original_name: `${name}.excalidraw`,
-          name: name,
-          file_type: fileType,
-          file_category: "unspecified",
+    const request: MetaArtifactUpsertRequest = {
+      datapoints: [
+        {
+          id: drawingId,
+          associating_type: associating_type,
           associating_id: associatingId,
-          mime_type: "text/plain",
-        });
-        signedUrl = response.signed_url;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const upload = await fetch(signedUrl, {
-        method: "PUT",
-        body: file,
-      });
-
-      if (!upload.ok) {
-        toast.error(t("error_uploading_file"));
-
-        return;
-      }
-      await markUploadComplete({ id: response?.id });
-      if (markUploadCompleteError) {
-        toast.error(t("file_error__mark_complete_failed"));
-
-        return;
-      } else {
-        toast.success(t("file_success__upload_complete"));
-        navigate(`drawings/${response!.id}`);
-      }
-    } catch {
-      toast.error(t("error_in_createUpload"));
-    }
+          name: name,
+          object_type: "excalidraw",
+          object_value: { elements: elements || [] },
+        },
+      ],
+    };
+    metaArtifactRequest(request);
   };
 
   if (elements === null) {
@@ -148,6 +127,7 @@ export default function ExcalidrawEditor({ associatingId, fileType }: Props) {
           }}
           initialData={{
             appState: { theme: "light" },
+            elements: elements,
           }}
           onChange={debounce((elements) => {
             setElements(elements);
