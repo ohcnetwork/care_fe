@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { PencilIcon } from "lucide-react";
 import { Link } from "raviger";
 import { ReactNode, useState } from "react";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,12 +20,14 @@ interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  className?: string;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
   facilityId,
+  className,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -40,8 +45,11 @@ export function DiagnosisList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
-        <Skeleton className="h-[100px] w-full" />
+        <CardContent className="px-2 pb-2">
+          <Skeleton className="h-[100px] w-full" />
+        </CardContent>
       </DiagnosisListLayout>
     );
   }
@@ -62,6 +70,7 @@ export function DiagnosisList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -75,33 +84,40 @@ export function DiagnosisList({
       facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
+      className={className}
     >
-      <DiagnosisTable
-        diagnoses={[
-          ...filteredDiagnoses.filter(
-            (diagnosis) => diagnosis.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredDiagnoses.filter(
-                (diagnosis) =>
-                  diagnosis.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-      />
+      <>
+        <DiagnosisTable
+          diagnoses={[
+            ...filteredDiagnoses.filter(
+              (diagnosis) =>
+                diagnosis.verification_status !== "entered_in_error",
+            ),
+            ...(showEnteredInError
+              ? filteredDiagnoses.filter(
+                  (diagnosis) =>
+                    diagnosis.verification_status === "entered_in_error",
+                )
+              : []),
+          ]}
+        />
 
-      {hasEnteredInErrorRecords && !showEnteredInError && (
-        <div className="flex justify-start">
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => setShowEnteredInError(true)}
-            className="text-xs underline text-gray-500"
-          >
-            {t("view_all")}
-          </Button>
-        </div>
-      )}
+        {hasEnteredInErrorRecords && !showEnteredInError && (
+          <>
+            <div className="border-b border-dashed border-gray-200 my-2" />
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => setShowEnteredInError(true)}
+                className="text-xs underline text-gray-950"
+              >
+                {t("view_all")}
+              </Button>
+            </div>
+          </>
+        )}
+      </>
     </DiagnosisListLayout>
   );
 }
@@ -111,22 +127,26 @@ const DiagnosisListLayout = ({
   patientId,
   encounterId,
   children,
+  className,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
+  className?: string;
 }) => {
   return (
-    <Card>
-      <CardHeader className="px-4 py-0 pt-4 flex justify-between flex-row">
+    <Card className={cn("rounded-sm ", className)}>
+      <CardHeader
+        className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
+      >
         <CardTitle>{t("diagnoses")}</CardTitle>
         {facilityId && encounterId && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500"
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
           >
-            <PencilIcon size={12} />
+            <CareIcon icon="l-edit" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}

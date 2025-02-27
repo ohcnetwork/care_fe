@@ -4,15 +4,18 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { formatRelative } from "date-fns";
 import {
   Info,
   Loader2,
   MessageCircle,
+  MessageSquare,
   MessageSquarePlus,
   Plus,
   Send,
   Users,
 } from "lucide-react";
+import { Link, usePathParams } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -24,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -52,6 +56,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
@@ -59,6 +64,7 @@ import { Thread } from "@/types/notes/threads";
 const MESSAGES_LIMIT = 20;
 
 // Thread templates for quick selection
+
 const threadTemplates = [
   "Treatment Plan",
   "Medication Notes",
@@ -105,8 +111,6 @@ const ThreadItem = ({
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-sm truncate">{thread.title}</h4>
-        {/* Todo: Replace with thread.created */}
-        <p className="text-xs text-gray-500 mt-1">12/12/2024</p>
       </div>
       {isSelected && (
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
@@ -118,6 +122,7 @@ const ThreadItem = ({
 // Message item component
 const MessageItem = ({ message }: { message: Message }) => {
   const authUser = useAuthUser();
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   const isCurrentUser = authUser?.external_id === message.created_by.id;
 
   return (
@@ -135,15 +140,19 @@ const MessageItem = ({ message }: { message: Message }) => {
       >
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex">
-                <Avatar
-                  name={message.created_by.username}
-                  imageUrl={message.created_by.profile_picture_url}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              </div>
-            </TooltipTrigger>
+            <Link
+              href={`/facility/${facilityId}/users/${message.created_by.username}`}
+            >
+              <TooltipTrigger asChild>
+                <div className="flex pr-2">
+                  <Avatar
+                    name={message.created_by.username}
+                    imageUrl={message.created_by.profile_picture_url}
+                    className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+                  />
+                </div>
+              </TooltipTrigger>
+            </Link>
             <TooltipContent>
               <p>{message.created_by.username}</p>
             </TooltipContent>
@@ -156,21 +165,28 @@ const MessageItem = ({ message }: { message: Message }) => {
             isCurrentUser ? "items-end" : "items-start",
           )}
         >
-          <span className="text-xs text-gray-500 mb-1">
-            {message.created_by.username}
-          </span>
+          <p className="text-xs space-x-2 mb-1">
+            <span className="text-gray-700 font-medium">
+              {message.created_by.username}
+            </span>
+            <time
+              className="text-gray-500"
+              dateTime={message.created_date}
+              title={formatDateTime(message.created_date)}
+            >
+              {formatRelative(message.created_date, new Date())}
+            </time>
+          </p>
           <div
             className={cn(
               "p-3 rounded-lg break-words",
               isCurrentUser
-                ? "bg-primary-100 text-white rounded-br-none"
-                : "bg-gray-100 rounded-bl-none",
+                ? "bg-white text-black rounded-tr-none border border-gray-200"
+                : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
             {message.message && (
-              <div className="mt-4">
-                <Markdown content={message.message} className="text-sm" />
-              </div>
+              <Markdown content={message.message} className="text-sm" />
             )}
           </div>
         </div>
@@ -185,11 +201,13 @@ const NewThreadDialog = ({
   onClose,
   onCreate,
   isCreating,
+  threadsUnused,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (title: string) => void;
   isCreating: boolean;
+  threadsUnused: string[];
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
@@ -211,13 +229,15 @@ const NewThreadDialog = ({
             <InfoTooltip content={t("encounter_notes__create_discussion")} />
           </DialogTitle>
           <DialogDescription className="text-sm text-left">
-            {t("encounter_notes__choose_template")}
+            {threadsUnused.length === 0
+              ? t("encounter_notes__no_unused_threads")
+              : t("encounter_notes__choose_template")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            {threadTemplates.map((template) => (
+            {threadsUnused.map((template) => (
               <Badge
                 key={template}
                 variant="primary"
@@ -239,9 +259,10 @@ const NewThreadDialog = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isCreating}>
-            {t("Cancel")}
-          </Button>
+          <DialogClose asChild disabled={isCreating}>
+            <Button variant="outline">{t("cancel")}</Button>
+          </DialogClose>
+
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
@@ -251,7 +272,7 @@ const NewThreadDialog = ({
             ) : (
               <MessageSquarePlus className="h-4 w-4 mr-2" />
             )}
-            {t("Create")}
+            {t("create")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -301,6 +322,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
+  const [commentAdded, setCommentAdded] = useState(false);
 
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
@@ -311,17 +333,11 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     }),
   });
 
-  // Auto-select first thread
-  useEffect(() => {
-    if (threadsData?.results.length && !selectedThread) {
-      setSelectedThread(threadsData.results[0].id);
-    }
-  }, [threadsData, selectedThread]);
-
   // Fetch messages with infinite scroll
   const {
     data: messagesData,
     isLoading: messagesLoading,
+    isFetching: isFetchingMessages,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -375,31 +391,63 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", selectedThread] });
       setNewMessage("");
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    },
-    onError: () => {
-      toast.error(t("Failed to send message"));
+      setCommentAdded(true);
     },
   });
 
+  // handle scrolling to last message when new message is added
+
+  useEffect(() => {
+    if (commentAdded && !isFetchingMessages) {
+      messagesEndRef.current?.scrollIntoView();
+      setCommentAdded(false);
+    }
+  }, [commentAdded, isFetchingMessages]);
+
+  const [threads, setThreads] = useState<string[]>([...threadTemplates]);
+
+  // Auto-select first thread
+
+  useEffect(() => {
+    if (threadsData?.results.length) {
+      if (!selectedThread) setSelectedThread(threadsData.results[0].id);
+      const threadTitles = threadsData.results.map((thread) => thread.title);
+      setThreads(
+        threads.filter((template) => !threadTitles.includes(template)),
+      );
+    }
+  }, [threadsData, selectedThread]);
+
+  // hack to scroll to bottom on initial load
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, [messagesLoading]);
+
   // Handle infinite scroll
+
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  // Scroll to bottom on initial load and thread change
-  useEffect(() => {
-    if (messagesData && !messagesLoading && !isFetchingNextPage) {
       messagesEndRef.current?.scrollIntoView();
     }
-  }, [selectedThread, messagesData, messagesLoading, isFetchingNextPage]);
+  }, [
+    inView,
+    hasNextPage,
+    fetchNextPage,
+    messagesData,
+    isFetchingNextPage,
+    messagesLoading,
+  ]);
 
   const handleCreateThread = (title: string) => {
     if (title.trim()) {
+      if (
+        threadsData?.results.some((thread) => thread.title === title.trim())
+      ) {
+        toast.error(t("thread_already_exists"));
+        return;
+      }
       createThreadMutation.mutate({
         title: title.trim(),
         encounter: encounter.id,
@@ -419,11 +467,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   }
 
   const messages = messagesData?.pages.flatMap((page) => page.results) ?? [];
+  const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
     <div className="flex h-[calc(100vh-12rem)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r bg-background">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -525,8 +574,8 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         <div className="flex flex-col h-full pb-[60px] lg:pb-0">
-          {/* Mobile Header */}
-          <div className="lg:hidden p-4 border-b bg-background sticky top-0 z-10">
+          {/* Header */}
+          <div className="p-4 border-b sticky top-0 z-10">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -535,10 +584,27 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       ?.title
                   }
                 </h2>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Users className="h-4 w-4" />
-                  <span>{messages.length}</span>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                      <Users className="h-4 w-4" />
+                      <span>
+                        {new Set(messages.map((m) => m.created_by.id)).size}
+                      </span>
+                      <MessageSquare className="h-4 w-4 ml-3" />
+                      <span>{totalMessages}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      {t("participants")}:{" "}
+                      {new Set(messages.map((m) => m.created_by.id)).size}
+                    </p>
+                    <p>
+                      {t("messages")}: {totalMessages}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             ) : (
               <div className="text-center text-sm font-medium text-gray-500">
@@ -546,13 +612,12 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               </div>
             )}
           </div>
-
           {selectedThread ? (
             <>
               {messagesLoading ? (
                 <div className="flex-1 p-4">
                   <div className="space-y-4">
-                    <CardListSkeleton count={3} />
+                    <CardListSkeleton count={4} />
                   </div>
                 </div>
               ) : (
@@ -576,19 +641,19 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                           <MessageItem key={message.id} message={message} />
                         ))
                       )}
-                      {isFetchingNextPage && (
+                      {isFetchingNextPage ? (
                         <div className="py-2">
                           <div className="space-y-4">
                             <CardListSkeleton count={3} />
                           </div>
                         </div>
+                      ) : (
+                        <div ref={ref} />
                       )}
-                      <div ref={ref} />
                     </div>
                   </ScrollArea>
-
                   {/* Message Input */}
-                  <div className="border-t bg-background p-4 sticky bottom-0">
+                  <div className="border-t p-4 sticky bottom-0">
                     <form onSubmit={handleSendMessage}>
                       <div className="flex gap-2">
                         <Textarea
@@ -658,6 +723,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
         onClose={() => setShowNewThreadDialog(false)}
         onCreate={handleCreateThread}
         isCreating={createThreadMutation.isPending}
+        threadsUnused={threads}
       />
     </div>
   );

@@ -28,3 +28,6 @@ jobs:
 
       - name: Run lint
         run: npm run lint -- --quiet
+
+      - name: Run unimported
+        run: npm run unimported

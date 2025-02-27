@@ -6,16 +6,13 @@ import * as Notifications from "@/Utils/Notifications";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
 
 export function handleHttpError(error: Error) {
-  if (error.name === "AbortError") {
+  // Skip handling silent errors and AbortError
+  if (("silent" in error && error.silent) || error.name === "AbortError") {
     return;
   }
 
   if (!(error instanceof HTTPError)) {
     toast.error(error.message || t("something_went_wrong"));
-    return;
-  }
-
-  if (error.silent) {
     return;
   }
 

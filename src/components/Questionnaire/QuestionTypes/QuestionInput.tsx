@@ -20,6 +20,7 @@ import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
+import { LocationQuestion } from "./LocationQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
@@ -123,7 +124,12 @@ export function QuestionInput({
                 />
               );
             }
-            return null;
+            return (
+              <span>
+                Medication requests cannot be recorded without an active
+                encounter
+              </span>
+            );
           case "medication_statement":
             if (encounterId) {
               return (
@@ -133,7 +139,12 @@ export function QuestionInput({
                 />
               );
             }
-            return null;
+            return (
+              <span>
+                Medication statement cannot be recorded without an active
+                encounter
+              </span>
+            );
           case "allergy_intolerance":
             return <AllergyQuestion {...commonProps} />;
           case "symptom":
@@ -146,14 +157,20 @@ export function QuestionInput({
                 />
               );
             }
-            return null;
+            return (
+              <span> Symptoms cannot be recorded without an encounter </span>
+            );
           case "diagnosis":
             if (encounterId) {
               return (
                 <DiagnosisQuestion {...commonProps} encounterId={encounterId} />
               );
             }
-            return null;
+            return (
+              <span>
+                Diagnosis cannot be recorded without an active encounter
+              </span>
+            );
           case "appointment":
             return <AppointmentQuestion {...commonProps} />;
           case "encounter":
@@ -166,7 +183,25 @@ export function QuestionInput({
                 />
               );
             }
-            return null;
+            return (
+              <span> Create an encounter first in order to update it </span>
+            );
+          case "location_association":
+            if (encounterId) {
+              return (
+                <LocationQuestion
+                  {...commonProps}
+                  facilityId={facilityId}
+                  locationId={patientId}
+                  encounterId={encounterId}
+                />
+              );
+            }
+            return (
+              <span>
+                Location cannot be recorded without an active encounter
+              </span>
+            );
         }
         return null;
 

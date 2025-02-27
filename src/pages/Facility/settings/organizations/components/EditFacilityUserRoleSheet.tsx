@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -155,18 +157,22 @@ export default function EditUserRoleSheet({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-              <div>
-                <span className="text-sm text-gray-500">{t("username")}</span>
-                <p className="text-sm font-medium">{userRole.user.username}</p>
+            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t">
+              <div className="flex flex-wrap">
+                <div className="mr-3">
+                  <span className="text-sm text-gray-500">{t("username")}</span>
+                  <p className="text-sm font-medium truncate ">
+                    {userRole.user.username}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">
+                    {t("current_role")}
+                  </span>
+                  <p className="text-sm font-medium">{userRole.role.name}</p>
+                </div>
               </div>
               <div>
-                <span className="text-sm text-gray-500">
-                  {t("current_role")}
-                </span>
-                <p className="text-sm font-medium">{userRole.role.name}</p>
-              </div>
-              <div className="col-span-2">
                 <span className="text-sm text-gray-500">
                   {t("last_login")}{" "}
                 </span>
@@ -230,7 +236,7 @@ export default function EditUserRoleSheet({
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => removeRole()}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className={cn(buttonVariants({ variant: "destructive" }))}
                   >
                     {t("remove")}
                   </AlertDialogAction>

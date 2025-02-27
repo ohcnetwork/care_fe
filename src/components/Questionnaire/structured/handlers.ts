@@ -3,6 +3,8 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
+import { LocationAssociationQuestion } from "@/types/location/association";
+import locationApi from "@/types/location/locationApi";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
@@ -23,7 +25,7 @@ type StructuredHandler<T extends StructuredQuestionType> = {
   }>;
 };
 
-const handlers: {
+export const structuredHandlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
@@ -114,8 +116,11 @@ const handlers: {
     },
   },
   encounter: {
-    getRequests: (encounters, { patientId, encounterId }) => {
+    getRequests: (encounters, { facilityId, patientId, encounterId }) => {
       if (!encounterId) return [];
+      if (!facilityId) {
+        throw new Error("Cannot create encounter without a facility");
+      }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
           organizations: [],
@@ -126,7 +131,7 @@ const handlers: {
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
-          facility: encounter.facility.id,
+          facility: facilityId,
         };
 
         return {
@@ -154,10 +159,43 @@ const handlers: {
       ];
     },
   },
+  location_association: {
+    getRequests: (
+      locationAssociations: LocationAssociationQuestion[],
+      { facilityId, encounterId },
+    ) => {
+      if (!locationAssociations.length) {
+        return [];
+      }
+
+      if (!facilityId) {
+        throw new Error(
+          "Cannot create location association without a facility",
+        );
+      }
+
+      return locationAssociations.map((locationAssociation) => {
+        return {
+          url: locationApi.createAssociation.path
+            .replace("{facility_external_id}", facilityId)
+            .replace("{location_external_id}", locationAssociation.location),
+          method: locationApi.createAssociation.method,
+          body: {
+            encounter: encounterId,
+            start_datetime: locationAssociation.start_datetime,
+            end_datetime: locationAssociation.end_datetime,
+            status: locationAssociation.status,
+            meta: locationAssociation.meta,
+          },
+          reference_id: `location_association_${locationAssociation}`,
+        };
+      });
+    },
+  },
 };
 
 export const getStructuredRequests = <T extends StructuredQuestionType>(
   type: T,
   data: DataTypeFor<T>[],
   context: StructuredHandlerContext,
-) => handlers[type].getRequests(data, context);
+) => structuredHandlers[type].getRequests(data, context);

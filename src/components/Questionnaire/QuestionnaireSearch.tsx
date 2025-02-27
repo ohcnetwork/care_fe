@@ -47,6 +47,7 @@ export function QuestionnaireSearch({
           ...conditionalAttribute(!!subjectType, {
             subject_type: subjectType,
           }),
+          status: "active",
         },
       }),
     });

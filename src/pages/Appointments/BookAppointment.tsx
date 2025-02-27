@@ -25,7 +25,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDisplayName, formatName } from "@/Utils/utils";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -175,7 +175,15 @@ export default function BookAppointment(props: Props) {
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={() => goBack()}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() =>
+                goBack(
+                  `/facility/${props.facilityId}/patient/${props.patientId}/appointments`,
+                )
+              }
+            >
               {t("cancel")}
             </Button>
             <Button

@@ -74,7 +74,14 @@ export const LoginHeader = () => {
         <Button
           variant="ghost"
           className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-          onClick={() => navigate("/login?mode=patient")}
+          onClick={() =>
+            navigate(
+              `/login?mode=${
+                localStorage.getItem(LocalStorageKeys.loginPreference) ??
+                "patient"
+              }`,
+            )
+          }
         >
           {t("sign_in")}
         </Button>

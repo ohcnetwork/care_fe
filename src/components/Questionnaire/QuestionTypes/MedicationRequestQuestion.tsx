@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -88,6 +88,7 @@ export function MedicationRequestQuestion({
   patientId,
   encounterId,
 }: MedicationRequestQuestionProps) {
+  const isPreview = patientId === "preview";
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
 
@@ -100,6 +101,7 @@ export function MedicationRequestQuestion({
         limit: 100,
       },
     }),
+    enabled: !isPreview,
   });
 
   useEffect(() => {
@@ -201,7 +203,7 @@ export function MedicationRequestQuestion({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRemoveMedication}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {t("remove")}
             </AlertDialogAction>
@@ -363,7 +365,7 @@ export function MedicationRequestQuestion({
       <div className="max-w-4xl">
         <ValueSetSelect
           system="system-medication"
-          placeholder={t("search_medications")}
+          placeholder={t("search_for_medications_to_add")}
           onSelect={handleAddMedication}
           disabled={disabled}
           searchPostFix=" clinical drug"

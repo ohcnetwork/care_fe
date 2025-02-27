@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { BanIcon, PrinterIcon } from "lucide-react";
+import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -54,20 +54,16 @@ import {
   formatName,
   getReadableDuration,
   saveElementAsImage,
-  stringifyGeoOrganization,
+  stringifyNestedObject,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
-import {
-  formatAppointmentSlotTime,
-  printAppointment,
-} from "@/pages/Appointments/utils";
 import { FacilityData } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentFinalStatuses,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApis";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
 
@@ -138,17 +134,9 @@ export default function AppointmentDetail(props: Props) {
   }
 
   const { patient } = appointment;
-  const appointmentDate = formatAppointmentSlotTime(appointment);
 
   return (
-    <Page
-      title={t("appointment_details")}
-      crumbsReplacements={{
-        [facility.id!]: { name: facility.name },
-        [patient.id]: { name: patient.name },
-        [appointment.id]: { name: `Appointment on ${appointmentDate}` },
-      }}
-    >
+    <Page title={t("appointment_details")}>
       <div className="container mx-auto p-6 max-w-7xl">
         <div
           className={cn(
@@ -161,17 +149,16 @@ export default function AppointmentDetail(props: Props) {
             facility={facilityQuery.data}
           />
           <div className="mt-3">
-            <div id="appointment-token-card" className="bg-gray-50 p-4">
-              <AppointmentTokenCard
-                appointment={appointmentQuery.data}
-                facility={facilityQuery.data}
-              />
+            <div id="section-to-print" className="print:w-[400px] print:pt-4">
+              <div id="appointment-token-card" className="bg-gray-50 md:p-4">
+                <AppointmentTokenCard
+                  appointment={appointmentQuery.data}
+                  facility={facilityQuery.data}
+                />
+              </div>
             </div>
-            <div className="flex gap-2 justify-end px-6">
-              <Button
-                variant="outline"
-                onClick={() => printAppointment({ t, facility, appointment })}
-              >
+            <div className="flex gap-2 justify-end px-6 mt-4 md:mt-0">
+              <Button variant="outline" onClick={() => print()}>
                 <PrinterIcon className="size-4 mr-2" />
                 <span>{t("print")}</span>
               </Button>
@@ -190,7 +177,7 @@ export default function AppointmentDetail(props: Props) {
               </Button>
             </div>
             <Separator className="my-4" />
-            <div className="mx-6 mt-10">
+            <div className="md:mx-6 mt-10">
               <AppointmentActions
                 facilityId={props.facilityId}
                 appointment={appointment}
@@ -216,11 +203,13 @@ const AppointmentDetails = ({
   const { t } = useTranslation();
 
   return (
-    <div className="container p-6 max-w-3xl space-y-6">
+    <div className="container md:p-6 max-w-3xl space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>
-            <span className="mr-3">{t("schedule_information")}</span>
+            <span className="mr-3 inline-block mb-2">
+              {t("schedule_information")}
+            </span>
             <Badge
               variant={
                 (
@@ -332,7 +321,7 @@ const AppointmentDetails = ({
                 {appointment.patient.address || t("no_address_provided")}
               </p>
               <p className="text-gray-600">
-                {stringifyGeoOrganization(appointment.patient.geo_organization)}
+                {stringifyNestedObject(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
@@ -391,7 +380,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
-  const { mutate: cancelAppointment } = useMutation({
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
         facility_id: facilityId,
@@ -554,8 +543,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "cancelled" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -584,8 +578,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

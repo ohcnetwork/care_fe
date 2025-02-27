@@ -1,59 +1,47 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useTranslation } from "react-i18next";
+import { useQueryParams } from "raviger";
+import { Trans, useTranslation } from "react-i18next";
 
-import PaginatedList from "@/CAREUI/misc/PaginatedList";
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import { formatDateTime, properCase } from "@/Utils/utils";
-import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { Encounter } from "@/types/emr/encounter";
-import { MedicationRequest } from "@/types/emr/medicationRequest";
-import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import { SymptomRequest } from "@/types/emr/symptom/symptom";
+import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  isPrintPreview?: boolean;
+  onlyUnstructured?: boolean;
 }
-
-type ResponseValueType = {
-  value?:
-    | string
-    | number
-    | boolean
-    | Date
-    | Encounter
-    | AllergyIntoleranceRequest[]
-    | MedicationRequest[]
-    | MedicationStatementRequest[]
-    | SymptomRequest[]
-    | DiagnosisRequest[]
-    | CreateAppointmentQuestion;
-  value_quantity?: {
-    value: number;
-  };
-};
 
 interface QuestionResponseProps {
   question: Question;
   response?: {
-    values: ResponseValueType[];
+    values: ResponseValue[];
     note?: string;
     question_id: string;
   };
 }
 
-function formatValue(value: ResponseValueType["value"], type: string): string {
+export function formatValue(
+  value: ResponseValue["value"],
+  type: string,
+): string {
   if (!value) return "";
 
   // Handle complex objects
@@ -83,22 +71,31 @@ function formatValue(value: ResponseValueType["value"], type: string): string {
 function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   if (!response) return null;
 
-  const value =
-    response.values[0]?.value || response.values[0]?.value_quantity?.value;
-
-  if (!value) return null;
-
   return (
     <div>
       <div className="text-xs text-gray-500">{question.text}</div>
-      <div className="text-sm font-medium whitespace-pre-wrap">
-        {formatValue(value, question.type)}
-        {question.unit?.code && (
-          <span className="ml-1 text-xs">{question.unit.code}</span>
-        )}
-        {response.note && (
-          <span className="ml-2 text-xs text-gray-500">({response.note})</span>
-        )}
+      <div className="space-y-1">
+        {response.values.map((valueObj, index) => {
+          const value = valueObj.value || valueObj.value_quantity?.value;
+          if (!value) return null;
+
+          return (
+            <div
+              key={index}
+              className="text-sm font-medium whitespace-pre-wrap"
+            >
+              {formatValue(value, question.type)}
+              {question.unit?.code && (
+                <span className="ml-1 text-xs">{question.unit.code}</span>
+              )}
+              {index === response.values.length - 1 && response.note && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({response.note})
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -111,7 +108,7 @@ function QuestionGroup({
 }: {
   group: Question;
   responses: {
-    values: ResponseValueType[];
+    values: ResponseValue[];
     note?: string;
     question_id: string;
   }[];
@@ -200,12 +197,23 @@ function StructuredResponseBadge({
   );
 }
 
-function ResponseCard({ item }: { item: QuestionnaireResponse }) {
+function ResponseCard({
+  item,
+  isPrintPreview,
+}: {
+  item: QuestionnaireResponse;
+  isPrintPreview?: boolean;
+}) {
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
   return (
-    <Card className="flex flex-col py-3 px-4 transition-colors hover:bg-muted/50">
+    <Card
+      className={cn(
+        "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
+        isPrintPreview && "shadow-none",
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -219,19 +227,33 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
                   }
                 />
               ) : (
-                <h3 className="text-sm font-medium">
-                  {item.questionnaire?.title} {t("filed")}
-                </h3>
+                <Trans
+                  i18nKey="filed"
+                  values={{ title: item.questionnaire?.title }}
+                  components={{ strong: <strong /> }}
+                />
               )}
             </div>
-            <span>{t("at")}</span>
-            <span>{formatDateTime(item.created_date)}</span>
-            <span>{t("by")}</span>
-            <div>
-              {item.created_by?.first_name || ""}{" "}
-              {item.created_by?.last_name || ""}
-              {item.created_by?.user_type && ` (${item.created_by?.user_type})`}
-            </div>
+            <span>
+              <Trans
+                i18nKey="at_time"
+                values={{ time: formatDateTime(item.created_date) }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
+            <span>
+              <Trans
+                i18nKey="by_name"
+                values={{
+                  by: `${item.created_by?.first_name || ""} ${item.created_by?.last_name || ""}${
+                    item.created_by?.user_type
+                      ? ` (${item.created_by.user_type})`
+                      : ""
+                  }`,
+                }}
+                components={{ strong: <strong /> }}
+              />
+            </span>
           </div>
         </div>
       </div>
@@ -273,46 +295,89 @@ function ResponseCard({ item }: { item: QuestionnaireResponse }) {
 export default function QuestionnaireResponsesList({
   encounter,
   patientId,
+  isPrintPreview = false,
+  onlyUnstructured,
 }: Props) {
   const { t } = useTranslation();
+  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+
+  const { data: questionnarieResponses, isLoading } = useQuery({
+    queryKey: ["questionnaireResponses", patientId, qParams],
+    queryFn: query.paginated(routes.getQuestionnaireResponses, {
+      pathParams: { patientId },
+      queryParams: {
+        ...(!isPrintPreview && {
+          limit: RESULTS_PER_PAGE_LIMIT,
+          offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+        }),
+        encounter: encounter?.id,
+        only_unstructured: onlyUnstructured,
+      },
+      maxPages: isPrintPreview ? undefined : 1,
+      pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
+    }),
+  });
 
   return (
-    <PaginatedList
-      route={routes.getQuestionnaireResponses}
-      pathParams={{
-        patientId: patientId,
-      }}
-      query={{
-        ...(encounter && { encounter: encounter.id }),
-      }}
-    >
-      {() => (
-        <div className="mt-4 flex w-full flex-col gap-4">
+    <div className="mt-4 gap-4">
+      <div className="max-w-full">
+        {isLoading ? (
+          <div className="grid gap-5">
+            <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+          </div>
+        ) : (
           <div>
-            <PaginatedList.WhenEmpty>
-              <Card className="p-6">
+            {questionnarieResponses?.results?.length === 0 ? (
+              <Card
+                className={cn(
+                  "p-6",
+                  isPrintPreview && "shadow-none border-gray",
+                )}
+              >
                 <div className="text-lg font-medium text-gray-500">
                   {t("no_questionnaire_responses")}
                 </div>
               </Card>
-            </PaginatedList.WhenEmpty>
-
-            <PaginatedList.WhenLoading>
-              <div className="grid gap-5">
-                <CardListSkeleton count={3} />
-              </div>
-            </PaginatedList.WhenLoading>
-
-            <PaginatedList.Items<QuestionnaireResponse> className="grid gap-4">
-              {(item) => <ResponseCard key={item.id} item={item} />}
-            </PaginatedList.Items>
-
-            <div className="flex w-full items-center justify-center mt-4">
-              <PaginatedList.Paginator hideIfSinglePage />
-            </div>
+            ) : (
+              <ul className="grid gap-4">
+                {questionnarieResponses?.results?.map(
+                  (item: QuestionnaireResponse) => (
+                    <li key={item.id} className="w-full">
+                      <ResponseCard
+                        key={item.id}
+                        item={item}
+                        isPrintPreview={isPrintPreview}
+                      />
+                    </li>
+                  ),
+                )}
+                {!isPrintPreview && (
+                  <div className="flex w-full items-center justify-center mt-4">
+                    <div
+                      className={cn(
+                        "flex w-full justify-center",
+                        (questionnarieResponses?.count ?? 0) >
+                          RESULTS_PER_PAGE_LIMIT
+                          ? "visible"
+                          : "invisible",
+                      )}
+                    >
+                      <PaginationComponent
+                        cPage={qParams.page ?? 1}
+                        defaultPerPage={RESULTS_PER_PAGE_LIMIT}
+                        data={{
+                          totalCount: questionnarieResponses?.count ?? 0,
+                        }}
+                        onChange={(page) => setQueryParams({ page })}
+                      />
+                    </div>
+                  </div>
+                )}
+              </ul>
+            )}
           </div>
-        </div>
-      )}
-    </PaginatedList>
+        )}
+      </div>
+    </div>
   );
 }

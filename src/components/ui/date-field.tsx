@@ -45,20 +45,25 @@ export default function DateField({
     const newDay = e.target.value;
     setDay(newDay);
 
+    // Check if change is from spinner (stepUp/stepDown) vs keyboard input
+    const isFromSpinner =
+      e.nativeEvent instanceof InputEvent &&
+      (e.nativeEvent as InputEvent).inputType === "insertReplacementText";
+
     if (
-      newDay.length === 2 &&
+      (isFromSpinner || newDay.length === 2) &&
       parseInt(newDay) >= 1 &&
       parseInt(newDay) <= 31
     ) {
-      if (isValidDate(year, month, newDay) && onChange) {
+      const modifiedDay = isFromSpinner ? newDay.padStart(2, "0") : newDay;
+      if (isValidDate(year, month, modifiedDay) && onChange) {
         const updatedDate = new Date(
           parseInt(year),
           parseInt(month) - 1,
-          parseInt(newDay),
+          parseInt(modifiedDay),
         );
         onChange(updatedDate);
       }
-      document.getElementById(`${id}-month-input`)?.focus();
     }
   };
 
@@ -66,21 +71,27 @@ export default function DateField({
     const newMonth = e.target.value;
     setMonth(newMonth);
 
+    // Check if change is from spinner (stepUp/stepDown) vs keyboard input
+    const isFromSpinner =
+      e.nativeEvent instanceof InputEvent &&
+      (e.nativeEvent as InputEvent).inputType === "insertReplacementText";
+
     if (
-      newMonth.length === 2 &&
+      (isFromSpinner || newMonth.length === 2) &&
       parseInt(newMonth) >= 1 &&
       parseInt(newMonth) <= 12
     ) {
-      if (isValidDate(year, newMonth, day) && onChange) {
+      const modifiedMonth = isFromSpinner
+        ? newMonth.padStart(2, "0")
+        : newMonth;
+      if (isValidDate(year, modifiedMonth, day) && onChange) {
         const updatedDate = new Date(
           parseInt(year),
-          parseInt(newMonth) - 1,
+          parseInt(modifiedMonth) - 1,
           parseInt(day),
         );
         onChange(updatedDate);
       }
-
-      document.getElementById(`${id}-year-input`)?.focus();
     }
   };
 
@@ -100,6 +111,38 @@ export default function DateField({
     }
   };
 
+  // Handle day blur to pad single digit values
+  const handleDayBlur = () => {
+    if (day.length === 1 && parseInt(day) >= 1 && parseInt(day) <= 9) {
+      const paddedDay = day.padStart(2, "0");
+      setDay(paddedDay);
+      if (isValidDate(year, month, paddedDay) && onChange) {
+        const updatedDate = new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(paddedDay),
+        );
+        onChange(updatedDate);
+      }
+    }
+  };
+
+  // Handle month blur to pad single digit values
+  const handleMonthBlur = () => {
+    if (month.length === 1 && parseInt(month) >= 1) {
+      const paddedMonth = month.padStart(2, "0");
+      setMonth(paddedMonth);
+      if (isValidDate(year, paddedMonth, day) && onChange) {
+        const updatedDate = new Date(
+          parseInt(year),
+          parseInt(paddedMonth) - 1,
+          parseInt(day),
+        );
+        onChange(updatedDate);
+      }
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1">
@@ -109,6 +152,7 @@ export default function DateField({
           placeholder="DD"
           value={day}
           onChange={handleDayChange}
+          onBlur={handleDayBlur}
           min={1}
           max={31}
           id={`${id}-day-input`}
@@ -124,6 +168,7 @@ export default function DateField({
           placeholder="MM"
           value={month}
           onChange={handleMonthChange}
+          onBlur={handleMonthBlur}
           min={1}
           max={12}
           id={`${id}-month-input`}
@@ -140,6 +185,7 @@ export default function DateField({
           value={year}
           onChange={handleYearChange}
           min={1900}
+          max={new Date().getFullYear()}
           id={`${id}-year-input`}
           data-cy={`${id}-year-input`}
           disabled={disabled}

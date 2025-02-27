@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -16,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -32,6 +35,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import UserSelector from "@/components/Common/UserSelector";
@@ -103,7 +107,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline_primary">
+        <Button variant="outline_primary" data-cy="assign-user-button">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           {t("assign_user")}
         </Button>
@@ -114,7 +118,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="space-y-4">
+          <div className="space-y-4" data-cy="patient-user-selector-container">
             <h3 className="text-sm font-medium">{t("search_user")}</h3>
             <UserSelector
               selected={selectedUser}
@@ -133,9 +137,11 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                     className="h-12 w-12"
                   />
                   <div className="flex flex-col flex-1">
-                    <span className="font-medium text-lg">
-                      {formatDisplayName(selectedUser)}
-                    </span>
+                    <TooltipComponent content={formatDisplayName(selectedUser)}>
+                      <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
+                        {formatDisplayName(selectedUser)}
+                      </p>
+                    </TooltipComponent>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
                     </span>
@@ -167,7 +173,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   {t("select_role")}
                 </label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger>
+                  <SelectTrigger data-cy="patient-user-role-select">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -188,6 +194,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               </div>
 
               <Button
+                data-cy="patient-user-assign-button"
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
@@ -236,7 +243,7 @@ export const PatientUsers = (props: PatientProps) => {
   const ManageUsers = () => {
     if (!users?.results?.length) {
       return (
-        <div className="h-full text-center space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
+        <div className="h-full space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
           {t("no_user_assigned")}
         </div>
       );
@@ -246,7 +253,7 @@ export const PatientUsers = (props: PatientProps) => {
         {users?.results.map((user) => (
           <div
             key={user.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm relative"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
@@ -256,32 +263,54 @@ export const PatientUsers = (props: PatientProps) => {
                   imageUrl={user.profile_picture_url}
                 />
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">
-                    {formatDisplayName(user)}
+                  <h3 className="inline-flex">
+                    <TooltipComponent content={formatDisplayName(user)}>
+                      <p className="text-sm font-medium text-gray-900 truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36">
+                        {formatDisplayName(user)}
+                      </p>
+                    </TooltipComponent>
                   </h3>
-                  <p className="text-sm text-gray-500">{user.username}</p>
+                  <p>
+                    <TooltipComponent content={user.username}>
+                      <p className="text-sm text-gray-500 truncate sm:max-w-96 md:max-w-32 lg:max-w-32 xl:max-w-36">
+                        {user.username}
+                      </p>
+                    </TooltipComponent>
+                  </p>
                 </div>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <CareIcon icon="l-trash" className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-cy="patient-user-remove-button"
+                    className="absolute top-0 right-0"
+                  >
+                    <CareIcon icon="l-trash" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {t("are_you_sure_want_to_remove", {
-                        name: formatDisplayName(user),
-                      })}
+                      <Trans
+                        i18nKey="are_you_sure_want_to_remove"
+                        values={{ name: formatDisplayName(user) }}
+                        components={{
+                          strong: (
+                            <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
+                          ),
+                        }}
+                      />
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
+                      data-cy="patient-user-remove-confirm-button"
                       onClick={() => removeUser(user.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className={cn(buttonVariants({ variant: "destructive" }))}
                     >
                       {t("remove")}
                     </AlertDialogAction>
@@ -306,7 +335,7 @@ export const PatientUsers = (props: PatientProps) => {
   };
 
   return (
-    <div className="mt-4 px-4 md:px-0" data-test-id="patient-users">
+    <div className="mt-4 px-4 md:px-0" data-cy="patient-users">
       <div className="group my-2 w-full">
         <div className="h-full space-y-2">
           <div className="flex flex-row items-center justify-between">
