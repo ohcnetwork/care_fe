@@ -27,6 +27,11 @@ import {
   LocationTypeIcons,
 } from "@/types/location/location";
 
+// Constants
+const LEVEL_HEIGHT = 220;
+const NODE_WIDTH = 280;
+const ROOT_SPACING = 100;
+
 interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
@@ -119,6 +124,178 @@ const CustomNode = ({ data }: NodeProps) => {
 const nodeTypes = {
   custom: CustomNode,
 };
+
+// Utility function to calculate node width
+function calculateNodeWidth(
+  location: LocationListType,
+  locations: LocationListType[],
+  expandedNodes: string[],
+): number {
+  if (!expandedNodes.includes(location.id)) return NODE_WIDTH;
+
+  const children = locations.filter((loc) => loc.parent?.id === location.id);
+  if (children.length === 0) return NODE_WIDTH;
+
+  return Math.max(
+    NODE_WIDTH,
+    children.reduce(
+      (sum, child) => sum + calculateNodeWidth(child, locations, expandedNodes),
+      0,
+    ) +
+      (children.length - 1) * 40,
+  );
+}
+
+// Create facility root node
+function createFacilityRootNode(
+  facilityName: string,
+  rootLocationsCount: number,
+  t: (key: string) => string,
+): Node {
+  return {
+    id: "facility-root",
+    type: "custom",
+    position: { x: 0, y: 0 },
+    draggable: true,
+    data: {
+      name: facilityName,
+      type: t("facility"),
+      form: "facility",
+      childCount: rootLocationsCount,
+      id: "facility-root",
+      isExpanded: true,
+      onToggle: () => {},
+      onClick: () => {},
+    },
+  };
+}
+
+// Create a location node
+function createLocationNode(
+  location: LocationListType,
+  childLocations: LocationListType[],
+  isExpanded: boolean,
+  level: number,
+  offsetX: number,
+  nodePositions: Record<string, { x: number; y: number }>,
+  toggleNode: (id: string) => void,
+  onLocationClick: (location: LocationListType) => void,
+  t: (key: string) => string,
+): Node {
+  return {
+    id: location.id,
+    type: "custom",
+    position: nodePositions[location.id] || {
+      x: offsetX,
+      y: level * LEVEL_HEIGHT,
+    },
+    draggable: true,
+    data: {
+      name: location.name,
+      type: t(`location_form__${location.form}`),
+      form: location.form,
+      childCount: childLocations.length,
+      id: location.id,
+      isExpanded,
+      onToggle: toggleNode,
+      onClick: (_loc: LocationListType) => onLocationClick(location),
+    },
+  };
+}
+
+// Create an edge between nodes
+function createEdge(sourceId: string, targetId: string): Edge {
+  return {
+    id: `${sourceId}-${targetId}`,
+    source: sourceId,
+    target: targetId,
+    type: "smoothstep",
+    animated: false,
+    style: {
+      stroke: "#94a3b8",
+      strokeWidth: 1.5,
+    },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 12,
+      height: 12,
+      color: "#94a3b8",
+    },
+  };
+}
+
+// Process location and its children recursively
+function processLocationHierarchy(
+  location: LocationListType,
+  locations: LocationListType[],
+  expandedNodes: string[],
+  level: number,
+  offsetX: number,
+  parentX: number | null,
+  nodePositions: Record<string, { x: number; y: number }>,
+  toggleNode: (id: string) => void,
+  onLocationClick: (location: LocationListType) => void,
+  t: (key: string) => string,
+): { nodes: Node[]; edges: Edge[] } {
+  const isExpanded = expandedNodes.includes(location.id);
+  const childLocations = locations.filter(
+    (loc) => loc.parent?.id === location.id,
+  );
+  const result = { nodes: [] as Node[], edges: [] as Edge[] };
+
+  // Create current location node
+  const node = createLocationNode(
+    location,
+    childLocations,
+    isExpanded,
+    level,
+    offsetX,
+    nodePositions,
+    toggleNode,
+    onLocationClick,
+    t,
+  );
+  result.nodes.push(node);
+
+  // Create edge from parent if exists
+  if (parentX !== null && location.parent?.id) {
+    result.edges.push(createEdge(location.parent.id, location.id));
+  }
+
+  // Process children if expanded
+  if (isExpanded && childLocations.length > 0) {
+    const totalChildrenWidth = childLocations.reduce(
+      (sum, child) => sum + calculateNodeWidth(child, locations, expandedNodes),
+      0,
+    );
+    const spacing = 20;
+    const totalWidth =
+      totalChildrenWidth + (childLocations.length - 1) * spacing;
+    let currentOffset = offsetX - totalWidth / 2;
+
+    childLocations.forEach((child) => {
+      const childWidth = calculateNodeWidth(child, locations, expandedNodes);
+      const childX = currentOffset + childWidth / 2;
+      const childResult = processLocationHierarchy(
+        child,
+        locations,
+        expandedNodes,
+        level + 1,
+        childX,
+        offsetX,
+        nodePositions,
+        toggleNode,
+        onLocationClick,
+        t,
+      );
+      result.nodes.push(...childResult.nodes);
+      result.edges.push(...childResult.edges);
+      currentOffset += childWidth + spacing;
+    });
+  }
+
+  return result;
+}
 
 function LocationMapContent({
   locations,
@@ -253,152 +430,58 @@ function LocationMapContent({
     [fitView],
   );
 
+  // Generate nodes and edges
   useEffect(() => {
-    const LEVEL_HEIGHT = 220;
-    const NODE_WIDTH = 280;
-
-    const getWidth = (location: LocationListType): number => {
-      if (!expandedNodes.includes(location.id)) return NODE_WIDTH;
-
-      const children = locations.filter(
-        (loc) => loc.parent?.id === location.id,
-      );
-      if (children.length === 0) return NODE_WIDTH;
-
-      return Math.max(
-        NODE_WIDTH,
-        children.reduce((sum, child) => sum + getWidth(child), 0) +
-          (children.length - 1) * 40,
-      );
-    };
-
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
 
     // Add facility root node
-    newNodes.push({
-      id: "facility-root",
-      type: "custom",
-      position: { x: 0, y: 0 },
-      draggable: true,
-      data: {
-        name: facilityName,
-        type: t("facility"),
-        form: "facility",
-        childCount: rootLocations.length,
-        id: "facility-root",
-        isExpanded: true,
-        onToggle: () => {},
-        onClick: () => {},
-      },
-    });
+    const facilityNode = createFacilityRootNode(
+      facilityName,
+      rootLocations.length,
+      t,
+    );
+    newNodes.push(facilityNode);
 
-    const processLocation = (
-      location: LocationListType,
-      level: number = 1, // Start from level 1 since facility is at level 0
-      offsetX: number = 0,
-      parentX: number | null = null,
-    ) => {
-      const isExpanded = expandedNodes.includes(location.id);
-      const childLocations = locations.filter(
-        (loc) => loc.parent?.id === location.id,
-      );
-
-      const node: Node = {
-        id: location.id,
-        type: "custom",
-        position: nodePositions[location.id] || {
-          x: offsetX,
-          y: level * LEVEL_HEIGHT,
-        },
-        draggable: true,
-        data: {
-          name: location.name,
-          type: t(`location_form__${location.form}`),
-          form: location.form,
-          childCount: childLocations.length,
-          id: location.id,
-          isExpanded,
-          onToggle: toggleNode,
-          onClick: (_loc: LocationListType) => onLocationClick(location),
-        },
-      };
-
-      newNodes.push(node);
-
-      if (parentX !== null) {
-        newEdges.push({
-          id: `${location.parent?.id}-${location.id}`,
-          source: location.parent?.id || "",
-          target: location.id,
-          type: "smoothstep",
-          animated: false,
-          style: {
-            stroke: "#94a3b8",
-            strokeWidth: 1.5,
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 12,
-            height: 12,
-            color: "#94a3b8",
-          },
-        });
-      }
-
-      if (isExpanded && childLocations.length > 0) {
-        const totalChildrenWidth = childLocations.reduce(
-          (sum, child) => sum + getWidth(child),
-          0,
-        );
-        const spacing = 20;
-        const totalWidth =
-          totalChildrenWidth + (childLocations.length - 1) * spacing;
-        let currentOffset = offsetX - totalWidth / 2;
-
-        childLocations.forEach((child) => {
-          const childWidth = getWidth(child);
-          const childX = currentOffset + childWidth / 2;
-          processLocation(child, level + 1, childX, offsetX);
-          currentOffset += childWidth + spacing;
-        });
-      }
-    };
-
-    // Process filtered locations
+    // Process root locations
     if (rootLocations.length > 0) {
       const totalRootWidth = rootLocations.reduce(
-        (sum, loc) => sum + getWidth(loc),
+        (sum, loc) => sum + calculateNodeWidth(loc, locations, expandedNodes),
         0,
       );
-      const rootSpacing = 100;
       const totalWidth =
-        totalRootWidth + (rootLocations.length - 1) * rootSpacing;
+        totalRootWidth + (rootLocations.length - 1) * ROOT_SPACING;
       let currentOffset = -totalWidth / 2;
 
       rootLocations.forEach((rootLocation) => {
-        const locationWidth = getWidth(rootLocation);
+        const locationWidth = calculateNodeWidth(
+          rootLocation,
+          locations,
+          expandedNodes,
+        );
         const locationX = currentOffset + locationWidth / 2;
-        processLocation(rootLocation, 1, locationX);
-        // Add edge from facility root to each root location
-        newEdges.push({
-          id: `facility-root-${rootLocation.id}`,
-          source: "facility-root",
-          target: rootLocation.id,
-          type: "smoothstep",
-          animated: false,
-          style: {
-            stroke: "#94a3b8",
-            strokeWidth: 1.5,
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 12,
-            height: 12,
-            color: "#94a3b8",
-          },
-        });
-        currentOffset += locationWidth + rootSpacing;
+
+        const { nodes: locationNodes, edges: locationEdges } =
+          processLocationHierarchy(
+            rootLocation,
+            locations,
+            expandedNodes,
+            1,
+            locationX,
+            null,
+            nodePositions,
+            toggleNode,
+            onLocationClick,
+            t,
+          );
+
+        newNodes.push(...locationNodes);
+        newEdges.push(...locationEdges);
+
+        // Add edge from facility root
+        newEdges.push(createEdge("facility-root", rootLocation.id));
+
+        currentOffset += locationWidth + ROOT_SPACING;
       });
     }
 
