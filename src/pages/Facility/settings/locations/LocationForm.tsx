@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -83,6 +83,14 @@ export default function LocationForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [bedNames, setBedNames] = useState<string[]>([]);
+  const updateBedName = (index: number, newName: string) => {
+    setBedNames((prev) => {
+      const updated = [...prev];
+      updated[index] = newName;
+      return updated;
+    });
+  };
 
   const { data: location, isLoading } = useQuery({
     queryKey: ["location", locationId],
@@ -101,6 +109,16 @@ export default function LocationForm({
       parent: parentId || null,
     },
   });
+  useEffect(() => {
+    if (form.watch("beds_count")) {
+      setBedNames(
+        Array.from(
+          { length: Number(form.watch("beds_count")) },
+          (_, index) => `${form.watch("name")} ${index + 1}`,
+        ),
+      );
+    }
+  }, [form.watch("beds_count"), form.watch("name")]);
 
   useEffect(() => {
     if (location) {
@@ -158,19 +176,20 @@ export default function LocationForm({
     };
 
     if (values.form === "bd" && !isEditMode && (values.beds_count ?? 0) > 1) {
+      if (bedNames.some((name) => name.trim() === "")) {
+        toast.error("Any Bed Name can't be empty");
+        return;
+      }
       const batchRequest: BatchRequestBody = {
-        requests: Array.from(
-          { length: Number(values.beds_count) },
-          (_, index) => ({
-            url: `/api/v1/facility/${facilityId}/location/`,
-            method: "POST",
-            reference_id: parentId ? `Location ${parentId}` : "Location",
-            body: {
-              ...data,
-              name: `${values.name} ${index + 1}`,
-            },
-          }),
-        ),
+        requests: bedNames.map((name) => ({
+          url: `/api/v1/facility/${facilityId}/location/`,
+          method: "POST",
+          reference_id: parentId ? `Location ${parentId}` : "Location",
+          body: {
+            ...data,
+            name,
+          },
+        })),
       };
       submitBatch(batchRequest);
       return;
@@ -221,6 +240,18 @@ export default function LocationForm({
             </FormItem>
           )}
         />
+        {form.watch("form") === "bd" && bedNames.length > 1 && (
+          <div className="space-y-2">
+            {bedNames.map((name, index) => (
+              <Input
+                key={index}
+                placeholder={`Bed ${index + 1}`}
+                value={name}
+                onChange={(e) => updateBedName(index, e.target.value)}
+              />
+            ))}
+          </div>
+        )}
         <FormField
           control={form.control}
           name="description"
