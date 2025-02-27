@@ -164,7 +164,7 @@ export default function LocationForm({
           (_, index) => ({
             url: `/api/v1/facility/${facilityId}/location/`,
             method: "POST",
-            reference_id: `Location`,
+            reference_id: parentId ? `Location ${parentId}` : "Location",
             body: {
               ...data,
               name: `${values.name} ${index + 1}`,
