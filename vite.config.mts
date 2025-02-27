@@ -1,5 +1,6 @@
 import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import federation from "@originjs/vite-plugin-federation";
+import reactScan from "@react-scan/vite-plugin-react-scan";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import fs from "fs";
@@ -208,6 +209,10 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       react(),
+      reactScan({
+        enable:
+          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
+      }),
       checker({
         typescript: true,
         eslint: {
@@ -288,6 +293,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 4000,
       host: "0.0.0.0",
+      allowedHosts: true,
     },
     preview: {
       headers: {

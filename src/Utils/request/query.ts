@@ -2,14 +2,13 @@ import careConfig from "@careConfig";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { getResponseBody } from "@/Utils/request/request";
 import {
   ApiCallOptions,
   ApiRoute,
   HTTPError,
   PaginatedResponse,
 } from "@/Utils/request/types";
-import { makeHeaders, makeUrl } from "@/Utils/request/utils";
+import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
 export async function callApi<Route extends ApiRoute<unknown, unknown>>(

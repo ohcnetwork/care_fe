@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -462,63 +463,67 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div
-          key={`${questionnaireForms.length}`}
-          className="flex gap-4 items-center m-4 max-w-4xl"
-        >
-          <QuestionnaireSearch
-            subjectType={subjectType}
-            onSelect={(selected) => {
-              if (
-                questionnaireForms.some(
-                  (form) => form.questionnaire.id === selected.id,
-                )
-              ) {
-                return;
-              }
-
-              setQuestionnaireForms((prev) => [
-                ...prev,
-                {
-                  questionnaire: selected,
-                  responses: initializeResponses(selected.questions),
-                  errors: [],
-                },
-              ]);
-            }}
-            disabled={isPending}
-          />
-        </div>
-
-        {/* Submit and Cancel Buttons */}
-        {questionnaireForms.length > 0 && (
-          <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
+        {encounterId !== "preview" && (
+          <>
+            <div
+              key={`${questionnaireForms.length}`}
+              className="flex gap-4 items-center m-4 max-w-4xl"
             >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isPending || hasErrors}
-              className="relative"
-            >
-              {isPending ? (
-                <>
-                  <span className="opacity-0">{t("submit")}</span>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
-                  </div>
-                </>
-              ) : (
-                t("submit")
-              )}
-            </Button>
-          </div>
+              <QuestionnaireSearch
+                subjectType={subjectType}
+                onSelect={(selected) => {
+                  if (
+                    questionnaireForms.some(
+                      (form) => form.questionnaire.id === selected.id,
+                    )
+                  ) {
+                    return;
+                  }
+
+                  setQuestionnaireForms((prev) => [
+                    ...prev,
+                    {
+                      questionnaire: selected,
+                      responses: initializeResponses(selected.questions),
+                      errors: [],
+                    },
+                  ]);
+                }}
+                disabled={isPending}
+              />
+            </div>
+
+            {/* Submit and Cancel Buttons */}
+            {questionnaireForms.length > 0 && (
+              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isPending}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={isPending || hasErrors}
+                  className="relative"
+                >
+                  {isPending ? (
+                    <>
+                      <span className="opacity-0">{t("submit")}</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                      </div>
+                    </>
+                  ) : (
+                    t("submit")
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         <PLUGIN_Component
@@ -527,15 +532,11 @@ export function QuestionnaireForm({
           setFormState={setQuestionnaireForms}
         />
 
-        {/* Add a Preview of the QuestionnaireForm */}
-        {import.meta.env.DEV && (
-          <div className="p-4 space-y-6 max-w-4xl">
-            <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-            <pre className="text-sm text-gray-500">
-              {JSON.stringify(questionnaireForms, null, 2)}
-            </pre>
-          </div>
-        )}
+        <DebugPreview
+          data={questionnaireForms}
+          title="QuestionnaireForm"
+          className="p-4 space-y-6 max-w-4xl"
+        />
       </div>
     </div>
   );

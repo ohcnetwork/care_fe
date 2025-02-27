@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import * as Sentry from "@sentry/browser";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 
@@ -31,4 +32,8 @@ if (import.meta.env.PROD) {
 }
 
 const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

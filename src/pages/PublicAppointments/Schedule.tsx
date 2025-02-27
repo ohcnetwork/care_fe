@@ -216,7 +216,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <Button
             variant="outline"
             className="border border-secondary-400"
-            onClick={() => goBack()}
+            onClick={() => goBack(`/facility/${facilityId}`)}
           >
             <span className="text-sm underline">{t("back")}</span>
           </Button>

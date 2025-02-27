@@ -16,26 +16,6 @@ export interface ApiRoute<TData, TBody = unknown> {
   noAuth?: boolean;
 }
 
-/**
- * @deprecated in favor of useQuery/useMutation/callApi
- */
-export interface RequestResult<TData> {
-  res: Response | undefined;
-  data: TData | undefined;
-  error: undefined | Record<string, unknown>;
-}
-
-/**
- * @deprecated in favor of ApiCallOptions used by useQuery/useMutation/callApi
- */
-export interface RequestOptions<TData = unknown, TBody = unknown> {
-  query?: QueryParams;
-  body?: TBody;
-  pathParams?: Record<string, string>;
-  onResponse?: (res: RequestResult<TData>) => void;
-  silent?: boolean;
-}
-
 type ExtractRouteParams<T extends string> =
   T extends `${infer _Start}{${infer Param}}${infer Rest}`
     ? Param | ExtractRouteParams<Rest>

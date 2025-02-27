@@ -5,8 +5,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/Common/Loading";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
+import { getPackageUrl } from "@/pages/Licenses/utils";
 import { LicensesSbom } from "@/types/license";
 
 const sbomUrlMap = {
@@ -102,7 +101,6 @@ const SbomPackage = ({
 }: {
   pkg: LicensesSbom["sbom"]["packages"][number];
 }) => {
-  const [showExternalRefs, setShowExternalRefs] = useState(false);
   const { t } = useTranslation();
   return (
     <div className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg">
@@ -110,6 +108,7 @@ const SbomPackage = ({
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-primary-dark block text-primary"
+        href={`${getPackageUrl(pkg.name, pkg.versionInfo, pkg.externalRefs[0].referenceLocator)}`}
       >
         <strong className="text-lg">{`${pkg.name} v${pkg.versionInfo}`}</strong>
       </a>
@@ -127,31 +126,6 @@ const SbomPackage = ({
           </a>
         </p>
       )}
-      <div>
-        <h4
-          className="block cursor-pointer font-semibold text-primary"
-          onClick={() => setShowExternalRefs(!showExternalRefs)}
-        >
-          <CareIcon icon="l-info-circle" />
-        </h4>
-        {showExternalRefs && (
-          <ul className="list-inside list-disc pl-4 text-xs">
-            {pkg.externalRefs.map((ref, idx) => (
-              <li key={idx}>
-                <a
-                  href={ref.referenceLocator}
-                  className="hover:text-primary-dark block break-words text-primary"
-                >
-                  {ref.referenceLocator}
-                </a>
-                {ref.referenceCategory && (
-                  <p>{t("category") + ": " + ref.referenceCategory}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
     </div>
   );
 };

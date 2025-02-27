@@ -112,6 +112,9 @@ export default function FacilityForm({
       queryClient.invalidateQueries({
         queryKey: ["facility"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["currentUser"],
+      });
       form.reset();
       onSubmitSuccess?.();
     },

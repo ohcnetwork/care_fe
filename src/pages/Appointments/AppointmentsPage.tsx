@@ -399,53 +399,52 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         : t("no_results")}
                     </CommandEmpty>
                     <CommandGroup>
-                      <PopoverClose className="w-full">
-                        <CommandItem
-                          value="all"
-                          onSelect={() =>
-                            setQParams({
-                              ...qParams,
-                              practitioner: null,
-                              slot: null,
-                            })
-                          }
-                          className="cursor-pointer"
-                        >
+                      <CommandItem
+                        value="all"
+                        onSelect={() =>
+                          setQParams({
+                            ...qParams,
+                            practitioner: null,
+                            slot: null,
+                          })
+                        }
+                        className="cursor-pointer w-full"
+                      >
+                        <PopoverClose className="w-full flex items-start">
                           <span>{t("show_all")}</span>
                           {!qParams.practitioner && (
                             <CheckIcon className="ml-auto" />
                           )}
-                        </CommandItem>
-                      </PopoverClose>
-                      {schedulableUsersQuery.data?.users.map((user) => (
-                        <PopoverClose className="w-full" key={user.id}>
-                          <CommandItem
-                            value={formatName(user)}
-                            onSelect={() =>
-                              setQParams({
-                                ...qParams,
-                                practitioner: user.username,
-                                slot: null,
-                              })
-                            }
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Avatar
-                                imageUrl={user.profile_picture_url}
-                                name={formatName(user)}
-                                className="size-6 rounded-full"
-                              />
-                              <span>{formatName(user)}</span>
-                              <span className="text-xs text-gray-500 font-medium">
-                                {user.user_type}
-                              </span>
-                            </div>
-                            {qParams.practitioner === user.username && (
-                              <CheckIcon className="ml-auto" />
-                            )}
-                          </CommandItem>
                         </PopoverClose>
+                      </CommandItem>
+                      {schedulableUsersQuery.data?.users.map((user) => (
+                        <CommandItem
+                          key={user.id}
+                          value={formatName(user)}
+                          onSelect={() =>
+                            setQParams({
+                              ...qParams,
+                              practitioner: user.username,
+                              slot: null,
+                            })
+                          }
+                          className="cursor-pointer w-full"
+                        >
+                          <PopoverClose className="flex items-center gap-2 w-full">
+                            <Avatar
+                              imageUrl={user.profile_picture_url}
+                              name={formatName(user)}
+                              className="size-6 rounded-full"
+                            />
+                            <span>{formatName(user)}</span>
+                            <span className="text-xs text-gray-500 font-medium">
+                              {user.user_type}
+                            </span>
+                          </PopoverClose>
+                          {qParams.practitioner === user.username && (
+                            <CheckIcon className="ml-auto" />
+                          )}
+                        </CommandItem>
                       ))}
                     </CommandGroup>
                   </CommandList>

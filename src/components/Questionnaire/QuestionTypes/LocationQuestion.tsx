@@ -1,10 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 
 import { LocationSearch } from "@/components/Location/LocationSearch";
 
+import api from "@/Utils/request/api";
+import query from "@/Utils/request/query";
+import { Encounter } from "@/types/emr/encounter";
 import { LocationAssociationQuestion } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
 import {
@@ -34,9 +38,23 @@ export function LocationQuestion({
   facilityId,
   encounterId,
 }: LocationQuestionProps) {
+  const { data: encounter } = useQuery<Encounter>({
+    queryKey: ["encounter", encounterId],
+    queryFn: query(api.encounter.get, {
+      pathParams: { id: encounterId },
+      queryParams: { facility: facilityId },
+    }),
+  });
+
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
+
+  useEffect(() => {
+    if (encounter?.current_location) {
+      setSelectedLocation(encounter.current_location);
+    }
+  }, [encounter]);
 
   const values =
     (questionnaireResponse.values?.[0]

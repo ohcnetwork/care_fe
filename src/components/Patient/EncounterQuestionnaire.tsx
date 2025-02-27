@@ -37,7 +37,7 @@ export default function EncounterQuestionnaire({
             onSubmit={() => {
               if (encounterId) {
                 navigate(
-                  `/facility/${facilityId}/encounter/${encounterId}/updates`,
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
                 );
               } else {
                 navigate(`/patient/${patientId}/updates`);

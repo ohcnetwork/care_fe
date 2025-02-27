@@ -445,7 +445,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
               data-cy="update-encounter-button"
             >
               <AlertDialog>
-                <DropdownMenu modal={false}>
+                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="primary">
                       {t("update")}
@@ -460,6 +460,14 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                         className="cursor-pointer text-gray-800"
                       >
                         {t("treatment_summary")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
+                        className="cursor-pointer text-gray-800"
+                      >
+                        {t("discharge_summary")}
                       </Link>
                     </DropdownMenuItem>
                     <AlertDialogTrigger asChild>
@@ -480,6 +488,11 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       {t("mark_encounter_as_complete_confirmation")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
+
+                  <PLUGIN_Component
+                    __name="PatientInfoCardMarkAsComplete"
+                    encounter={encounter}
+                  />
 
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
