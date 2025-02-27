@@ -220,43 +220,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </h2>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <PLUGIN_Component
-                      __name="FacilityHomeActions"
-                      facility={facilityData}
-                    />
-                    {/* <AlertDialog>
-                      TODO: add delete facility
-                      <AlertDialogTrigger asChild>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        {t("delete_facility")}
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("delete_facility")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("delete_facility_confirmation", {
-                              name: facilityData?.name,
-                            })}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <div
-                            onClick={() => deleteFacility()}
-                            className={cn(
-                              buttonVariants({ variant: "destructive" }),
-                            )}
-                            // disabled={isDeleting}
-                          >
-                            {isDeleting ? t("deleting") : t("delete")}
-                          </div>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog> */}
-                  </div>
                 </div>
               </div>
               <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:35rem)]:top-0">
@@ -280,7 +243,11 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="mt-2 space-y-2 flex justify-end">
+              <div className="mt-2 flex justify-end gap-2">
+                <PLUGIN_Component
+                  __name="FacilityHomeActions"
+                  facility={facilityData}
+                />
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
