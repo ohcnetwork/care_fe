@@ -10,6 +10,7 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
 
@@ -115,6 +116,12 @@ export function FacilityDetailsPage({ id }: Props) {
               <h1 className="text-3xl font-bold">{facility.name}</h1>
               <p className="text-lg text-gray-500">
                 {[facility.address].filter(Boolean).join(", ")}
+                {facility.latitude && facility.longitude && (
+                  <FacilityMapsLink
+                    latitude={facility.latitude.toString()}
+                    longitude={facility.longitude.toString()}
+                  />
+                )}
               </p>
             </div>
 

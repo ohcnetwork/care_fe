@@ -275,7 +275,12 @@ export default function LocationForm({
           />
         </div>
 
-        <Button type="submit" disabled={isPending}>
+        <Button
+          type="submit"
+          disabled={Boolean(
+            isPending || (location?.id && !form.formState.isDirty),
+          )}
+        >
           {isPending ? (
             <>{location?.id ? t("updating") : t("creating")}</>
           ) : (
