@@ -27,7 +27,6 @@ interface SymptomsListProps {
   encounterStatus?: Encounter["status"];
   className?: string;
   permissions: string[];
-  isPrintPreview?: boolean;
 }
 
 export function SymptomsList({
@@ -37,9 +36,8 @@ export function SymptomsList({
   encounterStatus,
   className,
   permissions,
-  isPrintPreview = false,
 }: SymptomsListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { hasPermission } = usePermissions();
   const {
@@ -107,7 +105,6 @@ export function SymptomsList({
       encounterId={encounterId}
       canEdit={canEdit}
       className={className}
-      isPrintPreview={isPrintPreview}
     >
       <SymptomTable
         symptoms={[
@@ -120,7 +117,6 @@ export function SymptomsList({
               )
             : []),
         ]}
-        isPrintPreview={isPrintPreview}
       />
 
       {hasEnteredInErrorRecords && !showEnteredInError && (
@@ -149,7 +145,6 @@ const SymptomListLayout = ({
   children,
   canEdit = false,
   className,
-  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
@@ -157,17 +152,10 @@ const SymptomListLayout = ({
   children: ReactNode;
   canEdit?: boolean;
   className?: string;
-  isPrintPreview?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2",
-          isPrintPreview && "px-0 py-2",
-        )}
-      >
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("symptoms")}</CardTitle>
         {facilityId && encounterId && canEdit && (
           <Link
@@ -179,14 +167,7 @@ const SymptomListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          isPrintPreview && "px-0 py-0",
-          !isPrintPreview && "px-2 pb-2",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };

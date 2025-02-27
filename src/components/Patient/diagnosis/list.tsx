@@ -27,7 +27,6 @@ interface DiagnosisListProps {
   encounterStatus?: Encounter["status"];
   className?: string;
   permissions: string[];
-  isPrintPreview?: boolean;
 }
 
 export function DiagnosisList({
@@ -37,9 +36,7 @@ export function DiagnosisList({
   encounterStatus,
   className,
   permissions,
-  isPrintPreview = false,
 }: DiagnosisListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
@@ -52,6 +49,7 @@ export function DiagnosisList({
     ? canSubmitEncounterQuestionnaire &&
       !inactiveEncounterStatus.includes(encounterStatus ?? "")
     : canSubmitPatientQuestionnaireResponses;
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: diagnoses, isLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
@@ -68,6 +66,7 @@ export function DiagnosisList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        className={className}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -93,6 +92,7 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
         canEdit={canEdit}
+        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -108,38 +108,39 @@ export function DiagnosisList({
       encounterId={encounterId}
       canEdit={canEdit}
       className={className}
-      isPrintPreview={isPrintPreview}
     >
-      <DiagnosisTable
-        diagnoses={[
-          ...filteredDiagnoses.filter(
-            (diagnosis) => diagnosis.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredDiagnoses.filter(
-                (diagnosis) =>
-                  diagnosis.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-        isPrintPreview={isPrintPreview}
-      />
+      <>
+        <DiagnosisTable
+          diagnoses={[
+            ...filteredDiagnoses.filter(
+              (diagnosis) =>
+                diagnosis.verification_status !== "entered_in_error",
+            ),
+            ...(showEnteredInError
+              ? filteredDiagnoses.filter(
+                  (diagnosis) =>
+                    diagnosis.verification_status === "entered_in_error",
+                )
+              : []),
+          ]}
+        />
 
-      {hasEnteredInErrorRecords && !showEnteredInError && (
-        <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
-        </>
-      )}
+        {hasEnteredInErrorRecords && !showEnteredInError && (
+          <>
+            <div className="border-b border-dashed border-gray-200 my-2" />
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => setShowEnteredInError(true)}
+                className="text-xs underline text-gray-950"
+              >
+                {t("view_all")}
+              </Button>
+            </div>
+          </>
+        )}
+      </>
     </DiagnosisListLayout>
   );
 }
@@ -151,7 +152,6 @@ const DiagnosisListLayout = ({
   children,
   canEdit = false,
   className,
-  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
@@ -159,15 +159,11 @@ const DiagnosisListLayout = ({
   children: ReactNode;
   canEdit?: boolean;
   className?: string;
-  isPrintPreview?: boolean;
 }) => {
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
+    <Card className={cn("rounded-sm ", className)}>
       <CardHeader
-        className={cn(
-          "px-4 pt-4 pb-2 flex justify-between flex-row",
-          isPrintPreview && "px-0 py-2",
-        )}
+        className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
         {facilityId && encounterId && canEdit && (
@@ -180,14 +176,7 @@ const DiagnosisListLayout = ({
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          isPrintPreview && "px-0 py-0",
-          !isPrintPreview && "px-2 pb-2",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };
