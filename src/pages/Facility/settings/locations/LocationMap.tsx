@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import {
+  LocationForm,
   LocationList as LocationListType,
   LocationTypeIcons,
 } from "@/types/location/location";
@@ -32,8 +33,8 @@ interface LocationMapProps {
   facilityName: string;
 }
 
-function getLocationTypeIcon(form: string) {
-  const Icon = LocationTypeIcons[form.toLowerCase()] || Folder;
+function getLocationTypeIcon(form: LocationForm) {
+  const Icon = LocationTypeIcons[form] || Folder;
   return <Icon className="h-5 w-5" />;
 }
 

@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import {
+  LocationForm,
+  LocationList,
+  LocationTypeIcons,
+} from "@/types/location/location";
 
 interface Props {
   location: LocationList;
@@ -19,8 +23,8 @@ interface Props {
 export function LocationCard({ location, onEdit, className }: Props) {
   const { t } = useTranslation();
 
-  const getLocationTypeIcon = (form: string) => {
-    const Icon = LocationTypeIcons[form.toLowerCase()] || Folder;
+  const getLocationTypeIcon = (form: LocationForm) => {
+    const Icon = LocationTypeIcons[form] || Folder;
     return <Icon className="h-5 w-5" />;
   };
 
