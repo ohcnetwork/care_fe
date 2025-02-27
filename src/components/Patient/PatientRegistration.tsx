@@ -99,7 +99,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
-          death_datetime: z.string().optional(),
+          death_datetime: z.string().nullable().optional(),
           age: z
             .number()
             .int()
@@ -589,7 +589,10 @@ export default function PatientRegistration(
                       <Input
                         type="datetime-local"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(e.target.value || undefined)
+                        }
                         id="death-datetime"
                       />
                     </FormControl>
