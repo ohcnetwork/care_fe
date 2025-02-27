@@ -27,13 +27,9 @@ import {
 
 interface SymptomTableProps {
   symptoms: Symptom[];
-  isPrintPreview?: boolean;
 }
 
-export function SymptomTable({
-  symptoms,
-  isPrintPreview = false,
-}: SymptomTableProps) {
+export function SymptomTable({ symptoms }: SymptomTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
@@ -118,26 +114,22 @@ export function SymptomTable({
             <TableCell className="max-w-[200px]">
               {symptom.note ? (
                 <div className="flex items-center gap-2">
-                  {isPrintPreview ? (
-                    <span className="text-gray-950">{symptom.note}</span>
-                  ) : (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs shrink-0"
-                        >
-                          {t("see_note")}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 p-4">
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {symptom.note}
-                        </p>
-                      </PopoverContent>
-                    </Popover>
-                  )}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs shrink-0"
+                      >
+                        {t("see_note")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {symptom.note}
+                      </p>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ) : (
                 "-"
@@ -150,6 +142,7 @@ export function SymptomTable({
                   className="w-4 h-4"
                   imageUrl={symptom.created_by.profile_picture_url}
                 />
+
                 <span className="text-sm">{symptom.created_by.username}</span>
               </div>
             </TableCell>
