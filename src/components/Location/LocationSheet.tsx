@@ -34,8 +34,9 @@ import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import { LocationSearch } from "./LocationSearch";
+import { LocationTree } from "./LocationTree";
 
-interface LocationFormSheetProps {
+interface LocationSheetProps {
   trigger: React.ReactNode;
   history: LocationHistory[];
   facilityId: string;
@@ -54,12 +55,12 @@ interface ValidationError {
 // Omit id field for creation
 type LocationAssociationCreate = Omit<LocationAssociationUpdate, "id">;
 
-export function LocationFormSheet({
+export function LocationSheet({
   trigger,
   history,
   facilityId,
   encounterId,
-}: LocationFormSheetProps) {
+}: LocationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -72,13 +73,7 @@ export function LocationFormSheet({
   };
   const [newLocation, setNewLocation] = useState(initialState);
 
-  const [locations, setLocations] = useState<LocationState[]>(() => {
-    return history.map((loc) => ({
-      ...loc,
-      displayStatus: loc.status,
-      end_datetime: loc.status === "active" ? undefined : loc.end_datetime,
-    }));
-  });
+  const [locations, setLocations] = useState<LocationState[]>([]);
 
   useEffect(() => {
     setLocations(
@@ -447,6 +442,16 @@ export function LocationFormSheet({
                 )}
               </div>
             </div>
+            {history.map((item, index) => (
+              <div key={index}>
+                <LocationTree
+                  location={item.location}
+                  datetime={item.start_datetime}
+                  isLatest={index === 0}
+                  showTimeline
+                />
+              </div>
+            ))}
           </div>
         </ScrollArea>
       </SheetContent>

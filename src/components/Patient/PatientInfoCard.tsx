@@ -43,8 +43,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { LocationFormSheet } from "@/components/Location/LocationFormSheet";
-import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
@@ -373,7 +372,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               {t("location")}
                             </h4>
 
-                            <LocationHistorySheet
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
                               history={encounter.location_history}
                               trigger={
                                 <div>
@@ -396,7 +397,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          <LocationFormSheet
+                          <LocationSheet
                             facilityId={props.encounter.facility.id}
                             encounterId={props.encounter.id}
                             trigger={
@@ -415,7 +416,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   ) : (
                     encounter.status !== "completed" && (
                       <Badge variant="outline">
-                        <LocationFormSheet
+                        <LocationSheet
                           facilityId={props.encounter.facility.id}
                           encounterId={props.encounter.id}
                           trigger={
