@@ -48,7 +48,7 @@ export default function DevicesList({ facilityId }: Props) {
         offset: (page - 1) * limit,
         limit,
         registered_name: searchQuery || undefined,
-        location: selectedLocation?.id || undefined,
+        current_location: selectedLocation?.id || undefined,
       },
     }),
   });

@@ -78,7 +78,7 @@ export function LocationSearch({
             className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
-          <CommandEmpty>No locations found.</CommandEmpty>
+          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
           <CommandGroup>
             {locations?.results.map((location) => (
               <CommandItem
