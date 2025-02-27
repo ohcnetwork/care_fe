@@ -102,17 +102,15 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
-  const [hasInputBeenFocused, setHasInputBeenFocused] = useState(false);
+  const hasInputBeenFocusedRef = useRef(false);
   const isSingleOption = options.length === 1;
 
   useEffect(() => {
     if (clearSearch?.value) {
       setSearchValue("");
-      if (hasInputBeenFocused) {
-        inputRef.current?.focus();
-      }
+      inputRef.current?.focus();
     }
-  }, [clearSearch?.value, hasInputBeenFocused]);
+  }, [clearSearch?.value, selectedOption]);
 
   const handleOptionChange = useCallback(
     (index: number) => {
@@ -121,22 +119,20 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       setSearchValue(option.value || "");
       setFocusedIndex(options.findIndex((op) => op.key === option.key));
       setOpen(false);
-      setHasInputBeenFocused(true);
+      hasInputBeenFocusedRef.current = true;
       setError(false);
       onSearch(option.key, option.value);
       onFieldChange?.(options[index]);
-      if (hasInputBeenFocused) {
-        inputRef.current?.focus();
-      }
+      inputRef.current?.focus();
     },
-    [onSearch, onFieldChange, options, hasInputBeenFocused],
+    [onSearch, onFieldChange, options],
   );
 
   useEffect(() => {
-    if (hasInputBeenFocused) {
+    if (hasInputBeenFocusedRef.current) {
       inputRef.current?.focus();
     }
-  }, [selectedOption, hasInputBeenFocused]);
+  }, [selectedOption]);
 
   const unselectedOptions = useMemo(
     () => options.filter((option) => option.key !== selectedOption.key),
@@ -154,7 +150,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         e.stopPropagation();
-        setHasInputBeenFocused(true);
+        hasInputBeenFocusedRef.current = true;
         inputRef.current?.focus();
         setOpen(true);
       }
@@ -208,7 +204,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               value={searchValue}
               onChange={(value) => setSearchValue(value)}
               className={inputClassName}
-              onFocus={() => setHasInputBeenFocused(true)}
+              onFocus={() => {
+                hasInputBeenFocusedRef.current = true;
+              }}
               autoFocus={true}
             />
             {!isSingleOption && <KeyboardShortcutHint open={open} />}
@@ -224,7 +222,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               ref={inputRef}
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
-              onFocus={() => setHasInputBeenFocused(true)}
+              onFocus={() => {
+                hasInputBeenFocusedRef.current = true;
+              }}
               className={cn(
                 "flex-grow border-none shadow-none focus-visible:ring-0",
                 inputClassName,
@@ -237,10 +237,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [selectedOption, searchValue, inputClassName, open, id, isSingleOption]);
 
   useEffect(() => {
-    if (autoFocus && hasInputBeenFocused) {
+    if (autoFocus) {
       inputRef.current?.focus();
     }
-  }, [autoFocus, hasInputBeenFocused]);
+  }, [autoFocus, selectedOption]);
 
   return (
     <div
@@ -265,7 +265,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                 size="sm"
                 onClick={() => {
                   setOpen(true);
-                  setHasInputBeenFocused(true);
+                  hasInputBeenFocusedRef.current = true;
                 }}
               >
                 <CareIcon icon="l-search" className="mr-2 text-base" />
@@ -389,7 +389,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
-            if (hasInputBeenFocused) {
+            if (hasInputBeenFocusedRef.current) {
               inputRef.current?.focus();
             }
           }}
