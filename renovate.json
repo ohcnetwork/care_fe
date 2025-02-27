@@ -11,7 +11,7 @@
   ],
   "automergeStrategy": "squash",
   "automergeType": "pr",
-  "bumpVersion": "minor",
+  "bumpVersion": "patch",
   "packageRules": [
     {
       "groupName": "all dependencies (minor, patch)",
