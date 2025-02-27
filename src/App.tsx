@@ -24,7 +24,10 @@ import { PubSubProvider } from "./Utils/pubsubContext";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: (failureCount, error) => {
+        // Only retry network errors up to 3 times
+        return error.message === "Network Error" && failureCount < 3;
+      },
       refetchOnWindowFocus: false,
     },
   },
