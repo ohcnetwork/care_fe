@@ -99,6 +99,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
+          death_datetime: z.string().optional(),
           age: z
             .number()
             .int()
@@ -577,6 +578,25 @@ export default function PatientRegistration(
                   />
                 </TabsContent>
               </Tabs>
+
+              <FormField
+                control={form.control}
+                name="death_datetime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("date_and_time_of_death")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        id="death-datetime"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
