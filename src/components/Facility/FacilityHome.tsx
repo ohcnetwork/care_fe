@@ -35,6 +35,8 @@ import type {
 } from "@/types/organization/organization";
 import { getOrgLabel } from "@/types/organization/organization";
 
+import { FacilityMapsLink } from "./FacilityMapLink";
+
 type Props = {
   facilityId: string;
 };
@@ -322,8 +324,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <span className="font-semibold text-lg">
                           {t("location_details")}
                         </span>
-                        <span className="text-gray-800 truncate">
-                          {/* Add Location Link Here */}
+                        <span>
+                          {facilityData.latitude && facilityData.longitude && (
+                            <FacilityMapsLink
+                              latitude={facilityData.latitude.toString()}
+                              longitude={facilityData.longitude.toString()}
+                            />
+                          )}
                         </span>
                       </div>
                     </div>
