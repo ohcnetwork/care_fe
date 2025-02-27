@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
@@ -51,7 +51,11 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
@@ -372,7 +376,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               {t("location")}
                             </h4>
 
-                            <LocationHistorySheet
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
                               history={encounter.location_history}
                               trigger={
                                 <div>
@@ -394,39 +400,40 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                           <LocationTree
                             location={props.encounter.current_location}
                           />
-                          {!disableButtons && (
-                            <>
-                              <div className="border-b border-dashed border-gray-200 my-2" />
+                          <div className="border-b border-dashed border-gray-200 my-2" />
+                          <LocationSheet
+                            facilityId={props.encounter.facility.id}
+                            encounterId={props.encounter.id}
+                            trigger={
                               <Button
                                 variant="outline"
                                 className="border-gray-400 w-full"
                               >
-                                <Link
-                                  href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                                  className="text-sm text-gray-950 font-semibold"
-                                >
-                                  {t("update_location")}
-                                </Link>
+                                {t("update_location")}
                               </Button>
-                            </>
-                          )}
+                            }
+                            history={encounter.location_history}
+                          />
                         </div>
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    encounter.status !== "completed" &&
-                    !disableButtons && (
+                    !inactiveEncounterStatus.includes(encounter.status) && (
                       <Badge variant="outline">
-                        <Link
-                          href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                          className="flex items-center gap-1 text-gray-950 py-0.5"
-                        >
-                          <CareIcon
-                            icon="l-location-point"
-                            className="h-4 w-4 text-green-600"
-                          />
-                          {t("add_location")}
-                        </Link>
+                        <LocationSheet
+                          facilityId={props.encounter.facility.id}
+                          encounterId={props.encounter.id}
+                          trigger={
+                            <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                              <CareIcon
+                                icon="l-location-point"
+                                className="h-4 w-4 text-green-600"
+                              />
+                              {t("add_location")}
+                            </div>
+                          }
+                          history={encounter.location_history}
+                        />
                       </Badge>
                     )
                   )}
@@ -522,8 +529,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
       <Badge
         key={org.id}
         className={cn(
-          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100",
-          !disableButtons && "cursor-pointer ",
+          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100 cursor-pointer",
         )}
         variant="outline"
         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
