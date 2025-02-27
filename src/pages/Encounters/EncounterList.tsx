@@ -120,7 +120,13 @@ export function EncounterList({
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "encounter_id", "external_identifier"],
+    cacheBlacklist: [
+      "name",
+      "encounter_id",
+      "external_identifier",
+      "status",
+      "encounter_class",
+    ],
   });
   const {
     status,
