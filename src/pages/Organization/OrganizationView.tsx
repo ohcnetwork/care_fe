@@ -38,7 +38,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     {
       key: "name",
       type: "text" as const,
-      placeholder: "Search by name",
+      placeholder: t("Search by name"),
       value: qParams.name || "",
     },
   ];
@@ -60,14 +60,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   }, [updateQuery]);
 
   const { data: children, isFetching } = useQuery({
-    queryKey: [
-      "organization",
-      id,
-      "children",
-      qParams.page,
-      resultsPerPage,
-      qParams.name,
-    ],
+    queryKey: ["organization", id, "children", qParams],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: id,
@@ -169,7 +162,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 </Card>
               )}
             </div>
-            {children && children.count > 0 && (
+            {children && (
               <div className="flex justify-center">
                 <Pagination totalCount={children.count || 0} />
               </div>
