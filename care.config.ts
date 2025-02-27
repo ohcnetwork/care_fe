@@ -55,6 +55,10 @@ const careConfig = {
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
 
+  mapFallbackUrlTemplate:
+    env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
+    "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
+
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 

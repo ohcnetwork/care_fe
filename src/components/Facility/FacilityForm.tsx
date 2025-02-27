@@ -144,7 +144,7 @@ export default function FacilityForm({
 
   const handleFeatureChange = (value: string[]) => {
     const features = value.map((val) => Number(val));
-    form.setValue("features", features);
+    form.setValue("features", features, { shouldDirty: true });
   };
 
   const handleGetCurrentLocation = () => {
@@ -152,8 +152,12 @@ export default function FacilityForm({
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          form.setValue("latitude", position.coords.latitude);
-          form.setValue("longitude", position.coords.longitude);
+          form.setValue("latitude", position.coords.latitude, {
+            shouldDirty: true,
+          });
+          form.setValue("longitude", position.coords.longitude, {
+            shouldDirty: true,
+          });
           setIsGettingLocation(false);
           toast.success(t("location_updated_successfully"));
         },
@@ -346,7 +350,9 @@ export default function FacilityForm({
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
                       onChange={(value) =>
-                        form.setValue("geo_organization", value)
+                        form.setValue("geo_organization", value, {
+                          shouldDirty: true,
+                        })
                       }
                       required
                     />
@@ -418,6 +424,7 @@ export default function FacilityForm({
                         form.setValue(
                           "latitude",
                           e.target.value ? Number(e.target.value) : undefined,
+                          { shouldDirty: true },
                         );
                       }}
                       data-cy="facility-latitude"
@@ -445,6 +452,7 @@ export default function FacilityForm({
                         form.setValue(
                           "longitude",
                           e.target.value ? Number(e.target.value) : undefined,
+                          { shouldDirty: true },
                         );
                       }}
                       data-cy="facility-longitude"
@@ -493,7 +501,9 @@ export default function FacilityForm({
           type="submit"
           className="w-full"
           variant="primary"
-          disabled={facilityId ? isUpdatePending : isPending}
+          disabled={
+            facilityId ? isUpdatePending || !form.formState.isDirty : isPending
+          }
           data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
           {facilityId ? (
