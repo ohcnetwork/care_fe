@@ -51,7 +51,11 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
@@ -414,7 +418,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    encounter.status !== "completed" && (
+                    !inactiveEncounterStatus.includes(encounter.status) && (
                       <Badge variant="outline">
                         <LocationSheet
                           facilityId={props.encounter.facility.id}
