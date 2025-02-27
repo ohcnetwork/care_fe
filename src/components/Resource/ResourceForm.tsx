@@ -202,7 +202,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }));
 
   const handleUserChange = (user: UserBase) => {
-    form.setValue("assigned_to", user.id);
+    form.setValue("assigned_to", user.id, { shouldDirty: true });
     setAssignedToUser(user);
   };
 
@@ -210,9 +210,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     form.setValue(
       "referring_facility_contact_name",
       `${authUser.first_name} ${authUser.last_name}`.trim(),
+      { shouldDirty: true },
     );
     if (authUser.phone_number) {
-      form.setValue("referring_facility_contact_number", authUser.phone_number);
+      form.setValue(
+        "referring_facility_contact_number",
+        authUser.phone_number,
+        { shouldDirty: true },
+      );
     }
   };
 
@@ -292,7 +297,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                                   facilities?.results.find(
                                     (f) => f.id === value,
                                   ) ?? null;
-                                form.setValue("assigned_facility", facility);
+                                form.setValue("assigned_facility", facility, {
+                                  shouldDirty: true,
+                                });
                               }}
                             />
                           </FormControl>
@@ -543,7 +550,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   </div>
                 </div>
 
-                <div className="sticky bottom-0 flex justify-end gap-4 border-t bg-background pt-4">
+                <div className="sticky bottom-0 flex justify-end gap-4 border-t pt-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -551,7 +558,15 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   >
                     {t("cancel")}
                   </Button>
-                  <Button type="submit" variant="default" disabled={isPending}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={
+                      id
+                        ? isUpdatePending || !form.formState.isDirty
+                        : isPending
+                    }
+                  >
                     {isPending && (
                       <CareIcon
                         icon="l-spinner"

@@ -18,13 +18,23 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { handleHttpError } from "@/Utils/request/errorHandler";
+import { HTTPError } from "@/Utils/request/types";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: (failureCount, error) => {
+        // Only retry network errors or server errors (502, 503, 504) up to 3 times
+        if (
+          error.message === "Network Error" ||
+          (error instanceof HTTPError && [502, 503, 504].includes(error.status))
+        ) {
+          return failureCount < 3;
+        }
+        return false;
+      },
       refetchOnWindowFocus: false,
     },
   },
