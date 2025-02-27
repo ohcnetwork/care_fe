@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import { FacilityData } from "@/types/facility/facility";
@@ -36,6 +37,12 @@ export function FacilityCard({ facility, className }: Props) {
               {facility.facility_type?.name}
               <p className="text-sm text-gray-500 truncate">
                 {[facility.address].filter(Boolean).join(", ")}
+                {facility.latitude && facility.longitude && (
+                  <FacilityMapsLink
+                    latitude={facility.latitude.toString()}
+                    longitude={facility.longitude.toString()}
+                  />
+                )}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
