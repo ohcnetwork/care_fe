@@ -16,6 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 
@@ -75,9 +81,24 @@ export function ValueSetList() {
                 <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   {t("name")}
                 </h3>
-                <p className="text-xl font-bold text-gray-900 truncate">
-                  {valueset.name}
-                </p>
+                {valueset.name && valueset.name.length > 20 ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="turncate">
+                        <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                          {valueset.name}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-black text-white z-40">
+                        {valueset.name}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                    {valueset.name}
+                  </p>
+                )}
               </div>
 
               <div className="mb-4 flex flex-wrap gap-4">
@@ -164,9 +185,24 @@ export function ValueSetList() {
             valuesets.map((valueset) => (
               <TableRow key={valueset.id} className="hover:bg-gray-50">
                 <TableCell className="whitespace-nowrap px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {valueset.name}
-                  </div>
+                  {valueset.name && valueset.name.length > 20 ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <div className="text-sm font-medium text-gray-900 truncate">
+                            {valueset.name}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black text-white z-40">
+                          {valueset.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <div className="text-sm font-medium text-gray-900 truncate">
+                      {valueset.name}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                   {valueset.slug}

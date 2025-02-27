@@ -23,6 +23,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -82,9 +88,24 @@ export function QuestionnaireList() {
                 <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   {t("title")}
                 </h3>
-                <p className="text-xl font-bold text-gray-900 truncate">
-                  {questionnaire.title}
-                </p>
+                {questionnaire.title && questionnaire.title.length > 20 ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="truncate">
+                        <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
+                          {questionnaire.title}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-black text-white z-40">
+                        {questionnaire.title}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
+                    {questionnaire.title}
+                  </p>
+                )}
               </div>
 
               <div className="mb-4">
@@ -110,7 +131,6 @@ export function QuestionnaireList() {
                   variant="outline"
                   size="sm"
                   onClick={(e) => {
-                    // prevent card's onClick if you want the button click to be separate
                     e.stopPropagation();
                     navigate(`/admin/questionnaire/${questionnaire.slug}`);
                   }}
@@ -155,9 +175,24 @@ export function QuestionnaireList() {
                 }
               >
                 <TableCell className="px-6 py-2">
-                  <div className="text-sm font-semibold text-gray-950">
-                    {questionnaire.title}
-                  </div>
+                  {questionnaire.title && questionnaire.title.length > 20 ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-sm text-left font-semibold text-gray-950 truncate">
+                            {questionnaire.title}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black text-white z-40">
+                          {questionnaire.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <span className="text-sm text-left font-semibold text-gray-950 truncate">
+                      {questionnaire.title}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="px-6 py-2">
                   <div className="flex items-center justify-between space-x-4">
