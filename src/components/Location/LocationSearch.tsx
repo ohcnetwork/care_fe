@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -59,15 +60,15 @@ export function LocationSearch({
         >
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
           {value && (
-            <button
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(null);
               }}
-              className="text-gray-500 hover:text-gray-700 p-1 rounded-full"
+              variant="ghost"
             >
               <CareIcon icon="l-times" className="h-4 w-4" />
-            </button>
+            </Button>
           )}
         </div>
       </PopoverTrigger>

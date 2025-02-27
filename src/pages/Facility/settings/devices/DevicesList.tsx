@@ -10,9 +10,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import PageTitle from "@/components/Common/PageTitle";
-import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { LocationSearch } from "@/components/Location/LocationSearch";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
@@ -25,30 +26,30 @@ interface Props {
 
 export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
     null,
   );
 
-  const limit = 12;
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
+    cacheBlacklist: ["search_text", "current_location"],
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "devices",
       facilityId,
-      page,
-      limit,
-      searchQuery,
+      qParams,
+      resultsPerPage,
       selectedLocation,
     ],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        offset: (page - 1) * limit,
-        limit,
-        registered_name: searchQuery || undefined,
+        search_text: qParams.search_text,
         current_location: selectedLocation?.id || undefined,
+        limit: resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
       },
     }),
   });
@@ -63,10 +64,9 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="w-full sm:w-72">
             <Input
               placeholder={t("search_by_name")}
-              value={searchQuery}
+              value={qParams.search_text}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
+                updateQuery({ search_text: e.target.value });
               }}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:ring-2 focus:ring-primary focus:border-primary"
             />
@@ -74,7 +74,12 @@ export default function DevicesList({ facilityId }: Props) {
           <div className="flex items-center gap-2 w-full sm:w-60">
             <LocationSearch
               facilityId={facilityId}
-              onSelect={setSelectedLocation}
+              onSelect={(location: LocationList | null) => {
+                updateQuery({
+                  current_location: location?.id || undefined,
+                });
+                setSelectedLocation(location);
+              }}
               value={selectedLocation}
             />
           </div>
@@ -106,16 +111,7 @@ export default function DevicesList({ facilityId }: Props) {
               </Card>
             )}
           </div>
-          {data && data.count > limit && (
-            <div className="flex justify-center">
-              <Pagination
-                data={{ totalCount: data.count }}
-                onChange={(page, _) => setPage(page)}
-                defaultPerPage={limit}
-                cPage={page}
-              />
-            </div>
-          )}
+          <Pagination totalCount={data?.count ?? 0} />
         </div>
       )}
     </div>
