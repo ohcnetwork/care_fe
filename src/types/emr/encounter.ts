@@ -1,5 +1,6 @@
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
 export const ENCOUNTER_ADMIT_SOURCE = [
@@ -26,7 +27,7 @@ export const ENCOUNTER_CLASS = [
 
 export const ENCOUNTER_DIET_PREFERENCE = [
   "vegetarian",
-  "diary_free",
+  "dairy_free",
   "nut_free",
   "gluten_free",
   "vegan",
@@ -116,6 +117,12 @@ export type StatusHistory = {
   history: History[];
 };
 
+export type LocationHistory = {
+  start_datetime: string;
+  location: LocationList;
+  status: string;
+};
+
 export interface Encounter {
   id: string;
   patient: Patient;
@@ -136,6 +143,8 @@ export interface Encounter {
   encounter_class_history: EncounterClassHistory;
   status_history: StatusHistory;
   organizations: FacilityOrganization[];
+  current_location: LocationList;
+  location_history: LocationHistory[];
 }
 
 export interface EncounterEditRequest {

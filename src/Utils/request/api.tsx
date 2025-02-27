@@ -17,7 +17,6 @@ import {
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
-import { MedicationStatement } from "@/types/emr/medicationStatement";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
   Observation,
@@ -102,16 +101,17 @@ const routes = {
     TBody: Type<LoginCredentials>(),
   },
 
+  logout: {
+    path: "/api/v1/auth/logout/",
+    method: "POST",
+    TBody: Type<JwtTokenObtainPair>(),
+  },
+
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
     TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
-  },
-
-  token_verify: {
-    path: "/api/v1/auth/token/verify/",
-    method: "POST",
   },
 
   checkResetToken: {
@@ -157,36 +157,18 @@ const routes = {
     TRes: Type<UserModel>(),
   },
 
-  userList: {
-    path: "/api/v1/users/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<UserModel>>(),
-  },
-
   deleteProfilePicture: {
     path: "/api/v1/users/{username}/profile_picture/",
     method: "DELETE",
     TRes: Type<UserModel>(),
+    TBody: Type<void>(),
   },
 
   deleteUser: {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  // Facility Endpoints
-
-  getPermittedFacilities: {
-    path: "/api/v1/facility/",
-    TRes: Type<PaginatedResponse<FacilityModel>>(),
-  },
-
-  createFacility: {
-    path: "/api/v1/facility/",
-    method: "POST",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
+    TBody: Type<void>(),
   },
 
   getPermittedFacility: {
@@ -212,11 +194,7 @@ const routes = {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
-  },
-
-  getFacilityUsers: {
-    path: "/api/v1/facility/{facility_id}/get_users/",
-    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
+    TBody: Type<void>(),
   },
 
   getScheduleAbleFacilityUser: {
@@ -234,6 +212,7 @@ const routes = {
     path: "/api/v1/facility/{id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
   },
 
   // Patient
@@ -326,11 +305,6 @@ const routes = {
     path: "/api/v1/resource/{id}/",
     method: "GET",
     TRes: Type<ResourceRequest>(),
-  },
-  downloadResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
@@ -551,6 +525,11 @@ const routes = {
       TRes: Type<Encounter>(),
       TBody: Type<{ organization: string }>(),
     },
+    generateDischargeSummary: {
+      path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
+      method: "POST",
+      TRes: Type<{ detail: string }>(),
+    },
   },
 
   // New Patient Routes
@@ -615,9 +594,7 @@ const routes = {
       path: "/api/v1/otp/login/",
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<
-        { access: string } | { errors: Array<Record<string, string>> }
-      >(),
+      TRes: Type<{ access: string }>(),
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
@@ -639,14 +616,6 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
-    },
-  },
-
-  medicationStatement: {
-    list: {
-      path: "/api/v1/patient/{patientId}/medication/statement/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<MedicationStatement>>(),
     },
   },
 } as const;

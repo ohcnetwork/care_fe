@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
 import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
 import {
+  INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
@@ -19,7 +21,7 @@ import {
 
 import { formatDosage, formatSig } from "./utils";
 
-function getFrequencyDisplay(
+export function getFrequencyDisplay(
   timing?: MedicationRequestDosageInstruction["timing"],
 ) {
   if (!timing) return undefined;
@@ -38,11 +40,13 @@ interface MedicationsTableProps {
 export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   const { t } = useTranslation();
 
-  if (!medications?.length) {
+  if (!medications.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
-        {t("no_medications_found_for_this_encounter")}
-      </div>
+      <CardContent className="p-2">
+        <p className="text-gray-500 w-full flex justify-center mb-3">
+          {t("no_active_medication_recorded")}
+        </p>
+      </CardContent>
     );
   }
 
@@ -66,8 +70,15 @@ export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
             const duration = instruction?.timing?.repeat?.bounds_duration;
             const remarks = formatSig(instruction);
             const notes = medication.note;
+            const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+              medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+            );
+
             return (
-              <TableRow key={medication.id} className="divide-x font-medium">
+              <TableRow
+                key={medication.id}
+                className={`divide-x font-medium ${isInactive ? "bg-gray-100" : ""}`}
+              >
                 <TableCell className="py-2 px-3">
                   {medication.medication?.display}
                 </TableCell>

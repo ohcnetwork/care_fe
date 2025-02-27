@@ -52,7 +52,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-gray-500 mb-4">
         {t("adjust_resource_filters")}
       </p>
     </Card>
@@ -103,8 +103,23 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   const resources = queryResources?.results || [];
 
   return (
-    <Page title={t("resource")} hideBack={true}>
-      <div className="space-y-4 mt-2">
+    <Page
+      title={t("resource")}
+      componentRight={
+        <Badge
+          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
+          variant="outline"
+        >
+          {isLoading
+            ? t("loading")
+            : t("entity_count", {
+                count: queryResources?.count ?? 0,
+                entity: "Resource",
+              })}
+        </Badge>
+      }
+    >
+      <div className="space-y-4 mt-2 px-6">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
@@ -154,11 +169,12 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           })
                         }
                         className="w-full border-none shadow-none"
+                        autoFocus
                       />
                     </div>
                   </PopoverContent>
                 </Popover>
-                <div className="hidden md:flex items-center">
+                <div className="items-center">
                   <Tabs
                     value={outgoing ? "outgoing" : "incoming"}
                     className="w-full"
@@ -193,7 +209,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </div>
               </div>
 
-              <div className="hidden md:flex items-center">
+              <div className="items-center">
                 <Tabs
                   value={isActive ? "active" : "completed"}
                   className="w-full"
@@ -228,11 +244,11 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
             </div>
 
-            <Separator className="hidden md:block" />
+            <Separator />
 
-            <div className="hidden md:block p-4">
+            <div className="p-4 h-auto overflow-hidden">
               <Tabs value={currentStatus} className="w-full">
-                <TabsList className="bg-transparent p-0 h-8">
+                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}

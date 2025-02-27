@@ -67,3 +67,4 @@ src/pluginMap.ts
 # Federation Temp files
 /.__mf__temp
 public/sbom/*
+public/_headers

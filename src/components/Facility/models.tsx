@@ -23,24 +23,12 @@ export interface FacilityModel {
   is_public?: boolean;
 }
 
-export type PatientCategory =
-  | "Comfort Care" // Discontinued
-  | "Mild"
-  | "Moderate"
-  | "Critical"
-  | "Actively Dying";
-
-export type IUserFacilityRequest = {
-  facility: string;
-};
-
 export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export interface CommentModel {
   id: string;
-  created_by_object: UserBareMinimum;
   created_date: string;
   modified_date: string;
   comment: string;
-  created_by: number;
+  created_by: UserBareMinimum;
 }

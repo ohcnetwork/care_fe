@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import MarkdownIt from "markdown-it";
 import * as React from "react";
 
@@ -22,7 +23,10 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Markdown = React.forwardRef<HTMLDivElement, MarkdownProps>(
   ({ className, content, prose = true, ...props }, ref) => {
-    const html = React.useMemo(() => md.render(content), [content]);
+    const html = React.useMemo(() => {
+      const renderedHtml = md.render(content);
+      return DOMPurify.sanitize(renderedHtml);
+    }, [content]);
 
     if (prose) {
       return (

@@ -2,7 +2,9 @@ import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { classNames, keysOf } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
+
+import { keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelector = (props: any) => {
@@ -27,7 +29,7 @@ export const LanguageSelector = (props: any) => {
   return (
     <div className="relative flex items-center">
       <select
-        className={classNames(
+        className={cn(
           props.className,
           "w-full cursor-pointer appearance-none rounded-md py-2 pl-2 pr-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500",
         )}

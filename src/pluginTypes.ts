@@ -31,6 +31,10 @@ export type PatientInfoCardActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientInfoCardMarkAsCompleteComponentType = React.FC<{
+  encounter: Encounter;
+}>;
+
 export type FacilityHomeActionsComponentType = React.FC<{
   facility: FacilityData;
   className?: string;
@@ -41,14 +45,22 @@ export type PatientRegistrationFormComponentType = React.FC<{
   patientId?: string;
 }>;
 
+export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
+  facilityId: string;
+  patientId: string;
+  patientData: Patient;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  PatientInfoCardMarkAsComplete: PatientInfoCardMarkAsCompleteComponentType;
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
+  PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
 };
 
 // Create a type for lazy-loaded components

@@ -2,6 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
+import { LocationAssociation, LocationAssociationWrite } from "./association";
 import { LocationDetail, LocationList, LocationWrite } from "./location";
 
 export default {
@@ -43,5 +44,32 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<LocationDetail>(),
     TBody: Type<{ organization: string }>(),
+  },
+  listAssociations: {
+    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<LocationAssociation>>(),
+  },
+  createAssociation: {
+    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",
+    method: HttpMethod.POST,
+    TRes: Type<LocationAssociation>(),
+    TBody: Type<LocationAssociationWrite>(),
+  },
+  getAssociation: {
+    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
+    method: HttpMethod.GET,
+    TRes: Type<LocationAssociation>(),
+  },
+  updateAssociation: {
+    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
+    method: HttpMethod.PUT,
+    TRes: Type<LocationAssociation>(),
+    TBody: Type<LocationAssociationWrite>(),
+  },
+  deleteAssociation: {
+    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
   },
 };

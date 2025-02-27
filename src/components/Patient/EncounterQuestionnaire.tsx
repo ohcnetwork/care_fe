@@ -25,10 +25,7 @@ export default function EncounterQuestionnaire({
 }: Props) {
   const { goBack } = useAppHistory();
   return (
-    <Page
-      title={t("questionnaire")}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`}
-    >
+    <Page title={t("questionnaire")}>
       <Card className="mt-2">
         <CardContent className="lg:p-4 p-0">
           <QuestionnaireForm
@@ -40,7 +37,7 @@ export default function EncounterQuestionnaire({
             onSubmit={() => {
               if (encounterId) {
                 navigate(
-                  `/facility/${facilityId}/encounter/${encounterId}/updates`,
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
                 );
               } else {
                 navigate(`/patient/${patientId}/updates`);

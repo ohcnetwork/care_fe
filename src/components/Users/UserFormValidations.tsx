@@ -1,8 +1,8 @@
 import { Trans } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { cn } from "@/lib/utils";
 
-import { classNames } from "@/Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 export type UserType = "doctor" | "nurse" | "staff" | "volunteer";
 
@@ -72,7 +72,7 @@ export const validateRule = (
         <CareIcon icon="l-times-circle" className="text-sm text-red-500" />
       )}{" "}
       <span
-        className={classNames(
+        className={cn(
           isInitialRender
             ? "text-black text-sm"
             : isConditionMet

@@ -236,6 +236,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                   setYearOfBirth(value);
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleVerify();
+                }
+              }}
             />
           </div>
           <DialogFooter>

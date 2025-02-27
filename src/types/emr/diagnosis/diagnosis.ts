@@ -54,3 +54,21 @@ export interface DiagnosisRequest {
   note?: string;
   encounter: string;
 }
+
+export const DIAGNOSIS_CLINICAL_STATUS_STYLES = {
+  active: "bg-green-100 text-green-800 border-green-200",
+  recurrence: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  relapse: "bg-red-100 text-red-800 border-red-200",
+  inactive: "bg-gray-100 text-gray-800 border-gray-200",
+  remission: "bg-blue-100 text-blue-800 border-blue-200",
+  resolved: "bg-emerald-100 text-emerald-800 border-emerald-200",
+} as const;
+
+export const DIAGNOSIS_VERIFICATION_STATUS_STYLES = {
+  unconfirmed: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  provisional: "bg-orange-100 text-orange-800 border-orange-200",
+  differential: "bg-purple-100 text-purple-800 border-purple-200",
+  confirmed: "bg-green-100 text-green-800 border-green-200",
+  refuted: "bg-red-100 text-red-800 border-red-200",
+  entered_in_error: "bg-red-100 text-red-800 border-red-200",
+} as const;

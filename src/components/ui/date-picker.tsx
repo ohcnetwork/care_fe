@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { t } from "i18next";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -30,13 +31,28 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
           className={cn(
             "w-full justify-start text-left font-normal",
             !date && "text-gray-500",
+            "sm:w-auto",
           )}
         >
-          <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          <CareIcon
+            icon="l-calender"
+            className="mr-0 sm:mr-2 h-4 w-4 flex-shrink-0"
+          />
+          <span className="truncate">
+            {date ? (
+              <>
+                <span className="block sm:hidden">
+                  {format(date, "MMM d, yyyy")}
+                </span>
+                <span className="hidden sm:block">{format(date, "PPP")}</span>
+              </>
+            ) : (
+              <span>{t("pick_a_date")}</span>
+            )}
+          </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 sm:w-64" align="start">
         <Calendar
           mode="single"
           selected={date}

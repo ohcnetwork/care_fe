@@ -1,4 +1,4 @@
-import ObservationsList from "@/components/Facility/ConsultationDetails/ObservationsList";
+import SideOverview from "@/components/Facility/ConsultationDetails/OverviewSideBar";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
@@ -14,7 +14,7 @@ export const EncounterUpdatesTab = ({
   return (
     <div className="flex flex-col gap-4">
       {/* Main Content Area */}
-      <div className="flex flex-col xl:flex-row gap-4">
+      <div className="flex flex-col-reverse xl:flex-row gap-4">
         {/* Left Column - Symptoms, Diagnoses, and Questionnaire Responses */}
         <div className="flex-1 space-y-4" data-cy="encounter-overview">
           {/* Allergies Section */}
@@ -23,6 +23,7 @@ export const EncounterUpdatesTab = ({
               facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
+              encounterStatus={encounter.status}
             />
           </div>
 
@@ -54,8 +55,8 @@ export const EncounterUpdatesTab = ({
         </div>
 
         {/* Right Column - Observations */}
-        <div className="xl:w-1/3">
-          <ObservationsList encounter={encounter} />
+        <div className="xl:w-1/4 p-1 bg-white rounded-md shadow-md h-full">
+          <SideOverview encounter={encounter} />
         </div>
       </div>
     </div>

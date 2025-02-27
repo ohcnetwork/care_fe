@@ -4,6 +4,13 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
+import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
+import DeviceDetail from "@/pages/Facility/settings/devices/DeviceDetail";
+import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
+import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+
 import { GeneralSettings } from "./general/general";
 import LocationList from "./locations/LocationList";
 import LocationView from "./locations/LocationView";
@@ -28,7 +35,15 @@ const getRoutes = (facilityId: string) => ({
   "/location/:id": ({ id }: { id: string }) => (
     <LocationView facilityId={facilityId} id={id} />
   ),
-  "*": () => <div>404</div>,
+  "/devices": () => <DevicesList facilityId={facilityId} />,
+  "/devices/create": () => <CreateDevice facilityId={facilityId} />,
+  "/devices/:id": ({ id }: { id: string }) => (
+    <DeviceDetail facilityId={facilityId} deviceId={id} />
+  ),
+  "/devices/:id/edit": ({ id }: { id: string }) => (
+    <UpdateDevice facilityId={facilityId} deviceId={id} />
+  ),
+  "*": () => <ErrorPage />,
 });
 
 export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
@@ -56,6 +71,11 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
       value: "locations",
       label: t("locations"),
       href: `${basePath}/locations`,
+    },
+    {
+      value: "devices",
+      label: t("devices"),
+      href: `${basePath}/devices`,
     },
   ];
 
