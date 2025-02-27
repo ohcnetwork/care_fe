@@ -319,7 +319,7 @@ const ScheduleTemplateEditor = ({
             <Button
               variant="primary"
               type="submit"
-              disabled={isUpdating}
+              disabled={isUpdating || !form.formState.isDirty}
               size="sm"
             >
               <SaveIcon />

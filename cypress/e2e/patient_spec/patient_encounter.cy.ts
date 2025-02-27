@@ -6,6 +6,7 @@ const patientEncounter = new PatientEncounter();
 
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
+    cy.viewport(1920, 1080);
     cy.loginByApi("devnurse");
     cy.visit("/");
   });

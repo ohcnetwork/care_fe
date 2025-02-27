@@ -349,6 +349,7 @@ const AvatarEditModal = ({
                       variant="destructive"
                       onClick={deleteAvatar}
                       disabled={isProcessing}
+                      data-cy="delete-avatar"
                     >
                       {t("delete")}
                     </Button>
@@ -358,6 +359,7 @@ const AvatarEditModal = ({
                     variant="outline"
                     onClick={uploadAvatar}
                     disabled={isProcessing || !selectedFile}
+                    data-cy="save-cover-image"
                   >
                     {isProcessing ? (
                       <CareIcon
