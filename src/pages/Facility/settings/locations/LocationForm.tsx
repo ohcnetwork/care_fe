@@ -240,18 +240,20 @@ export default function LocationForm({
             </FormItem>
           )}
         />
-        {form.watch("form") === "bd" && bedNames.length > 1 && (
-          <div className="space-y-2">
-            {bedNames.map((name, index) => (
-              <Input
-                key={index}
-                placeholder={`Bed ${index + 1}`}
-                value={name}
-                onChange={(e) => updateBedName(index, e.target.value)}
-              />
-            ))}
-          </div>
-        )}
+        {form.watch("form") === "bd" &&
+          bedNames.length > 1 &&
+          form.watch("name").trim() !== "" && (
+            <div className="space-y-2">
+              {bedNames.map((name, index) => (
+                <Input
+                  key={index}
+                  placeholder={`Bed ${index + 1}`}
+                  value={name}
+                  onChange={(e) => updateBedName(index, e.target.value)}
+                />
+              ))}
+            </div>
+          )}
         <FormField
           control={form.control}
           name="description"
