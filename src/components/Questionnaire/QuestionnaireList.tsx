@@ -23,6 +23,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 export function QuestionnaireList() {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
+    cacheBlacklist: ["title", "status"],
   });
 
   const navigate = useNavigate();
