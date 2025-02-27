@@ -32,8 +32,6 @@ import {
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
@@ -50,11 +48,18 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     useState<PartialPatientModel | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
   const { canCreatePatient } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    facilityData?.permissions ?? [],
   );
 
   const handleCreatePatient = useCallback(() => {

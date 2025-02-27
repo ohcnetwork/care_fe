@@ -25,7 +25,7 @@ import {
 
 interface Props {
   id: string;
-  children: React.ReactNode;
+  children: (props: { facilityPermissions: string[] }) => React.ReactNode;
   facilityId: string;
 }
 
@@ -58,6 +58,13 @@ export default function FacilityOrganizationLayout({
 
   const currentTab =
     navItems.find((item) => item.path === path)?.value || "departments";
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
@@ -161,7 +168,9 @@ export default function FacilityOrganizationLayout({
             </TabsList>
           </Tabs>
         </div>
-        <div className="mt-4">{children}</div>
+        <div className="mt-4">
+          {children({ facilityPermissions: facilityData?.permissions ?? [] })}
+        </div>
       </Page>
     </>
   );

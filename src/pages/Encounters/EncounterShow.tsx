@@ -8,7 +8,6 @@ import PageTitle from "@/components/Common/PageTitle";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 
-import useAuthUser from "@/hooks/useAuthUser";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 
 import { getPermissions } from "@/common/Permissions";
@@ -56,18 +55,25 @@ interface Props {
 export const EncounterShow = (props: Props) => {
   const { facilityId, encounterId, patientId, subPage } = props;
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canListEncounters, canWriteEncounter } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
   const pluginTabs = useCareAppEncounterTabs();
 
   const tabs: Record<string, React.FC<EncounterTabProps>> = {
     ...defaultTabs,
     ...pluginTabs,
   };
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
+  const { canListEncounters, canWriteEncounter } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],

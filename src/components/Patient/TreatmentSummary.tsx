@@ -2,6 +2,8 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -11,7 +13,7 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
-import useAuthUser from "@/hooks/useAuthUser";
+import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -31,12 +33,6 @@ export default function TreatmentSummary({
   facilityId,
   encounterId,
 }: TreatmentSummaryProps) {
-  const authUser = useAuthUser();
-  const { hasPermission } = usePermissions();
-  const { canViewEncounter } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
@@ -44,6 +40,21 @@ export default function TreatmentSummary({
       queryParams: { facility: facilityId },
     }),
   });
+
+  const { goBack } = useAppHistory();
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter } = getPermissions(
+    hasPermission,
+    encounter?.permissions ?? [],
+  );
+
+  useEffect(() => {
+    if (!canViewEncounter) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canViewEncounter]);
 
   if (!encounter) {
     return (
@@ -204,6 +215,7 @@ export default function TreatmentSummary({
               encounterId={encounterId}
               className="border-none shadow-none"
               isPrintPreview={true}
+              permissions={encounter.permissions}
             />
 
             {/* Symptoms */}
@@ -212,6 +224,7 @@ export default function TreatmentSummary({
               encounterId={encounterId}
               className="border-none shadow-none"
               isPrintPreview={true}
+              permissions={encounter.permissions}
             />
 
             {/* Diagnoses */}
@@ -220,6 +233,7 @@ export default function TreatmentSummary({
               encounterId={encounterId}
               className="border-none shadow-none"
               isPrintPreview={true}
+              permissions={encounter.permissions}
             />
 
             {/* Medications */}

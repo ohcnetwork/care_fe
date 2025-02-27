@@ -37,8 +37,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import routes from "@/Utils/request/api";
@@ -54,12 +52,14 @@ interface Props {
   organizationId: string;
   userRole: OrganizationUserRole;
   trigger?: React.ReactNode;
+  permissions: string[];
 }
 
 export default function EditUserRoleSheet({
   organizationId,
   userRole,
   trigger,
+  permissions,
 }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -125,9 +125,8 @@ export default function EditUserRoleSheet({
       role: selectedRole,
     });
   };
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, authUser.permissions);
+  const { canCreateUser } = getPermissions(hasPermission, permissions);
 
   return (
     <>

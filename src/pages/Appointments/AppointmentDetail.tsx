@@ -48,7 +48,6 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -81,15 +80,10 @@ interface Props {
 export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canViewAppointments, canUpdateAppointment } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
   const { goBack } = useAppHistory();
 
-  const facilityQuery = useQuery({
+  const { data: facilityData } = useQuery({
     queryKey: ["facility", props.facilityId],
     queryFn: query(routes.getPermittedFacility, {
       pathParams: {
@@ -97,6 +91,11 @@ export default function AppointmentDetail(props: Props) {
       },
     }),
   });
+
+  const { canViewAppointments, canUpdateAppointment } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
 
   const appointmentQuery = useQuery({
     queryKey: ["appointment", props.appointmentId],
@@ -149,9 +148,8 @@ export default function AppointmentDetail(props: Props) {
   });
 
   const appointment = appointmentQuery.data;
-  const facility = facilityQuery.data;
 
-  if (!facility || !appointment) {
+  if (!facilityData || !appointment) {
     return <Loading />;
   }
 
@@ -168,14 +166,14 @@ export default function AppointmentDetail(props: Props) {
         >
           <AppointmentDetails
             appointment={appointmentQuery.data}
-            facility={facilityQuery.data}
+            facility={facilityData}
           />
           <div className="mt-3">
             <div id="section-to-print" className="print:w-[400px] print:pt-4">
               <div id="appointment-token-card" className="bg-gray-50 md:p-4">
                 <AppointmentTokenCard
                   appointment={appointmentQuery.data}
-                  facility={facilityQuery.data}
+                  facility={facilityData}
                 />
               </div>
             </div>
@@ -207,6 +205,7 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     onChange={(status) => updateAppointment({ status })}
                     onViewPatient={redirectToPatientPage}
+                    permissions={facilityData.permissions}
                   />
                 </div>
               </>
@@ -390,6 +389,7 @@ interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
+  permissions: string[];
 }
 
 const AppointmentActions = ({
@@ -397,17 +397,14 @@ const AppointmentActions = ({
   appointment,
   onChange,
   onViewPatient,
+  permissions,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canCreateAppointment } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
+  const { canCreateAppointment } = getPermissions(hasPermission, permissions);
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());

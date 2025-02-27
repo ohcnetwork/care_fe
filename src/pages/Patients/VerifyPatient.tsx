@@ -22,7 +22,6 @@ import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { EncounterCard } from "@/components/Facility/EncounterCard";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -39,11 +38,17 @@ export default function VerifyPatient(props: { facilityId: string }) {
   const [qParams] = useQueryParams();
   const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
-
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: props.facilityId },
+    }),
+  });
+
   const { canCreateAppointment, canCreateEncounter, canListEncounters } =
-    getPermissions(hasPermission, authUser.permissions);
+    getPermissions(hasPermission, facilityData?.permissions ?? []);
   const canPerformActions =
     canCreateAppointment || canCreateEncounter || canListEncounters;
 
@@ -70,7 +75,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
       },
       silent: true,
     }),
-    enabled: !!patientData?.id,
+    enabled: !!patientData?.id && canListEncounters,
   });
 
   useEffect(() => {
@@ -236,7 +241,11 @@ export default function VerifyPatient(props: { facilityId: string }) {
                 {encounters?.results && encounters.results.length > 0 ? (
                   <>
                     {encounters.results.map((encounter: Encounter) => (
-                      <EncounterCard encounter={encounter} key={encounter.id} />
+                      <EncounterCard
+                        encounter={encounter}
+                        key={encounter.id}
+                        permissions={facilityData?.permissions ?? []}
+                      />
                     ))}
                   </>
                 ) : (

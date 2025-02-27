@@ -34,18 +34,14 @@ export interface TabChildProp {
 
 export default function UserHome(props: UserHomeProps) {
   const { tab } = props;
-  let { username } = props;
+  let { username, facilityId } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
   if (!username) {
     username = authUser.username;
   }
-  const { canViewSchedule } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
+  const { hasPermission } = usePermissions();
+  const { goBack } = useAppHistory();
 
   const {
     data: userData,
@@ -59,6 +55,19 @@ export default function UserHome(props: UserHomeProps) {
       },
     }),
   });
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["getFacilityDetails", props.facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId ?? "" },
+    }),
+    enabled: !!facilityId,
+  });
+
+  const { canViewSchedule } = getPermissions(
+    hasPermission,
+    facilityId ? (facilityData?.permissions ?? []) : authUser.permissions,
+  );
 
   if (isError) {
     goBack("/");
@@ -134,7 +143,11 @@ export default function UserHome(props: UserHomeProps) {
                 </div>
               </div>
             </div>
-            <SelectedTab userData={userData} username={username} {...props} />
+            <SelectedTab
+              userData={userData}
+              username={username}
+              permissions={facilityData?.permissions ?? []}
+            />
           </>
         }
       </Page>

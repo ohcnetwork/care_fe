@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -13,6 +14,8 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 
 interface FacilityOverviewProps {
@@ -23,9 +26,17 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
   const { canViewSchedule, canListEncounters } = getPermissions(
     hasPermission,
-    user.permissions,
+    facilityData?.permissions ?? [],
   );
 
   const shortcuts = [

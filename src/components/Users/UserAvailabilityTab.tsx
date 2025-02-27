@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { usePathParams, useQueryParams } from "raviger";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -23,10 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
-
-import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
-import useSlug from "@/hooks/useSlug";
+import { userChildProps } from "@/components/Common/UserColumns";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -53,11 +49,6 @@ import {
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
-
-type Props = {
-  userData: UserBase;
-};
 
 type AvailabilityTabQueryParams = {
   tab?: "schedule" | "exceptions" | null;
@@ -66,20 +57,18 @@ type AvailabilityTabQueryParams = {
   valid_to?: string | null;
 };
 
-export default function UserAvailabilityTab({ userData: user }: Props) {
+export default function UserAvailabilityTab({
+  userData: user,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<AvailabilityTabQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { canViewSchedule } = getPermissions(
-    hasPermission,
-    authUser.permissions,
-  );
-  const { goBack } = useAppHistory();
+  const { canViewSchedule } = getPermissions(hasPermission, permissions ?? []);
 
-  const facilityId = useSlug("facility");
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
 
   const templatesQuery = useQuery({
     queryKey: ["user-schedule-templates", { facilityId, userId: user.id }],
@@ -98,18 +87,6 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
     enabled: !!facilityId && canViewSchedule,
   });
-
-  useEffect(() => {
-    if (!canViewSchedule) {
-      toast.error(t("no_permission_to_view_page"));
-      goBack(
-        facilityId
-          ? `/facility/${facilityId}/users/${user.username}`
-          : `/users/${user.username}`,
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewSchedule]);
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;

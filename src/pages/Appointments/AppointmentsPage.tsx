@@ -67,6 +67,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
@@ -256,9 +257,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: facilityId },
+    }),
+  });
+
   const { canViewAppointments } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    facilityData?.permissions ?? [],
   );
 
   const schedulableUsersQuery = useQuery({

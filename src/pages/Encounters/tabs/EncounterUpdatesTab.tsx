@@ -48,6 +48,7 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               encounterStatus={encounter.status}
+              permissions={encounter.permissions}
             />
           </div>
 
@@ -58,6 +59,7 @@ export const EncounterUpdatesTab = ({
               encounterId={encounter.id}
               facilityId={facilityId}
               encounterStatus={encounter.status}
+              permissions={encounter.permissions}
             />
           </div>
 
@@ -68,6 +70,7 @@ export const EncounterUpdatesTab = ({
               encounterId={encounter.id}
               facilityId={facilityId}
               encounterStatus={encounter.status}
+              permissions={encounter.permissions}
             />
           </div>
 

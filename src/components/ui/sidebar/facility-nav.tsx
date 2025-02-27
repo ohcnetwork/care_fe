@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
@@ -5,10 +6,10 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { UserFacilityModel } from "@/components/Users/models";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
+import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 
 interface NavigationLink {
@@ -77,8 +78,15 @@ function generateFacilityLinks(
 
 export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
+
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", selectedFacility?.id],
+    queryFn: query(routes.getPermittedFacility, {
+      pathParams: { id: selectedFacility?.id ?? "" },
+    }),
+    enabled: !!selectedFacility?.id,
+  });
 
   const {
     canViewAppointments,
@@ -86,7 +94,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canCreateAppointment,
     canCreateEncounter,
     canViewEncounter,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(hasPermission, facilityData?.permissions ?? []);
   const permissions = {
     canViewAppointments,
     canListEncounters,

@@ -18,15 +18,13 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
   encounter: Encounter;
+  permissions: string[];
 }
 
 export const EncounterCard = (props: EncounterCardProps) => {
-  const { encounter } = props;
+  const { encounter, permissions } = props;
   const { hasPermission } = usePermissions();
-  const { canViewEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
+  const { canViewEncounter } = getPermissions(hasPermission, permissions);
 
   const Icon = encounterIcons[encounter.encounter_class];
 

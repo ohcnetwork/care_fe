@@ -55,15 +55,24 @@ export const HealthProfileSummary = (props: PatientProps) => {
             </div>
 
             <div className="md:col-span-2">
-              <AllergyList patientId={patientId} />
+              <AllergyList
+                patientId={patientId}
+                permissions={patientData.permissions}
+              />
             </div>
 
             <div className="md:col-span-2">
-              <SymptomsList patientId={patientId} />
+              <SymptomsList
+                patientId={patientId}
+                permissions={patientData.permissions}
+              />
             </div>
 
             <div className="md:col-span-2">
-              <DiagnosisList patientId={patientId} />
+              <DiagnosisList
+                patientId={patientId}
+                permissions={patientData.permissions}
+              />
             </div>
           </div>
         </div>

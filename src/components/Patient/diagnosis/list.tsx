@@ -11,8 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
@@ -28,6 +26,7 @@ interface DiagnosisListProps {
   facilityId?: string;
   encounterStatus?: Encounter["status"];
   className?: string;
+  permissions: string[];
   isPrintPreview?: boolean;
 }
 
@@ -37,17 +36,17 @@ export function DiagnosisList({
   facilityId,
   encounterStatus,
   className,
+  permissions,
   isPrintPreview = false,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
     canViewEncounter,
     canSubmitEncounterQuestionnaire,
     canSubmitPatientQuestionnaireResponses,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(hasPermission, permissions);
   const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
   const canEdit = encounterId
     ? canSubmitEncounterQuestionnaire &&

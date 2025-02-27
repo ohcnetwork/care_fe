@@ -33,8 +33,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
@@ -61,6 +59,7 @@ interface AllergyListProps {
   className?: string;
   isPrintPreview?: boolean;
   encounterStatus?: Encounter["status"];
+  permissions: string[];
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
@@ -83,16 +82,16 @@ export function AllergyList({
   className,
   isPrintPreview = false,
   encounterStatus,
+  permissions,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const {
     canViewClinicalData,
     canViewEncounter,
     canSubmitPatientQuestionnaireResponses,
     canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, authUser.permissions);
+  } = getPermissions(hasPermission, permissions);
   const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
   const canEdit = encounterId
     ? canSubmitEncounterQuestionnaire &&

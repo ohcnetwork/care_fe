@@ -2,8 +2,6 @@ import { t } from "i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
@@ -18,11 +16,10 @@ interface Props {
 }
 
 export default function SideOverview(props: Props) {
-  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const { canSubmitEncounterQuestionnaire } = getPermissions(
     hasPermission,
-    authUser.permissions,
+    props.encounter.permissions,
   );
   const canWrite =
     canSubmitEncounterQuestionnaire &&

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns from "@/components/Common/UserColumns";
+import { userChildProps } from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserResetPassword from "@/components/Users/UserResetPassword";
@@ -32,15 +33,17 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { usePermissions } from "@/context/PermissionContext";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
-import { UserBase } from "@/types/user/user";
 
-export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
+export default function UserSummaryTab({
+  userData,
+  permissions,
+}: userChildProps) {
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
   const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, authUser.permissions);
+  const { canCreateUser } = getPermissions(hasPermission, permissions ?? []);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
     mutationFn: mutate(routes.deleteUser, {
@@ -67,6 +70,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserBase }) {
   const userColumnsData = {
     userData,
     username: userData.username,
+    permissions,
   };
   const deletePermitted = showUserDelete(authUser, userData);
   const passwordResetPermitted = showUserPasswordReset(authUser, userData);

@@ -126,7 +126,11 @@ const EncounterHistory = (props: PatientProps) => {
               <ul className="grid gap-4">
                 {encounterData?.results?.map((encounter) => (
                   <li key={encounter.id} className="w-full">
-                    <EncounterCard key={encounter.id} encounter={encounter} />
+                    <EncounterCard
+                      key={encounter.id}
+                      encounter={encounter}
+                      permissions={patientData.permissions ?? []}
+                    />
                   </li>
                 ))}
                 <div className="flex w-full items-center justify-center">
