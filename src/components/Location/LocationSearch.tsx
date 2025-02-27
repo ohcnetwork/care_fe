@@ -70,7 +70,7 @@ export function LocationSearch({
             {locations?.results.map((location) => (
               <CommandItem
                 key={location.id}
-                value={location.id}
+                value={location.name}
                 onSelect={() => {
                   onSelect(location);
                   setOpen(false);
