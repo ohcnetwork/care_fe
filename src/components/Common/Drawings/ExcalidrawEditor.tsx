@@ -86,7 +86,12 @@ export default function ExcalidrawEditor({
         },
       ],
     };
-    metaArtifactRequest(request);
+    try {
+      metaArtifactRequest(request);
+      toast.success(t("file_saved_successfully"));
+    } catch (_error) {
+      toast.error(t("error_saving_file"));
+    }
   };
 
   if (elements === null) {

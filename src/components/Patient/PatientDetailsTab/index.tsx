@@ -1,3 +1,4 @@
+import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
@@ -46,6 +47,10 @@ export const patientTabs = [
     route: "files",
     component: PatientFilesTab,
   },
+  {
+    route: "drawings",
+    component: DrawingTab,
+  },
 ];
 
 export const facilityPatientTabs = [
@@ -80,5 +85,9 @@ export const facilityPatientTabs = [
   {
     route: "files",
     component: PatientFilesTab,
+  },
+  {
+    route: "drawings",
+    component: DrawingTab,
   },
 ];

@@ -31,4 +31,5 @@ export type MetaArtifactResponse = {
   modified_date: string;
   created_by: UserBase;
   updated_by: UserBase;
+  username: string;
 } & ObjectTypeValues;

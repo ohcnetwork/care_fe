@@ -68,7 +68,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
               );
             } else {
               navigate(
-                `/facility/${props.facilityId}/patient/${props.patientId}/drawings`,
+                `/facility/${props.facilityId}/patient/${props.patientId}/drawing`,
               );
             }
           }}
@@ -93,8 +93,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                     {new Date(drawing.created_date).toLocaleDateString()}
                   </p>
                   <p>
-                    {t("created_by")}: {drawing.created_by.first_name}{" "}
-                    {drawing.created_by.last_name}
+                    {t("created_by")}: {drawing.created_by.username}
                   </p>
                 </div>
                 <Button

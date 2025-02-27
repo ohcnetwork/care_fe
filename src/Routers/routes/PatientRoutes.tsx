@@ -51,13 +51,25 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
     <PatientRegistration facilityId={facilityId} patientId={id} />
   ),
-  "/facility/:facilityId/patient/:id/drawings": ({ id }) => {
+  "/facility/:facilityId/patient/:id/drawing": ({ id }) => {
     return (
       <Suspense fallback={<Loading />}>
         <ExcalidrawEditor associatingId={id} associating_type="patient" />
       </Suspense>
     );
   },
+  "/facility/:facilityId/patient/:patientId/drawings/:drawingId": ({
+    patientId,
+    drawingId,
+  }) => (
+    <Suspense fallback={<Loading />}>
+      <ExcalidrawEditor
+        associatingId={patientId}
+        associating_type="patient"
+        drawingId={drawingId}
+      />
+    </Suspense>
+  ),
 };
 
 export default PatientRoutes;

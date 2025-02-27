@@ -140,6 +140,7 @@ export const PatientHome = (props: {
           <div className="h-full lg:mr-7 lg:basis-5/6">
             {Tab && (
               <Tab
+                type="patient"
                 facilityId={facilityId || ""}
                 patientId={id}
                 patientData={patientData}
