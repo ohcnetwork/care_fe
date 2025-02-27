@@ -20,7 +20,6 @@ import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DateTimeQuestion } from "./DateTimeQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { EncounterQuestion } from "./EncounterQuestion";
-import { LocationQuestion } from "./LocationQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
 import { NotesInput } from "./NotesInput";
@@ -185,22 +184,6 @@ export function QuestionInput({
             }
             return (
               <span> Create an encounter first in order to update it </span>
-            );
-          case "location_association":
-            if (encounterId) {
-              return (
-                <LocationQuestion
-                  {...commonProps}
-                  facilityId={facilityId}
-                  locationId={patientId}
-                  encounterId={encounterId}
-                />
-              );
-            }
-            return (
-              <span>
-                Location cannot be recorded without an active encounter
-              </span>
             );
         }
         return null;
