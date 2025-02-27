@@ -42,7 +42,10 @@ import {
 } from "@/types/questionnaire/batch";
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: t("field_required") }),
+  name: z
+    .string()
+    .trim()
+    .min(1, { message: t("field_required") }),
   description: z.string().optional(),
   status: z.enum(["active", "inactive", "unknown"] as const),
   operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
