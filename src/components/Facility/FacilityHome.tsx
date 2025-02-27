@@ -243,7 +243,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="mt-2 flex justify-end gap-2">
+              <div className="flex justify-end gap-2 max-sm:flex-col max-sm:mt-8 mt-12 flex-wrap">
                 <PLUGIN_Component
                   __name="FacilityHomeActions"
                   facility={facilityData}
@@ -251,10 +251,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
-                    <Button
-                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
-                      variant="outline"
-                    >
+                    <Button className="cursor-pointer" variant="outline">
                       <CareIcon icon="l-edit" />
                       {t("edit_facility_details")}
                     </Button>
