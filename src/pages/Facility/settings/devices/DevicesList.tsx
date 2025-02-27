@@ -36,13 +36,7 @@ export default function DevicesList({ facilityId }: Props) {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: [
-      "devices",
-      facilityId,
-      qParams,
-      resultsPerPage,
-      selectedLocation,
-    ],
+    queryKey: ["devices", facilityId, qParams, resultsPerPage],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
