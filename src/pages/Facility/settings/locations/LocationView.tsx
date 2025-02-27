@@ -23,7 +23,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import query from "@/Utils/request/query";
-import { LocationList, getLocationFormLabel } from "@/types/location/location";
+import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
@@ -154,7 +154,7 @@ export default function LocationView({ id, facilityId }: Props) {
               <div className="flex items-center gap-4">
                 <h2 className="text-lg font-semibold">{t("locations")}</h2>
                 <Badge variant="outline">
-                  {getLocationFormLabel(location?.form)}
+                  {t(`location_form__${location?.form}`)}
                 </Badge>
                 <Badge
                   variant={
