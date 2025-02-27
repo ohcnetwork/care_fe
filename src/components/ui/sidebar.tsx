@@ -143,7 +143,7 @@ const SidebarProvider = React.forwardRef<
               } as React.CSSProperties
             }
             className={cn(
-              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+              "group/sidebar-wrapper bg-gray-100 flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
               className,
             )}
             ref={ref}
@@ -211,7 +211,7 @@ const Sidebar = React.forwardRef<
             <VisuallyHidden>
               <SheetTitle>Sidebar</SheetTitle>
             </VisuallyHidden>
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <div className="flex flex-col w-full h-full">{children}</div>
           </SheetContent>
         </Sheet>
       );
@@ -220,7 +220,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className="hidden group peer md:block text-sidebar-foreground"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -285,7 +285,7 @@ const SidebarTrigger = React.forwardRef<
     >
       {isMobile ? (
         <svg
-          className="h-8 w-8"
+          className="w-8 h-8"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 24 24"
@@ -637,7 +637,7 @@ const SidebarMenuAction = React.forwardRef<
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground··md:opacity-0",
         className,
       )}
       {...props}
@@ -687,7 +687,7 @@ const SidebarMenuSkeleton = React.forwardRef<
     >
       {showIcon && (
         <Skeleton
-          className="size-4 rounded-md"
+          className="rounded-md size-4"
           data-sidebar="menu-skeleton-icon"
         />
       )}
