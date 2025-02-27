@@ -325,36 +325,28 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     )
                   }
 
-                  {!disableButtons ? (
-                    <LinkDepartmentsSheet
-                      entityType="encounter"
-                      entityId={encounter.id}
-                      currentOrganizations={encounter.organizations}
-                      facilityId={encounter.facility.id}
-                      trigger={
-                        <div className="flex flex-wrap gap-2">
-                          {encounter.organizations.map((org) =>
-                            organizationBadge(org),
-                          )}
-                          {encounter.organizations.length === 0 && (
-                            <Badge
-                              className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                              variant="outline"
-                            >
-                              <Building className="w-4 h-4 text-blue-400" />
-                              Add Organizations
-                            </Badge>
-                          )}
-                        </div>
-                      }
-                    />
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {encounter.organizations.map((org) =>
-                        organizationBadge(org),
-                      )}
-                    </div>
-                  )}
+                  <LinkDepartmentsSheet
+                    entityType="encounter"
+                    entityId={encounter.id}
+                    currentOrganizations={encounter.organizations}
+                    facilityId={encounter.facility.id}
+                    trigger={
+                      <div className="flex flex-wrap gap-2">
+                        {encounter.organizations.map((org) =>
+                          organizationBadge(org),
+                        )}
+                        {encounter.organizations.length === 0 && (
+                          <Badge
+                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
+                            variant="outline"
+                          >
+                            <Building className="w-4 h-4 text-blue-400" />
+                            Add Organizations
+                          </Badge>
+                        )}
+                      </div>
+                    }
+                  />
                   {props.encounter.current_location ? (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -422,18 +414,21 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <Badge variant="outline">
-                      <Link
-                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                        className="flex items-center gap-1 text-gray-950 py-0.5"
-                      >
-                        <CareIcon
-                          icon="l-location-point"
-                          className="h-4 w-4 text-green-600"
-                        />
-                        {t("add_location")}
-                      </Link>
-                    </Badge>
+                    encounter.status !== "completed" &&
+                    !disableButtons && (
+                      <Badge variant="outline">
+                        <Link
+                          href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
+                          className="flex items-center gap-1 text-gray-950 py-0.5"
+                        >
+                          <CareIcon
+                            icon="l-location-point"
+                            className="h-4 w-4 text-green-600"
+                          />
+                          {t("add_location")}
+                        </Link>
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
