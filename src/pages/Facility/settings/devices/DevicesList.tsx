@@ -47,7 +47,7 @@ export default function DevicesList({ facilityId }: Props) {
       queryParams: {
         offset: (page - 1) * limit,
         limit,
-        name: searchQuery || undefined,
+        registered_name: searchQuery || undefined,
         location: selectedLocation?.id || undefined,
       },
     }),
