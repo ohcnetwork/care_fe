@@ -28,31 +28,13 @@ import Loading from "@/components/Common/Loading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 
-export function ValueSetList() {
+const RenderCard = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
-  });
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["valuesets", qParams],
-    queryFn: query(valuesetApi.list, {
-      queryParams: {
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-      },
-    }),
-  });
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  const valuesets = response?.results || [];
-
-  const RenderCard = () => (
+  return (
     <div className="xl:hidden space-y-4 px-4">
       {valuesets.length > 0 ? (
         valuesets.map((valueset) => (
@@ -154,8 +136,12 @@ export function ValueSetList() {
       )}
     </div>
   );
+};
 
-  const RenderTable = () => (
+const RenderTable = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  return (
     <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow">
       <Table className="min-w-full divide-y divide-gray-200">
         <TableHeader className="bg-gray-50">
@@ -258,6 +244,28 @@ export function ValueSetList() {
       </Table>
     </div>
   );
+};
+
+export function ValueSetList() {
+  const { t } = useTranslation();
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+  });
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["valuesets", qParams],
+    queryFn: query(valuesetApi.list, {
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+      },
+    }),
+  });
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  const valuesets = response?.results || [];
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -272,8 +280,8 @@ export function ValueSetList() {
           </Link>
         </Button>
       </div>
-      <RenderTable />
-      <RenderCard />
+      <RenderTable valuesets={valuesets} />
+      <RenderCard valuesets={valuesets} />
       <Pagination totalCount={response?.count ?? 0} />
     </div>
   );

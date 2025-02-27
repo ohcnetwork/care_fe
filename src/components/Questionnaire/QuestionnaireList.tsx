@@ -36,28 +36,13 @@ import query from "@/Utils/request/query";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
-export function QuestionnaireList() {
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
-  });
-
+const RenderCard = ({
+  questionnaireList,
+}: {
+  questionnaireList: QuestionnaireDetail[];
+}) => {
   const navigate = useNavigate();
-
-  const { data: response } = useQuery({
-    queryKey: ["questionnaires", qParams],
-    queryFn: query(questionnaireApi.list, {
-      queryParams: {
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        title: qParams.title || undefined,
-        status: qParams.status || "active",
-      },
-    }),
-  });
-
-  const questionnaireList = response?.results || [];
-
-  const RenderCard = () => (
+  return (
     <div className="xl:hidden space-y-4">
       {questionnaireList?.length > 0 ? (
         questionnaireList.map((questionnaire: QuestionnaireDetail) => (
@@ -150,8 +135,15 @@ export function QuestionnaireList() {
       )}
     </div>
   );
+};
 
-  const RenderTable = () => (
+const RenderTable = ({
+  questionnaireList,
+}: {
+  questionnaireList: QuestionnaireDetail[];
+}) => {
+  const navigate = useNavigate();
+  return (
     <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
       <Table className="min-w-full divide-y divide-gray-200">
         <TableHeader className="bg-gray-100 text-gray-700">
@@ -222,6 +214,28 @@ export function QuestionnaireList() {
       </Table>
     </div>
   );
+};
+
+export function QuestionnaireList() {
+  const navigate = useNavigate();
+
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+  });
+
+  const { data: response } = useQuery({
+    queryKey: ["questionnaires", qParams],
+    queryFn: query(questionnaireApi.list, {
+      queryParams: {
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        title: qParams.title || undefined,
+        status: qParams.status || "active",
+      },
+    }),
+  });
+
+  const questionnaireList = response?.results || [];
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -274,8 +288,8 @@ export function QuestionnaireList() {
         </div>
       </div>
 
-      <RenderTable />
-      <RenderCard />
+      <RenderTable questionnaireList={questionnaireList} />
+      <RenderCard questionnaireList={questionnaireList} />
       <Pagination totalCount={response?.count ?? 0} />
     </div>
   );
