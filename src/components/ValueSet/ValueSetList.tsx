@@ -44,7 +44,7 @@ export function ValueSetList() {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        name: qParams.name || undefined,
+        name: qParams.name,
         status: qParams.status || "active",
       },
     }),
