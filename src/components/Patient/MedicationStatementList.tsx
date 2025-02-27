@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -35,20 +36,14 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 interface MedicationStatementListProps {
   patientId: string;
   className?: string;
-  isPrintPreview?: boolean;
 }
 
 interface MedicationRowProps {
   statement: MedicationStatementRead;
   isEnteredInError?: boolean;
-  isPrintPreview?: boolean;
 }
 
-function MedicationRow({
-  statement,
-  isEnteredInError,
-  isPrintPreview = false,
-}: MedicationRowProps) {
+function MedicationRow({ statement, isEnteredInError }: MedicationRowProps) {
   const { t } = useTranslation();
 
   return (
@@ -80,26 +75,22 @@ function MedicationRow({
       <TableCell className="max-w-[200px]">
         {statement.note ? (
           <div className="flex items-center gap-2">
-            {isPrintPreview ? (
-              <span className="text-gray-950">{statement.note}</span>
-            ) : (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs shrink-0"
-                  >
-                    {t("see_note")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {statement.note}
-                  </p>
-                </PopoverContent>
-              </Popover>
-            )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs shrink-0"
+                >
+                  {t("see_note")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {statement.note}
+                </p>
+              </PopoverContent>
+            </Popover>
           </div>
         ) : (
           "-"
@@ -121,11 +112,10 @@ function MedicationRow({
 
 export function MedicationStatementList({
   patientId,
-  className,
-  isPrintPreview = false,
+  className = "",
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: medications, isLoading } = useQuery({
     queryKey: ["medication_statements", patientId],
@@ -136,16 +126,9 @@ export function MedicationStatementList({
 
   if (isLoading) {
     return (
-      <Card className={cn("border-none rounded-sm", className)}>
-        <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-        >
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent className="px-2 pb-2">
-          <Skeleton className="h-[100px] w-full" />
-        </CardContent>
-      </Card>
+      <MedicationStatementListLayout className={className}>
+        <Skeleton className="h-[100px] w-full" />
+      </MedicationStatementListLayout>
     );
   }
 
@@ -160,31 +143,18 @@ export function MedicationStatementList({
 
   if (!filteredMedications?.length) {
     return (
-      <Card className={cn("border-none rounded-sm", className)}>
-        <CardHeader
-          className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-        >
-          <CardTitle>{t("ongoing_medications")}</CardTitle>
-        </CardHeader>
-        <CardContent
-          className={cn("px-2 pb-3 pt-2", isPrintPreview && "px-0 py-0")}
-        >
-          <p className="text-gray-500">{t("no_ongoing_medications")}</p>
-        </CardContent>
-      </Card>
+      <MedicationStatementListLayout className={className}>
+        <p className="text-gray-500">{t("no_ongoing_medications")}</p>
+      </MedicationStatementListLayout>
     );
   }
 
   return (
-    <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn("px-4 pt-4 pb-2", isPrintPreview && "px-0 py-2")}
-      >
-        <CardTitle>
-          {t("ongoing_medications")} ({filteredMedications.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className={cn("px-2 pb-2", isPrintPreview && "px-0 py-0")}>
+    <MedicationStatementListLayout
+      medicationsCount={filteredMedications.length}
+      className={className}
+    >
+      <>
         <Table className="border-separate border-spacing-y-0.5">
           <TableHeader>
             <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -226,7 +196,6 @@ export function MedicationStatementList({
                 key={statement.id}
                 statement={statement}
                 isEnteredInError={statement.status === "entered_in_error"}
-                isPrintPreview={isPrintPreview}
               />
             ))}
           </TableBody>
@@ -246,7 +215,29 @@ export function MedicationStatementList({
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+      </>
+    </MedicationStatementListLayout>
   );
 }
+
+const MedicationStatementListLayout = ({
+  children,
+  className,
+  medicationsCount,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  medicationsCount?: number | undefined;
+}) => {
+  return (
+    <Card className={cn("rounded-sm ", className)}>
+      <CardHeader className="px-4 pt-4 pb-2">
+        <CardTitle>
+          {t("ongoing_medications")}{" "}
+          {medicationsCount ? `(${medicationsCount})` : ""}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
+    </Card>
+  );
+};
