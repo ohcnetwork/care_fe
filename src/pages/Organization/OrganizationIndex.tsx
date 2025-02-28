@@ -69,7 +69,8 @@ export default function OrganizationIndex() {
 
   return (
     <Page title={t("organizations")}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4 mt-4">
+
         {data.results.map((org: Organization) => (
           <Card key={org.id} className="relative group">
             <CardHeader>
@@ -85,10 +86,8 @@ export default function OrganizationIndex() {
 
             <CardFooter>
               <Button variant="outline" asChild className="w-full">
-                <Link
-                  href={`/organization/${org.id}`}
-                  className="flex items-center justify-center gap-2"
-                >
+                <Link href={`/organization/${org.id}`} asChild>
+                  <div className="flex items-center justify-center gap-2">
                   View Details
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Link>

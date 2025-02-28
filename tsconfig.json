@@ -15,7 +15,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "types": ["vite/client", "vite-plugin-pwa/client", "@tanstack/react-query", "raviger", "react-i18next"],
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
