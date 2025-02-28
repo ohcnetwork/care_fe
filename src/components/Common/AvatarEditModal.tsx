@@ -1,4 +1,3 @@
-import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -19,15 +18,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
-import useDragAndDrop from "@/hooks/useDragAndDrop";
+} from "@/src/components/ui/select";
 
 interface Props {
   title: string;
@@ -72,10 +73,8 @@ const AvatarEditModal = ({
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
-    undefined,
-  );
+  const [devices, setDevices] = useState<any>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<Webcam>(null);
@@ -87,6 +86,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const { preferredDeviceId, setDeviceId } = usePreferredMediaDevice();
 
   useEffect(() => {
     const getDevices = async () => {
@@ -97,20 +97,25 @@ const AvatarEditModal = ({
         );
         setDevices(videoDevices);
         if (videoDevices.length > 0) {
-          setSelectedDeviceId(videoDevices[0].deviceId);
+          const initialDeviceId =
+            preferredDeviceId != null
+              ? preferredDeviceId
+              : videoDevices[0].deviceId;
+          setSelectedDeviceId(initialDeviceId);
         }
       } catch {
         toast.error("Error fetching camera devices");
       }
     };
     getDevices();
-  }, []);
+  }, [preferredDeviceId]);
+
   const handleSwitchCamera = useCallback(() => {
-    setConstraint(
-      constraint.facingMode === "user"
+    setConstraint((prev) => {
+      return prev.facingMode === "user"
         ? VideoConstraints.environment
-        : VideoConstraints.user,
-    );
+        : VideoConstraints.user;
+    });
   }, []);
 
   const captureImage = () => {
@@ -164,12 +169,11 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    const file = e.target.files[0];
-    if (!isImageFile(file)) {
+    if (!isImageFile(e.target.files[0])) {
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
-    setSelectedFile(file);
+    setSelectedFile(e.target.files[0]);
   };
 
   const uploadAvatar = async () => {
@@ -255,15 +259,21 @@ const AvatarEditModal = ({
         </DialogHeader>
         <Select
           value={selectedDeviceId}
-          onValueChange={(val) => setSelectedDeviceId(val)}
+          onValueChange={(val) => {
+            setDeviceId(val);
+            setSelectedDeviceId(val);
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a camera" />
           </SelectTrigger>
           <SelectContent>
             {devices.map((device: any) => (
-              <SelectItem key={device.deviceId} value={device.deviceId}>
-                {device.label || "Unknown Camera"}
+              <SelectItem
+                key={device.deviceId}
+                value={device.deviceId || "Unknown Device"}
+              >
+                {device.label || `Camera ${device.deviceId}`}
               </SelectItem>
             ))}
           </SelectContent>
@@ -276,11 +286,7 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg">
                       <img
-                        src={
-                          preview && preview.startsWith("blob:")
-                            ? DOMPurify.sanitize(preview)
-                            : imageUrl
-                        }
+                        src={preview || imageUrl}
                         alt="cover-photo"
                         className="h-full w-full object-cover"
                       />
@@ -423,11 +429,16 @@ const AvatarEditModal = ({
                     <>
                       <Webcam
                         audio={false}
-                        height={720}
+                        height={constraint.height}
                         screenshotFormat="image/jpeg"
-                        width={1280}
+                        width={constraint.width}
                         ref={webRef}
-                        videoConstraints={{ deviceId: selectedDeviceId }}
+                        videoConstraints={{
+                          deviceId: selectedDeviceId,
+                          facingMode: constraint.facingMode,
+                          height: constraint.height,
+                          width: constraint.width,
+                        }}
                         onUserMediaError={(_e) => {
                           setIsCameraOpen(false);
                           toast.warning(t("camera_permission_denied"));
