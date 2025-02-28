@@ -144,7 +144,7 @@ export default function ResourceDetails({
                 navigate(`/facility/${facilityId}/resource/${id}/update`)
               }
             >
-              <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
               {t("update_status")}
             </Button>
           </div>
