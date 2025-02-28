@@ -30,12 +30,11 @@ export class UserAvatar {
   }
 
   clickSaveAvatarButton() {
-    cy.get('[data-cy="save-cover-image"]').then(($el) => {
-      const parent = $el.parent();
-      if (parent[0].scrollHeight > parent[0].clientHeight) {
-        cy.wrap(parent).scrollTo("bottom");
-      }
-    });
+    cy.get('[data-cy="save-cover-image"]')
+      .parents()
+      .filter((_, el) => el.scrollHeight > el.clientHeight)
+      .first()
+      .scrollTo("bottom");
     cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
     return this;
   }
@@ -54,6 +53,11 @@ export class UserAvatar {
   }
 
   clickDeleteAvatarButton() {
+    cy.get('[data-cy="delete-avatar"]')
+      .parents()
+      .filter((_, el) => el.scrollHeight > el.clientHeight)
+      .first()
+      .scrollTo("bottom");
     cy.verifyAndClickElement('[data-cy="delete-avatar"]', "Delete");
     return this;
   }
