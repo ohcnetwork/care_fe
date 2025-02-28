@@ -278,7 +278,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="flex justify-end gap-2 max-sm:flex-col max-sm:mt-8 mt-12 flex-wrap">
+              <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
                 <PLUGIN_Component
                   __name="FacilityHomeActions"
                   facility={facilityData}
