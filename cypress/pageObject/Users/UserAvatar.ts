@@ -30,6 +30,12 @@ export class UserAvatar {
   }
 
   clickSaveAvatarButton() {
+    cy.get('[data-cy="save-cover-image"]').then(($el) => {
+      const parent = $el.parent();
+      if (parent[0].scrollHeight > parent[0].clientHeight) {
+        cy.wrap(parent).scrollTo("bottom");
+      }
+    });
     cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
     return this;
   }

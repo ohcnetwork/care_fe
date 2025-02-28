@@ -222,7 +222,7 @@ const AvatarEditModal = ({
 
   return (
     <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="md:max-w-4xl max-h-screen overflow-auto">
+      <DialogContent className="md:max-w-4xl max-h-screen overflow-scroll">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
           <DialogDescription className="sr-only">
