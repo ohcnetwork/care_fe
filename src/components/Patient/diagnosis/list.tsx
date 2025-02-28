@@ -35,7 +35,9 @@ export function DiagnosisList({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: encounterId
+        ? { encounter: encounterId, limit: 100 }
+        : { limit: 100 },
     }),
   });
 

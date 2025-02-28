@@ -35,7 +35,9 @@ export function SymptomsList({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
-      queryParams: encounterId ? { encounter: encounterId } : undefined,
+      queryParams: encounterId
+        ? { encounter: encounterId, limit: 100 }
+        : { limit: 100 },
     }),
   });
 

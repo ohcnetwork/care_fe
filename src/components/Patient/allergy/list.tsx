@@ -84,6 +84,7 @@ export function AllergyList({
         encounter: completedEncounterStatus.includes(encounterStatus as string)
           ? encounterId
           : undefined,
+        limit: 100,
       },
     }),
   });
