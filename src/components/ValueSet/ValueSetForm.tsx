@@ -490,7 +490,10 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          disabled={isSubmitting || !form.formState.isDirty}
+        >
           {isSubmitting ? t("saving") : t("save_valueset")}
         </Button>
       </form>
