@@ -35,14 +35,13 @@ export const PrintPrescription = (props: {
 
   const { data: activeMedications, isLoading: medicationLoading } = useQuery({
     queryKey: ["medication_requests_active", patientId],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 50,
-        offset: 0,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
+      pageSize: 100,
     }),
     enabled: !!patientId,
   });
