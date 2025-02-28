@@ -42,14 +42,14 @@ export const Badge = ({
   return (
     <div className="relative mb-4">
       <div className="mt-1 h-1 w-6 bg-blue-600 mb-1" />
-      <div
+      <span
         className={`
           inline-flex items-center rounded-full text-base font-semibold
          ${textColor} ${className}
         `}
       >
         {text}
-      </div>
+      </span>
     </div>
   );
 };
