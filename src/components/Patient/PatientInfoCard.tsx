@@ -48,6 +48,7 @@ import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
@@ -133,6 +134,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
+                    <h3 className="text-sm font-medium">
+                      {t("expired_on")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -158,6 +170,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
+                    <h3 className="text-sm font-medium">
+                      {t("expired_on")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">

@@ -101,7 +101,7 @@ export default function UserResetPassword({
             variant="primary"
           >
             <CareIcon
-              icon={isEditing ? "l-times" : "l-edit"}
+              icon={isEditing ? "l-times" : "l-pen"}
               className="h-4 w-4"
             />
             {t("update_password")}

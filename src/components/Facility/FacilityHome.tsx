@@ -269,7 +269,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     aria-label={t("edit_cover_photo")}
                   >
                     <CareIcon
-                      icon="l-edit"
+                      icon="l-pen"
                       className="text-white"
                       aria-hidden="true"
                     />
@@ -290,7 +290,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
                       variant="outline"
                     >
-                      <CareIcon icon="l-edit" />
+                      <CareIcon icon="l-pen" />
                       {t("edit_facility_details")}
                     </Button>
                   }
