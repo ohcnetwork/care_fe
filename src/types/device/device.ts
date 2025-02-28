@@ -1,5 +1,6 @@
 import { ContactPoint } from "@/types/common/contactPoint";
 import { Encounter } from "@/types/emr/encounter";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
@@ -44,6 +45,7 @@ export interface DeviceDetail extends DeviceBase {
   current_location: LocationList | undefined;
   created_by: UserBase;
   updated_by: UserBase;
+  managing_organization: FacilityOrganization;
 }
 
 export interface DeviceList extends DeviceBase {

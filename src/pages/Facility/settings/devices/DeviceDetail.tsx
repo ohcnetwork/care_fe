@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ExternalLink } from "lucide-react";
+import { Building, ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -144,6 +145,24 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
         <div className="flex items-center gap-2">
+          <LinkDepartmentsSheet
+            entityType="device"
+            entityId={deviceId}
+            facilityId={facilityId}
+            currentOrganizations={[device.managing_organization]}
+            onUpdate={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["device", facilityId, deviceId],
+              });
+            }}
+            trigger={
+              <Button variant="outline">
+                <Building className="mr-2 h-4 w-4" />
+                {device.managing_organization?.name ||
+                  t("manage_organizations")}
+              </Button>
+            }
+          />
           <Link href={`/devices/${deviceId}/edit`}>
             <Button variant="outline">{t("edit")}</Button>
           </Link>
@@ -220,6 +239,44 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   >
                     {device.current_location ? t("change") : t("add")}
                   </Button>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  {t("managing_organization")}
+                </h4>
+                <div className="mt-1 flex items-center gap-6">
+                  {device.managing_organization ? (
+                    <>
+                      <Link
+                        href={`/departments/${device.managing_organization.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                      >
+                        {device.managing_organization.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">
+                      {t("no_organization")}
+                    </span>
+                  )}
+                  <LinkDepartmentsSheet
+                    entityType="device"
+                    entityId={deviceId}
+                    facilityId={facilityId}
+                    currentOrganizations={[device.managing_organization]}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["device", facilityId, deviceId],
+                      });
+                    }}
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        {device.managing_organization ? t("change") : t("add")}
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">

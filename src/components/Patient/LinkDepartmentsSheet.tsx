@@ -17,11 +17,12 @@ import {
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import deviceApi from "@/types/device/deviceApi";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
-  entityType: "encounter" | "location";
+  entityType: "encounter" | "location" | "device";
   entityId: string;
   currentOrganizations: FacilityOrganization[];
   facilityId: string;
@@ -33,7 +34,9 @@ type MutationRoute =
   | typeof routes.encounter.addOrganization
   | typeof routes.encounter.removeOrganization
   | typeof locationApi.addOrganization
-  | typeof locationApi.removeOrganization;
+  | typeof locationApi.removeOrganization
+  | typeof deviceApi.addOrganization
+  | typeof deviceApi.removeOrganization;
 
 interface EncounterPathParams {
   encounterId: string;
@@ -44,7 +47,12 @@ interface LocationPathParams {
   id: string;
 }
 
-type PathParams = EncounterPathParams | LocationPathParams;
+interface DevicePathParams {
+  facility_external_id: string;
+  external_id: string;
+}
+
+type PathParams = EncounterPathParams | LocationPathParams | DevicePathParams;
 
 interface MutationParams {
   route: MutationRoute;
@@ -53,7 +61,7 @@ interface MutationParams {
 }
 
 function getMutationParams(
-  entityType: "encounter" | "location",
+  entityType: "encounter" | "location" | "device",
   entityId: string,
   facilityId: string,
   isAdd: boolean,
@@ -66,22 +74,38 @@ function getMutationParams(
       pathParams: { encounterId: entityId } as EncounterPathParams,
       queryKey: ["encounter", entityId],
     };
-  }
+  } else if (entityType === "location")
+    return {
+      route: isAdd
+        ? locationApi.addOrganization
+        : locationApi.removeOrganization,
+      pathParams: {
+        facility_id: facilityId,
+        id: entityId,
+      } as LocationPathParams,
+      queryKey: ["location", entityId],
+    };
+
   return {
-    route: isAdd ? locationApi.addOrganization : locationApi.removeOrganization,
-    pathParams: { facility_id: facilityId, id: entityId } as LocationPathParams,
+    route: isAdd ? deviceApi.addOrganization : deviceApi.removeOrganization,
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: entityId,
+    } as DevicePathParams,
     queryKey: ["location", entityId],
   };
 }
 
 function getInvalidateQueries(
-  entityType: "encounter" | "location",
+  entityType: "encounter" | "location" | "device",
   entityId: string,
 ) {
   if (entityType === "encounter") {
     return ["encounter", entityId];
+  } else if (entityType === "location") {
+    return ["location", entityId, "organizations"];
   }
-  return ["location", entityId, "organizations"];
+  return ["device", entityId, "organizations"];
 }
 
 export default function LinkDepartmentsSheet({
@@ -106,8 +130,15 @@ export default function LinkDepartmentsSheet({
       );
       return mutate(route, {
         pathParams,
-        body: { organization: organizationId },
-      })({ organization: organizationId });
+        body:
+          entityType === "device"
+            ? { managing_organization: organizationId }
+            : { organization: organizationId },
+      })(
+        entityType === "device"
+          ? { managing_organization: organizationId }
+          : { organization: organizationId },
+      );
     },
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
@@ -171,7 +202,7 @@ export default function LinkDepartmentsSheet({
         <SheetHeader>
           <SheetTitle>{t("manage_organizations")}</SheetTitle>
           <SheetDescription>
-            {t("encounter_manage_organization_description")}
+            {t("manage_organization_description", { entityType })}
           </SheetDescription>
         </SheetHeader>
 
@@ -199,37 +230,38 @@ export default function LinkDepartmentsSheet({
                 {t("current_organizations")}
               </h3>
               <div className="space-y-2">
-                {currentOrganizations.map((org) => (
-                  <div
-                    key={org.id}
-                    className="flex items-center justify-between rounded-md border p-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <Building className="h-4 w-4 text-blue-400" />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            {org.description}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeOrganization(org.id)}
-                      disabled={isRemoving}
+                {currentOrganizations[0] != null &&
+                  currentOrganizations.map((org) => (
+                    <div
+                      key={org.id}
+                      className="flex items-center justify-between rounded-md border p-2"
                     >
-                      {isRemoving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      )}
-                    </Button>
-                  </div>
-                ))}
-                {currentOrganizations.length === 0 && (
+                      <div className="flex items-center space-x-2">
+                        <Building className="h-4 w-4 text-blue-400" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{org.name}</span>
+                          {org.description && (
+                            <span className="text-xs text-gray-500">
+                              {org.description}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeOrganization(org.id)}
+                        disabled={isRemoving}
+                      >
+                        {isRemoving ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                {currentOrganizations[0] == null && (
                   <p className="text-sm text-gray-500">
                     {t("no_organizations_added_yet")}
                   </p>
