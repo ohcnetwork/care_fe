@@ -249,13 +249,15 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
               <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
-                  <img
-                    src={fileUrl}
-                    alt="file"
-                    className={`h-full w-full object-contain ${
-                      zoom_values[file_state.zoom - 1]
-                    } ${getRotationClass(file_state.rotation)}`}
-                  />
+                  <div className="h-full w-full overflow-hidden">
+                    <img
+                      src={fileUrl}
+                      alt="file"
+                      className={`h-full w-full object-cover overflow-hidden ${
+                        zoom_values[file_state.zoom - 1]
+                      } ${getRotationClass(file_state.rotation)}`}
+                    />
+                  </div>
                 ) : file_state.extension === "pdf" ? (
                   <Suspense fallback={<CircularProgress />}>
                     <PDFViewer
