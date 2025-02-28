@@ -594,7 +594,10 @@ export default function PatientRegistration(
                     <h2 className="text-sm font-semibold">
                       {t("deceased_status")}
                     </h2>
-                    <span className="text-sm text-muted-foreground">
+                    <span
+                      className="text-sm text-gray-500
+"
+                    >
                       ({t("only_mark_if_applicable")})
                     </span>
                   </div>
@@ -622,7 +625,7 @@ export default function PatientRegistration(
 
                 {(isDeceased || form.watch("death_datetime")) && (
                   <div className="mt-4">
-                    <div className="flex items-center gap-2 mb-4 text-muted-foreground">
+                    <div className="flex items-center gap-2 mb-4 text-gray-500">
                       <InfoIcon className="w-4 h-4" />
                       <p className="text-sm text-gray-500">
                         {t("deceased_disclaimer")}

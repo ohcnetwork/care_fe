@@ -148,9 +148,7 @@ function ConceptFields({
                   <Input
                     {...field}
                     placeholder="Unverified"
-                    className={
-                      !field.value ? "text-muted-foreground" : undefined
-                    }
+                    className={!field.value ? "text-gray-500" : undefined}
                     readOnly
                   />
                 </FormControl>
