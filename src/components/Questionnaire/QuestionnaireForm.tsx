@@ -27,7 +27,10 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import type {
+  Question,
+  StructuredQuestionType,
+} from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -76,6 +79,18 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+  const isStructuredSlug = (slug: string): slug is StructuredQuestionType => {
+    return [
+      "allergy_intolerance",
+      "medication_request",
+      "medication_statement",
+      "symptom",
+      "diagnosis",
+      "encounter",
+      "appointment",
+      "location_association",
+    ].includes(slug);
+  };
 
   const {
     data: questionnaireData,
@@ -389,25 +404,25 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-
-              {form.questionnaire.id !== questionnaireData?.id && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setQuestionnaireForms((prev) =>
-                      prev.filter(
-                        (f) => f.questionnaire.id !== form.questionnaire.id,
-                      ),
-                    );
-                  }}
-                  disabled={isPending}
-                >
-                  <CareIcon icon="l-times-circle" />
-                  <span>Remove</span>
-                </Button>
-              )}
+              {form.questionnaire.id !== questionnaireData?.id &&
+                !isStructuredSlug(form.questionnaire.slug) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setQuestionnaireForms((prev) =>
+                        prev.filter(
+                          (f) => f.questionnaire.id !== form.questionnaire.id,
+                        ),
+                      );
+                    }}
+                    disabled={isPending}
+                  >
+                    <CareIcon icon="l-times-circle" />
+                    <span>Remove</span>
+                  </Button>
+                )}
             </div>
 
             <QuestionRenderer
