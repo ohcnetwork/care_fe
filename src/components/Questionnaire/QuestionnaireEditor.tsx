@@ -101,7 +101,6 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "diagnosis", label: "Diagnosis" },
   { value: "encounter", label: "Encounter" },
   { value: "appointment", label: "Appointment" },
-  { value: "location_association", label: "Location Association" },
 ] as const;
 
 interface Organization {
@@ -699,9 +698,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
     }),
-    onSuccess: () => {
+    onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire updated successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
+      navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
       toast.error("Failed to update questionnaire");
@@ -1384,7 +1384,7 @@ function QuestionEditor({
           <div className="space-y-6">
             <div className="border rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">Question Settings</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 Configure the basic behavior: mark as required, allow multiple
                 entries, or set as read only.
               </p>
@@ -1430,7 +1430,7 @@ function QuestionEditor({
               <h3 className="text-sm font-medium mb-2">
                 Data Collection Details
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 Specify key collection info: time, performer, body site, and
                 method.
               </p>
@@ -1498,7 +1498,7 @@ function QuestionEditor({
                 <h3 className="text-sm font-medium mb-2">
                   Group Layout Options
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-gray-500 mb-4">
                   Choose the layout style that best fits your sub-questions from
                   the available options.
                 </p>
@@ -1540,7 +1540,7 @@ function QuestionEditor({
                     <CardTitle className="text-base font-medium">
                       Answer Options
                     </CardTitle>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500">
                       Define possible answers for this question
                     </p>
                   </div>
