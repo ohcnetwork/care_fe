@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,11 +28,12 @@ export default function PrintPreview(props: Props) {
   const normalScale = useBreakpoints({ default: 1 });
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <Page title={props.title}>
       <div className="mx-auto my-8 xl:w-[50rem] border rounded-xl border-gray-200 shadow-2xl overflow-hidden">
-        <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
+        <div className="sticky top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
           <Button variant="outline" onClick={() => goBack()}>
             <CareIcon icon="l-arrow-left" className="text-lg" />
             {t("back")}
@@ -43,18 +44,31 @@ export default function PrintPreview(props: Props) {
           </Button>
         </div>
 
-        <ZoomProvider initialScale={normalScale}>
-          <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
-            <div
-              id="section-to-print"
-              className={cn("w-full", props.className)}
-            >
-              {props.children}
+        <div
+          ref={containerRef}
+          role="region"
+          aria-label={t("print_preview_content") || "Print preview content"}
+          tabIndex={0}
+        >
+          <ZoomProvider
+            initialScale={normalScale}
+            minScale={0.25}
+            maxScale={3}
+            scaleRatio={1.15}
+          >
+            <div className="overflow-hidden h-full w-full">
+              <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-transform duration-100 ease-in-out lg:origin-top print:transform-none">
+                <div
+                  id="section-to-print"
+                  className={cn("w-full", props.className)}
+                >
+                  {props.children}
+                </div>
+              </ZoomTransform>
             </div>
-          </ZoomTransform>
-
-          <ZoomControls disabled={props.disabled} />
-        </ZoomProvider>
+            <ZoomControls disabled={props.disabled} minimal={true} />
+          </ZoomProvider>
+        </div>
       </div>
     </Page>
   );
