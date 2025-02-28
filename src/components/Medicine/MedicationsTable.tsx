@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,14 +12,12 @@ import {
 
 import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 
-import query from "@/Utils/request/query";
 import {
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { formatDosage, formatSig } from "./utils";
 
@@ -37,38 +34,22 @@ export function getFrequencyDisplay(
 }
 
 interface MedicationsTableProps {
-  patientId?: string;
-  encounterId?: string;
-  medications?: MedicationRequestRead[];
+  medications: MedicationRequestRead[];
 }
 
-export const MedicationsTable = ({
-  medications,
-  patientId,
-  encounterId,
-}: MedicationsTableProps) => {
+export const MedicationsTable = ({ medications }: MedicationsTableProps) => {
   const { t } = useTranslation();
 
-  const { data: allMedications, isLoading } = useQuery({
-    queryKey: ["medication_requests", patientId, encounterId],
-    queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId },
-      queryParams: { encounter: encounterId, limit: 50, offset: 0 },
-    }),
-    enabled: !medications && !!patientId,
-  });
-
-  if (isLoading) {
+  if (!medications.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500">
-        <Skeleton className="h-[100px] w-full" />
-      </div>
+      <CardContent className="p-2">
+        <p className="text-gray-500 w-full flex justify-center mb-3">
+          {t("no_active_medication_recorded")}
+        </p>
+      </CardContent>
     );
   }
 
-  const displayedMedications = !medications
-    ? (allMedications?.results ?? [])
-    : medications;
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
@@ -82,7 +63,7 @@ export const MedicationsTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {displayedMedications?.map((medication) => {
+          {medications.map((medication) => {
             const instruction = medication.dosage_instruction[0];
             const frequency = getFrequencyDisplay(instruction?.timing);
             const dosage = formatDosage(instruction);

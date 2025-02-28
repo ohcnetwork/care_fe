@@ -355,7 +355,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-sm font-medium text-gray-500">
               {t("contact_points")}
             </h3>
             <Button

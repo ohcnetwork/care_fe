@@ -106,24 +106,21 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          className="flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
         >
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+          <div className="relative z-10 flex h-16 bg-white shadow shrink-0 md:hidden">
             <div className="flex items-center">
               {shouldShowSidebar && <SidebarTrigger />}
             </div>
-            <a className="flex h-full w-full items-center px-4 md:hidden">
+            <a className="flex items-center w-full h-full px-4 md:hidden">
               <img
-                className="h-8 w-auto"
+                className="w-auto h-8"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
             </a>
           </div>
-          <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
-            data-cui-page
-          >
+          <div className="p-3 mt-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

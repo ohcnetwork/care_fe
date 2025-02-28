@@ -3,6 +3,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeftClose, PanelRightClose } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
@@ -10,7 +11,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -143,7 +149,7 @@ const SidebarProvider = React.forwardRef<
               } as React.CSSProperties
             }
             className={cn(
-              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+              "group/sidebar-wrapper bg-gray-100 flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
               className,
             )}
             ref={ref}
@@ -178,6 +184,7 @@ const Sidebar = React.forwardRef<
     ref,
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const { t } = useTranslation();
 
     if (collapsible === "none") {
       return (
@@ -197,6 +204,9 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetDescription className="sr-only">
+            {t("sidebar_description")}
+          </SheetDescription>
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
@@ -211,7 +221,7 @@ const Sidebar = React.forwardRef<
             <VisuallyHidden>
               <SheetTitle>Sidebar</SheetTitle>
             </VisuallyHidden>
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <div className="flex flex-col w-full h-full">{children}</div>
           </SheetContent>
         </Sheet>
       );
@@ -220,7 +230,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className="hidden group peer md:block text-sidebar-foreground"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -285,7 +295,7 @@ const SidebarTrigger = React.forwardRef<
     >
       {isMobile ? (
         <svg
-          className="h-8 w-8"
+          className="w-8 h-8"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 24 24"
@@ -637,7 +647,7 @@ const SidebarMenuAction = React.forwardRef<
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground··md:opacity-0",
         className,
       )}
       {...props}
@@ -687,7 +697,7 @@ const SidebarMenuSkeleton = React.forwardRef<
     >
       {showIcon && (
         <Skeleton
-          className="size-4 rounded-md"
+          className="rounded-md size-4"
           data-sidebar="menu-skeleton-icon"
         />
       )}

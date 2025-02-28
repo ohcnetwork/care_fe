@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   Command,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
+import { stringifyNestedObject } from "@/Utils/utils";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -34,7 +35,6 @@ export function LocationSearch({
   disabled,
   value,
 }: LocationSearchProps) {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -42,7 +42,7 @@ export function LocationSearch({
     queryKey: ["locations", facilityId, mode, search],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search },
+      queryParams: { mode, name: search, form: "bd", available: "true" },
     }),
     enabled: facilityId !== "preview",
   });
@@ -54,7 +54,7 @@ export function LocationSearch({
           role="combobox"
           aria-expanded={open}
         >
-          {value?.name || "Select location..."}
+          {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
@@ -65,7 +65,7 @@ export function LocationSearch({
             className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
-          <CommandEmpty>No locations found.</CommandEmpty>
+          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
           <CommandGroup>
             {locations?.results.map((location) => (
               <CommandItem
@@ -76,15 +76,7 @@ export function LocationSearch({
                   setOpen(false);
                 }}
               >
-                <span>{location.name}</span>
-                <span className="text-xs text-gray-500">
-                  {t(`location_form__${location.form}`)}
-                  {" in "}
-                  {formatLocationParent(location)}
-                </span>
-                <span className="text-xs text-gray-500 ml-auto">
-                  {t(`location_status__${location.status}`)}
-                </span>
+                {stringifyNestedObject(location)}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -93,12 +85,3 @@ export function LocationSearch({
     </Popover>
   );
 }
-
-const formatLocationParent = (location: LocationList) => {
-  const parents: string[] = [];
-  while (location.parent?.name) {
-    parents.push(location.parent?.name);
-    location = location.parent;
-  }
-  return parents.reverse().join(" > ");
-};

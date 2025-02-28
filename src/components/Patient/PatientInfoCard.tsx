@@ -43,26 +43,32 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
+import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
+import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
+import {
+  Encounter,
+  completedEncounterStatus,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter";
 import { Patient } from "@/types/emr/newPatient";
-
-import LinkDepartmentsSheet from "./LinkDepartmentsSheet";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export interface PatientInfoCardProps {
   patient: Patient;
   encounter: Encounter;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  disableButtons?: boolean;
 }
 
 export default function PatientInfoCard(props: PatientInfoCardProps) {
-  const { patient, encounter } = props;
+  const { patient, encounter, disableButtons = false } = props;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -128,6 +134,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
+                    <h3 className="text-sm font-medium">
+                      {t("expired_on")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -153,6 +170,17 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                   {formatPatientAge(patient, true)} •{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </div>
+                {patient.death_datetime && (
+                  <Badge variant="destructive">
+                    <h3 className="text-sm font-medium">
+                      {t("expired_on")}
+                      {": "}
+                      {dayjs(patient.death_datetime).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    </h3>
+                  </Badge>
+                )}
               </div>
               <div className="grid gap-4 grid-cols-3 mt-2 md:mt-0">
                 <div className="flex flex-col space-y-1">
@@ -331,17 +359,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     facilityId={encounter.facility.id}
                     trigger={
                       <div className="flex flex-wrap gap-2">
-                        {encounter.organizations.map((org) => (
-                          <Badge
-                            key={org.id}
-                            className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
-                            variant="outline"
-                            title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
-                          >
-                            <Building className="w-4 h-4 text-blue-400" />
-                            {org.name}
-                          </Badge>
-                        ))}
+                        {encounter.organizations.map((org) =>
+                          organizationBadge(org),
+                        )}
                         {encounter.organizations.length === 0 && (
                           <Badge
                             className="capitalize gap-1 py-1 px-2 cursor-pointer hover:bg-secondary-100"
@@ -379,7 +399,9 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                               {t("location")}
                             </h4>
 
-                            <LocationHistorySheet
+                            <LocationSheet
+                              facilityId={props.encounter.facility.id}
+                              encounterId={props.encounter.id}
                               history={encounter.location_history}
                               trigger={
                                 <div>
@@ -402,33 +424,41 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                             location={props.encounter.current_location}
                           />
                           <div className="border-b border-dashed border-gray-200 my-2" />
-                          <Button
-                            variant="outline"
-                            className="border-gray-400 w-full"
-                          >
-                            <Link
-                              href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                              className="text-sm text-gray-950 font-semibold"
-                            >
-                              {t("update_location")}
-                            </Link>
-                          </Button>
+                          <LocationSheet
+                            facilityId={props.encounter.facility.id}
+                            encounterId={props.encounter.id}
+                            trigger={
+                              <Button
+                                variant="outline"
+                                className="border-gray-400 w-full"
+                              >
+                                {t("update_location")}
+                              </Button>
+                            }
+                            history={encounter.location_history}
+                          />
                         </div>
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <Badge variant="outline">
-                      <Link
-                        href={`/facility/${props.encounter.facility.id}/patient/${props.patient.id}/encounter/${props.encounter.id}/questionnaire/location_association`}
-                        className="flex items-center gap-1 text-gray-950 py-0.5"
-                      >
-                        <CareIcon
-                          icon="l-location-point"
-                          className="h-4 w-4 text-green-600"
+                    !inactiveEncounterStatus.includes(encounter.status) && (
+                      <Badge variant="outline">
+                        <LocationSheet
+                          facilityId={props.encounter.facility.id}
+                          encounterId={props.encounter.id}
+                          trigger={
+                            <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer hover:bg-secondary-100">
+                              <CareIcon
+                                icon="l-location-point"
+                                className="h-4 w-4 text-green-600"
+                              />
+                              {t("add_location")}
+                            </div>
+                          }
+                          history={encounter.location_history}
                         />
-                        {t("add_location")}
-                      </Link>
-                    </Badge>
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
@@ -439,78 +469,97 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) && (
-            <div
-              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-              data-cy="update-encounter-button"
-            >
-              <AlertDialog>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="primary">
-                      {t("update")}
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                    <DropdownMenuItem>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
-                        className="cursor-pointer text-gray-800"
-                      >
-                        {t("treatment_summary")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-                        className="cursor-pointer text-gray-800"
-                      >
-                        {t("discharge_summary")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        {t("mark_as_complete")}
+          {!completedEncounterStatus.includes(encounter.status) &&
+            !disableButtons && (
+              <div
+                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+                data-cy="update-encounter-button"
+              >
+                <AlertDialog>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="primary">
+                        {t("update")}
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                      <DropdownMenuItem>
+                        <Link
+                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
+                          className="cursor-pointer text-gray-800"
+                        >
+                          {t("treatment_summary")}
+                        </Link>
                       </DropdownMenuItem>
-                    </AlertDialogTrigger>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
+                          className="cursor-pointer text-gray-800"
+                        >
+                          {t("discharge_summary")}
+                        </Link>
+                      </DropdownMenuItem>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          {t("mark_as_complete")}
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <PLUGIN_Component
+                        __name="PatientInfoCardActions"
+                        encounter={encounter}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("mark_as_complete")}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("mark_encounter_as_complete_confirmation")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
                     <PLUGIN_Component
-                      __name="PatientInfoCardActions"
+                      __name="PatientInfoCardMarkAsComplete"
                       encounter={encounter}
                     />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("mark_encounter_as_complete_confirmation")}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
 
-                  <PLUGIN_Component
-                    __name="PatientInfoCardMarkAsComplete"
-                    encounter={encounter}
-                  />
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
 
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-
-                    <AlertDialogAction
-                      className={cn(buttonVariants({ variant: "primary" }))}
-                      onClick={handleMarkAsComplete}
-                      data-cy="mark-encounter-as-complete"
-                    >
-                      {t("mark_as_complete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
+                      <AlertDialogAction
+                        className={cn(buttonVariants({ variant: "primary" }))}
+                        onClick={handleMarkAsComplete}
+                        data-cy="mark-encounter-as-complete"
+                      >
+                        {t("mark_as_complete")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
         </div>
       </section>
     </>
   );
+
+  function organizationBadge(org: FacilityOrganization) {
+    return (
+      <Badge
+        key={org.id}
+        className={cn(
+          "capitalize gap-1 py-1 px-2 hover:bg-secondary-100 cursor-pointer",
+        )}
+        variant="outline"
+        title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
+      >
+        <Building className="w-4 h-4 text-blue-400" />
+        {org.name}
+      </Badge>
+    );
+  }
 }
