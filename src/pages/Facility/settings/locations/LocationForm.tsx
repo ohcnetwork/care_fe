@@ -1,13 +1,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
+import { Info, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -31,12 +40,12 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
   LocationFormOptions,
-  LocationWrite,
-  OperationalStatus,
-  Status,
+  type LocationWrite,
+  type OperationalStatus,
+  type Status,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-import {
+import type {
   BatchRequestBody,
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
@@ -51,15 +60,15 @@ const formSchema = z.object({
   operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
   form: z.enum(LocationFormOptions),
   parent: z.string().optional().nullable(),
-  beds_count: z
-    .number()
-    .min(1, t("number_min_error", { min: 1 }))
-    .optional(),
+  enableBulkCreation: z.boolean().default(false),
+  numberOfBeds: z.string().optional(),
+  customizeNames: z.boolean().default(false),
   organizations: z.array(z.string()).default([]),
   availability_status: z.enum(["available", "unavailable"] as const),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
 interface Props {
   facilityId: string;
   onSuccess?: () => void;
@@ -73,11 +82,14 @@ const defaultValues: FormValues = {
   status: "active",
   operational_status: "O",
   form: "ro",
-  beds_count: 1,
   parent: null,
+  enableBulkCreation: false,
+  numberOfBeds: "2",
+  customizeNames: false,
   organizations: [],
   availability_status: "available",
 };
+
 export default function LocationForm({
   facilityId,
   onSuccess,
@@ -87,13 +99,6 @@ export default function LocationForm({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [bedNames, setBedNames] = useState<string[]>([]);
-  const updateBedName = (index: number, newName: string) => {
-    setBedNames((prev) => {
-      const updated = [...prev];
-      updated[index] = newName;
-      return updated;
-    });
-  };
 
   const { data: location, isLoading } = useQuery({
     queryKey: ["location", locationId],
@@ -112,16 +117,53 @@ export default function LocationForm({
       parent: parentId || null,
     },
   });
-  useEffect(() => {
-    if (form.watch("beds_count")) {
+
+  const updateBedName = (index: number, newName: string) => {
+    setBedNames((prev) => {
+      const updated = [...prev];
+      updated[index] = newName;
+      return updated;
+    });
+  };
+
+  const resetToDefaultNames = () => {
+    if (form.watch("name") && form.watch("numberOfBeds")) {
       setBedNames(
         Array.from(
-          { length: Number(form.watch("beds_count")) },
+          { length: Number.parseInt(form.watch("numberOfBeds") ?? "0") },
           (_, index) => `${form.watch("name")} ${index + 1}`,
         ),
       );
     }
-  }, [form.watch("beds_count"), form.watch("name")]);
+  };
+
+  useEffect(() => {
+    if (
+      form.watch("form") === "bd" &&
+      form.watch("enableBulkCreation") &&
+      form.watch("numberOfBeds") &&
+      form.watch("name")
+    ) {
+      if (!form.watch("customizeNames") || bedNames.length === 0) {
+        resetToDefaultNames();
+      } else {
+        const newCount = Number.parseInt(form.watch("numberOfBeds") ?? "0");
+        setBedNames((prev) => {
+          const updated = [...prev];
+          while (updated.length < newCount) {
+            updated.push(`${form.watch("name")} ${updated.length + 1}`);
+          }
+          return updated.slice(0, newCount);
+        });
+      }
+    }
+  }, [
+    form.watch("numberOfBeds"),
+    form.watch("name"),
+    form.watch("form"),
+    form.watch("enableBulkCreation"),
+    bedNames.length,
+  ]);
 
   useEffect(() => {
     if (location) {
@@ -134,6 +176,7 @@ export default function LocationForm({
         parent: parentId || null,
         organizations: [],
         availability_status: location.availability_status || "available",
+        customizeNames: false,
       });
     }
   }, [location, form, parentId]);
@@ -149,7 +192,6 @@ export default function LocationForm({
     onSuccess: () => {
       toast.success(isEditMode ? t("location_updated") : t("location_created"));
       queryClient.invalidateQueries({ queryKey: ["locations"] });
-
       onSuccess?.();
     },
   });
@@ -163,7 +205,6 @@ export default function LocationForm({
       queryClient.invalidateQueries({ queryKey: ["locations"] });
       onSuccess?.();
     },
-
     onError: () => {
       toast.error(t("beds_creation_failed"));
     },
@@ -178,7 +219,7 @@ export default function LocationForm({
       parent: values.parent || undefined,
     };
 
-    if (values.form === "bd" && !isEditMode && (values.beds_count ?? 0) > 1) {
+    if (values.form === "bd" && !isEditMode && values.enableBulkCreation) {
       if (bedNames.some((name) => name.trim() === "")) {
         toast.error("Any Bed Name can't be empty");
         return;
@@ -227,50 +268,11 @@ export default function LocationForm({
     return <div className="p-4">Loading...</div>;
   }
 
+  const showBedOptions = form.watch("form") === "bd" && !isEditMode;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("name")}</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {form.watch("form") === "bd" &&
-          bedNames.length > 1 &&
-          form.watch("name").trim() !== "" && (
-            <div className="space-y-2">
-              {bedNames.map((name, index) => (
-                <Input
-                  key={index}
-                  placeholder={`Bed ${index + 1}`}
-                  value={name}
-                  onChange={(e) => updateBedName(index, e.target.value)}
-                />
-              ))}
-            </div>
-          )}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("description")}</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -279,7 +281,15 @@ export default function LocationForm({
               <FormItem>
                 <FormLabel>{t("location_form")}</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    if (value !== "bd") {
+                      form.setValue("enableBulkCreation", false);
+                      form.setValue("numberOfBeds", "2");
+                      form.setValue("customizeNames", false);
+                      setBedNames([]);
+                    }
+                  }}
                   value={field.value}
                   disabled={!!locationId}
                 >
@@ -301,24 +311,184 @@ export default function LocationForm({
             )}
           />
 
-          {form.watch("form") === "bd" && !isEditMode && (
+          {showBedOptions && (
             <FormField
               control={form.control}
-              name="beds_count"
+              name="enableBulkCreation"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("total_number_of_beds")}</FormLabel>
-                  <Input
-                    {...field}
-                    type="number"
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                  />
-                  <FormMessage />
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>{t("create_multiple_beds")}</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      {t("create_multiple_beds_description")}
+                    </p>
+                  </div>
                 </FormItem>
               )}
             />
           )}
+        </div>
 
+        {showBedOptions && form.watch("enableBulkCreation") && (
+          <FormField
+            control={form.control}
+            name="numberOfBeds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("number_of_beds")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("select_number_of_beds")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Array.from({ length: 14 }, (_, i) => i + 2).map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num} {t("beds")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("name")}</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {showBedOptions &&
+          form.watch("enableBulkCreation") &&
+          form.watch("name").trim() !== "" && (
+            <div className="space-y-4 mt-4">
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-500" />
+                <AlertDescription className="text-blue-700">
+                  {t("bulk_bed_creation_info")}
+                </AlertDescription>
+              </Alert>
+
+              <FormField
+                control={form.control}
+                name="customizeNames"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("customize_bed_names")}</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        {t("customize_bed_names_description")}
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("customizeNames") ? (
+                <div className="space-y-4 border rounded-md p-4">
+                  <div className="flex justify-between items-center flex-wrap">
+                    <h4 className="font-medium">{t("individual_bed_names")}</h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={resetToDefaultNames}
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      {t("reset_to_default")}
+                    </Button>
+                  </div>
+
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="bed-names">
+                      <AccordionTrigger>
+                        <span className="text-sm font-medium">
+                          {t("edit_bed_names", {
+                            count: Number(form.watch("numberOfBeds")),
+                          })}
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-3 mt-2">
+                          {bedNames.map((name, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <span className="text-sm font-medium min-w-[60px]">
+                                {t("bed_number", { number: index + 1 })}:
+                              </span>
+                              <Input
+                                value={name}
+                                onChange={(e) =>
+                                  updateBedName(index, e.target.value)
+                                }
+                                placeholder={t("bed_name_placeholder", {
+                                  number: index + 1,
+                                })}
+                                className="flex-1"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              ) : (
+                <div className="rounded-md bg-muted p-4">
+                  <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
+                  <div className="text-sm text-muted-foreground">
+                    {bedNames.map((name, index) => (
+                      <div key={index} className="mb-1">
+                        {name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("description")}</FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder="dfs" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="status"
