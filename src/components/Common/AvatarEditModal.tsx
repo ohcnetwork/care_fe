@@ -18,17 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import useDragAndDrop from "@/hooks/useDragAndDrop";
-import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
-
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
+} from "@/components/ui/select";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
 
 interface Props {
   title: string;
@@ -259,7 +258,7 @@ const AvatarEditModal = ({
         </DialogHeader>
         <Select
           value={selectedDeviceId}
-          onValueChange={(val) => {
+          onValueChange={(val: any) => {
             setDeviceId(val);
             setSelectedDeviceId(val);
           }}
