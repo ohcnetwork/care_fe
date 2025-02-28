@@ -103,6 +103,16 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     }
   }, [rootOrgs]);
 
+  const clearLocalBodySelection = () => {
+    const newSelectedLevels = selectedLevels.slice(0, 1);
+    setSelectedLevels(newSelectedLevels);
+    onChange({
+      organization:
+        newSelectedLevels.length > 0 ? newSelectedLevels[0].id : undefined,
+      facility_type: selectedFacilityType?.id,
+    });
+  };
+
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
     setOrgTypes((prevTypes) => {
@@ -157,20 +167,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
           ),
         )}
         {selectedLevels.length > 1 && (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              const newSelectedLevels = selectedLevels.slice(0, 1); // Keep only the first selection
-              setSelectedLevels(newSelectedLevels);
-              onChange({
-                organization:
-                  newSelectedLevels.length > 0
-                    ? newSelectedLevels[0].id
-                    : undefined,
-                facility_type: selectedFacilityType?.id,
-              });
-            }}
-          >
+          <Button variant="ghost" onClick={clearLocalBodySelection}>
             {t("x")}
           </Button>
         )}
