@@ -38,7 +38,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     {
       key: "name",
       type: "text" as const,
-      placeholder: t("Search by name"),
+      placeholder: t("search_by_name"),
       value: qParams.name || "",
     },
   ];
@@ -162,11 +162,9 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 </Card>
               )}
             </div>
-            {children && (
-              <div className="flex justify-center">
-                <Pagination totalCount={children.count || 0} />
-              </div>
-            )}
+            <div className="flex justify-center">
+              <Pagination totalCount={children?.count || 0} />
+            </div>
           </div>
         )}
       </div>
