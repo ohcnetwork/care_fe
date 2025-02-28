@@ -12,7 +12,11 @@ const usePreferredMediaDevice = () => {
 
   const setDeviceId = (deviceId: string) => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("preferredDeviceId", deviceId);
+      try {
+        localStorage.setItem("preferredDeviceId", deviceId);
+      } catch {
+        console.error("Failed to save device preference to localStorage");
+      }
     }
     setPreferredDeviceId(deviceId);
   };
