@@ -120,26 +120,6 @@ const symptom_questionnaire: QuestionnaireDetail = {
   tags: [],
 };
 
-const location_association_questionnaire: QuestionnaireDetail = {
-  id: "location_association",
-  slug: "location_association",
-  version: "0.0.1",
-  title: "Location Association",
-  status: "active",
-  subject_type: "patient",
-  questions: [
-    {
-      id: "location_association",
-      text: "Location Association",
-      type: "structured",
-      structured_type: "location_association",
-      link_id: "1.1",
-      required: true,
-    },
-  ],
-  tags: [],
-};
-
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {
   encounter: encounterQuestionnaire,
   medication_request: medication_request_questionnaire,
@@ -147,5 +127,4 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> = {
   medication_statement: medication_statement_questionnaire,
   diagnosis: diagnosis_questionnaire,
   symptom: symptom_questionnaire,
-  location_association: location_association_questionnaire,
 };

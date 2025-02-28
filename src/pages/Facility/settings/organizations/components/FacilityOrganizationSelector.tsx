@@ -38,21 +38,28 @@ export default function FacilityOrganizationSelector(
   );
   const [selectedOrganization, setSelectedOrganization] =
     useState<FacilityOrganization | null>(null);
+  const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
 
   const { data: rootOrganizations } = useQuery<FacilityOrganizationResponse>({
-    queryKey: ["organizations-root"],
-    queryFn: query(routes.facilityOrganization.list, {
+    queryKey: ["organizations-root", facilityOrgSearch],
+    queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId },
-      queryParams: { parent: "" },
+      queryParams: {
+        parent: "",
+        name: facilityOrgSearch,
+      },
     }),
   });
 
   const organizationQueries = useQueries({
     queries: selectedLevels.map((level, _index) => ({
-      queryKey: ["organizations", level.id],
-      queryFn: query(routes.facilityOrganization.list, {
+      queryKey: ["organizations", level.id, facilityOrgSearch],
+      queryFn: query.debounced(routes.facilityOrganization.list, {
         pathParams: { facilityId },
-        queryParams: { parent: level.id },
+        queryParams: {
+          parent: level.id,
+          name: facilityOrgSearch,
+        },
       }),
       enabled: !!level.id,
     })),
@@ -132,6 +139,7 @@ export default function FacilityOrganizationSelector(
               options={getOrganizationOptions(orgList)}
               onChange={(value) => handleLevelChange(value, level)}
               placeholder={getDropdownLabel()}
+              onSearch={(value) => setFacilityOrgSearch(value)}
             />
           </div>
           {level > 0 && level < selectedLevels.length && (
