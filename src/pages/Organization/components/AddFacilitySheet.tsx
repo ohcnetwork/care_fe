@@ -18,9 +18,13 @@ import FacilityForm from "@/components/Facility/FacilityForm";
 
 interface Props {
   organizationId: string;
+  navOrganizationId: string;
 }
 
-export default function AddFacilitySheet({ organizationId }: Props) {
+export default function AddFacilitySheet({
+  organizationId,
+  navOrganizationId,
+}: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -40,6 +44,7 @@ export default function AddFacilitySheet({ organizationId }: Props) {
         <div className="mt-6">
           <FacilityForm
             organizationId={organizationId}
+            navOrganizationId={navOrganizationId}
             onSubmitSuccess={() => {
               setOpen(false);
               queryClient.invalidateQueries({ queryKey: ["currentUser"] });

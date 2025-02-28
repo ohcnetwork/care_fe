@@ -51,7 +51,7 @@ export default function OrganizationFacilities({
     enabled: !!id,
   });
 
-  if (!id) {
+  if (!id || !navOrganizationId) {
     return null;
   }
 
@@ -67,7 +67,10 @@ export default function OrganizationFacilities({
               customTranslation="facility_count"
             />
           </div>
-          <AddFacilitySheet organizationId={id} />
+          <AddFacilitySheet
+            navOrganizationId={navOrganizationId}
+            organizationId={id}
+          />
         </div>
 
         <div className="flex gap-2">

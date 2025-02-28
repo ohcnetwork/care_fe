@@ -45,11 +45,14 @@ import { Organization } from "@/types/organization/organization";
 
 interface FacilityProps {
   organizationId?: string;
+  navOrganizationId?: string;
   facilityId?: string;
   onSubmitSuccess?: () => void;
 }
 
 export default function FacilityForm({
+  organizationId,
+  navOrganizationId,
   facilityId,
   onSubmitSuccess,
 }: FacilityProps) {
@@ -346,6 +349,8 @@ export default function FacilityForm({
                   <FormControl>
                     <GovtOrganizationSelector
                       {...field}
+                      organizationId={organizationId}
+                      navOrganizationId={navOrganizationId}
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
                       onChange={(value) =>
