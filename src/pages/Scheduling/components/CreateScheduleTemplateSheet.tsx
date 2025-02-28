@@ -30,6 +30,7 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -252,6 +253,9 @@ export default function CreateScheduleTemplateSheet({
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("create_schedule_template")}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
