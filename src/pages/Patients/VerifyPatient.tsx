@@ -239,7 +239,7 @@ export default function VerifyPatient(props: { facilityId: string }) {
               <Button
                 variant={"primary_gradient"}
                 className="gap-3 group"
-                onClick={() => goBack()}
+                onClick={() => goBack(`/facility/${props.facilityId}/patients`)}
               >
                 {t("go_back")}
               </Button>

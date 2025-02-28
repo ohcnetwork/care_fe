@@ -120,7 +120,11 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent
+        className="p-2 sm:p-0 w-[var(--radix-popover-trigger-width)] min-w-64"
+        align="start"
+        sideOffset={5}
+      >
         <Command>
           <CommandInput
             placeholder={t("search_country")}
