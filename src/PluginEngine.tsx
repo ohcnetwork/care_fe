@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
@@ -52,7 +51,11 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
           return null;
         }
 
-        return <Component {...props} key={plugin.plugin} />;
+        return (
+          <React.Suspense key={plugin.plugin} fallback={<div>Loading...</div>}>
+            <Component {...props} />
+          </React.Suspense>
+        );
       })}
     </>
   );
