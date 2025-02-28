@@ -36,7 +36,7 @@ export function ValueSetList() {
   const navigate = useNavigate();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["name", "status"],
+    disableCache: true,
   });
   const { data: response, isLoading } = useQuery({
     queryKey: ["valuesets", qParams],
