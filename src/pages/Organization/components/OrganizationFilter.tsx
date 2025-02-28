@@ -156,6 +156,24 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
             />
           ),
         )}
+        {selectedLevels.length > 1 && (
+          <Button
+            onClick={() => {
+              const newSelectedLevels = selectedLevels.slice(0, 1); // Keep only the first selection
+              setSelectedLevels(newSelectedLevels);
+              onChange({
+                organization:
+                  newSelectedLevels.length > 0
+                    ? newSelectedLevels[0].id
+                    : undefined,
+                facility_type: selectedFacilityType?.id,
+              });
+            }}
+            className="bg-white text-black border border-gray-300 hover:bg-white hover:text-black"
+          >
+            {t("X")}
+          </Button>
+        )}
       </div>
       <Button
         onClick={clearSelections}
