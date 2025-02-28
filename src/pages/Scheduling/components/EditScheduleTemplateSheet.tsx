@@ -43,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -88,6 +89,9 @@ export default function EditScheduleTemplateSheet({
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("edit_schedule_template")}
+          </SheetDescription>
         </SheetHeader>
         <div className="overflow-auto -mx-6 px-6 pb-16">
           <ScheduleTemplateEditor
