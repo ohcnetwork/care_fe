@@ -278,7 +278,9 @@ export default function LocationForm({
             control={form.control}
             name="form"
             render={({ field }) => (
-              <FormItem>
+              <FormItem
+                className={showBedOptions ? "md:col-span-1" : "md:col-span-2"}
+              >
                 <FormLabel>{t("location_form")}</FormLabel>
                 <Select
                   onValueChange={(value) => {
@@ -294,7 +296,7 @@ export default function LocationForm({
                   disabled={!!locationId}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -311,6 +313,7 @@ export default function LocationForm({
             )}
           />
 
+          {/* Checkbox Field (Hidden when `showBedOptions` is false) */}
           {showBedOptions && (
             <FormField
               control={form.control}
