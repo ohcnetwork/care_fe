@@ -169,7 +169,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
                 facility_type: selectedFacilityType?.id,
               });
             }}
-            className="bg-white text-black border border-gray-300 hover:bg-white hover:text-black"
+            className="bg-white hover:bg-gray-300 text-black"
           >
             {t("X")}
           </Button>
