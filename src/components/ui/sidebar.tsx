@@ -218,6 +218,7 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            {/* merge conflict */}
             <VisuallyHidden>
               <SheetTitle>Sidebar</SheetTitle>
             </VisuallyHidden>
