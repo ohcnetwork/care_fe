@@ -108,34 +108,35 @@ export const PatientHome = (props: {
         </div>
 
         <div
-          className="sticky top-0 z-10 mt-4 w-full overflow-x-auto border-b bg-gray-50"
+          className="sticky top-0 z-10 mt-4 w-full border-b bg-gray-50"
           role="navigation"
         >
-          <div className="flex flex-row" role="tablist">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.route}
-                data-cy={`tab-${tab.route}`}
-                href={
-                  facilityId
-                    ? `/facility/${facilityId}/patient/${id}/${tab.route}`
-                    : `/patient/${id}/${tab.route}`
-                }
-                className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${
-                  page === tab.route
-                    ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
-                    : "rounded-t-lg text-gray-600 hover:bg-gray-100"
-                }`}
-                role="tab"
-                aria-selected={page === tab.route}
-                aria-controls={`${tab.route}-panel`}
-              >
-                {t(tab.route)}
-              </Link>
-            ))}
+          <div className="overflow-x-auto pb-3">
+            <div className="flex flex-row" role="tablist">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.route}
+                  data-cy={`tab-${tab.route}`}
+                  href={
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${id}/${tab.route}`
+                      : `/patient/${id}/${tab.route}`
+                  }
+                  className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${
+                    page === tab.route
+                      ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
+                      : "rounded-t-lg text-gray-600 hover:bg-gray-100"
+                  }`}
+                  role="tab"
+                  aria-selected={page === tab.route}
+                  aria-controls={`${tab.route}-panel`}
+                >
+                  {t(tab.route)}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
-
         <div className="h-full lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
             {Tab && (

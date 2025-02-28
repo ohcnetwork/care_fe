@@ -101,7 +101,6 @@ const STRUCTURED_QUESTION_TYPES = [
   { value: "diagnosis", label: "Diagnosis" },
   { value: "encounter", label: "Encounter" },
   { value: "appointment", label: "Appointment" },
-  { value: "location_association", label: "Location Association" },
 ] as const;
 
 interface Organization {
@@ -699,9 +698,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
     }),
-    onSuccess: () => {
+    onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire updated successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
+      navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
       toast.error("Failed to update questionnaire");
