@@ -442,7 +442,8 @@ export function LocationSheet({
               <div key={index}>
                 <LocationTree
                   location={item.location}
-                  datetime={item.start_datetime}
+                  startDatetime={item.start_datetime}
+                  endDatetime={item.end_datetime}
                   isLatest={index === 0}
                   showTimeline
                 />

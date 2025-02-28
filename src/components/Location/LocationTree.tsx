@@ -7,7 +7,8 @@ import { LocationList } from "@/types/location/location";
 
 interface LocationPathProps {
   location: LocationList;
-  datetime?: string;
+  startDatetime?: string;
+  endDatetime?: string;
   isLatest?: boolean;
   showTimeline?: boolean;
 }
@@ -16,6 +17,7 @@ interface LocationNodeProps {
   location: LocationList;
   isLast: boolean;
   datetime?: string;
+  endDatetime?: string;
   children?: React.ReactNode;
 }
 
@@ -23,6 +25,7 @@ function LocationNode({
   location,
   isLast,
   datetime,
+  endDatetime,
   children,
 }: LocationNodeProps) {
   if (!location.parent?.id) {
@@ -40,6 +43,8 @@ function LocationNode({
         {isLast && datetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
             {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+            {endDatetime &&
+              ` - ${format(new Date(endDatetime), "MMM d, yyyy h:mm a")}`}
           </div>
         )}
       </div>
@@ -73,7 +78,8 @@ function LocationNode({
 
 export function LocationTree({
   location,
-  datetime,
+  startDatetime,
+  endDatetime,
   isLatest,
   showTimeline = false,
 }: LocationPathProps) {
@@ -98,7 +104,12 @@ export function LocationTree({
         </div>
       )}
       <div className="flex flex-col gap-2">
-        <LocationNode location={location} isLast={true} datetime={datetime} />
+        <LocationNode
+          location={location}
+          isLast={true}
+          datetime={startDatetime}
+          endDatetime={endDatetime}
+        />
       </div>
     </div>
   );
