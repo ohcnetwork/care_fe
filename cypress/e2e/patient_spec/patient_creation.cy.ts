@@ -17,6 +17,7 @@ const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
+const ORGANIZATION_NAME = "Administration";
 
 describe("Patient Management", () => {
   const TEST_PHONE = "9495031234";
@@ -122,6 +123,7 @@ describe("Patient Management", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
+        .selectOrganization(ORGANIZATION_NAME)
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
@@ -150,6 +152,7 @@ describe("Patient Management", () => {
       .selectEncounterType(ENCOUNTER_TYPE)
       .selectEncounterStatus(ENCOUNTER_STATUS)
       .selectEncounterPriority(ENCOUNTER_PRIORITY)
+      .selectOrganization(ORGANIZATION_NAME)
       .clickSubmitEncounter()
       .assertEncounterCreationSuccess();
 

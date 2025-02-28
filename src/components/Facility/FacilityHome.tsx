@@ -1,39 +1,16 @@
 import careConfig from "@careConfig";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { Edit2, Hospital, MapPin, MoreVertical, Settings } from "lucide-react";
-import { navigate } from "raviger";
+import { Hospital } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -84,25 +61,28 @@ const renderGeoOrganizations = (geoOrg: Organization) => {
     currentParent = currentParent.parent;
   }
 
+  const formatValue = (name: string, label: string) => {
+    return name.endsWith(label)
+      ? name.replace(new RegExp(`${label}$`), "").trim()
+      : name;
+  };
+
   const parentDetails = orgParents.map((org) => {
+    const label = getOrgLabel(org.org_type, org.metadata);
     return {
-      label: getOrgLabel(org.org_type, org.metadata),
-      value: org.name,
+      label,
+      value: formatValue(org.name, label),
     };
   });
 
+  const geoOrgLabel = getOrgLabel(geoOrg.org_type, geoOrg.metadata);
+
   return [
     {
-      label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
-      value: geoOrg.name,
+      label: geoOrgLabel,
+      value: formatValue(geoOrg.name, geoOrgLabel),
     },
-  ]
-    .concat(parentDetails)
-    .map((org, index) => (
-      <div key={index}>
-        <span className="text-gray-500">{org.value}</span>
-      </div>
-    ));
+  ].concat(parentDetails);
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
@@ -115,18 +95,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     queryFn: query(routes.facility.show, {
       pathParams: { id: facilityId },
     }),
-  });
-
-  const { mutate: deleteFacility, isPending: isDeleting } = useMutation({
-    mutationFn: mutate(routes.deleteFacility, {
-      pathParams: { id: facilityId },
-    }),
-    onSuccess: () => {
-      toast.success(
-        t("facility_deleted_successfully", { name: facilityData?.name }),
-      );
-      navigate("/facility");
-    },
   });
 
   const { mutateAsync: deleteAvatar } = useMutation({
@@ -142,24 +110,29 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const handleCoverImageUpload = async (file: File, onError: () => void) => {
+  const handleCoverImageUpload = async (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     const formData = new FormData();
     formData.append("cover_image", file);
     const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
       { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
+          setEditCoverImage(false);
           await sleep(1000);
           queryClient.invalidateQueries({
             queryKey: ["facility", facilityId],
           });
           toast.success(t("cover_image_updated"));
-          setEditCoverImage(false);
+          onSuccess();
         } else {
           onError();
         }
@@ -170,9 +143,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-  const handleCoverImageDelete = async (onError: () => void) => {
+  const handleCoverImageDelete = async (
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     try {
       await deleteAvatar();
+      onSuccess();
     } catch {
       onError();
     }
@@ -183,6 +160,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
   }
 
   const hasPermissionToEditCoverImage = true;
+
+  //  TODO: get permissions from backend to delete facility
 
   const coverImageHint = (
     <>
@@ -206,163 +185,170 @@ export const FacilityHome = ({ facilityId }: Props) => {
       />
       <div className="container mx-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          <Card className="overflow-hidden border-none bg-transparent shadow-none">
-            <div className="group relative h-64 w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
+          <Card className="border-none bg-transparent shadow-none">
+            <div className="group rounded-3xl relative h-64 w-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600">
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
                     src={facilityData.read_cover_image_url}
                     alt={facilityData?.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover rounded-2xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
+                  <div className="absolute rounded-lg inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
                 </>
               ) : (
-                <div className="relative h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
+                <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
+              <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
+                <div className="sm:px-4 px-8 inline-flex rounded-md">
+                  <Avatar
+                    name={facilityData.name}
+                    className="size-16 sm:size-20 md:size-24 rounded-md border-4 border-white shadow-lg"
+                  />
+                </div>
+              </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+              <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 md:gap-4">
-                      <Avatar
-                        name={facilityData.name}
-                        className="h-9 w-9 md:h-12 md:w-12 shrink-0 rounded-xl border-2 border-white/10 shadow-xl"
-                      />
-                      <div className="min-w-0">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <h1 className="text-sm md:text-3xl text-white md:font-bold">
-                                {facilityData?.name}
-                              </h1>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-sm text-white bg-black rounded-md p-2">
-                                {facilityData?.name}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                    <div className="text-white">
+                      <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
+                        {facilityData?.name}
+                      </h1>
+                      <h2 className="text-base sm:text-sm md:text-md lg:text-sm text-white/70">
+                        {facilityData?.facility_type}
+                      </h2>
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          aria-label={t("facility_actions_menu")}
-                          className="bg-white/20 hover:bg-white/40 w-8 h-8"
-                        >
-                          <MoreVertical className="h-4 w-4 text-white" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 md:w-56">
-                        {hasPermissionToEditCoverImage && (
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => setEditCoverImage(true)}
+                    <PLUGIN_Component
+                      __name="FacilityHomeActions"
+                      facility={facilityData}
+                    />
+                    {/* <AlertDialog>
+                      TODO: add delete facility
+                      <AlertDialogTrigger asChild>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {t("delete_facility")}
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("delete_facility")}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("delete_facility_confirmation", {
+                              name: facilityData?.name,
+                            })}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <div
+                            onClick={() => deleteFacility()}
+                            className={cn(
+                              buttonVariants({ variant: "destructive" }),
+                            )}
+                            // disabled={isDeleting}
                           >
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            {t("edit_cover_photo")}
-                          </DropdownMenuItem>
-                        )}
-
-                        <EditFacilitySheet
-                          facilityId={facilityId}
-                          trigger={
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onSelect={(e) => {
-                                e.preventDefault();
-                              }}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              {t("update_facility")}
-                            </DropdownMenuItem>
-                          }
-                        />
-                        <AlertDialog>
-                          {/* TODO: add delete facility */}
-                          {/* <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                              className="cursor-pointer text-danger-500"
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              {t("delete_facility")}
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger> */}
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                {t("delete_facility")}
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t("delete_facility_confirmation", {
-                                  name: facilityData?.name,
-                                })}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>
-                                {t("cancel")}
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteFacility()}
-                                className={cn(
-                                  buttonVariants({ variant: "destructive" }),
-                                )}
-                                disabled={isDeleting}
-                              >
-                                {isDeleting ? t("deleting") : t("delete")}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-
-                        <PLUGIN_Component
-                          __name="FacilityHomeActions"
-                          facility={facilityData}
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                            {isDeleting ? t("deleting") : t("delete")}
+                          </div>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog> */}
                   </div>
                 </div>
+              </div>
+              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:35rem)]:top-0">
+                {hasPermissionToEditCoverImage && (
+                  <Button
+                    variant="link"
+                    onClick={() => setEditCoverImage(true)}
+                    aria-label={t("edit_cover_photo")}
+                  >
+                    <CareIcon
+                      icon="l-edit"
+                      className="text-white"
+                      aria-hidden="true"
+                    />
+                    <span className="underline text-white">
+                      {t("edit_cover_photo")}
+                    </span>
+                  </Button>
+                )}
               </div>
             </div>
 
             <div className="mt-2 space-y-2">
-              <Card>
-                <CardContent>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-12 mt-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="mt-2 h-5 w-5 flex-shrink-0 text-gray-500" />
-                      <div>
-                        {facilityData?.geo_organization && (
-                          <div className="mt-2 text-sm">
-                            {renderGeoOrganizations(
-                              facilityData?.geo_organization,
-                            )}
-                          </div>
-                        )}
+              <div className="mt-2 space-y-2 flex justify-end">
+                <EditFacilitySheet
+                  facilityId={facilityId}
+                  trigger={
+                    <Button
+                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
+                      variant="outline"
+                    >
+                      <CareIcon icon="l-edit" />
+                      {t("edit_facility_details")}
+                    </Button>
+                  }
+                />
+              </div>
+              <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
+                <Card className="basis-1/2">
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                      <div className="col-span-1 sm:col-span-2 flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {t("address")}
+                        </span>
+                        <span className="text-gray-700 truncate">
+                          {facilityData.address}
+                        </span>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="mt-1">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {t("mobile_number")}
+                        </span>
+                        <span className="text-gray-800 truncate">
                           <ContactLink
                             tel={String(facilityData?.phone_number)}
                           />
-                        </div>
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {t("location_details")}
+                        </span>
+                        <span className="text-gray-800 truncate">
+                          {/* Add Location Link Here */}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                <Card className="basis-1/2">
+                  <CardContent>
+                    <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 gap-4">
+                      {facilityData.geo_organization &&
+                        renderGeoOrganizations(
+                          facilityData.geo_organization,
+                        ).map((item, index) => (
+                          <div key={index} className="flex flex-col">
+                            <span className="font-semibold text-lg truncate">
+                              {item.label}
+                            </span>
+                            <span className="text-gray-800 truncate">
+                              {item.value}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {facilityData?.features?.some((feature: number) =>
                 FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
@@ -383,7 +369,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <Badge
                               key={feature}
                               variant="secondary"
-                              className="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              className="flex items-center gap-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1"
                             >
                               {getFacilityFeatureIcon(feature)}
                               <span>
