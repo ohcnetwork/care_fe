@@ -1410,6 +1410,7 @@
   "manage_bed_presets": "Manage Presets of Bed",
   "manage_facility_users": "Manage encounters",
   "manage_my_schedule": "Manage my schedule",
+  "manage_organization": "Manage Organization",
   "manage_organization_description": "Add or remove organizations from this {{entityType}}",
   "manage_organizations": "Manage Organizations",
   "manage_organizations_description": "Add or remove organizations from this questionnaire",

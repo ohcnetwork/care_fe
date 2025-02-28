@@ -158,8 +158,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             trigger={
               <Button variant="outline">
                 <Building className="mr-2 h-4 w-4" />
-                {device.managing_organization?.name ||
-                  t("manage_organizations")}
+                {device.managing_organization?.name || t("manage_organization")}
               </Button>
             }
           />
