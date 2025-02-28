@@ -158,7 +158,7 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             Back to List
           </Button>
           <Button onClick={() => navigate(`/admin/questionnaire/${id}/edit`)}>
-            <CareIcon icon="l-edit" className="mr-2 h-4 w-4" />
+            <CareIcon icon="l-pen" className="mr-2 h-4 w-4" />
             Edit
           </Button>
           <DropdownMenu>
