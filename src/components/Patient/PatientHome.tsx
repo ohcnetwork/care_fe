@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -87,13 +89,28 @@ export const PatientHome = (props: {
                         name={patientData.name}
                       />
                     </div>
+
                     <div>
-                      <h1
-                        id="patient-name"
-                        className="text-xl font-bold capitalize text-gray-950"
-                      >
-                        {patientData.name}
-                      </h1>
+                      <div className="flex flex-row gap-x-4">
+                        <h1
+                          id="patient-name"
+                          className="text-xl font-bold capitalize text-gray-950"
+                        >
+                          {patientData.name}
+                        </h1>
+                        {patientData.death_datetime && (
+                          <Badge variant="destructive">
+                            <h3 className="text-sm font-medium">
+                              {t("expired_on")}
+                              {": "}
+                              {dayjs(patientData.death_datetime).format(
+                                "DD MMM YYYY, hh:mm A",
+                              )}
+                            </h3>
+                          </Badge>
+                        )}
+                      </div>
+
                       <h3 className="text-sm font-medium text-gray-600 capitalize">
                         {formatPatientAge(patientData, true)},{"  "}
                         {t(`GENDER__${patientData.gender}`)}, {"  "}

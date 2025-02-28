@@ -110,7 +110,7 @@ export function QuestionnaireList() {
               <tr
                 key={questionnaire.id}
                 onClick={() =>
-                  navigate(`/admin/questionnaire/${questionnaire.slug}`)
+                  navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
                 }
                 className="cursor-pointer hover:bg-gray-50"
               >
