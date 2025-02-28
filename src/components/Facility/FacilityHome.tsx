@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
@@ -27,6 +26,7 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -34,6 +34,8 @@ import type {
   OrganizationParent,
 } from "@/types/organization/organization";
 import { getOrgLabel } from "@/types/organization/organization";
+
+import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
   facilityId: string;
@@ -110,24 +112,29 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const handleCoverImageUpload = async (file: File, onError: () => void) => {
+  const handleCoverImageUpload = async (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     const formData = new FormData();
     formData.append("cover_image", file);
     const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
       { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
+          setEditCoverImage(false);
           await sleep(1000);
           queryClient.invalidateQueries({
             queryKey: ["facility", facilityId],
           });
           toast.success(t("cover_image_updated"));
-          setEditCoverImage(false);
+          onSuccess();
         } else {
           onError();
         }
@@ -138,9 +145,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     );
   };
-  const handleCoverImageDelete = async (onError: () => void) => {
+  const handleCoverImageDelete = async (
+    onSuccess: () => void,
+    onError: () => void,
+  ) => {
     try {
       await deleteAvatar();
+      onSuccess();
     } catch {
       onError();
     }
@@ -191,12 +202,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <div className="relative rounded-3xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
               )}
               <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
-                <Button variant="link">
+                <div className="sm:px-4 px-8 inline-flex rounded-md">
                   <Avatar
                     name={facilityData.name}
-                    className="h-24 w-24 rounded-md border-4 border-white shadow-lg"
+                    className="size-16 sm:size-20 md:size-24 rounded-md border-4 border-white shadow-lg"
                   />
-                </Button>
+                </div>
               </div>
 
               <div className="absolute bottom-0 left-0 translate-x-0 ml-[8rem]">
@@ -313,8 +324,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <span className="font-semibold text-lg">
                           {t("location_details")}
                         </span>
-                        <span className="text-gray-800 truncate">
-                          {/* Add Location Link Here */}
+                        <span>
+                          {facilityData.latitude && facilityData.longitude && (
+                            <FacilityMapsLink
+                              latitude={facilityData.latitude.toString()}
+                              longitude={facilityData.longitude.toString()}
+                            />
+                          )}
                         </span>
                       </div>
                     </div>
@@ -346,33 +362,18 @@ export const FacilityHome = ({ facilityId }: Props) => {
               ) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg font-medium">
+                    <CardTitle className="font-semibold text-lg">
                       {t("features")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData?.features?.map(
-                        (feature: number) =>
-                          FACILITY_FEATURE_TYPES.some(
-                            (f) => f.id === feature,
-                          ) && (
-                            <Badge
-                              key={feature}
-                              variant="secondary"
-                              className="flex items-center gap-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1"
-                            >
-                              {getFacilityFeatureIcon(feature)}
-                              <span>
-                                {
-                                  FACILITY_FEATURE_TYPES.find(
-                                    (f) => f.id === feature,
-                                  )?.name
-                                }
-                              </span>
-                            </Badge>
-                          ),
-                      )}
+                      {facilityData.features?.map((featureId) => (
+                        <FeatureBadge
+                          key={featureId}
+                          featureId={featureId as number}
+                        />
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

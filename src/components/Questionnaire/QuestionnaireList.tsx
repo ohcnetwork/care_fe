@@ -12,12 +12,6 @@ import { useNavigate } from "raviger";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useFilters from "@/hooks/useFilters";
@@ -108,9 +102,6 @@ export function QuestionnaireList() {
               <th className="px-6 py-3 text-left text-xs font-medium tracking-wider ">
                 {t("description")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider ">
-                {t("slug")}
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -122,43 +113,25 @@ export function QuestionnaireList() {
                 }
                 className="cursor-pointer hover:bg-gray-50"
               >
-                <td className="whitespace-nowrap px-6 py-2">
+                <td className="px-6 py-2">
                   <div className="text-sm font-semibold text-gray-950">
                     {questionnaire.title}
                   </div>
                 </td>
                 <td className="px-6 py-2">
-                  <div className="flex items-center justify-between">
-                    <div className="max-w-md truncate text-sm text-gray-950">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="w-full text-sm text-gray-950">
                       {questionnaire.description}
                     </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => e.stopPropagation()}
-                          className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
-                        >
-                          <EyeIcon className="w-4 h-4 mr-2" />
-                          {t("see_details")}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <div className="space-y-2">
-                          <h4 className="font-medium">{questionnaire.title}</h4>
-                          <p className="text-sm text-gray-600">
-                            {questionnaire.description}
-                          </p>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
+                    >
+                      <EyeIcon className="w-4 h-4 mr-0" />
+                      {t("View")}
+                    </Button>
                   </div>
-                </td>
-                <td className="whitespace-nowrap px-2">
-                  <Label className=" text-gray-800 bg-gray-100 rounded-md px-2 py-1.5 w-fit">
-                    {questionnaire.slug}
-                  </Label>
                 </td>
               </tr>
             ))}
