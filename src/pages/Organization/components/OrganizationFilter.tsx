@@ -158,6 +158,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         )}
         {selectedLevels.length > 1 && (
           <Button
+            variant="ghost"
             onClick={() => {
               const newSelectedLevels = selectedLevels.slice(0, 1); // Keep only the first selection
               setSelectedLevels(newSelectedLevels);
@@ -169,9 +170,8 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
                 facility_type: selectedFacilityType?.id,
               });
             }}
-            className="bg-white hover:bg-gray-300 text-black"
           >
-            {t("X")}
+            {t("x")}
           </Button>
         )}
       </div>
