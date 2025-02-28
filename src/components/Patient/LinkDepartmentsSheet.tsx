@@ -119,27 +119,17 @@ export default function LinkDepartmentsSheet({
   const [open, setOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string>("");
   const queryClient = useQueryClient();
+  const { route, pathParams } = getMutationParams(
+    entityType,
+    entityId,
+    facilityId,
+    true,
+  );
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: (organizationId: string) => {
-      const { route, pathParams } = getMutationParams(
-        entityType,
-        entityId,
-        facilityId,
-        true,
-      );
-      return mutate(route, {
-        pathParams,
-        body:
-          entityType === "device"
-            ? { managing_organization: organizationId }
-            : { organization: organizationId },
-      })(
-        entityType === "device"
-          ? { managing_organization: organizationId }
-          : { organization: organizationId },
-      );
-    },
+    mutationFn: mutate(route, {
+      pathParams,
+    }),
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
@@ -217,7 +207,14 @@ export default function LinkDepartmentsSheet({
 
               <Button
                 className="w-full"
-                onClick={() => selectedOrg && addOrganization(selectedOrg)}
+                onClick={() =>
+                  selectedOrg &&
+                  addOrganization(
+                    entityType === "device"
+                      ? { managing_organization: selectedOrg }
+                      : { organization: selectedOrg },
+                  )
+                }
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
