@@ -26,13 +26,9 @@ import {
 
 interface DiagnosisTableProps {
   diagnoses: Diagnosis[];
-  isPrintPreview?: boolean;
 }
 
-export function DiagnosisTable({
-  diagnoses,
-  isPrintPreview = false,
-}: DiagnosisTableProps) {
+export function DiagnosisTable({ diagnoses }: DiagnosisTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
@@ -100,26 +96,22 @@ export function DiagnosisTable({
             <TableCell className="max-w-[200px]">
               {diagnosis.note ? (
                 <div className="flex items-center gap-2">
-                  {isPrintPreview ? (
-                    <span className="text-gray-950">{diagnosis.note}</span>
-                  ) : (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-xs shrink-0"
-                        >
-                          {t("see_note")}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 p-4">
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {diagnosis.note}
-                        </p>
-                      </PopoverContent>
-                    </Popover>
-                  )}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs shrink-0"
+                      >
+                        {t("see_note")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {diagnosis.note}
+                      </p>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ) : (
                 "-"
@@ -132,6 +124,7 @@ export function DiagnosisTable({
                   className="w-4 h-4"
                   imageUrl={diagnosis.created_by.profile_picture_url}
                 />
+
                 <span className="text-sm">{diagnosis.created_by.username}</span>
               </div>
             </TableCell>
