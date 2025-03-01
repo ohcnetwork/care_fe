@@ -87,7 +87,6 @@ import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import { CodingEditor } from "./CodingEditor";
 import ManageQuestionnaireOrganizationsSheet from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet from "./ManageQuestionnaireTagsSheet";
-import { QuestionnaireForm } from "./QuestionnaireForm";
 
 interface QuestionnaireEditorProps {
   id?: string;
@@ -142,6 +141,7 @@ interface QuestionnairePropertiesProps {
     available?: TagResponse;
     isLoading?: boolean;
   };
+  activeTab: "edit" | "preview";
 }
 
 function StatusSelector({
@@ -357,10 +357,12 @@ function TagSelector({
   id,
   selection,
   questionnaire,
+  activeTab,
 }: {
   id?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
   questionnaire: QuestionnaireDetail;
+  activeTab: string;
 }) {
   if (id) {
     return (
@@ -380,15 +382,17 @@ function TagSelector({
             <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
           )}
         </div>
-        <ManageQuestionnaireTagsSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 h-4 w-4" />
-              {t("manage_tags")}
-            </Button>
-          }
-        />
+        {activeTab === "edit" && (
+          <ManageQuestionnaireTagsSheet
+            questionnaire={questionnaire}
+            trigger={
+              <Button variant="outline" className="w-full justify-start">
+                <Tags className="mr-2 h-4 w-4" />
+                {t("manage_tags")}
+              </Button>
+            }
+          />
+        )}
       </>
     );
   }
@@ -478,6 +482,7 @@ function QuestionnaireProperties({
   organizations,
   organizationSelection,
   tagSelection,
+  activeTab,
 }: QuestionnairePropertiesProps) {
   return (
     <Card className="border-none bg-transparent shadow-none space-y-4 mt-2 ml-2">
@@ -485,55 +490,84 @@ function QuestionnaireProperties({
         <CardTitle>{t("properties")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-0">
-        <StatusSelector
-          value={questionnaire.status}
-          onChange={(val) => updateQuestionnaireField("status", val)}
-        />
+        {activeTab === "edit" ? (
+          <>
+            <StatusSelector
+              value={questionnaire.status}
+              onChange={(val) => updateQuestionnaireField("status", val)}
+            />
+            <SubjectTypeSelector
+              value={questionnaire.subject_type}
+              onChange={(val) => updateQuestionnaireField("subject_type", val)}
+            />
+            <div className="space-y-2">
+              <Label>
+                {t("organizations")} <span className="text-red-500">*</span>
+              </Label>
+              <OrganizationSelector
+                id={id}
+                organizations={organizations}
+                selection={organizationSelection}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("tags")}</Label>
+              <TagSelector
+                id={id}
+                selection={tagSelection}
+                questionnaire={questionnaire}
+                activeTab={activeTab}
+              />
+            </div>
+            <CloneQuestionnaireSheet
+              questionnaire={questionnaire}
+              trigger={
+                <Button variant="outline" className="w-full justify-start">
+                  <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
+                  Clone Questionnaire
+                </Button>
+              }
+            />
 
-        <SubjectTypeSelector
-          value={questionnaire.subject_type}
-          onChange={(val) => updateQuestionnaireField("subject_type", val)}
-        />
-
-        <div className="space-y-2">
-          <Label>
-            {t("organizations")} <span className="text-red-500">*</span>
-          </Label>
-          <OrganizationSelector
-            id={id}
-            organizations={organizations}
-            selection={organizationSelection}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("tags")}</Label>
-          <TagSelector
-            id={id}
-            selection={tagSelection}
-            questionnaire={questionnaire}
-          />
-        </div>
-        <CloneQuestionnaireSheet
-          questionnaire={questionnaire}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <CareIcon icon="l-copy" className="mr-2 h-4 w-4" />
-              Clone Questionnaire
-            </Button>
-          }
-        />
-
-        <div className="space-y-2">
-          <Label htmlFor="version">{t("version")}</Label>
-          <Input
-            id="version"
-            value={questionnaire.version || "0.0.1"}
-            disabled={true}
-            onChange={(e) =>
-              updateQuestionnaireField("version", e.target.value)
-            }
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="version">{t("version")}</Label>
+              <Input
+                id="version"
+                value={questionnaire.version || "0.0.1"}
+                disabled={true}
+                onChange={(e) =>
+                  updateQuestionnaireField("version", e.target.value)
+                }
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between">
+              <div>
+                <p className="text-sm text-gray-700">{t("status")}</p>
+                <p className="text-md font-bold">{questionnaire.status}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-700">{t("subject_type")}:</p>
+                <p className="text-md font-bold">
+                  {questionnaire.subject_type}
+                </p>
+              </div>
+              <p className="text-sm text-gray-700">{t("version")}:</p>
+              <p className="text-md font-bold">{questionnaire.version}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("tags")}</Label>
+              <TagSelector
+                id={id}
+                selection={tagSelection}
+                questionnaire={questionnaire}
+                activeTab={activeTab}
+              />
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
@@ -942,6 +976,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     available: availableTags,
                     isLoading: isLoadingAvailableTags,
                   }}
+                  activeTab={activeTab}
                 />
               </div>
             </div>
@@ -1113,6 +1148,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   available: availableTags,
                   isLoading: isLoadingAvailableTags,
                 }}
+                activeTab={activeTab}
               />
             </div>
           </div>
@@ -1124,22 +1160,314 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuestionnaireForm
-                questionnaireSlug={id}
-                patientId="preview"
-                subjectType={questionnaire.subject_type}
-                encounterId="preview"
-                facilityId="preview"
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="space-y-4 md:w-60">
+              <Card className="border-none bg-transparent shadow-none space-y-3 mt-2 md:block hidden">
+                <CardHeader className="p-0">
+                  <CardTitle>{t("navigation")}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <nav className="space-y-1">
+                    {questionnaire.questions.map((question, index) => {
+                      const hasSubQuestions =
+                        question.type === "group" &&
+                        question.questions &&
+                        question.questions.length > 0;
+                      return (
+                        <div key={question.id} className="space-y-1">
+                          <button
+                            onClick={() => {
+                              const element = document.getElementById(
+                                `question-${question.id}`,
+                              );
+                              if (element) {
+                                element.scrollIntoView({ behavior: "smooth" });
+                                toggleQuestionExpanded(question.id);
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                              expandedQuestions.has(question.id)
+                                ? "bg-accent"
+                                : ""
+                            }`}
+                          >
+                            <span className="font-medium text-gray-500">
+                              {index + 1}.
+                            </span>
+                            <span className="flex-1 truncate">
+                              {question.text || "Untitled Question"}
+                            </span>
+                          </button>
+                          {hasSubQuestions && question.questions && (
+                            <div className="ml-6 border-l-2 border-muted pl-2 space-y-1">
+                              {question.questions.map(
+                                (subQuestion, subIndex) => (
+                                  <button
+                                    key={subQuestion.id}
+                                    onClick={() => {
+                                      const element = document.getElementById(
+                                        `question-${subQuestion.id}`,
+                                      );
+                                      if (element) {
+                                        element.scrollIntoView({
+                                          behavior: "smooth",
+                                        });
+                                        toggleQuestionExpanded(question.id);
+                                      }
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
+                                  >
+                                    <span className="font-medium text-gray-500">
+                                      {index + 1}.{subIndex + 1}
+                                    </span>
+                                    <span className="flex-1 truncate">
+                                      {subQuestion.text || "Untitled Question"}
+                                    </span>
+                                  </button>
+                                ),
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </nav>
+                </CardContent>
+              </Card>
+              <div className="space-y-4 max-w-sm lg:hidden">
+                <QuestionnaireProperties
+                  questionnaire={questionnaire}
+                  updateQuestionnaireField={updateQuestionnaireField}
+                  id={id}
+                  organizations={organizations}
+                  organizationSelection={{
+                    selectedIds: selectedOrgIds,
+                    onToggle: handleToggleOrganization,
+                    searchQuery: orgSearchQuery,
+                    setSearchQuery: setOrgSearchQuery,
+                    available: availableOrganizations,
+                    isLoading: isLoadingAvailableOrganizations,
+                  }}
+                  tags={questionnaire.tags}
+                  tagSelection={{
+                    selectedIds: selectedTagIds,
+                    onToggle: handleToggleTag,
+                    searchQuery: tagSearchQuery,
+                    setSearchQuery: setTagSearchQuery,
+                    available: availableTags,
+                    isLoading: isLoadingAvailableTags,
+                  }}
+                  activeTab={activeTab}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1 flex-1">
+              <p className="text-sm text-gray-700">
+                {t("questionnaire_title_description")}
+              </p>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{questionnaire.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-gray-700">
+                    {questionnaire.description}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="border-none bg-transparent shadow-none">
+                <CardHeader className="flex justify-between px-0 py-2">
+                  <div>
+                    <CardTitle className="flex justify-between items-center w-full">
+                      <p className="text-sm text-gray-700 font-medium mt-1">
+                        {questionnaire.questions?.length || 0} {t("question")}
+                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="w-3 h-3 bg-purple-500 rounded-sm"></span>
+                          <span className="text-gray-700 font-medium">
+                            {questionnaire.questions?.filter((q) => q.required)
+                              .length || 0}{" "}
+                            {t("required")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-3 h-3 bg-gray-400 rounded-sm"></span>
+                          <span className="text-gray-700 font-medium">
+                            {questionnaire.questions?.filter((q) => !q.required)
+                              .length || 0}{" "}
+                            {t("optional")}
+                          </span>
+                        </div>
+                      </div>
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="bg-white py-4">
+                  <div className="space-y-6">
+                    {questionnaire.questions.map((question, index) => (
+                      <div key={question.id} id={`question-${question.id}`}>
+                        {QuestionPreview(question, index, 0)}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-4 w-60 hidden lg:block">
+              <QuestionnaireProperties
+                questionnaire={questionnaire}
+                updateQuestionnaireField={updateQuestionnaireField}
+                id={id}
+                organizations={organizations}
+                organizationSelection={{
+                  selectedIds: selectedOrgIds,
+                  onToggle: handleToggleOrganization,
+                  searchQuery: orgSearchQuery,
+                  setSearchQuery: setOrgSearchQuery,
+                  available: availableOrganizations,
+                  isLoading: isLoadingAvailableOrganizations,
+                }}
+                tags={questionnaire.tags}
+                tagSelection={{
+                  selectedIds: selectedTagIds,
+                  onToggle: handleToggleTag,
+                  searchQuery: tagSearchQuery,
+                  setSearchQuery: setTagSearchQuery,
+                  available: availableTags,
+                  isLoading: isLoadingAvailableTags,
+                }}
+                activeTab={activeTab}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+          <DebugPreview
+            data={questionnaire}
+            title="Questionnaire"
+            className="mt-4"
+          />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+function QuestionPreview(question: Question, index: number, depth: number) {
+  const isRequired = question.required;
+  const hasSubQuestions =
+    question.type === "group" && (question.questions?.length ?? 0) > 0;
+
+  return (
+    <div className="space-y-2">
+      <div
+        className={`pl-3 -ml-6 ${
+          depth === 0
+            ? isRequired
+              ? "border-l-4 border-purple-500"
+              : "border-l-4 border-gray-300"
+            : ""
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-gray-700 font-bold">
+            {question.text || t("Untitled")}
+            {isRequired && <span className="text-red-500 ml-1">*</span>}
+          </span>
+          <Button variant="ghost" className="underline">
+            + {t("add_notes")}
+          </Button>
+        </div>
+      </div>
+
+      {question.type === "boolean" && (
+        <RadioGroup>
+          <div className="flex gap-4">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="true" id={`boolean-yes-${question.id}`} />
+              <Label htmlFor={`boolean-yes-${question.id}`}>{t("yes")}</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="false" id={`boolean-no-${question.id}`} />
+              <Label htmlFor={`boolean-no-${question.id}`}>{t("no")}</Label>
+            </div>
+          </div>
+        </RadioGroup>
+      )}
+
+      {(question.type === "decimal" || question.type === "integer") && (
+        <Input
+          type="number"
+          className="border border-gray-300 rounded-md p-2 text-sm w-full"
+        />
+      )}
+
+      {question.type === "structured" && (
+        <Input
+          type="text"
+          placeholder="Search..."
+          className="border border-gray-300 rounded-md p-2 text-sm w-full"
+        />
+      )}
+
+      {(question.type === "date" ||
+        question.type === "dateTime" ||
+        question.type === "time") && (
+        <div className="flex gap-2">
+          <Input type="date" />
+          {(question.type === "dateTime" || question.type === "time") && (
+            <Input type="time" />
+          )}
+        </div>
+      )}
+
+      {(question.type === "string" || question.type === "text") && (
+        <Input className="border border-gray-300 rounded-md p-2 text-sm w-full" />
+      )}
+
+      {question.type === "url" && (
+        <Input
+          type="url"
+          className="border border-gray-300 rounded-md p-2 text-sm w-full"
+        />
+      )}
+      {question.type === "choice" && question.answer_option && (
+        <RadioGroup defaultValue={question.answer_option[0]?.value}>
+          {question.answer_option.map((option) => (
+            <div key={option.value} className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={option.value}
+                id={`option-${option.value}`}
+              />
+              <Label htmlFor={`option-${option.value}`}>
+                {option.display || option.value}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      )}
+
+      {question.type === "quantity" && (
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            className="border border-gray-300 rounded-md p-2 text-sm w-full"
+          />
+          <span>{question.unit?.display || t("unit_unit(s)")}</span>
+        </div>
+      )}
+
+      {question.type === "display" && (
+        <p className="text-gray-600">{question.text}</p>
+      )}
+
+      {hasSubQuestions && (
+        <div className="border border-gray-200 rounded-md p-4 space-y-3 mt-2">
+          {question.questions?.map((subQuestion, subIndex) =>
+            QuestionPreview(subQuestion, subIndex, depth + 1),
+          )}
+        </div>
+      )}
     </div>
   );
 }
