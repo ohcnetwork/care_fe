@@ -179,7 +179,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-screen overflow-scroll w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
+      <DialogContent className="max-h-screen overflow-auto w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
@@ -247,7 +247,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-left" className="h-4 w-4" />
                 </Button>
               )}
-              <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+              <div className="flex h-[75vh] w-full items-center justify-center overflow-auto rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
                   <div className="h-full w-full overflow-hidden">
                     <img
