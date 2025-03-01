@@ -14,6 +14,7 @@
     "@originjs/vite-plugin-federation",
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
+    "care_fe",
     "cross-env",
     "postcss-loader"
   ],
@@ -37,9 +38,21 @@
       ]
     ],
     [
+      "tsx/cjs",
+      [
+        "node_modules\\find-cypress-specs\\src\\index.js"
+      ]
+    ],
+    [
       "virtual:pwa-register",
       [
         "src/index.tsx"
+      ]
+    ],
+    [
+      "virtual:pwa-register",
+      [
+        "src\\index.tsx"
       ]
     ]
   ],
