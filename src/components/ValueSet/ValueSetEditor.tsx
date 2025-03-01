@@ -2,8 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+
+// import { Button } from "@/components/ui/button";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+// import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -64,13 +70,22 @@ export function ValueSetEditor({ slug }: ValueSetEditorProps) {
       createMutation.mutate(createData);
     }
   };
-
+  const handleCancel = () => {
+    navigate(`/admin/valuesets`);
+  };
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">
         {slug ? "Edit ValueSet" : "Create New ValueSet"}
       </h1>
-
+      <Button
+        variant="outline"
+        className="fixed top-10 right-4"
+        onClick={handleCancel}
+      >
+        <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
+        Cancel
+      </Button>
       {slug && isLoading ? (
         <FormSkeleton rows={10} />
       ) : (
