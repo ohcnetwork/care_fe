@@ -43,6 +43,7 @@ export default function FacilityOrganizationIndex({
   facilityId: string;
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [searchTerm, setSearchTerm] = useState("");
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
@@ -52,6 +53,11 @@ export default function FacilityOrganizationIndex({
     enabled: !!facilityId,
   });
   const tableData = data?.results || [];
+  const filteredTableData = tableData.filter(
+    (org) =>
+      org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.org_type.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
   const isMobile = useBreakpoints({ default: true, sm: false });
   if (isLoading) {
     return (
@@ -274,6 +280,10 @@ export default function FacilityOrganizationIndex({
           <Input
             className="px-2 placeholder:text-xs placeholder:text-gray-500"
             placeholder={t("filter_by_department_or_team_name")}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
           ></Input>
         </div>
         <div className="flex lg:justify-end w-full">
@@ -330,7 +340,7 @@ export default function FacilityOrganizationIndex({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableData
+          {filteredTableData
             .filter(
               (org) => !org.parent || Object.keys(org.parent).length === 0,
             ) // Parent rows only
