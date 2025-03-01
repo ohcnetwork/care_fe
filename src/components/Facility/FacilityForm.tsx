@@ -312,7 +312,6 @@ export default function FacilityForm({
                     <PhoneInput
                       data-cy="facility-phone"
                       placeholder={t("enter_phone_number")}
-                      maxLength={13}
                       {...field}
                     />
                   </FormControl>
