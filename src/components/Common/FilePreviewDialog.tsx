@@ -179,7 +179,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-screen overflow-auto w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
+      <DialogContent className="max-h-[95vh] overflow-auto w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
         <DialogHeader>
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
