@@ -48,8 +48,8 @@ interface LocationPathParams {
 }
 
 interface DevicePathParams {
-  facility_external_id: string;
-  external_id: string;
+  facilityId: string;
+  id: string;
 }
 
 type PathParams = EncounterPathParams | LocationPathParams | DevicePathParams;
@@ -89,8 +89,8 @@ function getMutationParams(
   return {
     route: isAdd ? deviceApi.addOrganization : deviceApi.removeOrganization,
     pathParams: {
-      facility_external_id: facilityId,
-      external_id: entityId,
+      facilityId,
+      id: entityId,
     } as DevicePathParams,
     queryKey: ["device", entityId],
   };

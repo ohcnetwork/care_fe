@@ -45,13 +45,13 @@ export default {
     TBody: Type<{ location: string }>(),
   },
   addOrganization: {
-    path: "/api/v1/facility/{facility_external_id}/device/{external_id}/add_managing_organization/",
+    path: "/api/v1/facility/{facilityId}/device/{id}/add_managing_organization/",
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ managing_organization: string }>(),
   },
   removeOrganization: {
-    path: "/api/v1/facility/{facility_external_id}/device/{external_id}/remove_managing_organization/",
+    path: "/api/v1/facility/{facilityId}/device/{id}/remove_managing_organization/",
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ managing_organization: string }>(),
