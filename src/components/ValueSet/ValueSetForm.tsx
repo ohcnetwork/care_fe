@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
-import { navigate } from "raviger";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -29,6 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -402,6 +403,8 @@ export function ValueSetForm({
 }: ValueSetFormProps) {
   const { t } = useTranslation();
 
+  const { goBack } = useAppHistory();
+
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
@@ -496,7 +499,7 @@ export function ValueSetForm({
             variant="outline"
             disabled={isSubmitting}
             type="button"
-            onClick={() => navigate(`/admin/valuesets`)}
+            onClick={() => goBack()}
           >
             <CareIcon icon="l-arrow-left" className="mr-1 h-4 w-4" />
             {t("cancel")}
