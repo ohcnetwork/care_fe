@@ -42,9 +42,8 @@ function LocationNode({
         {children}
         {isLast && datetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
-            {endDatetime &&
-              ` - ${format(new Date(endDatetime), "MMM d, yyyy h:mm a")}`}
+            {format(datetime, "MMM d, yyyy h:mm a")}
+            {endDatetime && ` - ${format(endDatetime, "MMM d, yyyy h:mm a")}`}
           </div>
         )}
       </div>
@@ -68,7 +67,7 @@ function LocationNode({
         {children}
         {isLast && datetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+            {format(datetime, "MMM d, yyyy h:mm a")}
           </div>
         )}
       </div>
