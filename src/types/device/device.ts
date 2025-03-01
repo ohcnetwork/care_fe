@@ -50,4 +50,12 @@ export interface DeviceList extends DeviceBase {
   id: string;
 }
 
+export interface DeviceEncounters {
+  id: string;
+  encounter: Encounter;
+  created_by: UserBase;
+  start: string;
+  end: string;
+}
+
 export type DeviceWrite = DeviceBase;

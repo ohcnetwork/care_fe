@@ -44,7 +44,7 @@ export const EncounterDevicesTab = ({
         <div className="flex items-center gap-4"></div>
         <Button variant="primary" onClick={() => setIsDeviceSheetOpen(true)}>
           <CareIcon icon="l-plus" className="h-4 w-4 m-auto center" />
-          {t("add_device")}
+          {t("associate_device")}
         </Button>
       </div>
 

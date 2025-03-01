@@ -1,8 +1,12 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Encounter } from "@/types/emr/encounter";
 
-import { DeviceDetail, DeviceList, DeviceWrite } from "./device";
+import {
+  DeviceDetail,
+  DeviceEncounters,
+  DeviceList,
+  DeviceWrite,
+} from "./device";
 
 export default {
   list: {
@@ -54,6 +58,6 @@ export default {
   encounterHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/encounter_history/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Encounter>>(),
+    TRes: Type<PaginatedResponse<DeviceEncounters>>(),
   },
 };

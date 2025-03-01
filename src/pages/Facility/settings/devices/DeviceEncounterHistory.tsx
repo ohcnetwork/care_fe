@@ -1,0 +1,97 @@
+import { useQuery } from "@tanstack/react-query";
+import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+import PaginationComponent from "@/components/Common/Pagination";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
+import query from "@/Utils/request/query";
+import { DeviceEncounterCard } from "@/pages/Facility/settings/devices/components/DeviceEncounterCard";
+import deviceApi from "@/types/device/deviceApi";
+
+interface Props {
+  facilityId: string;
+  id: string;
+}
+
+const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
+  const { t } = useTranslation();
+
+  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
+
+  const { data: encountersData, isLoading } = useQuery({
+    queryKey: ["deviceEncounterHistory", facilityId, id],
+    queryFn: query(deviceApi.encounterHistory, {
+      queryParams: {
+        limit: 5,
+        offset: ((qParams.page ?? 1) - 1) * 5,
+      },
+      pathParams: {
+        facilityId,
+        id,
+      },
+    }),
+  });
+
+  return (
+    <div className="mt-8">
+      <div>
+        {isLoading ? (
+          <div>
+            <div className="grid gap-5">
+              <CardListSkeleton count={5} />
+            </div>
+          </div>
+        ) : (
+          <div>
+            {encountersData?.results?.length === 0 ? (
+              <div className="p-2">
+                <div className="h-full space-y-2 rounded-lg bg-white px-7 py-12 border border-secondary-300">
+                  <div className="flex w-full items-center justify-center text-lg text-secondary-600">
+                    <div className="h-full flex w-full items-center justify-center">
+                      <span className="text-sm text-gray-500">
+                        {t("no_encounters_found")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <ul className="grid gap-4">
+                {encountersData?.results?.map((encounterData) => (
+                  <li key={encounterData.id} className="w-full">
+                    <DeviceEncounterCard
+                      key={encounterData.id}
+                      encounterData={encounterData}
+                    />
+                  </li>
+                ))}
+                <div className="flex w-full items-center justify-center">
+                  <div
+                    className={cn(
+                      "flex w-full justify-center",
+                      (encountersData?.count ?? 0) > 5
+                        ? "visible"
+                        : "invisible",
+                    )}
+                  >
+                    <PaginationComponent
+                      cPage={qParams.page ?? 1}
+                      defaultPerPage={5}
+                      data={{ totalCount: encountersData?.count ?? 0 }}
+                      onChange={(page) => setQueryParams({ page })}
+                    />
+                  </div>
+                </div>
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DeviceEncounterHistory;

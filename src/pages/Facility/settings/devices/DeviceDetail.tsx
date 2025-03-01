@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -144,13 +146,22 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
         <div className="flex items-center gap-2">
+          <Link href={`/devices/${deviceId}/encounterHistory`} className="mr-8">
+            <Button variant="primary">{t("encounter_history")}</Button>
+          </Link>
           <Link href={`/devices/${deviceId}/edit`}>
-            <Button variant="outline">{t("edit")}</Button>
+            <Button variant="outline">
+              <CareIcon icon="l-pen" className="w-4 h-4" />
+              {t("edit")}
+            </Button>
           </Link>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">{t("delete")}</Button>
+              <Button variant="destructive">
+                <CareIcon icon="l-trash" className="h-4" />
+                {t("delete")}
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
