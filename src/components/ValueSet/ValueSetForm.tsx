@@ -491,7 +491,7 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <div className="flex gap-1 w-full justify-end">
+        <div className="flex gap-2 w-full justify-end">
           <Button
             variant="outline"
             disabled={isSubmitting}
