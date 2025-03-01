@@ -42,17 +42,16 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
-  navOrganizationId?: string;
   facilityId?: string;
   onSubmitSuccess?: () => void;
 }
 
 export default function FacilityForm({
   organizationId,
-  navOrganizationId,
   facilityId,
   onSubmitSuccess,
 }: FacilityProps) {
@@ -93,6 +92,20 @@ export default function FacilityForm({
       is_public: false,
     },
   });
+
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org && org.org_type === "govt") levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(routes.facility.create),
@@ -349,8 +362,6 @@ export default function FacilityForm({
                   <FormControl>
                     <GovtOrganizationSelector
                       {...field}
-                      organizationId={organizationId}
-                      navOrganizationId={navOrganizationId}
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
                       onChange={(value) =>

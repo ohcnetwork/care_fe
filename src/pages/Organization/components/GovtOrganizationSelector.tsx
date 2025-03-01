@@ -13,8 +13,6 @@ import { Organization } from "@/types/organization/organization";
 interface GovtOrganizationSelectorProps {
   value?: string;
   onChange: (value: string) => void;
-  organizationId?: string;
-  navOrganizationId?: string;
   required?: boolean;
   authToken?: string;
   selected?: Organization[];
@@ -31,7 +29,6 @@ interface OrganizationLevelProps {
   ) => void;
   required?: boolean;
   authToken?: string;
-  isFetching?: boolean;
 }
 
 function OrganizationLevelSelect({
@@ -41,14 +38,13 @@ function OrganizationLevelSelect({
   onChange,
   required,
   authToken,
-  isFetching,
 }: OrganizationLevelProps) {
   const parentId = index === 0 ? "" : previousLevel?.id || "";
 
-  const { options, handleChange, handleSearch, organizations } =
+  const { options, handleChange, handleSearch, organizations, isFetching } =
     useGovtOrganizationLevel({
       index,
-      onChange: (filter, index) => {
+      onChange: (filter: FilterState, index: number) => {
         const selectedOrg = organizations?.find(
           (org) => org.id === filter.organization,
         );
@@ -68,9 +64,7 @@ function OrganizationLevelSelect({
             ? `SYSTEM__govt_org_type__${currentLevel.metadata?.govt_org_type}`
             : index === 0
               ? "SYSTEM__govt_org_type__default"
-              : `SYSTEM__govt_org_type__${
-                  previousLevel?.metadata?.govt_org_children_type || "default"
-                }`,
+              : `SYSTEM__govt_org_type__${previousLevel?.metadata?.govt_org_children_type || "default"}`,
         )}
         {required && <span className="text-red-500">*</span>}
       </Label>
@@ -95,48 +89,24 @@ function OrganizationLevelSelect({
 export default function GovtOrganizationSelector(
   props: GovtOrganizationSelectorProps,
 ) {
-  const {
-    onChange,
-    required,
-    selected,
-    authToken,
-    navOrganizationId,
-    organizationId,
-  } = props;
+  const { onChange, required, selected, authToken } = props;
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
-  const { organizations: navOrg, isFetching: fetchingNavOrg } =
-    useGovtOrganizationLevel({
-      index: 0,
-      onChange: () => {},
-      parentId: "",
-      authToken,
-    });
-
-  const { organizations: org, isFetching: fetchingOrg } =
-    useGovtOrganizationLevel({
-      index: 1,
-      onChange: () => {},
-      parentId: navOrganizationId || "",
-      authToken,
-    });
-
   useEffect(() => {
-    if (selected?.length) {
-      setSelectedLevels(selected);
-      return;
+    if (selected && selected.length > 0) {
+      let currentOrg = selected[0];
+      if (currentOrg.level_cache === 0) {
+        setSelectedLevels(selected);
+      } else {
+        const levels: Organization[] = [];
+        while (currentOrg && currentOrg.level_cache >= 0) {
+          levels.unshift(currentOrg);
+          currentOrg = currentOrg.parent as unknown as Organization;
+        }
+        setSelectedLevels(levels);
+      }
     }
-    const selectedOrgs: Organization[] = [];
-    if (navOrganizationId && navOrg) {
-      const navSelected = navOrg.find((org) => org.id === navOrganizationId);
-      if (navSelected) selectedOrgs.push(navSelected);
-    }
-    if (organizationId && org) {
-      const selectedOrg = org.find((org) => org.id === organizationId);
-      if (selectedOrg) selectedOrgs.push(selectedOrg);
-    }
-    setSelectedLevels(selectedOrgs);
-  }, [navOrg, org, navOrganizationId, organizationId, selected]);
+  }, [selected]);
 
   const handleFilterChange = (
     filter: FilterState,
@@ -149,13 +119,20 @@ export default function GovtOrganizationSelector(
         newLevels.push(organization);
         return newLevels;
       });
-      onChange(organization.has_children ? "" : organization.id);
+      if (!organization.has_children) {
+        onChange(organization.id);
+        // Else condition is necessary to reset the form value for pre-filled forms
+      } else {
+        onChange("");
+      }
     } else {
       onChange("");
+      // Reset subsequent levels when clearing a selection
       setSelectedLevels((prev) => prev.slice(0, index));
     }
   };
 
+  // Calculate the number of levels to show based on selectedLevels and has_children
   const totalLevels =
     selectedLevels.length +
     (selectedLevels.length === 0 ||
@@ -174,7 +151,6 @@ export default function GovtOrganizationSelector(
           onChange={handleFilterChange}
           required={required}
           authToken={authToken}
-          isFetching={index === 0 ? fetchingNavOrg : fetchingOrg}
         />
       ))}
     </>
