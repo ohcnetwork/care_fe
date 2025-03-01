@@ -495,6 +495,7 @@ export function ValueSetForm({
           <Button
             variant="outline"
             disabled={isSubmitting}
+            type="button"
             onClick={() => navigate(`/admin/valuesets`)}
           >
             <CareIcon icon="l-arrow-left" className="mr-1 h-4 w-4" />
