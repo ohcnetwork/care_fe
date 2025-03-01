@@ -29,7 +29,7 @@ export const EncounterDevicesTab = ({
   const { data, isLoading } = useQuery({
     queryKey: ["devices", facilityId, page, limit],
     queryFn: query.debounced(deviceApi.list, {
-      pathParams: { facilityId },
+      pathParams: { facility_id: facilityId },
       queryParams: {
         current_encounter: encounter.id,
         offset: (page - 1) * limit,
