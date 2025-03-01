@@ -1,11 +1,8 @@
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,6 +24,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -37,13 +40,21 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import CreateFacilityOrganizationSheet from "@/pages/Facility/settings/organizations/components/CreateFacilityOrganizationSheet";
 
+const createSearchMatcher = (searchQuery: string) => {
+  const normalizedQuery = searchQuery.toLowerCase().trim();
+  return (text: string) => text.toLowerCase().includes(normalizedQuery);
+};
+
 export default function FacilityOrganizationIndex({
   facilityId,
 }: {
   facilityId: string;
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
+
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
     queryFn: query.paginated(routes.facilityOrganization.list, {
@@ -51,8 +62,105 @@ export default function FacilityOrganizationIndex({
     }),
     enabled: !!facilityId,
   });
+
   const tableData = data?.results || [];
-  const isMobile = useBreakpoints({ default: true, sm: false });
+
+  const matchesSearch = useMemo(
+    () => createSearchMatcher(searchQuery),
+    [searchQuery],
+  );
+
+  const getChildren = useCallback(
+    (parentId: string) => {
+      const children = tableData.filter((org) => org.parent?.id === parentId);
+      if (!searchQuery) return children;
+
+      return children.filter(
+        (org) =>
+          matchesSearch(org.name) ||
+          tableData.some(
+            (child) =>
+              child.parent?.id === org.id &&
+              (matchesSearch(child.name) || hasDeepChildren(child.id)),
+          ),
+      );
+    },
+    [tableData, searchQuery, matchesSearch],
+  );
+
+  // Helper to check for deep nested children matches
+  const hasDeepChildren = useCallback(
+    (parentId: string): boolean => {
+      const children = tableData.filter((org) => org.parent?.id === parentId);
+      return children.some(
+        (child) => matchesSearch(child.name) || hasDeepChildren(child.id),
+      );
+    },
+    [tableData, matchesSearch],
+  );
+
+  // Check if an organization has matching children
+  const hasMatchingChildren = useCallback(
+    (parentId: string): boolean => {
+      const children = getChildren(parentId);
+      return children.some(
+        (child) => matchesSearch(child.name) || hasDeepChildren(child.id),
+      );
+    },
+    [getChildren, matchesSearch, hasDeepChildren],
+  );
+
+  // Filter data based on search query
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return tableData;
+
+    return tableData.filter(
+      (org) => matchesSearch(org.name) || hasMatchingChildren(org.id),
+    );
+  }, [tableData, searchQuery, matchesSearch, hasMatchingChildren]);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setExpandedRows({});
+      return;
+    }
+
+    const newExpandedRows: Record<string, boolean> = {};
+
+    const processOrg = (org: any) => {
+      if (!org) return;
+
+      if (matchesSearch(org.name) || hasMatchingChildren(org.id)) {
+        let currentOrg = org;
+        while (currentOrg?.parent?.id) {
+          newExpandedRows[currentOrg.parent.id] = true;
+          currentOrg = tableData.find((o) => o.id === currentOrg.parent?.id);
+        }
+      }
+    };
+
+    tableData
+      .filter((org) => !org.parent || Object.keys(org.parent).length === 0)
+      .forEach(processOrg);
+
+    setExpandedRows((prev) => ({
+      ...prev,
+      ...newExpandedRows,
+    }));
+  }, [searchQuery, tableData, matchesSearch, hasMatchingChildren]);
+
+  const toggleRow = (id: string) => {
+    const newExpandedRows = { ...expandedRows };
+    newExpandedRows[id] = !newExpandedRows[id];
+    const children = getChildren(id);
+    children.forEach((child) => {
+      if (!child.has_children) {
+        newExpandedRows[child.id] = !newExpandedRows[child.id];
+      }
+    });
+    setExpandedRows(newExpandedRows);
+  };
+
   if (isLoading) {
     return (
       <div className="px-6 py-6 space-y-6">
@@ -92,20 +200,7 @@ export default function FacilityOrganizationIndex({
       </Page>
     );
   }
-  const toggleRow = (id: string) => {
-    const newExpandedRows = { ...expandedRows };
-    newExpandedRows[id] = !newExpandedRows[id];
-    const children = getChildren(id);
-    children.forEach((child) => {
-      if (!child.has_children) {
-        newExpandedRows[child.id] = !newExpandedRows[child.id];
-      }
-    });
-    setExpandedRows(newExpandedRows);
-  };
-  const getChildren = (parentId: string) => {
-    return tableData.filter((org) => org.parent?.id === parentId);
-  };
+
   const OrganizationRow = ({
     org,
     expandedRows,
@@ -150,6 +245,19 @@ export default function FacilityOrganizationIndex({
       });
     };
     const allExpanded = children.every((child) => expandedRows[child.id]);
+
+    const highlightMatch = (text: string) => {
+      if (!searchQuery) return text;
+
+      const normalizedQuery = searchQuery.toLowerCase();
+      const normalizedText = text.toLowerCase();
+      const index = normalizedText.indexOf(normalizedQuery);
+
+      if (index === -1) return text;
+
+      return <>{text}</>;
+    };
+
     return (
       <>
         <TableRow
@@ -187,7 +295,7 @@ export default function FacilityOrganizationIndex({
                 icon={isTopLevel ? "l-building" : "l-users-alt"}
                 className="mr-2"
               />
-              {org.name}
+              {highlightMatch(org.name)}
             </div>
 
             <div className="flex justify-between gap-5">
@@ -266,6 +374,7 @@ export default function FacilityOrganizationIndex({
       </>
     );
   };
+
   return (
     <Page title={t("departments")} hideTitleOnPage={true}>
       <h3 className="mb-4 text-black">{t("departments")}</h3>
@@ -274,7 +383,9 @@ export default function FacilityOrganizationIndex({
           <Input
             className="px-2 placeholder:text-xs placeholder:text-gray-500"
             placeholder={t("filter_by_department_or_team_name")}
-          ></Input>
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className="flex lg:justify-end w-full">
           <CreateFacilityOrganizationSheet facilityId={facilityId} />
@@ -319,7 +430,7 @@ export default function FacilityOrganizationIndex({
       <Table className="border rounded-lg w-full overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[80%] border text-gray-700  bg-gray-200">
+            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
               {t("name")}
             </TableHead>
             {!isMobile && (
@@ -330,10 +441,10 @@ export default function FacilityOrganizationIndex({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableData
+          {filteredData
             .filter(
               (org) => !org.parent || Object.keys(org.parent).length === 0,
-            ) // Parent rows only
+            )
             .map((parent) => (
               <OrganizationRow
                 key={parent.id}
