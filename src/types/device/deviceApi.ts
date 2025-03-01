@@ -1,5 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Encounter } from "@/types/emr/encounter";
 
 import { DeviceDetail, DeviceList, DeviceWrite } from "./device";
 
@@ -43,5 +44,21 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
+  },
+  associateEncounter: {
+    path: "/api/v1/facility/{facility_id}/device/{id}/associate_encounter/",
+    method: HttpMethod.POST,
+    TRes: Type<DeviceDetail>(),
+    TBody: Type<{ location: string }>(),
+  },
+  encounterHistory: {
+    path: "/api/v1/facility/{facilityId}/device/{id}/encounter_history/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<Encounter>>(),
+  },
+  encounterDevices: {
+    path: "/api/v1/facility/{facilityId}/device/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<DeviceList>>(),
   },
 };
