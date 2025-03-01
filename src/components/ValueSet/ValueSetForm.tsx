@@ -7,8 +7,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -501,7 +499,6 @@ export function ValueSetForm({
             type="button"
             onClick={() => goBack("/admin/valuesets")}
           >
-            <CareIcon icon="l-arrow-left" className="mr-1 h-4 w-4" />
             {t("cancel")}
           </Button>
           <Button variant="primary" type="submit" disabled={isSubmitting}>
