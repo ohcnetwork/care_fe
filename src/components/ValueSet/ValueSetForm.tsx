@@ -2,10 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { t } from "i18next";
+import { useNavigate } from "raviger";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -400,6 +403,7 @@ export function ValueSetForm({
   isSubmitting,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
@@ -489,10 +493,21 @@ export function ValueSetForm({
           <RuleFields type="include" form={form} />
           <RuleFields type="exclude" form={form} />
         </div>
-
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t("saving") : t("save_valueset")}
-        </Button>
+        <div className="flex items-center">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("saving") : t("save_valueset")}
+          </Button>
+          <Button
+            variant="outline"
+            className="m-4"
+            onClick={() => {
+              navigate(`/admin/valuesets`);
+            }}
+          >
+            <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+            {t("cancel")}
+          </Button>
+        </div>
       </form>
     </Form>
   );
