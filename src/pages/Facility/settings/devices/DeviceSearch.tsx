@@ -21,7 +21,6 @@ import deviceApi from "@/types/device/deviceApi";
 
 interface DeviceSearchProps {
   facilityId: string;
-  mode?: "kind" | "instance";
   onSelect: (device: DeviceList) => void;
   disabled?: boolean;
   value?: DeviceList | null;
@@ -29,7 +28,6 @@ interface DeviceSearchProps {
 
 export function DeviceSearch({
   facilityId,
-  mode,
   onSelect,
   disabled,
   value,
@@ -38,11 +36,11 @@ export function DeviceSearch({
   const [search, setSearch] = useState("");
 
   const { data: devices } = useQuery({
-    queryKey: ["devices", facilityId, mode, search],
+    queryKey: ["devices", facilityId, search],
     queryFn: query(deviceApi.list, {
       pathParams: { facility_id: facilityId },
+      queryParams: { search_text: search },
     }),
-    enabled: facilityId !== "preview",
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
