@@ -93,16 +93,14 @@ export default function OrganizationFacilities({
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
-            <Card className="col-span-full">
-              <CardContent className="p-6 text-center text-gray-500">
-                {t("no_facilities_found")}
-              </CardContent>
-            </Card>
+            <div className="text-center text-gray-500">
+              {t("no_facilities_found")}
+            </div>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
               <Card
                 key={facility.id}
-                className="h-full hover:border-primary/50 transition-colors overflow-hidden"
+                className="h-full flex flex-col hover:border-primary/50 transition-colors overflow-hidden"
               >
                 <div className="relative h-48 bg-gray-100">
                   {facility.read_cover_image_url ? (
@@ -117,53 +115,57 @@ export default function OrganizationFacilities({
                     </div>
                   )}
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="p-6 flex-grow">
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-md font-medium text-gray-900">
+                        <h3
+                          className={`text-md font-medium text-gray-900 ${
+                            facilities.results.length === 1 ? "text-lg" : ""
+                          }`}
+                        >
                           {facility.name}
                         </h3>
-                        <div className="font-medium">
+                        <div
+                          className={`text-sm font-medium ${
+                            facilities.results.length === 1 ? "text-base" : ""
+                          }`}
+                        >
                           {facility.facility_type}
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <div className="flex items-center pl-7">
-                    <EditFacilitySheet
-                      organizationId={id}
-                      facilityId={facility.id}
-                      trigger={
-                        <Button
-                          variant="link"
-                          size="icon"
-                          className="text-primary"
-                        >
-                          <CareIcon icon="l-pen" className="h-4 w-4" />
-                          <span className="">{t("edit_facility")}</span>
-                        </Button>
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Button
-                      variant="link"
-                      size="icon"
-                      className="text-primary"
-                      asChild
-                    >
-                      <Link
-                        href={`/facility/${facility.id}/settings/general`}
-                        className="text-sm w-full hover:underline"
+                <CardFooter className="flex justify-between items-center p-4 border-t mt-auto">
+                  <EditFacilitySheet
+                    organizationId={id}
+                    facilityId={facility.id}
+                    trigger={
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="text-primary p-0 flex items-center gap-1"
                       >
-                        {t("view_facility")}
-                        <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
+                        <CareIcon icon="l-pen" className="h-4 w-4" />
+                        <span>{t("edit_facility")}</span>
+                      </Button>
+                    }
+                  />
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="text-primary p-0 flex items-center gap-1"
+                    asChild
+                  >
+                    <Link
+                      href={`/facility/${facility.id}/settings/general`}
+                      className="hover:underline flex items-center gap-1"
+                    >
+                      <span>{t("view_facility")}</span>
+                      <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                    </Link>
+                  </Button>
                 </CardFooter>
               </Card>
             ))
