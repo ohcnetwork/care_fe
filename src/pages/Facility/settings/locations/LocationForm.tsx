@@ -484,7 +484,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="dfs" />
+                <Textarea {...field} placeholder="Description" />
               </FormControl>
               <FormMessage />
             </FormItem>
