@@ -478,7 +478,6 @@ export default function DeviceForm({
               goBack(`/facility/${facilityId}/settings/devices/${deviceId}`)
             }
           >
-            <CareIcon icon="l-arrow-left" className="h-4 w-4" />
             {t("cancel")}
           </Button>
         </div>
