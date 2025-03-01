@@ -39,6 +39,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
           <DeviceForm
             facilityId={facilityId}
             device={device}
+            deviceId={deviceId}
             onSuccess={() => {
               window.history.back();
             }}

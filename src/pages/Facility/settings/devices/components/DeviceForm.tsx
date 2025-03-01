@@ -28,6 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import {
@@ -77,6 +79,7 @@ const formSchema = z
 interface Props {
   facilityId: string;
   device?: DeviceList;
+  deviceId?: string;
   onSuccess?: () => void;
 }
 
@@ -90,9 +93,15 @@ const defaultValues: z.infer<typeof formSchema> = {
   contact: [],
 };
 
-export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
+export default function DeviceForm({
+  facilityId,
+  device,
+  deviceId,
+  onSuccess,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { goBack } = useAppHistory();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -458,9 +467,19 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           ))}
         </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="submit" disabled={isPending}>
+        <div className="flex items-center justify-end">
+          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
             {isPending ? t("saving") : t("save")}
+          </Button>
+          <Button
+            variant="outline"
+            className="m-4"
+            onClick={() =>
+              goBack(`/facility/${facilityId}/settings/devices/${deviceId}`)
+            }
+          >
+            <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+            {t("cancel")}
           </Button>
         </div>
       </form>
