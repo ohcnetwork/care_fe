@@ -3,7 +3,29 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import { DeviceDetail, DeviceList, DeviceWrite } from "./device";
 
-export default {
+// Service History API Interfaces
+interface ServiceHistoryResponse {
+  id: string;
+  serviced_on: string;
+  note: string;
+  meta: Record<string, any>;
+}
+
+interface ServiceHistoryListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ServiceHistoryResponse[];
+}
+
+interface ServiceHistoryCreateUpdateRequest {
+  serviced_on: string;
+  note: string;
+  meta?: Record<string, any>;
+}
+
+// Device API with Service History
+const deviceApi = {
   list: {
     path: "/api/v1/facility/{facility_id}/device/",
     method: HttpMethod.GET,
@@ -44,4 +66,39 @@ export default {
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
   },
+
+  // Service History API
+  serviceHistory: {
+    list: {
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
+      method: HttpMethod.GET,
+      TRes: {} as ServiceHistoryListResponse,
+      TReq: {},
+    },
+    retrieve: {
+      method: HttpMethod.GET,
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+      TRes: {} as ServiceHistoryResponse,
+      TReq: {},
+    },
+    create: {
+      method: HttpMethod.POST,
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
+      TRes: {} as ServiceHistoryResponse,
+      TReq: {} as ServiceHistoryCreateUpdateRequest,
+    },
+    update: {
+      method: HttpMethod.PUT,
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+      TRes: {} as ServiceHistoryResponse,
+      TReq: {} as ServiceHistoryCreateUpdateRequest,
+    },
+    delete: {
+      method: HttpMethod.DELETE,
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+      TRes: Type<void>(),
+    },
+  },
 };
+
+export default deviceApi;

@@ -38,6 +38,7 @@ import { ContactPoint } from "@/types/common/contactPoint";
 import deviceApi from "@/types/device/deviceApi";
 
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
+import DeviceServiceHistory from "./components/DeviceServiceHistory";
 
 interface Props {
   facilityId: string;
@@ -367,6 +368,8 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
         facilityId={facilityId}
         deviceId={deviceId}
       />
+
+      <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
     </div>
   );
 }
