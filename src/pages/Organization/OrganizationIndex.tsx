@@ -84,6 +84,7 @@ export default function OrganizationIndex() {
             </CardHeader>
 
             <CardFooter>
+<<<<<<< Updated upstream
               <Button variant="outline" asChild className="w-full">
                 <Link
                   href={`/organization/${org.id}`}
@@ -93,6 +94,17 @@ export default function OrganizationIndex() {
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Link>
               </Button>
+=======
+              <Link href={`/organization/${org.id}`} asChild>
+                <Button variant="outline" className="w-full">
+                  <div className="flex items-center justify-center gap-2">
+                    View Details
+                    <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  </div>
+                </Button>
+              </Link>
+
+>>>>>>> Stashed changes
             </CardFooter>
           </Card>
         ))}
