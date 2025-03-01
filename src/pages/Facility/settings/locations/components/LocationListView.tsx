@@ -108,49 +108,48 @@ function LocationRow({
             )}
             {location.name}
           </div>
-          {isTopLevel && (
-            <div className="flex justify-between items-center gap-2">
-              <div className="flex-1">
-                {children.length > 0 && displayExpandAll && (
-                  <Button
-                    variant="white"
-                    size={isMobile ? "xs" : "sm"}
-                    onClick={toggleAllChildren}
-                    className="gap-2"
-                  >
-                    <CareIcon
-                      icon={allExpanded ? "l-minus" : "l-plus"}
-                      className="h-4 w-4"
-                    />
-                    <span className="hidden lg:inline">
-                      {t(allExpanded ? "collapse_all" : "expand_all")}
-                    </span>
-                  </Button>
-                )}
-              </div>
 
-              <div className="flex items-center gap-2 ml-auto">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex-1">
+              {children.length > 0 && displayExpandAll && (
                 <Button
                   variant="white"
                   size={isMobile ? "xs" : "sm"}
-                  onClick={() => onEdit(location)}
+                  onClick={toggleAllChildren}
+                  className="gap-2"
                 >
-                  <PenLine className="h-4 w-4" />
-                  <span className="hidden lg:inline">{t("edit")}</span>
+                  <CareIcon
+                    icon={allExpanded ? "l-minus" : "l-plus"}
+                    className="h-4 w-4"
+                  />
+                  <span className="hidden lg:inline">
+                    {t(allExpanded ? "collapse_all" : "expand_all")}
+                  </span>
                 </Button>
-
-                <Button variant="white" size={isMobile ? "xs" : "sm"} asChild>
-                  <Link
-                    href={`/location/${location.id}`}
-                    className="text-gray-900 flex items-center"
-                  >
-                    <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
-                    <span className="hidden lg:inline">{t("see_details")}</span>
-                  </Link>
-                </Button>
-              </div>
+              )}
             </div>
-          )}
+
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                variant="white"
+                size={isMobile ? "xs" : "sm"}
+                onClick={() => onEdit(location)}
+              >
+                <PenLine className="h-4 w-4" />
+                <span className="hidden lg:inline">{t("edit")}</span>
+              </Button>
+
+              <Button variant="white" size={isMobile ? "xs" : "sm"} asChild>
+                <Link
+                  href={`/location/${location.id}`}
+                  className="text-gray-900 flex items-center"
+                >
+                  <CareIcon icon="l-arrow-up-right" className="h-4 w-4" />
+                  <span className="hidden lg:inline">{t("see_details")}</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
         </TableCell>
         <TableCell className="hidden sm:table-cell border-l bg-white font-semibold text-gray-900">
           {t(`location_form__${location.form}`)}
