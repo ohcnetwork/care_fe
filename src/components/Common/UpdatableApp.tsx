@@ -1,4 +1,4 @@
-import { Popover, Transition } from "@headlessui/react";
+import { t } from "i18next";
 import { ReactNode, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -6,6 +6,11 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const META_URL = "/build-meta.json";
 const APP_VERSION_KEY = "app-version";
@@ -37,8 +42,6 @@ export const checkForUpdate = async () => {
   const meta = await res.json();
 
   if (appVersion !== meta.version) {
-    // Trigger an update if key: 'app-version' not present in localStorage
-    // or does not match with metaVersion.
     console.info("App can be updated.");
     return meta.version as string;
   }
@@ -69,10 +72,8 @@ const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
   const updateApp = async () => {
     if (!newVersion) return;
 
-    // Service worker cache should be cleared with caches.delete()
     caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
 
-    // A second of delay to appreciate the update animation.
     const updateLocalStorageAndReload = () => {
       localStorage.setItem(APP_UPDATED_KEY, "true");
       window.location.reload();
@@ -116,22 +117,26 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
 
   return (
     <AlertTransition show={isShowing}>
-      <Popover className="rounded-xl bg-alert-600 px-5 py-4 text-white shadow-2xl shadow-alert-900">
-        <div className="flex items-center gap-4">
-          <CareIcon
-            icon="l-sync"
-            className={cn("text-2xl", isUpdating && "animate-spin")}
-          />
-          <span className="mr-4 flex flex-col">
-            <p className="font-semibold">Software Update</p>
-            <p className="text-sm font-medium">
-              A new version of CARE is available
-            </p>
-          </span>
-          <Button disabled={isUpdating} onClick={updateApp} variant="alert">
-            {isUpdating ? "Updating..." : "Update"}
-          </Button>
-        </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="rounded-xl bg-alert-600 px-5 py-4 text-white shadow-2xl shadow-alert-900 cursor-pointer">
+            <div className="flex items-center gap-4">
+              <CareIcon
+                icon="l-sync"
+                className={cn("text-2xl", isUpdating && "animate-spin")}
+              />
+              <span className="mr-4 flex flex-col">
+                <p className="font-semibold">{t("software_update")}</p>
+                <p className="text-sm font-medium">
+                  {t("a_new_version_of_care_is_available")}
+                </p>
+              </span>
+              <Button disabled={isUpdating} onClick={updateApp} variant="alert">
+                {isUpdating ? "Updating..." : "Update"}
+              </Button>
+            </div>
+          </div>
+        </PopoverTrigger>
       </Popover>
     </AlertTransition>
   );
@@ -144,16 +149,23 @@ interface AppUpdatedAlertProps {
 const AppUpdatedAlert = ({ show }: AppUpdatedAlertProps) => {
   return (
     <AlertTransition show={show}>
-      <Popover className="rounded-xl bg-primary-500 px-5 py-4 text-white shadow-2xl shadow-primary-500">
-        <div className="flex items-center gap-4">
-          <CareIcon icon="l-thumbs-up" className="text-2xl" />
-          <span className="mr-4 flex flex-col">
-            <p className="font-semibold">Updated successfully</p>
-            <p className="text-sm font-medium">
-              Now using the latest version of CARE
-            </p>
-          </span>
-        </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="rounded-xl bg-primary-500 px-5 py-4 text-white shadow-2xl shadow-primary-500 cursor-pointer">
+            <div className="flex items-center gap-4">
+              <CareIcon icon="l-thumbs-up" className="text-2xl" />
+              <span className="mr-4 flex flex-col">
+                <p className="font-semibold">{t("updated_successfully")}</p>
+                <p className="text-sm font-medium">
+                  {t("now_using_the_latest_version_of_care")}
+                </p>
+              </span>
+            </div>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent>
+          <span>{t("application_successfully_updated")}</span>
+        </PopoverContent>
       </Popover>
     </AlertTransition>
   );
@@ -166,18 +178,15 @@ interface AlertTransitionProps {
 
 const AlertTransition = ({ show, children }: AlertTransitionProps) => {
   return (
-    <Transition
-      show={show}
-      enter="ease-out duration-300"
-      enterFrom="opacity-0 scale-95 -translate-y-10"
-      enterTo="opacity-100 scale-100 translate-y-0"
-      leave="ease-in duration-200"
-      leaveFrom="opacity-100 scale-100"
-      leaveTo="opacity-0 scale-95"
+    <div
+      className={cn(
+        "fixed left-1/2 top-6 z-50 -translate-x-1/2 transition-transform duration-300",
+        show
+          ? "opacity-100 scale-100 translate-y-0"
+          : "opacity-0 scale-95 -translate-y-10",
+      )}
     >
-      <div className="fixed left-1/2 top-6 z-50 -translate-x-1/2">
-        {children}
-      </div>
-    </Transition>
+      {children}
+    </div>
   );
 };
