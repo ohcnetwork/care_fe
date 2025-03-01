@@ -499,7 +499,7 @@ export function ValueSetForm({
             variant="outline"
             disabled={isSubmitting}
             type="button"
-            onClick={() => goBack()}
+            onClick={() => goBack("/admin/valuesets")}
           >
             <CareIcon icon="l-arrow-left" className="mr-1 h-4 w-4" />
             {t("cancel")}
