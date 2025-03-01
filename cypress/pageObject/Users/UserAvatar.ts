@@ -32,7 +32,10 @@ export class UserAvatar {
   clickSaveAvatarButton() {
     cy.get('[data-cy="save-cover-image"]')
       .parents()
-      .filter((_, el) => el.scrollHeight > el.clientHeight)
+      .filter(
+        (_: any, el: { scrollHeight: number; clientHeight: number }) =>
+          el.scrollHeight > el.clientHeight,
+      )
       .first()
       .scrollTo("bottom");
     cy.verifyAndClickElement('[data-cy="save-cover-image"]', "Save");
@@ -55,7 +58,10 @@ export class UserAvatar {
   clickDeleteAvatarButton() {
     cy.get('[data-cy="delete-avatar"]')
       .parents()
-      .filter((_, el) => el.scrollHeight > el.clientHeight)
+      .filter(
+        (_: any, el: { scrollHeight: number; clientHeight: number }) =>
+          el.scrollHeight > el.clientHeight,
+      )
       .first()
       .scrollTo("bottom");
     cy.verifyAndClickElement('[data-cy="delete-avatar"]', "Delete");
