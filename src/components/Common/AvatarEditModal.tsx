@@ -243,7 +243,7 @@ const AvatarEditModal = ({
                             : imageUrl
                         }
                         alt="cover-photo"
-                        className="h-full w-full object-cover"
+                        className="h-40 w-40 object-cover rounded-md"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">
