@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
@@ -399,6 +401,8 @@ export function ValueSetForm({
 }: ValueSetFormProps) {
   const { t } = useTranslation();
 
+  const { goBack } = useAppHistory();
+
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
@@ -488,9 +492,19 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t("saving") : t("save_valueset")}
-        </Button>
+        <div className="flex gap-2 w-full justify-end">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            type="button"
+            onClick={() => goBack("/admin/valuesets")}
+          >
+            {t("cancel")}
+          </Button>
+          <Button variant="primary" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? t("saving") : t("save_valueset")}
+          </Button>
+        </div>
       </form>
     </Form>
   );
