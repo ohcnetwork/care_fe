@@ -1,28 +1,14 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { DeviceDetail, DeviceList, DeviceWrite } from "./device";
-
-// Service History API Interfaces
-interface ServiceHistoryResponse {
-  id: string;
-  serviced_on: string;
-  note: string;
-  meta: Record<string, any>;
-}
-
-interface ServiceHistoryListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ServiceHistoryResponse[];
-}
-
-interface ServiceHistoryCreateUpdateRequest {
-  serviced_on: string;
-  note: string;
-  meta?: Record<string, any>;
-}
+import {
+  DeviceDetail,
+  DeviceList,
+  DeviceWrite,
+  ServiceHistoryCreateUpdateRequest,
+  ServiceHistoryListResponse,
+  ServiceHistoryResponse,
+} from "./device";
 
 // Device API with Service History
 const deviceApi = {
@@ -92,11 +78,6 @@ const deviceApi = {
       path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
       TRes: {} as ServiceHistoryResponse,
       TReq: {} as ServiceHistoryCreateUpdateRequest,
-    },
-    delete: {
-      method: HttpMethod.DELETE,
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
-      TRes: Type<void>(),
     },
   },
 };

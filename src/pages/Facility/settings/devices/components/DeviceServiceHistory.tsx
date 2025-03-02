@@ -5,13 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -74,14 +68,11 @@ export default function DeviceServiceHistory({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>{t("Service History")}</CardTitle>
-          <CardDescription>
-            {t("device service history description")}
-          </CardDescription>
+          <CardTitle>{t("service_history")}</CardTitle>
         </div>
         <Button onClick={handleAddService} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          {t("add_service_record")}
+          {t("service_record_add")}
         </Button>
       </CardHeader>
       <CardContent>
@@ -96,7 +87,7 @@ export default function DeviceServiceHistory({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("service_date")}</TableHead>
-                <TableHead className="w-full">{t("notes")}</TableHead>
+                <TableHead>{t("service_notes")}</TableHead>
                 <TableHead className="text-right">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -124,7 +115,7 @@ export default function DeviceServiceHistory({
           </Table>
         ) : (
           <div className="text-center py-6 text-muted-foreground">
-            {t("no_service_records", "No service history available")}
+            {t("service_records_none", "No service history available")}
           </div>
         )}
       </CardContent>

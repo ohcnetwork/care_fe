@@ -64,7 +64,7 @@ export default function ServiceHistorySheet({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      note: "",
+      note: "This is a demo service note",
       serviced_on: new Date(),
     },
   });
@@ -77,7 +77,7 @@ export default function ServiceHistorySheet({
       });
     } else {
       form.reset({
-        note: "",
+        note: "This is a demo service note",
         serviced_on: new Date(),
       });
     }
@@ -109,7 +109,7 @@ export default function ServiceHistorySheet({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["device-service-history", facilityId, deviceId],
+        queryKey: ["device", facilityId, deviceId],
       });
       onOpenChange(false);
       form.reset();
@@ -137,11 +137,9 @@ export default function ServiceHistorySheet({
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
           <SheetTitle>
-            {serviceRecord ? t("edit_service_record") : t("add_service_record")}
+            {serviceRecord ? t("service_record_edit") : t("service_record_add")}
           </SheetTitle>
-          <SheetDescription>
-            {t("device_service_record_description")}
-          </SheetDescription>
+          <SheetDescription>{t("service_record_description")}</SheetDescription>
         </SheetHeader>
         <div className="py-4">
           <Form {...form}>
@@ -189,10 +187,10 @@ export default function ServiceHistorySheet({
                 name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("notes")}</FormLabel>
+                    <FormLabel>{t("service_notes")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder={t("enter_service_notes")}
+                        placeholder={t("service_notes_enter")}
                         {...field}
                         rows={5}
                       />
@@ -207,16 +205,16 @@ export default function ServiceHistorySheet({
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  {t("cancel")}
+                  {t("button_cancel")}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending
                     ? serviceRecord
-                      ? t("updating")
-                      : t("saving")
+                      ? t("button_updating")
+                      : t("button_saving")
                     : serviceRecord
-                      ? t("update")
-                      : t("save")}
+                      ? t("button_update")
+                      : t("button_save")}
                 </Button>
               </div>
             </form>

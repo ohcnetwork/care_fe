@@ -50,4 +50,24 @@ export interface DeviceList extends DeviceBase {
   id: string;
 }
 
+// Service History API Interfaces
+export interface ServiceHistoryResponse {
+  id: string;
+  serviced_on: string;
+  note: string;
+  meta: Record<string, any>;
+}
+
+export interface ServiceHistoryListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ServiceHistoryResponse[];
+}
+
+export interface ServiceHistoryCreateUpdateRequest {
+  serviced_on: string;
+  note: string;
+  meta?: Record<string, any>;
+}
 export type DeviceWrite = DeviceBase;
