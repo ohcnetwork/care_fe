@@ -17,6 +17,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -226,10 +228,12 @@ export default function CreateEncounterForm({
                           key={value}
                           type="button"
                           data-cy={`encounter-type-${value}`}
-                          className="h-24 w-full justify-start text-lg"
-                          variant={
-                            field.value === value ? "default" : "outline"
-                          }
+                          className={cn(
+                            "h-24 w-full justify-start text-lg",
+                            field.value === value &&
+                              "ring-2 ring-primary text-primary",
+                          )}
+                          variant="outline"
                           onClick={() => field.onChange(value)}
                         >
                           <div className="flex flex-col items-center text-center">
