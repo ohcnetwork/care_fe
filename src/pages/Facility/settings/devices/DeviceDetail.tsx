@@ -146,8 +146,11 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle title={device.registered_name} />
         <div className="flex items-center gap-2">
-          <Link href={`/devices/${deviceId}/encounterHistory`} className="mr-8">
-            <Button variant="primary">{t("encounter_history")}</Button>
+          <Link href={`/devices/${deviceId}/encounterHistory`}>
+            <Button variant="outline_primary" className="mr-3">
+              <CareIcon icon="l-history" className="h-4 w-4" />
+              {t("encounter_history")}
+            </Button>
           </Link>
           <Link href={`/devices/${deviceId}/edit`}>
             <Button variant="outline">

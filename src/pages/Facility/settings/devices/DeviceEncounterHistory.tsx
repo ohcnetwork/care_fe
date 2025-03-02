@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import Page from "@/components/Common/Page";
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -36,11 +37,11 @@ const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
   });
 
   return (
-    <div className="mt-8">
+    <Page title={t("encounter_history")} className="mt-8">
       <div>
         {isLoading ? (
           <div>
-            <div className="grid gap-5">
+            <div className="grid gap-5 my-5">
               <CardListSkeleton count={5} />
             </div>
           </div>
@@ -59,7 +60,7 @@ const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
                 </div>
               </div>
             ) : (
-              <ul className="grid gap-4">
+              <ul className="grid gap-4 my-5">
                 {encountersData?.results?.map((encounterData) => (
                   <li key={encounterData.id} className="w-full">
                     <DeviceEncounterCard
@@ -90,7 +91,7 @@ const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
           </div>
         )}
       </div>
-    </div>
+    </Page>
   );
 };
 

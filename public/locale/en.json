@@ -958,7 +958,7 @@
   "encounter_discharge_disposition__rehab": "Rehabilitation",
   "encounter_discharge_disposition__snf": "Skilled nursing facility",
   "encounter_duration_confirmation": "The duration of this encounter would be",
-  "encounter_history": "Encounter History",
+  "encounter_history": "Encounters History",
   "encounter_id": "Encounter ID",
   "encounter_manage_organization_description": "Add or remove organizations from this encouter",
   "encounter_marked_as_complete": "Encounter Completed",
