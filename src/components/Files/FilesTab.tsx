@@ -57,7 +57,6 @@ import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
@@ -252,55 +251,53 @@ export const FilesTab = (props: FilesTabProps) => {
     const filetype = getFileType(file);
     return (
       <>
-        {editPermission() && (
-          <div className="flex flex-row gap-2 justify-end">
-            {filetype === "AUDIO" && !file.is_archived && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setSelectedAudioFile(file);
-                  setOpenAudioPlayerDialog(true);
-                }}
-              >
-                <span className="flex flex-row items-center gap-1">
-                  <CareIcon icon="l-play-circle" className="mr-1" />
-                  {t("play")}
-                </span>
+        <div className="flex flex-row gap-2 justify-end">
+          {filetype === "AUDIO" && !file.is_archived && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSelectedAudioFile(file);
+                setOpenAudioPlayerDialog(true);
+              }}
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-play-circle" className="mr-1" />
+                {t("play")}
+              </span>
+            </Button>
+          )}
+          {fileManager.isPreviewable(file) && (
+            <Button
+              variant="secondary"
+              onClick={() => fileManager.viewFile(file, associatingId)}
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-eye" />
+                {t("view")}
+              </span>
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" data-cy="file-options-button">
+                <CareIcon icon="l-ellipsis-h" />
               </Button>
-            )}
-            {fileManager.isPreviewable(file) && (
-              <Button
-                variant="secondary"
-                onClick={() => fileManager.viewFile(file, associatingId)}
-              >
-                <span className="flex flex-row items-center gap-1">
-                  <CareIcon icon="l-eye" />
-                  {t("view")}
-                </span>
-              </Button>
-            )}
-            {
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" data-cy="file-options-button">
-                    <CareIcon icon="l-ellipsis-h" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild className="text-primary-900">
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        fileManager.downloadFile(file, associatingId)
-                      }
-                      variant="ghost"
-                      className="w-full flex flex-row justify-stretch items-center"
-                      data-cy="file-download-button"
-                    >
-                      <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                      <span>{t("download")}</span>
-                    </Button>
-                  </DropdownMenuItem>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild className="text-primary-900">
+                <Button
+                  size="sm"
+                  onClick={() => fileManager.downloadFile(file, associatingId)}
+                  variant="ghost"
+                  className="w-full flex flex-row justify-stretch items-center"
+                  data-cy="file-download-button"
+                >
+                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                  <span>{t("download")}</span>
+                </Button>
+              </DropdownMenuItem>
+              {editPermission() && (
+                <>
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
@@ -327,11 +324,11 @@ export const FilesTab = (props: FilesTabProps) => {
                       <span>{t("rename")}</span>
                     </Button>
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            }
-          </div>
-        )}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </>
     );
   };
@@ -667,27 +664,29 @@ export const FilesTab = (props: FilesTabProps) => {
         associatingId={associatingId}
       />
       <Tabs defaultValue={subPage}>
-        <TabsList className="grid w-auto grid-cols-2 w-fit">
-          <TabsTrigger value="all" asChild>
-            <Link
-              className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
-            >
-              {t("all")}
-            </Link>
-          </TabsTrigger>
-          <TabsTrigger value="discharge_summary" asChild>
-            <Link
-              className="text-gray-600"
-              href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
-            >
-              {t("discharge_summary")}
-            </Link>
-          </TabsTrigger>
-        </TabsList>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
+        {type === "encounter" && (
+          <TabsList className="grid w-auto grid-cols-2 sm:w-fit">
+            <TabsTrigger value="all" asChild>
+              <Link
+                className="text-gray-600"
+                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
+              >
+                {t("all")}
+              </Link>
+            </TabsTrigger>
+            <TabsTrigger value="discharge_summary" asChild>
+              <Link
+                className="text-gray-600"
+                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
+              >
+                {t("discharge_summary")}
+              </Link>
+            </TabsTrigger>
+          </TabsList>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mt-2">
           <FilterButton />
-          {subPage === "discharge_summary" && (
+          {type === "encounter" && subPage === "discharge_summary" && (
             <>
               <Button
                 variant="outline_primary"
@@ -702,10 +701,6 @@ export const FilesTab = (props: FilesTabProps) => {
                 <CareIcon icon="l-sync" />
                 <span className="ml-2">{t("refresh")}</span>
               </Button>
-            </>
-          )}
-          {subPage === "discharge_summary" && (
-            <>
               <Button
                 variant="primary"
                 className="flex flex-row items-center"
