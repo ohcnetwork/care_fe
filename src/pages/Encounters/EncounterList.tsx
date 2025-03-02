@@ -503,7 +503,7 @@ export function EncounterList({
                           if (status === "planned") {
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
-                              status: "all",
+                              status: undefined,
                             });
                           } else {
                             updateQuery({
@@ -523,7 +523,7 @@ export function EncounterList({
                           if (status === "in_progress") {
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
-                              status: "all",
+                              status: undefined,
                             });
                           } else {
                             updateQuery({
@@ -543,7 +543,7 @@ export function EncounterList({
                           if (status === "discharged") {
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
-                              status: "all",
+                              status: undefined,
                             });
                           } else {
                             updateQuery({
@@ -563,7 +563,7 @@ export function EncounterList({
                           if (status === "completed") {
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
-                              status: "all",
+                              status: undefined,
                             });
                           } else {
                             updateQuery({
@@ -583,7 +583,7 @@ export function EncounterList({
                           if (status === "cancelled") {
                             updateQuery({
                               ...{ encounter_class: encounterClass, priority },
-                              status: "all",
+                              status: undefined,
                             });
                           } else {
                             updateQuery({
