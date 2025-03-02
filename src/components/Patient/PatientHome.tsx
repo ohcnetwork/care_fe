@@ -59,11 +59,12 @@ export const PatientHome = (props: {
 
   return (
     <Page
+      className="w-[94vw] md:w-full flex flex-col items-center justify-center"
       title={t("patient_details")}
       options={
         <>
           {facilityId && (
-            <Button asChild variant="primary">
+            <Button asChild variant="primary" className="w-[85vw]">
               <Link
                 href={`/facility/${facilityId}/patient/${id}/book-appointment`}
               >
@@ -127,7 +128,7 @@ export const PatientHome = (props: {
           role="navigation"
         >
           <div className="overflow-x-auto pb-3">
-            <div className="flex flex-row" role="tablist">
+            <div className="flex flex-row w-[100vw] " role="tablist">
               {tabs.map((tab) => (
                 <Link
                   key={tab.route}
