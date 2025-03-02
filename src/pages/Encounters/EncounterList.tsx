@@ -499,12 +499,19 @@ export function EncounterList({
                       <TabsTrigger
                         value="planned"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "planned",
-                          })
-                        }
+                        onClick={() => {
+                          if (status === "planned") {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "all",
+                            });
+                          } else {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "planned",
+                            });
+                          }
+                        }}
                       >
                         <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
                         {t("encounter_status__planned")}
@@ -512,12 +519,19 @@ export function EncounterList({
                       <TabsTrigger
                         value="in_progress"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "in_progress",
-                          })
-                        }
+                        onClick={() => {
+                          if (status === "in_progress") {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "all",
+                            });
+                          } else {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "in_progress",
+                            });
+                          }
+                        }}
                       >
                         <CareIcon icon="l-spinner" className="mr-2 h-4 w-4" />
                         {t("encounter_class__in_progress")}
@@ -525,12 +539,19 @@ export function EncounterList({
                       <TabsTrigger
                         value="discharged"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "discharged",
-                          })
-                        }
+                        onClick={() => {
+                          if (status === "discharged") {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "all",
+                            });
+                          } else {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "discharged",
+                            });
+                          }
+                        }}
                       >
                         <CareIcon icon="l-home" className="mr-2 h-4 w-4" />
                         {t("discharge")}
@@ -538,12 +559,19 @@ export function EncounterList({
                       <TabsTrigger
                         value="completed"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "completed",
-                          })
-                        }
+                        onClick={() => {
+                          if (status === "completed") {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "all",
+                            });
+                          } else {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "completed",
+                            });
+                          }
+                        }}
                       >
                         <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
                         {t("completed")}
@@ -551,12 +579,19 @@ export function EncounterList({
                       <TabsTrigger
                         value="cancelled"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                        onClick={() =>
-                          updateQuery({
-                            ...{ encounter_class: encounterClass, priority },
-                            status: "cancelled",
-                          })
-                        }
+                        onClick={() => {
+                          if (status === "cancelled") {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "all",
+                            });
+                          } else {
+                            updateQuery({
+                              ...{ encounter_class: encounterClass, priority },
+                              status: "cancelled",
+                            });
+                          }
+                        }}
                       >
                         <CareIcon icon="l-x" className="mr-2 h-4 w-4" />
                         {t("cancelled")}
