@@ -1150,6 +1150,8 @@
   "file_preview": "File Preview",
   "file_preview_not_supported": "Can't preview this file. Try downloading it.",
   "file_type": "File Type",
+  "no_departments_match_search":"No Department Matches Search",
+  "try_different_search":"Try different search",
   "file_upload_error": "Error uploading file",
   "file_upload_success": "File uploaded successfully",
   "file_uploaded": "File Uploaded Successfully",

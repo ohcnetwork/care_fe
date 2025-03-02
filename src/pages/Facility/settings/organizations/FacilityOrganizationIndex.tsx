@@ -40,11 +40,6 @@ import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import CreateFacilityOrganizationSheet from "@/pages/Facility/settings/organizations/components/CreateFacilityOrganizationSheet";
 
-const createSearchMatcher = (searchQuery: string) => {
-  const normalizedQuery = searchQuery.toLowerCase().trim();
-  return (text: string) => text.toLowerCase().includes(normalizedQuery);
-};
-
 export default function FacilityOrganizationIndex({
   facilityId,
 }: {
@@ -65,89 +60,54 @@ export default function FacilityOrganizationIndex({
 
   const tableData = data?.results || [];
 
-  const matchesSearch = useMemo(
-    () => createSearchMatcher(searchQuery),
-    [searchQuery],
-  );
-
   const getChildren = useCallback(
     (parentId: string) => {
-      const children = tableData.filter((org) => org.parent?.id === parentId);
-      if (!searchQuery) return children;
-
-      return children.filter(
-        (org) =>
-          matchesSearch(org.name) ||
-          tableData.some(
-            (child) =>
-              child.parent?.id === org.id &&
-              (matchesSearch(child.name) || hasDeepChildren(child.id)),
-          ),
-      );
+      return tableData.filter((org) => org.parent?.id === parentId);
     },
-    [tableData, searchQuery, matchesSearch],
+    [tableData],
   );
 
-  // Helper to check for deep nested children matches
-  const hasDeepChildren = useCallback(
-    (parentId: string): boolean => {
-      const children = tableData.filter((org) => org.parent?.id === parentId);
-      return children.some(
-        (child) => matchesSearch(child.name) || hasDeepChildren(child.id),
-      );
-    },
-    [tableData, matchesSearch],
-  );
-
-  // Check if an organization has matching children
-  const hasMatchingChildren = useCallback(
-    (parentId: string): boolean => {
-      const children = getChildren(parentId);
-      return children.some(
-        (child) => matchesSearch(child.name) || hasDeepChildren(child.id),
-      );
-    },
-    [getChildren, matchesSearch, hasDeepChildren],
-  );
-
-  // Filter data based on search query
   const filteredData = useMemo(() => {
-    if (!searchQuery) return tableData;
+    if (!searchQuery.trim()) return tableData;
 
-    return tableData.filter(
-      (org) => matchesSearch(org.name) || hasMatchingChildren(org.id),
-    );
-  }, [tableData, searchQuery, matchesSearch, hasMatchingChildren]);
+    const normalizedQuery = searchQuery.toLowerCase().trim();
+    const matches = new Set<string>();
+
+    tableData.forEach((org) => {
+      if (org.name.toLowerCase().includes(normalizedQuery)) {
+        matches.add(org.id);
+        let current = org;
+        while (current.parent?.id) {
+          matches.add(current.parent.id);
+          current = tableData.find((o) => o.id === current.parent?.id)!;
+        }
+      }
+    });
+
+    return tableData.filter((org) => matches.has(org.id));
+  }, [tableData, searchQuery]);
 
   useEffect(() => {
-    if (!searchQuery) {
+    if (!searchQuery.trim()) {
       setExpandedRows({});
       return;
     }
 
+    const normalizedQuery = searchQuery.toLowerCase().trim();
     const newExpandedRows: Record<string, boolean> = {};
 
-    const processOrg = (org: any) => {
-      if (!org) return;
-
-      if (matchesSearch(org.name) || hasMatchingChildren(org.id)) {
-        let currentOrg = org;
-        while (currentOrg?.parent?.id) {
-          newExpandedRows[currentOrg.parent.id] = true;
-          currentOrg = tableData.find((o) => o.id === currentOrg.parent?.id);
+    tableData.forEach((org) => {
+      if (org.name.toLowerCase().includes(normalizedQuery)) {
+        let current = org;
+        while (current.parent?.id) {
+          newExpandedRows[current.parent.id] = true;
+          current = tableData.find((o) => o.id === current.parent?.id)!;
         }
       }
-    };
+    });
 
-    tableData
-      .filter((org) => !org.parent || Object.keys(org.parent).length === 0)
-      .forEach(processOrg);
-
-    setExpandedRows((prev) => ({
-      ...prev,
-      ...newExpandedRows,
-    }));
-  }, [searchQuery, tableData, matchesSearch, hasMatchingChildren]);
+    setExpandedRows(newExpandedRows);
+  }, [searchQuery, tableData]);
 
   const toggleRow = (id: string) => {
     const newExpandedRows = { ...expandedRows };
@@ -216,12 +176,7 @@ export default function FacilityOrganizationIndex({
     };
     expandedRows: Record<string, boolean>;
     toggleRow: (id: string) => void;
-    getChildren: (parentId: string) => {
-      id: string;
-      name: string;
-      parent?: { id: string };
-      org_type: string;
-    }[];
+    getChildren: (parentId: string) => any[];
     indent: number;
   }) => {
     const children = getChildren(org.id);
@@ -244,19 +199,8 @@ export default function FacilityOrganizationIndex({
         return newExpandedRows;
       });
     };
+
     const allExpanded = children.every((child) => expandedRows[child.id]);
-
-    const highlightMatch = (text: string) => {
-      if (!searchQuery) return text;
-
-      const normalizedQuery = searchQuery.toLowerCase();
-      const normalizedText = text.toLowerCase();
-      const index = normalizedText.indexOf(normalizedQuery);
-
-      if (index === -1) return text;
-
-      return <>{text}</>;
-    };
 
     return (
       <>
@@ -295,7 +239,7 @@ export default function FacilityOrganizationIndex({
                 icon={isTopLevel ? "l-building" : "l-users-alt"}
                 className="mr-2"
               />
-              {highlightMatch(org.name)}
+              {org.name}
             </div>
 
             <div className="flex justify-between gap-5">
@@ -427,36 +371,60 @@ export default function FacilityOrganizationIndex({
           </div>
         </div>
       </div>
-      <Table className="border rounded-lg w-full overflow-hidden">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
-              {t("name")}
-            </TableHead>
-            {!isMobile && (
-              <TableHead className="bg-gray-200 text-gray-700">
-                {t("category")}
+      {filteredData.length === 0 ? (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-center">
+              {t("no_results_found")}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {t("try_different_search")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <div className="rounded-full bg-primary/10 p-6 mb-4">
+              <CareIcon icon="l-search" className="h-12 w-12 text-primary" />
+            </div>
+            <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
+              {t("no_departments_match_search", { search: searchQuery })}
+            </p>
+            <Button variant="outline" onClick={() => setSearchQuery("")}>
+              {t("clear_search")}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Table className="border rounded-lg w-full overflow-hidden">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80%] border text-gray-700 bg-gray-200">
+                {t("name")}
               </TableHead>
-            )}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredData
-            .filter(
-              (org) => !org.parent || Object.keys(org.parent).length === 0,
-            )
-            .map((parent) => (
-              <OrganizationRow
-                key={parent.id}
-                org={parent}
-                expandedRows={expandedRows}
-                toggleRow={toggleRow}
-                getChildren={getChildren}
-                indent={1}
-              />
-            ))}
-        </TableBody>
-      </Table>
+              {!isMobile && (
+                <TableHead className="bg-gray-200 text-gray-700">
+                  {t("category")}
+                </TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredData
+              .filter(
+                (org) => !org.parent || Object.keys(org.parent).length === 0,
+              )
+              .map((parent) => (
+                <OrganizationRow
+                  key={parent.id}
+                  org={parent}
+                  expandedRows={expandedRows}
+                  toggleRow={toggleRow}
+                  getChildren={getChildren}
+                  indent={1}
+                />
+              ))}
+          </TableBody>
+        </Table>
+      )}
     </Page>
   );
 }
