@@ -16,7 +16,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import MultiFacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/MultiFacilityOrganizationSelector";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import locationApi from "@/types/location/locationApi";
 
@@ -93,27 +93,34 @@ export default function LinkDepartmentsSheet({
   onUpdate,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string>("");
+  const [selectedOrg, setSelectedOrg] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
-    mutationFn: (organizationId: string) => {
+    mutationFn: async () => {
+      if (!selectedOrg.length) return;
       const { route, pathParams } = getMutationParams(
         entityType,
         entityId,
         facilityId,
         true,
       );
-      return mutate(route, {
-        pathParams,
-        body: { organization: organizationId },
-      })({ organization: organizationId });
+
+      // Send each organization separately
+      await Promise.all(
+        selectedOrg.map((orgId) =>
+          mutate(route, {
+            pathParams,
+            body: { organization: orgId }, // Send one at a time
+          })({ organization: orgId }),
+        ),
+      );
     },
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
-      toast.success("Organization added successfully");
-      setSelectedOrg("");
+      toast.success("Organizations added successfully");
+      setSelectedOrg([]);
       setOpen(false);
       onUpdate?.();
     },
@@ -178,7 +185,7 @@ export default function LinkDepartmentsSheet({
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-4">
-              <FacilityOrganizationSelector
+              <MultiFacilityOrganizationSelector
                 facilityId={facilityId}
                 value={selectedOrg}
                 onChange={setSelectedOrg}
@@ -186,8 +193,8 @@ export default function LinkDepartmentsSheet({
 
               <Button
                 className="w-full"
-                onClick={() => selectedOrg && addOrganization(selectedOrg)}
-                disabled={!selectedOrg || isAdding}
+                onClick={() => selectedOrg.length > 0 && addOrganization()}
+                disabled={selectedOrg.length === 0 || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("add_organizations")}
