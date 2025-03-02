@@ -96,7 +96,8 @@ export default function AssociateDeviceSheet({
           />
         </div>
         <SheetFooter>
-          {selectedDeviceDetail?.current_encounter ? (
+          {selectedDeviceDetail?.current_encounter &&
+          selectedDeviceDetail.current_encounter.id != encounterId ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="primary">
