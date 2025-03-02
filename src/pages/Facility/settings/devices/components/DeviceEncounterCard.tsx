@@ -87,7 +87,7 @@ export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
           </Badge>
         </div>
 
-        <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
+        <div className="grid sm:flex sm:flex-wrap gap-7">
           <div className="w-full mx-3 sm:w-auto">
             <div className="text-gray-600 text-sm">{t("associated_by")}</div>
             <div className="font-semibold text-base flex items-center gap-2">
