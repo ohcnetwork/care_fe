@@ -963,7 +963,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="slug">{t("Slug")}</Label>
+                    <Label htmlFor="slug">{t("slug")}</Label>
                     <Input
                       id="slug"
                       value={questionnaire.slug}
