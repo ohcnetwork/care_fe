@@ -37,7 +37,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Markdown } from "@/components/ui/markdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -519,6 +524,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       {/* Mobile Sheet */}
       <Sheet open={isThreadsExpanded} onOpenChange={setIsThreadsExpanded}>
         <SheetContent side="left" className="w-[100%] sm:w-[380px] p-0">
+          <SheetDescription className="sr-only">
+            {t("encounter_notes__all_discussions_description")}
+          </SheetDescription>
+          <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">

@@ -703,6 +703,13 @@ export function EncounterList({
                       >
                         <CardTitle className="group-hover:text-primary transition-colors">
                           {encounter.patient.name}
+                          {encounter.patient.death_datetime && (
+                            <Badge variant="destructive" className="ml-2 py-0">
+                              <h3 className="text-xs font-medium">
+                                {t("expired")}
+                              </h3>
+                            </Badge>
+                          )}
                         </CardTitle>
                       </Link>
                     </div>
