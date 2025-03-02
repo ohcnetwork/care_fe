@@ -23,7 +23,7 @@ const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
 
   const { data: encountersData, isLoading } = useQuery({
-    queryKey: ["deviceEncounterHistory", facilityId, id],
+    queryKey: ["deviceEncounterHistory", facilityId, id, qParams],
     queryFn: query(deviceApi.encounterHistory, {
       queryParams: {
         limit: 5,
