@@ -289,9 +289,10 @@ const Login = (props: LoginProps) => {
   // Handle OTP flow
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTimeLeft(resendOtpTimeout); //
+
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
+      setTimeLeft(resendOtpTimeout);
     } else {
       verifyOtp({ phone_number: phone, otp });
     }
@@ -703,11 +704,15 @@ const Login = (props: LoginProps) => {
                               setTimeLeft(resendOtpTimeout);
                             }}
                           >
-                            Resend OTP
+                            {t("resend_otp")}
                           </p>
                         ) : (
                           <p className=" text-gray-500 text-center mt-5 ">
-                            Resend OTP <span> in {timeLeft} seconds </span>
+                            {t("resend_otp")}
+                            <span>
+                              {" "}
+                              {t("in")} {timeLeft} {t("seconds")}{" "}
+                            </span>
                           </p>
                         ))}
                     </form>
