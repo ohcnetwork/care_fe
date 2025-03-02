@@ -27,7 +27,7 @@ export const EncounterDevicesTab = ({
   const limit = 12;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["devices", facilityId, page, limit],
+    queryKey: ["devices", facilityId, encounter.patient.id, page, limit],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
