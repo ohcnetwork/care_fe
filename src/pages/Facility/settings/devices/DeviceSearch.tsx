@@ -41,6 +41,7 @@ export function DeviceSearch({
       pathParams: { facility_id: facilityId },
       queryParams: { search_text: search },
     }),
+    enabled: facilityId !== "preview",
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -66,7 +67,7 @@ export function DeviceSearch({
             {devices?.results.map((device) => (
               <CommandItem
                 key={device.id}
-                value={device.id}
+                value={device.registered_name}
                 onSelect={() => {
                   onSelect(device);
                   setOpen(false);
