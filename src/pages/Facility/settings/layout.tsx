@@ -45,7 +45,7 @@ const getRoutes = (facilityId: string) => ({
     <UpdateDevice facilityId={facilityId} deviceId={id} />
   ),
   "/devices/:id/encounterHistory": ({ id }: { id: string }) => (
-    <DeviceEncounterHistory facilityId={facilityId} id={id} />
+    <DeviceEncounterHistory facilityId={facilityId} deviceId={id} />
   ),
   "*": () => <ErrorPage />,
 });

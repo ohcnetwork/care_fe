@@ -14,16 +14,16 @@ import deviceApi from "@/types/device/deviceApi";
 
 interface Props {
   facilityId: string;
-  id: string;
+  deviceId: string;
 }
 
-const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
+const DeviceEncounterHistory = ({ facilityId, deviceId }: Props) => {
   const { t } = useTranslation();
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
 
   const { data: encountersData, isLoading } = useQuery({
-    queryKey: ["deviceEncounterHistory", facilityId, id, qParams],
+    queryKey: ["deviceEncounterHistory", facilityId, deviceId, qParams],
     queryFn: query(deviceApi.encounterHistory, {
       queryParams: {
         limit: 5,
@@ -31,7 +31,7 @@ const DeviceEncounterHistory = ({ facilityId, id }: Props) => {
       },
       pathParams: {
         facilityId,
-        id,
+        id: deviceId,
       },
     }),
   });
