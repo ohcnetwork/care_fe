@@ -69,8 +69,14 @@ interface LoginProps {
 
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
-  const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
-    careConfig;
+  const {
+    reCaptchaSiteKey,
+    urls,
+    stateLogo,
+    customLogo,
+    customLogoAlt,
+    resendOtpTimeout,
+  } = careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const initForm: any = {
     username: "",
@@ -93,6 +99,20 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState(resendOtpTimeout);
+
+  // Timer Function for resend OTP
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -269,7 +289,7 @@ const Login = (props: LoginProps) => {
   // Handle OTP flow
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setTimeLeft(resendOtpTimeout); //
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
     } else {
@@ -673,6 +693,23 @@ const Login = (props: LoginProps) => {
                           t("send_otp")
                         )}
                       </Button>
+                      {isOtpSent &&
+                        (timeLeft <= 0 ? (
+                          <p
+                            className=" text-center mt-5 cursor-pointer hover:underline  "
+                            onClick={() => {
+                              sendOtp({ phone_number: phone });
+
+                              setTimeLeft(resendOtpTimeout);
+                            }}
+                          >
+                            Resend OTP
+                          </p>
+                        ) : (
+                          <p className=" text-gray-500 text-center mt-5 ">
+                            Resend OTP <span> in {timeLeft} seconds </span>
+                          </p>
+                        ))}
                     </form>
                   </TabsContent>
                 </Tabs>
