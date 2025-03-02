@@ -696,16 +696,18 @@ const Login = (props: LoginProps) => {
                       </Button>
                       {isOtpSent &&
                         (timeLeft <= 0 ? (
-                          <p
-                            className=" text-center mt-5 cursor-pointer hover:underline  "
-                            onClick={() => {
-                              sendOtp({ phone_number: phone });
+                          <div className="flex justify-center">
+                            <p
+                              className=" text-center  cursor-pointer hover:underline inline-block "
+                              onClick={() => {
+                                sendOtp({ phone_number: phone });
 
-                              setTimeLeft(resendOtpTimeout);
-                            }}
-                          >
-                            {t("resend_otp")}
-                          </p>
+                                setTimeLeft(resendOtpTimeout);
+                              }}
+                            >
+                              {t("resend_otp")}
+                            </p>
+                          </div>
                         ) : (
                           <p className=" text-gray-500 text-center mt-5 ">
                             {t("resend_otp")}
