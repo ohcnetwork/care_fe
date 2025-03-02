@@ -37,7 +37,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import mutate from "@/Utils/request/mutate";
-import { LocationList, getLocationFormLabel } from "@/types/location/location";
+import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
@@ -119,7 +119,7 @@ export function LocationCard({
                 {location.name}
               </h3>
               <p className="text-sm text-gray-500">
-                {getLocationFormLabel(location.form)}
+                {t(`location_form__${location.form}`)}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
@@ -128,17 +128,17 @@ export function LocationCard({
                     location.status === "active" ? "default" : "secondary"
                   }
                 >
-                  {location.status}
+                  {t(location.status)}
                 </Badge>
                 <Badge
                   variant={
-                    location.availability_status === "available"
-                      ? "default"
-                      : "destructive"
+                    !location.current_encounter ? "default" : "destructive"
                   }
                   className="capitalize"
                 >
-                  {location.availability_status}
+                  {location.current_encounter
+                    ? t("unavailable")
+                    : t("available")}
                 </Badge>
                 {location.has_children && (
                   <Badge variant="outline" className="flex items-center gap-1">

@@ -1,4 +1,15 @@
+import {
+  Ambulance,
+  BedDouble,
+  Building2,
+  Home,
+  MonitorSmartphone,
+  Stethoscope,
+} from "lucide-react";
+
 import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { EncounterClass } from "@/types/emr/encounter";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 
@@ -112,37 +123,37 @@ export const FACILITY_FEATURE_TYPES: {
     id: 1,
     name: "CT Scan",
     icon: "l-compact-disc",
-    variant: "green",
+    variant: "blue",
   },
   {
     id: 2,
     name: "Maternity Care",
     icon: "l-baby-carriage",
-    variant: "blue",
+    variant: "pink",
   },
   {
     id: 3,
     name: "X-Ray",
     icon: "l-clipboard-alt",
-    variant: "amber",
+    variant: "blue",
   },
   {
     id: 4,
     name: "Neonatal Care",
     icon: "l-baby-carriage",
-    variant: "teal",
+    variant: "pink",
   },
   {
     id: 5,
     name: "Operation Theater",
     icon: "l-syringe",
-    variant: "red",
+    variant: "orange",
   },
   {
     id: 6,
     name: "Blood Bank",
     icon: "l-medical-drip",
-    variant: "orange",
+    variant: "purple",
   },
   {
     id: 7,
@@ -154,17 +165,17 @@ export const FACILITY_FEATURE_TYPES: {
     id: 8,
     name: "Inpatient Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "orange",
   },
   {
     id: 9,
     name: "Outpatient Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "indigo",
   },
   {
     id: 10,
-    name: "Intensive Care Units",
+    name: "Intensive Care Units (ICU)",
     icon: "l-hospital",
     variant: "red",
   },
@@ -172,25 +183,25 @@ export const FACILITY_FEATURE_TYPES: {
     id: 11,
     name: "Pharmacy",
     icon: "l-hospital",
-    variant: "red",
+    variant: "indigo",
   },
   {
     id: 12,
     name: "Rehabilitation Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "teal",
   },
   {
     id: 13,
     name: "Home Care Services",
     icon: "l-hospital",
-    variant: "red",
+    variant: "teal",
   },
   {
     id: 14,
     name: "Psychosocial Support",
     icon: "l-hospital",
-    variant: "red",
+    variant: "purple",
   },
   {
     id: 15,
@@ -202,7 +213,7 @@ export const FACILITY_FEATURE_TYPES: {
     id: 16,
     name: "Daycare Programs",
     icon: "l-hospital",
-    variant: "red",
+    variant: "yellow",
   },
 ];
 
@@ -354,6 +365,14 @@ export const FILE_EXTENSIONS = {
   PRESENTATION: ["pptx"],
   DOCUMENT: ["pdf", "docx"],
 } as const;
+export const encounterIcons = {
+  imp: <BedDouble />,
+  amb: <Ambulance />,
+  obsenc: <Stethoscope />,
+  emer: <Building2 />,
+  vr: <MonitorSmartphone />,
+  hh: <Home />,
+} as const satisfies Record<EncounterClass, React.ReactNode>;
 
 export const PREVIEWABLE_FILE_EXTENSIONS = [
   "html",

@@ -2,7 +2,11 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
-import { LocationAssociation, LocationAssociationWrite } from "./association";
+import {
+  LocationAssociation,
+  LocationAssociationRequest,
+  LocationAssociationUpdate,
+} from "./association";
 import { LocationDetail, LocationList, LocationWrite } from "./location";
 
 export default {
@@ -59,7 +63,7 @@ export default {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",
     method: HttpMethod.POST,
     TRes: Type<LocationAssociation>(),
-    TBody: Type<LocationAssociationWrite>(),
+    TBody: Type<LocationAssociationRequest>(),
   },
   getAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
@@ -70,7 +74,7 @@ export default {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
     method: HttpMethod.PUT,
     TRes: Type<LocationAssociation>(),
-    TBody: Type<LocationAssociationWrite>(),
+    TBody: Type<LocationAssociationUpdate>(),
   },
   deleteAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -62,11 +61,10 @@ function OrganizationCard({
 
 export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 12,
     cacheBlacklist: ["username"],
   });
-  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: children, isLoading } = useQuery({
     queryKey: [
@@ -76,7 +74,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       id,
       qParams.page,
       resultsPerPage,
-      searchQuery,
+      qParams.search,
     ],
     queryFn: query.debounced(routes.facilityOrganization.list, {
       pathParams: { facilityId },
@@ -84,7 +82,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
         parent: id,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         limit: resultsPerPage,
-        name: searchQuery || undefined,
+        name: qParams.search || undefined,
       },
     }),
   });
@@ -102,9 +100,9 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
                 />
                 <Input
                   placeholder={t("search_by_department_team_name")}
-                  value={searchQuery}
+                  value={qParams.search || ""}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    updateQuery({ search: e.target.value || undefined });
                   }}
                   className="w-full pl-8"
                 />

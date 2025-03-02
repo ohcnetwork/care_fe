@@ -29,9 +29,10 @@ export const Appointments = (props: PatientProps) => {
   const { data } = useQuery({
     queryKey: ["patient-appointments", patientId],
     queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: facilityId },
+      pathParams: { facility_id: facilityId ?? "" },
       queryParams: { patient: patientId, limit: 100 },
     }),
+    enabled: !!facilityId,
   });
 
   const appointments = data?.results;

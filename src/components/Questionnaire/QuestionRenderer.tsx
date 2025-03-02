@@ -46,6 +46,7 @@ export function QuestionRenderer({
   patientId,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const isPreview = encounterId === "preview";
 
   useEffect(() => {
     if (activeGroupId && questionRefs.current[activeGroupId]) {
@@ -79,7 +80,7 @@ export function QuestionRenderer({
             updateQuestionnaireResponseCB={onResponseChange}
             errors={errors}
             clearError={clearError}
-            disabled={disabled}
+            disabled={disabled || isPreview}
             activeGroupId={activeGroupId}
             patientId={patientId}
           />

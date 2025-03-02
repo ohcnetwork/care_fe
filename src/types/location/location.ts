@@ -1,3 +1,4 @@
+import { Encounter } from "@/types/emr/encounter";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 import { Code } from "@/types/questionnaire/code";
 
@@ -9,22 +10,7 @@ export type OperationalStatus = "C" | "H" | "O" | "U" | "K" | "I";
 
 export type LocationMode = "instance" | "kind";
 
-export type LocationForm =
-  | "si"
-  | "bu"
-  | "wi"
-  | "wa"
-  | "lvl"
-  | "co"
-  | "ro"
-  | "bd"
-  | "ve"
-  | "ho"
-  | "ca"
-  | "rd"
-  | "area"
-  | "jdn"
-  | "vi";
+export type LocationForm = (typeof LocationFormOptions)[number];
 
 export interface LocationBase {
   status: Status;
@@ -46,6 +32,7 @@ export interface LocationList extends LocationBase {
   id: string;
   has_children: boolean;
   parent?: LocationList;
+  current_encounter?: Encounter;
 }
 
 export interface LocationWrite extends LocationBase {
@@ -55,24 +42,20 @@ export interface LocationWrite extends LocationBase {
   mode: LocationMode;
 }
 
-export const locationFormOptions = [
-  { value: "si", label: "Site" },
-  { value: "bu", label: "Building" },
-  { value: "wi", label: "Wing" },
-  { value: "wa", label: "Ward" },
-  { value: "lvl", label: "Level" },
-  { value: "co", label: "Corridor" },
-  { value: "ro", label: "Room" },
-  { value: "bd", label: "Bed" },
-  { value: "ve", label: "Vehicle" },
-  { value: "ho", label: "House" },
-  { value: "ca", label: "Cabinet" },
-  { value: "rd", label: "Road" },
-  { value: "area", label: "Area" },
-  { value: "jdn", label: "Jurisdiction" },
-  { value: "vi", label: "Virtual" },
-];
-
-export const getLocationFormLabel = (value: LocationForm) => {
-  return locationFormOptions.find((option) => option.value === value)?.label;
-};
+export const LocationFormOptions = [
+  "si",
+  "bu",
+  "wi",
+  "wa",
+  "lvl",
+  "co",
+  "ro",
+  "bd",
+  "ve",
+  "ho",
+  "ca",
+  "rd",
+  "area",
+  "jdn",
+  "vi",
+] as const;
