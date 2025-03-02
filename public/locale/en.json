@@ -428,7 +428,7 @@
   "assigned_volunteer": "Assigned Volunteer",
   "associate": "Associate",
   "associate_device": "Associate device",
-  "associate_device_confirmation": "This device is currently linked to another <link>encounter</link>. Proceeding with this association will automatically unlink it from the previous encounter.",
+  "associate_device_confirmation": "This device is currently linked to another encounter. Proceeding with this association will automatically unlink it from the previous encounter.",
   "associate_device_description": "Select a device to associate with this encounter",
   "associate_location": "Associate Location",
   "associate_location_description": "Select a location to associate with this device",
