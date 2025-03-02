@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import query from "@/Utils/request/query";
+import { ServiceHistoryResponse } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import ServiceHistorySheet from "./ServiceHistorySheet";
@@ -33,14 +34,14 @@ export default function DeviceServiceHistory({
   const { t } = useTranslation();
   const [isServiceSheetOpen, setIsServiceSheetOpen] = useState(false);
   const [selectedServiceHistory, setSelectedServiceHistory] =
-    useState<any>(null);
+    useState<ServiceHistoryResponse | null>(null);
 
   const {
     data: serviceHistory,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["device", facilityId, deviceId],
+    queryKey: ["device", facilityId, deviceId, "serviceHistory"],
     queryFn: query(deviceApi.serviceHistory.list, {
       pathParams: {
         facility_external_id: facilityId,
@@ -54,7 +55,7 @@ export default function DeviceServiceHistory({
     setIsServiceSheetOpen(true);
   };
 
-  const handleEditService = (service: any) => {
+  const handleEditService = (service: ServiceHistoryResponse) => {
     setSelectedServiceHistory(service);
     setIsServiceSheetOpen(true);
   };
@@ -92,7 +93,7 @@ export default function DeviceServiceHistory({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {serviceHistory.results.map((service: any) => (
+              {serviceHistory.results.map((service: ServiceHistoryResponse) => (
                 <TableRow key={service.id}>
                   <TableCell className="font-medium">
                     {format(new Date(service.serviced_on), "PPP")}

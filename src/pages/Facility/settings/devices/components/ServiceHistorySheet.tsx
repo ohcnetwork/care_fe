@@ -34,6 +34,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
+import { ServiceHistoryResponse } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 interface ServiceHistorySheetProps {
@@ -41,7 +42,7 @@ interface ServiceHistorySheetProps {
   onOpenChange: (open: boolean) => void;
   facilityId: string;
   deviceId: string;
-  serviceRecord?: any;
+  serviceRecord?: ServiceHistoryResponse | null;
 }
 
 const formSchema = z.object({
@@ -64,7 +65,7 @@ export default function ServiceHistorySheet({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      note: "This is a demo service note",
+      note: "",
       serviced_on: new Date(),
     },
   });
@@ -77,7 +78,7 @@ export default function ServiceHistorySheet({
       });
     } else {
       form.reset({
-        note: "This is a demo service note",
+        note: "",
         serviced_on: new Date(),
       });
     }
@@ -90,6 +91,9 @@ export default function ServiceHistorySheet({
         device_external_id: deviceId,
       },
     }),
+    onError: (error) => {
+      console.error("Failed to create service record:", error);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["device", facilityId, deviceId],
@@ -107,6 +111,9 @@ export default function ServiceHistorySheet({
         external_id: serviceRecord?.id,
       },
     }),
+    onError: (error) => {
+      console.error("Failed to update service record:", error);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["device", facilityId, deviceId],
@@ -120,7 +127,7 @@ export default function ServiceHistorySheet({
     const payload = {
       ...values,
       serviced_on: values.serviced_on.toISOString(),
-      meta: {},
+      meta: serviceRecord?.meta || {},
     };
 
     if (serviceRecord) {
