@@ -54,7 +54,7 @@ const deviceApi = {
 
   serviceHistory: {
     list: {
-      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
+      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<ServiceHistory>>(),
     },

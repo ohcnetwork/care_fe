@@ -40,8 +40,8 @@ export default function DeviceServiceHistory({
     queryKey: ["device", facilityId, deviceId, "serviceHistory"],
     queryFn: query(deviceApi.serviceHistory.list, {
       pathParams: {
-        facilityId: facilityId,
-        deviceId: deviceId,
+        facility_external_id: facilityId,
+        device_external_id: deviceId,
       },
     }),
   });
