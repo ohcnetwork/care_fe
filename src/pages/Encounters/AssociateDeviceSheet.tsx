@@ -1,9 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +29,7 @@ import {
 } from "@/components/ui/sheet";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { DeviceSearch } from "@/pages/Facility/settings/devices/DeviceSearch";
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
@@ -35,18 +51,27 @@ export default function AssociateDeviceSheet({
   const queryClient = useQueryClient();
   const [selectedDevice, setSelectedDevice] = useState<DeviceList | null>(null);
 
-  const { mutate: associateDevice, isPending } = useMutation({
-    mutationFn: mutate(deviceApi.associateEncounter, {
-      pathParams: { facilityId, id: selectedDevice?.id },
+  const { mutate: associateDevice, isPending: isPendingAssociation } =
+    useMutation({
+      mutationFn: mutate(deviceApi.associateEncounter, {
+        pathParams: { facilityId, id: selectedDevice?.id },
+      }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["devices", facilityId],
+        });
+        toast.success(t("device_associated_successfully"));
+        onOpenChange(false);
+        setSelectedDevice(null);
+      },
+    });
+
+  const { data: selectedDeviceDetail, isPending: isPendingDevice } = useQuery({
+    queryKey: ["device", facilityId, selectedDevice?.id],
+    queryFn: query(deviceApi.retrieve, {
+      pathParams: { facility_id: facilityId, id: selectedDevice?.id },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["devices", facilityId],
-      });
-      toast.success(t("device_associated_successfully"));
-      onOpenChange(false);
-      setSelectedDevice(null);
-    },
+    enabled: !!selectedDevice,
   });
 
   const handleSubmit = () => {
@@ -71,12 +96,50 @@ export default function AssociateDeviceSheet({
           />
         </div>
         <SheetFooter>
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedDevice || isPending}
-          >
-            {isPending ? t("associating") : t("associate")}
-          </Button>
+          {selectedDeviceDetail?.current_encounter ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="primary">
+                  <CareIcon icon="l-link-add" className="h-4" />
+                  {t("associate")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t("device_association_exist")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("associate_device_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>
+                    <CareIcon icon="l-cancel" className="h-4" />
+                    {t("cancel")}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleSubmit}
+                    className={cn(buttonVariants({ variant: "primary" }))}
+                    disabled={isPendingDevice || isPendingAssociation}
+                  >
+                    <CareIcon icon="l-link-add" className="h-4" />
+                    {isPendingAssociation ? t("associating") : t("proceed")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                !selectedDevice || isPendingAssociation || isPendingDevice
+              }
+            >
+              <CareIcon icon="l-link-add" className="h-4" />
+              {isPendingAssociation ? t("associating") : t("associate")}
+            </Button>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>
