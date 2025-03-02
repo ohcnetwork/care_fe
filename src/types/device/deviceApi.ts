@@ -5,9 +5,8 @@ import {
   DeviceDetail,
   DeviceList,
   DeviceWrite,
-  ServiceHistoryCreateUpdateRequest,
-  ServiceHistoryListResponse,
-  ServiceHistoryResponse,
+  ServiceHistory,
+  ServiceHistoryWriteRequest,
 } from "./device";
 
 // Device API with Service History
@@ -53,31 +52,28 @@ const deviceApi = {
     TBody: Type<{ location: string }>(),
   },
 
-  // Service History API
   serviceHistory: {
     list: {
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
       method: HttpMethod.GET,
-      TRes: {} as ServiceHistoryListResponse,
-      TReq: {},
+      TRes: Type<PaginatedResponse<ServiceHistory>>(),
     },
     retrieve: {
       method: HttpMethod.GET,
       path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
-      TRes: {} as ServiceHistoryResponse,
-      TReq: {},
+      TRes: Type<ServiceHistory>(),
     },
     create: {
       method: HttpMethod.POST,
       path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
-      TRes: {} as ServiceHistoryResponse,
-      TReq: {} as ServiceHistoryCreateUpdateRequest,
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
     },
     update: {
       method: HttpMethod.PUT,
       path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
-      TRes: {} as ServiceHistoryResponse,
-      TReq: {} as ServiceHistoryCreateUpdateRequest,
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
     },
   },
 };

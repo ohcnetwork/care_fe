@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Edit, Plus } from "lucide-react";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import query from "@/Utils/request/query";
-import { ServiceHistoryResponse } from "@/types/device/device";
+import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import ServiceHistorySheet from "./ServiceHistorySheet";
@@ -34,18 +34,14 @@ export default function DeviceServiceHistory({
   const { t } = useTranslation();
   const [isServiceSheetOpen, setIsServiceSheetOpen] = useState(false);
   const [selectedServiceHistory, setSelectedServiceHistory] =
-    useState<ServiceHistoryResponse | null>(null);
-
-  const {
-    data: serviceHistory,
-    isLoading,
-    refetch,
-  } = useQuery({
+    useState<ServiceHistory | null>(null);
+  const queryClient = useQueryClient();
+  const { data: serviceHistory, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId, "serviceHistory"],
     queryFn: query(deviceApi.serviceHistory.list, {
       pathParams: {
-        facility_external_id: facilityId,
-        device_external_id: deviceId,
+        facilityId: facilityId,
+        deviceId: deviceId,
       },
     }),
   });
@@ -55,14 +51,16 @@ export default function DeviceServiceHistory({
     setIsServiceSheetOpen(true);
   };
 
-  const handleEditService = (service: ServiceHistoryResponse) => {
+  const handleEditService = (service: ServiceHistory) => {
     setSelectedServiceHistory(service);
     setIsServiceSheetOpen(true);
   };
 
   const handleServiceSheetClose = () => {
     setIsServiceSheetOpen(false);
-    refetch();
+    queryClient.invalidateQueries({
+      queryKey: ["device", facilityId, deviceId, "serviceHistory"],
+    });
   };
 
   return (
@@ -93,7 +91,7 @@ export default function DeviceServiceHistory({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {serviceHistory.results.map((service: ServiceHistoryResponse) => (
+              {serviceHistory.results.map((service: ServiceHistory) => (
                 <TableRow key={service.id}>
                   <TableCell className="font-medium">
                     {format(new Date(service.serviced_on), "PPP")}
@@ -116,7 +114,7 @@ export default function DeviceServiceHistory({
           </Table>
         ) : (
           <div className="text-center py-6 text-muted-foreground">
-            {t("service_records_none", "No service history available")}
+            {t("service_records_none")}
           </div>
         )}
       </CardContent>
