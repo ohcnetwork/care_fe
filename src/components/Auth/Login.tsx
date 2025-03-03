@@ -99,20 +99,21 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] =
+    useState(resendOtpTimeout);
 
   // Timer Function for resend OTP
   useEffect(() => {
-    if (timeLeft <= 0) {
+    if (resendOtpCountdown <= 0) {
       return;
     }
 
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => prevTime - 1);
+      setResendOtpCountdown((prevTime) => prevTime - 1);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -292,7 +293,7 @@ const Login = (props: LoginProps) => {
 
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
-      setTimeLeft(resendOtpTimeout);
+      setResendOtpCountdown(resendOtpTimeout);
     } else {
       verifyOtp({ phone_number: phone, otp });
     }
@@ -695,14 +696,14 @@ const Login = (props: LoginProps) => {
                         )}
                       </Button>
                       {isOtpSent &&
-                        (timeLeft <= 0 ? (
+                        (resendOtpCountdown <= 0 ? (
                           <div className="flex justify-center">
                             <p
                               className=" text-center  cursor-pointer hover:underline inline-block "
                               onClick={() => {
                                 sendOtp({ phone_number: phone });
 
-                                setTimeLeft(resendOtpTimeout);
+                                setResendOtpCountdown(resendOtpTimeout);
                               }}
                             >
                               {t("resend_otp")}
@@ -710,11 +711,9 @@ const Login = (props: LoginProps) => {
                           </div>
                         ) : (
                           <p className=" text-gray-500 text-center mt-5 ">
-                            {t("resend_otp")}
-                            <span>
-                              {" "}
-                              {t("in")} {timeLeft} {t("seconds")}{" "}
-                            </span>
+                            {t("resend_otp_timer", {
+                              time: resendOtpCountdown,
+                            })}
                           </p>
                         ))}
                     </form>
