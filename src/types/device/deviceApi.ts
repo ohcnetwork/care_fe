@@ -4,7 +4,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import {
   DeviceDetail,
   DeviceList,
-  DeviceLocations,
+  DeviceLocationHistory,
   DeviceWrite,
 } from "./device";
 
@@ -52,6 +52,6 @@ export default {
   locationHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<DeviceLocations>>(),
+    TRes: Type<PaginatedResponse<DeviceLocationHistory>>(),
   },
 };

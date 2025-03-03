@@ -50,14 +50,12 @@ export interface DeviceList extends DeviceBase {
   id: string;
 }
 
-export interface DeviceHistoryBase {
+export interface DeviceLocationHistory {
   id: string;
   created_by: UserBase;
+  location: LocationList;
   start: string;
   end: string;
-}
-export interface DeviceLocations extends DeviceHistoryBase {
-  location: LocationList;
 }
 
 export type DeviceWrite = DeviceBase;
