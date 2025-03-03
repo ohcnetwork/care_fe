@@ -28,7 +28,7 @@ import authApi, { MFALoginRequest } from "@/types/auth/authApi";
 export const Authenticate = () => {
   const { urls, stateLogo, customLogo, customLogoAlt } = careConfig;
   // Handle customDescriptionHtml as a separate variable since it might not exist in careConfig
-  const customDescriptionHtml = (careConfig as any).customDescriptionHtml;
+  const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
   );
@@ -94,8 +94,8 @@ export const Authenticate = () => {
     });
   });
 
-  const accesWays: string[] = ["Use a recovery code"];
-  const recoveryWays: string[] = ["Use authenticator app"];
+  const accesWays: readonly string[] = ["Use a recovery code"];
+  const recoveryWays: readonly string[] = ["Use authenticator app"];
 
   function handleRedirect(way: string): void {
     if (way === "Use a recovery code") {
@@ -106,14 +106,14 @@ export const Authenticate = () => {
   }
 
   return (
-    <div className="relative flex md:h-screen flex-col-reverse md:flex-row">
+    <div className="relative flex min-h-screen flex-col md:h-screen md:flex-row">
       {/* Hero Section */}
-      <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
+      <div className="login-hero order-last relative flex flex-auto flex-col justify-between p-6 md:order-first md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
         <div></div>
         <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
           <div className="mb-4 hidden items-center gap-6 md:flex">
             {logos.map((logo, index) =>
-              logo?.light ? (
+              logo && logo.light ? (
                 <div key={index} className="flex items-center">
                   <img
                     src={logo.light}
@@ -147,7 +147,7 @@ export const Authenticate = () => {
                 <div
                   className="max-w-xl text-secondary-400"
                   dangerouslySetInnerHTML={{
-                    __html: customDescriptionHtml,
+                    __html: __CUSTOM_DESCRIPTION_HTML__,
                   }}
                 />
               </div>
@@ -212,37 +212,9 @@ export const Authenticate = () => {
         </div>
       </div>
       {/* Login Forms Section */}
-      <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
-        <div className="relative h-full items-center justify-center md:flex">
+      <div className="login-hero-form py-16 w-full md:mt-0 md:h-full md:w-1/2">
+        <div className="relative h-full items-center flex justify-center md:flex">
           <div className="w-full max-w-[400px] space-y-6">
-            {/* Logo for Mobile */}
-            <div className="px-4 flex items-center mx-auto gap-4 md:hidden">
-              {logos.map((logo, index) =>
-                logo?.dark ? (
-                  <div key={index} className="flex items-center">
-                    <img
-                      src={logo.dark}
-                      className="h-14 rounded-lg py-3"
-                      alt="state logo"
-                    />
-                  </div>
-                ) : null,
-              )}
-              {logos.length === 0 && (
-                <a
-                  href={urls.ohcn}
-                  className="inline-block"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={customLogoAlt?.light ?? "/images/ohc_logo_light.svg"}
-                    className="h-8"
-                    alt="Open Healthcare Network logo"
-                  />
-                </a>
-              )}
-            </div>
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
                 <CardTitle className="text-3xl font-bold w-15 text-black">
@@ -297,7 +269,7 @@ export const Authenticate = () => {
 
                     <div className="mt-5 text-center">
                       <p className="text-sm text-gray-500 font-base">
-                        {recoveryModal ? t("") : t("cant_access_code")}
+                        {recoveryModal ? "" : t("cant_access_code")}
                       </p>
                       <ul className="list-disc inline-flex justify-center w-full">
                         {(recoveryModal ? recoveryWays : accesWays).map(

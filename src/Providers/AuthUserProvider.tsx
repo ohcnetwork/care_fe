@@ -99,8 +99,12 @@ export default function AuthUserProvider({
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
         // Invalidate and wait for the currentUser query to complete
-        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        await queryClient.refetchQueries({ queryKey: ["currentUser"] });
+        try {
+          await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          await queryClient.refetchQueries({ queryKey: ["currentUser"] });
+        } catch (error) {
+          console.error("Error refreshing currentUser query:", error);
+        }
 
         if (location.pathname === "/" || location.pathname === "/login") {
           navigate(getRedirectOr("/"));

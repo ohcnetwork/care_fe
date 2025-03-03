@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { userChildProps } from "@/components/Common/UserColumns";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
@@ -10,6 +10,7 @@ import query from "@/Utils/request/query";
 
 export function TwoFactorAuthWrapper(props: userChildProps) {
   const authUser = useAuthUser();
+  const queryClient = useQueryClient();
 
   // Fetch current user to get the latest 2FA status
   const { data: currentUser } = useQuery({
@@ -31,7 +32,8 @@ export function TwoFactorAuthWrapper(props: userChildProps) {
       isEnabled={is2faEnabled}
       onSuccess={() => {
         // Refetch user data to update 2FA status
-        window.location.reload();
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        //window.location.reload();
       }}
     />
   );
