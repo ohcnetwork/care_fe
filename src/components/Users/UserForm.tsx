@@ -532,28 +532,27 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t("gender")}</FormLabel>
-                <Select
-                  {...field}
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger data-cy="gender-select">
                       <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {GENDER_TYPES.map((gender) => (
-                      <SelectItem
-                        key={gender.id}
-                        value={gender.id}
-                        data-cy={`gender-${gender.id}`}
-                      >
-                        {gender.text}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectContent>
+                      {GENDER_TYPES.map((gender) => (
+                        <SelectItem
+                          key={gender.id}
+                          value={gender.id}
+                          data-cy={`gender-${gender.id}`}
+                        >
+                          {gender.text}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
