@@ -79,17 +79,11 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const isStructuredSlug = (slug: string): slug is StructuredQuestionType => {
-    return [
-      "allergy_intolerance",
-      "medication_request",
-      "medication_statement",
-      "symptom",
-      "diagnosis",
-      "encounter",
-      "appointment",
-      "location_association",
-    ].includes(slug);
+  const isStructuredSlug = (
+    slug: string | undefined,
+  ): slug is StructuredQuestionType => {
+    if (!slug) return false;
+    return Object.keys(FIXED_QUESTIONNAIRES).includes(slug);
   };
 
   const {
