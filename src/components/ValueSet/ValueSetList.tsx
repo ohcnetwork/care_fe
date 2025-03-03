@@ -8,7 +8,7 @@ import {
   PlusIcon,
   Search,
 } from "lucide-react";
-import { Link, useNavigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,6 @@ import valuesetApi from "@/types/valueset/valuesetApi";
 
 export function ValueSetList() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -177,12 +176,14 @@ export function ValueSetList() {
                           variant="outline"
                           size="sm"
                           className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
-                          onClick={() =>
-                            navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                          }
                         >
-                          <Pencil className="w-4 h-4 mr-0" />
-                          {t("edit")}
+                          <Link
+                            href={`/admin/valuesets/${valueset.slug}/edit`}
+                            className="flex items-center gap-2"
+                          >
+                            <Pencil className="w-4 h-4 mr-0" />
+                            {t("edit")}
+                          </Link>
                         </Button>
                       )}
                     </TableCell>
