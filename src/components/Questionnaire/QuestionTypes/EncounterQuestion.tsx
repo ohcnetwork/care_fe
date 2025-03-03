@@ -29,6 +29,7 @@ import {
   type EncounterEditRequest,
   type EncounterPriority,
   type EncounterStatus,
+  Hospitalization,
 } from "@/types/emr/encounter";
 import type {
   QuestionnaireResponse,
@@ -114,6 +115,13 @@ export function EncounterQuestion({
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    if (
+      newEncounter.encounter_class === "amb" ||
+      newEncounter.encounter_class === "vr" ||
+      newEncounter.encounter_class === "hh"
+    ) {
+      newEncounter.hospitalization = {} as Hospitalization;
+    }
 
     // Create the full encounter request object
     const encounterRequest: EncounterEditRequest = {
