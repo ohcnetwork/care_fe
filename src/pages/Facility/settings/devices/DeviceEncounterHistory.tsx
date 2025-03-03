@@ -8,6 +8,8 @@ import Page from "@/components/Common/Page";
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
 import query from "@/Utils/request/query";
 import { DeviceEncounterCard } from "@/pages/Facility/settings/devices/components/DeviceEncounterCard";
 import deviceApi from "@/types/device/deviceApi";
@@ -26,8 +28,8 @@ const DeviceEncounterHistory = ({ facilityId, deviceId }: Props) => {
     queryKey: ["deviceEncounterHistory", facilityId, deviceId, qParams],
     queryFn: query(deviceApi.encounterHistory, {
       queryParams: {
-        limit: 5,
-        offset: ((qParams.page ?? 1) - 1) * 5,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
       pathParams: {
         facilityId,
@@ -42,7 +44,7 @@ const DeviceEncounterHistory = ({ facilityId, deviceId }: Props) => {
         {isLoading ? (
           <div>
             <div className="grid gap-5 my-5">
-              <CardListSkeleton count={5} />
+              <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
             </div>
           </div>
         ) : (
@@ -73,14 +75,14 @@ const DeviceEncounterHistory = ({ facilityId, deviceId }: Props) => {
                   <div
                     className={cn(
                       "flex w-full justify-center",
-                      (encountersData?.count ?? 0) > 5
+                      (encountersData?.count ?? 0) > RESULTS_PER_PAGE_LIMIT
                         ? "visible"
                         : "invisible",
                     )}
                   >
                     <PaginationComponent
                       cPage={qParams.page ?? 1}
-                      defaultPerPage={5}
+                      defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                       data={{ totalCount: encountersData?.count ?? 0 }}
                       onChange={(page) => setQueryParams({ page })}
                     />
