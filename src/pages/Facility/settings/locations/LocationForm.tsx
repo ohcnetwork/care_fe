@@ -197,16 +197,13 @@ export default function LocationForm({
   });
 
   const { mutate: submitBatch } = useMutation({
-    mutationFn: mutate(routes.batchRequest, { silent: true }),
+    mutationFn: mutate(routes.batchRequest),
     onSuccess: (data: { results: BatchSubmissionResult[] }) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),
       );
       queryClient.invalidateQueries({ queryKey: ["locations"] });
       onSuccess?.();
-    },
-    onError: () => {
-      toast.error(t("beds_creation_failed"));
     },
   });
 
