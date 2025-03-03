@@ -56,7 +56,7 @@ export interface QuestionnaireFormProps {
   subjectType?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
-  facilityId: string;
+  facilityId?: string;
 }
 
 export function QuestionnaireForm({

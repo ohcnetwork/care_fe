@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -41,6 +42,12 @@ export const Updates = (props: PatientProps) => {
     <div className="mt-4 px-3 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold leading-tight">{t("updates")}</h2>
+        <Button asChild variant="outline_primary">
+          <Link href={`/patient/${patientId}/questionnaire`}>
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("add_patient_updates")}
+          </Link>
+        </Button>
       </div>
       <div className="flex w-full flex-col gap-4">
         <div className="flex flex-col gap-4">

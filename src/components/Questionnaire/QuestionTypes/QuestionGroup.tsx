@@ -26,7 +26,7 @@ interface QuestionGroupProps {
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 

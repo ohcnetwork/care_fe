@@ -87,6 +87,9 @@ const consultationRoutes: AppRoutes = {
       subjectType="patient"
     />
   ),
+  "/patient/:patientId/questionnaire": ({ patientId }) => (
+    <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
+  ),
 };
 
 export default consultationRoutes;
