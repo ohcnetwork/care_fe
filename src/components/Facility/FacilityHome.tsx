@@ -223,10 +223,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <PLUGIN_Component
-                      __name="FacilityHomeActions"
-                      facility={facilityData}
-                    />
                     {/* <AlertDialog>
                       TODO: add delete facility
                       <AlertDialogTrigger asChild>
@@ -282,14 +278,15 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="mt-2 space-y-2 flex justify-end">
+              <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
+                <PLUGIN_Component
+                  __name="FacilityHomeActions"
+                  facility={facilityData}
+                />
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
-                    <Button
-                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
-                      variant="outline"
-                    >
+                    <Button className="cursor-pointer" variant="outline">
                       <CareIcon icon="l-pen" />
                       {t("edit_facility_details")}
                     </Button>
