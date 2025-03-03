@@ -14,11 +14,11 @@ import { encounterIcons } from "@/common/constants";
 
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { DeviceEncounters } from "@/types/device/device";
+import { DeviceEncounter } from "@/types/device/device";
 import { completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
-  encounterData: DeviceEncounters;
+  encounterData: DeviceEncounter;
 }
 
 export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
@@ -35,10 +35,10 @@ export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
             id="patient-name-consultation"
           >
             <Link
-              href={`/../patient/${encounter.patient.id}`}
+              href={`/patient/${encounter.patient.id}`}
+              basePath={`/facility/${encounter.facility.id}`}
               className="text-gray-950 font-semibold flex items-start gap-0.5"
               id="patient-details"
-              data-cy="patient-details-button"
             >
               {encounter.patient.name}
               <CareIcon
@@ -119,7 +119,8 @@ export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
         <div className="w-full py-2 bg-gray-100 px-2">
           <Button variant="outline" className="p-2 border border-black">
             <Link
-              href={`/../patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+              href={`/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+              basePath={`/facility/${encounter.facility.id}`}
               className="flex items-center gap-2"
             >
               <Eye className="w-4 h-4" />
