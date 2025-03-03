@@ -263,7 +263,6 @@ export const Demography = (props: PatientProps) => {
                       <Button
                         data-cy="edit-patient-button"
                         variant="outline"
-                        disabled={!!patientData.death_datetime}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
                         )}
