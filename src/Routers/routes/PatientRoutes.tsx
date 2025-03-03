@@ -1,3 +1,5 @@
+import { Redirect } from "raviger";
+
 import {
   facilityPatientTabs,
   patientTabs,
@@ -7,7 +9,7 @@ import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { EncounterList } from "@/pages/Encounters/EncounterList";
+import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const PatientRoutes: AppRoutes = {
@@ -15,7 +17,10 @@ const PatientRoutes: AppRoutes = {
     <PatientIndex facilityId={facilityId} />
   ),
   "/facility/:facilityId/encounters": ({ facilityId }) => (
-    <EncounterList facilityId={facilityId} />
+    <Redirect to={`/facility/${facilityId}/encounters/patients`} />
+  ),
+  "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
+    <EncountersOverview facilityId={facilityId} tab={tab} />
   ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
