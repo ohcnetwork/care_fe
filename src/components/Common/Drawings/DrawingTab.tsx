@@ -39,7 +39,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
     queryKey: ["drawings", associatingId, qParams, resultsPerPage],
     queryFn: query.debounced(metaArtifactApi.list, {
       queryParams: {
-        object_type: "excalidraw",
+        object_type: "drawing",
         associating_type: props.type,
         name: qParams.name,
         associating_id: associatingId,

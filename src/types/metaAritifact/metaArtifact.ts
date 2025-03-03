@@ -7,7 +7,7 @@ type ExcalidrawValue = {
 };
 
 type ObjectTypeValues = {
-  object_type: "excalidraw";
+  object_type: "drawing";
   object_value: ExcalidrawValue;
 };
 
@@ -32,4 +32,17 @@ export type MetaArtifactResponse = {
   created_by: UserBase;
   updated_by: UserBase;
   username: string;
+} & ObjectTypeValues;
+
+export type MetaArtifactCreatRequest = {
+  associating_type: "patient" | "encounter";
+  associating_id: string;
+  name: string;
+} & ObjectTypeValues;
+
+export type MetaArtifactUpdateRequest = {
+  id: string;
+  associating_type: "patient" | "encounter";
+  associating_id: string;
+  name: string;
 } & ObjectTypeValues;

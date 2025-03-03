@@ -1,7 +1,9 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
+  MetaArtifactCreatRequest,
   MetaArtifactResponse,
+  MetaArtifactUpdateRequest,
   MetaArtifactUpsertRequest,
 } from "@/types/metaAritifact/metaArtifact";
 
@@ -13,7 +15,7 @@ export default {
     path: "/api/v1/meta_artifacts/",
     method: HttpMethod.POST,
     TRes: Type<MetaArtifactResponse>(),
-    TBody: Type<MetaArtifactUpsertRequest>(),
+    TBody: Type<MetaArtifactCreatRequest>(),
   },
   retrieve: {
     path: "/api/v1/meta_artifacts/{external_id}/",
@@ -28,7 +30,7 @@ export default {
   update: {
     path: "/api/v1/meta_artifacts/{external_id}/",
     method: HttpMethod.PUT,
-    TBody: Type<MetaArtifactUpsertRequest>(),
+    TBody: Type<MetaArtifactUpdateRequest>(),
     TRes: Type<MetaArtifactResponse>(),
   },
   upsert: {

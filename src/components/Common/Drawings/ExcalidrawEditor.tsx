@@ -81,7 +81,7 @@ export default function ExcalidrawEditor({
           associating_type: associating_type,
           associating_id: associatingId,
           name: name,
-          object_type: "excalidraw",
+          object_type: "drawing",
           object_value: { elements: elements || [] },
         },
       ],
