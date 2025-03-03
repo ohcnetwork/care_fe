@@ -23,7 +23,7 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
-import { handleCameraPermission } from "../../Utils/cameraPermissionHandler";
+import { handleCameraPermission } from "@/Utils/cameraPermissionHandler";
 
 interface Props {
   title: string;
