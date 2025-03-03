@@ -51,7 +51,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
-      <div className="space-y-6">
+      <div className="space-y-6 ">
         <div className="flex flex-col justify-between items-start gap-4">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
             <EntityBadge

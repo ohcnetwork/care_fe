@@ -106,10 +106,10 @@ export default function OrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name}`}>
+    <Page title={`${org.name}`} className="w-[95vw]">
       {/* Navigation */}
-      <div className="mt-4">
-        <Menubar className="w-full h-full overflow-x-auto">
+      <div className="mt-4 overflow-auto scrollbar-height: [1px]">
+        <Menubar className="w-full h-full overflow-auto">
           {navItems
             .filter((item) => item.visibility)
             .map((item) => (
