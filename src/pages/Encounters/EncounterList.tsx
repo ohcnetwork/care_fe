@@ -741,7 +741,7 @@ export function EncounterList({
                           {t(`encounter_priority__${encounter.priority}`)}
                         </Badge>
                       </div>
-                      <div>
+                      <div className="">
                         <Separator className="my-2" />
                         <Link
                           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
