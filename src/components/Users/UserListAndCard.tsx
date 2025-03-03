@@ -73,19 +73,20 @@ const UserCard = ({ user }: { user: UserBase }) => {
           />
 
           <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-start justify-between">
-                <h1 className="text-base font-bold break-words pr-2">
+            <div className="flex items-start justify-between min-w-0">
+              <div className="flex flex-col min-w-0 flex-1">
+                <h1 className="text-base font-bold overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
                   {user.first_name} {user.last_name}
                 </h1>
-                <span className="text-sm text-gray-500">
-                  <UserStatusIndicator user={user} />
+                <span className="text-sm text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                  {user.username}
                 </span>
               </div>
-              <span className="text-sm text-gray-500 mr-2 break-words">
-                {user.username}
+              <span className="text-sm text-gray-500 flex-shrink-0 pl-1">
+                <UserStatusIndicator user={user} />
               </span>
             </div>
+
             <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <div className="text-gray-500">{t("role")}</div>
