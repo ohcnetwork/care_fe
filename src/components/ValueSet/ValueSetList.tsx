@@ -8,7 +8,7 @@ import {
   PlusIcon,
   Search,
 } from "lucide-react";
-import { useNavigate } from "raviger";
+import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -97,13 +97,15 @@ export function ValueSetList() {
               />
             </div>
           </div>
-
-          <div className="flex items-center md:self-start">
-            <Button onClick={() => navigate("/admin/valuesets/create")}>
+          <Button>
+            <Link
+              href="/admin/valuesets/create"
+              className="flex items-center gap-2"
+            >
               <PlusIcon className="w-4 h-4" />
               {t("create_valueset")}
-            </Button>
-          </div>
+            </Link>
+          </Button>
         </div>
       </div>
 
