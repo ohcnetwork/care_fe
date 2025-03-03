@@ -2,8 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Info, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -65,6 +65,13 @@ const formSchema = z.object({
   customizeNames: z.boolean().default(false),
   organizations: z.array(z.string()).default([]),
   availability_status: z.enum(["available", "unavailable"] as const),
+  bedNames: z
+    .array(
+      z.object({
+        name: z.string().min(1, { message: t("field_required") }),
+      }),
+    )
+    .default([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -88,6 +95,7 @@ const defaultValues: FormValues = {
   customizeNames: false,
   organizations: [],
   availability_status: "available",
+  bedNames: [],
 };
 
 export default function LocationForm({
@@ -98,7 +106,6 @@ export default function LocationForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [bedNames, setBedNames] = useState<string[]>([]);
 
   const { data: location, isLoading } = useQuery({
     queryKey: ["location", locationId],
@@ -117,52 +124,59 @@ export default function LocationForm({
       parent: parentId || null,
     },
   });
-
-  const updateBedName = (index: number, newName: string) => {
-    setBedNames((prev) => {
-      const updated = [...prev];
-      updated[index] = newName;
-      return updated;
-    });
-  };
+  const { fields: bedFields, replace: replaceBedFields } = useFieldArray({
+    control: form.control,
+    name: "bedNames",
+  });
 
   const resetToDefaultNames = () => {
     if (form.watch("name") && form.watch("numberOfBeds")) {
-      setBedNames(
-        Array.from(
-          { length: Number.parseInt(form.watch("numberOfBeds") ?? "0") },
-          (_, index) => `${form.watch("name")} ${index + 1}`,
-        ),
+      const defaultNames = Array.from(
+        { length: Number.parseInt(form.watch("numberOfBeds") ?? "0") },
+        (_, index) => ({
+          name: `${form.watch("name")} ${index + 1}`,
+        }),
       );
+      replaceBedFields(defaultNames);
     }
   };
 
   useEffect(() => {
+    const formType = form.watch("form");
+    const bulkCreationEnabled = form.watch("enableBulkCreation");
+    const numberOfBeds = form.watch("numberOfBeds");
+    const locationName = form.watch("name");
+    const customizeNames = form.watch("customizeNames");
+
     if (
-      form.watch("form") === "bd" &&
-      form.watch("enableBulkCreation") &&
-      form.watch("numberOfBeds") &&
-      form.watch("name")
+      formType === "bd" &&
+      bulkCreationEnabled &&
+      numberOfBeds &&
+      locationName
     ) {
-      if (!form.watch("customizeNames") || bedNames.length === 0) {
+      if (!customizeNames || bedFields.length === 0) {
         resetToDefaultNames();
       } else {
-        const newCount = Number.parseInt(form.watch("numberOfBeds") ?? "0");
-        setBedNames((prev) => {
-          const updated = [...prev];
-          while (updated.length < newCount) {
-            updated.push(`${form.watch("name")} ${updated.length + 1}`);
-          }
-          return updated.slice(0, newCount);
-        });
+        const newCount = Number.parseInt(numberOfBeds ?? "0", 10);
+        const currentFields = form.getValues("bedNames") ?? [];
+        const updatedFields = [...currentFields];
+
+        while (updatedFields.length < newCount) {
+          updatedFields.push({
+            name: `${locationName} ${updatedFields.length + 1}`,
+          });
+        }
+
+        replaceBedFields(updatedFields.slice(0, newCount));
       }
     }
   }, [
-    form.watch("numberOfBeds"),
-    form.watch("name"),
     form.watch("form"),
     form.watch("enableBulkCreation"),
-    bedNames.length,
+    form.watch("numberOfBeds"),
+    form.watch("name"),
+    form.watch("customizeNames"),
+    bedFields.length,
   ]);
 
   useEffect(() => {
@@ -177,6 +191,7 @@ export default function LocationForm({
         organizations: [],
         availability_status: location.availability_status || "available",
         customizeNames: false,
+        bedNames: [],
       });
     }
   }, [location, form, parentId]);
@@ -217,18 +232,14 @@ export default function LocationForm({
     };
 
     if (values.form === "bd" && !isEditMode && values.enableBulkCreation) {
-      if (bedNames.some((name) => name.trim() === "")) {
-        toast.error("Any Bed Name can't be empty");
-        return;
-      }
       const batchRequest: BatchRequestBody = {
-        requests: bedNames.map((name) => ({
+        requests: values.bedNames.map((bed) => ({
           url: `/api/v1/facility/${facilityId}/location/`,
           method: "POST",
           reference_id: parentId ? `Location ${parentId}` : "Location",
           body: {
             ...data,
-            name,
+            name: bed.name,
           },
         })),
       };
@@ -286,7 +297,6 @@ export default function LocationForm({
                       form.setValue("enableBulkCreation", false);
                       form.setValue("numberOfBeds", "2");
                       form.setValue("customizeNames", false);
-                      setBedNames([]);
                     }
                   }}
                   value={field.value}
@@ -434,25 +444,31 @@ export default function LocationForm({
                       </AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-3 mt-2">
-                          {bedNames.map((name, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2"
-                            >
-                              <span className="text-sm font-medium min-w-[60px]">
-                                {t("bed_number", { number: index + 1 })}:
-                              </span>
-                              <Input
-                                value={name}
-                                onChange={(e) =>
-                                  updateBedName(index, e.target.value)
-                                }
-                                placeholder={t("bed_name_placeholder", {
-                                  number: index + 1,
-                                })}
-                                className="flex-1"
-                              />
-                            </div>
+                          {bedFields.map((field, index) => (
+                            <FormField
+                              key={field.id}
+                              control={form.control}
+                              name={`bedNames.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center gap-2">
+                                    <FormLabel className="text-sm font-medium min-w-[60px]">
+                                      {t("bed_number", { number: index + 1 })}:
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder={t("bed_name_placeholder", {
+                                          number: index + 1,
+                                        })}
+                                        className="flex-1"
+                                      />
+                                    </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           ))}
                         </div>
                       </AccordionContent>
@@ -462,10 +478,13 @@ export default function LocationForm({
               ) : (
                 <div className="rounded-md bg-muted p-4">
                   <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
-                  <div className="text-sm text-muted-foreground">
-                    {bedNames.map((name, index) => (
-                      <div key={index} className="mb-1">
-                        {name}
+                  <div className="text-sm text-muted-foreground flex flex-wrap gap-2">
+                    {bedFields.map((field) => (
+                      <div
+                        key={field.id}
+                        className="px-3 py-1 bg-gray-100 rounded-md shadow-sm"
+                      >
+                        {field.name}
                       </div>
                     ))}
                   </div>
