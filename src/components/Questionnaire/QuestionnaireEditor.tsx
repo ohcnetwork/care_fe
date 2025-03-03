@@ -838,7 +838,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </TabsTrigger>
           <TabsTrigger value="preview">
             <SquarePenIcon className="w-4 h-4 mr-2" />
-            {t("previous_form")}
+            {t("form_preview")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
