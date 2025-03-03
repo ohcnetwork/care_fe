@@ -106,7 +106,7 @@ export default function OrganizationLayout({
   }
 
   return (
-    <Page title={`${org.name}`} className="w-[95vw]">
+    <Page title={`${org.name}`} className="w-[95vw] md:w-auto">
       {/* Navigation */}
       <div className="mt-4 overflow-auto scrollbar-height: [1px]">
         <Menubar className="w-full h-full overflow-auto">
