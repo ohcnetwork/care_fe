@@ -9,7 +9,12 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import routes, { JwtTokenObtainPair, Type } from "@/Utils/request/api";
+import routes, {
+  JwtTokenObtainPair,
+  LoginResponse,
+  MFAResponse,
+  Type,
+} from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { TokenData } from "@/types/auth/otpToken";
@@ -18,6 +23,14 @@ interface Props {
   children: React.ReactNode;
   unauthorized: React.ReactNode;
   otpAuthorized: React.ReactNode;
+}
+
+function isMFAResponse(data: LoginResponse): data is MFAResponse {
+  return "temp_token" in data;
+}
+
+function isJwtTokenResponse(data: LoginResponse): data is JwtTokenObtainPair {
+  return "access" in data && "refresh" in data;
 }
 
 export default function AuthUserProvider({
@@ -70,14 +83,28 @@ export default function AuthUserProvider({
 
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(routes.login),
-    onSuccess: (data: JwtTokenObtainPair) => {
-      setAccessToken(data.access);
-      localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-      localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    onSuccess: async (data: LoginResponse) => {
+      // Handle MFA cases
+      if (isMFAResponse(data)) {
+        localStorage.setItem("mfa_temp_token", data.temp_token);
+        localStorage.setItem("mfa_method", "totp");
+        navigate("/authenticate");
+        return;
+      }
 
-      if (location.pathname === "/" || location.pathname === "/login") {
-        navigate(getRedirectOr("/"));
+      // Handle normal login with JWT tokens
+      if (isJwtTokenResponse(data)) {
+        setAccessToken(data.access);
+        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+
+        // Invalidate and wait for the currentUser query to complete
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        await queryClient.refetchQueries({ queryKey: ["currentUser"] });
+
+        if (location.pathname === "/" || location.pathname === "/login") {
+          navigate(getRedirectOr("/"));
+        }
       }
     },
   });

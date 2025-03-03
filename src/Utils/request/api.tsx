@@ -66,6 +66,13 @@ export interface JwtTokenObtainPair {
   refresh: string;
 }
 
+export interface MFAResponse {
+  temp_token: string;
+  mfa_required?: boolean;
+}
+
+export type LoginResponse = JwtTokenObtainPair | MFAResponse;
+
 export interface LoginCredentials {
   username: string;
   password: string;
@@ -97,7 +104,7 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
-    TRes: Type<JwtTokenObtainPair>(),
+    TRes: Type<LoginResponse>(),
     TBody: Type<LoginCredentials>(),
   },
 
