@@ -13,6 +13,8 @@ import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
 import query from "@/Utils/request/query";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
 import deviceApi from "@/types/device/deviceApi";
@@ -25,7 +27,7 @@ export default function DevicesList({ facilityId }: Props) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
 
-  const limit = 12;
+  const limit = RESULTS_PER_PAGE_LIMIT;
 
   const { data: devices, isLoading } = useQuery({
     queryKey: ["devices", facilityId, page, limit],
@@ -44,7 +46,7 @@ export default function DevicesList({ facilityId }: Props) {
         <div className="flex items-center gap-4">
           <PageTitle title={t("devices")} className="mt-2" />
           <Badge
-            className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 w-max"
+            className="bg-purple-50 text-purple-700  text-sm font-medium rounded-xl px-3 w-max"
             variant="outline"
           >
             {isLoading
@@ -52,11 +54,11 @@ export default function DevicesList({ facilityId }: Props) {
               : devices?.count == 1
                 ? t("entity_count_one", {
                     count: devices?.count ?? 0,
-                    entity: "Device",
+                    entity: t("device"),
                   })
                 : t("entity_count_other", {
                     count: devices?.count ?? 0,
-                    entity: "Device",
+                    entity: t("device"),
                   })}
           </Badge>
         </div>

@@ -776,6 +776,7 @@
   "details_of_origin_facility": "Details of origin facility",
   "details_of_patient": "Details of patient",
   "details_of_shifting_approving_facility": "Details of shifting approving facility",
+  "device": "Device",
   "device_availability_status_available": "Available",
   "device_availability_status_damaged": "Damaged",
   "device_availability_status_destroyed": "Destroyed",
