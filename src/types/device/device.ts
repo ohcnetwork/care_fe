@@ -50,7 +50,7 @@ export interface DeviceList extends DeviceBase {
   id: string;
 }
 
-export interface DeviceEncounters {
+export interface DeviceEncounter {
   id: string;
   encounter: Encounter;
   created_by: UserBase;
