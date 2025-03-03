@@ -152,7 +152,7 @@ export const PatientHome = (props: {
             </div>
           </div>
         </div>
-        <div className="h-full lg:flex">
+        <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
             {Tab && (
               <Tab
