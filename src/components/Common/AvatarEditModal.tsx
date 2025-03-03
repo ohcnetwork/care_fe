@@ -23,6 +23,8 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
+import{ handleCameraPermission } from "../../Utils/cameraPermissionHandler";
+
 interface Props {
   title: string;
   open: boolean;
@@ -391,9 +393,10 @@ const AvatarEditModal = ({
                         width={1280}
                         ref={webRef}
                         videoConstraints={constraint}
-                        onUserMediaError={(_e) => {
-                          setIsCameraOpen(false);
-                          toast.warning(t("camera_permission_denied"));
+                        onUserMediaError={async () => {
+                          await handleCameraPermission("user", () =>
+                            setIsCameraOpen(false),
+                          );
                         }}
                       />
                     </>
