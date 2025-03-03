@@ -58,7 +58,7 @@ export default function AssociateLocationSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{t("associate_location")}</SheetTitle>

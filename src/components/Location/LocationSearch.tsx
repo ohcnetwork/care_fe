@@ -40,7 +40,7 @@ export function LocationSearch({
 
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId, mode, search],
-    queryFn: query(locationApi.list, {
+    queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { mode, name: search, form: "bd", available: "true" },
     }),
@@ -57,7 +57,7 @@ export function LocationSearch({
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="w-[400px] max-h-[calc(100vh-12rem)] overflow-y-auto">
         <Command className="pt-1">
           <CommandInput
             placeholder="Search locations..."
