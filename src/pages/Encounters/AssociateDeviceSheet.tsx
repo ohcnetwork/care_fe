@@ -82,7 +82,7 @@ export default function AssociateDeviceSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{t("associate_device")}</SheetTitle>

@@ -37,7 +37,7 @@ export function DeviceSearch({
 
   const { data: devices } = useQuery({
     queryKey: ["devices", facilityId, search],
-    queryFn: query(deviceApi.list, {
+    queryFn: query.paginated(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { search_text: search },
     }),
@@ -54,7 +54,7 @@ export function DeviceSearch({
           {value?.registered_name || t("select_device")}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="w-[400px] max-h-[calc(100vh-12rem)] overflow-y-auto">
         <Command className="pt-1">
           <CommandInput
             placeholder={t("search_devices")}
