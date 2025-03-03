@@ -16,22 +16,23 @@ export default function UserDashboard() {
   const user = useAuthUser();
   const { signOut } = useAuthContext();
   const facilities = user.facilities || [];
-  const organizations = user.organizations || [];
   const { t } = useTranslation();
+
+  const organizations = user.organizations || [];
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm">
+      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
             name={formatDisplayName(user)}
             imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
-          <div className="space-y-1">
+          <div className="space-y-1 text-center sm:text-left">
             <h1 className="text-xl md:text-2xl font-bold">
-              {t("welcome_back", { name: user.first_name })}
+              {t("welcome_back_name", { name: user.first_name })}
             </h1>
             <p className="text-sm md:text-base text-gray-500">
               {new Date().toLocaleDateString("en-US", {
@@ -43,7 +44,7 @@ export default function UserDashboard() {
             </p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             variant="outline"
             size="sm"
@@ -52,7 +53,7 @@ export default function UserDashboard() {
           >
             <Link
               href={`/users/${user.username}`}
-              className="gap-2 text-inherit"
+              className="gap-2 text-inherit flex items-center"
             >
               <Settings className="h-4 w-4" />
               {t("edit_profile")}
@@ -65,7 +66,10 @@ export default function UserDashboard() {
               className="w-full sm:w-auto"
               asChild
             >
-              <Link href="/admin/questionnaire" className="gap-2 text-inherit">
+              <Link
+                href="/admin/questionnaire"
+                className="gap-2 text-inherit flex items-center"
+              >
                 <User2Icon className="h-4 w-4" />
                 {t("admin_dashboard")}
               </Link>
@@ -75,7 +79,7 @@ export default function UserDashboard() {
             variant="outline"
             size="sm"
             className="w-full sm:w-auto"
-            onClick={() => signOut()}
+            onClick={signOut}
           >
             <LogOut className="h-4 w-4" />
             {t("sign_out")}
