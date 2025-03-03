@@ -693,7 +693,7 @@ export function EncounterList({
               {encounters.map((encounter: Encounter) => (
                 <Card
                   key={encounter.id}
-                  className="hover:shadow-lg transition-shadow group"
+                  className="hover:shadow-lg  md:flex md:flex-col  transition-shadow group"
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
@@ -719,8 +719,8 @@ export function EncounterList({
                         format(new Date(encounter.period.start), "PPp")}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="">
-                    <div className="flex flex-col space-y-2">
+                  <CardContent className=" md:flex-grow">
+                    <div className="flex flex-col md:justify-between md:h-full space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge
                           className={getStatusColor(encounter.status)}
@@ -741,17 +741,19 @@ export function EncounterList({
                           {t(`encounter_priority__${encounter.priority}`)}
                         </Badge>
                       </div>
-                      <Separator className="my-2" />
-                      <Link
-                        href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-                        className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-                      >
-                        View Details
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-1 h-4 w-4"
-                        />
-                      </Link>
+                      <div>
+                        <Separator className="my-2" />
+                        <Link
+                          href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+                          className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
+                        >
+                          View Details
+                          <CareIcon
+                            icon="l-arrow-right"
+                            className="ml-1 h-4 w-4"
+                          />
+                        </Link>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
