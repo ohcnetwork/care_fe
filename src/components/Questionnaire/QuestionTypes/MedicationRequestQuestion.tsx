@@ -524,15 +524,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm gap-x-2">
-        {(medication.status === "active" || medication.status === "ended") && (
-          <span
-            className={`break-words line-clamp-2 hidden lg:block ${
-              medication.status === "ended" ? "text-gray-500" : ""
-            }`}
-          >
-            {medication.medication?.display}
-          </span>
-        )}
+        <span
+          className={`break-words line-clamp-2 hidden lg:block ${
+            medication.status === "ended" ? "text-gray-500" : ""
+          }`}
+        >
+          {medication.medication?.display}
+        </span>
         <span>
           {(medication.status === "active" ||
             medication.status === "ended") && (
