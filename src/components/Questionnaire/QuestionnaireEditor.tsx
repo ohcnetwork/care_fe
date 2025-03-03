@@ -775,7 +775,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleCancel = () => {
-    navigate(id ? `/admin/questionnaire/${id}` : "/admin/questionnaire");
+    window.location.href = "http://localhost:4000/admin/questionnaire";
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
