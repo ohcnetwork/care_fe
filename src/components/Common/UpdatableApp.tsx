@@ -12,6 +12,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { useToast } from "@/hooks/useToast";
+
 const META_URL = "/build-meta.json";
 const APP_VERSION_KEY = "app-version";
 const APP_UPDATED_KEY = "app-updated";
@@ -103,11 +105,19 @@ interface UpdateAppPopupProps {
 }
 
 const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
-  const [isShowing, setIsShowing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    setTimeout(() => setIsShowing(true), 1000);
+    toast({
+      title: t("software_update"),
+      description: t("a_new_version_of_care_is_available"),
+      action: (
+        <Button onClick={updateApp} disabled={isUpdating} variant="white">
+          {isUpdating ? "Updating..." : "Update"}
+        </Button>
+      ),
+    });
   }, []);
 
   const updateApp = () => {
@@ -115,31 +125,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
     onUpdate();
   };
 
-  return (
-    <AlertTransition show={isShowing}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <div className="rounded-xl bg-alert-600 px-5 py-4 text-white shadow-2xl shadow-alert-900 cursor-pointer">
-            <div className="flex items-center gap-4">
-              <CareIcon
-                icon="l-sync"
-                className={cn("text-2xl", isUpdating && "animate-spin")}
-              />
-              <span className="mr-4 flex flex-col">
-                <p className="font-semibold">{t("software_update")}</p>
-                <p className="text-sm font-medium">
-                  {t("a_new_version_of_care_is_available")}
-                </p>
-              </span>
-              <Button disabled={isUpdating} onClick={updateApp} variant="alert">
-                {isUpdating ? "Updating..." : "Update"}
-              </Button>
-            </div>
-          </div>
-        </PopoverTrigger>
-      </Popover>
-    </AlertTransition>
-  );
+  return null;
 };
 
 interface AppUpdatedAlertProps {
