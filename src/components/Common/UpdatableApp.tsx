@@ -1,16 +1,7 @@
 import { t } from "i18next";
 import { ReactNode, useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import { useToast } from "@/hooks/useToast";
 
@@ -133,46 +124,16 @@ interface AppUpdatedAlertProps {
 }
 
 const AppUpdatedAlert = ({ show }: AppUpdatedAlertProps) => {
-  return (
-    <AlertTransition show={show}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <div className="rounded-xl bg-primary-500 px-5 py-4 text-white shadow-2xl shadow-primary-500 cursor-pointer">
-            <div className="flex items-center gap-4">
-              <CareIcon icon="l-thumbs-up" className="text-2xl" />
-              <span className="mr-4 flex flex-col">
-                <p className="font-semibold">{t("updated_successfully")}</p>
-                <p className="text-sm font-medium">
-                  {t("now_using_the_latest_version_of_care")}
-                </p>
-              </span>
-            </div>
-          </div>
-        </PopoverTrigger>
-        <PopoverContent>
-          <span>{t("application_successfully_updated")}</span>
-        </PopoverContent>
-      </Popover>
-    </AlertTransition>
-  );
-};
+  const { toast } = useToast();
+  useEffect(() => {
+    if (show) {
+      toast({
+        title: t("updated_successfully"),
+        description: t("now_using_the_latest_version_of_care"),
+        duration: 5000,
+      });
+    }
+  }, [show]);
 
-interface AlertTransitionProps {
-  show: boolean;
-  children: ReactNode;
-}
-
-const AlertTransition = ({ show, children }: AlertTransitionProps) => {
-  return (
-    <div
-      className={cn(
-        "fixed left-1/2 top-6 z-50 -translate-x-1/2 transition-transform duration-300",
-        show
-          ? "opacity-100 scale-100 translate-y-0"
-          : "opacity-0 scale-95 -translate-y-10",
-      )}
-    >
-      {children}
-    </div>
-  );
+  return null;
 };
