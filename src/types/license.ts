@@ -31,3 +31,5 @@ export interface LicensesSbom {
     }[];
   };
 }
+
+export type PackageType = "pypi" | "npm" | "github" | "githubactions";

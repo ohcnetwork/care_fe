@@ -1,37 +1,20 @@
-import { navigate } from "raviger";
+import { t } from "i18next";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import useSlug from "@/hooks/useSlug";
 
 import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
 import { UserBase } from "@/types/user/user";
-
-const GetDetailsButton = (username: string) => {
-  const { t } = useTranslation();
-  const facilityId = useSlug("facility");
-
-  return (
-    <div className="grow">
-      <button
-        id={`more-details-${username}`}
-        onClick={() => navigate(`/facility/${facilityId}/users/${username}`)}
-        className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs hover:bg-gray-200 w-full"
-      >
-        <CareIcon icon="l-arrow-up-right" className="text-lg" />
-        <span>{t("more_details")}</span>
-      </button>
-    </div>
-  );
-};
 
 export const UserStatusIndicator = ({
   user,
@@ -64,7 +47,10 @@ export const UserStatusIndicator = ({
           </span>
         </Badge>
       ) : (
-        <Badge variant="secondary" className="bg-gray-100 whitespace-nowrap">
+        <Badge
+          variant="secondary"
+          className="bg-gray-100 whitespace-nowrap text-wrap"
+        >
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
           <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
         </Badge>
@@ -73,50 +59,64 @@ export const UserStatusIndicator = ({
   );
 };
 const UserCard = ({ user }: { user: UserBase }) => {
-  const { t } = useTranslation();
-
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   return (
     <Card key={user.id} className="h-full">
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex flex-col h-full gap-4">
-          <div className="flex gap-4">
-            <Avatar
-              name={user.username ?? ""}
-              imageUrl={
-                "profile_picture_url" in user ? user.profile_picture_url : ""
-              }
-              className="h-12 w-12 sm:h-16 sm:w-16 text-xl sm:text-2xl flex-shrink-0"
-            />
-            <div className="flex flex-col min-w-0 flex-1">
-              <div className="flex flex-col gap-1">
+      <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
+        <div className="flex items-start gap-3">
+          <Avatar
+            name={formatName(user)}
+            imageUrl={
+              "profile_picture_url" in user ? user.profile_picture_url : ""
+            }
+            className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
+          />
+
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-start justify-between">
                 <h1 className="text-base font-bold break-words pr-2">
                   {user.first_name} {user.last_name}
                 </h1>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-500 truncate">
-                    {user.username}
-                  </span>
+                <span className="text-sm text-gray-500">
                   <UserStatusIndicator user={user} />
+                </span>
+              </div>
+              <span className="text-sm text-gray-500 mr-2 break-words">
+                {user.username}
+              </span>
+            </div>
+            <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <div className="text-gray-500">{t("role")}</div>
+                <div className="font-medium truncate">
+                  {user.user_type ?? "-"}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-500">{t("phone_number")}</div>
+                <div className="font-medium truncate">
+                  {user.phone_number
+                    ? formatPhoneNumberIntl(user.phone_number)
+                    : "-"}
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <div className="text-gray-500">{t("role")}</div>
-              <div className="font-medium truncate">
-                {user.user_type ?? "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-gray-500">{t("phone_number")}</div>
-              <div className="font-medium truncate">
-                {formatPhoneNumberIntl(user.phone_number)}
-              </div>
-            </div>
-          </div>
-          <div className="mt-auto pt-2">{GetDetailsButton(user.username)}</div>
+        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
+          <Button
+            asChild
+            id={`see-details-${user.username}`}
+            variant="outline"
+            size="sm"
+          >
+            <Link href={`/facility/${facilityId}/users/${user.username}`}>
+              <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+              <span>{t("see_details")}</span>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -129,7 +129,6 @@ export const UserGrid = ({ users }: { users?: UserBase[] }) => (
 );
 
 const UserListHeader = () => {
-  const { t } = useTranslation();
   return (
     <thead>
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
@@ -143,6 +142,7 @@ const UserListHeader = () => {
 };
 
 const UserListRow = ({ user }: { user: UserBase }) => {
+  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
   return (
     <tr
       key={`usr_${user.id}`}
@@ -152,11 +152,10 @@ const UserListRow = ({ user }: { user: UserBase }) => {
       <td className="px-4 py-4 lg:pr-20">
         <div className="flex items-center gap-3">
           <Avatar
-            // TO do: adjust for facility users
             imageUrl={
               "profile_picture_url" in user ? user.profile_picture_url : ""
             }
-            name={user.username ?? ""}
+            name={formatName(user) ?? ""}
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">
@@ -167,7 +166,7 @@ const UserListRow = ({ user }: { user: UserBase }) => {
               id={`username-${user.username}`}
               className="text-xs text-gray-500"
             >
-              @{user.username}
+              {user.username}
             </span>
           </div>
         </div>
@@ -179,9 +178,21 @@ const UserListRow = ({ user }: { user: UserBase }) => {
         {user.user_type}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
-        {formatPhoneNumberIntl(user.phone_number)}
+        {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}
       </td>
-      <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
+      <td className="px-4 py-4">
+        <Button
+          asChild
+          id={`see-details-${user.username}`}
+          variant="outline"
+          size="sm"
+        >
+          <Link href={`/facility/${facilityId}/users/${user.username}`}>
+            <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+            <span>{t("see_details")}</span>
+          </Link>
+        </Button>
+      </td>
     </tr>
   );
 };

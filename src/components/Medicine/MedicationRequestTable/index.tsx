@@ -7,6 +7,7 @@ import { useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -99,14 +100,16 @@ export default function MedicationRequestTable({
       ]
     : activeMedications?.results || [];
 
-  const displayedMedications = medications.filter(
-    (med: MedicationRequestRead) => {
-      if (!searchQuery.trim()) return true;
-      const searchTerm = searchQuery.toLowerCase().trim();
-      const medicationName = med.medication?.display?.toLowerCase() || "";
-      return medicationName.includes(searchTerm);
-    },
-  );
+  const displayedMedications = !searchQuery.trim()
+    ? medications
+    : [
+        ...(activeMedications?.results || []),
+        ...(stoppedMedications?.results || []),
+      ].filter((med: MedicationRequestRead) =>
+        med.medication?.display
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim()),
+      );
 
   const isLoading = loadingActive || loadingStopped;
 
@@ -134,8 +137,7 @@ export default function MedicationRequestTable({
               <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-1">
                   <CareIcon icon="l-search" className="text-lg text-gray-500" />
-                  <input
-                    type="text"
+                  <Input
                     placeholder={t("search_medications")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -167,8 +169,8 @@ export default function MedicationRequestTable({
                     </Link>
                   </Button>
                   <Button
-                    asChild
                     variant="outline"
+                    disabled={!activeMedications?.results?.length}
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
@@ -186,35 +188,34 @@ export default function MedicationRequestTable({
                 <div className="min-h-[200px] flex items-center justify-center">
                   <Loading />
                 </div>
-              ) : !medications.length ? (
-                <EmptyState />
-              ) : !displayedMedications.length ? (
+              ) : !activeMedications?.results?.length &&
+                !stoppedMedications?.results?.length ? (
+                <EmptyState message={t("no_medications")} />
+              ) : searchQuery && !displayedMedications.length ? (
                 <EmptyState searching searchQuery={searchQuery} />
               ) : (
                 <ScrollArea className="h-[calc(100vh-16rem)]">
                   <div className="min-w-[800px]">
                     <div className="p-2">
-                      <MedicationsTable
-                        patientId={patientId}
-                        encounterId={encounterId}
-                      />
+                      <MedicationsTable medications={displayedMedications} />
                     </div>
-                    {!!stoppedMedications?.results?.length && (
-                      <div
-                        className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                        onClick={() => setShowStopped(!showStopped)}
-                      >
-                        <CareIcon
-                          icon={showStopped ? "l-eye-slash" : "l-eye"}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm underline">
-                          {showStopped ? t("hide") : t("show")}{" "}
-                          {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                          {t("prescriptions")}
-                        </span>
-                      </div>
-                    )}
+                    {!!stoppedMedications?.results?.length &&
+                      !searchQuery.trim() && (
+                        <div
+                          className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                          onClick={() => setShowStopped(!showStopped)}
+                        >
+                          <CareIcon
+                            icon={showStopped ? "l-eye-slash" : "l-eye"}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm underline">
+                            {showStopped ? t("hide") : t("show")}{" "}
+                            {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
+                            {t("prescriptions")}
+                          </span>
+                        </div>
+                      )}
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>

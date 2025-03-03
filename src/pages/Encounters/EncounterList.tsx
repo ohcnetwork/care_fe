@@ -213,8 +213,23 @@ export function EncounterList({
   const { t } = useTranslation();
 
   return (
-    <Page title={t("encounters")}>
-      <div className="space-y-4 mt-2 flex flex-col">
+    <Page
+      title={t("encounters")}
+      componentRight={
+        <Badge
+          className="bg-purple-50 text-purple-700 ml-2 text-sm font-medium rounded-xl px-3 m-3 w-max"
+          variant="outline"
+        >
+          {isLoading
+            ? t("loading")
+            : t("entity_count", {
+                count: queryEncounters?.count ?? 0,
+                entity: "Encounter",
+              })}
+        </Badge>
+      }
+    >
+      <div className="space-y-4 mt-2 flex flex-col px-6">
         <div className="rounded-lg border bg-card shadow-sm flex flex-col">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
@@ -688,6 +703,13 @@ export function EncounterList({
                       >
                         <CardTitle className="group-hover:text-primary transition-colors">
                           {encounter.patient.name}
+                          {encounter.patient.death_datetime && (
+                            <Badge variant="destructive" className="ml-2 py-0">
+                              <h3 className="text-xs font-medium">
+                                {t("expired")}
+                              </h3>
+                            </Badge>
+                          )}
                         </CardTitle>
                       </Link>
                     </div>

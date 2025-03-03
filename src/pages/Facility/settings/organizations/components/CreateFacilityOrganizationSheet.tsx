@@ -40,7 +40,7 @@ const ORG_TYPES = [
 
 type OrgType = (typeof ORG_TYPES)[number]["value"];
 
-export default function CreateFacilityOrganizationSheet({
+export default function FacilityOrganizationSheet({
   facilityId,
   parentId,
 }: Props) {

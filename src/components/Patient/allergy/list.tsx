@@ -50,7 +50,7 @@ interface AllergyListProps {
   patientId: string;
   encounterId?: string;
   className?: string;
-  isPrintPreview?: boolean;
+
   encounterStatus?: Encounter["status"];
 }
 
@@ -72,10 +72,9 @@ export function AllergyList({
   patientId,
   encounterId,
   className,
-  isPrintPreview = false,
   encounterStatus,
 }: AllergyListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(isPrintPreview);
+  const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
@@ -178,28 +177,22 @@ export function AllergyList({
         <TableCell className="text-sm text-gray-950">
           {allergy.note && (
             <div className="flex items-center gap-2">
-              {isPrintPreview ? (
-                <span className="text-gray-950 max-w-[200px]">
-                  {allergy.note}
-                </span>
-              ) : (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs shrink-0"
-                    >
-                      {t("see_note")}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {allergy.note}
-                    </p>
-                  </PopoverContent>
-                </Popover>
-              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs shrink-0"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {allergy.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </TableCell>
@@ -223,7 +216,6 @@ export function AllergyList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
-      isPrintPreview={isPrintPreview}
     >
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
@@ -295,43 +287,28 @@ const AllergyListLayout = ({
   encounterId,
   children,
   className,
-  isPrintPreview = false,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
   className?: string;
-  isPrintPreview?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
-      <CardHeader
-        className={cn(
-          "flex justify-between flex-row",
-          !isPrintPreview && "px-4 pt-4 pb-2 ",
-          isPrintPreview && "px-0 py-2 ",
-        )}
-      >
+      <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("allergies")}</CardTitle>
         {facilityId && encounterId && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-edit" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}
       </CardHeader>
-      <CardContent
-        className={cn(
-          !isPrintPreview && "px-2 pb-2",
-          isPrintPreview && "px-0 py-0",
-        )}
-      >
-        {children}
-      </CardContent>
+      <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
   );
 };
