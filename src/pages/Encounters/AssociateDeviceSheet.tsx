@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Eye } from "lucide-react";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -115,6 +117,15 @@ export default function AssociateDeviceSheet({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
+                  <Button variant="warning" className="p-2 mr-6">
+                    <Link
+                      href={`/facility/${facilityId}/patient/${selectedDeviceDetail.current_encounter.patient.id}/encounter/${selectedDeviceDetail.current_encounter.id}/updates`}
+                      className="flex gap-1"
+                    >
+                      <Eye className="w-4 h-4 mt-1" />
+                      <span>{t("view_associated_encounter")}</span>
+                    </Link>
+                  </Button>
                   <AlertDialogCancel>
                     <CareIcon icon="l-cancel" className="h-4" />
                     {t("cancel")}
