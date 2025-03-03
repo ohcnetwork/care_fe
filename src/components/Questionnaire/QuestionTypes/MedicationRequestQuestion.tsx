@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Collapsible,
@@ -182,6 +183,12 @@ export function MedicationRequestQuestion({
       questionnaireResponse.question_id,
     );
   };
+  const sortedMedications = [...medications].sort((a, b) => {
+    const statusOrder = { active: 0, ended: 1 };
+    const aOrder = statusOrder[a.status as keyof typeof statusOrder] ?? 2;
+    const bOrder = statusOrder[b.status as keyof typeof statusOrder] ?? 2;
+    return aOrder - bOrder;
+  });
 
   return (
     <div className="space-y-4">
@@ -263,7 +270,7 @@ export function MedicationRequestQuestion({
                   "bg-transparent": !desktopLayout,
                 })}
               >
-                {medications.map((medication, index) => (
+                {sortedMedications.map((medication, index) => (
                   <React.Fragment key={index}>
                     {!desktopLayout ? (
                       <Collapsible
@@ -516,9 +523,30 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       )}
     >
       {/* Medicine Name */}
-      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm">
-        <span className="break-words line-clamp-2 hidden lg:block">
-          {medication.medication?.display}
+      <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r font-medium overflow-hidden text-sm gap-x-2">
+        {(medication.status === "active" || medication.status === "ended") && (
+          <span
+            className={`break-words line-clamp-2 hidden lg:block ${
+              medication.status === "ended" ? "text-gray-500" : ""
+            }`}
+          >
+            {medication.medication?.display}
+          </span>
+        )}
+        <span>
+          {(medication.status === "active" ||
+            medication.status === "ended") && (
+            <Badge
+              variant={medication.status === "active" ? "primary" : "outline"}
+              className={`inline-flex items-center gap-1 ${
+                medication.status === "ended"
+                  ? "bg-gray-50/50 text-gray-500 border-gray-200"
+                  : ""
+              }`}
+            >
+              {t(`${medication.status}`)}
+            </Badge>
+          )}
         </span>
       </div>
       {/* Dosage */}
