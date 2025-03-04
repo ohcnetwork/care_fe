@@ -155,7 +155,7 @@ export default function LocationList({ facilityId }: Props) {
 
   useEffect(() => {
     if (!searchQuery) {
-      setExpandedRows({});
+      setExpandedRows((prevExpandedRows) => ({ ...prevExpandedRows }));
       return;
     }
 
