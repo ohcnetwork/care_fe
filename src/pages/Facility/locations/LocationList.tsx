@@ -21,7 +21,8 @@ import { useCallback, useMemo, useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,6 +35,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import PaginationComponent from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -49,6 +51,7 @@ interface LocationState {
   selectedLocation: LocationListType | null;
   expandedLocations: Set<string>;
   searchQuery: string;
+  currentPage: number;
 }
 
 // Constants
@@ -69,8 +72,6 @@ const LocationIcon = {
   jdn: MapPin, // Junction
   vi: Building2, // Village
 } as const;
-
-const QUERY_LIMIT = 100;
 
 // Utility functions
 function getLocationIcon(
@@ -97,12 +98,14 @@ function useLocationState(): LocationState & {
   handleToggleExpand: (locationId: string) => void;
   handleSearchChange: (value: string) => void;
   handleLocationData: (location: LocationListType | undefined) => void;
+  handlePageChange: (page: number) => void;
 } {
   const [state, setState] = useState<LocationState>({
     selectedLocationId: null,
     selectedLocation: null,
     expandedLocations: new Set(),
     searchQuery: "",
+    currentPage: 1,
   });
 
   const handleLocationSelect = useCallback((location: LocationListType) => {
@@ -116,7 +119,10 @@ function useLocationState(): LocationState & {
       return;
     }
 
+    // Get parent chain and include the current location ID
     const parentIds = getParentChain(location);
+    parentIds.add(location.id);
+
     setState((prev) => ({
       ...prev,
       selectedLocationId: location.id,
@@ -139,7 +145,11 @@ function useLocationState(): LocationState & {
   }, []);
 
   const handleSearchChange = useCallback((value: string) => {
-    setState((prev) => ({ ...prev, searchQuery: value }));
+    setState((prev) => ({
+      ...prev,
+      searchQuery: value,
+      currentPage: 1, // Reset to first page when search changes
+    }));
   }, []);
 
   const handleLocationData = useCallback(
@@ -166,12 +176,17 @@ function useLocationState(): LocationState & {
     [],
   );
 
+  const handlePageChange = useCallback((page: number) => {
+    setState((prev) => ({ ...prev, currentPage: page }));
+  }, []);
+
   return {
     ...state,
     handleLocationSelect,
     handleToggleExpand,
     handleSearchChange,
     handleLocationData,
+    handlePageChange,
   };
 }
 
@@ -210,15 +225,14 @@ function LocationTreeNode({
   // Query for this node's children
   const { data: children, isLoading } = useQuery({
     queryKey: ["locations", facilityId, "children", location.id],
-    queryFn: query(locationApi.list, {
+    queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: location.id,
-        limit: 100,
         mode: "kind",
       },
+      pageSize: 100,
     }),
-    enabled: isExpanded && hasChildren,
   });
 
   return (
@@ -403,21 +417,37 @@ function SelectedLocationChildren({
   onSelect,
   searchQuery,
   onLocationData,
+  currentPage,
+  onPageChange,
 }: {
   facilityId: string;
   selectedLocationId: string;
   onSelect: (location: LocationListType) => void;
   searchQuery: string;
   onLocationData: (location: LocationListType | undefined) => void;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }) {
   const { t } = useTranslation();
+  const ITEMS_PER_PAGE = 12;
+
   const { data: children, isLoading } = useQuery({
-    queryKey: ["locations", facilityId, "children", selectedLocationId, "full"],
+    queryKey: [
+      "locations",
+      facilityId,
+      "children",
+      selectedLocationId,
+      "full",
+      currentPage,
+      searchQuery, // Add search query to cache key
+    ],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: selectedLocationId,
-        limit: 100,
+        limit: ITEMS_PER_PAGE,
+        offset: (currentPage - 1) * ITEMS_PER_PAGE,
+        name: searchQuery, // Add search parameter to API call
       },
     }),
     enabled: !!selectedLocationId,
@@ -431,15 +461,6 @@ function SelectedLocationChildren({
     }
   }, [children?.results, onLocationData]);
 
-  // Filter children based on search query
-  const filteredChildren = React.useMemo(() => {
-    if (!searchQuery || !children?.results) return children?.results || [];
-    const searchLower = searchQuery.toLowerCase();
-    return children.results.filter((loc) =>
-      loc.name.toLowerCase().includes(searchLower),
-    );
-  }, [children?.results, searchQuery]);
-
   if (isLoading) {
     return <CardGridSkeleton count={6} />;
   }
@@ -448,30 +469,41 @@ function SelectedLocationChildren({
     return (
       <Card className="col-span-full">
         <CardContent className="p-6 text-center text-gray-500">
-          {t("no_child_locations")}
+          {searchQuery ? t("no_locations_found") : t("no_child_locations")}
         </CardContent>
       </Card>
     );
   }
 
-  if (searchQuery && filteredChildren.length === 0) {
-    return (
-      <Card className="col-span-full">
-        <CardContent className="p-6 text-center text-gray-500">
-          {t("no_locations_found")}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return filteredChildren.map((child) => (
-    <ChildLocationCard
-      key={child.id}
-      location={child}
-      onClick={() => onSelect(child)}
-      facilityId={facilityId}
-    />
-  ));
+  return (
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        {children.results.map((child) => (
+          <ChildLocationCard
+            key={child.id}
+            location={child}
+            onClick={() => onSelect(child)}
+            facilityId={facilityId}
+          />
+        ))}
+      </div>
+      <div className="flex w-full items-center justify-center mt-4">
+        <div
+          className={cn(
+            "flex w-full justify-center",
+            (children?.count ?? 0) > ITEMS_PER_PAGE ? "visible" : "invisible",
+          )}
+        >
+          <PaginationComponent
+            cPage={currentPage}
+            defaultPerPage={ITEMS_PER_PAGE}
+            data={{ totalCount: children?.count ?? 0 }}
+            onChange={onPageChange}
+          />
+        </div>
+      </div>
+    </>
+  );
 }
 
 function Breadcrumbs({
@@ -520,52 +552,6 @@ function Breadcrumbs({
   );
 }
 
-function LocationSummary({ locations }: { locations: LocationListType[] }) {
-  const { t } = useTranslation();
-
-  const summary = React.useMemo(() => {
-    const beds = locations.filter((loc) => loc.form === "bd");
-    const nonBeds = locations.filter((loc) => loc.form !== "bd");
-    const availableBeds = beds.filter((bed) => !bed.current_encounter);
-
-    return {
-      totalLocations: locations.length,
-      hasNonBeds: nonBeds.length > 0,
-      totalBeds: beds.length,
-      availableBeds: availableBeds.length,
-      occupiedBeds: beds.length - availableBeds.length,
-    };
-  }, [locations]);
-
-  if (!locations.length) return null;
-
-  return (
-    <div className="flex gap-4 flex-wrap">
-      {summary.hasNonBeds && (
-        <Badge
-          variant="secondary"
-          className="flex items-center gap-2 px-2 font-medium"
-        >
-          <span>{t("total_locations")}</span>
-          <span>{summary.totalLocations}</span>
-        </Badge>
-      )}
-      {summary.totalBeds > 0 && (
-        <div className="flex gap-2">
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center gap-2 px-2 font-medium">
-            <span>{t("available_beds")}</span>
-            <span>{summary.availableBeds}</span>
-          </Badge>
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 flex items-center gap-2 px-2 font-medium">
-            <span>{t("occupied_beds")}</span>
-            <span>{summary.occupiedBeds}</span>
-          </Badge>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function LocationList({ facilityId }: { facilityId: string }) {
   const { t } = useTranslation();
   const {
@@ -573,10 +559,12 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
     selectedLocation,
     expandedLocations,
     searchQuery,
+    currentPage,
     handleLocationSelect,
     handleToggleExpand,
     handleSearchChange,
     handleLocationData,
+    handlePageChange,
   } = useLocationState();
 
   const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
@@ -585,21 +573,10 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
       pathParams: { facility_id: facilityId },
       queryParams: {
         mine: true,
-        page_size: QUERY_LIMIT,
+        mode: "kind",
       },
+      pageSize: 100,
     }),
-  });
-
-  const { data: selectedChildren } = useQuery({
-    queryKey: ["locations", facilityId, "children", selectedLocationId, "full"],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        parent: selectedLocationId,
-        limit: 100,
-      },
-    }),
-    enabled: !!selectedLocationId,
   });
 
   const topLevelLocations = useMemo(() => {
@@ -610,7 +587,7 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
   }, [allLocations?.results]);
 
   return (
-    <div className="flex px-4 space-x-4 h-[calc(100vh-4rem)]">
+    <div className="flex px-4 space-x-4 min-h-[100vh]">
       {/* Left sidebar - Location tree */}
       {topLevelLocations.length > 0 && (
         <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
@@ -656,13 +633,6 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
               <h2 className="text-lg font-semibold whitespace-nowrap">
                 {selectedLocation ? selectedLocation.name : t("locations")}
               </h2>
-              {selectedLocationId ? (
-                selectedChildren?.results && (
-                  <LocationSummary locations={selectedChildren.results} />
-                )
-              ) : (
-                <LocationSummary locations={topLevelLocations} />
-              )}
             </div>
             <div className="w-full sm:w-72 shrink-0">
               <Input
@@ -679,15 +649,15 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
         {selectedLocationId ? (
           <div className="space-y-6">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <SelectedLocationChildren
-                  facilityId={facilityId}
-                  selectedLocationId={selectedLocationId}
-                  onSelect={handleLocationSelect}
-                  searchQuery={searchQuery}
-                  onLocationData={handleLocationData}
-                />
-              </div>
+              <SelectedLocationChildren
+                facilityId={facilityId}
+                selectedLocationId={selectedLocationId}
+                onSelect={handleLocationSelect}
+                searchQuery={searchQuery}
+                onLocationData={handleLocationData}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+              />
             </div>
           </div>
         ) : (
