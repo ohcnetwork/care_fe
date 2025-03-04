@@ -72,20 +72,39 @@ export default function FacilityOrganizationIndex({
 
     const normalizedQuery = searchQuery.toLowerCase().trim();
     const matches = new Set<string>();
-
+    const parentChains = new Map<string, string[]>();
     tableData.forEach((org) => {
+      const parentChain: string[] = [];
+      let current = org;
+      while (current.parent?.id) {
+        const parentId = current.parent.id;
+        parentChain.push(parentId);
+        current = tableData.find((o) => o.id === parentId)!;
+      }
+      parentChains.set(org.id, parentChain);
       if (org.name.toLowerCase().includes(normalizedQuery)) {
         matches.add(org.id);
-        let current = org;
-        while (current.parent?.id) {
-          matches.add(current.parent.id);
-          current = tableData.find((o) => o.id === current.parent?.id)!;
-        }
       }
+    });
+    matches.forEach((matchId) => {
+      const parents = parentChains.get(matchId) || [];
+      parents.forEach((parentId) => matches.add(parentId));
     });
 
     return tableData.filter((org) => matches.has(org.id));
   }, [tableData, searchQuery]);
+  const getFilteredChildren = useCallback(
+    (parentId: string) => {
+      if (!searchQuery.trim()) {
+        return getChildren(parentId);
+      }
+
+      return getChildren(parentId).filter((child) =>
+        filteredData.some((item) => item.id === child.id),
+      );
+    },
+    [filteredData, getChildren, searchQuery],
+  );
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -179,7 +198,10 @@ export default function FacilityOrganizationIndex({
     getChildren: (parentId: string) => any[];
     indent: number;
   }) => {
-    const children = getChildren(org.id);
+    const children = searchQuery.trim()
+      ? getFilteredChildren(org.id)
+      : getChildren(org.id);
+
     const isTopLevel = !org.parent || Object.keys(org.parent).length === 0;
 
     const toggleAllChildren = () => {
