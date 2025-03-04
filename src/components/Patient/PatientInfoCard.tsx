@@ -373,11 +373,13 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       }
                     />
                   ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {encounter.organizations.map((org) =>
-                        organizationBadge(org),
-                      )}
-                    </div>
+                    encounter.organizations.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {encounter.organizations.map((org) =>
+                          organizationBadge(org),
+                        )}
+                      </div>
+                    )
                   )}
                   {props.encounter.current_location ? (
                     <Popover>
