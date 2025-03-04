@@ -1563,6 +1563,7 @@
   "no_linked_facilities": "No Linked Facilities",
   "no_location": "No location assigned",
   "no_location_description": "This device is not currently assigned to any location",
+  "no_locations": "No locations",
   "no_locations_available": "No locations available",
   "no_locations_found": "No locations found",
   "no_log_update_delta": "No changes since previous log update",

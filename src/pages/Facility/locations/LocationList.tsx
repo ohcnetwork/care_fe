@@ -610,34 +610,36 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
   }, [allLocations?.results]);
 
   return (
-    <div className="flex px-4 space-x-4">
+    <div className="flex px-4 space-x-4 h-[calc(100vh-4rem)]">
       {/* Left sidebar - Location tree */}
-      <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold">{t("locations")}</h2>
-        </div>
-        <ScrollArea>
-          <div className="p-2">
-            {isLoadingLocations ? (
-              <div className="p-4">
-                <CardGridSkeleton count={3} />
-              </div>
-            ) : (
-              topLevelLocations.map((location) => (
-                <LocationTreeNode
-                  key={location.id}
-                  location={location}
-                  selectedLocationId={selectedLocationId}
-                  onSelect={handleLocationSelect}
-                  expandedLocations={expandedLocations}
-                  onToggleExpand={handleToggleExpand}
-                  facilityId={facilityId}
-                />
-              ))
-            )}
+      {topLevelLocations.length > 0 && (
+        <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold">{t("locations")}</h2>
           </div>
-        </ScrollArea>
-      </div>
+          <ScrollArea>
+            <div className="p-2">
+              {isLoadingLocations ? (
+                <div className="p-4">
+                  <CardGridSkeleton count={3} />
+                </div>
+              ) : (
+                topLevelLocations.map((location) => (
+                  <LocationTreeNode
+                    key={location.id}
+                    location={location}
+                    selectedLocationId={selectedLocationId}
+                    onSelect={handleLocationSelect}
+                    expandedLocations={expandedLocations}
+                    onToggleExpand={handleToggleExpand}
+                    facilityId={facilityId}
+                  />
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
 
       {/* Main content area */}
       <div className="flex-1 p-6 space-y-4 rounded-lg bg-white shadow-lg">
@@ -690,16 +692,24 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {topLevelLocations.map((location) => (
-                <ChildLocationCard
-                  key={location.id}
-                  location={location}
-                  onClick={() => handleLocationSelect(location)}
-                  facilityId={facilityId}
-                />
-              ))}
-            </div>
+            {topLevelLocations.length === 0 ? (
+              <Card className="col-span-full">
+                <CardContent className="p-6 text-center text-gray-500">
+                  {t("no_locations")}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {topLevelLocations.map((location) => (
+                  <ChildLocationCard
+                    key={location.id}
+                    location={location}
+                    onClick={() => handleLocationSelect(location)}
+                    facilityId={facilityId}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
