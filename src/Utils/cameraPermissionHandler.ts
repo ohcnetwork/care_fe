@@ -7,7 +7,7 @@ export const handleCameraPermission = () => {
   const requestPermission = useCallback(
     async (device: "camera", cameraFacingMode: string = "user") => {
       try {
-        setToastShown(false); 
+        setToastShown(false);
         const constraints =
           device === "camera"
             ? { video: { facingMode: cameraFacingMode } }
@@ -20,7 +20,7 @@ export const handleCameraPermission = () => {
           setToastShown(true);
           toast.warning(`${device} permission denied`);
         }
-        return false; // Permission denied
+        return false;
       }
     },
     [toastShown],
