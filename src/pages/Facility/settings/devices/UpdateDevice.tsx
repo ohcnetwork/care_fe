@@ -46,7 +46,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-16">
-          <p className="text-muted-foreground">{t("device_not_found")}</p>
+          <p className="text-gray-500">{t("device_not_found")}</p>
           <Link href={`/facility/${facilityId}/settings/devices/${deviceId}`}>
             <Button variant="outline">{t("back")}</Button>
           </Link>

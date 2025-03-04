@@ -104,7 +104,7 @@ export function SymptomsList({
               variant="ghost"
               size="xs"
               onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-500 text-gray-950"
+              className="text-xs underline text-gray-950"
             >
               {t("view_all")}
             </Button>
