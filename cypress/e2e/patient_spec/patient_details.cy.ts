@@ -8,6 +8,7 @@ const patientDetails = new PatientDetails();
 
 describe("Patient Management", () => {
   beforeEach(() => {
+    cy.viewport(1920, 1080);
     cy.loginByApi("devdoctor");
     cy.visit("/");
   });

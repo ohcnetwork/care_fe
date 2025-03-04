@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
@@ -27,6 +26,7 @@ import query from "@/Utils/request/query";
 import uploadFile from "@/Utils/request/uploadFile";
 import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+import { FeatureBadge } from "@/pages/Facility/Utils";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FacilityData } from "@/types/facility/facility";
 import type {
@@ -223,10 +223,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <PLUGIN_Component
-                      __name="FacilityHomeActions"
-                      facility={facilityData}
-                    />
                     {/* <AlertDialog>
                       TODO: add delete facility
                       <AlertDialogTrigger asChild>
@@ -269,7 +265,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     aria-label={t("edit_cover_photo")}
                   >
                     <CareIcon
-                      icon="l-edit"
+                      icon="l-pen"
                       className="text-white"
                       aria-hidden="true"
                     />
@@ -282,15 +278,16 @@ export const FacilityHome = ({ facilityId }: Props) => {
             </div>
 
             <div className="mt-2 space-y-2">
-              <div className="mt-2 space-y-2 flex justify-end">
+              <div className="flex justify-end gap-2 max-sm:flex-col sm:mt-4 mt-12 flex-wrap">
+                <PLUGIN_Component
+                  __name="FacilityHomeActions"
+                  facility={facilityData}
+                />
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
-                    <Button
-                      className="cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full"
-                      variant="outline"
-                    >
-                      <CareIcon icon="l-edit" />
+                    <Button className="cursor-pointer" variant="outline">
+                      <CareIcon icon="l-pen" />
                       {t("edit_facility_details")}
                     </Button>
                   }
@@ -362,33 +359,18 @@ export const FacilityHome = ({ facilityId }: Props) => {
               ) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg font-medium">
+                    <CardTitle className="font-semibold text-lg">
                       {t("features")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {facilityData?.features?.map(
-                        (feature: number) =>
-                          FACILITY_FEATURE_TYPES.some(
-                            (f) => f.id === feature,
-                          ) && (
-                            <Badge
-                              key={feature}
-                              variant="secondary"
-                              className="flex items-center gap-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1"
-                            >
-                              {getFacilityFeatureIcon(feature)}
-                              <span>
-                                {
-                                  FACILITY_FEATURE_TYPES.find(
-                                    (f) => f.id === feature,
-                                  )?.name
-                                }
-                              </span>
-                            </Badge>
-                          ),
-                      )}
+                      {facilityData.features?.map((featureId) => (
+                        <FeatureBadge
+                          key={featureId}
+                          featureId={featureId as number}
+                        />
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

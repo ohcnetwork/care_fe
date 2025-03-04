@@ -1,5 +1,6 @@
 import { Patient } from "@/types/emr/newPatient";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationList } from "@/types/location/location";
 import { UserBase } from "@/types/user/user";
 
@@ -118,9 +119,11 @@ export type StatusHistory = {
 };
 
 export type LocationHistory = {
+  id: string;
   start_datetime: string;
   location: LocationList;
-  status: string;
+  status: LocationAssociationStatus;
+  end_datetime?: string;
 };
 
 export interface Encounter {
@@ -172,3 +175,7 @@ export interface EncounterRequest {
 }
 
 export const completedEncounterStatus = ["completed", "discharged"];
+export const inactiveEncounterStatus = [
+  ...["cancelled", "entered_in_error", "discontinued"],
+  ...(completedEncounterStatus as EncounterStatus[]),
+] as const;

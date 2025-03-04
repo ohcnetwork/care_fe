@@ -6,7 +6,9 @@ import { useTranslation } from "react-i18next";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
-import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import PrintTable from "@/components/Common/PrintTable";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -33,14 +35,13 @@ export const PrintPrescription = (props: {
 
   const { data: activeMedications, isLoading: medicationLoading } = useQuery({
     queryKey: ["medication_requests_active", patientId],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 50,
-        offset: 0,
         status: ["active", "on-hold", "draft", "unknown"].join(","),
       },
+      pageSize: 100,
     }),
     enabled: !!patientId,
   });
@@ -72,7 +73,7 @@ export const PrintPrescription = (props: {
       title={`${t("prescriptions")} - ${encounter?.patient.name}`}
       disabled={!activeMedications?.results?.length}
     >
-      <div className="min-h-screen bg-white md:p-2 max-w-4xl mx-auto">
+      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b">
@@ -130,7 +131,36 @@ export const PrintPrescription = (props: {
           <div className="text-2xl font-semibold mb-3">℞</div>
 
           {/* Medications Table */}
-          <MedicationsTable medications={activeMedications?.results ?? []} />
+          <PrintTable
+            headers={[
+              { key: "medicine" },
+              { key: "dosage" },
+              { key: "frequency" },
+              { key: "duration" },
+              { key: "instructions" },
+            ]}
+            rows={activeMedications?.results.map((medication) => {
+              const instruction = medication.dosage_instruction[0];
+              const frequency = getFrequencyDisplay(instruction?.timing);
+              const dosage = formatDosage(instruction);
+              const duration = instruction?.timing?.repeat?.bounds_duration;
+              const remarks = formatSig(instruction);
+              const notes = medication.note;
+              return {
+                medicine: medication.medication?.display,
+                status: t(medication.status),
+                dosage: dosage,
+                frequency: instruction?.as_needed_boolean
+                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
+                  : (frequency?.meaning ?? "-") +
+                    (instruction?.additional_instruction?.[0]?.display
+                      ? `, ${instruction.additional_instruction[0].display}`
+                      : ""),
+                duration: duration ? `${duration.value} ${duration.unit}` : "-",
+                instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+              };
+            })}
+          />
 
           {/* Doctor's Signature */}
           <div className="mt-6 flex justify-end gap-8">
