@@ -721,7 +721,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire created successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
-      navigate(`/admin/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (_error) => {
       toast.error("Failed to create questionnaire");
@@ -732,10 +732,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
     }),
-    onSuccess: (data: QuestionnaireDetail) => {
+    onSuccess: () => {
       toast.success("Questionnaire updated successfully");
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
-      navigate(`/admin/questionnaire/${data.slug}`);
     },
     onError: (_error) => {
       toast.error("Failed to update questionnaire");
@@ -809,7 +808,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const handleCancel = () => {
-    navigate(id ? `/admin/questionnaire/${id}` : "/admin/questionnaire");
+    navigate("/admin/questionnaire");
   };
 
   const toggleQuestionExpanded = (questionId: string) => {
