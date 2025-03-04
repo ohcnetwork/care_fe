@@ -236,7 +236,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
-    limit: 10,
+    limit: 5,
   });
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
@@ -295,8 +295,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     // Only update if there are changes
     if (Object.keys(updates).length > 0) {
       updateQuery({
-        ...qParams,
-        page: 1,
         ...updates,
       });
     }
@@ -398,8 +396,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         value="all"
                         onSelect={() =>
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             practitioner: null,
                             slot: null,
                           })
@@ -419,8 +415,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           value={formatName(user)}
                           onSelect={() =>
                             updateQuery({
-                              ...qParams,
-                              page: 1,
                               practitioner: user.username,
                               slot: null,
                             })
@@ -473,8 +467,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         onClick={() => {
                           const today = new Date();
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             date_from: dateQueryString(subDays(today, 7)),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -490,8 +482,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         onClick={() => {
                           const today = new Date();
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             date_from: dateQueryString(subDays(today, 1)),
                             date_to: dateQueryString(subDays(today, 1)),
                             slot: null,
@@ -507,8 +497,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         onClick={() => {
                           const today = new Date();
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -524,8 +512,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         onClick={() => {
                           const today = new Date();
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 7)),
                             slot: null,
@@ -541,8 +527,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         onClick={() => {
                           const today = new Date();
                           updateQuery({
-                            ...qParams,
-                            page: 1,
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(addDays(today, 30)),
                             slot: null,
@@ -564,8 +548,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       }}
                       onChange={(date) =>
                         updateQuery({
-                          ...qParams,
-                          page: 1,
                           date_from: date?.from
                             ? dateQueryString(date.from)
                             : null,
@@ -585,9 +567,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 selectedSlot={slot}
                 onSelect={(slot) => {
                   if (slot === "all") {
-                    updateQuery({ ...qParams, page: 1, slot: null });
+                    updateQuery({ slot: null });
                   } else {
-                    updateQuery({ ...qParams, page: 1, slot });
+                    updateQuery({ slot });
                   }
                 }}
               />
@@ -600,9 +582,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             className="w-[300px]"
             placeholder={t("search")}
             value={qParams.search ?? ""}
-            onChange={(e) =>
-              updateQuery({ ...qParams, page: 1, search: e.target.value })
-            }
+            onChange={(e) => updateQuery({ search: e.target.value })}
           />
         </div>
       </div>
@@ -837,9 +817,7 @@ function AppointmentRow(props: {
         <Tabs
           value={props.status ?? "booked"}
           className="w-full overflow-scroll"
-          onValueChange={(value) =>
-            props.updateQuery({ status: value, page: 1 })
-          }
+          onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <TabsList>
             <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
