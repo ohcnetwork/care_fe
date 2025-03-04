@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -154,7 +152,7 @@ export const PatientHome = (props: {
             </div>
           </div>
         </div>
-        <div className="h-full lg:flex">
+        <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
             {Tab && (
               <Tab
@@ -246,21 +244,6 @@ export const PatientHome = (props: {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="py-2">
-              {patientData.death_datetime && (
-                <div>
-                  <Button
-                    id="death-report"
-                    className="my-2 w-full"
-                    name="death_report"
-                    onClick={() => navigate(`/death_report/${id}`)}
-                  >
-                    <CareIcon icon="l-file-download" className="text-lg" />
-                    {t("death_report")}
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>
