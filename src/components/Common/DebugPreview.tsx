@@ -19,7 +19,7 @@ export function DebugPreview({ data, title, className }: DebugPreviewProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <pre className="text-sm text-muted-foreground whitespace-pre-wrap overflow-auto max-h-[500px]">
+        <pre className="text-sm text-gray-500 whitespace-pre-wrap overflow-auto max-h-[500px]">
           {JSON.stringify(data, null, 2)}
         </pre>
       </CardContent>

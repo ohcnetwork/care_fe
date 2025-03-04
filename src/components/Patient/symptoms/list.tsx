@@ -127,7 +127,7 @@ export function SymptomsList({
               variant="ghost"
               size="xs"
               onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-500 text-gray-950"
+              className="text-xs underline text-gray-950"
             >
               {t("view_all")}
             </Button>
@@ -160,9 +160,9 @@ const SymptomListLayout = ({
         {facilityId && encounterId && canEdit && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-edit" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}

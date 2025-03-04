@@ -788,7 +788,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   return (
     <div className="flex flex-col gap-2 mt-4 mx-2">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-start items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-1">
           <div className="flex items-center gap-2 flex-1">
             <CareIcon icon="l-search" className="text-lg text-gray-500" />
@@ -813,8 +813,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         {canWrite && (
           <Button
             variant="outline"
-            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+            className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
             onClick={() => setIsSheetOpen(true)}
+            disabled={!activeMedications?.results.length}
           >
             <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
             {t("administer_medicine")}
@@ -859,7 +860,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             });
           }
         }}
-        medications={medications}
+        medications={activeMedications?.results || []}
         lastAdministeredDates={lastAdministeredDetails?.dates}
         patientId={patientId}
         encounterId={encounterId}
