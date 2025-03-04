@@ -236,7 +236,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
-    limit: 5,
+    limit: 15,
   });
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
