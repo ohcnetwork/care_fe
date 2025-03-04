@@ -814,7 +814,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               ? t("edit") + " " + questionnaire.title
               : "Create Questionnaire"}
           </h1>
-          <p className="text-sm text-gray-500">{questionnaire.description}</p>
+          <p className="text-sm text-gray-500 break-words whitespace-pre-wrap">
+            {questionnaire.description}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
