@@ -144,9 +144,9 @@ const DiagnosisListLayout = ({
         {facilityId && encounterId && (
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 underline"
+            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
-            <CareIcon icon="l-edit" className="w-4 h-4" />
+            <CareIcon icon="l-pen" className="w-4 h-4" />
             {t("edit")}
           </Link>
         )}
