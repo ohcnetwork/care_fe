@@ -33,12 +33,12 @@ interface Props {
 
 const VideoConstraints = {
   user: {
-    width: 1280,
+    width: 720,
     height: 720,
     facingMode: "user",
   },
   environment: {
-    width: 1280,
+    width: 720,
     height: 720,
     facingMode: { exact: "environment" },
   },
@@ -337,23 +337,29 @@ const AvatarEditModal = ({
                 <div className="flex flex-1 items-center justify-center">
                   {!previewImage ? (
                     <>
-                      <Webcam
-                        audio={false}
-                        height={720}
-                        screenshotFormat="image/jpeg"
-                        width={1280}
-                        ref={webRef}
-                        videoConstraints={constraint}
-                        onUserMediaError={(_e) => {
-                          setIsCameraOpen(false);
-                          toast.warning(t("camera_permission_denied"));
-                        }}
-                      />
+                      <div className="relative aspect-square max-w-[720px] w-full overflow-hidden">
+                        <Webcam
+                          audio={false}
+                          height={720}
+                          width={720}
+                          screenshotFormat="image/jpeg"
+                          ref={webRef}
+                          videoConstraints={constraint}
+                          className="h-full w-full object-cover"
+                          onUserMediaError={(_e) => {
+                            setIsCameraOpen(false);
+                            toast.warning(t("camera_permission_denied"));
+                          }}
+                        />
+                      </div>
                     </>
                   ) : (
-                    <>
-                      <img src={previewImage} />
-                    </>
+                    <div className="aspect-square max-w-[720px] w-full overflow-hidden">
+                      <img
+                        src={previewImage}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                   )}
                 </div>
                 {/* buttons for mobile screens */}
