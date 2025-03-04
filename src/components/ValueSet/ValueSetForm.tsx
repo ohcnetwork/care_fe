@@ -502,6 +502,7 @@ export function ValueSetForm({
             {t("cancel")}
           </Button>
           <Button
+            variant="primary"
             type="submit"
             disabled={isSubmitting || !form.formState.isDirty}
           >
