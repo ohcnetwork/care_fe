@@ -42,6 +42,7 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
@@ -50,6 +51,7 @@ interface FacilityProps {
 }
 
 export default function FacilityForm({
+  organizationId,
   facilityId,
   onSubmitSuccess,
 }: FacilityProps) {
@@ -90,6 +92,20 @@ export default function FacilityForm({
       is_public: false,
     },
   });
+
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org && org.org_type === "govt") levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(routes.facility.create),

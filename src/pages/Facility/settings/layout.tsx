@@ -8,6 +8,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceDetail";
+import DeviceLocationHistory from "@/pages/Facility/settings/devices/DeviceLocationHistory";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 
@@ -42,6 +43,9 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices/:id/edit": ({ id }: { id: string }) => (
     <UpdateDevice facilityId={facilityId} deviceId={id} />
+  ),
+  "/devices/:id/locationHistory": ({ id }: { id: string }) => (
+    <DeviceLocationHistory facilityId={facilityId} deviceId={id} />
   ),
   "*": () => <ErrorPage />,
 });
