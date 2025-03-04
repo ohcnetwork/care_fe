@@ -27,8 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
@@ -347,7 +345,7 @@ const valuesetFormSchema = z.object({
     .string()
     .trim()
     .min(5, t("field_required"))
-    .max(25, t("slug_lengthy_message"))
+    .max(25, t("max_character_validation", { length: 25 }))
     .regex(/^[-\w]+$/, {
       message: t("slug_format_message"),
     }),
@@ -408,8 +406,6 @@ export function ValueSetForm({
   isSubmitting,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
-
-  const { goBack } = useAppHistory();
 
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
@@ -500,19 +496,9 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <div className="flex gap-2 w-full justify-end">
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            type="button"
-            onClick={() => goBack("/admin/valuesets")}
-          >
-            {t("cancel")}
-          </Button>
-          <Button variant="primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t("saving") : t("save_valueset")}
-          </Button>
-        </div>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? t("saving") : t("save_valueset")}
+        </Button>
       </form>
     </Form>
   );
