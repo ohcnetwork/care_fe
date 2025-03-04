@@ -142,7 +142,7 @@ export default function OrganizationFacilities({
                           size="icon"
                           className="text-primary"
                         >
-                          <CareIcon icon="l-edit" className="h-4 w-4" />
+                          <CareIcon icon="l-pen" className="h-4 w-4" />
                           <span className="">{t("edit_facility")}</span>
                         </Button>
                       }
