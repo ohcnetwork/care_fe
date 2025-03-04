@@ -299,6 +299,7 @@ export default function LocationList({ facilityId }: Props) {
               locations={filteredData || []}
               onLocationClick={handleEditLocation}
               facilityName={facilityData?.name || t("facility")}
+              searchQuery={searchQuery}
             />
           )}
 

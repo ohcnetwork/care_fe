@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import {
-  LocationForm,
   LocationList as LocationListType,
   LocationTypeIcons,
 } from "@/types/location/location";
@@ -36,16 +35,14 @@ interface LocationMapProps {
   locations: LocationListType[];
   onLocationClick: (location: LocationListType) => void;
   facilityName: string;
-}
-
-function getLocationTypeIcon(form: LocationForm) {
-  const Icon = LocationTypeIcons[form] || Folder;
-  return <Icon className="h-5 w-5" />;
+  searchQuery?: string;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
   const { t } = useTranslation();
   const hasChildren = data.childCount > 0;
+  const Icon =
+    LocationTypeIcons[data.form as keyof typeof LocationTypeIcons] || Folder;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,7 +81,7 @@ const CustomNode = ({ data }: NodeProps) => {
         <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
-              {getLocationTypeIcon(data.form)}
+              <Icon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-gray-900 truncate">
@@ -301,6 +298,7 @@ function LocationMapContent({
   locations,
   onLocationClick,
   facilityName,
+  searchQuery,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -359,8 +357,12 @@ function LocationMapContent({
       }
     });
 
-    // Uncomment this to Expand all nodes by default(complete hierarchy)
-    // setExpandedNodes(Array.from(matchedIds));
+    // Expand all nodes when there's a search query, collapse all when search is cleared
+    if (searchQuery && searchQuery.trim()) {
+      setExpandedNodes(Array.from(matchedIds));
+    } else {
+      setExpandedNodes([]); // Collapse all nodes when search is cleared
+    }
 
     // Fit view after nodes are updated
     setTimeout(() => {
@@ -371,28 +373,71 @@ function LocationMapContent({
         duration: 800,
       });
     }, 100);
-  }, [locations, fitView, rootLocations]);
+  }, [locations, fitView, rootLocations, searchQuery]);
 
   const toggleNode = useCallback(
     (nodeId: string) => {
       setNodePositions({});
-      setExpandedNodes((prev) =>
-        prev.includes(nodeId)
-          ? prev.filter((id) => id !== nodeId)
-          : [...prev, nodeId],
-      );
-      setTimeout(
-        () =>
-          fitView({
-            padding: 0.5,
-            minZoom: 0.2,
-            maxZoom: 0.7,
-            duration: 800,
-          }),
-        100,
-      );
+      setExpandedNodes((prev) => {
+        const isExpanding = !prev.includes(nodeId);
+        const newExpandedNodes = isExpanding
+          ? [...prev, nodeId]
+          : prev.filter((id) => id !== nodeId);
+
+        setTimeout(() => {
+          // When expanding, focus on both parent and all visible children
+          if (isExpanding) {
+            // Get all immediate children of the node
+            const childNodes = locations
+              .filter((loc) => loc.parent?.id === nodeId)
+              .map((child) => ({ id: child.id }));
+
+            // Include both parent and children in the view
+            fitView({
+              padding: 0.2,
+              minZoom: 0.2,
+              maxZoom: 1,
+              duration: 800,
+              nodes: [{ id: nodeId }, ...childNodes],
+            });
+          } else {
+            // When collapsing, show the entire visible tree
+            const getAllVisibleNodes = () => {
+              // Start with root nodes
+              const visibleNodes = new Set(["facility-root"]);
+
+              // Add all expanded nodes and their visible children
+              const processNode = (id: string) => {
+                visibleNodes.add(id);
+                // If this node is expanded, add its children
+                if (newExpandedNodes.includes(id)) {
+                  const children = locations.filter(
+                    (loc) => loc.parent?.id === id,
+                  );
+                  children.forEach((child) => processNode(child.id));
+                }
+              };
+
+              // Process from root locations
+              rootLocations.forEach((root) => processNode(root.id));
+
+              return Array.from(visibleNodes).map((id) => ({ id }));
+            };
+
+            fitView({
+              padding: 0.2,
+              minZoom: 0.2,
+              maxZoom: 1.5,
+              duration: 800,
+              nodes: getAllVisibleNodes(),
+            });
+          }
+        }, 100);
+
+        return newExpandedNodes;
+      });
     },
-    [fitView],
+    [fitView, locations, rootLocations],
   );
 
   const toggleAllNodes = useCallback(() => {

@@ -8,11 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import {
-  LocationForm,
-  LocationList,
-  LocationTypeIcons,
-} from "@/types/location/location";
+import { LocationList, LocationTypeIcons } from "@/types/location/location";
 
 interface Props {
   location: LocationList;
@@ -22,11 +18,9 @@ interface Props {
 
 export function LocationCard({ location, onEdit, className }: Props) {
   const { t } = useTranslation();
-
-  const getLocationTypeIcon = (form: LocationForm) => {
-    const Icon = LocationTypeIcons[form] || Folder;
-    return <Icon className="h-5 w-5" />;
-  };
+  const Icon =
+    LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
+    Folder;
 
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
@@ -34,7 +28,7 @@ export function LocationCard({ location, onEdit, className }: Props) {
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
-              {getLocationTypeIcon(location.form)}
+              <Icon className="h-5 w-5" />
             </div>
 
             <div className="flex grow flex-col min-w-0">
