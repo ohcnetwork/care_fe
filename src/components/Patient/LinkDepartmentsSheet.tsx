@@ -99,22 +99,24 @@ export default function LinkDepartmentsSheet({
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
     mutationFn: async () => {
       if (!selectedOrg.length) return;
-      const { route, pathParams } = getMutationParams(
+
+      const { route } = getMutationParams(
         entityType,
         entityId,
         facilityId,
         true,
       );
 
-      // Send each organization separately
-      await Promise.all(
-        selectedOrg.map((orgId) =>
-          mutate(route, {
-            pathParams,
-            body: { organization: orgId }, // Send one at a time
-          })({ organization: orgId }),
-        ),
-      );
+      mutate(routes.batchRequest, {
+        body: {
+          requests: selectedOrg.map((orgId) => ({
+            url: route.path,
+            reference_id: orgId,
+            method: "POST",
+            body: { organization: orgId },
+          })),
+        },
+      });
     },
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
