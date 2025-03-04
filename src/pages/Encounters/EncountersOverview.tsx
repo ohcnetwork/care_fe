@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +16,6 @@ export default function EncountersOverview({
   tab = "patients",
 }: EncountersOverviewProps) {
   const { t } = useTranslation();
-
 
   return (
     <div className="h-full">
