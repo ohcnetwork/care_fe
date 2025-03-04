@@ -113,7 +113,7 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [resendOtpCountdown]);
+  }, []);
 
   // Remember the last login mode
   useEffect(() => {
@@ -698,16 +698,17 @@ const Login = (props: LoginProps) => {
                       {isOtpSent &&
                         (resendOtpCountdown <= 0 ? (
                           <div className="flex justify-center">
-                            <p
-                              className=" text-center  cursor-pointer hover:underline inline-block "
+                            <Button
+                              variant="link"
+                              type="button"
+                              className=" text-center cursor-pointer hover:underline inline-block "
                               onClick={() => {
                                 sendOtp({ phone_number: phone });
-
                                 setResendOtpCountdown(resendOtpTimeout);
                               }}
                             >
                               {t("resend_otp")}
-                            </p>
+                            </Button>
                           </div>
                         ) : (
                           <p className=" text-gray-500 text-center mt-5 ">
