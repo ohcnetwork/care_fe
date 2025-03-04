@@ -8,7 +8,10 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
+import { getPermissions } from "@/common/Permissions";
+
 import { formatDisplayName } from "@/Utils/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import { getOrgLabel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
@@ -16,6 +19,11 @@ export default function UserDashboard() {
   const { signOut } = useAuthContext();
   const facilities = user.facilities || [];
   const organizations = user.organizations || [];
+  const { hasPermission } = usePermissions();
+  const { canWriteQuestionnaire } = getPermissions(
+    hasPermission,
+    user.permissions,
+  );
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
@@ -56,7 +64,7 @@ export default function UserDashboard() {
               Edit Profile
             </Link>
           </Button>
-          {user.is_superuser && (
+          {canWriteQuestionnaire && (
             <Button
               variant="outline"
               size="sm"
