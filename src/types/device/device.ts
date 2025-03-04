@@ -61,6 +61,13 @@ export interface ServiceHistoryWriteRequest {
   serviced_on: string;
   note: string;
   meta?: Record<string, any>;
+
+export interface DeviceLocationHistory {
+  id: string;
+  created_by: UserBase;
+  location: LocationList;
+  start: string;
+  end: string;
 }
 
 export type DeviceWrite = DeviceBase;

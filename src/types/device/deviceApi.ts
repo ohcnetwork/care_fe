@@ -7,6 +7,8 @@ import {
   DeviceWrite,
   ServiceHistory,
   ServiceHistoryWriteRequest,
+  DeviceLocationHistory,
+  DeviceWrite,
 } from "./device";
 
 // Device API with Service History
@@ -72,6 +74,11 @@ const deviceApi = {
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
     TRes: Type<ServiceHistory>(),
     TBody: Type<ServiceHistoryWriteRequest>(),
+
+  locationHistory: {
+    path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<DeviceLocationHistory>>(),
   },
 };
 
