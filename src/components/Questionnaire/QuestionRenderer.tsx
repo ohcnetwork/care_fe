@@ -69,7 +69,7 @@ export function QuestionRenderer({
           key={question.id}
           ref={(el) => (questionRefs.current[question.id] = el)}
           className={cn(
-            shouldBeFullWidth(question) ? "md:w-auto" : "max-w-4xl",
+            shouldBeFullWidth(question) ? "md:max-w-4xl" : "max-w-4xl",
           )}
         >
           <QuestionGroup
