@@ -529,7 +529,7 @@ const AllergyTableRow = ({
             onValueChange={(value) => onUpdate?.({ criticality: value })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[65px] px-1">
+            <SelectTrigger className="h-7 px-1">
               <SelectValue placeholder={t("critical")} />
             </SelectTrigger>
             <SelectContent>
@@ -541,7 +541,7 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[85px] py-1 px-0.5">
+        <TableCell className="py-1 px-0.5">
           <Select
             value={allergy.verification_status}
             onValueChange={(value) => {
@@ -553,7 +553,7 @@ const AllergyTableRow = ({
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-7 w-[85px] px-1">
+            <SelectTrigger className="h-7 px-1">
               <SelectValue placeholder={t("verify")} />
             </SelectTrigger>
             <SelectContent>
@@ -567,13 +567,13 @@ const AllergyTableRow = ({
             </SelectContent>
           </Select>
         </TableCell>
-        <TableCell className="min-w-[100px] py-1 px-1">
+        <TableCell className="py-1 px-1">
           <Input
             type="date"
             value={allergy.last_occurrence}
             onChange={(e) => onUpdate?.({ last_occurrence: e.target.value })}
             disabled={disabled}
-            className="h-7 text-sm w-[100px] px-1"
+            className="h-7 text-sm px-1"
           />
         </TableCell>
         <TableCell className="min-w-[35px] py-1 px-0">
