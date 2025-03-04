@@ -51,7 +51,7 @@ const deviceApi = {
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
   },
-  getserviceHistory: {
+  serviceHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/service_history/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ServiceHistory>>(),

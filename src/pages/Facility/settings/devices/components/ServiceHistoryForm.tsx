@@ -87,7 +87,7 @@ export default function ServiceHistoryForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["device", facilityId, deviceId],
+        queryKey: ["deviceserviceHistory", facilityId, deviceId],
       });
       onOpenChange(false);
       form.reset();
@@ -107,7 +107,7 @@ export default function ServiceHistoryForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["device", facilityId, deviceId],
+        queryKey: ["deviceserviceHistory", facilityId, deviceId],
       });
       onOpenChange(false);
       form.reset();
