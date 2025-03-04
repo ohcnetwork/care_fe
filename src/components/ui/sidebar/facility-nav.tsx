@@ -41,8 +41,7 @@ function generateFacilityLinks(
     },
     {
       name: t("encounters"),
--      url: `${baseUrl}/encounters/`,
-+      url: `${baseUrl}/encounters`,
+      url: `${baseUrl}/encounters`,
       icon: "d-patient",
     },
     {
