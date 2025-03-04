@@ -783,6 +783,7 @@
   "device_availability_status_lost": "Lost",
   "device_contact_description": "Contact points associated with this device",
   "device_information": "Device Information",
+  "device_location_history": "Device Location History",
   "device_not_found": "Device not found",
   "device_status_active": "Active",
   "device_status_entered_in_error": "Entered in Error",
