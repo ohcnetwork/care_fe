@@ -164,7 +164,7 @@ export function LocationCard({
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between">
-            {!location.has_children && (
+            {!location.has_children && !location.current_encounter && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button className={cn(buttonVariants({ variant: "white" }))}>
