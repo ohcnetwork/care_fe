@@ -368,7 +368,7 @@ function LocationMapContent({
     setTimeout(() => {
       fitView({
         padding: 0.2,
-        minZoom: 0.1,
+        minZoom: 0.2,
         maxZoom: 0.7,
         duration: 800,
       });
@@ -384,77 +384,58 @@ function LocationMapContent({
           ? [...prev, nodeId]
           : prev.filter((id) => id !== nodeId);
 
-        setTimeout(() => {
-          // When expanding, focus on both parent and all visible children
+        requestAnimationFrame(() => {
           if (isExpanding) {
             // Get all immediate children of the node
             const childNodes = locations
               .filter((loc) => loc.parent?.id === nodeId)
               .map((child) => ({ id: child.id }));
 
-            // Include both parent and children in the view
+            // Include both parent and children in the view with adjusted padding
+            fitView({
+              padding: childNodes.length > 4 ? 0.5 : 0.3,
+              minZoom: 0.2,
+              maxZoom: 0.8,
+              duration: 400,
+              nodes: [{ id: nodeId }, ...childNodes],
+            });
+          } else {
+            // When collapsing, focus directly on the clicked node
             fitView({
               padding: 0.2,
               minZoom: 0.2,
               maxZoom: 1,
-              duration: 800,
-              nodes: [{ id: nodeId }, ...childNodes],
-            });
-          } else {
-            // When collapsing, show the entire visible tree
-            const getAllVisibleNodes = () => {
-              // Start with root nodes
-              const visibleNodes = new Set(["facility-root"]);
-
-              // Add all expanded nodes and their visible children
-              const processNode = (id: string) => {
-                visibleNodes.add(id);
-                // If this node is expanded, add its children
-                if (newExpandedNodes.includes(id)) {
-                  const children = locations.filter(
-                    (loc) => loc.parent?.id === id,
-                  );
-                  children.forEach((child) => processNode(child.id));
-                }
-              };
-
-              // Process from root locations
-              rootLocations.forEach((root) => processNode(root.id));
-
-              return Array.from(visibleNodes).map((id) => ({ id }));
-            };
-
-            fitView({
-              padding: 0.2,
-              minZoom: 0.2,
-              maxZoom: 1.5,
-              duration: 800,
-              nodes: getAllVisibleNodes(),
+              duration: 500,
+              nodes: [{ id: nodeId }],
             });
           }
-        }, 100);
+        });
 
         return newExpandedNodes;
       });
     },
-    [fitView, locations, rootLocations],
+    [fitView, locations],
   );
 
   const toggleAllNodes = useCallback(() => {
     setNodePositions({});
-    setExpandedNodes((prev) =>
-      prev.length === locations.length ? [] : locations.map((loc) => loc.id),
-    );
-    setTimeout(
-      () =>
+    setExpandedNodes((prev) => {
+      const isExpanding = prev.length !== locations.length;
+      const newExpandedNodes = isExpanding
+        ? locations.map((loc) => loc.id)
+        : [];
+
+      setTimeout(() => {
         fitView({
-          padding: 0.5,
-          minZoom: 0.2,
+          padding: 0.2,
+          minZoom: 0.1,
           maxZoom: 0.8,
           duration: 800,
-        }),
-      100,
-    );
+        });
+      }, 100);
+
+      return newExpandedNodes;
+    });
   }, [locations, fitView]);
 
   const onNodeDrag = useCallback((_: ReactMouseEvent, node: Node) => {
@@ -470,7 +451,14 @@ function LocationMapContent({
         ...prev,
         [node.id]: node.position,
       }));
-      setTimeout(() => fitView({ padding: 0.2 }), 0);
+      requestAnimationFrame(() => {
+        fitView({
+          padding: 0.2,
+          duration: 300,
+          minZoom: 0.2,
+          maxZoom: 1,
+        });
+      });
     },
     [fitView],
   );
@@ -576,6 +564,10 @@ function LocationMapContent({
         }}
         minZoom={0.1}
         maxZoom={2}
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        panOnScroll={true}
+        panOnDrag={true}
         connectionMode={ConnectionMode.Loose}
       >
         <Background />
