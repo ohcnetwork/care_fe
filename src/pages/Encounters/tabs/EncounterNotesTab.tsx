@@ -169,8 +169,10 @@ const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
 
           <div
             className={cn(
-              "flex flex-col",
-              isCurrentUser ? "items-end" : "items-start",
+              "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
+              isCurrentUser
+                ? "bg-white text-black rounded-tr-none border border-gray-200"
+                : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
             <p className="text-xs space-x-2 mb-1">
