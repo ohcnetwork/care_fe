@@ -119,7 +119,7 @@ export default function LinkDepartmentsSheet({
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
-      toast.success("Organizations added successfully");
+      toast.success(t("organization_added_successfully"));
       setSelectedOrg([]);
       setOpen(false);
       onUpdate?.();
@@ -153,7 +153,7 @@ export default function LinkDepartmentsSheet({
         false,
       );
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Organization removed successfully");
+      toast.success(t("organization_removed_successfully"));
       onUpdate?.();
     },
     onError: (error) => {
