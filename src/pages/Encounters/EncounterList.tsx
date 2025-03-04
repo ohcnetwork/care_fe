@@ -693,7 +693,7 @@ export function EncounterList({
               {encounters.map((encounter: Encounter) => (
                 <Card
                   key={encounter.id}
-                  className="hover:shadow-lg  md:flex md:flex-col  transition-shadow group"
+                  className="hover:shadow-lg md:flex md:flex-col transition-shadow group"
                 >
                   <CardHeader className="space-y-1 pb-2">
                     <div className="flex items-center justify-between">
