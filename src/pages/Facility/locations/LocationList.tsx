@@ -551,7 +551,7 @@ function LocationSummary({ locations }: { locations: LocationListType[] }) {
         </Badge>
       )}
       {summary.totalBeds > 0 && (
-        <>
+        <div className="flex gap-2">
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center gap-2 px-2 font-medium">
             <span>{t("available_beds")}</span>
             <span>{summary.availableBeds}</span>
@@ -560,7 +560,7 @@ function LocationSummary({ locations }: { locations: LocationListType[] }) {
             <span>{t("occupied_beds")}</span>
             <span>{summary.occupiedBeds}</span>
           </Badge>
-        </>
+        </div>
       )}
     </div>
   );
@@ -610,13 +610,13 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
   }, [allLocations?.results]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] px-4 space-x-4">
+    <div className="flex px-4 space-x-4">
       {/* Left sidebar - Location tree */}
-      <div className="w-64 shadow-lg bg-white rounded-lg">
+      <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
         <div className="p-4">
           <h2 className="text-lg font-semibold">{t("locations")}</h2>
         </div>
-        <ScrollArea className="h-[calc(100vh-8rem)]">
+        <ScrollArea>
           <div className="p-2">
             {isLoadingLocations ? (
               <div className="p-4">
@@ -640,7 +640,7 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 p-6 space-y-4 rounded-lg bg-white">
+      <div className="flex-1 p-6 space-y-4 rounded-lg bg-white shadow-lg">
         <div className="flex flex-col gap-4">
           {selectedLocation && (
             <Breadcrumbs
@@ -649,7 +649,7 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
               t={t}
             />
           )}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
               <h2 className="text-lg font-semibold whitespace-nowrap">
                 {selectedLocation ? selectedLocation.name : t("locations")}
