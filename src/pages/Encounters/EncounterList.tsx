@@ -719,7 +719,7 @@ export function EncounterList({
                         format(new Date(encounter.period.start), "PPp")}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className=" md:flex-grow">
+                  <CardContent className="md:flex-grow">
                     <div className="flex flex-col md:justify-between md:h-full space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge
