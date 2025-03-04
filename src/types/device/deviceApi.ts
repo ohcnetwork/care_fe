@@ -52,24 +52,24 @@ const deviceApi = {
     TBody: Type<{ location: string }>(),
   },
   serviceHistory: {
-    path: "/api/v1/facility/{facilityId}/device/{id}/service_history/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ServiceHistory>>(),
   },
   retrieveserviceHistory: {
     method: HttpMethod.GET,
-    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
     TRes: Type<ServiceHistory>(),
   },
   createserviceHistory: {
     method: HttpMethod.POST,
-    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
     TRes: Type<ServiceHistory>(),
     TBody: Type<ServiceHistoryWriteRequest>(),
   },
   updateserviceHistory: {
     method: HttpMethod.PUT,
-    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
     TRes: Type<ServiceHistory>(),
     TBody: Type<ServiceHistoryWriteRequest>(),
   },

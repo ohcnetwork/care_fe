@@ -54,7 +54,7 @@ export default function DeviceServiceHistory({
       },
       pathParams: {
         facilityId,
-        id: deviceId,
+        deviceId,
       },
     }),
   });

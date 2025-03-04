@@ -78,8 +78,8 @@ export default function ServiceHistoryForm({
   const createMutation = useMutation({
     mutationFn: mutate(deviceApi.createserviceHistory, {
       pathParams: {
-        facility_external_id: facilityId,
-        device_external_id: deviceId,
+        facilityId,
+        deviceId,
       },
     }),
     onError: (error) => {
@@ -97,9 +97,9 @@ export default function ServiceHistoryForm({
   const updateMutation = useMutation({
     mutationFn: mutate(deviceApi.updateserviceHistory, {
       pathParams: {
-        facility_external_id: facilityId,
-        device_external_id: deviceId,
-        external_id: serviceRecord?.id,
+        facilityId,
+        deviceId,
+        id: serviceRecord?.id,
       },
     }),
     onError: (error) => {
