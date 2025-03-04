@@ -115,11 +115,7 @@ export function EncounterQuestion({
   ) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
-    if (
-      newEncounter.encounter_class === "amb" ||
-      newEncounter.encounter_class === "vr" ||
-      newEncounter.encounter_class === "hh"
-    ) {
+    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
       newEncounter.hospitalization = {} as Hospitalization;
     }
 
@@ -235,9 +231,7 @@ export function EncounterQuestion({
         </div>
       </div>
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {(encounter.encounter_class === "imp" ||
-        encounter.encounter_class === "obsenc" ||
-        encounter.encounter_class === "emer") && (
+      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
         <div className="col-span-2 border rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}

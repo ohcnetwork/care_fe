@@ -644,12 +644,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <div className="flex gap-2">
           {dosageInstruction?.timing && (
             <Input
-              type="number"
+              type="text"
               min={0}
-              value={
-                dosageInstruction.timing.repeat.bounds_duration?.value ??
-                undefined
-              }
+              value={dosageInstruction.timing.repeat.bounds_duration?.value}
               onChange={(e) => {
                 const value = e.target.value;
                 if (!dosageInstruction.timing) return;
@@ -659,9 +656,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     repeat: {
                       ...dosageInstruction.timing.repeat,
                       bounds_duration: {
-                        value: value
-                          ? Number(value)
-                          : (undefined as unknown as number),
+                        value: Number(value),
                         unit: dosageInstruction.timing.repeat.bounds_duration
                           .unit,
                       },
