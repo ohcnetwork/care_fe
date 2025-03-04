@@ -93,12 +93,7 @@ const defaultValues: z.infer<typeof formSchema> = {
   contact: [],
 };
 
-export default function DeviceForm({
-  facilityId,
-  device,
-  deviceId,
-  onSuccess,
-}: Props) {
+export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { goBack } = useAppHistory();
@@ -474,9 +469,13 @@ export default function DeviceForm({
           <Button
             variant="outline"
             className="m-4"
-            onClick={() =>
-              goBack(`/facility/${facilityId}/settings/devices/${deviceId}`)
-            }
+            onClick={() => {
+              if (device?.id) {
+                goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
+              } else {
+                goBack(`/facility/${facilityId}/settings/devices`);
+              }
+            }}
           >
             {t("cancel")}
           </Button>
