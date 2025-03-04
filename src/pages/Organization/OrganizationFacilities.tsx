@@ -93,9 +93,11 @@ export default function OrganizationFacilities({
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : facilities?.results?.length === 0 ? (
-            <div className="text-center text-gray-500">
-              {t("no_facilities_found")}
-            </div>
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-center text-gray-500">
+                {t("no_facilities_found")}
+              </CardContent>
+            </Card>
           ) : (
             facilities?.results?.map((facility: BaseFacility) => (
               <Card
@@ -126,11 +128,7 @@ export default function OrganizationFacilities({
                         >
                           {facility.name}
                         </h3>
-                        <div
-                          className={`text-sm font-medium ${
-                            facilities.results.length === 1 ? "text-base" : ""
-                          }`}
-                        >
+                        <div className="text-sm font-medium text-base">
                           {facility.facility_type}
                         </div>
                       </div>
