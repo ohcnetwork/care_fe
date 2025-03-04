@@ -51,30 +51,27 @@ const deviceApi = {
     TRes: Type<DeviceDetail>(),
     TBody: Type<{ location: string }>(),
   },
-
-  serviceHistory: {
-    list: {
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
-      method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<ServiceHistory>>(),
-    },
-    retrieve: {
-      method: HttpMethod.GET,
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
-      TRes: Type<ServiceHistory>(),
-    },
-    create: {
-      method: HttpMethod.POST,
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
-      TRes: Type<ServiceHistory>(),
-      TBody: Type<ServiceHistoryWriteRequest>(),
-    },
-    update: {
-      method: HttpMethod.PUT,
-      path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
-      TRes: Type<ServiceHistory>(),
-      TBody: Type<ServiceHistoryWriteRequest>(),
-    },
+  getserviceHistory: {
+    path: "/api/v1/facility/{facilityId}/device/{id}/service_history/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<ServiceHistory>>(),
+  },
+  retrieveserviceHistory: {
+    method: HttpMethod.GET,
+    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+    TRes: Type<ServiceHistory>(),
+  },
+  createserviceHistory: {
+    method: HttpMethod.POST,
+    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/",
+    TRes: Type<ServiceHistory>(),
+    TBody: Type<ServiceHistoryWriteRequest>(),
+  },
+  updateserviceHistory: {
+    method: HttpMethod.PUT,
+    path: "/api/v1/facility/{facility_external_id}/device/{device_external_id}/service_history/{external_id}/",
+    TRes: Type<ServiceHistory>(),
+    TBody: Type<ServiceHistoryWriteRequest>(),
   },
 };
 

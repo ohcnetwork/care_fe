@@ -1,8 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Edit, Plus } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import PaginationComponent from "@/components/Common/Pagination";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { ServiceHistory } from "@/types/device/device";
@@ -36,12 +43,18 @@ export default function DeviceServiceHistory({
   const [selectedServiceHistory, setSelectedServiceHistory] =
     useState<ServiceHistory | null>(null);
   const queryClient = useQueryClient();
+
+  const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { data: serviceHistory, isLoading } = useQuery({
-    queryKey: ["device", facilityId, deviceId, "serviceHistory"],
-    queryFn: query(deviceApi.serviceHistory.list, {
+    queryKey: ["deviceserviceHistory", facilityId, deviceId, qParams],
+    queryFn: query(deviceApi.getserviceHistory, {
+      queryParams: {
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+      },
       pathParams: {
-        facility_external_id: facilityId,
-        device_external_id: deviceId,
+        facilityId,
+        id: deviceId,
       },
     }),
   });
@@ -59,7 +72,7 @@ export default function DeviceServiceHistory({
   const handleServiceSheetClose = () => {
     setIsServiceSheetOpen(false);
     queryClient.invalidateQueries({
-      queryKey: ["device", facilityId, deviceId, "serviceHistory"],
+      queryKey: ["deviceserviceHistory", facilityId, deviceId, qParams],
     });
   };
 
@@ -111,6 +124,23 @@ export default function DeviceServiceHistory({
                 </TableRow>
               ))}
             </TableBody>
+            <div className="flex w-full items-center justify-center">
+              <div
+                className={cn(
+                  "flex w-full justify-center",
+                  (serviceHistory?.count ?? 0) > RESULTS_PER_PAGE_LIMIT
+                    ? "visible"
+                    : "invisible",
+                )}
+              >
+                <PaginationComponent
+                  cPage={qParams.page ?? 1}
+                  defaultPerPage={RESULTS_PER_PAGE_LIMIT}
+                  data={{ totalCount: serviceHistory?.count ?? 0 }}
+                  onChange={(page) => setQueryParams({ page })}
+                />
+              </div>
+            </div>
           </Table>
         ) : (
           <div className="text-center py-6 text-muted-foreground">
