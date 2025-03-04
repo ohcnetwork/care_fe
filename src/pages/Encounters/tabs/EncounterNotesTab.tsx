@@ -184,7 +184,7 @@ const MessageItem = ({ message }: { message: Message }) => {
           </p>
           <div
             className={cn(
-              "p-3 rounded-lg break-words",
+              "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
               isCurrentUser
                 ? "bg-white text-black rounded-tr-none border border-gray-200"
                 : "bg-gray-100 rounded-tl-none border border-gray-200",

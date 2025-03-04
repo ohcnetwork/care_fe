@@ -221,6 +221,7 @@ export function QuestionnaireList() {
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
+    disableCache: true,
   });
 
   const { data: response } = useQuery({
@@ -241,7 +242,7 @@ export function QuestionnaireList() {
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4">
         <div className="mb-2">
-          <h1 className="text-2xl font-bold">{t("questionnaires")}</h1>
+          <h1 className="text-2xl font-bold">{t("questionnaire_other")}</h1>
           <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
         </div>
 
