@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -89,11 +89,7 @@ export default function DeviceServiceHistory({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
+          <TableSkeleton count={5} />
         ) : serviceHistory && serviceHistory?.results?.length > 0 ? (
           <Table>
             <TableHeader>
