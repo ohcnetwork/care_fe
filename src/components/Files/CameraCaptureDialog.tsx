@@ -15,6 +15,8 @@ import {
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { handleCameraPermission } from "@/Utils/cameraPermissionHandler";
+
 export interface CameraCaptureDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,6 +28,8 @@ export interface CameraCaptureDialogProps {
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { open, onOpenChange, onCapture, onResetCapture, setPreview } = props;
   const isLaptopScreen = useBreakpoints({ lg: true, default: false });
+  const { requestPermission } = handleCameraPermission();
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
@@ -41,17 +45,25 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
   useEffect(() => {
     if (!open) return;
-    let stream: MediaStream | null = null;
 
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: cameraFacingMode } })
-      .then((mediaStream) => {
-        stream = mediaStream;
-      })
-      .catch(() => {
-        toast.warning(t("camera_permission_denied"));
+    const getCameraStream = async () => {
+      const hasPermission = await requestPermission("camera", cameraFacingMode);
+      if (!hasPermission) {
         onOpenChange(false);
-      });
+        return;
+      }
+
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: cameraFacingMode },
+        });
+        setStream(mediaStream);
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+      }
+    };
+
+    getCameraStream();
 
     return () => {
       if (stream) {

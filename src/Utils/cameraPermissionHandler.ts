@@ -1,24 +1,30 @@
-import { useTranslation } from "react-i18next";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-const { t } = useTranslation();
+export const handleCameraPermission = () => {
+  const [toastShown, setToastShown] = useState(false);
 
-let toastShown = false;
+  const requestPermission = useCallback(
+    async (device: "camera", cameraFacingMode: string = "user") => {
+      try {
+        setToastShown(false); 
+        const constraints =
+          device === "camera"
+            ? { video: { facingMode: cameraFacingMode } }
+            : { audio: true };
 
-export const handleCameraPermission = async (
-  cameraFacingMode: string,
-  onPermissionDenied: () => void,
-) => {
-  toastShown = false;
-  try {
-    await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: cameraFacingMode },
-    });
-  } catch (_error) {
-    if (!toastShown) {
-      toastShown = true;
-      toast.warning(t("camera_permission_denied"));
-    }
-    onPermissionDenied();
-  }
+        await navigator.mediaDevices.getUserMedia(constraints);
+        return true;
+      } catch (_error) {
+        if (!toastShown) {
+          setToastShown(true);
+          toast.warning(`${device} permission denied`);
+        }
+        return false; // Permission denied
+      }
+    },
+    [toastShown],
+  );
+
+  return { requestPermission };
 };

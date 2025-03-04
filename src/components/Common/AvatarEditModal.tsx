@@ -79,6 +79,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const { requestPermission } = handleCameraPermission();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -394,9 +395,13 @@ const AvatarEditModal = ({
                         ref={webRef}
                         videoConstraints={constraint}
                         onUserMediaError={async () => {
-                          await handleCameraPermission("user", () =>
-                            setIsCameraOpen(false),
+                          const hasPermission = await requestPermission(
+                            "camera",
+                            "user",
                           );
+                          if (!hasPermission) {
+                            setIsCameraOpen(false);
+                          }
                         }}
                       />
                     </>
