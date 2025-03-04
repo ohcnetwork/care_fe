@@ -16,7 +16,7 @@ interface LocationPathProps {
 interface LocationNodeProps {
   location: LocationList;
   isLast: boolean;
-  datetime?: string;
+  startDatetime?: string;
   endDatetime?: string;
   children?: React.ReactNode;
 }
@@ -24,7 +24,7 @@ interface LocationNodeProps {
 function LocationNode({
   location,
   isLast,
-  datetime,
+  startDatetime,
   endDatetime,
   children,
 }: LocationNodeProps) {
@@ -40,9 +40,9 @@ function LocationNode({
           </span>
         </div>
         {children}
-        {isLast && datetime && (
+        {isLast && startDatetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(datetime, "MMM d, yyyy h:mm a")}
+            {format(startDatetime, "MMM d, yyyy h:mm a")}
             {endDatetime && ` - ${format(endDatetime, "MMM d, yyyy h:mm a")}`}
           </div>
         )}
@@ -51,7 +51,11 @@ function LocationNode({
   }
 
   return (
-    <LocationNode location={location.parent} isLast={false} datetime={datetime}>
+    <LocationNode
+      location={location.parent}
+      isLast={false}
+      startDatetime={startDatetime}
+    >
       <div className="flex flex-col gap-2 ml-2">
         <div className="flex items-center text-sm">
           <CareIcon
@@ -65,9 +69,9 @@ function LocationNode({
           </span>
         </div>
         {children}
-        {isLast && datetime && (
+        {isLast && startDatetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(datetime, "MMM d, yyyy h:mm a")}
+            {format(startDatetime, "MMM d, yyyy h:mm a")}
           </div>
         )}
       </div>
@@ -106,7 +110,7 @@ export function LocationTree({
         <LocationNode
           location={location}
           isLast={true}
-          datetime={startDatetime}
+          startDatetime={startDatetime}
           endDatetime={endDatetime}
         />
       </div>
