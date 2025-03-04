@@ -18,9 +18,6 @@ export default function EncountersOverview({
 }: EncountersOverviewProps) {
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log("tab", tab);
-  }, [tab]);
 
   return (
     <div className="h-full">
