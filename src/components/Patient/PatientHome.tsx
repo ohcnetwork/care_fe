@@ -97,7 +97,10 @@ export const PatientHome = (props: {
                           {patientData.name}
                         </h1>
                         {patientData.death_datetime && (
-                          <Badge variant="destructive">
+                          <Badge
+                            variant="destructive"
+                            className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                          >
                             <h3 className="text-sm font-medium">
                               {t("expired_on")}
                               {": "}
