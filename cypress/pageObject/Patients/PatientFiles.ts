@@ -213,13 +213,14 @@ export class PatientFiles {
   }
 
   verifyArchiveReason(reason: string) {
-    cy.verifyContentPresence('[data-cy="archive-reason"]', [reason]);
+    cy.verifyContentPresence('[data-cy="archived-reason"]', [reason]);
+
     return this;
   }
 
   filterActiveFiles() {
     this.interceptFilterRequest();
-    cy.verifyAndClickElement('[data-cy="filter-button"]', "Filter");
+    cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement('[data-cy="active-files-button"]', "Active Files");
     this.verifyFilterApiCall();
     return this;
@@ -227,7 +228,7 @@ export class PatientFiles {
 
   filterArchivedFiles() {
     this.interceptFilterRequest();
-    cy.verifyAndClickElement('[data-cy="filter-button"]', "Filter");
+    cy.verifyAndClickElement('[data-cy="files-filter-button"]', "Filter");
     cy.verifyAndClickElement(
       '[data-cy="archived-files-button"]',
       "Archived Files",
@@ -237,10 +238,20 @@ export class PatientFiles {
   }
 
   removeFilter() {
-    cy.verifyAndClickElement('[data-cy="filter-badge"]', "Active Files");
+    cy.get('[data-cy="filter-badge"]').click();
     this.verifyFilterApiCall();
     return this;
   }
 
-  // CONVERT TO PDF
+  closeFilePreview() {
+    cy.verifyAndClickElement("[data-cy=file-preview-close]", "Close");
+    return this;
+  }
+
+  verifyNotAccessible(fileName: string, archivedReason: string) {
+    this.clickViewFile(fileName);
+    this.verifyArchiveReason(archivedReason);
+    cy.verifyAndClickElement("[data-cy=archive-dialog-close", "Close");
+    return this;
+  }
 }

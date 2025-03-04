@@ -232,7 +232,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     </a>
                   </Button>
                 )}
-                <Button variant="outline" type="button" onClick={handleClose}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={handleClose}
+                  data-cy="file-preview-close"
+                >
                   {t("close")}
                 </Button>
               </div>

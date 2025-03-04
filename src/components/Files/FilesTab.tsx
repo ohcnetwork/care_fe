@@ -270,6 +270,7 @@ export const FilesTab = (props: FilesTabProps) => {
             <Button
               variant="secondary"
               onClick={() => fileManager.viewFile(file, associatingId)}
+              data-cy="file-view-button"
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />

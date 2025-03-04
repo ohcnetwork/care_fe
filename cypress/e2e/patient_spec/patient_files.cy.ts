@@ -8,9 +8,9 @@ const patientFiles = new PatientFiles();
 
 describe("Patient Files", () => {
   beforeEach(() => {
-    cy.loginByApi("nurse");
+    cy.loginByApi("devnurse");
     cy.visit("/");
-    facilityCreation.selectFacility("PHC Angamaly");
+    facilityCreation.selectFacility("GHC payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
@@ -114,7 +114,6 @@ describe("Patient Files", () => {
       .clickUploadFilesButton()
       .verifyFileUploadApiCall()
       .verifySingleFileUploadSuccess(fileUploadSuccessToast)
-      .filterActiveFiles()
       .verifyFilesAdded([audioDisplayName])
 
       // Download Audio file
@@ -159,8 +158,34 @@ describe("Patient Files", () => {
       .clickProceedButton()
       .verifyFileArchiveApiCall()
       .verifySingleFileUploadSuccess(fileArchiveSuccessToast)
-      .filterArchivedFiles()
       .clickViewFile(newFileDisplayName)
       .verifyArchiveReason(archiveReason);
+  });
+
+  it("File Accessible by another user", () => {
+    // Login as a new user
+
+    cy.loginByApi("devnurse");
+    cy.visit("/");
+    facilityCreation.selectFacility("GHC payyanur");
+    patientEncounter
+      .navigateToEncounters()
+      .openFirstEncounterDetails()
+      .clickPatientDetailsButton();
+
+    // Verify Files Accessible
+
+    patientFiles
+      .clickFilesTab()
+      // .clickViewFile(audioFileName)
+      // .closeFilePreview()
+      .clickViewFile(fileDisplayNames[1])
+      .closeFilePreview()
+
+      // Verify archieved file is not accessible to another user
+
+      .filterArchivedFiles()
+      .verifyNotAccessible(newFileDisplayName, archiveReason)
+      .removeFilter();
   });
 });
