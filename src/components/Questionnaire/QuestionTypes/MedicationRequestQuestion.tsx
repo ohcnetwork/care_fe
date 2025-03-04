@@ -542,7 +542,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   : ""
               }`}
             >
-              {t(`${medication.status}`)}
+              {t(medication.status)}
             </Badge>
           )}
         </span>
