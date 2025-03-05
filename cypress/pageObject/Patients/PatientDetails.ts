@@ -58,4 +58,16 @@ export class PatientDetails {
     cy.verifyNotification("User removed successfully");
     return this;
   }
+
+  clickResourcesTab() {
+    cy.verifyAndClickElement('[data-cy="tab-resource_requests"]', "Requests");
+    return this;
+  }
+
+  clickCreateRequestButton() {
+    cy.verifyAndClickElement(
+      '[data-cy="create-request-button"]',
+      "Create Request",
+    );
+  }
 }

@@ -65,7 +65,11 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         {facilityId && (
-          <Button variant="outline_primary" asChild>
+          <Button
+            variant="outline_primary"
+            asChild
+            data-cy="create-request-button"
+          >
             <Link
               href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
