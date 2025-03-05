@@ -150,6 +150,10 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             <Button variant="outline_primary" className="mr-3">
               <CareIcon icon="l-history" className="h-4 w-4" />
               {t("encounter_history")}
+          <Link href={`/devices/${deviceId}/locationHistory`}>
+            <Button variant="outline_primary" className="mr-3">
+              <CareIcon icon="l-location-point" className="h-4 w-4" />
+              {t("location_history")}
             </Button>
           </Link>
           <Link href={`/devices/${deviceId}/edit`}>

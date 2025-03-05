@@ -54,6 +54,12 @@ export interface DeviceEncounter {
   id: string;
   encounter: Encounter;
   created_by: UserBase;
+}
+
+export interface DeviceLocationHistory {
+  id: string;
+  created_by: UserBase;
+  location: LocationList;
   start: string;
   end: string;
 }
