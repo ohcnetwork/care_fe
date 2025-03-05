@@ -38,7 +38,7 @@ export const checkForUpdate = async () => {
 
 const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
   useAppUpdates(silentlyAutoUpdate);
-  return <div className="relative">{children}</div>;
+  return children;
 };
 
 export default UpdatableApp;
