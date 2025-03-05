@@ -47,6 +47,7 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices/:id/encounterHistory": ({ id }: { id: string }) => (
     <DeviceEncounterHistory facilityId={facilityId} deviceId={id} />
+  ),
   "/devices/:id/locationHistory": ({ id }: { id: string }) => (
     <DeviceLocationHistory facilityId={facilityId} deviceId={id} />
   ),
