@@ -112,6 +112,17 @@ const SidebarProvider = React.forwardRef<
       toggleSidebar,
     );
 
+    // load the sidebar state from the cookie
+    React.useEffect(() => {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(SIDEBAR_COOKIE_NAME));
+      if (cookie) {
+        const value = cookie.split("=")[1];
+        setOpen(value === "true");
+      }
+    }, []);
+
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed";
