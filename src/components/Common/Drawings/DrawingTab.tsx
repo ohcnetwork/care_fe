@@ -1,6 +1,9 @@
+import { exportToSvg } from "@excalidraw/excalidraw";
+import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
+import { memo, useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -24,6 +27,106 @@ export interface DrawingsTabProps {
   encounter?: Encounter;
   patient?: Patient;
 }
+
+interface ExcalidrawPreviewProps {
+  elements: readonly ExcalidrawElement[];
+}
+
+// Memoize the preview component to prevent unnecessary re-renders
+const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [svgKey, setSvgKey] = useState(0); // Add a key to force re-rendering
+
+  // Reset loading state when elements change
+  useEffect(() => {
+    setIsLoading(true);
+    setSvgKey((prev) => prev + 1);
+  }, [elements]);
+
+  // Generate SVG effect
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!elements.length || !svgContainerRef.current) {
+      if (isMounted) setIsLoading(false);
+      return;
+    }
+
+    const generateSvg = async () => {
+      try {
+        // Clear previous content
+        if (svgContainerRef.current) {
+          svgContainerRef.current.innerHTML = "";
+        }
+
+        const svg = await exportToSvg({
+          elements,
+          appState: {
+            viewBackgroundColor: "#ffffff",
+            exportWithDarkMode: false,
+            theme: "light",
+          },
+          exportPadding: 10,
+          files: null,
+        });
+
+        // Add the SVG to the container if component is still mounted
+        if (isMounted && svgContainerRef.current) {
+          svg.setAttribute("width", "100%");
+          svg.setAttribute("height", "100%");
+          svg.style.maxHeight = "100%";
+          svg.style.maxWidth = "100%";
+          svg.style.display = "block";
+          svg.style.margin = "auto";
+
+          svgContainerRef.current.appendChild(svg);
+        }
+      } catch (error) {
+        console.error("Error generating SVG:", error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    // Small timeout to ensure DOM is ready, especially during hot reloading
+    const timeoutId = setTimeout(() => {
+      generateSvg();
+    }, 50);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [elements, svgKey]); // Add svgKey to dependencies
+
+  return (
+    <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
+      {isLoading ? (
+        <div className="flex items-center justify-center h-full w-full">
+          <CareIcon
+            icon="l-spinner"
+            className="animate-spin text-2xl text-gray-400"
+          />
+        </div>
+      ) : elements.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-gray-400">
+          <CareIcon icon="l-image" className="text-2xl mb-1" />
+          <span className="text-xs">{t("empty_drawing")}</span>
+        </div>
+      ) : (
+        <div
+          ref={svgContainerRef}
+          className="h-full w-full flex items-center justify-center p-2"
+        />
+      )}
+    </div>
+  );
+});
+
+// Add display name for debugging purposes
+ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
 export const DrawingTab = (props: DrawingsTabProps) => {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -75,43 +178,56 @@ export const DrawingTab = (props: DrawingsTabProps) => {
               <p className="text-sm">{t("create_new_drawing_message")}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {data?.results.map((drawing) => (
-                <Card key={drawing.id} className="p-4">
-                  <CardContent className="flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <CareIcon icon="l-edit" className="text-xl" />
-                      <span className="font-medium">{drawing.name}</span>
+                <Card
+                  key={drawing.id}
+                  className="overflow-hidden hover:shadow-md transition-shadow duration-200 group cursor-pointer"
+                  onClick={() => {
+                    if (props.type === "encounter") {
+                      navigate(
+                        `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
+                      );
+                    } else {
+                      navigate(
+                        `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${drawing.id}`,
+                      );
+                    }
+                  }}
+                >
+                  <div className="relative">
+                    <div className="h-60 md:h-40 w-full bg-gray-50">
+                      <ExcalidrawPreview
+                        elements={drawing.object_value.elements}
+                      />
                     </div>
-                    <div className="text-sm text-gray-600">
-                      <p>
-                        {t("created_on")}:{" "}
-                        {new Date(drawing.created_date).toLocaleDateString()}
-                      </p>
-                      <p>
-                        {t("created_by")}: {drawing.created_by.username}
-                      </p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        if (props.type === "encounter") {
-                          navigate(
-                            `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
-                          );
-                        } else {
-                          navigate(
-                            `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${drawing.id}`,
-                          );
-                        }
-                      }}
-                      className="mt-2"
-                    >
-                      <span className="flex flex-row items-center gap-1">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-center p-2">
+                      <span className="text-white font-medium flex items-center gap-1">
                         <CareIcon icon="l-eye" />
                         {t("view")}
                       </span>
-                    </Button>
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CareIcon
+                        icon="l-edit"
+                        className="text-xl text-primary-600 flex-shrink-0"
+                      />
+                      <span className="font-medium truncate">
+                        {drawing.name}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p className="flex items-center gap-1">
+                        <CareIcon icon="l-calender" className="text-gray-400" />
+                        {new Date(drawing.created_date).toLocaleDateString()}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <CareIcon icon="l-user" className="text-gray-400" />
+                        {drawing.created_by.username}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

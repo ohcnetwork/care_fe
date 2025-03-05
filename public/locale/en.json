@@ -916,6 +916,7 @@
   "emergency_description": "Mark as emergency if immediate attention is required.",
   "emergency_phone_number": "Emergency Phone Number",
   "empty_date_time": "--:-- --; --/--/----",
+  "empty_drawing": "Empty drawing",
   "encounter": "Encounter",
   "encounter_admit_sources__born": "Born in hospital",
   "encounter_admit_sources__emd": "From accident/emergency department",
