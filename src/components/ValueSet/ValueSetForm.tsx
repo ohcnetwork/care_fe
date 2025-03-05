@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import mutate from "@/Utils/request/mutate";
 import {
   TERMINOLOGY_SYSTEMS,
@@ -407,6 +409,8 @@ export function ValueSetForm({
 }: ValueSetFormProps) {
   const { t } = useTranslation();
 
+  const { goBack } = useAppHistory();
+
   const form = useForm<ValuesetFormType>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
@@ -513,7 +517,6 @@ export function ValueSetForm({
             {isSubmitting ? t("saving") : t("save_valueset")}
           </Button>
         </div>
-        
       </form>
     </Form>
   );
