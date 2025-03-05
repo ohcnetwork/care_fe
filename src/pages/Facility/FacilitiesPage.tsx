@@ -123,7 +123,7 @@ export function FacilitiesPage() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 3xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 3xl:grid-cols-3">
               {facilitiesResponse.results.map((facility) => (
                 <FacilityCard key={facility.id} facility={facility} />
               ))}
