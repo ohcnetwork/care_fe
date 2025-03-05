@@ -114,7 +114,7 @@ export default function ExcalidrawEditor({
                 onChange={(e) => setName(e.target.value)}
               />
             ) : (
-              <h2 className="text-lg font-bold">{name}</h2>
+              <label className="text-2xl font-bold">{name}</label>
             )}
           </div>
         </div>
