@@ -111,7 +111,7 @@ export default function CloneQuestionnaireSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent>
+      <SheetContent className="focus:ring-0">
         <SheetHeader>
           <SheetTitle>Clone Questionnaire</SheetTitle>
           <SheetDescription>
@@ -192,6 +192,7 @@ export default function CloneQuestionnaireSheet({
                   <CommandInput
                     placeholder={t("search_organizations")}
                     onValueChange={setSearchQuery}
+                    className="focus:ring-0 focus:outline-none border-none"
                   />
                   <CommandList>
                     <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
@@ -206,6 +207,7 @@ export default function CloneQuestionnaireSheet({
                             key={org.id}
                             value={org.id}
                             onSelect={() => handleToggleOrganization(org.id)}
+                            className="flex items-center justify-between pr-2"
                           >
                             <div className="flex flex-1 items-center gap-2">
                               <Building className="h-4 w-4" />
@@ -216,9 +218,11 @@ export default function CloneQuestionnaireSheet({
                                 </span>
                               )}
                             </div>
-                            {selectedIds.includes(org.id) && (
-                              <Check className="h-4 w-4" />
-                            )}
+                            <div className="w-4 h-4 flex items-center justify-center">
+                              {selectedIds.includes(org.id) && (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </div>
                           </CommandItem>
                         ))
                       )}
