@@ -68,47 +68,57 @@ export const DrawingTab = (props: DrawingsTabProps) => {
       {isLoading ? (
         <Loading />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {data?.results.map((drawing) => (
-            <Card key={drawing.id} className="p-4">
-              <CardContent className="flex flex-col space-y-2">
-                <div className="flex items-center space-x-2">
-                  <CareIcon icon="l-edit" className="text-xl" />
-                  <span className="font-medium">{drawing.name}</span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  <p>
-                    {t("created_on")}:{" "}
-                    {new Date(drawing.created_date).toLocaleDateString()}
-                  </p>
-                  <p>
-                    {t("created_by")}: {drawing.created_by.username}
-                  </p>
-                </div>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    if (props.type === "encounter") {
-                      navigate(
-                        `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
-                      );
-                    } else {
-                      navigate(
-                        `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${drawing.id}`,
-                      );
-                    }
-                  }}
-                  className="mt-2"
-                >
-                  <span className="flex flex-row items-center gap-1">
-                    <CareIcon icon="l-eye" />
-                    {t("view")}
-                  </span>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          {data?.results.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+              <CareIcon icon="l-image" className="text-4xl mb-2" />
+              <p className="text-lg font-medium">{t("no_drawings_so_far")}</p>
+              <p className="text-sm">{t("create_new_drawing_message")}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {data?.results.map((drawing) => (
+                <Card key={drawing.id} className="p-4">
+                  <CardContent className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <CareIcon icon="l-edit" className="text-xl" />
+                      <span className="font-medium">{drawing.name}</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <p>
+                        {t("created_on")}:{" "}
+                        {new Date(drawing.created_date).toLocaleDateString()}
+                      </p>
+                      <p>
+                        {t("created_by")}: {drawing.created_by.username}
+                      </p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        if (props.type === "encounter") {
+                          navigate(
+                            `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
+                          );
+                        } else {
+                          navigate(
+                            `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${drawing.id}`,
+                          );
+                        }
+                      }}
+                      className="mt-2"
+                    >
+                      <span className="flex flex-row items-center gap-1">
+                        <CareIcon icon="l-eye" />
+                        {t("view")}
+                      </span>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
       <Pagination totalCount={data?.count || 0} />
     </div>
