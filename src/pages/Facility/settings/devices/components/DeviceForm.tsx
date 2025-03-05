@@ -79,7 +79,6 @@ const formSchema = z
 interface Props {
   facilityId: string;
   device?: DeviceList;
-  deviceId?: string;
   onSuccess?: () => void;
 }
 
