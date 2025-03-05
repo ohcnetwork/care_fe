@@ -1234,7 +1234,7 @@ function QuestionEditor({
               {repeats && <Badge variant="secondary">{t("repeatable")}</Badge>}
               {type === "group" && questions && questions.length > 0 && (
                 <Badge variant="secondary">
-                  {questions.length} {t("sub_questions")}
+                  {t("sub_questions_count", { count: questions.length })}
                 </Badge>
               )}
             </div>
