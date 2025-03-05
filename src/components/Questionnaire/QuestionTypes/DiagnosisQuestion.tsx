@@ -1,4 +1,6 @@
 import {
+  CheckCircledIcon,
+  CircleBackslashIcon,
   DotsVerticalIcon,
   MinusCircledIcon,
   Pencil2Icon,
@@ -6,9 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
-
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -191,22 +199,224 @@ export function DiagnosisQuestion({
     <div className="space-y-2">
       {diagnoses.length > 0 && (
         <div className="rounded-lg border">
-          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-5">{t("diagnosis")}</div>
-            <div className="col-span-2 text-center">{t("date")}</div>
-            <div className="col-span-2 text-center">{t("status")}</div>
-            <div className="col-span-2 text-center">{t("verification")}</div>
-            <div className="col-span-1 text-center">{t("action")}</div>
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-55">{t("diagnosis")}</TableHead>
+                  <TableHead className="w-25 text-center px-0.5">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-21 text-center px-0.5">
+                    {t("status")}
+                  </TableHead>
+                  <TableHead className="w-21 text-center px-0.5">
+                    {t("verification")}
+                  </TableHead>
+                  <TableHead className="w-9"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {diagnoses.map((diagnosis, index) => (
+                  <DiagnosisTableRow
+                    key={index}
+                    diagnosis={diagnosis}
+                    disabled={disabled}
+                    onUpdate={(updates) =>
+                      handleUpdateDiagnosis(index, updates)
+                    }
+                    onRemove={() => handleRemoveDiagnosis(index)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <div className="divide-y divide-gray-200">
+
+          <div className="md:hidden divide-y divide-gray-200">
             {diagnoses.map((diagnosis, index) => (
-              <DiagnosisItem
+              <div
                 key={index}
-                diagnosis={diagnosis}
-                disabled={disabled}
-                onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
-                onRemove={() => handleRemoveDiagnosis(index)}
-              />
+                className={`p-3 space-y-3 ${
+                  diagnosis.verification_status === "entered_in_error"
+                    ? "opacity-40 pointer-events-none"
+                    : diagnosis.clinical_status === "inactive"
+                      ? "opacity-60"
+                      : diagnosis.clinical_status === "resolved"
+                        ? "line-through"
+                        : ""
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="font-medium">{diagnosis.code.display}</div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={disabled}
+                        className="h-8 w-8"
+                      >
+                        <DotsVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleUpdateDiagnosis(index, {
+                            note: diagnosis.note !== undefined ? undefined : "",
+                          })
+                        }
+                      >
+                        <Pencil2Icon className="h-4 w-4 mr-2" />
+                        {diagnosis.note !== undefined
+                          ? t("hide_notes")
+                          : t("add_notes")}
+                      </DropdownMenuItem>
+                      {diagnosis.clinical_status !== "active" && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleUpdateDiagnosis(index, {
+                              clinical_status: "active",
+                            })
+                          }
+                        >
+                          <CheckCircledIcon className="h-4 w-4 mr-2" />
+                          {t("mark_active")}
+                        </DropdownMenuItem>
+                      )}
+                      {diagnosis.clinical_status !== "inactive" && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleUpdateDiagnosis(index, {
+                              clinical_status: "inactive",
+                            })
+                          }
+                        >
+                          <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                          {t("mark_inactive")}
+                        </DropdownMenuItem>
+                      )}
+                      {diagnosis.clinical_status !== "resolved" && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleUpdateDiagnosis(index, {
+                              clinical_status: "resolved",
+                            })
+                          }
+                        >
+                          <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                          {t("mark_resolved")}
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleRemoveDiagnosis(index)}
+                      >
+                        <MinusCircledIcon className="h-4 w-4 mr-2" />
+                        {t("remove_diagnosis")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs text-gray-500">{t("date")}</Label>
+                    <Input
+                      type="date"
+                      value={diagnosis.onset?.onset_datetime || ""}
+                      onChange={(e) =>
+                        handleUpdateDiagnosis(index, {
+                          onset: { onset_datetime: e.target.value },
+                        })
+                      }
+                      disabled={disabled || !!diagnosis.id}
+                      className="h-8 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("status")}
+                    </Label>
+                    <Select
+                      value={diagnosis.clinical_status}
+                      onValueChange={(value) =>
+                        handleUpdateDiagnosis(index, {
+                          clinical_status:
+                            value as DiagnosisRequest["clinical_status"],
+                        })
+                      }
+                      disabled={disabled}
+                    >
+                      <SelectTrigger className="h-8 mt-1">
+                        <SelectValue placeholder={t("status")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="capitalize"
+                          >
+                            {t(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("verification")}
+                    </Label>
+                    <Select
+                      value={diagnosis.verification_status}
+                      onValueChange={(value) =>
+                        handleUpdateDiagnosis(index, {
+                          verification_status:
+                            value as DiagnosisRequest["verification_status"],
+                        })
+                      }
+                      disabled={disabled}
+                    >
+                      <SelectTrigger className="h-8 mt-1">
+                        <SelectValue placeholder={t("verify")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="capitalize"
+                          >
+                            {t(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {diagnosis.note !== undefined && (
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("notes")}
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder={t("add_notes_about_diagnosis")}
+                      value={diagnosis.note ?? ""}
+                      onChange={(e) =>
+                        handleUpdateDiagnosis(index, { note: e.target.value })
+                      }
+                      disabled={disabled}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -228,164 +438,139 @@ interface DiagnosisItemProps {
   onRemove?: () => void;
 }
 
-const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
+const DiagnosisTableRow = ({
   diagnosis,
   disabled,
   onUpdate,
   onRemove,
-}) => {
-  const [showNotes, setShowNotes] = useState(Boolean(diagnosis.note));
+}: DiagnosisItemProps) => {
+  const [showNotes, setShowNotes] = useState(diagnosis.note !== undefined);
+
+  const rowClassName = `group ${
+    diagnosis.verification_status === "entered_in_error"
+      ? "opacity-40 pointer-events-none"
+      : diagnosis.clinical_status === "inactive"
+        ? "opacity-60"
+        : diagnosis.clinical_status === "resolved"
+          ? "line-through"
+          : ""
+  }`;
+
+  const handleNotesToggle = () => {
+    if (showNotes) {
+      setShowNotes(false);
+      onUpdate?.({ note: undefined });
+    } else {
+      setShowNotes(true);
+      onUpdate?.({ note: "" });
+    }
+  };
 
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          diagnosis.verification_status === "entered_in_error",
-      })}
-    >
-      <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
-        <div className="flex items-center justify-between md:col-span-5">
-          <div
-            className="font-medium text-sm truncate"
-            title={diagnosis.code.display}
+    <>
+      <TableRow className={rowClassName}>
+        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+          {diagnosis.code.display}
+        </TableCell>
+        <TableCell className="min-w-[100px] py-1 px-1">
+          <Input
+            type="date"
+            value={diagnosis.onset?.onset_datetime || ""}
+            onChange={(e) =>
+              onUpdate?.({
+                onset: { onset_datetime: e.target.value },
+              })
+            }
+            disabled={disabled || !!diagnosis.id}
+            className="h-7 text-sm px-1"
+          />
+        </TableCell>
+        <TableCell className="min-w-[80px] py-1 px-0.5">
+          <Select
+            value={diagnosis.clinical_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                clinical_status: value as DiagnosisRequest["clinical_status"],
+              })
+            }
+            disabled={disabled}
           >
-            {diagnosis.code.display}
-          </div>
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={disabled}
-                  className="h-8 w-8"
-                >
-                  <DotsVerticalIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
-                  <Pencil2Icon className="h-4 w-4 mr-2" />
-                  {showNotes ? t("hide_notes") : t("add_notes")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={onRemove}
-                >
-                  <MinusCircledIcon className="h-4 w-4 mr-2" />
-                  {t("remove_diagnosis")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 md:col-span-6 md:grid-cols-3 md:gap-4">
-          <div className="col-span-2 md:col-span-1">
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("date")}
-            </Label>
-            <Input
-              type="date"
-              value={diagnosis.onset?.onset_datetime || ""}
-              onChange={(e) =>
-                onUpdate?.({
-                  onset: { onset_datetime: e.target.value },
-                })
-              }
-              disabled={disabled || !!diagnosis.id}
-              className="h-8 md:h-9"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("status")}
-            </Label>
-            <Select
-              value={diagnosis.clinical_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  clinical_status: value as DiagnosisRequest["clinical_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_status_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 md:hidden">
-              {t("verification")}
-            </Label>
-            <Select
-              value={diagnosis.verification_status}
-              onValueChange={(value) =>
-                onUpdate?.({
-                  verification_status:
-                    value as DiagnosisRequest["verification_status"],
-                })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger className="h-8 md:h-9">
-                <SelectValue
-                  placeholder={
-                    <span className="text-gray-500">
-                      {t("diagnosis_verification_placeholder")}
-                    </span>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="capitalize"
-                  >
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="hidden md:block md:col-span-1">
+            <SelectTrigger className="h-7 px-1">
+              <SelectValue placeholder={t("status")} />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_CLINICAL_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="min-w-[80px] py-1 px-0.5">
+          <Select
+            value={diagnosis.verification_status}
+            onValueChange={(value) =>
+              onUpdate?.({
+                verification_status:
+                  value as DiagnosisRequest["verification_status"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-7 px-1">
+              <SelectValue placeholder={t("verify")} />
+            </SelectTrigger>
+            <SelectContent>
+              {DIAGNOSIS_VERIFICATION_STATUS.map((status) => (
+                <SelectItem key={status} value={status} className="capitalize">
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell className="min-w-[35px] py-1 px-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-9 w-9"
+                className="h-7 w-6 px-0"
               >
-                <DotsVerticalIcon className="h-4 w-4" />
+                <DotsVerticalIcon className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowNotes(!showNotes)}>
+              <DropdownMenuItem onClick={handleNotesToggle}>
                 <Pencil2Icon className="h-4 w-4 mr-2" />
                 {showNotes ? t("hide_notes") : t("add_notes")}
               </DropdownMenuItem>
+              {diagnosis.clinical_status !== "active" && (
+                <DropdownMenuItem
+                  onClick={() => onUpdate?.({ clinical_status: "active" })}
+                >
+                  <CheckCircledIcon className="h-4 w-4 mr-2" />
+                  {t("mark_active")}
+                </DropdownMenuItem>
+              )}
+              {diagnosis.clinical_status !== "inactive" && (
+                <DropdownMenuItem
+                  onClick={() => onUpdate?.({ clinical_status: "inactive" })}
+                >
+                  <CircleBackslashIcon className="h-4 w-4 mr-2" />
+                  {t("mark_inactive")}
+                </DropdownMenuItem>
+              )}
+              {diagnosis.clinical_status !== "resolved" && (
+                <DropdownMenuItem
+                  onClick={() => onUpdate?.({ clinical_status: "resolved" })}
+                >
+                  <CheckCircledIcon className="h-4 w-4 mr-2 text-green-600" />
+                  {t("mark_resolved")}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
@@ -396,19 +581,23 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </div>
+        </TableCell>
+      </TableRow>
       {showNotes && (
-        <div className="px-3 pb-3">
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_diagnosis")}
-            value={diagnosis.note || ""}
-            onChange={(e) => onUpdate?.({ note: e.target.value })}
-            disabled={disabled}
-          />
-        </div>
+        <TableRow>
+          <TableCell colSpan={5} className="px-4 py-2">
+            <Label className="text-xs text-gray-500">{t("notes")}</Label>
+            <Input
+              type="text"
+              placeholder={t("add_notes_about_diagnosis")}
+              value={diagnosis.note ?? ""}
+              onChange={(e) => onUpdate?.({ note: e.target.value })}
+              disabled={disabled}
+              className="mt-0.5"
+            />
+          </TableCell>
+        </TableRow>
       )}
-    </div>
+    </>
   );
 };
