@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import React from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -39,7 +39,7 @@ function LocationNode({
         {children}
         {isLast && datetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+            {dayjs(datetime).format("MMM D, YYYY h:mm A")}
           </div>
         )}
       </div>
@@ -63,7 +63,7 @@ function LocationNode({
         {children}
         {isLast && datetime && (
           <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
-            {format(new Date(datetime), "MMM d, yyyy h:mm a")}
+            {dayjs(datetime).format("MMM D, YYYY h:mm A")}
           </div>
         )}
       </div>
