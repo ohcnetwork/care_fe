@@ -8,8 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
 import { properCase } from "@/Utils/utils";
-import ValueSetSelect from "@/src/components/Questionnaire/ValueSetSelect";
 import { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
