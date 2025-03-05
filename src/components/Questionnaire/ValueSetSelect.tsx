@@ -28,7 +28,7 @@ import query from "@/Utils/request/query";
 import { Code, ValueSetSystem } from "@/types/questionnaire/code";
 
 interface Props {
-  system: ValueSetSystem;
+  system: ValueSetSystem | string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;

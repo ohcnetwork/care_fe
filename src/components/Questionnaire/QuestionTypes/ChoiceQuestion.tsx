@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { memo, useState } from "react";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import {
   Select,
   SelectContent,
@@ -10,9 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
 import { properCase } from "@/Utils/utils";
+import ValueSetSelect from "@/src/components/Questionnaire/ValueSetSelect";
+import { Code } from "@/types/questionnaire/code";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -33,32 +31,6 @@ interface ChoiceQuestionProps {
   index?: number;
 }
 
-function ValuesetAutoComplete(props: { valueset: string }) {
-  const [search, setSearch] = useState("");
-
-  const fetchValuesetOptions = useQuery({
-    queryKey: ["valueset", props.valueset, "expand", search],
-    queryFn: query.debounced(routes.valueset.expand, {
-      pathParams: { system: props.valueset },
-      body: { search, count: 10 },
-    }),
-  });
-  return (
-    <Autocomplete
-      options={
-        fetchValuesetOptions.data?.results.map((option) => {
-          return {
-            label: option.display!,
-            value: option.code,
-          };
-        }) || []
-      }
-      value={search}
-      onChange={(value: string) => setSearch(value)}
-    />
-  );
-}
-
 export const ChoiceQuestion = memo(function ChoiceQuestion({
   question,
   questionnaireResponse,
@@ -67,11 +39,27 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   clearError,
   index = 0,
 }: ChoiceQuestionProps) {
-  if (question.answer_value_set) {
-    return <ValuesetAutoComplete valueset={question.answer_value_set} />;
-  }
   const options = question.answer_option || [];
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
+  const [currentCode, setCurrentCode] = useState<Code>({
+    system: "",
+    code: "",
+    display: "",
+  });
+  const handleValuesetSelectChange = (code: Code) => {
+    clearError();
+    setCurrentCode(code);
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "string",
+      value: code.display,
+    };
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
   const handleValueChange = (newValue: string) => {
     clearError();
     const newValues = [...questionnaireResponse.values];
@@ -88,24 +76,36 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   };
 
   return (
-    <Select
-      value={currentValue}
-      onValueChange={handleValueChange}
-      disabled={disabled}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select an option" />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option: AnswerOption) => (
-          <SelectItem
-            key={option.value.toString()}
-            value={option.value.toString()}
-          >
-            {properCase(option.display || option.value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <>
+      {question.answer_value_set ? (
+        <ValueSetSelect
+          value={currentCode}
+          system={question.answer_value_set}
+          placeholder={"Search and Select an option"}
+          onSelect={handleValuesetSelectChange}
+          disabled={disabled}
+        />
+      ) : (
+        <Select
+          value={currentValue}
+          onValueChange={handleValueChange}
+          disabled={disabled}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option: AnswerOption) => (
+              <SelectItem
+                key={option.value.toString()}
+                value={option.value.toString()}
+              >
+                {properCase(option.display || option.value)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </>
   );
 });
