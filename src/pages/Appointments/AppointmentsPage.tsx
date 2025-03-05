@@ -236,7 +236,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
-    limit: 15,
+    limit: 4,
   });
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
@@ -261,8 +261,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       return;
     }
 
-    const updates: Partial<any> = {};
-
     // Sets the practitioner filter to the current user if they are in the list of
     // schedulable users and no practitioner was selected.
     if (
@@ -271,7 +269,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         (r) => r.username === authUser.username,
       )
     ) {
-      updates.practitioner = authUser.username;
+      qParams.practitioner = authUser.username;
     }
 
     // Set default date range if no dates are present
@@ -281,21 +279,21 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
       if (defaultDays === 0) {
         // Today only
-        updates.date_from = dateQueryString(today);
-        updates.date_to = dateQueryString(today);
+        qParams.date_from = dateQueryString(today);
+        qParams.date_to = dateQueryString(today);
       } else {
         // Past or future days based on configuration
         const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
         const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
-        updates.date_from = dateQueryString(fromDate);
-        updates.date_to = dateQueryString(toDate);
+        qParams.date_from = dateQueryString(fromDate);
+        qParams.date_to = dateQueryString(toDate);
       }
     }
 
     // Only update if there are changes
-    if (Object.keys(updates).length > 0) {
+    if (Object.keys(qParams).length > 0) {
       updateQuery({
-        ...updates,
+        ...qParams,
       });
     }
   }, [schedulableUsersQuery.isLoading, qParams]);
