@@ -60,19 +60,8 @@ export const DrawingTab = (props: DrawingsTabProps) => {
           onChange={(e) => updateQuery({ name: e.target.value })}
           className="w-full sm:w-1/3"
         />
-        <Button
-          onClick={() => {
-            if (props.type === "encounter") {
-              navigate(
-                `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings`,
-              );
-            } else {
-              navigate(
-                `/facility/${props.facilityId}/patient/${props.patientId}/drawing`,
-              );
-            }
-          }}
-        >
+        <Button variant="white" onClick={() => navigate("drawings/new")}>
+          <CareIcon icon="l-pen" />
           {t("new_drawing")}
         </Button>
       </div>

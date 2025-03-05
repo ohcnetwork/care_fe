@@ -17,10 +17,6 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  MetaArtifactResponse,
-  MetaArtifactUpsertRequest,
-} from "@/types/metaAritifact/metaArtifact";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 type Props = {
@@ -44,13 +40,9 @@ export default function ExcalidrawEditor({
     setIsDirty(!!elements?.length);
   }, [elements?.length]);
 
-  const { mutate: metaArtifactRequest } = useMutation({
+  const { mutate: saveDrawing } = useMutation({
     mutationFn: mutate(metaArtifactApi.upsert),
-    onSuccess: (response: MetaArtifactResponse[]) => {
-      if (!drawingId) {
-        navigate(`drawings/${response[0].id}`);
-      }
-    },
+    onSuccess: () => navigate("../drawings"),
   });
 
   const { data } = useQuery({
@@ -74,21 +66,23 @@ export default function ExcalidrawEditor({
       toast.error(t("please_enter_a_name_for_the_drawing"));
       return;
     }
-    const request: MetaArtifactUpsertRequest = {
-      datapoints: [
-        {
-          id: drawingId,
-          associating_type: associating_type,
-          associating_id: associatingId,
-          name: name,
-          object_type: "drawing",
-          object_value: { elements: elements || [] },
-        },
-      ],
-    };
     try {
-      metaArtifactRequest(request);
-      toast.success(t("file_saved_successfully"));
+      saveDrawing({
+        datapoints: [
+          {
+            id: drawingId,
+            associating_type: associating_type,
+            associating_id: associatingId,
+            name: name,
+            object_type: "drawing",
+            object_value: {
+              application: "excalidraw",
+              elements: elements || [],
+            },
+          },
+        ],
+      });
+      toast.success(t("drawing_saved_successfully"));
     } catch (_error) {
       toast.error(t("error_saving_file"));
     }
@@ -114,11 +108,15 @@ export default function ExcalidrawEditor({
             />
           </div>
         </div>
-        {isDirty && (
-          <Button className="ml-auto" onClick={handleSave}>
-            {t("save")}
-          </Button>
-        )}
+        <Button
+          variant="white"
+          className="ml-auto"
+          onClick={handleSave}
+          disabled={!isDirty}
+        >
+          <CareIcon icon="l-save" className="text-lg hidden sm:block" />
+          {t("save")}
+        </Button>
       </div>
 
       <div className="flex-grow h-[calc(100vh-10rem)] -m-2">
@@ -134,9 +132,7 @@ export default function ExcalidrawEditor({
             appState: { theme: "light" },
             elements: elements,
           }}
-          onChange={debounce((elements) => {
-            setElements(elements);
-          }, 100)}
+          onChange={debounce((elements) => setElements(elements), 100)}
         />
       </div>
     </div>

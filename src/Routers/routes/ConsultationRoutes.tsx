@@ -38,16 +38,15 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings": ({
-    encounterId,
-  }) => (
-    <Suspense fallback={<Loading />}>
-      <ExcalidrawEditor
-        associatingId={encounterId}
-        associating_type="encounter"
-      />
-    </Suspense>
-  ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
+    ({ encounterId }) => (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawEditor
+          associatingId={encounterId}
+          associating_type="encounter"
+        />
+      </Suspense>
+    ),
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
     ({ encounterId, drawingId }) => (
