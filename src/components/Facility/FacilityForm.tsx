@@ -216,6 +216,8 @@ export default function FacilityForm({
     }
   }, [facilityData]);
 
+  const [isPreview, setIsPreview] = useState(false);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -281,6 +283,8 @@ export default function FacilityForm({
                     {...field}
                     data-cy="facility-description"
                     placeholder="Describe your facility (Markdown supported)"
+                    isPreview={isPreview}
+                    onTogglePreview={setIsPreview}
                   />
                 </FormControl>
                 <FormMessage />
