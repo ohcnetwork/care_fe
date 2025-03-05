@@ -253,32 +253,13 @@ const SymptomRow = React.memo(function SymptomRow({
         </TableCell>
 
         <TableCell className="min-w-[35px] py-1 px-0">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={disabled}
-                className="h-7 w-6 px-0"
-              >
-                <DotsVerticalIcon className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleToggleNotes}>
-                <Pencil2Icon className="h-4 w-4 mr-2" />
-                {showNotes ? t("hide_notes") : t("add_notes")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={handleRemove}
-              >
-                <MinusCircledIcon className="h-4 w-4 mr-2" />
-                {t("remove_symptom")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SymptomActionsMenu
+            showNotes={showNotes}
+            verificationStatus={symptom.verification_status}
+            disabled={disabled}
+            onToggleNotes={handleToggleNotes}
+            onRemove={handleRemove}
+          />
         </TableCell>
       </TableRow>
 
