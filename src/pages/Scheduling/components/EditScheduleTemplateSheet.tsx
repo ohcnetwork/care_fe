@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, parse } from "date-fns";
-import { ArrowRightIcon, Loader2, SaveIcon, Trash2Icon } from "lucide-react";
+import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -753,12 +753,12 @@ const NewAvailabilityCard = ({
             )}
           /> */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap">
             <FormField
               control={form.control}
               name="start_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full">
                   <FormLabel required>{t("start_time")}</FormLabel>
                   <FormControl>
                     <Input type="time" {...field} />
@@ -768,13 +768,11 @@ const NewAvailabilityCard = ({
               )}
             />
 
-            <ArrowRightIcon className="size-4 mt-5" />
-
             <FormField
               control={form.control}
               name="end_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full mt-2">
                   <FormLabel required>{t("end_time")}</FormLabel>
                   <FormControl>
                     <Input type="time" {...field} />
