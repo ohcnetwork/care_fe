@@ -111,7 +111,7 @@ export default function CloneQuestionnaireSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="focus:ring-0">
+      <SheetContent>
         <SheetHeader>
           <SheetTitle>Clone Questionnaire</SheetTitle>
           <SheetDescription>
@@ -218,11 +218,9 @@ export default function CloneQuestionnaireSheet({
                                 </span>
                               )}
                             </div>
-                            <div className="w-4 h-4 flex items-center justify-center">
-                              {selectedIds.includes(org.id) && (
-                                <Check className="h-4 w-4" />
-                              )}
-                            </div>
+                            {selectedIds.includes(org.id) && (
+                              <Check className="h-4 w-4" />
+                            )}
                           </CommandItem>
                         ))
                       )}
