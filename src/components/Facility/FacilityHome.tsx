@@ -104,7 +104,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
   const { canUpdateFacility } = getPermissions(
     hasPermission,
-    facilityData?.permissions ?? [],
+    facilityData?.root_org_permissions ?? [],
   );
 
   /*   const { mutate: deleteFacility, isPending: isDeleting } = useMutation({

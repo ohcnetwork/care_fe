@@ -37,4 +37,6 @@ export interface FacilityData {
   pincode: number;
   is_public: boolean;
   permissions: string[];
+  root_org_permissions: string[];
+  child_org_permissions: string[];
 }
