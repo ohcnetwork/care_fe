@@ -462,9 +462,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         </div>
 
         <div className="flex items-center justify-end">
-          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
-            {isPending ? t("saving") : t("save")}
-          </Button>
           <Button
             variant="outline"
             className="m-4"
@@ -477,6 +474,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             }}
           >
             {t("cancel")}
+          </Button>
+          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
+            {isPending ? t("saving") : t("save")}
           </Button>
         </div>
       </form>
