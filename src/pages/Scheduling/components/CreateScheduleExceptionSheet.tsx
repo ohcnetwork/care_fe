@@ -193,7 +193,7 @@ export default function CreateScheduleExceptionSheet({
                   name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>Reason</FormLabel>
+                      <FormLabel required>{t("reason")}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g. Holiday Leave, Conference, etc."
@@ -211,7 +211,7 @@ export default function CreateScheduleExceptionSheet({
                     name="valid_from"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Valid From</FormLabel>
+                        <FormLabel required>{t("valid_from")}</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -226,7 +226,7 @@ export default function CreateScheduleExceptionSheet({
                     name="valid_to"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Valid Till</FormLabel>
+                        <FormLabel required>{t("valid_to")}</FormLabel>
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
@@ -249,7 +249,7 @@ export default function CreateScheduleExceptionSheet({
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Full Day Unavailable</FormLabel>
+                        <FormLabel>{t("full_day_unavailable")}</FormLabel>
                       </div>
                     </FormItem>
                   )}
