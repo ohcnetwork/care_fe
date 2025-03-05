@@ -204,18 +204,18 @@ export function AllergyQuestion({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px]"></TableHead>
-                  <TableHead className="w-[220px]">{t("substance")}</TableHead>
-                  <TableHead className="w-[65px] text-center px-0.5">
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-55">{t("substance")}</TableHead>
+                  <TableHead className="w-17 text-center px-0.5">
                     {t("criticality")}
                   </TableHead>
-                  <TableHead className="w-[85px] text-center px-0.5">
+                  <TableHead className="w-21 text-center px-0.5">
                     {t("status")}
                   </TableHead>
-                  <TableHead className="w-[100px] text-center px-0.5 pr-6">
+                  <TableHead className="w-25 text-center px-0.5 pr-6">
                     {t("occurrence")}
                   </TableHead>
-                  <TableHead className="w-[35px]"></TableHead>
+                  <TableHead className="w-9"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
