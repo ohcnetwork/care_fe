@@ -496,9 +496,24 @@ export function ValueSetForm({
           <RuleFields type="exclude" form={form} />
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? t("saving") : t("save_valueset")}
-        </Button>
+        <div className="flex gap-2 w-full justify-end">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            type="button"
+            onClick={() => goBack("/admin/valuesets")}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={isSubmitting || !form.formState.isDirty}
+          >
+            {isSubmitting ? t("saving") : t("save_valueset")}
+          </Button>
+        </div>
+        
       </form>
     </Form>
   );
