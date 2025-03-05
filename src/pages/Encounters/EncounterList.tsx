@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -716,7 +716,9 @@ export function EncounterList({
                     <CardDescription className="flex items-center">
                       <CareIcon icon="l-clock" className="mr-2 h-4 w-4" />
                       {encounter.period.start &&
-                        format(new Date(encounter.period.start), "PPp")}
+                        dayjs(encounter.period.start).format(
+                          "MMM D, YYYY, h:mm A",
+                        )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="">

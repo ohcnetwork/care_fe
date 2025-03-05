@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -31,6 +30,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import dayjs from "@/Utils/dayjs";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
@@ -79,20 +79,24 @@ export default function CreateScheduleExceptionSheet({
         if (data.unavailable_all_day) return true;
 
         // Parse time strings into Date objects for comparison
-        const startTime = parse(data.start_time, "HH:mm", new Date());
-        const endTime = parse(data.end_time, "HH:mm", new Date());
-
-        return isBefore(startTime, endTime);
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
+        return startTime.isBefore(endTime);
       },
       {
         message: t("start_time_must_be_before_end_time"),
         path: ["start_time"], // This will show the error on the start_time field
       },
     )
-    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"], // This will show the error on the valid_from field
-    });
+    .refine(
+      (data) => {
+        return !dayjs(data.valid_from).isAfter(dayjs(data.valid_to));
+      },
+      {
+        message: t("from_date_must_be_before_to_date"),
+        path: ["valid_from"], // This will show the error on the valid_from field
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

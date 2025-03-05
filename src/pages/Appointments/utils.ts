@@ -1,12 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import {
-  compareAsc,
-  eachDayOfInterval,
-  format,
-  max,
-  startOfToday,
-} from "date-fns";
+import dayjs from "dayjs";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
@@ -16,6 +10,17 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+
+function eachDayOfInterval({ start, end }: { start: Date; end: Date }): Date[] {
+  const dates: Date[] = [];
+  let current = dayjs(start).startOf("day");
+  const last = dayjs(end).startOf("day");
+  while (current.isBefore(last) || current.isSame(last)) {
+    dates.push(current.toDate());
+    current = current.add(1, "day");
+  }
+  return dates;
+}
 
 export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   const result: {
@@ -37,12 +42,12 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
 
   // sort slots by start time
   result.forEach(({ slots }) =>
-    slots.sort((a, b) => compareAsc(a.start_datetime, b.start_datetime)),
+    slots.sort((a, b) => dayjs(a.start_datetime).diff(dayjs(b.start_datetime))),
   );
 
   // sort availability by first slot start time
   result.sort((a, b) =>
-    compareAsc(a.slots[0].start_datetime, b.slots[0].start_datetime),
+    dayjs(a.slots[0].start_datetime).diff(dayjs(b.slots[0].start_datetime)),
   );
 
   return result;
@@ -63,7 +68,9 @@ export const useAvailabilityHeatmap = ({
   const { start, end } = getMonthStartAndEnd(month);
 
   // start from today if the month is current or past
-  const fromDate = dateQueryString(max([start, startOfToday()]));
+  const today = dayjs().startOf("day").toDate();
+  const fromDateObj = new Date(Math.max(start.getTime(), today.getTime()));
+  const fromDate = dateQueryString(fromDateObj);
   const toDate = dateQueryString(end);
 
   let queryFn = query(scheduleApis.slots.availabilityStats, {
@@ -95,7 +102,9 @@ const getInfiniteAvailabilityHeatmap = ({
   fromDate: string;
   toDate: string;
 }) => {
-  const dates = eachDayOfInterval({ start: fromDate, end: toDate });
+  const startDate = new Date(fromDate);
+  const endDate = new Date(toDate);
+  const dates = eachDayOfInterval({ start: startDate, end: endDate });
 
   const result: AvailabilityHeatmapResponse = {};
 
@@ -110,15 +119,14 @@ export const formatAppointmentSlotTime = (appointment: Appointment) => {
   if (!appointment.token_slot?.start_datetime) {
     return "";
   }
-  return format(appointment.token_slot.start_datetime, "dd MMM, yyyy, hh:mm a");
+  return dayjs(appointment.token_slot.start_datetime).format(
+    "DD MMM, YYYY, hh:mm A",
+  );
 };
 
 export const formatSlotTimeRange = (slot: {
   start_datetime: string;
   end_datetime: string;
 }) => {
-  return `${format(slot.start_datetime, "h:mm a")} - ${format(
-    slot.end_datetime,
-    "h:mm a",
-  )}`;
+  return `${dayjs(slot.start_datetime).format("h:mm A")} - ${dayjs(slot.end_datetime).format("h:mm A")}`;
 };

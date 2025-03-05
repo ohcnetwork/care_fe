@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import dayjs from "dayjs";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -118,11 +118,11 @@ const ScheduleExceptionItem = (
               </span>
               <span> {t("from")} </span>
               <span className="font-medium">
-                {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
+                {dayjs(props.valid_from).format("ddd, DD MMM YYYY")}
               </span>
               <span> {t("to")} </span>
               <span className="font-medium">
-                {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
+                {dayjs(props.valid_to).format("ddd, DD MMM YYYY")}
               </span>
             </span>
           </div>

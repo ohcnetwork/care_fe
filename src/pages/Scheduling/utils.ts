@@ -1,10 +1,5 @@
-import {
-  addMinutes,
-  format,
-  isSameDay,
-  isWithinInterval,
-  parse,
-} from "date-fns";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 
 import { Time } from "@/Utils/types";
 import {
@@ -13,33 +8,26 @@ import {
   ScheduleException,
 } from "@/types/scheduling/schedule";
 
+dayjs.extend(isBetween);
+
 export const isDateInRange = (
   date: Date,
   startDate: string,
   endDate: string,
 ) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  return (
-    isWithinInterval(date, { start, end }) ||
-    isSameDay(date, start) ||
-    isSameDay(date, end)
-  );
+  const d = dayjs(date);
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+  return d.isBetween(start, end, "day", "[]");
 };
 
 export function getDurationInMinutes(startTime: Time, endTime: Time) {
-  const start = new Date(`1970-01-01T${startTime}`);
-  const end = new Date(`1970-01-01T${endTime}`);
-
-  if (
-    start.toString() === "Invalid Date" ||
-    end.toString() === "Invalid Date"
-  ) {
+  const start = dayjs(`1970-01-01T${startTime}`);
+  const end = dayjs(`1970-01-01T${endTime}`);
+  if (!start.isValid() || !end.isValid()) {
     return null;
   }
-
-  return (end.getTime() - start.getTime()) / (1000 * 60);
+  return end.diff(start, "minute");
 }
 
 type VirtualSlot = {
@@ -54,37 +42,35 @@ export function computeAppointmentSlots(
   exceptions: ScheduleException[],
   referenceDate: Date = new Date(),
 ) {
-  const startTime = parse(
-    availability.availability[0].start_time,
-    "HH:mm:ss",
-    referenceDate,
-  );
-  const endTime = parse(
-    availability.availability[0].end_time,
-    "HH:mm:ss",
-    referenceDate,
-  );
+  const avail = availability.availability[0];
+  const [sh, sm, ss] = avail.start_time.split(":").map(Number);
+  const [eh, em, es] = avail.end_time.split(":").map(Number);
+  const startTime = dayjs(referenceDate).hour(sh).minute(sm).second(ss);
+  const endTime = dayjs(referenceDate).hour(eh).minute(em).second(es);
   const slotSizeInMinutes = availability.slot_size_in_minutes;
   const slots: VirtualSlot[] = [];
 
   let time = startTime;
-  while (time < endTime) {
-    const slotEndTime = addMinutes(time, slotSizeInMinutes);
+  while (time.isBefore(endTime)) {
+    const slotEndTime = time.add(slotSizeInMinutes, "minute");
 
     let conflicting = false;
     for (const exception of exceptions) {
-      const exceptionStartTime = parse(
-        exception.start_time,
-        "HH:mm:ss",
-        referenceDate,
-      );
-      const exceptionEndTime = parse(
-        exception.end_time,
-        "HH:mm:ss",
-        referenceDate,
-      );
+      const [exh, exm, exs] = exception.start_time.split(":").map(Number);
+      const [eeh, eem, ees] = exception.end_time.split(":").map(Number);
+      const exceptionStartTime = dayjs(referenceDate)
+        .hour(exh)
+        .minute(exm)
+        .second(exs);
+      const exceptionEndTime = dayjs(referenceDate)
+        .hour(eeh)
+        .minute(eem)
+        .second(ees);
 
-      if (exceptionStartTime < slotEndTime && exceptionEndTime > time) {
+      if (
+        exceptionStartTime.isBefore(slotEndTime) &&
+        exceptionEndTime.isAfter(time)
+      ) {
         conflicting = true;
         break;
       }
@@ -92,8 +78,8 @@ export function computeAppointmentSlots(
 
     if (!conflicting) {
       slots.push({
-        start_time: format(time, "HH:mm") as Time,
-        end_time: format(slotEndTime, "HH:mm") as Time,
+        start_time: time.format("HH:mm") as Time,
+        end_time: slotEndTime.format("HH:mm") as Time,
         isAvailable: true,
         exceptions: [],
       });

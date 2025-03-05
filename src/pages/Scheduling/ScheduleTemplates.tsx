@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
@@ -150,11 +150,8 @@ const ScheduleTemplateItem = ({
           <Trans
             i18nKey="schedule_valid_from_till_range"
             values={{
-              from_date: format(
-                parseISO(template.valid_from),
-                "EEE, dd MMM yyyy",
-              ),
-              to_date: format(parseISO(template.valid_to), "EEE, dd MMM yyyy"),
+              from_date: dayjs(template.valid_from).format("ddd, DD MMM YYYY"),
+              to_date: dayjs(template.valid_to).format("ddd, DD MMM YYYY"),
             }}
             components={{ strong: <strong className="font-semibold" /> }}
           />

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -67,7 +67,7 @@ const SbomViewer = ({ data: { sbom } }: { data: LicensesSbom }) => {
           {t("spdx_sbom_version") + ": " + sbom.spdxVersion}
         </h2>
         <p className="text-sm text-gray-500">
-          {t("created_on")} {format(sbom.creationInfo.created, "PPP")}
+          {t("created_on")} {dayjs(sbom.creationInfo.created).format("LL")}
         </p>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

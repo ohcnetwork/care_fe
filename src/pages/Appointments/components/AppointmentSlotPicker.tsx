@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, isBefore, isSameDay, startOfToday } from "date-fns";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -56,8 +56,8 @@ export function AppointmentSlotPicker({
   });
 
   const renderDay = (date: Date) => {
-    const isSelected = isSameDay(date, selectedDate);
-    const isBeforeToday = isBefore(date, startOfToday());
+    const isSelected = dayjs(date).isSame(dayjs(selectedDate), "day");
+    const isBeforeToday = dayjs(date).isBefore(dayjs().startOf("day"));
     const availability = heatmapQuery.data?.[dateQueryString(date)];
 
     if (
@@ -221,8 +221,8 @@ export const TokenSlotButton = ({
 }) => {
   const percentage = slot.allocated / availability.tokens_per_slot;
   const isPastSlot =
-    isSameDay(selectedDate, new Date()) &&
-    isBefore(slot.start_datetime, new Date());
+    dayjs(selectedDate).isSame(dayjs(), "day") &&
+    dayjs(slot.start_datetime).isBefore(dayjs());
 
   return (
     <Button
@@ -234,7 +234,7 @@ export const TokenSlotButton = ({
       className="flex flex-col items-center group gap-0 w-24"
     >
       <span className="font-semibold">
-        {format(slot.start_datetime, "HH:mm")}
+        {dayjs(slot.start_datetime).format("HH:mm")}
       </span>
       <span
         className={cn(

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
+import dayjs from "dayjs";
 import { ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -331,7 +331,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                           {t("manufacture_date")}
                         </h4>
                         <p className="mt-1">
-                          {formatDate(device.manufacture_date, "dd/MM/yyyy")}
+                          {dayjs(device.manufacture_date).format("DD/MM/YYYY")}
                         </p>
                       </div>
                     )}
@@ -341,7 +341,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                           {t("expiration_date")}
                         </h4>
                         <p className="mt-1">
-                          {formatDate(device.expiration_date, "dd/MM/yyyy")}
+                          {dayjs(device.expiration_date).format("DD/MM/YYYY")}
                         </p>
                       </div>
                     )}

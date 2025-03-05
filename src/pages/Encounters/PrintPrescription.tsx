@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -115,7 +115,7 @@ export const PrintPrescription = (props: {
                 label={t("encounter_date")}
                 value={
                   encounter?.period?.start &&
-                  format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
+                  dayjs(encounter.period.start).format("DD MMM YYYY, dddd")
                 }
                 isStrong
               />
@@ -181,7 +181,7 @@ export const PrintPrescription = (props: {
           {/* Footer */}
           <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
             <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
+              {t("generated_on")} {dayjs().format("LL [at] LT")}
             </p>
             <p>{t("computer_generated_prescription")}</p>
           </div>

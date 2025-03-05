@@ -4,7 +4,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { formatRelative } from "date-fns";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import {
   Info,
   Loader2,
@@ -65,6 +66,8 @@ import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
+
+dayjs.extend(relativeTime);
 
 const MESSAGES_LIMIT = 20;
 
@@ -184,7 +187,7 @@ const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
                 dateTime={message.created_date}
                 title={formatDateTime(message.created_date)}
               >
-                {formatRelative(message.created_date, new Date())}
+                {dayjs(message.created_date).fromNow()}
               </time>
             </p>
             <div

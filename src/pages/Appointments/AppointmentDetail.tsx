@@ -11,7 +11,7 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { differenceInYears, format, isSameDay } from "date-fns";
+import dayjs from "dayjs";
 import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -239,7 +239,9 @@ const AppointmentDetails = ({
             <CalendarIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
-                {format(appointment.token_slot.start_datetime, "MMMM d, yyyy")}
+                {dayjs(appointment.token_slot.start_datetime).format(
+                  "MMMM D, YYYY",
+                )}
               </p>
               <p className="text-gray-600">
                 {appointment.token_slot.availability.name}
@@ -250,8 +252,8 @@ const AppointmentDetails = ({
             <ClockIcon className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">
-                {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
-                {format(appointment.token_slot.end_datetime, "h:mm a")}
+                {dayjs(appointment.token_slot.start_datetime).format("h:mm A")}{" "}
+                - {dayjs(appointment.token_slot.end_datetime).format("h:mm A")}
               </p>
               <p className="text-gray-600 capitalize">
                 {t("duration")}:{" "}
@@ -284,20 +286,22 @@ const AppointmentDetails = ({
               <p className="text-gray-600">
                 {appointment.patient.date_of_birth ? (
                   <>
-                    {format(appointment.patient.date_of_birth, "MMMM d, yyyy")}{" "}
+                    {dayjs(appointment.patient.date_of_birth).format(
+                      "MMMM D, YYYY",
+                    )}{" "}
                     |{" "}
-                    {differenceInYears(
-                      new Date(),
-                      appointment.patient.date_of_birth!,
+                    {dayjs(new Date()).diff(
+                      appointment.patient.date_of_birth,
+                      "year",
                     )}
                   </>
                 ) : (
                   <>
-                    {differenceInYears(
-                      new Date(),
+                    {dayjs(new Date()).diff(
                       new Date().setFullYear(
                         Number(appointment.patient.year_of_birth),
                       ),
+                      "year",
                     )}
                   </>
                 )}{" "}
@@ -353,7 +357,7 @@ const AppointmentDetails = ({
       <div className="text-sm text-gray-600">
         {t("booked_by")} {appointment.booked_by?.first_name}{" "}
         {appointment.booked_by?.last_name} {t("on")}{" "}
-        {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}
+        {dayjs(appointment.booked_on).format("MMMM D, YYYY [at] h:mm A")}
       </div>
     </div>
   );
@@ -378,7 +382,10 @@ const AppointmentActions = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
-  const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
+  const isToday = dayjs(appointment.token_slot.start_datetime).isSame(
+    dayjs(),
+    "day",
+  );
 
   const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {

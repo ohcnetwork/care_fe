@@ -2,16 +2,7 @@ import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  addDays,
-  format,
-  formatDate,
-  isPast,
-  isToday,
-  isTomorrow,
-  isYesterday,
-  subDays,
-} from "date-fns";
+import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
@@ -112,22 +103,22 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   if (
     (dateFrom === dateQueryString(today) &&
       dateTo === dateQueryString(today)) ||
-    (dateFrom === dateQueryString(subDays(today, 1)) &&
-      dateTo === dateQueryString(subDays(today, 1)))
+    (dateFrom === dateQueryString(dayjs(today).subtract(1, "day").toDate()) &&
+      dateTo === dateQueryString(dayjs(today).subtract(1, "day").toDate()))
   ) {
     <>
       {dateFrom === dateQueryString(today) ? (
         <>
           <span className="text-black">{t("today")}</span>
           <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
+            ({dayjs(dateFrom).format("DD MMM YYYY")})
           </span>
         </>
       ) : (
         <>
           <span className="text-black">{t("yesterday")}</span>
           <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
+            ({dayjs(dateFrom).format("DD MMM YYYY")})
           </span>
         </>
       )}
@@ -138,18 +129,18 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   const ranges = [
     {
       label: t("last_week_short"),
-      from: subDays(today, 7),
+      from: dayjs(today).subtract(7, "day").toDate(),
       to: today,
     },
     {
       label: t("next_week_short"),
       from: today,
-      to: addDays(today, 7),
+      to: dayjs(today).add(7, "day").toDate(),
     },
     {
       label: t("next_month"),
       from: today,
-      to: addDays(today, 30),
+      to: dayjs(today).add(30, "day").toDate(),
     },
   ];
 
@@ -166,8 +157,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       <>
         <span className="text-black">{matchingRange.label}</span>
         <span className="pl-1 text-gray-500">
-          ({formatDate(dateFrom, "dd MMM yyyy")} -{" "}
-          {formatDate(dateTo, "dd MMM yyyy")})
+          ({dayjs(dateFrom).format("DD MMM YYYY")} -{" "}
+          {dayjs(dateTo).format("DD MMM YYYY")})
         </span>
       </>
     );
@@ -178,11 +169,11 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
     const date = new Date(dateFrom);
     let relativeDay = null;
 
-    if (isToday(date)) {
+    if (dayjs(date).isSame(dayjs(), "day")) {
       relativeDay = t("today");
-    } else if (isTomorrow(date)) {
+    } else if (dayjs(date).isSame(dayjs().add(1, "day"), "day")) {
       relativeDay = t("tomorrow");
-    } else if (isYesterday(date)) {
+    } else if (dayjs(date).isSame(dayjs().subtract(1, "day"), "day")) {
       relativeDay = t("yesterday");
     }
 
@@ -191,7 +182,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
         <>
           <span className="text-black">{relativeDay}</span>
           <span className="pl-1 text-gray-500">
-            ({formatDate(dateFrom, "dd MMM yyyy")})
+            ({dayjs(dateFrom).format("DD MMM YYYY")})
           </span>
         </>
       );
@@ -201,7 +192,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       <>
         <span className="capitalize text-gray-500">{t("on")} </span>
         <span className="pl-1 text-black ">
-          {formatDate(dateFrom, "dd MMM yyyy")}
+          {dayjs(dateFrom).format("DD MMM YYYY")}
         </span>
       </>
     );
@@ -213,7 +204,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       <>
         <span className="capitalize text-gray-500">{t("after")} </span>
         <span className="pl-1 text-black">
-          {formatDate(dateFrom, "dd MMM yyyy")}
+          {dayjs(dateFrom).format("DD MMM YYYY")}
         </span>
       </>
     );
@@ -224,7 +215,7 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
       <>
         <span className=" capitalize text-gray-500">{t("before")} </span>
         <span className="pl-1 text-black">
-          {formatDate(dateTo, "dd MMM yyyy")}
+          {dayjs(dateTo).format("DD MMM YYYY")}
         </span>
       </>
     );
@@ -233,8 +224,8 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
   // Case 5: Date range
   return (
     <span className="text-black">
-      {formatDate(dateFrom!, "dd MMM yyyy")} -{" "}
-      {formatDate(dateTo!, "dd MMM yyyy")}
+      {dayjs(dateFrom!).format("DD MMM YYYY")} -{" "}
+      {dayjs(dateTo!).format("DD MMM YYYY")}
     </span>
   );
 }
@@ -291,8 +282,14 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         updates.date_to = dateQueryString(today);
       } else {
         // Past or future days based on configuration
-        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
-        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+        const fromDate =
+          defaultDays > 0
+            ? today
+            : dayjs(today).add(defaultDays, "day").toDate();
+        const toDate =
+          defaultDays > 0
+            ? dayjs(today).add(defaultDays, "day").toDate()
+            : today;
         updates.date_from = dateQueryString(fromDate);
         updates.date_to = dateQueryString(toDate);
       }
@@ -477,7 +474,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           const today = new Date();
                           setQParams({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 7)),
+                            date_from: dateQueryString(
+                              dayjs(today).subtract(7, "day").toDate(),
+                            ),
                             date_to: dateQueryString(today),
                             slot: null,
                           });
@@ -493,8 +492,12 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           const today = new Date();
                           setQParams({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 1)),
-                            date_to: dateQueryString(subDays(today, 1)),
+                            date_from: dateQueryString(
+                              dayjs(today).subtract(1, "day").toDate(),
+                            ),
+                            date_to: dateQueryString(
+                              dayjs(today).subtract(1, "day").toDate(),
+                            ),
                             slot: null,
                           });
                         }}
@@ -526,7 +529,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           setQParams({
                             ...qParams,
                             date_from: dateQueryString(today),
-                            date_to: dateQueryString(addDays(today, 7)),
+                            date_to: dateQueryString(
+                              dayjs(today).add(7, "day").toDate(),
+                            ),
                             slot: null,
                           });
                         }}
@@ -542,7 +547,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           setQParams({
                             ...qParams,
                             date_from: dateQueryString(today),
-                            date_to: dateQueryString(addDays(today, 30)),
+                            date_to: dateQueryString(
+                              dayjs(today).add(30, "day").toDate(),
+                            ),
                             slot: null,
                           });
                         }}
@@ -929,7 +936,9 @@ const AppointmentStatusDropdown = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const currentStatus = appointment.status;
-  const hasStarted = isPast(appointment.token_slot.start_datetime);
+  const hasStarted = dayjs(appointment.token_slot.start_datetime).isBefore(
+    dayjs(),
+  );
 
   const { mutate: updateAppointment } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.update, {
@@ -1035,9 +1044,9 @@ export const SlotFilter = ({
               value={slot.id}
               disabled={props.disabled}
             >
-              {format(slot.start_datetime, "h:mm a").replace(":00", "")}
+              {dayjs(slot.start_datetime).format("h:mm A").replace(":00", "")}
               {" - "}
-              {format(slot.end_datetime, "h:mm a").replace(":00", "")}
+              {dayjs(slot.end_datetime).format("h:mm A").replace(":00", "")}
             </TabsTrigger>
           ))}
         </TabsList>

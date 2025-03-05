@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, parse } from "date-fns";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -63,6 +63,8 @@ import {
   ScheduleTemplate,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+
+dayjs.extend(customParseFormat);
 
 export default function EditScheduleTemplateSheet({
   template,
@@ -156,22 +158,17 @@ const ScheduleTemplateEditor = ({
         required_error: t("field_required"),
       }),
     })
-    .refine(
-      (data) => {
-        return isBefore(data.valid_from, data.valid_to);
-      },
-      {
-        message: t("from_date_must_be_before_to_date"),
-        path: ["valid_from"],
-      },
-    );
+    .refine((data) => dayjs(data.valid_from).isBefore(dayjs(data.valid_to)), {
+      message: t("from_date_must_be_before_to_date"),
+      path: ["valid_from"],
+    });
 
   const form = useForm<z.infer<typeof templateFormSchema>>({
     resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: template.name,
-      valid_from: new Date(template.valid_from),
-      valid_to: new Date(template.valid_to),
+      valid_from: dayjs(template.valid_from).toDate(),
+      valid_to: dayjs(template.valid_to).toDate(),
     },
   });
 
@@ -578,15 +575,14 @@ const NewAvailabilityCard = ({
     })
     .refine(
       (data) => {
-        // Parse time strings into Date objects for comparison
-        const startTime = parse(data.start_time, "HH:mm", new Date());
-        const endTime = parse(data.end_time, "HH:mm", new Date());
-
-        return isBefore(startTime, endTime);
+        // Parse time strings into dayjs objects for comparison
+        const startTime = dayjs(data.start_time, "HH:mm");
+        const endTime = dayjs(data.end_time, "HH:mm");
+        return startTime.isBefore(endTime);
       },
       {
         message: t("start_time_must_be_before_end_time"),
-        path: ["start_time"], // This will show the error on the start_time field
+        path: ["start_time"],
       },
     );
 
@@ -719,39 +715,6 @@ const NewAvailabilityCard = ({
               </FormItem>
             )}
           />
-
-          {/* <FormField
-            control={form.control}
-            name="slot_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>{t("session_type")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue>
-                        {t(`SCHEDULE_AVAILABILITY_TYPE__${field.value}`)}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {["appointment", "open", "closed"].map((type) => (
-                      <SelectItem key={type} value={type}>
-                        <p>{t(`SCHEDULE_AVAILABILITY_TYPE__${type}`)}</p>
-                        <p className="text-xs text-gray-500">
-                          {t(`SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__${type}`)}
-                        </p>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
 
           <div className="flex flex-wrap">
             <FormField

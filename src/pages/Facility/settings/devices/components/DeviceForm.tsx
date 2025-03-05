@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, startOfTomorrow } from "date-fns";
+import dayjs from "dayjs";
 import { t } from "i18next";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -51,7 +51,8 @@ const formSchema = z
       .string()
       .optional()
       .refine(
-        (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+        (date) =>
+          !date || dayjs(date).isBefore(dayjs().add(1, "day").startOf("day")),
         t("manufacture_date_cannot_be_in_future"),
       ),
     expiration_date: z.string().optional(),
