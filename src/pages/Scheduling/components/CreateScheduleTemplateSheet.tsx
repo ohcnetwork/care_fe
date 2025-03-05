@@ -80,12 +80,16 @@ export default function CreateScheduleTemplateSheet({
         .date({
           required_error: t("field_required"),
         })
-        .refine((date) => isAfter(date, new Date()), {
-          message: t("valid_from_must_be_future"),
+        .refine((date) => !isBefore(date, new Date()), {
+          message: t("valid_from_must_be_today_or_future"),
         }),
-      valid_to: z.date({
-        required_error: t("field_required"),
-      }),
+      valid_to: z
+        .date({
+          required_error: t("field_required"),
+        })
+        .refine((date) => isAfter(date, new Date()), {
+          message: t("valid_to_must_be_future"),
+        }),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -142,7 +146,6 @@ export default function CreateScheduleTemplateSheet({
       message: t("from_date_must_be_before_to_date"),
       path: ["valid_from"],
     });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
