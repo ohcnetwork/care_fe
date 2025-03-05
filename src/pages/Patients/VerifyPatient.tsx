@@ -165,23 +165,25 @@ export default function VerifyPatient(props: { facilityId: string }) {
                       href={`/facility/${props.facilityId}/patient/${patientData.id}/book-appointment`}
                       className="p-4 md:p-6"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-                      <div className="relative flex w-full items-center gap-3 md:gap-4">
-                        <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <CalendarIcon className="size-5 md:size-6 text-primary" />
+                      <div className="w-full p-4 md:p-6">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
+                        <div className="relative flex w-full items-center gap-3 md:gap-4">
+                          <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                            <CalendarIcon className="size-5 md:size-6 text-primary" />
+                          </div>
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
+                              {t("schedule_appointment")}
+                            </span>
+                            <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
+                              {t("book_a_new_appointment")}
+                            </span>
+                          </div>
+                          <CareIcon
+                            icon="l-arrow-right"
+                            className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
+                          />
                         </div>
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                            {t("schedule_appointment")}
-                          </span>
-                          <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                            {t("book_a_new_appointment")}
-                          </span>
-                        </div>
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                        />
                       </div>
                     </Link>
                   </Button>
