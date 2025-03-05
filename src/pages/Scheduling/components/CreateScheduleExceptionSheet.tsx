@@ -59,7 +59,6 @@ export default function CreateScheduleExceptionSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { replace: false });
-
   const formSchema = z
     .object({
       reason: z.string().min(1, t("field_required")),
@@ -73,12 +72,25 @@ export default function CreateScheduleExceptionSheet({
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
       unavailable_all_day: z.boolean(),
     })
+    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
+      message: t("from date must be before to date"),
+      path: ["valid_from"],
+    })
     .refine(
       (data) => {
-        // Skip time validation if unavailable all day
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return !isBefore(data.valid_from, today);
+      },
+      {
+        message: t("from  date must be today or future"),
+        path: ["valid_from"],
+      },
+    )
+    .refine(
+      (data) => {
         if (data.unavailable_all_day) return true;
 
-        // Parse time strings into Date objects for comparison
         const startTime = parse(data.start_time, "HH:mm", new Date());
         const endTime = parse(data.end_time, "HH:mm", new Date());
 
@@ -86,13 +98,9 @@ export default function CreateScheduleExceptionSheet({
       },
       {
         message: t("start_time_must_be_before_end_time"),
-        path: ["start_time"], // This will show the error on the start_time field
+        path: ["start_time"],
       },
-    )
-    .refine((data) => !isAfter(data.valid_from, data.valid_to), {
-      message: t("from_date_must_be_before_to_date"),
-      path: ["valid_from"], // This will show the error on the valid_from field
-    });
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
