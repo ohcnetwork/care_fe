@@ -49,7 +49,7 @@ export const UserStatusIndicator = ({
       ) : (
         <Badge
           variant="secondary"
-          className="bg-gray-100 whitespace-nowrap text-wrap"
+          className="bg-gray-100 whitespace-nowrap flex items-center px-2 py-1"
         >
           <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
           <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
