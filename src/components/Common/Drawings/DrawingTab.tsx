@@ -23,7 +23,6 @@ export interface DrawingsTabProps {
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
-  drawingId?: string;
 }
 
 export const DrawingTab = (props: DrawingsTabProps) => {

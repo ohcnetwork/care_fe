@@ -28,7 +28,6 @@ export interface EncounterTabProps {
   encounter: Encounter;
   patient: Patient;
   subPage?: string;
-  drawingId?: string;
 }
 
 const defaultTabs = {
@@ -50,7 +49,6 @@ interface Props {
   encounterId: string;
   tab?: string;
   subPage?: string;
-  drawingId?: string;
 }
 
 export const EncounterShow = (props: Props) => {

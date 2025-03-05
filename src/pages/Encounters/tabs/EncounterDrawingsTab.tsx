@@ -9,7 +9,6 @@ export const EncounterDrawingsTab = (props: EncounterTabProps) => {
       facilityId={props.facilityId}
       patientId={props.patient.id}
       encounter={props.encounter}
-      drawingId={props.drawingId}
     />
   );
 };
