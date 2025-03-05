@@ -296,7 +296,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         ...qParams,
       });
     }
-  }, [schedulableUsersQuery.isLoading, qParams]);
+  }, [schedulableUsersQuery.isLoading]);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
