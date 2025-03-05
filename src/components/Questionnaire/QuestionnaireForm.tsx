@@ -79,7 +79,7 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const isStructuredSlug = (
+  const StructuredQuestion = (
     slug: string | undefined,
   ): slug is StructuredQuestionType => {
     if (!slug) return false;
@@ -399,7 +399,7 @@ export function QuestionnaireForm({
                 )}
               </div>
               {form.questionnaire.id !== questionnaireData?.id &&
-                !isStructuredSlug(form.questionnaire.slug) && (
+                !StructuredQuestion(form.questionnaire.slug) && (
                   <Button
                     type="button"
                     variant="ghost"
