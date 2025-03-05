@@ -1,5 +1,3 @@
-"use client";
-
 import {
   DotsVerticalIcon,
   MinusCircledIcon,
@@ -21,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -28,6 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -183,97 +190,113 @@ const SymptomRow = React.memo(function SymptomRow({
   const handleToggleNotes = useCallback(() => setShowNotes((n) => !n), []);
 
   return (
-    <div
-      className={cn("group hover:bg-gray-50", {
-        "opacity-40 pointer-events-none":
-          symptom.verification_status === "entered_in_error",
-      })}
-    >
-      <div className="py-1 px-2 space-y-2 md:space-y-0 md:grid md:grid-cols-12 md:items-center md:gap-4">
-        <div className="flex items-center justify-between md:col-span-5">
-          <div
-            className="font-medium text-sm truncate"
-            title={symptom.code.display}
-          >
-            {symptom.code.display}
-          </div>
-        </div>
-        <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("date")}
-          </div>
+    <>
+      <TableRow
+        className={cn("group hover:bg-gray-50", {
+          "opacity-40 pointer-events-none":
+            symptom.verification_status === "entered_in_error",
+        })}
+      >
+        <TableCell className="min-w-[220px] font-medium py-1 pl-1">
+          {symptom.code.display}
+        </TableCell>
+        <TableCell className="min-w-[100px] py-1 px-1">
           <Input
             type="date"
             value={symptom.onset?.onset_datetime || ""}
             onChange={handleDateChange}
             disabled={disabled || !!symptom.id}
-            className="h-8 md:h-9"
+            className="h-7 text-sm px-1"
           />
-        </div>
-        <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("status")}
-          </div>
+        </TableCell>
+
+        <TableCell className="min-w-[80px] py-1 px-0.5">
           <Select
             value={symptom.clinical_status}
             onValueChange={handleStatusChange}
             disabled={disabled}
           >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
+            <SelectTrigger className="h-7 px-1">
+              <SelectValue placeholder={t("status")} />
             </SelectTrigger>
             <SelectContent>
               {SYMPTOM_CLINICAL_STATUS.map((status) => (
-                <SelectItem key={status} value={status}>
+                <SelectItem key={status} value={status} className="capitalize">
                   {t(status)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div className="col-span-2">
-          <div className="block text-sm font-medium text-gray-500 mb-1 md:hidden">
-            {t("severity")}
-          </div>
+        </TableCell>
+
+        <TableCell className="min-w-[80px] py-1 px-0.5">
           <Select
             value={symptom.severity}
             onValueChange={handleSeverityChange}
             disabled={disabled}
           >
-            <SelectTrigger className="h-8 md:h-9">
-              <SelectValue />
+            <SelectTrigger className="h-7 px-1">
+              <SelectValue placeholder={t("severity")} />
             </SelectTrigger>
             <SelectContent>
               {SYMPTOM_SEVERITY.map((severity) => (
-                <SelectItem key={severity} value={severity}>
+                <SelectItem
+                  key={severity}
+                  value={severity}
+                  className="capitalize"
+                >
                   {t(severity)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div className="col-span-1 flex justify-center">
-          <SymptomActionsMenu
-            showNotes={showNotes}
-            verificationStatus={symptom.verification_status}
-            disabled={disabled}
-            onToggleNotes={handleToggleNotes}
-            onRemove={handleRemove}
-          />
-        </div>
-      </div>
+        </TableCell>
+
+        <TableCell className="min-w-[35px] py-1 px-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={disabled}
+                className="h-7 w-6 px-0"
+              >
+                <DotsVerticalIcon className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleToggleNotes}>
+                <Pencil2Icon className="h-4 w-4 mr-2" />
+                {showNotes ? t("hide_notes") : t("add_notes")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={handleRemove}
+              >
+                <MinusCircledIcon className="h-4 w-4 mr-2" />
+                {t("remove_symptom")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
       {showNotes && (
-        <div className="px-3 pb-3">
-          <Input
-            type="text"
-            placeholder={t("add_notes_about_symptom")}
-            value={symptom.note || ""}
-            onChange={handleNotesChange}
-            disabled={disabled}
-          />
-        </div>
+        <TableRow>
+          <TableCell colSpan={5} className="px-4 py-2">
+            <Input
+              type="text"
+              placeholder={t("add_notes_about_symptom")}
+              value={symptom.note ?? ""}
+              onChange={handleNotesChange}
+              disabled={disabled}
+              className="mt-0.5"
+            />
+          </TableCell>
+        </TableRow>
       )}
-    </div>
+    </>
   );
 });
 
@@ -365,23 +388,151 @@ export function SymptomQuestion({
     <div className="space-y-2">
       {symptoms.length > 0 && (
         <div className="rounded-lg border">
-          <div className="hidden md:grid md:grid-cols-12 items-center gap-4 p-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-5">{t("symptom")}</div>
-            <div className="col-span-2 text-center">{t("date")}</div>
-            <div className="col-span-2 text-center">{t("status")}</div>
-            <div className="col-span-2 text-center">{t("severity")}</div>
-            <div className="col-span-1 text-center">{t("action")}</div>
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-55">{t("symptom")}</TableHead>
+                  <TableHead className="w-25 text-center px-0.5">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-21 text-center px-0.5">
+                    {t("status")}
+                  </TableHead>
+                  <TableHead className="w-21 text-center px-0.5">
+                    {t("severity")}
+                  </TableHead>
+                  <TableHead className="w-9">{t("action")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {symptoms.map((symptom, index) => (
+                  <SymptomRow
+                    key={index}
+                    symptom={symptom}
+                    index={index}
+                    disabled={disabled}
+                    onUpdate={handleUpdateSymptom}
+                    onRemove={handleRemoveSymptom}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="md:hidden divide-y divide-gray-200">
             {symptoms.map((symptom, index) => (
-              <SymptomRow
-                key={index}
-                symptom={symptom}
-                index={index}
-                disabled={disabled}
-                onUpdate={handleUpdateSymptom}
-                onRemove={handleRemoveSymptom}
-              />
+              <div key={index} className="p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-medium">{symptom.code.display}</div>
+                  <SymptomActionsMenu
+                    showNotes={Boolean(symptom.note)}
+                    verificationStatus={symptom.verification_status}
+                    disabled={disabled}
+                    onToggleNotes={() =>
+                      handleUpdateSymptom(index, {
+                        note: symptom.note ? undefined : "",
+                      })
+                    }
+                    onRemove={() => handleRemoveSymptom(index)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs text-gray-500">{t("date")}</Label>
+                    <Input
+                      type="date"
+                      value={symptom.onset?.onset_datetime || ""}
+                      onChange={(e) =>
+                        handleUpdateSymptom(index, {
+                          onset: { onset_datetime: e.target.value },
+                        })
+                      }
+                      disabled={disabled || !!symptom.id}
+                      className="h-8 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("status")}
+                    </Label>
+                    <Select
+                      value={symptom.clinical_status}
+                      onValueChange={(value) =>
+                        handleUpdateSymptom(index, {
+                          clinical_status:
+                            value as SymptomRequest["clinical_status"],
+                        })
+                      }
+                      disabled={disabled}
+                    >
+                      <SelectTrigger className="h-8 mt-1">
+                        <SelectValue placeholder={t("status")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SYMPTOM_CLINICAL_STATUS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="capitalize"
+                          >
+                            {t(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("severity")}
+                    </Label>
+                    <Select
+                      value={symptom.severity}
+                      onValueChange={(value) =>
+                        handleUpdateSymptom(index, {
+                          severity: value as SymptomRequest["severity"],
+                        })
+                      }
+                      disabled={disabled}
+                    >
+                      <SelectTrigger className="h-8 mt-1">
+                        <SelectValue placeholder={t("severity")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SYMPTOM_SEVERITY.map((severity) => (
+                          <SelectItem
+                            key={severity}
+                            value={severity}
+                            className="capitalize"
+                          >
+                            {t(severity)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {symptom.note !== undefined && (
+                  <div>
+                    <Label className="text-xs text-gray-500">
+                      {t("notes")}
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder={t("add_notes_about_symptom")}
+                      value={symptom.note ?? ""}
+                      onChange={(e) =>
+                        handleUpdateSymptom(index, { note: e.target.value })
+                      }
+                      disabled={disabled}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
