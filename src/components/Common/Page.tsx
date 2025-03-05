@@ -31,7 +31,7 @@ export default function Page(props: PageProps) {
   // }, [props.collapseSidebar]);
 
   return (
-    <div className={cn("md:px-6 py-0", props.className)} ref={props.ref}>
+    <div className={cn("md:px-6 py-0 grid", props.className)} ref={props.ref}>
       <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}

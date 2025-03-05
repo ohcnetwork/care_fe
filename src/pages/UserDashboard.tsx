@@ -1,5 +1,6 @@
 import { ChevronRight, LogOut, Settings, User2Icon } from "lucide-react";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,21 +16,23 @@ export default function UserDashboard() {
   const user = useAuthUser();
   const { signOut } = useAuthContext();
   const facilities = user.facilities || [];
+  const { t } = useTranslation();
+
   const organizations = user.organizations || [];
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm">
+      <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
             name={formatDisplayName(user)}
             imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
-          <div className="space-y-1">
+          <div className="space-y-1 text-center sm:text-left">
             <h1 className="text-xl md:text-2xl font-bold">
-              Welcome back, {user.first_name}!
+              {t("welcome_back_name", { name: user.first_name })}
             </h1>
             <p className="text-sm md:text-base text-gray-500">
               {new Date().toLocaleDateString("en-US", {
@@ -41,7 +44,7 @@ export default function UserDashboard() {
             </p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Button
             variant="outline"
             size="sm"
@@ -50,10 +53,10 @@ export default function UserDashboard() {
           >
             <Link
               href={`/users/${user.username}`}
-              className="gap-2 text-inherit"
+              className="gap-2 text-inherit flex items-center"
             >
               <Settings className="h-4 w-4" />
-              Edit Profile
+              {t("edit_profile")}
             </Link>
           </Button>
           {user.is_superuser && (
@@ -63,9 +66,12 @@ export default function UserDashboard() {
               className="w-full sm:w-auto"
               asChild
             >
-              <Link href="/admin/questionnaire" className="gap-2 text-inherit">
+              <Link
+                href="/admin/questionnaire"
+                className="gap-2 text-inherit flex items-center"
+              >
                 <User2Icon className="h-4 w-4" />
-                Admin Dashboard
+                {t("admin_dashboard")}
               </Link>
             </Button>
           )}
@@ -73,10 +79,10 @@ export default function UserDashboard() {
             variant="outline"
             size="sm"
             className="w-full sm:w-auto"
-            onClick={() => signOut()}
+            onClick={signOut}
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {t("sign_out")}
           </Button>
         </div>
       </div>
@@ -84,7 +90,7 @@ export default function UserDashboard() {
       {/* Facilities Section */}
       {facilities.length > 0 && (
         <section className="space-y-3 md:space-y-4">
-          <h2 className="text-lg font-semibold px-1">Your Facilities</h2>
+          <h2 className="text-lg font-semibold px-1">{t("your_facilities")}</h2>
           <div
             className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             data-cy="facility-list"
@@ -105,7 +111,7 @@ export default function UserDashboard() {
                         {facility.name}
                       </h3>
                       <p className="text-xs md:text-sm text-gray-500 truncate">
-                        View facility details
+                        {t("view_facility_details")}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
@@ -120,7 +126,9 @@ export default function UserDashboard() {
       {/* Organizations Section */}
       {organizations.length > 0 && (
         <section className="space-y-3 md:space-y-4">
-          <h2 className="text-lg font-semibold px-1">Your Organizations</h2>
+          <h2 className="text-lg font-semibold px-1">
+            {t("your_organizations")}
+          </h2>
           <div
             className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             data-cy="organization-list"

@@ -194,7 +194,7 @@ export default function MedicationRequestTable({
               ) : searchQuery && !displayedMedications.length ? (
                 <EmptyState searching searchQuery={searchQuery} />
               ) : (
-                <ScrollArea className="h-[calc(100vh-16rem)]">
+                <ScrollArea className="h-fit">
                   <div className="min-w-[800px]">
                     <div className="p-2">
                       <MedicationsTable medications={displayedMedications} />
