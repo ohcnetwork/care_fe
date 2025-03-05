@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -185,7 +185,7 @@ export function AppointmentQuestion({
                             >
                               <div className="flex items-center justify-between">
                                 <span>
-                                  {format(slot.start_datetime, "HH:mm")}
+                                  {dayjs(slot.start_datetime).format("HH:mm")}
                                 </span>
                                 <span className="pl-1 text-xs text-gray-500">
                                   {availability.tokens_per_slot -

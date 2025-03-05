@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import dayjs from "dayjs";
 
 import { MedicationAdministrationRequest } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
@@ -30,8 +30,8 @@ export function createMedicationAdministrationRequest(
       display: medication.medication?.display,
       system: medication.medication?.system,
     },
-    occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-    occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    occurrence_period_start: dayjs(new Date()).format("YYYY-MM-DDTHH:mm"),
+    occurrence_period_end: dayjs(new Date()).format("YYYY-MM-DDTHH:mm"),
     note: "",
     status: "completed",
     dosage: {

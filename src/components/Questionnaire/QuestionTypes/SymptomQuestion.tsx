@@ -6,7 +6,7 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -76,7 +76,7 @@ function convertToSymptomRequest(symptom: Symptom): SymptomRequest {
       ? {
           ...symptom.onset,
           onset_datetime: symptom.onset.onset_datetime
-            ? format(new Date(symptom.onset.onset_datetime), "yyyy-MM-dd")
+            ? dayjs(symptom.onset.onset_datetime).format("YYYY-MM-DD")
             : "",
         }
       : undefined,

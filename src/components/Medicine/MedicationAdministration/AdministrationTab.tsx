@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow } from "date-fns";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -44,6 +45,8 @@ import {
   TIME_SLOTS,
   createMedicationAdministrationRequest,
 } from "./utils";
+
+dayjs.extend(relativeTime);
 
 // Utility Functions
 function isTimeInSlot(
@@ -163,10 +166,10 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
         <div className="flex items-center h-full ml-2">
           <div className="flex flex-col items-center">
             <div className="text-sm font-medium">
-              {format(slot.date, "dd MMM").toUpperCase()}
+              {dayjs(slot.date).format("DD MMM").toUpperCase()}
             </div>
             <div className="text-sm text-[#6b7280]">
-              {format(slot.date, "EEE")}
+              {dayjs(slot.date).format("ddd")}
             </div>
           </div>
           <div className="flex-1 border-t border-dotted border-gray-300 ml-2" />
@@ -182,10 +185,10 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
           <div className="flex-1 border-t border-dotted border-gray-300 mr-2" />
           <div className="flex flex-col items-center">
             <div className="text-sm font-medium">
-              {format(slot.date, "dd MMM").toUpperCase()}
+              {dayjs(slot.date).format("DD MMM").toUpperCase()}
             </div>
             <div className="text-sm text-[#6b7280]">
-              {format(slot.date, "EEE")}
+              {dayjs(slot.date).format("ddd")}
             </div>
           </div>
         </div>
@@ -228,9 +231,8 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
         </div>
         <div className="text-xs text-[#6b7280] mt-1 truncate">
           {t("added_on")}:{" "}
-          {format(
-            new Date(medication.authored_on || medication.created_date),
-            "MMM dd, yyyy, hh:mm a",
+          {dayjs(medication.authored_on || medication.created_date).format(
+            "MMM DD, YYYY, hh:mm A",
           )}
         </div>
       </div>
@@ -247,7 +249,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 
         return (
           <div
-            key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+            key={`${dayjs(slot.date).format("YYYY-MM-DD")}-${slot.start}`}
             className={`p-4 border-t relative text-sm ${isInactive ? "bg-gray-100" : ""}`}
           >
             {administrationRecords?.map((admin) => {
@@ -431,14 +433,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             const [startHour] = firstSlot.start.split(":").map(Number);
             const date = new Date(firstSlot.date);
             date.setHours(startHour, 0, 0, 0);
-            return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+            return dayjs(date).format("YYYY-MM-DDTHH:mm:ss");
           })(),
           occurrence_period_start_before: (() => {
             const lastSlot = visibleSlots[visibleSlots.length - 1];
             const [endHour] = lastSlot.end.split(":").map(Number);
             const date = new Date(lastSlot.date);
             date.setHours(endHour, 0, 0, 0);
-            return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+            return dayjs(date).format("YYYY-MM-DDTHH:mm:ss");
           })(),
         }),
       },
@@ -665,7 +667,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     {lastModifiedDate && (
                       <div className="text-xs text-[#6b7280]">
                         {t("last_modified")}{" "}
-                        {formatDistanceToNow(lastModifiedDate)} {t("ago")}
+                        {dayjs(lastModifiedDate).fromNow(true)} {t("ago")}
                       </div>
                     )}
                   </div>
@@ -688,7 +690,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 </div>
                 {visibleSlots.map((slot) => (
                   <TimeSlotHeader
-                    key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                    key={`${dayjs(slot.date).format("YYYY-MM-DD")}-${slot.start}`}
                     slot={slot}
                     isCurrentSlot={isTimeInSlot(currentDate, slot)}
                     isEndSlot={slot.date.getTime() === currentDate.getTime()}
@@ -715,7 +717,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 </div>
                 {visibleSlots.map((slot, i) => (
                   <div
-                    key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                    key={`${dayjs(slot.date).format("YYYY-MM-DD")}-${slot.start}`}
                     className="p-4 font-semibold text-xs text-center border-t relative bg-[#F3F4F6] text-secondary-700"
                   >
                     {i === endSlotIndex &&

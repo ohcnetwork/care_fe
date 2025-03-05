@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, isAfter, isBefore, parseISO } from "date-fns";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -67,8 +67,8 @@ export function LocationSheet({
   const initialState = {
     location: "",
     status: "active",
-    start_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-    end_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    start_datetime: dayjs(new Date()).format("YYYY-MM-DDTHH:mm"),
+    end_datetime: dayjs(new Date()).format("YYYY-MM-DDTHH:mm"),
     encounter: encounterId,
   };
   const [newLocation, setNewLocation] = useState(initialState);
@@ -90,8 +90,8 @@ export function LocationSheet({
     startTime: string,
     endTime?: string,
   ): ValidationError | null {
-    const now = new Date();
-    const start = parseISO(startTime);
+    const now = dayjs();
+    const start = dayjs(startTime);
 
     if (!startTime) {
       return { message: t("start_time_required"), field: "start_datetime" };
@@ -102,8 +102,8 @@ export function LocationSheet({
     }
 
     if (endTime) {
-      const end = parseISO(endTime);
-      if (isBefore(end, start)) {
+      const end = dayjs(endTime);
+      if (end.isBefore(start)) {
         return {
           message: t("start_time_must_be_before_end_time"),
           field: "end_datetime",
@@ -113,7 +113,7 @@ export function LocationSheet({
 
     if (
       (status === "planned" || status === "reserved") &&
-      isBefore(start, now)
+      start.isBefore(now)
     ) {
       return {
         message: t("planned_reserved_cannot_be_in_past"),
@@ -121,7 +121,7 @@ export function LocationSheet({
       };
     }
 
-    if (status === "active" && isAfter(start, now)) {
+    if (status === "active" && start.isAfter(now)) {
       return {
         message: t("active_location_cannot_be_in_future"),
         field: "start_datetime",
@@ -265,10 +265,7 @@ export function LocationSheet({
             <label className="text-sm text-gray-500">{t("start_time")}</label>
             <Input
               type="datetime-local"
-              value={format(
-                new Date(location.start_datetime),
-                "yyyy-MM-dd'T'HH:mm",
-              )}
+              value={dayjs(location.start_datetime).format("YYYY-MM-DDTHH:mm")}
               onChange={(e) =>
                 handleLocationUpdate({
                   ...location,
@@ -286,10 +283,7 @@ export function LocationSheet({
               type="datetime-local"
               value={
                 location.end_datetime
-                  ? format(
-                      new Date(location.end_datetime),
-                      "yyyy-MM-dd'T'HH:mm",
-                    )
+                  ? dayjs(location.end_datetime).format("YYYY-MM-DDTHH:mm")
                   : undefined
               }
               onChange={(e) =>

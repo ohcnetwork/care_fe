@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { t } from "i18next";
 
 import { cn } from "@/lib/utils";
@@ -105,7 +105,7 @@ export function DateTimeQuestion({
             disabled={disabled}
           >
             <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-            {currentValue ? format(currentValue, "PPP") : t("pick_a_date")}
+            {currentValue ? dayjs(currentValue).format("LL") : t("pick_a_date")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

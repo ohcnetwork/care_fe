@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
 
@@ -23,6 +24,8 @@ import { completedEncounterStatus } from "@/types/emr/encounter";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+
+dayjs.extend(localizedFormat);
 
 interface TreatmentSummaryProps {
   facilityId: string;
@@ -260,10 +263,7 @@ export default function TreatmentSummary({
                   <span className="text-gray-600">{t("encounter_date")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
-                    {format(
-                      new Date(encounter.period.start),
-                      "dd MMM yyyy, EEEE",
-                    )}
+                    {dayjs(encounter.period.start).format("DD MMM YYYY, dddd")}
                   </span>
                 </div>
               )}
@@ -494,7 +494,7 @@ export default function TreatmentSummary({
         {/* Footer */}
         <div className="mt-8 space-y-1 pt-2 text-[10px] text-gray-500 flex justify-between">
           <p>
-            {t("generated_on")} {format(new Date(), "PPP 'at' p")}
+            {t("generated_on")} {dayjs().format("LL [at] LT")}
           </p>
         </div>
       </div>

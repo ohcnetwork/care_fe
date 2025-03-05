@@ -4,7 +4,7 @@ import {
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
@@ -73,7 +73,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
       ? {
           ...diagnosis.onset,
           onset_datetime: diagnosis.onset.onset_datetime
-            ? format(new Date(diagnosis.onset.onset_datetime), "yyyy-MM-dd")
+            ? dayjs(diagnosis.onset.onset_datetime).format("YYYY-MM-DD")
             : "",
         }
       : undefined,

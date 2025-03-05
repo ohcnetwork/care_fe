@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -73,7 +73,7 @@ export function DateTimePicker({
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {value ? (
-            format(value, "dd/MM/yyyy hh:mm aa")
+            dayjs(value).format("DD/MM/YYYY hh:mm A")
           ) : (
             <span>DD/MM/YYYY hh:mm aa</span>
           )}

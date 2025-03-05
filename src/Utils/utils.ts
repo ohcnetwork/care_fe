@@ -1,5 +1,4 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
 import { toPng } from "html-to-image";
 
 import dayjs from "@/Utils/dayjs";
@@ -29,7 +28,7 @@ export const formatDateTime = (date: DateLike, format?: string) => {
 };
 
 export const formatTimeShort = (time: Time) => {
-  return format(new Date(`1970-01-01T${time}`), "h:mm a").replace(":00", "");
+  return dayjs(`1970-01-01T${time}`).format("h:mm A").replace(":00", "");
 };
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
@@ -201,7 +200,7 @@ export const getReadableDuration = (
   start: string | Date,
   end: string | Date,
 ) => {
-  const duration = differenceInMinutes(end, start);
+  const duration = dayjs(end).diff(dayjs(start), "minute");
   const hours = Math.floor(duration / 60);
   const minutes = duration % 60;
   if (hours === 0 && minutes === 0) return "0 minutes";

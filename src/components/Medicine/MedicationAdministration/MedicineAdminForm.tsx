@@ -1,6 +1,8 @@
 "use client";
 
-import { format, formatDistanceToNow } from "date-fns";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
@@ -36,6 +38,9 @@ import {
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
+
+dayjs.extend(localizedFormat);
+dayjs.extend(relativeTime);
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -197,15 +202,14 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </h3>
         {lastAdministeredDate && (
           <p className="text-sm text-gray-500">
-            {t("last_administered")}{" "}
-            {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}{" "}
-            {t("by")} {formatName(medication.created_by)}
+            {t("last_administered")} {dayjs(lastAdministeredDate).fromNow(true)}{" "}
+            {t("ago")} {t("by")} {formatName(medication.created_by)}
           </p>
         )}
         <p className="text-sm text-gray-500">
           {t("prescribed")}{" "}
-          {formatDistanceToNow(
-            new Date(medication.authored_on || medication.created_date),
+          {dayjs(medication.authored_on || medication.created_date).fromNow(
+            true,
           )}{" "}
           {t("ago")} {t("by")} {lastAdministeredBy}
         </p>
@@ -343,9 +347,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               >
                 <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
                 {administrationRequest.occurrence_period_start
-                  ? format(
-                      new Date(administrationRequest.occurrence_period_start),
-                      "PPP",
+                  ? dayjs(administrationRequest.occurrence_period_start).format(
+                      "LL",
                     )
                   : t("pick_a_date")}
               </Button>
@@ -405,9 +408,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               >
                 <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
                 {administrationRequest.occurrence_period_end
-                  ? format(
-                      new Date(administrationRequest.occurrence_period_end),
-                      "PPP",
+                  ? dayjs(administrationRequest.occurrence_period_end).format(
+                      "LL",
                     )
                   : t("pick_a_date")}
               </Button>

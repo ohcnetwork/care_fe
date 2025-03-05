@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -42,9 +42,11 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
             {date ? (
               <>
                 <span className="block sm:hidden">
-                  {format(date, "MMM d, yyyy")}
+                  {dayjs(date).format("MMM D, YYYY")}
                 </span>
-                <span className="hidden sm:block">{format(date, "PPP")}</span>
+                <span className="hidden sm:block">
+                  {dayjs(date).format("LL")}
+                </span>
               </>
             ) : (
               <span>{t("pick_a_date")}</span>
