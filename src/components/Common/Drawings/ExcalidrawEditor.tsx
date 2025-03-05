@@ -1,6 +1,11 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  hashKey,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -10,6 +15,16 @@ import { debounce } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -36,10 +51,7 @@ export default function ExcalidrawEditor({
   );
   const [name, setName] = useState("");
   const [isDirty, setIsDirty] = useState(false);
-
-  useEffect(() => {
-    setIsDirty(!!elements?.length);
-  }, [elements?.length]);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
 
   const { mutate: saveDrawing } = useMutation({
     mutationFn: mutate(metaArtifactApi.upsert),
@@ -65,6 +77,7 @@ export default function ExcalidrawEditor({
     }
     setName(data.name);
     setElements(data.object_value.elements);
+    setIsDirty(false);
   }, [data]);
 
   const handleSave = async () => {
@@ -94,37 +107,74 @@ export default function ExcalidrawEditor({
     }
   };
 
+  const handleBack = () => {
+    if (isDirty) {
+      setIsAlertOpen(true);
+    } else {
+      navigate("../drawings");
+    }
+  };
+
+  const handleSaveAndGoBack = async () => {
+    await handleSave();
+    setIsAlertOpen(false);
+  };
+
   if (elements === null || isFetching) {
     return <Loading />;
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] -mt-8 -mr-2">
-      <div className="flex flex-row justify-between items-center p-2">
-        <div className="flex flex-row items-center">
-          <div className="rounded-full bg-primary-100 px-3 py-2">
-            <CareIcon icon="l-pen" className="text-lg text-primary-500" />
-          </div>
-          <div className="m-4">
-            {!drawingId ? (
-              <Input
-                type="text"
-                value={name}
-                placeholder={t("enter_the_file_name")}
-                onChange={(e) => setName(e.target.value)}
-              />
-            ) : (
-              <label className="text-2xl font-bold">{name}</label>
-            )}
-          </div>
-        </div>
+    <div className="flex flex-col h-[calc(100vh-4rem)] -mt-8 -mr-2">
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("unsaved_changes")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("you_have_unsaved_changes_what_would_you_like_to_do")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90"
+              onClick={() => {
+                setIsAlertOpen(false);
+                navigate("../drawings");
+              }}
+            >
+              {t("discard_changes")}
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleSaveAndGoBack}>
+              {t("save_and_go_back")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="flex flex-row items-center justify-between ml-0 mx-2 my-3">
+        <Button variant="ghost" size="sm" onClick={handleBack}>
+          <CareIcon icon="l-arrow-left" />
+          {t("back")}
+        </Button>
+        {!drawingId ? (
+          <Input
+            type="text"
+            className="max-w-xs text-center"
+            value={name}
+            placeholder={t("enter_drawing_name")}
+            onChange={(e) => setName(e.target.value)}
+          />
+        ) : (
+          <h1 className="text-base font-semibold">{name}</h1>
+        )}
         <Button
           variant="white"
-          className="ml-auto"
+          size="sm"
           onClick={handleSave}
           disabled={!isDirty}
         >
-          <CareIcon icon="l-save" className="text-lg hidden sm:block" />
+          <CareIcon icon="l-save" className="text-base hidden sm:block" />
           {t("save")}
         </Button>
       </div>
@@ -142,7 +192,12 @@ export default function ExcalidrawEditor({
             appState: { theme: "light" },
             elements: elements,
           }}
-          onChange={debounce((elements) => setElements(elements), 100)}
+          onChange={debounce((newElements) => {
+            setElements(newElements);
+            if (!isDirty && hashKey(newElements) !== hashKey(elements)) {
+              setIsDirty(true);
+            }
+          }, 100)}
         />
       </div>
     </div>
