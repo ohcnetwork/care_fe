@@ -1,6 +1,6 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { type ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -30,6 +30,7 @@ export default function ExcalidrawEditor({
   associating_type,
   drawingId,
 }: Props) {
+  const queryClient = useQueryClient();
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],
   );
@@ -42,11 +43,16 @@ export default function ExcalidrawEditor({
 
   const { mutate: saveDrawing } = useMutation({
     mutationFn: mutate(metaArtifactApi.upsert),
-    onSuccess: () => navigate("../drawings"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["drawing", drawingId, associatingId],
+      });
+      navigate("../drawings");
+    },
   });
 
-  const { data } = useQuery({
-    queryKey: ["drawingId", drawingId, associatingId],
+  const { data, isFetching } = useQuery({
+    queryKey: ["drawing", drawingId, associatingId],
     queryFn: query(metaArtifactApi.retrieve, {
       pathParams: { external_id: drawingId || "" },
     }),
@@ -88,24 +94,28 @@ export default function ExcalidrawEditor({
     }
   };
 
-  if (elements === null) {
+  if (elements === null || isFetching) {
     return <Loading />;
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-6rem)] -mt-8 -mr-2">
       <div className="flex flex-row justify-between items-center p-2">
         <div className="flex flex-row items-center">
-          <div className="rounded-full bg-primary-100 px-5 py-4">
+          <div className="rounded-full bg-primary-100 px-3 py-2">
             <CareIcon icon="l-pen" className="text-lg text-primary-500" />
           </div>
           <div className="m-4">
-            <Input
-              type="text"
-              value={name}
-              placeholder={t("enter_the_file_name")}
-              onChange={(e) => setName(e.target.value)}
-            />
+            {!drawingId ? (
+              <Input
+                type="text"
+                value={name}
+                placeholder={t("enter_the_file_name")}
+                onChange={(e) => setName(e.target.value)}
+              />
+            ) : (
+              <h2 className="text-lg font-bold">{name}</h2>
+            )}
           </div>
         </div>
         <Button
@@ -119,7 +129,7 @@ export default function ExcalidrawEditor({
         </Button>
       </div>
 
-      <div className="flex-grow h-[calc(100vh-10rem)] -m-2">
+      <div className="h-full w-full -m-2">
         <Excalidraw
           UIOptions={{
             canvasActions: {
