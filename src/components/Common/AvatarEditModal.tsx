@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -224,6 +225,9 @@ const AvatarEditModal = ({
       <DialogContent className="md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("edit_avatar")}
+          </DialogDescription>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
@@ -231,7 +235,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex flex-1 items-center justify-center rounded-lg">
+                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -239,7 +243,7 @@ const AvatarEditModal = ({
                             : imageUrl
                         }
                         alt="cover-photo"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">

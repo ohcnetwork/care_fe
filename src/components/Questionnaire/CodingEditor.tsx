@@ -133,7 +133,7 @@ export function CodingEditor({ code, onChange }: CodingEditorProps) {
             <Input
               value={code.display}
               placeholder="Unverified"
-              className={!code.display ? "text-muted-foreground" : undefined}
+              className={!code.display ? "text-gray-500" : undefined}
               readOnly
             />
           </div>
