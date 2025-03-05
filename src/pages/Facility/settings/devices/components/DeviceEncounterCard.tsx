@@ -14,11 +14,11 @@ import { encounterIcons } from "@/common/constants";
 
 import dayjs from "@/Utils/dayjs";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { DeviceEncounter } from "@/types/device/device";
+import { DeviceEncounterHistory } from "@/types/device/device";
 import { completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
-  encounterData: DeviceEncounter;
+  encounterData: DeviceEncounterHistory;
 }
 
 export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {

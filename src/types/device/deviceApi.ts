@@ -3,7 +3,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
   DeviceDetail,
-  DeviceEncounter,
+  DeviceEncounterHistory,
   DeviceList,
   DeviceLocationHistory,
   DeviceWrite,
@@ -59,7 +59,7 @@ export default {
   encounterHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/encounter_history/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<DeviceEncounter>>(),
+    TRes: Type<PaginatedResponse<DeviceEncounterHistory>>(),
   },
   locationHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",

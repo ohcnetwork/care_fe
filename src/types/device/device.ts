@@ -50,10 +50,12 @@ export interface DeviceList extends DeviceBase {
   id: string;
 }
 
-export interface DeviceEncounter {
+export interface DeviceEncounterHistory {
   id: string;
   encounter: Encounter;
   created_by: UserBase;
+  start: string;
+  end: string;
 }
 
 export interface DeviceLocationHistory {
