@@ -66,6 +66,7 @@ export function LocationSearch({
                 onSelect(null);
               }}
               variant="ghost"
+              className="hover:bg-transparent"
             >
               <CareIcon icon="l-times" className="h-4 w-4" />
             </Button>
