@@ -46,6 +46,9 @@ export default function AssociateLocationSheet({
       queryClient.invalidateQueries({
         queryKey: ["device", facilityId, deviceId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["deviceLocationHistory", facilityId, deviceId],
+      });
       toast.success(t("location_associated_successfully"));
       onOpenChange(false);
       setSelectedLocation(null);
