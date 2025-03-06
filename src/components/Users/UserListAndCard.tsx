@@ -49,10 +49,12 @@ export const UserStatusIndicator = ({
       ) : (
         <Badge
           variant="secondary"
-          className="bg-gray-100 whitespace-nowrap flex items-center px-2 py-1"
+          className="bg-gray-100 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs sm:text-sm text-gray-700 
+        max-w-full truncate overflow-hidden whitespace-nowrap"
         >
-          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gray-500 mr-2" />
-          <span className="text-xs text-gray-700">{t("never_logged_in")}</span>
+          <span className="h-2 w-2 shrink-0 rounded-full bg-gray-500"></span>
+          <span className="hidden lg:inline-block">Never Logged In</span>
+          <span className="inline-block lg:hidden">Never</span>
         </Badge>
       )}
     </span>
@@ -63,7 +65,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
   return (
     <Card key={user.id} className="h-full">
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 ">
           <Avatar
             name={formatName(user)}
             imageUrl={
@@ -74,14 +76,13 @@ const UserCard = ({ user }: { user: UserBase }) => {
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
-              <div className="flex items-start justify-between">
-                <h1 className="text-base font-bold break-words pr-2 w-[50%] text-wrap">
+              <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
+                <h1 className="text-base font-bold truncate pr-2 max-w-[60%]">
                   {user.first_name} {user.last_name}
                 </h1>
-                <span className="text-sm text-gray-500">
-                  <UserStatusIndicator user={user} />
-                </span>
+                <UserStatusIndicator user={user} className="flex-shrink-0" />
               </div>
+
               <span className="text-sm text-gray-500 mr-2 break-words">
                 {user.username}
               </span>
