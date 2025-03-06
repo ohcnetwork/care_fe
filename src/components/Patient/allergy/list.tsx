@@ -111,7 +111,7 @@ export function AllergyList({
   if (!allergies?.results.length) {
     return (
       <AllergyListLayout readOnly={readOnly} className={className}>
-        <CardContent className="px-2 pb-3 pt-2">
+        <CardContent className="w-full flex justify-center">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
         </CardContent>
       </AllergyListLayout>

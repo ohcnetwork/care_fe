@@ -69,7 +69,7 @@ export function SymptomsList({
         encounterId={encounterId}
         readOnly={readOnly}
       >
-        <CardContent className="px-2 pb-3 pt-2">
+        <CardContent className="w-full flex justify-center">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
         </CardContent>
       </SymptomListLayout>

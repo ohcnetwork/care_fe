@@ -63,7 +63,7 @@ export function DiagnosisList({
   if (!diagnoses?.results?.length) {
     return (
       <DiagnosisListLayout className={className} readOnly={readOnly}>
-        <CardContent className="px-2 pb-3 pt-2">
+        <CardContent className="w-full flex justify-center">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
       </DiagnosisListLayout>
