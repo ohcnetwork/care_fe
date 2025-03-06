@@ -43,7 +43,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             facilityId={facilityId}
             device={device}
             onSuccess={() => {
-              goBack();
+              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
             }}
           />
         </div>

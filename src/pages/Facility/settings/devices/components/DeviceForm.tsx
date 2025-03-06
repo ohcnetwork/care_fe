@@ -466,7 +466,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             variant="outline"
             className="m-4"
             onClick={() => {
-              if (device?.id) {
+              if (device) {
                 goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
               } else {
                 goBack(`/facility/${facilityId}/settings/devices`);
