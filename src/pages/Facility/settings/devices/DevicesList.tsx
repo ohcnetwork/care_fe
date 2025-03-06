@@ -44,7 +44,7 @@ export default function DevicesList({ facilityId }: Props) {
           <PageTitle title={t("devices")} />
         </div>
 
-        <Button variant="primary" asChild>
+        <Button variant="primary" asChild data-cy="add-device-button">
           <Link href="/devices/create">
             <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
             {t("add_device")}

@@ -95,6 +95,7 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
             <Link key={tab.value} href={tab.href}>
               <TabsTrigger
                 value={tab.value}
+                data-cy={`settings-tab-${tab.value}`}
                 className="border-b-2 border-transparent px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-primary-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {tab.label}

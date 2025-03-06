@@ -29,7 +29,7 @@ export function NavMain({
     <SidebarGroup>
       <SidebarMenu>
         {links.map((link) => (
-          <SidebarMenuItem key={link.name}>
+          <SidebarMenuItem key={`sidebar-button-${link.url}`}>
             <SidebarMenuButton
               asChild
               tooltip={link.name}
