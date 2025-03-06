@@ -8,6 +8,7 @@ import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 import { Patient } from "@/types/emr/newPatient";
 
 import { Appointments } from "./Appointments";
+import { PatientDrawingTab } from "./PatientDrawingsTab";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
@@ -49,7 +50,7 @@ export const patientTabs = [
   },
   {
     route: "drawings",
-    component: DrawingTab,
+    component: PatientDrawingTab,
   },
 ];
 

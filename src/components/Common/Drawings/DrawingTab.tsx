@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { memo, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -17,15 +18,13 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
-import { Patient } from "@/types/emr/newPatient";
 import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
   type: "encounter" | "patient";
-  facilityId: string;
+  facilityId?: string;
   patientId?: string;
   encounter?: Encounter;
-  patient?: Patient;
 }
 
 interface ExcalidrawPreviewProps {
@@ -82,8 +81,8 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 
           svgContainerRef.current.appendChild(svg);
         }
-      } catch (error) {
-        console.error("Error generating SVG:", error);
+      } catch (_error) {
+        toast.error(t("error_generating_svg"));
       } finally {
         if (isMounted) setIsLoading(false);
       }

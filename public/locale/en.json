@@ -1079,6 +1079,7 @@
   "error_fetching_user_details": "Error while fetching user details: ",
   "error_fetching_users_data": "Failed to load user data. Please try again later.",
   "error_generating_discharge_summary": "Error generating discharge summary",
+  "error_generating_svg": "Error generating SVG",
   "error_in_createUpload": "Error in createUpload",
   "error_loading_questionnaire_response": "Error loading questionnaire response",
   "error_saving_file": "Error saving file",
