@@ -26,8 +26,6 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
-import LocationRoutes from "./routes/LocationRoutes";
-
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
 
@@ -51,7 +49,6 @@ const Routes: AppRoutes = {
   // ...AssetRoutes,
   ...ConsultationRoutes,
   ...FacilityRoutes,
-  ...LocationRoutes,
   ...PatientRoutes,
   ...ResourceRoutes,
   ...ScheduleRoutes,

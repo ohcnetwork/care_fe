@@ -9,11 +9,13 @@ import LocationList from "@/pages/Facility/locations/LocationList";
 interface EncountersOverviewProps {
   facilityId: string;
   tab?: string;
+  locationId?: string;
 }
 
 export default function EncountersOverview({
   facilityId,
   tab = "patients",
+  locationId,
 }: EncountersOverviewProps) {
   const { t } = useTranslation();
 
@@ -43,12 +45,12 @@ export default function EncountersOverview({
           </TabsList>
         </div>
 
-        <TabsContent value="patients" className="mt-4 h-[calc(100%-3rem)]">
+        <TabsContent value="patients" className="mt-4">
           <EncounterList facilityId={facilityId} />
         </TabsContent>
 
-        <TabsContent value="locations" className="mt-4 h-[calc(100%-3rem)]">
-          <LocationList facilityId={facilityId} />
+        <TabsContent value="locations" className="mt-4">
+          <LocationList facilityId={facilityId} locationId={locationId} />
         </TabsContent>
       </Tabs>
     </div>
