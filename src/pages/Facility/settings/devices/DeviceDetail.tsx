@@ -151,7 +151,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             </Button>
           </Link>
           <Link href={`/devices/${deviceId}/locationHistory`}>
-            <Button variant="outline_primary" className="m-0 sm:mr-3">
+            <Button variant="outline_primary" className="sm:mr-3">
               <CareIcon icon="l-location-point" className="h-4 w-4" />
               {t("location_history")}
             </Button>
