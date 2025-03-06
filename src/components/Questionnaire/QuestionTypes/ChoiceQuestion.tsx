@@ -86,7 +86,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         <ValueSetSelect
           value={currentCode}
           system={question.answer_value_set}
-          placeholder={"Search and Select an option"}
+          placeholder="Search and Select an option"
           onSelect={handleValuesetSelectChange}
           disabled={disabled}
         />
