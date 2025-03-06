@@ -232,6 +232,7 @@
   "SYSTEM__govt_org_type__corporation": "Corporation",
   "SYSTEM__govt_org_type__default": "State",
   "SYSTEM__govt_org_type__district": "District",
+  "SYSTEM__govt_org_type__district_panchayat": "District Panchayat",
   "SYSTEM__govt_org_type__grama_panchayat": "Grama Panchayat",
   "SYSTEM__govt_org_type__local_body": "Local Body",
   "SYSTEM__govt_org_type__municipality": "Municipality",
