@@ -74,7 +74,7 @@ export const PatientHome = (props: {
         </>
       }
     >
-      <div className="mt-3" data-testid="patient-dashboard">
+      <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
             <div>
