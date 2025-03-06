@@ -62,6 +62,7 @@ const AvatarEditModal = ({
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
@@ -78,7 +79,7 @@ const AvatarEditModal = ({
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
-  }, []);
+  }, [constraint]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -273,6 +274,7 @@ const AvatarEditModal = ({
                         />
                         {t("upload_an_image")}
                         <input
+                          // eslint-disable-next-line i18next/no-literal-string
                           title="changeFile"
                           type="file"
                           accept="image/*"
