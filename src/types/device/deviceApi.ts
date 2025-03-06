@@ -57,18 +57,18 @@ const deviceApi = {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ServiceHistory>>(),
   },
-  retrieveserviceHistory: {
+  retrieveServiceHistory: {
     method: HttpMethod.GET,
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
     TRes: Type<ServiceHistory>(),
   },
-  createserviceHistory: {
+  createServiceHistory: {
     method: HttpMethod.POST,
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
     TRes: Type<ServiceHistory>(),
     TBody: Type<ServiceHistoryWriteRequest>(),
   },
-  updateserviceHistory: {
+  updateServiceHistory: {
     method: HttpMethod.PUT,
     path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
     TRes: Type<ServiceHistory>(),

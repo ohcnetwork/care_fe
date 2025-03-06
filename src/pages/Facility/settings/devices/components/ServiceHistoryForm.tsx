@@ -5,6 +5,7 @@ import { CalendarIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
@@ -30,28 +31,29 @@ import mutate from "@/Utils/request/mutate";
 import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
-interface ServiceHistoryFormProps {
+interface Props {
   facilityId: string;
   deviceId: string;
   serviceRecord?: ServiceHistory | null;
-  onOpenChange: (open: boolean) => void;
+  onSubmitSuccess?: (serviceRecord: ServiceHistory) => void;
 }
-
-const formSchema = z.object({
-  note: z.string().min(1, { message: "Notes are required" }),
-  serviced_on: z.date({ required_error: "Service date is required" }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 export default function ServiceHistoryForm({
   facilityId,
   deviceId,
   serviceRecord,
-  onOpenChange,
-}: ServiceHistoryFormProps) {
+  onSubmitSuccess,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const isEditMode = !!serviceRecord;
+
+  const formSchema = z.object({
+    note: z.string().min(1, { message: t("notes_required") }),
+    serviced_on: z.date({ required_error: t("date_required") }),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,52 +69,55 @@ export default function ServiceHistoryForm({
         note: serviceRecord.note,
         serviced_on: new Date(serviceRecord.serviced_on),
       });
-    } else {
-      form.reset({
-        note: "",
-        serviced_on: new Date(),
-      });
     }
   }, [serviceRecord, form]);
 
-  const createMutation = useMutation({
-    mutationFn: mutate(deviceApi.createserviceHistory, {
-      pathParams: {
-        facilityId,
-        deviceId,
+  const { mutate: createServiceRecord, isPending: createPending } = useMutation(
+    {
+      mutationKey: ["create_service_record"],
+      mutationFn: mutate(deviceApi.createServiceHistory, {
+        pathParams: {
+          facilityId,
+          deviceId,
+        },
+      }),
+      onSuccess: (resp: ServiceHistory) => {
+        toast.success(t("service_record_added_successfully"));
+        queryClient.invalidateQueries({
+          queryKey: ["deviceserviceHistory", facilityId, deviceId],
+        });
+        form.reset();
+        onSubmitSuccess?.(resp);
       },
-    }),
-    onError: (error) => {
-      console.error("Failed to create service record:", error);
+      onError: (error) => {
+        toast.error(error?.message ?? t("service_record_add_error"));
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["deviceserviceHistory", facilityId, deviceId],
-      });
-      onOpenChange(false);
-      form.reset();
-    },
-  });
+  );
 
-  const updateMutation = useMutation({
-    mutationFn: mutate(deviceApi.updateserviceHistory, {
-      pathParams: {
-        facilityId,
-        deviceId,
-        id: serviceRecord?.id,
+  const { mutate: updateServiceRecord, isPending: updatePending } = useMutation(
+    {
+      mutationKey: ["update_service_record"],
+      mutationFn: mutate(deviceApi.updateServiceHistory, {
+        pathParams: {
+          facilityId,
+          deviceId,
+          id: serviceRecord?.id,
+        },
+      }),
+      onSuccess: (resp: ServiceHistory) => {
+        toast.success(t("service_record_updated_successfully"));
+        queryClient.invalidateQueries({
+          queryKey: ["deviceserviceHistory", facilityId, deviceId],
+        });
+        form.reset();
+        onSubmitSuccess?.(resp);
       },
-    }),
-    onError: (error) => {
-      console.error("Failed to update service record:", error);
+      onError: (error) => {
+        toast.error(error?.message ?? t("service_record_update_error"));
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["deviceserviceHistory", facilityId, deviceId],
-      });
-      onOpenChange(false);
-      form.reset();
-    },
-  });
+  );
 
   const onSubmit = (values: FormValues) => {
     const payload = {
@@ -121,14 +126,14 @@ export default function ServiceHistoryForm({
       meta: serviceRecord?.meta || {},
     };
 
-    if (serviceRecord) {
-      updateMutation.mutate(payload);
+    if (isEditMode) {
+      updateServiceRecord(payload);
     } else {
-      createMutation.mutate(payload);
+      createServiceRecord(payload);
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending = createPending || updatePending;
 
   return (
     <Form {...form}>
@@ -138,7 +143,7 @@ export default function ServiceHistoryForm({
           name="serviced_on"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>{t("service_date")}</FormLabel>
+              <FormLabel required>{t("service_date")}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -148,6 +153,7 @@ export default function ServiceHistoryForm({
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
+                      data-cy="service-date-select"
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -176,9 +182,10 @@ export default function ServiceHistoryForm({
           name="note"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("service_notes")}</FormLabel>
+              <FormLabel required>{t("service_notes")}</FormLabel>
               <FormControl>
                 <Textarea
+                  data-cy="service-notes-input"
                   placeholder={t("service_notes_enter")}
                   {...field}
                   rows={5}
@@ -192,16 +199,17 @@ export default function ServiceHistoryForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => onSubmitSuccess?.(serviceRecord as ServiceHistory)}
+            data-cy="cancel-button"
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} data-cy="submit-button">
             {isPending
-              ? serviceRecord
+              ? isEditMode
                 ? t("updating")
                 : t("saving")
-              : serviceRecord
+              : isEditMode
                 ? t("update")
                 : t("save")}
           </Button>

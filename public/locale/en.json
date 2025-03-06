@@ -1637,6 +1637,7 @@
   "note": "Note",
   "notes": "Notes",
   "notes_placeholder": "Type your Notes",
+  "notes_required": "notes are required",
   "notice_board": "Notice Board",
   "notification_cancelled": "Notification cancelled",
   "notification_permission_denied": "Notification permission denied",
