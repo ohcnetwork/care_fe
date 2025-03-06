@@ -42,10 +42,14 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
   const currentValue = questionnaireResponse.values[index]?.value?.toString();
-  const [currentCode, setCurrentCode] = useState<Code>({
-    system: "",
-    code: "",
-    display: "",
+  const [currentCode, setCurrentCode] = useState<Code>(() => {
+    const existingValue =
+      questionnaireResponse.values[index]?.value?.toString();
+    return {
+      system: question.answer_value_set ?? "",
+      code: "",
+      display: existingValue ?? "",
+    };
   });
   const handleValuesetSelectChange = (code: Code) => {
     clearError();
