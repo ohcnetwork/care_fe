@@ -140,7 +140,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
                   >
                     <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
@@ -179,7 +179,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                     className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
                   >
                     <h3 className="text-sm font-medium">
-                      {t("expired_on")}
+                      {t("time_of_death")}
                       {": "}
                       {dayjs(patient.death_datetime).format(
                         "DD MMM YYYY, hh:mm A",
