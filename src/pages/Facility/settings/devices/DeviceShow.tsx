@@ -34,7 +34,9 @@ import PageTitle from "@/components/Common/PageTitle";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
+import { type DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 import AssociateLocationSheet from "./components/AssociateLocationSheet";
@@ -44,7 +46,7 @@ interface Props {
   deviceId: string;
 }
 
-export default function DeviceDetail({ facilityId, deviceId }: Props) {
+export default function DeviceShow({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
@@ -344,6 +346,12 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
           </CardContent>
         </Card>
 
+        {device.care_type && (
+          <PluginDeviceShowCard
+            device={device as DeviceDetail & { care_type: string }}
+          />
+        )}
+
         {device.contact?.length > 0 && (
           <Card className="md:col-span-2">
             <CardHeader>
@@ -370,3 +378,16 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
     </div>
   );
 }
+
+const PluginDeviceShowCard = ({
+  device,
+}: {
+  device: DeviceDetail & { care_type: string };
+}) => {
+  const pluginDevice = usePluginDevice(device.care_type);
+  if (!pluginDevice.showPageCard) {
+    return null;
+  }
+
+  return <pluginDevice.showPageCard device={device} />;
+};
