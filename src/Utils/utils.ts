@@ -270,7 +270,7 @@ export const mergeAutocompleteOptions = (
   return [value, ...options];
 };
 
-export function getWeeksStartDateTillTodayFrom(startDate?: Date | string) {
+export function getWeekRangesTillTodayFrom(startDate?: Date | string) {
   if (!startDate) {
     return [];
   }
@@ -300,4 +300,35 @@ export function getWeeksStartDateTillTodayFrom(startDate?: Date | string) {
   }
 
   return weeks;
+}
+
+export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
+  if (!pastDate) {
+    return [];
+  }
+
+  const intervals = [];
+  let current = new Date(pastDate);
+  const today = new Date();
+
+  let currentEnd = today;
+
+  while (currentEnd >= current) {
+    let currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() - 6);
+
+    if (currentStart < current) {
+      currentStart = current;
+    }
+
+    intervals.push({
+      start: currentStart,
+      end: currentEnd,
+    });
+
+    currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() - 1);
+  }
+
+  return intervals;
 }

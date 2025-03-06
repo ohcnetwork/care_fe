@@ -19,12 +19,13 @@ import {
 } from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
+import PrintTable from "@/components/Common/PrintTable";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   formatPatientAge,
-  getWeeksStartDateTillTodayFrom,
+  getWeeklyIntervalsFromTodayTill,
 } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -237,7 +238,7 @@ export const PrintMedicationAdministration = (props: {
           </div>
 
           <div className="flex flex-col gap-6">
-            {getWeeksStartDateTillTodayFrom(encounter?.period.start).map(
+            {getWeeklyIntervalsFromTodayTill(encounter?.period.start).map(
               ({ start: weekStartDate, end: weekEndDate }) => (
                 <MedicationAdministrationTable
                   key={weekStartDate.toISOString()}
@@ -257,6 +258,36 @@ export const PrintMedicationAdministration = (props: {
                 />
               ),
             )}
+          </div>
+
+          <div className="mt-6">
+            <PrintTable
+              headers={[
+                { key: "medicine" },
+                { key: "administered_at" },
+                { key: "administered_by" },
+                { key: "notes" },
+              ]}
+              rows={medicationAdministrations?.results
+                .sort(
+                  (a, b) =>
+                    Number(new Date(a.occurrence_period_start)) -
+                    Number(new Date(b.occurrence_period_start)),
+                )
+                .map((administration) => {
+                  return {
+                    medicine:
+                      administration.medication.display ??
+                      administration.medication.code,
+                    administered_at: format(
+                      new Date(administration.occurrence_period_start),
+                      "dd MMM yyyy, hh:mm a",
+                    ),
+                    administered_by: `Dr. ${administration.created_by.first_name} ${administration.created_by.last_name}`,
+                    notes: administration.note,
+                  };
+                })}
+            />
           </div>
 
           <div className="mt-6 flex justify-end gap-8">
@@ -359,7 +390,7 @@ const MedicationAdministrationTable = ({
           </span>
           {administration.dosage?.route && (
             <span>
-              {t("administered_through", {
+              {t("administered_through_route", {
                 route:
                   administration.dosage?.route?.display ??
                   administration.dosage?.route?.code,
@@ -368,7 +399,7 @@ const MedicationAdministrationTable = ({
           )}
           {administration.dosage?.method && (
             <span>
-              {t("administered_via", {
+              {t("administered_via_method", {
                 method:
                   administration.dosage?.method?.display ??
                   administration.dosage?.method?.code,
@@ -377,7 +408,7 @@ const MedicationAdministrationTable = ({
           )}
           {administration.dosage?.site && (
             <span>
-              {t("administered_at", {
+              {t("administered_at_site", {
                 site:
                   administration.dosage?.site?.display ??
                   administration.dosage?.site?.code,
@@ -394,8 +425,10 @@ const MedicationAdministrationTable = ({
     <div className="overflow-hidden rounded-lg border-2 border-black">
       <div>
         <h3 className="font-semibold text-lg text-center bg-gray-200 p-2">
-          Week of {format(dates[0], "dd MMM yyyy")} -{" "}
-          {format(dates[dates.length - 1], "dd MMM yyyy")}
+          {t("date_range_from_till", {
+            from: format(dates[0], "dd MMM yyyy"),
+            till: format(dates[dates.length - 1], "dd MMM yyyy"),
+          })}
         </h3>
       </div>
       <Table className="w-full">
