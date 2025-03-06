@@ -233,6 +233,7 @@ function LocationTreeNode({
       },
       pageSize: 100,
     }),
+    enabled: isExpanded, // Only fetch when the node is expanded
   });
 
   return (
@@ -375,7 +376,7 @@ function LocationCard({ location, onClick }: ChildLocationCardProps) {
 
       <div className="p-4">
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {location.description || t("no_description")}
+          {location.description}
         </p>
 
         <div className="flex justify-between text-sm">
@@ -439,7 +440,7 @@ function SelectedLocationChildren({
       selectedLocationId,
       "full",
       currentPage,
-      searchQuery, // Add search query to cache key
+      searchQuery,
     ],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -447,7 +448,7 @@ function SelectedLocationChildren({
         parent: selectedLocationId,
         limit: ITEMS_PER_PAGE,
         offset: (currentPage - 1) * ITEMS_PER_PAGE,
-        name: searchQuery, // Add search parameter to API call
+        name: searchQuery,
       },
     }),
     enabled: !!selectedLocationId,
@@ -475,18 +476,62 @@ function SelectedLocationChildren({
     );
   }
 
+  // Group locations by type (bed vs non-bed)
+  const { bedLocations, nonBedLocations } = children.results.reduce(
+    (acc, location) => {
+      if (location.form === "bd") {
+        acc.bedLocations.push(location);
+      } else {
+        acc.nonBedLocations.push(location);
+      }
+      return acc;
+    },
+    {
+      bedLocations: [] as LocationListType[],
+      nonBedLocations: [] as LocationListType[],
+    },
+  );
+
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {children.results.map((child) => (
-          <ChildLocationCard
-            key={child.id}
-            location={child}
-            onClick={() => onSelect(child)}
-            facilityId={facilityId}
-          />
-        ))}
+      <div className="space-y-8">
+        {/* Non-bed locations */}
+        {nonBedLocations.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-700">
+              {t("locations")}
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {nonBedLocations.map((location) => (
+                <ChildLocationCard
+                  key={location.id}
+                  location={location}
+                  onClick={() => onSelect(location)}
+                  facilityId={facilityId}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Bed locations */}
+        {bedLocations.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-700">{t("beds")}</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {bedLocations.map((location) => (
+                <ChildLocationCard
+                  key={location.id}
+                  location={location}
+                  onClick={() => onSelect(location)}
+                  facilityId={facilityId}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="flex w-full items-center justify-center mt-4">
         <div
           className={cn(

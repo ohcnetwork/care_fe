@@ -486,6 +486,7 @@
   "bed_type__300": "Oxygen Supported Bed",
   "bed_type__400": "Isolation Bed",
   "bed_type__500": "Others",
+  "beds": "Beds",
   "before": "before",
   "begin_clinical_encounter": "Begin a new clinical encounter for {{patientName}}. Select the appropriate encounter type, status, and priority to ensure proper documentation and care delivery.",
   "beta": "beta",
