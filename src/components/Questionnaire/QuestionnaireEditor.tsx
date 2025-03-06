@@ -1497,7 +1497,6 @@ function QuestionEditor({
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   {t("choose_layout_style")}
-
                 </p>
                 <RadioGroup
                   value={
