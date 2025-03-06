@@ -310,7 +310,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
 
   return (
     <div
-      className={`border rounded-lg overflow-hidden shadow-sm h-fit ${
+      className={`border rounded-lg overflow-hidden shadow-sm h-full ${
         isOccupied ? "bg-white border-gray-200" : "bg-green-50 border-green-200"
       }`}
     >
