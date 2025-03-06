@@ -65,7 +65,6 @@ export const EncounterShow = (props: Props) => {
       pathParams: { id: encounterId },
       queryParams: {
         facility: facilityId,
-        patient: patientId,
       },
     }),
     enabled: !!encounterId,
