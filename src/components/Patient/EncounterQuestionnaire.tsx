@@ -76,6 +76,10 @@ export default function EncounterQuestionnaire({
                   navigate(
                     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
                   );
+                } else if (facilityId) {
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/updates`,
+                  );
                 } else {
                   navigate(`/patient/${patientId}/updates`);
                 }
