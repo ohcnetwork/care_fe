@@ -22,7 +22,6 @@ import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
   type: "encounter" | "patient";
-  facilityId?: string;
   patientId?: string;
   encounter?: Encounter;
 }
@@ -185,11 +184,11 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                   onClick={() => {
                     if (props.type === "encounter") {
                       navigate(
-                        `/facility/${props.facilityId}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
+                        `/facility/${props.encounter?.facility.id}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
                       );
                     } else {
                       navigate(
-                        `/facility/${props.facilityId}/patient/${props.patientId}/drawings/${drawing.id}`,
+                        `/facility/${props.encounter?.facility.id}/patient/${props.patientId}/drawings/${drawing.id}`,
                       );
                     }
                   }}
