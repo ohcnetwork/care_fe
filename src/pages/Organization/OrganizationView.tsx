@@ -88,37 +88,24 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {children?.results?.length ? (
                 children.results.map((orgChild: Organization) => (
-                  <Card key={orgChild.id}>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between flex-wrap">
-                          <div className="space-y-1 mb-2">
-                            <h3 className="text-lg font-semibold">
-                              {orgChild.name}
-                            </h3>
-                            <div className="flex items-center gap-2">
+                  <Card key={orgChild.id} className="flex flex-col h-full">
+                    <CardContent className="p-6 flex-grow">
+                      <div className="space-y-4 flex-grow">
+                        <div className="space-y-1 mb-2">
+                          <h3 className="text-lg font-semibold">
+                            {orgChild.name}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{orgChild.org_type}</Badge>
+                            {orgChild.metadata?.govt_org_type && (
                               <Badge variant="outline">
-                                {orgChild.org_type}
+                                {getOrgLabel(
+                                  orgChild.org_type,
+                                  orgChild.metadata,
+                                )}
                               </Badge>
-                              {orgChild.metadata?.govt_org_type && (
-                                <Badge variant="outline">
-                                  {getOrgLabel(
-                                    orgChild.org_type,
-                                    orgChild.metadata,
-                                  )}
-                                </Badge>
-                              )}
-                            </div>
+                            )}
                           </div>
-                          <Button variant="link" asChild>
-                            <Link href={`${baseUrl}/children/${orgChild.id}`}>
-                              {t("view_details")}
-                              <CareIcon
-                                icon="l-arrow-right"
-                                className="h-4 w-4"
-                              />
-                            </Link>
-                          </Button>
                         </div>
                         {orgChild.description && (
                           <p className="text-sm text-gray-500 line-clamp-2">
@@ -127,6 +114,14 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                         )}
                       </div>
                     </CardContent>
+                    <div className="p-4 pt-0 mt-auto text-end">
+                      <Button variant="link" asChild>
+                        <Link href={`${baseUrl}/children/${orgChild.id}`}>
+                          {t("view_details")}
+                          <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   </Card>
                 ))
               ) : (

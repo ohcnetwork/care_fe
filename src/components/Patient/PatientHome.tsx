@@ -5,12 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
@@ -198,18 +193,11 @@ export const PatientHome = (props: {
 
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.modified_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.modified_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.modified_date)}
+                      >
+                        <span>{relativeTime(patientData.modified_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
@@ -226,18 +214,11 @@ export const PatientHome = (props: {
                   </div>
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.created_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.created_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.created_date)}
+                      >
+                        <span>{relativeTime(patientData.created_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
