@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -49,7 +48,6 @@ interface Props {
 export default function DeviceDetail({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -148,7 +146,7 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
         <div className="flex items-center gap-2">
           <Link href={`/devices/${deviceId}/encounterHistory`}>
             <Button variant="outline_primary" className="mr-3">
-              <CareIcon icon="l-history" className="h-4 w-4" />
+              <CareIcon icon="l-medkit" className="h-4 w-4" />
               {t("encounter_history")}
             </Button>
           </Link>
@@ -233,13 +231,35 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                   ) : (
                     <span className="text-gray-500">{t("no_location")}</span>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsLocationSheetOpen(true)}
+                  <AssociateLocationSheet
+                    facilityId={facilityId}
+                    deviceId={deviceId}
                   >
-                    {device.current_location ? t("change") : t("add")}
-                  </Button>
+                    <Button variant="outline" size="sm">
+                      {device.current_location ? t("change") : t("add")}
+                    </Button>
+                  </AssociateLocationSheet>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  {t("encounter")}
+                </h4>
+                <div className="mt-1 flex items-center gap-6">
+                  {device.current_encounter ? (
+                    <>
+                      <Link
+                        href={`/encounter/${device.current_encounter.id}/updates`}
+                        basePath={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}`}
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
+                      >
+                        {device.current_encounter.patient.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">{t("no_encounter")}</span>
+                  )}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -380,13 +400,6 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
           </Card>
         )}
       </div>
-
-      <AssociateLocationSheet
-        open={isLocationSheetOpen}
-        onOpenChange={setIsLocationSheetOpen}
-        facilityId={facilityId}
-        deviceId={deviceId}
-      />
     </div>
   );
 }

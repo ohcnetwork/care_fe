@@ -1560,6 +1560,7 @@
   "no_discharge_summaries_found": "No Discharge Summaries found",
   "no_doctors_found": "No Doctors Found",
   "no_duplicate_facility": "You should not create duplicate facilities",
+  "no_encounter": "No associated encounter currently",
   "no_encounter_history": "No encounter history available",
   "no_encounters_found": "No encounters found",
   "no_facilities": "No Facilities found",

@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
 import query from "@/Utils/request/query";
 import AssociateDeviceSheet from "@/pages/Encounters/AssociateDeviceSheet";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -22,13 +24,12 @@ export const EncounterDevicesTab = ({
 }: EncounterTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const [isDeviceSheetOpen, setIsDeviceSheetOpen] = useState(false);
 
-  const limit = 12;
+  const limit = RESULTS_PER_PAGE_LIMIT;
 
   const { data, isLoading } = useQuery({
     queryKey: ["devices", facilityId, encounter.patient.id, page, limit],
-    queryFn: query.debounced(deviceApi.list, {
+    queryFn: query(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         current_encounter: encounter.id,
@@ -42,10 +43,15 @@ export const EncounterDevicesTab = ({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4"></div>
-        <Button variant="primary" onClick={() => setIsDeviceSheetOpen(true)}>
-          <CareIcon icon="l-plus" className="h-4 w-4 m-auto center" />
-          {t("associate_device")}
-        </Button>
+        <AssociateDeviceSheet
+          facilityId={facilityId}
+          encounterId={encounter.id}
+        >
+          <Button variant="primary">
+            <CareIcon icon="l-plus" className="h-4 w-4 m-auto center" />
+            {t("associate_device")}
+          </Button>
+        </AssociateDeviceSheet>
       </div>
 
       {isLoading ? (
@@ -79,12 +85,6 @@ export const EncounterDevicesTab = ({
           )}
         </div>
       )}
-      <AssociateDeviceSheet
-        open={isDeviceSheetOpen}
-        onOpenChange={setIsDeviceSheetOpen}
-        facilityId={facilityId}
-        encounterId={encounter.id}
-      />
     </div>
   );
 };

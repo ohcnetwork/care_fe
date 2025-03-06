@@ -28,6 +28,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import mutate from "@/Utils/request/mutate";
@@ -37,21 +38,20 @@ import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
 interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   facilityId: string;
   encounterId: string;
+  children?: React.ReactNode;
 }
 
 export default function AssociateDeviceSheet({
-  open,
-  onOpenChange,
   facilityId,
   encounterId,
+  children,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedDevice, setSelectedDevice] = useState<DeviceList | null>(null);
+  const [open, setOpen] = useState(false);
 
   const { mutate: associateDevice, isPending: isPendingAssociation } =
     useMutation({
@@ -63,7 +63,7 @@ export default function AssociateDeviceSheet({
           queryKey: ["devices", facilityId],
         });
         toast.success(t("device_associated_successfully"));
-        onOpenChange(false);
+        setOpen(false);
         setSelectedDevice(null);
       },
     });
@@ -82,7 +82,8 @@ export default function AssociateDeviceSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+    <Sheet modal={false} open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{t("associate_device")}</SheetTitle>
