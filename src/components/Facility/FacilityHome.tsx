@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Hospital } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -315,7 +316,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         </span>
                         <span className="text-gray-700 truncate text-sm">
                           <ContactLink
-                            tel={String(facilityData?.phone_number)}
+                            tel={formatPhoneNumberIntl(
+                              String(facilityData?.phone_number),
+                            )}
                           />
                         </span>
                       </div>
