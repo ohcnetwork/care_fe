@@ -28,12 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
@@ -548,18 +543,11 @@ export const FilesTab = (props: FilesTabProps) => {
                         <CareIcon icon={icons[filetype]} className="text-xl" />
                       </span>
                       {file.name && file.name.length > 20 ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="truncate">
-                              <span className="text-gray-900 truncate block">
-                                {fileName}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white z-40">
-                              <span>{fileName}</span>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <TooltipComponent content={fileName}>
+                          <span className="text-gray-900 truncate block">
+                            {fileName}
+                          </span>
+                        </TooltipComponent>
                       ) : (
                         <span className="text-gray-900 truncate block">
                           {fileName}
