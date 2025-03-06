@@ -115,7 +115,7 @@
     "react-phone-number-input": "^3.4.11",
     "react-webcam": "^7.2.0",
     "recharts": "^2.15.0",
-    "sonner": "^1.7.2",
+    "sonner": "^2.0.0",
     "tailwind-merge": "^3.0.0",
     "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",

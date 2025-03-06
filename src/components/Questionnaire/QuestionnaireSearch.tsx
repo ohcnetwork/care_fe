@@ -80,14 +80,14 @@ export function QuestionnaireSearch({
           <CareIcon icon="l-arrow-down" className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[600px] p-0" align="start">
+      <PopoverContent className="w-full sm:w-[600px] p-0" align="start">
         <div className="flex items-center border-b px-3">
           <CareIcon
             icon="l-search"
             className="mr-2 h-4 w-4 shrink-0 text-gray-500"
           />
           <input
-            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-0 focus:border-transparent"
             placeholder="Search questionnaires..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}

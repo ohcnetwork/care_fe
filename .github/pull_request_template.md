@@ -14,4 +14,5 @@
 - [ ] Ensure that UI text is kept in I18n files.
 - [ ] Prep screenshot or demo video for changelog entry, and attach it to issue.
 - [ ] Request for Peer Reviews
-- [ ] Completion of QA
+- [ ] Completion of QA in Mobile Devices
+- [ ] Completion of QA in Desktop Devices

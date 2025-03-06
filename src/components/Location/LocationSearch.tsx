@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import { useState } from "react";
 
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
+import { stringifyNestedObject } from "@/Utils/utils";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -40,7 +42,7 @@ export function LocationSearch({
     queryKey: ["locations", facilityId, mode, search],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { mode, name: search },
+      queryParams: { mode, name: search, form: "bd", available: "true" },
     }),
     enabled: facilityId !== "preview",
   });
@@ -52,7 +54,7 @@ export function LocationSearch({
           role="combobox"
           aria-expanded={open}
         >
-          {value?.name || "Select location..."}
+          {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
@@ -60,9 +62,10 @@ export function LocationSearch({
           <CommandInput
             placeholder="Search locations..."
             value={search}
+            className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
-          <CommandEmpty>No locations found.</CommandEmpty>
+          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
           <CommandGroup>
             {locations?.results.map((location) => (
               <CommandItem
@@ -73,7 +76,7 @@ export function LocationSearch({
                   setOpen(false);
                 }}
               >
-                {location.name}
+                {stringifyNestedObject(location)}
               </CommandItem>
             ))}
           </CommandGroup>
