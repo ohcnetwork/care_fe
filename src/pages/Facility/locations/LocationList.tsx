@@ -17,7 +17,7 @@ import {
   Truck,
   Users,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -579,12 +579,7 @@ export default function LocationList({ facilityId }: { facilityId: string }) {
     }),
   });
 
-  const topLevelLocations = useMemo(() => {
-    if (!allLocations?.results) return [];
-    return allLocations.results.filter(
-      (loc) => !loc.parent || Object.keys(loc.parent).length === 0,
-    );
-  }, [allLocations?.results]);
+  const topLevelLocations = allLocations?.results || [];
 
   return (
     <div className="flex px-4 space-x-4 min-h-[100vh]">
