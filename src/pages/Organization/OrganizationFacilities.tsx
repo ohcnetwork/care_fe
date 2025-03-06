@@ -87,7 +87,7 @@ export default function OrganizationFacilities({
         </div>
 
         <div
-          className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+          className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4"
           data-cy="facility-cards"
         >
           {isFetching ? (

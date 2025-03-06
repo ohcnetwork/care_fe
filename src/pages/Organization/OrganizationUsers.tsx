@@ -148,7 +148,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
             data-cy="search-user"
           />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {isFetchingUsers ? (
             <CardGridSkeleton count={6} />
           ) : users?.results?.length === 0 ? (
