@@ -232,7 +232,7 @@ export default function FacilityForm({
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
-                        <SelectValue placeholder="Select facility type" />
+                        <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -261,7 +261,7 @@ export default function FacilityForm({
                   <FormControl>
                     <Input
                       data-cy="facility-name"
-                      placeholder="Enter facility name"
+                      placeholder={t("enter_facility_name")}
                       {...field}
                     />
                   </FormControl>
@@ -280,7 +280,7 @@ export default function FacilityForm({
                   <Textarea
                     {...field}
                     data-cy="facility-description"
-                    placeholder="Describe your facility (Markdown supported)"
+                    placeholder={t("markdown_supported")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -341,11 +341,11 @@ export default function FacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Pincode</FormLabel>
+                  <FormLabel required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
-                      placeholder="Enter pincode"
+                      placeholder={t("enter_pincode")}
                       maxLength={6}
                       {...field}
                     />
@@ -388,7 +388,7 @@ export default function FacilityForm({
                   <Textarea
                     {...field}
                     data-cy="facility-address"
-                    placeholder="Enter complete address"
+                    placeholder={t("enter_address")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -443,7 +443,7 @@ export default function FacilityForm({
                         );
                       }}
                       data-cy="facility-latitude"
-                      placeholder="Enter latitude"
+                      placeholder={t("enter_latitude")}
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
                     />
@@ -471,7 +471,7 @@ export default function FacilityForm({
                         );
                       }}
                       data-cy="facility-longitude"
-                      placeholder="Enter longitude"
+                      placeholder={t("enter_longitude")}
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
                     />
