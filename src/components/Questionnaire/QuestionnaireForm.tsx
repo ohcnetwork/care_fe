@@ -535,7 +535,7 @@ export function QuestionnaireForm({
         <DebugPreview
           data={questionnaireForms}
           title="QuestionnaireForm"
-          className="p-4 space-y-6 max-w-4xl"
+          className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>
     </div>
