@@ -149,7 +149,9 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
             entityType="device"
             entityId={deviceId}
             facilityId={facilityId}
-            currentOrganizations={[device.managing_organization]}
+            currentOrganizations={
+              device.managing_organization ? [device.managing_organization] : []
+            }
             onUpdate={() => {
               queryClient.invalidateQueries({
                 queryKey: ["device", facilityId, deviceId],
@@ -264,7 +266,11 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
                     entityType="device"
                     entityId={deviceId}
                     facilityId={facilityId}
-                    currentOrganizations={[device.managing_organization]}
+                    currentOrganizations={
+                      device.managing_organization
+                        ? [device.managing_organization]
+                        : []
+                    }
                     onUpdate={() => {
                       queryClient.invalidateQueries({
                         queryKey: ["device", facilityId, deviceId],

@@ -2,9 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -26,7 +23,7 @@ import locationApi from "@/types/location/locationApi";
 interface LocationSearchProps {
   facilityId: string;
   mode?: "kind" | "instance";
-  onSelect: (location: LocationList | null) => void;
+  onSelect: (location: LocationList) => void;
   disabled?: boolean;
   value?: LocationList | null;
 }
@@ -51,15 +48,6 @@ export function LocationSearch({
   });
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {value && (
-        <Button onClick={() => onSelect(null)} size="sm" variant="ghost">
-          <CareIcon
-            icon="l-times-circle"
-            className="ml-2 box-content cursor-pointer rounded-full"
-          />{" "}
-          {t("clear_filter")}
-        </Button>
-      )}
       <PopoverTrigger asChild disabled={disabled}>
         <div
           className="w-full h-9 px-3 rounded-md border text-sm flex items-center justify-between cursor-pointer"

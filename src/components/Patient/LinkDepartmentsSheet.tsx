@@ -227,38 +227,37 @@ export default function LinkDepartmentsSheet({
                 {t("current_organizations")}
               </h3>
               <div className="space-y-2">
-                {currentOrganizations[0] != null &&
-                  currentOrganizations.map((org) => (
-                    <div
-                      key={org.id}
-                      className="flex items-center justify-between rounded-md border p-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Building className="h-4 w-4 text-blue-400" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">{org.name}</span>
-                          {org.description && (
-                            <span className="text-xs text-gray-500">
-                              {org.description}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeOrganization(org.id)}
-                        disabled={isRemoving}
-                      >
-                        {isRemoving ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                {currentOrganizations.map((org) => (
+                  <div
+                    key={org.id}
+                    className="flex items-center justify-between rounded-md border p-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Building className="h-4 w-4 text-blue-400" />
+                      <div className="flex flex-col">
+                        <span className="font-medium">{org.name}</span>
+                        {org.description && (
+                          <span className="text-xs text-gray-500">
+                            {org.description}
+                          </span>
                         )}
-                      </Button>
+                      </div>
                     </div>
-                  ))}
-                {currentOrganizations[0] == null && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOrganization(org.id)}
+                      disabled={isRemoving}
+                    >
+                      {isRemoving ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+                {currentOrganizations.length == 0 && (
                   <p className="text-sm text-gray-500">
                     {t("no_organizations_added_yet")}
                   </p>
