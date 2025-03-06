@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -30,19 +32,22 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
 
   const { data: children, isFetching } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, searchQuery],
+    queryKey: ["organization", id, "children", page, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: (page - 1) * RESULTS_PER_PAGE_LIMIT,
+        limit: RESULTS_PER_PAGE_LIMIT,
         name: searchQuery || undefined,
       },
     }),
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [id, searchQuery]);
 
   // Hack for the sidebar to work
   const baseUrl = navOrganizationId
@@ -134,12 +139,12 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 </Card>
               )}
             </div>
-            {children && children.count > limit && (
+            {children && children.count > RESULTS_PER_PAGE_LIMIT && (
               <div className="flex justify-center">
                 <Pagination
                   data={{ totalCount: children.count }}
                   onChange={(page, _) => setPage(page)}
-                  defaultPerPage={limit}
+                  defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                   cPage={page}
                 />
               </div>
