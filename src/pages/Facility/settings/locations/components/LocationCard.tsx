@@ -165,51 +165,59 @@ export function LocationCard({
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-between">
             {!location.has_children && !location.current_encounter && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button className={cn(buttonVariants({ variant: "white" }))}>
-                    <CareIcon icon="l-trash" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove")} {location.name}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("are_you_sure_want_to_delete", {
-                        name: location.name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        removeLocation({
-                          pathParams: {
-                            facility_id: facilityId,
-                            id: location.id,
-                          },
-                        })
-                      }
-                      className={cn(buttonVariants({ variant: "destructive" }))}
+              <div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      className={cn(buttonVariants({ variant: "white" }))}
                     >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <CareIcon icon="l-trash" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("remove")} {location.name}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("are_you_sure_want_to_delete", {
+                          name: location.name,
+                        })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() =>
+                          removeLocation({
+                            pathParams: {
+                              facility_id: facilityId,
+                              id: location.id,
+                            },
+                          })
+                        }
+                        className={cn(
+                          buttonVariants({ variant: "destructive" }),
+                        )}
+                      >
+                        {t("remove")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             )}
-            <Button variant="outline" asChild>
-              <Link
-                href={`/location/${location.id}`}
-                className="flex items-center gap-2"
-              >
-                {t("view_details")}
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="ml-auto">
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/location/${location.id}`}
+                  className="flex items-center gap-2"
+                >
+                  {t("view_details")}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
