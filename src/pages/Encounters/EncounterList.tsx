@@ -679,7 +679,7 @@ export function EncounterList({
         </div>
 
         <div
-          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-1 xl:grid-cols-2 lg:grid-cols-3"
           data-cy="encounter-list-cards"
         >
           {isLoading ? (
@@ -741,6 +741,7 @@ export function EncounterList({
                           {t(`encounter_priority__${encounter.priority}`)}
                         </Badge>
                       </div>
+
                       <div className="">
                         <Separator className="my-2" />
                         <Link
