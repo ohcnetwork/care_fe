@@ -1,5 +1,3 @@
-import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
-import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
@@ -23,6 +21,10 @@ export const patientTabs = [
   {
     route: "demography",
     component: Demography,
+  },
+  {
+    route: "appointments",
+    component: Appointments,
   },
   {
     route: "encounters",
@@ -51,44 +53,5 @@ export const patientTabs = [
   {
     route: "drawings",
     component: PatientDrawingTab,
-  },
-];
-
-export const facilityPatientTabs = [
-  {
-    route: "demography",
-    component: Demography,
-  },
-  {
-    route: "appointments",
-    component: Appointments,
-  },
-  {
-    route: "encounters",
-    component: EncounterHistory,
-  },
-  {
-    route: "health-profile",
-    component: HealthProfileSummary,
-  },
-  {
-    route: "updates",
-    component: QuestionnaireResponsesList,
-  },
-  {
-    route: "resource_requests",
-    component: ResourceRequests,
-  },
-  {
-    route: "users",
-    component: PatientUsers,
-  },
-  {
-    route: "files",
-    component: PatientFilesTab,
-  },
-  {
-    route: "drawings",
-    component: DrawingTab,
   },
 ];
