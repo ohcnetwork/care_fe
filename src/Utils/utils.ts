@@ -269,3 +269,35 @@ export const mergeAutocompleteOptions = (
   if (options.find((o) => o.value === value.value)) return options;
   return [value, ...options];
 };
+
+export function getWeeksStartDateTillTodayFrom(startDate?: Date | string) {
+  if (!startDate) {
+    return [];
+  }
+  const weeks = [];
+  let current = new Date(startDate);
+
+  current.setHours(0, 0, 0, 0);
+
+  const dayOfWeek = current.getDay();
+  if (dayOfWeek !== 0) {
+    current.setDate(current.getDate() - dayOfWeek);
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  while (current <= today) {
+    const weekStart = new Date(current);
+    const weekEnd = new Date(current);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    weeks.push({
+      start: weekStart,
+      end: weekEnd,
+    });
+    current.setDate(current.getDate() + 7);
+  }
+
+  return weeks;
+}

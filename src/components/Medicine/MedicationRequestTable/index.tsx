@@ -227,6 +227,7 @@ export default function MedicationRequestTable({
             <AdministrationTab
               patientId={patientId}
               encounterId={encounterId}
+              facilityId={facilityId}
             />
           </TabsContent>
         </Tabs>
