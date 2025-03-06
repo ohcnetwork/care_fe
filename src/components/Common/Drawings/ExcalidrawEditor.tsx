@@ -134,7 +134,7 @@ export default function ExcalidrawEditor({
               {t("you_have_unsaved_changes_what_would_you_like_to_do")}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90"
