@@ -378,7 +378,7 @@ export function QuestionnaireForm({
             key={`${form.questionnaire.id}-${index}`}
             className="rounded-lg py-6 px-4 space-y-6"
           >
-            <div className="flex justify-between items-center max-w-4xl">
+            <div className="flex justify-between items-center max-w-full">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">
                   {form.questionnaire.title}
@@ -467,7 +467,7 @@ export function QuestionnaireForm({
           <>
             <div
               key={`${questionnaireForms.length}`}
-              className="flex gap-4 items-center m-4 max-w-4xl"
+              className="flex gap-4 items-center m-4 max-w-full"
             >
               <QuestionnaireSearch
                 subjectType={subjectType}
@@ -495,7 +495,7 @@ export function QuestionnaireForm({
 
             {/* Submit and Cancel Buttons */}
             {questionnaireForms.length > 0 && (
-              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-full">
                 <Button
                   type="button"
                   variant="outline"
@@ -535,7 +535,7 @@ export function QuestionnaireForm({
         <DebugPreview
           data={questionnaireForms}
           title="QuestionnaireForm"
-          className="p-4 space-y-6 max-w-4xl"
+          className="p-4 space-y-6 max-w-full"
         />
       </div>
     </div>

@@ -362,7 +362,7 @@ export function MedicationRequestQuestion({
           </div>
         </div>
       )}
-      <div className="max-w-4xl">
+      <div className="max-w-full">
         <ValueSetSelect
           system="system-medication"
           placeholder={t("search_for_medications_to_add")}
