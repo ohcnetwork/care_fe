@@ -706,7 +706,7 @@ export function EncounterList({
                           {encounter.patient.death_datetime && (
                             <Badge variant="destructive" className="ml-2 py-0">
                               <h3 className="text-xs font-medium">
-                                {t("expired")}
+                                {t("deceased")}
                               </h3>
                             </Badge>
                           )}
