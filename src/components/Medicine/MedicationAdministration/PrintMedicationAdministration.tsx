@@ -354,27 +354,34 @@ const MedicationAdministrationTable = ({
         <p className="text-sm flex items-center justify-center gap-1 flex-wrap">
           <span>
             {administration.dosage?.dose?.value}{" "}
-            {administration.dosage?.dose?.unit.code}
+            {administration.dosage?.dose?.unit.display ??
+              administration.dosage?.dose?.unit.code}
           </span>
           {administration.dosage?.route && (
             <span>
-              {t("through")}{" "}
-              {administration.dosage?.route?.display ??
-                administration.dosage?.route?.code}
+              {t("administered_through", {
+                route:
+                  administration.dosage?.route?.display ??
+                  administration.dosage?.route?.code,
+              })}
             </span>
           )}
           {administration.dosage?.method && (
             <span>
-              {t("via")}{" "}
-              {administration.dosage?.method?.display ??
-                administration.dosage?.method?.code}
+              {t("administered_via", {
+                method:
+                  administration.dosage?.method?.display ??
+                  administration.dosage?.method?.code,
+              })}
             </span>
           )}
           {administration.dosage?.site && (
             <span>
-              {t("at")}{" "}
-              {administration.dosage?.site?.display ??
-                administration.dosage?.site?.code}
+              {t("administered_at", {
+                site:
+                  administration.dosage?.site?.display ??
+                  administration.dosage?.site?.code,
+              })}
             </span>
           )}
           <span>{administration.dosage?.text}</span>
