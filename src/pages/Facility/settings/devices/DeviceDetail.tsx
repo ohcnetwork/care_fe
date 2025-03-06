@@ -141,54 +141,55 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-col sm:flex-row">
         <PageTitle title={device.registered_name} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-col sm:flex-row justify-center align-center ">
           <Link href={`/devices/${deviceId}/encounterHistory`}>
-            <Button variant="outline_primary" className="mr-3">
+            <Button variant="outline_primary">
               <CareIcon icon="l-medkit" className="h-4 w-4" />
               {t("encounter_history")}
             </Button>
           </Link>
           <Link href={`/devices/${deviceId}/locationHistory`}>
-            <Button variant="outline_primary" className="mr-3">
+            <Button variant="outline_primary" className="m-0 sm:mr-3">
               <CareIcon icon="l-location-point" className="h-4 w-4" />
               {t("location_history")}
             </Button>
           </Link>
-          <Link href={`/devices/${deviceId}/edit`}>
-            <Button variant="outline">
-              <CareIcon icon="l-pen" className="w-4 h-4" />
-              {t("edit")}
-            </Button>
-          </Link>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <CareIcon icon="l-trash" className="h-4" />
-                {t("delete")}
+          <div className="flex gap-2">
+            <Link href={`/devices/${deviceId}/edit`}>
+              <Button variant="outline">
+                <CareIcon icon="l-pen" className="w-4 h-4" />
+                {t("edit")}
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("delete_device_confirmation")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => deleteDevice()}
-                  className={cn(buttonVariants({ variant: "destructive" }))}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? t("deleting") : t("delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            </Link>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <CareIcon icon="l-trash" className="h-4" />
+                  {t("delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("delete_device")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("delete_device_confirmation")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteDevice()}
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? t("deleting") : t("delete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
 
