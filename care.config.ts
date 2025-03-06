@@ -136,6 +136,13 @@ const careConfig = {
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 
   defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
+
+  resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
+    ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
+    : 30,
+
+
+
 } as const;
 
 export default careConfig;
