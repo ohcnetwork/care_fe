@@ -109,3 +109,11 @@ export const CardGridSkeleton = ({ count }: { count: number }) =>
       </Card>
     </div>
   ));
+
+export const FormSkeleton = ({ rows }: { rows: number }) => (
+  <div className="flex flex-col gap-4">
+    {Array.from({ length: rows }).map((_, index) => (
+      <Skeleton key={index} className="h-10 w-full" />
+    ))}
+  </div>
+);

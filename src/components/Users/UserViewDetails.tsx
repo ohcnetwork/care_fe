@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { TooltipComponent } from "@/components/ui/tooltip";
+
 import { UserBase } from "@/types/user/user";
 
 interface UserViewDetailsProps {
@@ -16,10 +18,12 @@ const LabelValue = ({
   id?: string;
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-sm text-gray-500">{label}</span>
-    <span id={`view-${id}`} className="text-sm">
-      {value || "-"}
-    </span>
+    <p className="text-sm text-gray-500">{label}</p>
+    <TooltipComponent content={value || "-"} side="bottom">
+      <span id={`view-${id}`} className="text-sm truncate max-w-fit">
+        {value || "-"}
+      </span>
+    </TooltipComponent>
   </div>
 );
 

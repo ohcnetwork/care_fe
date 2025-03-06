@@ -55,24 +55,14 @@ const careConfig = {
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
 
+  mapFallbackUrlTemplate:
+    env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
+    "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
+
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
 
-  govDataApiKey:
-    env.REACT_GOV_DATA_API_KEY ||
-    "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
   reCaptchaSiteKey: env.REACT_RECAPTCHA_SITE_KEY,
-
-  wartimeShifting: boolean("REACT_WARTIME_SHIFTING"),
-
-  stillWatching: {
-    idleTimeout: env.REACT_STILL_WATCHING_IDLE_TIMEOUT
-      ? parseInt(env.REACT_STILL_WATCHING_IDLE_TIMEOUT)
-      : 3 * 60,
-    promptDuration: env.REACT_STILL_WATCHING_PROMPT_DURATION
-      ? parseInt(env.REACT_STILL_WATCHING_PROMPT_DURATION)
-      : 30,
-  },
 
   auth: {
     tokenRefreshInterval: env.REACT_JWT_TOKEN_REFRESH_INTERVAL
@@ -146,6 +136,10 @@ const careConfig = {
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 
   defaultCountry: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
+
+  resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
+    ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
+    : 30,
 } as const;
 
 export default careConfig;

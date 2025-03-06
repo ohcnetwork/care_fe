@@ -11,12 +11,14 @@ import {
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { patientVerify } from "@/pageObject/Patients/PatientVerify";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 const ENCOUNTER_TYPE = "Observation";
 const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
+const ORGANIZATION_NAME = "Administration";
 
 describe("Patient Management", () => {
   const TEST_PHONE = "9495031234";
@@ -100,13 +102,14 @@ describe("Patient Management", () => {
   ];
 
   beforeEach(() => {
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop2k.height);
     cy.loginByApi("doctor");
     cy.visit("/");
   });
 
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
-      facilityCreation.selectFacility("GHC Trikaripur");
+      facilityCreation.selectFacility("GHC payyanur");
       patientCreation
         .clickSearchPatients()
         .clickCreateNewPatient()
@@ -122,6 +125,7 @@ describe("Patient Management", () => {
         .selectEncounterType(ENCOUNTER_TYPE)
         .selectEncounterStatus(ENCOUNTER_STATUS)
         .selectEncounterPriority(ENCOUNTER_PRIORITY)
+        .selectOrganization(ORGANIZATION_NAME)
         .clickSubmitEncounter()
         .assertEncounterCreationSuccess();
 
@@ -134,7 +138,7 @@ describe("Patient Management", () => {
   });
 
   it("Search patient with phone number and create a new encounter", () => {
-    facilityCreation.selectFacility("GHC Trikaripur");
+    facilityCreation.selectFacility("GHC payyanur");
     patientCreation
       .clickSearchPatients()
       .searchPatient(TEST_PHONE)
@@ -150,6 +154,7 @@ describe("Patient Management", () => {
       .selectEncounterType(ENCOUNTER_TYPE)
       .selectEncounterStatus(ENCOUNTER_STATUS)
       .selectEncounterPriority(ENCOUNTER_PRIORITY)
+      .selectOrganization(ORGANIZATION_NAME)
       .clickSubmitEncounter()
       .assertEncounterCreationSuccess();
 
@@ -167,7 +172,7 @@ describe("Patient Management", () => {
       address: generateAddress(true),
     };
 
-    facilityCreation.selectFacility("GHC Trikaripur");
+    facilityCreation.selectFacility("GHC payyanur");
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()

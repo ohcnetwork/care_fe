@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -30,19 +32,22 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const limit = 12; // 3x4 grid
 
   const { data: children, isFetching } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, searchQuery],
+    queryKey: ["organization", id, "children", page, searchQuery],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: (page - 1) * RESULTS_PER_PAGE_LIMIT,
+        limit: RESULTS_PER_PAGE_LIMIT,
         name: searchQuery || undefined,
       },
     }),
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [id, searchQuery]);
 
   // Hack for the sidebar to work
   const baseUrl = navOrganizationId
@@ -83,37 +88,24 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {children?.results?.length ? (
                 children.results.map((orgChild: Organization) => (
-                  <Card key={orgChild.id}>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between flex-wrap">
-                          <div className="space-y-1 mb-2">
-                            <h3 className="text-lg font-semibold">
-                              {orgChild.name}
-                            </h3>
-                            <div className="flex items-center gap-2">
+                  <Card key={orgChild.id} className="flex flex-col h-full">
+                    <CardContent className="p-6 flex-grow">
+                      <div className="space-y-4 flex-grow">
+                        <div className="space-y-1 mb-2">
+                          <h3 className="text-lg font-semibold">
+                            {orgChild.name}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{orgChild.org_type}</Badge>
+                            {orgChild.metadata?.govt_org_type && (
                               <Badge variant="outline">
-                                {orgChild.org_type}
+                                {getOrgLabel(
+                                  orgChild.org_type,
+                                  orgChild.metadata,
+                                )}
                               </Badge>
-                              {orgChild.metadata?.govt_org_type && (
-                                <Badge variant="outline">
-                                  {getOrgLabel(
-                                    orgChild.org_type,
-                                    orgChild.metadata,
-                                  )}
-                                </Badge>
-                              )}
-                            </div>
+                            )}
                           </div>
-                          <Button variant="link" asChild>
-                            <Link href={`${baseUrl}/children/${orgChild.id}`}>
-                              {t("view_details")}
-                              <CareIcon
-                                icon="l-arrow-right"
-                                className="h-4 w-4"
-                              />
-                            </Link>
-                          </Button>
                         </div>
                         {orgChild.description && (
                           <p className="text-sm text-gray-500 line-clamp-2">
@@ -122,6 +114,14 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                         )}
                       </div>
                     </CardContent>
+                    <div className="p-4 pt-0 mt-auto text-end">
+                      <Button variant="link" asChild>
+                        <Link href={`${baseUrl}/children/${orgChild.id}`}>
+                          {t("view_details")}
+                          <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   </Card>
                 ))
               ) : (
@@ -134,12 +134,12 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                 </Card>
               )}
             </div>
-            {children && children.count > limit && (
+            {children && children.count > RESULTS_PER_PAGE_LIMIT && (
               <div className="flex justify-center">
                 <Pagination
                   data={{ totalCount: children.count }}
                   onChange={(page, _) => setPage(page)}
-                  defaultPerPage={limit}
+                  defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                   cPage={page}
                 />
               </div>

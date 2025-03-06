@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -29,8 +30,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   imageUrl?: string;
-  handleUpload: (file: File, onError: () => void) => Promise<void>;
-  handleDelete: (onError: () => void) => Promise<void>;
+  handleUpload: (
+    file: File,
+    onSuccess: () => void,
+    onError: () => void,
+  ) => Promise<void>;
+  handleDelete: (onSuccess: () => void, onError: () => void) => Promise<void>;
   hint?: React.ReactNode;
 }
 
@@ -65,8 +70,7 @@ const AvatarEditModal = ({
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const webRef = useRef<any>(null);
+  const webRef = useRef<Webcam>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
@@ -111,13 +115,19 @@ const AvatarEditModal = ({
   );
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const myFile = new File([blob], "image.png", {
-        type: blob.type,
-      });
-      setSelectedFile(myFile);
+    if (webRef.current) {
+      setPreviewImage(webRef.current.getScreenshot());
+    }
+    const canvas = webRef.current?.getCanvas();
+    canvas?.toBlob((blob) => {
+      if (blob) {
+        const myFile = new File([blob], "image.png", {
+          type: blob.type,
+        });
+        setSelectedFile(myFile);
+      } else {
+        toast.error(t("failed_to_capture_image"));
+      }
     });
   };
 
@@ -180,7 +190,8 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (!isImageFile(e.target.files[0])) {
+    const file = e.target.files[0];
+    if (!isImageFile(file)) {
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
@@ -198,24 +209,36 @@ const AvatarEditModal = ({
       setErrorMessage(null);
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
-      await handleUpload(selectedFile, () => {
-        setSelectedFile(undefined);
-        setPreview(undefined);
-        setPreviewImage(null);
-        setIsCaptureImgBeingUploaded(false);
-        setIsProcessing(false);
-      });
+      await handleUpload(
+        selectedFile,
+        () => {
+          setPreview(undefined);
+        },
+        () => {
+          setPreview(undefined);
+          setPreviewImage(null);
+          setIsCaptureImgBeingUploaded(false);
+          setIsProcessing(false);
+        },
+      );
     } finally {
+      setPreview(undefined);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
+      setSelectedFile(undefined);
     }
   };
 
   const deleteAvatar = async () => {
     setIsProcessing(true);
-    await handleDelete(() => {
-      setIsProcessing(false);
-    });
+    await handleDelete(
+      () => {
+        setIsProcessing(false);
+        setPreview(undefined);
+        setPreviewImage(null);
+      },
+      () => setIsProcessing(false),
+    );
   };
 
   const dragProps = useDragAndDrop();
@@ -258,6 +281,9 @@ const AvatarEditModal = ({
       <DialogContent className="md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("edit_avatar")}
+          </DialogDescription>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
@@ -434,6 +460,7 @@ const AvatarEditModal = ({
                       variant="destructive"
                       onClick={deleteAvatar}
                       disabled={isProcessing}
+                      data-cy="delete-avatar"
                     >
                       {t("delete")}
                     </Button>
@@ -443,6 +470,7 @@ const AvatarEditModal = ({
                     variant="outline"
                     onClick={uploadAvatar}
                     disabled={isProcessing || !selectedFile}
+                    data-cy="save-cover-image"
                   >
                     {isProcessing ? (
                       <CareIcon
@@ -596,7 +624,10 @@ const AvatarEditModal = ({
                       setPreviewImage(null);
                       setIsCameraOpen(false);
                       setIsCropping(false);
-                      webRef.current.stopCamera();
+                      if (webRef.current?.stream) {
+                        const tracks = webRef.current.stream.getTracks();
+                        tracks.forEach((track) => track.stop());
+                      }
                     }}
                     disabled={isProcessing}
                   >

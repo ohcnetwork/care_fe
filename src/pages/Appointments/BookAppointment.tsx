@@ -175,7 +175,15 @@ export default function BookAppointment(props: Props) {
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline" type="button" onClick={() => goBack()}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() =>
+                goBack(
+                  `/facility/${props.facilityId}/patient/${props.patientId}/appointments`,
+                )
+              }
+            >
               {t("cancel")}
             </Button>
             <Button

@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -41,11 +42,17 @@ export interface QuestionnaireFormState {
   errors: QuestionValidationError[];
 }
 
-interface BatchRequest {
+interface FormBatchRequest {
   url: string;
   method: string;
   body: Record<string, any>;
   reference_id: string;
+}
+
+interface ServerValidationError {
+  reference_id: string;
+  message: string;
+  status_code: number;
 }
 
 export interface QuestionnaireFormProps {
@@ -56,6 +63,214 @@ export interface QuestionnaireFormProps {
   onSubmit?: () => void;
   onCancel?: () => void;
   facilityId: string;
+}
+
+interface ValidationErrorDisplayProps {
+  questionnaireForms: QuestionnaireFormState[];
+  serverErrors?: ServerValidationError[];
+}
+
+function ValidationErrorDisplay({
+  questionnaireForms,
+  serverErrors,
+}: ValidationErrorDisplayProps) {
+  const hasErrors =
+    questionnaireForms.some((form) => form.errors.length > 0) ||
+    (serverErrors?.length ?? 0) > 0;
+
+  if (!hasErrors) return null;
+
+  const findQuestionText = (
+    form: QuestionnaireFormState,
+    questionId: string,
+  ): string | undefined => {
+    const findInQuestions = (questions: Question[]): string | undefined => {
+      for (const q of questions) {
+        if (q.id === questionId) return q.text;
+        if (q.type === "group" && q.questions) {
+          const found = findInQuestions(q.questions);
+          if (found) return found;
+        }
+      }
+    };
+    return (
+      findInQuestions(form.questionnaire.questions) || t("unknown_question")
+    );
+  };
+
+  const getErrorTitle = (error: ServerValidationError) => {
+    // Find matching questionnaire title first
+    const form = questionnaireForms.find(
+      (f) => f.questionnaire.id === error.reference_id,
+    );
+    if (form) {
+      return form.questionnaire.title;
+    }
+
+    // For other cases, transform the reference_id into a readable title
+    return error.reference_id
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const findStructuredQuestionId = (
+    forms: QuestionnaireFormState[],
+    structuredType: string,
+  ): { questionId: string; form: QuestionnaireFormState } | undefined => {
+    for (const form of forms) {
+      const response = form.responses.find(
+        (r) => r.structured_type === structuredType,
+      );
+      if (response) {
+        return { questionId: response.question_id, form };
+      }
+    }
+    return undefined;
+  };
+
+  return (
+    <div className="mx-4 mt-8 max-w-4xl">
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-6">
+        <div className="flex items-center gap-2 mb-4">
+          <CareIcon
+            icon="l-exclamation-circle"
+            className="h-5 w-5 text-red-500"
+          />
+          <h3 className="font-medium text-red-700">Validation Errors</h3>
+        </div>
+
+        {/* Server-level errors */}
+        {serverErrors?.map((error, index) => {
+          // Find the structured question if this is a structured data error
+          const structuredQuestion = findStructuredQuestionId(
+            questionnaireForms,
+            error.reference_id,
+          );
+
+          return (
+            <div
+              key={`server-${index}`}
+              className="bg-white rounded p-3 border border-red-100 shadow-sm"
+            >
+              <div className="font-medium text-gray-900 mb-1">
+                {getErrorTitle(error)}
+              </div>
+              <div className="text-sm text-red-600 flex items-start gap-2">
+                <CareIcon
+                  icon="l-exclamation-circle"
+                  className="h-4 w-4 mt-0.5 flex-shrink-0"
+                />
+                <span>{error.message}</span>
+              </div>
+              {structuredQuestion && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-8 text-xs"
+                  onClick={() => {
+                    const element = document.querySelector(
+                      `[data-question-id="${structuredQuestion.questionId}"]`,
+                    );
+                    if (element) {
+                      element.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                      element.classList.add(
+                        "ring-2",
+                        "ring-red-500",
+                        "ring-offset-2",
+                        "rounded",
+                      );
+                      setTimeout(() => {
+                        element.classList.remove(
+                          "ring-2",
+                          "ring-red-500",
+                          "ring-offset-2",
+                          "rounded",
+                        );
+                      }, 2000);
+                    }
+                  }}
+                >
+                  <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                  {t("scroll_to_question")}
+                </Button>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Form-level errors */}
+        {questionnaireForms.map(
+          (form, index) =>
+            form.errors.length > 0 && (
+              <div
+                key={`${form.questionnaire.id}-${index}`}
+                className="space-y-3"
+              >
+                <h3 className="font-medium text-gray-900">
+                  {form.questionnaire.title}
+                </h3>
+                <div className="space-y-3">
+                  {form.errors.map((error, errorIndex) => (
+                    <div
+                      key={errorIndex}
+                      className="bg-white rounded p-3 border border-red-100 shadow-sm"
+                    >
+                      <div className="text-sm text-gray-600 mb-1">
+                        {findQuestionText(form, error.question_id)}
+                      </div>
+                      <div className="text-sm text-red-600 flex items-start gap-2">
+                        <CareIcon
+                          icon="l-exclamation-circle"
+                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                        />
+                        <span>{error.error}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 h-8 text-xs"
+                        onClick={() => {
+                          const element = document.querySelector(
+                            `[data-question-id="${error.question_id}"]`,
+                          );
+                          if (element) {
+                            element.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                            element.classList.add(
+                              "ring-2",
+                              "ring-red-500",
+                              "ring-offset-2",
+                              "rounded",
+                            );
+                            setTimeout(() => {
+                              element.classList.remove(
+                                "ring-2",
+                                "ring-red-500",
+                                "ring-offset-2",
+                                "rounded",
+                              );
+                            }, 2000);
+                          }
+                        }}
+                      >
+                        <CareIcon icon="l-arrow-up" className="mr-1 h-3 w-3" />
+                        {t("scroll_to_question")}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ),
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function QuestionnaireForm({
@@ -71,6 +286,7 @@ export function QuestionnaireForm({
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
+  const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
@@ -91,13 +307,91 @@ export function QuestionnaireForm({
   const { mutate: submitBatch, isPending } = useMutation({
     mutationFn: mutate(routes.batchRequest, { silent: true }),
     onSuccess: () => {
+      setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
       onSubmit?.();
     },
     onError: (error) => {
-      const errorData = error.cause;
+      const errorData = error.cause as {
+        results: Array<{
+          reference_id: string;
+          status_code: number;
+          data:
+            | {
+                errors?: Array<{
+                  question_id?: string;
+                  msg?: string;
+                  error?: string;
+                  type?: string;
+                  loc?: string[];
+                }>;
+              }
+            | Array<{
+                errors: Array<{
+                  type: string;
+                  loc: string[];
+                  msg: string;
+                }>;
+              }>;
+        }>;
+      };
+
       if (errorData?.results) {
-        handleSubmissionError(errorData.results as ValidationErrorResponse[]);
+        const results = errorData.results;
+
+        // Only process failed requests (status_code !== 200)
+        const failedResults = results.filter(
+          (result) => result.status_code !== 200,
+        );
+
+        setServerErrors(
+          failedResults.map((result) => {
+            const reference_id = result.reference_id || "";
+            let message = t("validation_failed");
+
+            // Handle array-style structured data errors
+            if (Array.isArray(result.data)) {
+              const errors = result.data.flatMap((d) => d.errors || []);
+              if (errors.length > 0) {
+                message = errors
+                  .map((e) => {
+                    if (e.loc) {
+                      return `${e.loc.join(" > ")}: ${e.msg}`;
+                    }
+                    return e.msg;
+                  })
+                  .join(", ");
+              }
+            }
+            // Handle regular errors
+            else if (result.data?.errors) {
+              const firstError = result.data.errors[0];
+              if (firstError.loc) {
+                message = `${firstError.loc.join(" > ")}: ${firstError.msg}`;
+              } else {
+                message =
+                  firstError.msg || firstError.error || t("validation_failed");
+              }
+            }
+
+            return {
+              reference_id,
+              message,
+              status_code: result.status_code,
+            };
+          }),
+        );
+
+        // Handle form-level validation errors
+        const validationResults = failedResults.filter(
+          (r) =>
+            !Array.isArray(r.data) &&
+            r.data?.errors?.some((e) => e.question_id),
+        );
+
+        if (validationResults.length > 0) {
+          handleSubmissionError(validationResults as ValidationErrorResponse[]);
+        }
       }
       toast.error(t("questionnaire_submission_failed"));
     },
@@ -260,7 +554,7 @@ export function QuestionnaireForm({
     }
 
     // Continue with existing submission logic...
-    const requests: BatchRequest[] = [];
+    const requests: FormBatchRequest[] = [];
     if (encounterId && patientId) {
       const context = { facilityId, patientId, encounterId };
       // First, collect all structured data requests if encounterId is provided
@@ -462,63 +756,72 @@ export function QuestionnaireForm({
 
         {/* Search and Add Questionnaire */}
 
-        <div
-          key={`${questionnaireForms.length}`}
-          className="flex gap-4 items-center m-4 max-w-4xl"
-        >
-          <QuestionnaireSearch
-            subjectType={subjectType}
-            onSelect={(selected) => {
-              if (
-                questionnaireForms.some(
-                  (form) => form.questionnaire.id === selected.id,
-                )
-              ) {
-                return;
-              }
-
-              setQuestionnaireForms((prev) => [
-                ...prev,
-                {
-                  questionnaire: selected,
-                  responses: initializeResponses(selected.questions),
-                  errors: [],
-                },
-              ]);
-            }}
-            disabled={isPending}
-          />
-        </div>
-
-        {/* Submit and Cancel Buttons */}
-        {questionnaireForms.length > 0 && (
-          <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
+        {encounterId !== "preview" && (
+          <>
+            <div
+              key={`${questionnaireForms.length}`}
+              className="flex gap-4 items-center m-4 max-w-4xl"
             >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isPending || hasErrors}
-              className="relative"
-            >
-              {isPending ? (
-                <>
-                  <span className="opacity-0">{t("submit")}</span>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
-                  </div>
-                </>
-              ) : (
-                t("submit")
-              )}
-            </Button>
-          </div>
+              <QuestionnaireSearch
+                subjectType={subjectType}
+                onSelect={(selected) => {
+                  if (
+                    questionnaireForms.some(
+                      (form) => form.questionnaire.id === selected.id,
+                    )
+                  ) {
+                    return;
+                  }
+
+                  setQuestionnaireForms((prev) => [
+                    ...prev,
+                    {
+                      questionnaire: selected,
+                      responses: initializeResponses(selected.questions),
+                      errors: [],
+                    },
+                  ]);
+                }}
+                disabled={isPending}
+              />
+            </div>
+
+            {/* Submit and Cancel Buttons */}
+            {questionnaireForms.length > 0 && (
+              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isPending}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={isPending || hasErrors}
+                  className="relative"
+                >
+                  {isPending ? (
+                    <>
+                      <span className="opacity-0">{t("submit")}</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                      </div>
+                    </>
+                  ) : (
+                    t("submit")
+                  )}
+                </Button>
+              </div>
+            )}
+
+            <ValidationErrorDisplay
+              questionnaireForms={questionnaireForms}
+              serverErrors={serverErrors}
+            />
+          </>
         )}
 
         <PLUGIN_Component
@@ -527,15 +830,11 @@ export function QuestionnaireForm({
           setFormState={setQuestionnaireForms}
         />
 
-        {/* Add a Preview of the QuestionnaireForm */}
-        {import.meta.env.DEV && (
-          <div className="p-4 space-y-6 max-w-4xl">
-            <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-            <pre className="text-sm text-gray-500">
-              {JSON.stringify(questionnaireForms, null, 2)}
-            </pre>
-          </div>
-        )}
+        <DebugPreview
+          data={questionnaireForms}
+          title="QuestionnaireForm"
+          className="p-4 space-y-6 max-w-4xl m-2"
+        />
       </div>
     </div>
   );

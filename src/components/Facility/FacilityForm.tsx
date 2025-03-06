@@ -42,6 +42,7 @@ import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { BaseFacility } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 interface FacilityProps {
   organizationId?: string;
@@ -50,6 +51,7 @@ interface FacilityProps {
 }
 
 export default function FacilityForm({
+  organizationId,
   facilityId,
   onSubmitSuccess,
 }: FacilityProps) {
@@ -91,6 +93,20 @@ export default function FacilityForm({
     },
   });
 
+  const { data: org } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
+
+  useEffect(() => {
+    const levels: Organization[] = [];
+    if (org && org.org_type === "govt") levels.push(org);
+    setSelectedLevels(levels);
+  }, [org, organizationId]);
+
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(routes.facility.create),
     onSuccess: (_data: BaseFacility) => {
@@ -111,6 +127,9 @@ export default function FacilityForm({
       });
       queryClient.invalidateQueries({
         queryKey: ["facility"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["currentUser"],
       });
       form.reset();
       onSubmitSuccess?.();
@@ -141,7 +160,7 @@ export default function FacilityForm({
 
   const handleFeatureChange = (value: string[]) => {
     const features = value.map((val) => Number(val));
-    form.setValue("features", features);
+    form.setValue("features", features, { shouldDirty: true });
   };
 
   const handleGetCurrentLocation = () => {
@@ -149,8 +168,12 @@ export default function FacilityForm({
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          form.setValue("latitude", position.coords.latitude);
-          form.setValue("longitude", position.coords.longitude);
+          form.setValue("latitude", position.coords.latitude, {
+            shouldDirty: true,
+          });
+          form.setValue("longitude", position.coords.longitude, {
+            shouldDirty: true,
+          });
           setIsGettingLocation(false);
           toast.success(t("location_updated_successfully"));
         },
@@ -209,7 +232,7 @@ export default function FacilityForm({
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger data-cy="facility-type">
-                        <SelectValue placeholder="Select facility type" />
+                        <SelectValue placeholder={t("select_facility_type")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -238,7 +261,7 @@ export default function FacilityForm({
                   <FormControl>
                     <Input
                       data-cy="facility-name"
-                      placeholder="Enter facility name"
+                      placeholder={t("enter_facility_name")}
                       {...field}
                     />
                   </FormControl>
@@ -257,7 +280,7 @@ export default function FacilityForm({
                   <Textarea
                     {...field}
                     data-cy="facility-description"
-                    placeholder="Describe your facility (Markdown supported)"
+                    placeholder={t("markdown_supported")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -305,7 +328,6 @@ export default function FacilityForm({
                     <PhoneInput
                       data-cy="facility-phone"
                       placeholder={t("enter_phone_number")}
-                      maxLength={13}
                       {...field}
                     />
                   </FormControl>
@@ -319,11 +341,11 @@ export default function FacilityForm({
               name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Pincode</FormLabel>
+                  <FormLabel required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
                       data-cy="facility-pincode"
-                      placeholder="Enter pincode"
+                      placeholder={t("enter_pincode")}
                       maxLength={6}
                       {...field}
                     />
@@ -343,7 +365,9 @@ export default function FacilityForm({
                       value={form.watch("geo_organization")}
                       selected={selectedLevels}
                       onChange={(value) =>
-                        form.setValue("geo_organization", value)
+                        form.setValue("geo_organization", value, {
+                          shouldDirty: true,
+                        })
                       }
                       required
                     />
@@ -364,7 +388,7 @@ export default function FacilityForm({
                   <Textarea
                     {...field}
                     data-cy="facility-address"
-                    placeholder="Enter complete address"
+                    placeholder={t("enter_address")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -415,10 +439,11 @@ export default function FacilityForm({
                         form.setValue(
                           "latitude",
                           e.target.value ? Number(e.target.value) : undefined,
+                          { shouldDirty: true },
                         );
                       }}
                       data-cy="facility-latitude"
-                      placeholder="Enter latitude"
+                      placeholder={t("enter_latitude")}
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
                     />
@@ -442,10 +467,11 @@ export default function FacilityForm({
                         form.setValue(
                           "longitude",
                           e.target.value ? Number(e.target.value) : undefined,
+                          { shouldDirty: true },
                         );
                       }}
                       data-cy="facility-longitude"
-                      placeholder="Enter longitude"
+                      placeholder={t("enter_longitude")}
                       disabled={isGettingLocation}
                       className={isGettingLocation ? "animate-pulse" : ""}
                     />
@@ -490,7 +516,9 @@ export default function FacilityForm({
           type="submit"
           className="w-full"
           variant="primary"
-          disabled={facilityId ? isUpdatePending : isPending}
+          disabled={
+            facilityId ? isUpdatePending || !form.formState.isDirty : isPending
+          }
           data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
           {facilityId ? (

@@ -7,12 +7,12 @@ import {
 } from "./medicationAdministration";
 
 export default {
-  listMedicationAdministrations: {
+  list: {
     path: "/api/v1/patient/{patientId}/medication/administration/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<MedicationAdministrationRead>>(),
   },
-  upsertMedicationAdministration: {
+  upsert: {
     path: "/api/v1/patient/{patientId}/medication/administration/upsert/",
     method: HttpMethod.POST,
     TRes: Type<MedicationAdministrationRequest[]>,

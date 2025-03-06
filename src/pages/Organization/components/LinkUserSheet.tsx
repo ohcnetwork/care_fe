@@ -111,7 +111,7 @@ export default function LinkUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button variant="primary_gradient">
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           Link User
         </Button>
@@ -135,16 +135,16 @@ export default function LinkUserSheet({
           {selectedUser && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4 space-y-4">
-                <div className="flex items-start gap-4">
+                <div className="flex gap-4 flex-row">
                   <Avatar
                     name={`${selectedUser.first_name} ${selectedUser.last_name}`}
                     imageUrl={selectedUser.profile_picture_url}
                     className="h-12 w-12"
                   />
-                  <div className="flex flex-col flex-1">
-                    <span className="font-medium text-lg">
+                  <div className="w-3/4">
+                    <p className="font-medium text-lg truncate">
                       {selectedUser.first_name} {selectedUser.last_name}
-                    </span>
+                    </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
                     </span>
@@ -154,7 +154,7 @@ export default function LinkUserSheet({
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                   <div>
                     <span className="text-sm text-gray-500">Username</span>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium truncate">
                       {selectedUser.username}
                     </p>
                   </div>
@@ -192,7 +192,6 @@ export default function LinkUserSheet({
                   </SelectContent>
                 </Select>
               </div>
-
               <Button
                 className="w-full"
                 onClick={handleAddUser}

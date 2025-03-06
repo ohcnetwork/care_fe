@@ -34,12 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { NotesInput } from "@/components/Questionnaire/QuestionTypes/NotesInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -94,6 +89,7 @@ export function MedicationStatementQuestion({
   encounterId,
 }: MedicationStatementQuestionProps) {
   const { t } = useTranslation();
+  const isPreview = patientId === "preview";
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null
@@ -115,6 +111,7 @@ export function MedicationStatementQuestion({
         encounter: encounterId,
       },
     }),
+    enabled: !isPreview,
   });
 
   useEffect(() => {
@@ -293,32 +290,29 @@ export function MedicationStatementQuestion({
                                 <Pencil2Icon className="h-4 w-4" />
                               </Button>
                             )}
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveMedication(index);
-                                    }}
-                                    disabled={
-                                      disabled ||
-                                      medication.status === "entered_in_error"
-                                    }
-                                    className="h-8 w-8"
-                                  >
-                                    <MinusCircledIcon className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {medication.status === "entered_in_error"
-                                    ? t("medication_already_marked_as_error")
-                                    : t("remove_medication")}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <TooltipComponent
+                              content={
+                                medication.status === "entered_in_error"
+                                  ? t("medication_already_marked_as_error")
+                                  : t("remove_medication")
+                              }
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveMedication(index);
+                                }}
+                                disabled={
+                                  disabled ||
+                                  medication.status === "entered_in_error"
+                                }
+                                className="h-8 w-8"
+                              >
+                                <MinusCircledIcon className="h-4 w-4" />
+                              </Button>
+                            </TooltipComponent>
                           </div>
                         </div>
                         <CollapsibleContent>

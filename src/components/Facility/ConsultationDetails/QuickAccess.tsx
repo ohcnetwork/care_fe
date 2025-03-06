@@ -10,6 +10,7 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
+import { stringifyNestedObject } from "@/Utils/utils";
 import { Encounter } from "@/types/emr/encounter";
 
 interface QuickAccessProps {
@@ -85,7 +86,7 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
                         variant="outline"
                         title={`Organization: ${org.name}${org.description ? ` - ${org.description}` : ""}`}
                       >
-                        {org.name}
+                        {stringifyNestedObject(org)}
                       </Badge>
                     ))
                   : t("no_organizations_added_yet")}

@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { BanIcon, PrinterIcon } from "lucide-react";
+import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -54,7 +54,7 @@ import {
   formatName,
   getReadableDuration,
   saveElementAsImage,
-  stringifyGeoOrganization,
+  stringifyNestedObject,
 } from "@/Utils/utils";
 import { AppointmentTokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { FacilityData } from "@/types/facility/facility";
@@ -321,7 +321,7 @@ const AppointmentDetails = ({
                 {appointment.patient.address || t("no_address_provided")}
               </p>
               <p className="text-gray-600">
-                {stringifyGeoOrganization(appointment.patient.geo_organization)}
+                {stringifyNestedObject(appointment.patient.geo_organization)}
               </p>
               <p className="text-gray-600">
                 {t("pincode")}: {appointment.patient.pincode}
@@ -380,7 +380,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
-  const { mutate: cancelAppointment } = useMutation({
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
         facility_id: facilityId,
@@ -543,8 +543,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "cancelled" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -573,8 +578,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

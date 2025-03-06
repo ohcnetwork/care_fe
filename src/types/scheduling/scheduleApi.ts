@@ -157,5 +157,13 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<{ users: UserBase[] }>(),
     },
+    /**
+     * Get appointments across facilities
+     */
+    getAppointments: {
+      path: "/api/v1/patient/{patient_id}/get_appointments/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<Appointment>>(),
+    },
   },
 } as const;

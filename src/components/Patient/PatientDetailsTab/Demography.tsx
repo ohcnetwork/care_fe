@@ -143,6 +143,7 @@ export const Demography = (props: PatientProps) => {
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
           __name="PatientDetailsTabDemographyGeneralInfo"
+          facilityId={facilityId ?? ""}
           {...props}
         />,
         { label: t("full_name"), value: patientData.name },
@@ -262,7 +263,6 @@ export const Demography = (props: PatientProps) => {
                       <Button
                         data-cy="edit-patient-button"
                         variant="outline"
-                        disabled={!!patientData.death_datetime}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
                         )}

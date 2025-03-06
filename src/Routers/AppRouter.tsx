@@ -4,7 +4,7 @@ import { Redirect, useRedirect, useRoutes } from "raviger";
 import IconIndex from "@/CAREUI/icons/Index";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
@@ -15,17 +15,16 @@ import { usePluginRoutes } from "@/hooks/useCareApps";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
+import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
-
-import OrganizationRoutes from "./routes/OrganizationRoutes";
-import QuestionnaireRoutes from "./routes/questionnaireRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
@@ -55,7 +54,6 @@ const Routes: AppRoutes = {
   ...ScheduleRoutes,
   ...UserRoutes,
   ...OrganizationRoutes,
-  ...QuestionnaireRoutes,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,
@@ -67,6 +65,10 @@ const Routes: AppRoutes = {
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   "/login": () => <Redirect to="/" />,
+};
+
+const AdminRouter: AppRoutes = {
+  ...AdminRoutes,
 };
 
 export default function AppRouter() {
@@ -81,7 +83,13 @@ export default function AppRouter() {
     ...routes,
   };
 
-  const pages = useRoutes(routes) || <ErrorPage />;
+  const appPages = useRoutes(routes);
+  const adminPages = useRoutes(AdminRouter);
+
+  const sidebarFor = adminPages ? SidebarFor.ADMIN : SidebarFor.FACILITY;
+
+  const pages = appPages || adminPages || <ErrorPage />;
+
   const user = useAuthUser();
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
@@ -92,27 +100,26 @@ export default function AppRouter() {
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
       >
-        {shouldShowSidebar && <AppSidebar user={user} />}
+        {shouldShowSidebar && (
+          <AppSidebar user={user} sidebarFor={sidebarFor} />
+        )}
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-none md:pb-2 md:pr-2"
+          className="overflow-y-auto flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
         >
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+          <div className="relative z-10 flex h-16 bg-white shadow shrink-0 md:hidden">
             <div className="flex items-center">
               {shouldShowSidebar && <SidebarTrigger />}
             </div>
-            <a className="flex h-full w-full items-center px-4 md:hidden">
+            <a className="flex items-center w-full h-full px-4 md:hidden">
               <img
-                className="h-8 w-auto"
+                className="w-auto h-8"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
             </a>
           </div>
-          <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
-            data-cui-page
-          >
+          <div className="p-3 mt-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

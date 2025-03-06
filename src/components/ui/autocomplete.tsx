@@ -69,10 +69,11 @@ export default function Autocomplete({
           {options.map((option) => (
             <CommandItem
               key={option.value}
-              value={option.value}
+              value={`${option.label} - ${option.value}`}
               onSelect={(v) => {
                 const currentValue =
-                  options.find((option) => option.value === v)?.value || "";
+                  options.find((o) => `${o.label} - ${o.value}` === v)?.value ||
+                  "";
                 onChange(currentValue);
                 setOpen(false);
               }}

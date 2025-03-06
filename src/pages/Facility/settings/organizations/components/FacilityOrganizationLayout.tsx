@@ -105,7 +105,9 @@ export default function FacilityOrganizationLayout({
                       asChild
                       className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
                     >
-                      <Link href={parent.id}>{parent.name}</Link>
+                      <Link href={path.replace(id, parent.id)}>
+                        {parent.name}
+                      </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbItem key={`ellipsis-${parent.id}`}>

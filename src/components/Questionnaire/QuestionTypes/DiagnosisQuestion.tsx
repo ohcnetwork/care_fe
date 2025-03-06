@@ -90,6 +90,7 @@ export function DiagnosisQuestion({
   updateQuestionnaireResponseCB,
   disabled,
 }: DiagnosisQuestionProps) {
+  const isPreview = patientId === "preview";
   const diagnoses =
     (questionnaireResponse.values?.[0]?.value as DiagnosisRequest[]) || [];
 
@@ -102,6 +103,7 @@ export function DiagnosisQuestion({
         limit: 100,
       },
     }),
+    enabled: !isPreview,
   });
 
   useEffect(() => {
