@@ -60,50 +60,88 @@ export default function FacilityOrganizationIndex({
 
   const tableData = data?.results || [];
 
+  const [{ childrenMap, topLevelOrganizations }, setOrganizationHierarchy] =
+    useState<{
+      childrenMap: Map<string, (typeof tableData)[0][]>;
+      topLevelOrganizations: (typeof tableData)[0][];
+    }>({ childrenMap: new Map(), topLevelOrganizations: [] });
+
+  useEffect(() => {
+    const childrenMap = new Map<string, (typeof tableData)[0][]>();
+    const topLevelOrgs = tableData.filter(
+      (org) => !org.parent || Object.keys(org.parent).length === 0,
+    );
+
+    tableData.forEach((org) => {
+      if (org.parent?.id) {
+        const parentId = org.parent.id;
+        if (!childrenMap.has(parentId)) {
+          childrenMap.set(parentId, []);
+        }
+        childrenMap.get(parentId)?.push(org);
+      }
+    });
+
+    setOrganizationHierarchy({
+      childrenMap,
+      topLevelOrganizations: topLevelOrgs,
+    });
+  }, [tableData]);
+
   const getChildren = useCallback(
     (parentId: string) => {
-      return tableData.filter((org) => org.parent?.id === parentId);
+      return childrenMap.get(parentId) || [];
     },
-    [tableData],
+    [childrenMap],
+  );
+
+  const createSearchMatcher = (query: string) => {
+    const normalizedQuery = query.toLowerCase().trim();
+    return (name: string) => name.toLowerCase().includes(normalizedQuery);
+  };
+
+  const matchesSearch = useMemo(
+    () => createSearchMatcher(searchQuery),
+    [searchQuery],
+  );
+
+  const hasMatchingChildren = useCallback(
+    (parentId: string): boolean => {
+      const children = childrenMap.get(parentId) || [];
+      return children.some(
+        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
+      );
+    },
+    [childrenMap, matchesSearch],
   );
 
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return tableData;
 
-    const normalizedQuery = searchQuery.toLowerCase().trim();
-    const matches = new Set<string>();
-    const parentChains = new Map<string, string[]>();
-    tableData.forEach((org) => {
-      const parentChain: string[] = [];
-      let current = org;
-      while (current.parent?.id) {
-        const parentId = current.parent.id;
-        parentChain.push(parentId);
-        current = tableData.find((o) => o.id === parentId)!;
-      }
-      parentChains.set(org.id, parentChain);
-      if (org.name.toLowerCase().includes(normalizedQuery)) {
-        matches.add(org.id);
-      }
-    });
-    matches.forEach((matchId) => {
-      const parents = parentChains.get(matchId) || [];
-      parents.forEach((parentId) => matches.add(parentId));
-    });
+    const hasMatchingDescendant = (orgId: string): boolean => {
+      const children = childrenMap.get(orgId) || [];
+      return children.some(
+        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
+      );
+    };
 
-    return tableData.filter((org) => matches.has(org.id));
-  }, [tableData, searchQuery]);
+    return tableData.filter(
+      (org) => matchesSearch(org.name) || hasMatchingDescendant(org.id),
+    );
+  }, [tableData, searchQuery, childrenMap, matchesSearch]);
+
   const getFilteredChildren = useCallback(
     (parentId: string) => {
+      const children = getChildren(parentId);
       if (!searchQuery.trim()) {
-        return getChildren(parentId);
+        return children;
       }
 
-      return getChildren(parentId).filter((child) =>
-        filteredData.some((item) => item.id === child.id),
+      return children.filter(
+        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
       );
     },
-    [filteredData, getChildren, searchQuery],
+    [getChildren, searchQuery, matchesSearch, hasMatchingChildren],
   );
 
   useEffect(() => {
@@ -112,21 +150,35 @@ export default function FacilityOrganizationIndex({
       return;
     }
 
-    const normalizedQuery = searchQuery.toLowerCase().trim();
     const newExpandedRows: Record<string, boolean> = {};
 
-    tableData.forEach((org) => {
-      if (org.name.toLowerCase().includes(normalizedQuery)) {
+    const processMatchingNodes = (org: (typeof tableData)[0]) => {
+      if (matchesSearch(org.name)) {
         let current = org;
         while (current.parent?.id) {
           newExpandedRows[current.parent.id] = true;
-          current = tableData.find((o) => o.id === current.parent?.id)!;
+          const parentOrg = tableData.find((o) => o.id === current.parent?.id);
+          if (!parentOrg) break;
+          current = parentOrg;
         }
       }
-    });
+
+      // Check children recursively
+      const children = childrenMap.get(org.id) || [];
+      children.forEach(processMatchingNodes);
+    };
+
+    // Start with top-level organizations
+    topLevelOrganizations.forEach(processMatchingNodes);
 
     setExpandedRows(newExpandedRows);
-  }, [searchQuery, tableData]);
+  }, [
+    searchQuery,
+    tableData,
+    childrenMap,
+    topLevelOrganizations,
+    matchesSearch,
+  ]);
 
   const toggleRow = (id: string) => {
     const newExpandedRows = { ...expandedRows };
