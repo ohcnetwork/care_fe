@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import Cropper from "react-easy-crop";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
 import { toast } from "sonner";
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/dialog";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
+
+import { getCroppedImg } from "@/Utils/getCroppedImg";
 
 interface Props {
   title: string;
@@ -64,7 +67,7 @@ const AvatarEditModal = ({
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
   const [constraint, setConstraint] = useState<IVideoConstraint>(
@@ -72,6 +75,17 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -80,6 +94,21 @@ const AvatarEditModal = ({
         : VideoConstraints.user,
     );
   }, [constraint]);
+
+  const onCropComplete = useCallback(
+    (
+      croppedArea: { x: number; y: number; width: number; height: number },
+      croppedAreaPixels: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      },
+    ) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    [],
+  );
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -92,10 +121,48 @@ const AvatarEditModal = ({
     });
   };
 
+  const handleCropImage = async () => {
+    if (!previewImage && !preview) return;
+    setIsProcessing(true);
+    const imageSrc = previewImage || preview;
+    try {
+      const croppedImage = await getCroppedImg(
+        imageSrc as string,
+        croppedAreaPixels,
+      );
+      setCroppedImage(croppedImage);
+    } catch (_e) {
+      toast.error("Unable to crop the image at the moment");
+      setCroppedImage(null);
+    } finally {
+      setIsProcessing(false);
+      setIsCropping(false);
+    }
+  };
+
+  useEffect(() => {
+    if (croppedImage) {
+      fetch(croppedImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const myFile = new File([blob], "cropped_image.png", {
+            type: blob.type,
+          });
+          setSelectedFile(myFile);
+          setPreview(croppedImage);
+          setCroppedImage(null);
+        });
+    }
+  }, [croppedImage]);
+
   const closeModal = () => {
     setPreview(undefined);
     setIsProcessing(false);
     setSelectedFile(undefined);
+    setPreviewImage(null);
+    setCroppedImage(null);
+    setIsCropping(false);
+    setErrorMessage(null);
     onOpenChange(false);
   };
 
@@ -118,6 +185,7 @@ const AvatarEditModal = ({
       return;
     }
     setSelectedFile(e.target.files[0]);
+    setIsCropping(true);
   };
 
   const uploadAvatar = async () => {
@@ -127,6 +195,7 @@ const AvatarEditModal = ({
         return;
       }
 
+      setErrorMessage(null);
       setIsProcessing(true);
       setIsCaptureImgBeingUploaded(true);
       await handleUpload(selectedFile, () => {
@@ -158,6 +227,7 @@ const AvatarEditModal = ({
     if (!isImageFile(droppedFile))
       return dragProps.setFileDropError("Please drop an image file to upload!");
     setSelectedFile(droppedFile);
+    setIsCropping(true);
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -191,16 +261,62 @@ const AvatarEditModal = ({
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+                <p className="flex items-center">
+                  <CareIcon icon="l-exclamation-circle" className="mr-2" />
+                  {errorMessage}
+                </p>
+              </div>
+            )}
             {!isCameraOpen ? (
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex flex-1 items-center justify-center rounded-lg">
-                      <img
-                        src={preview || imageUrl}
-                        alt="cover-photo"
-                        className="h-full w-full object-cover"
-                      />
+                    <div className="flex flex-1 items-center justify-center rounded-lg relative">
+                      <div
+                        className="w-full"
+                        style={{
+                          overflow: "hidden",
+                          maxWidth: "100%",
+                          maxHeight: "calc(100vh - 200px)",
+                        }}
+                      >
+                        {isCropping ? (
+                          <Cropper
+                            image={preview || imageUrl || undefined}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={1}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                          />
+                        ) : (
+                          <img
+                            src={preview || imageUrl}
+                            alt="cover-photo"
+                            className="h-auto w-full object-contain"
+                          />
+                        )}
+                      </div>
+                      {isCropping && (
+                        <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsCropping(false);
+                              setCrop({ x: 0, y: 0 });
+                              setZoom(1);
+                            }}
+                          >
+                            {t("cancel")}
+                          </Button>
+                          <Button onClick={handleCropImage} variant="primary">
+                            {t("Crop")}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <p className="text-center font-medium text-secondary-700">
                       {hintMessage}
@@ -293,6 +409,14 @@ const AvatarEditModal = ({
                   >
                     {`${t("open_camera")}`}
                   </Button>
+                  {preview && !isCropping && (
+                    <Button
+                      variant="primary"
+                      onClick={() => setIsCropping(true)}
+                    >
+                      {t("Crop")}
+                    </Button>
+                  )}
                   <div className="sm:flex-1" />
                   <Button
                     variant="outline"
@@ -356,12 +480,28 @@ const AvatarEditModal = ({
                       </div>
                     </>
                   ) : (
-                    <div className="aspect-square max-w-[720px] w-full overflow-hidden">
-                      <img
-                        src={previewImage}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
+                    <>
+                      {isCropping ? (
+                        <div className="aspect-square max-w-[720px] w-full overflow-hidden relative">
+                          <Cropper
+                            image={previewImage}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={1}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-square max-w-[720px] w-full overflow-hidden">
+                          <img
+                            src={previewImage}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 {/* buttons for mobile screens */}
@@ -384,31 +524,68 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          setPreviewImage(null);
-                        }}
-                      >
-                        {t("retake")}
-                      </Button>
-                      <Button
-                        variant="primary"
-                        disabled={isProcessing}
-                        onClick={uploadAvatar}
-                      >
-                        {isCaptureImgBeingUploaded ? (
-                          <>
-                            <CareIcon
-                              icon="l-spinner"
-                              className="animate-spin text-lg"
-                            />
-                            {`${t("submitting")}...`}
-                          </>
-                        ) : (
-                          <> {t("submit")}</>
-                        )}
-                      </Button>
+                      {isCropping ? (
+                        <>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              setIsCropping(false);
+                              setCrop({ x: 0, y: 0 });
+                              setZoom(1);
+                            }}
+                          >
+                            {t("cancel")}
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={handleCropImage}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <CareIcon
+                                icon="l-spinner"
+                                className="animate-spin text-lg"
+                              />
+                            ) : (
+                              t("crop")
+                            )}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              setPreviewImage(null);
+                            }}
+                          >
+                            {t("retake")}
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={() => setIsCropping(true)}
+                          >
+                            {t("crop")}
+                          </Button>
+                          <Button
+                            variant="primary"
+                            disabled={isProcessing}
+                            onClick={uploadAvatar}
+                          >
+                            {isCaptureImgBeingUploaded ? (
+                              <>
+                                <CareIcon
+                                  icon="l-spinner"
+                                  className="animate-spin text-lg"
+                                />
+                                {`${t("submitting")}...`}
+                              </>
+                            ) : (
+                              <> {t("submit")}</>
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                   <div className="sm:flex-1"></div>
@@ -418,6 +595,7 @@ const AvatarEditModal = ({
                     onClick={() => {
                       setPreviewImage(null);
                       setIsCameraOpen(false);
+                      setIsCropping(false);
                       webRef.current.stopCamera();
                     }}
                     disabled={isProcessing}
