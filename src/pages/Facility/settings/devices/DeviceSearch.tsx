@@ -37,7 +37,7 @@ export function DeviceSearch({
 
   const { data: devices } = useQuery({
     queryKey: ["devices", facilityId, search],
-    queryFn: query.paginated(deviceApi.list, {
+    queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: { search_text: search },
     }),
