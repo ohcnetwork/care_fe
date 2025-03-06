@@ -281,69 +281,67 @@ export default function LocationForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="form"
+          render={({ field }) => (
+            <FormItem
+              className={showBedOptions ? "md:col-span-1" : "md:col-span-2"}
+            >
+              <FormLabel>{t("location_form")}</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  if (value !== "bd") {
+                    form.setValue("enableBulkCreation", false);
+                    form.setValue("numberOfBeds", "2");
+                    form.setValue("customizeNames", false);
+                  }
+                }}
+                value={field.value}
+                disabled={!!locationId}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[46vh]">
+                  {LocationFormOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {t(`location_form__${option}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Checkbox Field (Hidden when `showBedOptions` is false) */}
+        {showBedOptions && (
           <FormField
             control={form.control}
-            name="form"
+            name="enableBulkCreation"
             render={({ field }) => (
-              <FormItem
-                className={showBedOptions ? "md:col-span-1" : "md:col-span-2"}
-              >
-                <FormLabel>{t("location_form")}</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    if (value !== "bd") {
-                      form.setValue("enableBulkCreation", false);
-                      form.setValue("numberOfBeds", "2");
-                      form.setValue("customizeNames", false);
-                    }
-                  }}
-                  value={field.value}
-                  disabled={!!locationId}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-[46vh]">
-                    {LocationFormOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {t(`location_form__${option}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>{t("create_multiple_beds")}</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    {t("create_multiple_beds_description")}
+                  </p>
+                </div>
               </FormItem>
             )}
           />
-
-          {/* Checkbox Field (Hidden when `showBedOptions` is false) */}
-          {showBedOptions && (
-            <FormField
-              control={form.control}
-              name="enableBulkCreation"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>{t("create_multiple_beds")}</FormLabel>
-                    <p className="text-sm text-muted-foreground">
-                      {t("create_multiple_beds_description")}
-                    </p>
-                  </div>
-                </FormItem>
-              )}
-            />
-          )}
-        </div>
+        )}
 
         {showBedOptions && form.watch("enableBulkCreation") && (
           <FormField
@@ -420,7 +418,7 @@ export default function LocationForm({
 
               {form.watch("customizeNames") ? (
                 <div className="space-y-4 border rounded-md p-4">
-                  <div className="flex justify-between items-center flex-wrap">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
                     <h4 className="font-medium">{t("individual_bed_names")}</h4>
                     <Button
                       type="button"
