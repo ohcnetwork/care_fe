@@ -62,7 +62,7 @@ export function SymptomsList({
     (symptom) => symptom.verification_status === "entered_in_error",
   );
 
-  if (!filteredSymptoms?.length) {
+  if (!symptoms?.results.length) {
     return (
       <SymptomListLayout
         patientId={patientId}
@@ -83,30 +83,37 @@ export function SymptomsList({
       className={className}
       readOnly={readOnly}
     >
-      <SymptomTable
-        symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
-        ]}
-      />
+      {!filteredSymptoms?.length ? (
+        <CardContent className="w-full flex justify-center">
+          <p className="text-gray-500">{t("no_active_symptoms_recorded")}</p>
+        </CardContent>
+      ) : (
+        <SymptomTable
+          symptoms={[
+            ...filteredSymptoms.filter(
+              (symptom) => symptom.verification_status !== "entered_in_error",
+            ),
+            ...(showEnteredInError
+              ? filteredSymptoms.filter(
+                  (symptom) =>
+                    symptom.verification_status === "entered_in_error",
+                )
+              : []),
+          ]}
+        />
+      )}
 
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+      {hasEnteredInErrorRecords && (
         <>
           <div className="border-b border-dashed border-gray-200 my-2" />
           <div className="flex justify-center ">
             <Button
               variant="ghost"
               size="xs"
-              onClick={() => setShowEnteredInError(true)}
+              onClick={() => setShowEnteredInError((prev) => !prev)}
               className="text-xs underline text-gray-950"
             >
-              {t("view_all")}
+              {showEnteredInError ? t("hide") : t("view_all")}
             </Button>
           </div>
         </>

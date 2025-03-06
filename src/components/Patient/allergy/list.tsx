@@ -108,7 +108,7 @@ export function AllergyList({
     (allergy) => allergy.verification_status === "entered_in_error",
   );
 
-  if (!filteredAllergies?.length) {
+  if (!allergies?.results.length) {
     return (
       <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-3 pt-2">
@@ -205,62 +205,72 @@ export function AllergyList({
 
   return (
     <AllergyListLayout readOnly={readOnly} className={className}>
-      <Table className="border-separate border-spacing-y-0.5">
-        <TableHeader>
-          <TableRow className="rounded-md overflow-hidden bg-gray-100">
-            <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
-            <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
-              {t("allergen")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("status")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("criticality")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("verification")}
-            </TableHead>
-            <TableHead className="h-auto py-1 px-2 text-gray-600">
-              {t("notes")}
-            </TableHead>
-            <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
-              {t("logged_by")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {/* Valid entries */}
-          {filteredAllergies
-            .filter(
-              (allergy) => allergy.verification_status !== "entered_in_error",
-            )
-            .map((allergy) => (
-              <AllergyRow key={allergy.id} allergy={allergy} />
-            ))}
+      {!filteredAllergies?.length ? (
+        <CardContent className="w-full flex justify-center">
+          <p className="text-gray-500">{t("no_active_allergies_recorded")}</p>
+        </CardContent>
+      ) : (
+        <>
+          <Table className="border-separate border-spacing-y-0.5">
+            <TableHeader>
+              <TableRow className="rounded-md overflow-hidden bg-gray-100">
+                <TableHead className="first:rounded-l-md h-auto py-1 pl-1 pr-0 text-gray-600"></TableHead>
+                <TableHead className="h-auto py-1 pl-1 pr-2 text-gray-600">
+                  {t("allergen")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("status")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("criticality")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("verification")}
+                </TableHead>
+                <TableHead className="h-auto py-1 px-2 text-gray-600">
+                  {t("notes")}
+                </TableHead>
+                <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+                  {t("logged_by")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Valid entries */}
+              {filteredAllergies
+                .filter(
+                  (allergy) =>
+                    allergy.verification_status !== "entered_in_error",
+                )
+                .map((allergy) => (
+                  <AllergyRow key={allergy.id} allergy={allergy} />
+                ))}
 
-          {/* Entered in error entries */}
-          {showEnteredInError &&
-            filteredAllergies
-              .filter(
-                (allergy) => allergy.verification_status === "entered_in_error",
-              )
-              .map((allergy) => (
-                <AllergyRow key={allergy.id} allergy={allergy} />
-              ))}
-        </TableBody>
-      </Table>
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+              {/* Entered in error entries */}
+              {showEnteredInError &&
+                filteredAllergies
+                  .filter(
+                    (allergy) =>
+                      allergy.verification_status === "entered_in_error",
+                  )
+                  .map((allergy) => (
+                    <AllergyRow key={allergy.id} allergy={allergy} />
+                  ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
+      {hasEnteredInErrorRecords && (
         <>
           <div className="border-b border-dashed border-gray-200 my-2" />
           <div className="flex justify-center">
             <Button
               variant="ghost"
               size="xs"
-              onClick={() => setShowEnteredInError(true)}
+              onClick={() => setShowEnteredInError((prev) => !prev)}
               className="text-xs underline text-gray-950"
             >
-              {t("view_all")}
+              {showEnteredInError ? t("hide") : t("view_all")}
             </Button>
           </div>
         </>

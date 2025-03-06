@@ -60,7 +60,7 @@ export function DiagnosisList({
     (diagnosis) => diagnosis.verification_status === "entered_in_error",
   );
 
-  if (!filteredDiagnoses?.length) {
+  if (!diagnoses?.results?.length) {
     return (
       <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
@@ -73,32 +73,37 @@ export function DiagnosisList({
   return (
     <DiagnosisListLayout className={className} readOnly={readOnly}>
       <>
-        <DiagnosisTable
-          diagnoses={[
-            ...filteredDiagnoses.filter(
-              (diagnosis) =>
-                diagnosis.verification_status !== "entered_in_error",
-            ),
-            ...(showEnteredInError
-              ? filteredDiagnoses.filter(
-                  (diagnosis) =>
-                    diagnosis.verification_status === "entered_in_error",
-                )
-              : []),
-          ]}
-        />
-
-        {hasEnteredInErrorRecords && !showEnteredInError && (
+        {!filteredDiagnoses?.length ? (
+          <CardContent className="w-full flex justify-center">
+            <p className="text-gray-500">{t("no_active_diagnoses_recorded")}</p>
+          </CardContent>
+        ) : (
+          <DiagnosisTable
+            diagnoses={[
+              ...filteredDiagnoses.filter(
+                (diagnosis) =>
+                  diagnosis.verification_status !== "entered_in_error",
+              ),
+              ...(showEnteredInError
+                ? filteredDiagnoses.filter(
+                    (diagnosis) =>
+                      diagnosis.verification_status === "entered_in_error",
+                  )
+                : []),
+            ]}
+          />
+        )}
+        {hasEnteredInErrorRecords && (
           <>
             <div className="border-b border-dashed border-gray-200 my-2" />
             <div className="flex justify-center">
               <Button
                 variant="ghost"
                 size="xs"
-                onClick={() => setShowEnteredInError(true)}
+                onClick={() => setShowEnteredInError((prev) => !prev)}
                 className="text-xs underline text-gray-950"
               >
-                {t("view_all")}
+                {showEnteredInError ? t("hide") : t("view_all")}
               </Button>
             </div>
           </>
