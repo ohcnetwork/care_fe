@@ -51,15 +51,10 @@ export default function DevicesList({ facilityId }: Props) {
           >
             {isLoading
               ? t("loading")
-              : devices?.count == 1
-                ? t("entity_count_one", {
-                    count: devices?.count ?? 0,
-                    entity: t("device"),
-                  })
-                : t("entity_count_other", {
-                    count: devices?.count ?? 0,
-                    entity: t("device"),
-                  })}
+              : t("entity_count", {
+                  count: devices?.count ?? 0,
+                  entity: t("device"),
+                })}
           </Badge>
         </div>
 
