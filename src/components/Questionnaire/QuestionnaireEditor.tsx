@@ -770,9 +770,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return (
       <Alert variant="destructive">
         <CareIcon icon="l-exclamation-circle" className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>
-          Failed to load questionnaire. Please try again later.
+          {t("failed_to_load_questionnaire_Please_try_later")}
         </AlertDescription>
       </Alert>
     );
@@ -781,9 +781,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     return (
       <Alert>
         <CareIcon icon="l-info-circle" className="h-4 w-4" />
-        <AlertTitle>Not Found</AlertTitle>
+        <AlertTitle>{t("not_found")}</AlertTitle>
         <AlertDescription>
-          The requested questionnaire could not be found.
+          {t("the_requested_questionnaire_could_not_found")}
         </AlertDescription>
       </Alert>
     );
@@ -846,18 +846,18 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           <h1 className="text-2xl font-bold">
             {id
               ? t("edit") + " " + questionnaire.title
-              : "Create Questionnaire"}
+              : t("create_questionnaire")}
           </h1>
           <p className="text-sm text-gray-500">{questionnaire.description}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
             <CareIcon icon="l-arrow-left" className="mr-2 h-4 w-4" />
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isCreating || isUpdating}>
             <CareIcon icon="l-save" className="mr-2 h-4 w-4" />
-            {id ? "Save" : "Create"}
+            {id ? t("save") : t("create")}
           </Button>
         </div>
       </div>
@@ -869,11 +869,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <TabsList className="mb-4">
           <TabsTrigger value="edit">
             <ViewIcon className="w-4 h-4 mr-2" />
-            Edit form
+            {t("edit_form")}
           </TabsTrigger>
           <TabsTrigger value="preview">
             <SquarePenIcon className="w-4 h-4 mr-2" />
-            Preview form
+            {t("preview_form")}
           </TabsTrigger>
         </TabsList>
 
@@ -983,11 +983,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             <div className="space-y-4 flex-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
+                  <CardTitle>{t("basic_information")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t("title")}</Label>
                     <Input
                       id="title"
                       value={questionnaire.title}
@@ -998,23 +998,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="slug">Slug</Label>
+                    <Label htmlFor="slug">{t("slug")}</Label>
                     <Input
                       id="slug"
                       value={questionnaire.slug}
                       onChange={(e) =>
                         updateQuestionnaireField("slug", e.target.value)
                       }
-                      placeholder="unique-identifier-for-questionnaire"
+                      placeholder={t("unique_identifier_question")}
                       className="font-mono"
                     />
                     <p className="text-sm text-gray-500 mt-1">
-                      A unique URL-friendly identifier for this questionnaire
+                      {t("a_unique_url_friendly_identifier_questionnaire")}
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="desc">Description</Label>
+                    <Label htmlFor="desc">{t("description")}</Label>
                     <Textarea
                       id="desc"
                       value={questionnaire.description || ""}
@@ -1031,8 +1031,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} Question
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                        {questionnaire.questions?.length || 0} {t("question")}
+                        {questionnaire.questions?.length !== 1 ? t("s") : ""}
                       </p>
                     </CardTitle>
                   </div>
@@ -1057,7 +1057,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     }}
                   >
                     <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                    Add Question
+                    {t("add_question")}
                   </Button>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1153,7 +1153,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title="Questionnaire"
+            title={t("questionnaire")}
             className="mt-4"
           />
         </TabsContent>
@@ -1281,7 +1281,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     <CardTitle className="flex justify-between items-center w-full">
                       <p className="text-sm text-gray-700 font-medium mt-1">
                         {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? "s" : ""}
+                        {questionnaire.questions?.length !== 1 ? t("s") : ""}
                       </p>
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-1">
@@ -1344,7 +1344,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title="Questionnaire"
+            title={t("questionnaire")}
             className="mt-4"
           />
         </TabsContent>
@@ -1556,15 +1556,15 @@ function QuestionEditor({
         <CollapsibleTrigger className="flex-1 flex items-center">
           <div className="flex-1">
             <div className="font-semibold text-left">
-              {index + 1}. {text || "Untitled Question"}
+              {index + 1}. {text || t("untitled_question")}
             </div>
             <div className="flex gap-2 mt-1">
               <Badge variant="secondary">{type}</Badge>
-              {required && <Badge variant="secondary">Required</Badge>}
-              {repeats && <Badge variant="secondary">Repeatable</Badge>}
+              {required && <Badge variant="secondary">{t("required")}</Badge>}
+              {repeats && <Badge variant="secondary">{t("repeatable")}</Badge>}
               {type === "group" && questions && questions.length > 0 && (
                 <Badge variant="secondary">
-                  {questions.length} sub-questions
+                  {questions.length} {t("sub_questions")}
                 </Badge>
               )}
             </div>
@@ -1590,7 +1590,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronUp className="mr-2 h-4 w-4" />
-                Move Up
+                {t("move_up")}
               </DropdownMenuItem>
             )}
             {!isLast && (
@@ -1601,7 +1601,7 @@ function QuestionEditor({
                 }}
               >
                 <ChevronDown className="mr-2 h-4 w-4" />
-                Move Down
+                {t("move_down")}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
@@ -1613,7 +1613,7 @@ function QuestionEditor({
               className="text-destructive"
             >
               <CareIcon icon="l-trash-alt" className="mr-2 h-4 w-4" />
-              Delete
+              {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -1623,28 +1623,28 @@ function QuestionEditor({
         <div className="p-2 pt-0 space-y-4 mt-2">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>Question Text</Label>
+              <Label>{t("question_text")}</Label>
               <Input
                 value={text}
                 onChange={(e) => updateField("text", e.target.value)}
               />
             </div>
             <div className="flex-1">
-              <Label>Link ID</Label>
+              <Label>{t("link_id")}</Label>
               <Input
                 value={question.link_id}
                 onChange={(e) => updateField("link_id", e.target.value)}
-                placeholder="Unique identifier for this question"
+                placeholder={t("unique_identifier_question")}
               />
             </div>
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>{t("description")}</Label>
             <Textarea
               value={question.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Additional context or instructions for this question"
+              placeholder={t("additional_context_instructions_question")}
               className="h-20"
             />
           </div>
@@ -1652,7 +1652,7 @@ function QuestionEditor({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Type</Label>
+                <Label>{t("type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(val: QuestionType) => {
@@ -1664,7 +1664,7 @@ function QuestionEditor({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select question type" />
+                    <SelectValue placeholder={t("select_question_type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_QUESTION_TYPES.map((type) => (
@@ -1678,7 +1678,7 @@ function QuestionEditor({
 
               {type === "structured" && (
                 <div>
-                  <Label>Structured Type</Label>
+                  <Label>{t("structured_type")}</Label>
                   <Select
                     value={structured_type ?? "allergy_intolerance"}
                     onValueChange={(val: StructuredQuestionType) =>
@@ -1686,7 +1686,7 @@ function QuestionEditor({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select structured type" />
+                      <SelectValue placeholder={t("select_structured_type")} />
                     </SelectTrigger>
                     <SelectContent>
                       {STRUCTURED_QUESTION_TYPES.map((type) => (
@@ -1710,10 +1710,11 @@ function QuestionEditor({
 
           <div className="space-y-6">
             <div className="border rounded-lg bg-gray-100 p-4">
-              <h3 className="text-sm font-medium mb-2">Question Settings</h3>
+              <h3 className="text-sm font-medium mb-2">
+                {t("question_settings")}
+              </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Configure the basic behavior: mark as required, allow multiple
-                entries, or set as read only.
+                {t("configure_behavior_required_multiple_read_only")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1724,7 +1725,7 @@ function QuestionEditor({
                       id={`required-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`required-${getQuestionPath()}`}>
-                      Required
+                      {t("required")}
                     </Label>
                   </div>
 
@@ -1735,7 +1736,7 @@ function QuestionEditor({
                       id={`repeats-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`repeats-${getQuestionPath()}`}>
-                      Repeatable
+                      {t("repeatable")}
                     </Label>
                   </div>
 
@@ -1746,7 +1747,7 @@ function QuestionEditor({
                       id={`read_only-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`read_only-${getQuestionPath()}`}>
-                      Read Only
+                      {t("read_only")}
                     </Label>
                   </div>
                 </div>
@@ -1755,11 +1756,10 @@ function QuestionEditor({
 
             <div className="border rounded-lg bg-gray-100 p-4">
               <h3 className="text-sm font-medium mb-2">
-                Data Collection Details
+                {t("data_collection_details")}
               </h3>
               <p className="text-sm text-gray-500 mb-4">
-                Specify key collection info: time, performer, body site, and
-                method.
+                {t("specify_collection_info_time_performer_site_method")}
               </p>
               <div className="">
                 <div className="flex flex-wrap gap-4">
@@ -1772,7 +1772,7 @@ function QuestionEditor({
                       id={`collect_time-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_time-${getQuestionPath()}`}>
-                      Collect Time
+                      {t("collect_time")}
                     </Label>
                   </div>
 
@@ -1785,7 +1785,7 @@ function QuestionEditor({
                       id={`collect_performer-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_performer-${getQuestionPath()}`}>
-                      Collect Performer
+                      {t("collect_performer")}
                     </Label>
                   </div>
 
@@ -1798,7 +1798,7 @@ function QuestionEditor({
                       id={`collect_body_site-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_body_site-${getQuestionPath()}`}>
-                      Collect Body Site
+                      {t("collect_body_site")}
                     </Label>
                   </div>
 
@@ -1811,7 +1811,7 @@ function QuestionEditor({
                       id={`collect_method-${getQuestionPath()}`}
                     />
                     <Label htmlFor={`collect_method-${getQuestionPath()}`}>
-                      Collect Method
+                      {t("collect_method")}
                     </Label>
                   </div>
                 </div>
@@ -1823,11 +1823,10 @@ function QuestionEditor({
             <div className="space-y-4">
               <div className="border rounded-lg bg-gray-100 p-4">
                 <h3 className="text-sm font-medium mb-2">
-                  Group Layout Options
+                  {t("group_layout_options")}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
-                  Choose the layout style that best fits your sub-questions from
-                  the available options.
+                  {t("choose_layout_style_fits_questions_options")}
                 </p>
                 <RadioGroup
                   value={
@@ -1865,10 +1864,10 @@ function QuestionEditor({
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <div>
                     <CardTitle className="text-base font-medium">
-                      Answer Options
+                      {t("answer_options")}
                     </CardTitle>
                     <p className="text-sm text-gray-500">
-                      Define possible answers for this question
+                      {t("define_possible_answers_question")}
                     </p>
                   </div>
                   <Select
@@ -1965,7 +1964,7 @@ function QuestionEditor({
                       }}
                     >
                       <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                      Add Option
+                      {t("add_option")}
                     </Button>
                   </CardContent>
                 ) : (
@@ -2001,9 +2000,9 @@ function QuestionEditor({
             <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-gray-950 font-semibold">
-                  {question.questions?.length || 0} Sub-Question
-                  {question.questions?.length !== 1 ? "s " : " "}
-                  (for the "{text}" Group)
+                  {question.questions?.length || 0} {t("sub_question")}
+                  {question.questions?.length !== 1 ? t("s") : " "}
+                  {t("for_group", { text })}
                 </Label>
                 <Button
                   variant="ghost"
@@ -2027,7 +2026,7 @@ function QuestionEditor({
                   }}
                 >
                   <CareIcon icon="l-plus" className="h-4 w-4" />
-                  Add Sub-Question
+                  {t("add_subquestion")}
                 </Button>
               </div>
               <div className="space-y-4">
@@ -2088,11 +2087,11 @@ function QuestionEditor({
           )}
 
           <div className="space-y-4">
-            <Label>Enable When Conditions</Label>
+            <Label>{t("enable_when_conditions")}</Label>
             <div className="space-y-2">
               {(question.enable_when || []).length > 0 && (
                 <div>
-                  <Label className="text-xs">Enable Behavior</Label>
+                  <Label className="text-xs">{t("enable_behavior")}</Label>
                   <Select
                     value={question.enable_behavior ?? "all"}
                     onValueChange={(val: "all" | "any") =>
@@ -2104,10 +2103,10 @@ function QuestionEditor({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">
-                        All conditions must be met
+                        {t("all_condition_met")}
                       </SelectItem>
                       <SelectItem value="any">
-                        Any condition must be met
+                        {t("any_condition_met")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -2310,7 +2309,7 @@ function QuestionEditor({
                 }}
               >
                 <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
-                Add Condition
+                {t("add_condition")}
               </Button>
             </div>
           </div>
