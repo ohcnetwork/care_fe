@@ -257,7 +257,7 @@ export default function LinkDepartmentsSheet({
                     </Button>
                   </div>
                 ))}
-                {currentOrganizations.length == 0 && (
+                {currentOrganizations.length === 0 && (
                   <p className="text-sm text-gray-500">
                     {t("no_organizations_added_yet")}
                   </p>
