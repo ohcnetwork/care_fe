@@ -40,7 +40,7 @@ export default function EncounterQuestionnaire({
   });
   return (
     <Page title={t("questionnaire_one")}>
-      <div className="flex flex-col space-y-4 mt-4">
+      <div className="flex flex-col space-y-4 mt-4 overflow-y-auto">
         {encounter && (
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
