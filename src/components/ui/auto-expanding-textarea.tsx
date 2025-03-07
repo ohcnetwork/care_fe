@@ -1,5 +1,9 @@
 import { forwardRef, useEffect, useRef } from "react";
 
+import { cn } from "@/lib/utils";
+
+import { Textarea } from "./textarea";
+
 interface AutoExpandingTextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
@@ -7,10 +11,11 @@ interface AutoExpandingTextareaProps
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
 }
+
 const AutoExpandingTextarea = forwardRef<
   HTMLTextAreaElement,
   AutoExpandingTextareaProps
->(({ value, onChange, onKeyDown, placeholder, ...rest }) => {
+>(({ value, onChange, onKeyDown, placeholder, className, ...rest }, _ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -21,16 +26,14 @@ const AutoExpandingTextarea = forwardRef<
   }, [value]);
 
   return (
-    <textarea
+    <Textarea
       ref={textareaRef}
       value={value}
       onChange={onChange}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       {...rest}
-      rows={1}
-      style={{ overflow: "hidden", resize: "none" }}
-      className="flex-1 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+      className={cn("min-h-[40px] max-h-[200px] resize-none", className)}
     />
   );
 });
