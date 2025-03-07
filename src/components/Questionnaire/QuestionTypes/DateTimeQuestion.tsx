@@ -92,7 +92,7 @@ export function DateTimeQuestion({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex sm:gap-2 flex-wrap">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -119,7 +119,7 @@ export function DateTimeQuestion({
       </Popover>
       <Input
         type="time"
-        className="w-[150px]"
+        className="sm:w-[150px] border-t-0 sm:border-t"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

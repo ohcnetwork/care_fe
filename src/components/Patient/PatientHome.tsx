@@ -5,20 +5,12 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import {
-  facilityPatientTabs,
-  patientTabs,
-} from "@/components/Patient/PatientDetailsTab";
+import { patientTabs as tabs } from "@/components/Patient/PatientDetailsTab";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -29,7 +21,7 @@ import { Patient } from "@/types/emr/newPatient";
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
-  page: (typeof patientTabs | typeof facilityPatientTabs)[0]["route"];
+  page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
 
@@ -48,8 +40,6 @@ export const PatientHome = (props: {
   if (isLoading) {
     return <Loading />;
   }
-
-  const tabs = facilityId ? facilityPatientTabs : patientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
@@ -74,7 +64,7 @@ export const PatientHome = (props: {
         </>
       }
     >
-      <div className="mt-3" data-testid="patient-dashboard">
+      <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
             <div>
@@ -198,18 +188,11 @@ export const PatientHome = (props: {
 
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.modified_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.modified_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.modified_date)}
+                      >
+                        <span>{relativeTime(patientData.modified_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
@@ -226,18 +209,11 @@ export const PatientHome = (props: {
                   </div>
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.created_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.created_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.created_date)}
+                      >
+                        <span>{relativeTime(patientData.created_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
