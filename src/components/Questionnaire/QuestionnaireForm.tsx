@@ -521,44 +521,6 @@ export function QuestionnaireForm({
 
         if (q.required) {
           // Handle appointment validation
-          if (q.type === "structured") {
-            const response = form.responses.find((r) => r.question_id === q.id);
-
-            switch (q.structured_type) {
-              case "appointment": {
-                const appointmentData =
-                  (response?.values?.[0]
-                    ?.value as CreateAppointmentQuestion[]) || [];
-
-                const appointmentErrors = validateAppointmentQuestion(
-                  appointmentData[0],
-                  q.id,
-                );
-                errors.push(...appointmentErrors);
-                if (appointmentErrors.length > 0) {
-                  firstErrorId = firstErrorId ? firstErrorId : q.id;
-                }
-                break;
-              }
-              case "medication_statement": {
-                const medicationData =
-                  (response?.values?.[0]
-                    ?.value as MedicationStatementRequest[]) || [];
-
-                const medicationErrors = validateMedicationStatementQuestion(
-                  medicationData,
-                  q.id,
-                );
-                errors.push(...medicationErrors);
-                if (medicationErrors.length > 0) {
-                  firstErrorId = firstErrorId ? firstErrorId : q.id;
-                }
-                break;
-              }
-              default:
-                break;
-            }
-          }
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
             (v) =>
@@ -576,6 +538,45 @@ export function QuestionnaireForm({
               msg: t("field_required"),
             });
             firstErrorId = firstErrorId ? firstErrorId : q.id;
+          }
+        }
+
+        if (q.type === "structured") {
+          const response = form.responses.find((r) => r.question_id === q.id);
+
+          switch (q.structured_type) {
+            case "appointment": {
+              const appointmentData =
+                (response?.values?.[0]?.value as CreateAppointmentQuestion[]) ||
+                [];
+
+              const appointmentErrors = validateAppointmentQuestion(
+                appointmentData[0],
+                q.id,
+              );
+              errors.push(...appointmentErrors);
+              if (appointmentErrors.length > 0) {
+                firstErrorId = firstErrorId ? firstErrorId : q.id;
+              }
+              break;
+            }
+            case "medication_statement": {
+              const medicationData =
+                (response?.values?.[0]
+                  ?.value as MedicationStatementRequest[]) || [];
+
+              const medicationErrors = validateMedicationStatementQuestion(
+                medicationData,
+                q.id,
+              );
+              errors.push(...medicationErrors);
+              if (medicationErrors.length > 0) {
+                firstErrorId = firstErrorId ? firstErrorId : q.id;
+              }
+              break;
+            }
+            default:
+              break;
           }
         }
       };
