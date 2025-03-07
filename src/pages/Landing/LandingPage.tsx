@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -42,6 +42,10 @@ export function LandingPage() {
   const filteredOrganizations = organizations.filter((organization) =>
     organization.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const orgType = t(
+    `SYSTEM__govt_org_type__${organizations[0]?.metadata?.govt_org_type || "district"}`,
+  ).toLowerCase();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -124,18 +128,20 @@ export function LandingPage() {
 
         {/* Search Section */}
         <div className="w-full max-w-[620px] mx-auto px-4 sm:px-6 py-4 bg-gray-100 rounded-md">
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 space-x-1">
             <span className="text-sm md:text-base block sm:inline">
-              {t("search_facilities")}
-            </span>
-            <span className="lg:ml-1 font-bold text-sm md:text-base block sm:inline">
-              {t("search_facilities_note")}
+              <Trans
+                i18nKey="search_facilities"
+                components={{
+                  strong: <strong />,
+                }}
+              />
             </span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
-            <div className="relative w-full" data-search-container>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="relative w-full sm:w-9/12" data-search-container>
               <div className="rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
-                <div className="flex items-center px-4 h-10 sm:h-11 md:h-12 bg-white rounded-lg">
+                <div className="flex items-center px-2 bg-white rounded-lg">
                   <CareIcon icon="l-search" className="h-5 w-5 text-gray-400" />
                   <input
                     ref={inputRef}
@@ -147,23 +153,26 @@ export function LandingPage() {
                     }
                     onChange={handleSearchChange}
                     onClick={handleInputClick}
-                    placeholder={t("search_placeholder")}
+                    placeholder={t(`landing_search_placeholder`, {
+                      orgType,
+                    })}
                     className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-500 cursor-pointer shadow-none ring-0"
                   />
                   {(searchQuery || selectedOrganization) && (
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSearchQuery("");
                         setSelectedOrganization(null);
                       }}
-                      className="p-1 hover:bg-gray-100 rounded-full"
+                      className="p-1 hover:bg-transparent"
                     >
                       <CareIcon
                         icon="l-times"
                         className="h-4 w-4 text-gray-400"
                       />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -194,11 +203,12 @@ export function LandingPage() {
             </div>
             {/* Search Button */}
             <Button
-              variant="primary"
-              className="w-full sm:w-auto px-4 md:px-6 h-10 sm:h-11"
+              variant="primary_gradient"
+              className="w-full sm:w-3/12"
               onClick={handleSearch}
               disabled={!selectedOrganization}
             >
+              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
               {t("search_button")}
             </Button>
           </div>
@@ -216,62 +226,60 @@ export function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
             <div
-              className="w-full min-h-[130px] md:min-h-[150px] flex flex-col items-center justify-center text-center p-3 md:p-4 rounded-xl hover:shadow-md transition-all relative overflow-hidden bg-white border-gray-100"
+              className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow bg-white hover:shadow-md transition-all"
               style={{
                 backgroundImage: 'url("/images/staff_background.png")',
                 backgroundSize: "auto",
-                backgroundPosition: "center",
+                backgroundPosition: "0% 10%",
                 backgroundRepeat: "no-repeat",
               }}
             >
-              <div className="w-full max-w-[40px] md:max-w-[48px] aspect-square mb-3 bg-green-100 rounded-full flex items-center justify-center border-2 border-white">
-                <img
-                  src="/images/health_worker.svg"
-                  alt="Staff Login"
-                  className="max-w-full max-h-full"
+              <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow">
+                <CareIcon
+                  icon="d-health-worker"
+                  className="w-8 h-8 text-green-700"
                 />
               </div>
-
-              {/* Staff Login Button */}
-              <Button
-                variant="outline"
-                className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                onClick={() => navigate(`/login?mode=staff`)}
-              >
-                {t("staff_login")}
-              </Button>
-              <p className="text-xs mt-2 w-full">
-                {t("staff_login_description")}
-              </p>
+              <div className="flex flex-col items-center">
+                <Button
+                  variant="outline"
+                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                  onClick={() => navigate(`/login?mode=staff`)}
+                >
+                  {t("staff_login")}
+                </Button>
+                <p className="text-xs mt-2 w-full text-center">
+                  {t("staff_login_description")}
+                </p>
+              </div>
             </div>
-
             <div
-              className="w-full min-h-[130px] md:min-h-[150px] flex flex-col items-center justify-center text-center p-3 md:p-4 rounded-xl border hover:shadow-md transition-all relative overflow-hidden bg-white"
+              className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow bg-white hover:shadow-md transition-all"
               style={{
-                backgroundImage: 'url("/images/paitent_background.png")',
+                backgroundImage: 'url("/images/patient_background.png")',
                 backgroundSize: "auto",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
               }}
             >
-              <div className="w-full max-w-[40px] md:max-w-[48px] aspect-square mb-3 border-2 border-white bg-blue-100 rounded-full flex items-center justify-center">
-                <img
-                  src="/images/patient_icon.svg"
-                  alt="Patient Login"
-                  className="max-w-full max-h-full"
+              <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow">
+                <CareIcon
+                  icon="d-patient"
+                  className="w-8 h-8 text-indigo-700"
                 />
               </div>
-              {/* Patient Login Button */}
-              <Button
-                variant="outline"
-                className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-600 font-semibold transition-colors"
-                onClick={() => navigate(`/login?mode=patient`)}
-              >
-                {t("patient_login")}
-              </Button>
-              <p className="text-xs mt-2 w-full">
-                {t("patient_login_description")}
-              </p>
+              <div className="flex flex-col items-center">
+                <Button
+                  variant="outline"
+                  className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                  onClick={() => navigate(`/login?mode=patient`)}
+                >
+                  {t("patient_login")}
+                </Button>
+                <p className="text-xs mt-2 w-full text-center">
+                  {t("patient_login_description")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
