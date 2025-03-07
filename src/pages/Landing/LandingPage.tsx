@@ -230,7 +230,7 @@ export function LandingPage() {
               style={{
                 backgroundImage: 'url("/images/staff_background.png")',
                 backgroundSize: "auto",
-                backgroundPosition: "0% 10%",
+                backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
               }}
             >
