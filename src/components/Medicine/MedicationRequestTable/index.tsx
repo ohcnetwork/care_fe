@@ -52,7 +52,6 @@ export const EmptyState = ({
 
 interface Props {
   readonly?: boolean;
-  facilityId: string;
   patientId: string;
   encounterId: string;
 }
@@ -60,7 +59,6 @@ interface Props {
 export default function MedicationRequestTable({
   patientId,
   encounterId,
-  facilityId,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
@@ -161,9 +159,7 @@ export default function MedicationRequestTable({
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`}
-                    >
+                    <Link href={`questionnaire/medication_request`}>
                       <PencilIcon className="mr-2 h-4 w-4" />
                       {t("edit")}
                     </Link>
@@ -174,9 +170,7 @@ export default function MedicationRequestTable({
                     size="sm"
                     className="text-gray-950 hover:text-gray-700 h-9"
                   >
-                    <Link
-                      href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/prescriptions/print`}
-                    >
+                    <Link href={`prescriptions/print`}>
                       <CareIcon icon="l-print" className="mr-2" />
                       {t("print")}
                     </Link>
