@@ -23,7 +23,6 @@ import { Patient } from "@/types/emr/newPatient";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
-  facilityId: string;
   encounter: Encounter;
   patient: Patient;
   subPage?: string;
@@ -42,15 +41,15 @@ const defaultTabs = {
 } as Record<string, React.FC<EncounterTabProps>>;
 
 interface Props {
-  facilityId: string;
   patientId: string;
   encounterId: string;
+  facilityId?: string;
   tab?: string;
   subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { facilityId, encounterId, patientId, subPage } = props;
+  const { encounterId, patientId, facilityId, subPage } = props;
   const { t } = useTranslation();
   const pluginTabs = useCareAppEncounterTabs();
 
@@ -63,9 +62,13 @@ export const EncounterShow = (props: Props) => {
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId },
-      queryParams: {
-        facility: facilityId,
-      },
+      queryParams: facilityId
+        ? {
+            facility: facilityId,
+          }
+        : {
+            patient: patientId,
+          },
     }),
     enabled: !!encounterId,
   });
@@ -78,7 +81,6 @@ export const EncounterShow = (props: Props) => {
     encounter: encounterData,
     patient: encounterData.patient,
     subPage: subPage,
-    facilityId,
   };
 
   if (!props.tab) {
@@ -170,7 +172,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterData.id}/${tab}`}
+                    href={`${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
