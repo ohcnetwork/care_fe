@@ -587,15 +587,12 @@ export function QuestionnaireForm({
     setQuestionnaireForms(formsWithValidation);
 
     if (firstErrorId) {
-      const element = document.querySelector(
-        `[data-question-id="${firstErrorId}"]`,
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    if (formsWithValidation.some((form) => form.errors.length > 0)) {
+      setTimeout(() => {
+        const element = document.querySelector(
+          `[data-question-id="${firstErrorId}"]`,
+        );
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 

@@ -140,10 +140,6 @@ export function MedicationStatementQuestion({
     null,
   );
 
-  useEffect(() => {
-    console.log("Medication Statement Errors", errors);
-  }, [errors]);
-
   const medications =
     (questionnaireResponse.values?.[0]
       ?.value as MedicationStatementRequest[]) || [];
