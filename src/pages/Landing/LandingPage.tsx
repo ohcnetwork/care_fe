@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -21,6 +22,7 @@ import organizationApi from "@/types/organization/organizationApi";
 const { customLogo, stateLogo, mainLogo } = careConfig;
 
 export function LandingPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] =
@@ -124,10 +126,10 @@ export function LandingPage() {
         <div className="w-full max-w-[620px] mx-auto px-4 sm:px-6 py-4 bg-gray-100 rounded-md">
           <div className="text-center mb-4">
             <span className="text-sm md:text-base block sm:inline">
-              Search for available facilities to book an appointment
+              {t("search_facilities")}
             </span>
             <span className="lg:ml-1 font-bold text-sm md:text-base block sm:inline">
-              (for new patients)
+              {t("search_facilities_note")}
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
@@ -170,9 +172,7 @@ export function LandingPage() {
                   <Command>
                     <CommandGroup className="overflow-y-auto max-h-60 md:max-h-80">
                       {filteredOrganizations.length === 0 ? (
-                        <CommandEmpty>
-                          Unable to find anything based on your search.
-                        </CommandEmpty>
+                        <CommandEmpty>{t("search_no_results")}</CommandEmpty>
                       ) : (
                         filteredOrganizations.map((organization) => (
                           <CommandItem
@@ -199,7 +199,7 @@ export function LandingPage() {
               onClick={handleSearch}
               disabled={!selectedOrganization}
             >
-              Search Facilities
+              {t("search_button")}
             </Button>
           </div>
         </div>
@@ -212,7 +212,7 @@ export function LandingPage() {
         {/* Login Section */}
         <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
           <div className="text-sm font-medium mb-4 md:mb-6 text-center">
-            Already registered? Log in to your account.
+            {t("login_already_registered")}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
             <div
@@ -238,10 +238,10 @@ export function LandingPage() {
                 className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
                 onClick={() => navigate(`/login?mode=staff`)}
               >
-                Login in as Staff
+                {t("staff_login")}
               </Button>
               <p className="text-xs mt-2 w-full">
-                For hospital staff: doctors, nurses, and administrators.
+                {t("staff_login_description")}
               </p>
             </div>
 
@@ -267,10 +267,10 @@ export function LandingPage() {
                 className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-600 font-semibold transition-colors"
                 onClick={() => navigate(`/login?mode=patient`)}
               >
-                Login in as Patient
+                {t("patient_login")}
               </Button>
               <p className="text-xs mt-2 w-full">
-                For patients to book and manage their appointments.
+                {t("patient_login_description")}
               </p>
             </div>
           </div>
