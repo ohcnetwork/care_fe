@@ -187,9 +187,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                         `/facility/${props.encounter?.facility.id}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
                       );
                     } else {
-                      navigate(
-                        `/facility/${props.encounter?.facility.id}/patient/${props.patientId}/drawings/${drawing.id}`,
-                      );
+                      navigate(`./drawings/${drawing.id}`);
                     }
                   }}
                 >

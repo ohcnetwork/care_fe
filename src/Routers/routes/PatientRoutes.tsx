@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import { PatientDrawingTab } from "@/components/Patient/PatientDetailsTab/PatientDrawingsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
@@ -70,14 +71,8 @@ const PatientRoutes: AppRoutes = {
       />
     </Suspense>
   ),
-  "/patient/:patientId/drawings/:drawingId": ({ patientId, drawingId }) => (
-    <Suspense fallback={<Loading />}>
-      <ExcalidrawEditor
-        associatingId={patientId}
-        associating_type="patient"
-        drawingId={drawingId}
-      />
-    </Suspense>
+  "organization/:id/patient/:patientId/drawings": ({ patientId }) => (
+    <PatientDrawingTab patientId={patientId} />
   ),
 };
 

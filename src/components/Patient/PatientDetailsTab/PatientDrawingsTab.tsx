@@ -1,7 +1,9 @@
 import { DrawingTab } from "@/components/Common/Drawings/DrawingTab";
 
-import { PatientProps } from ".";
+interface PatientDrawingTabProps {
+  patientId: string;
+}
 
-export const PatientDrawingTab = (props: PatientProps) => {
+export const PatientDrawingTab = (props: PatientDrawingTabProps) => {
   return <DrawingTab type="patient" patientId={props.patientId} />;
 };
