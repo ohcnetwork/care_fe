@@ -18,6 +18,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import {
   DetailedValidationError,
@@ -35,6 +36,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
@@ -568,6 +570,21 @@ export function QuestionnaireForm({
               const medicationErrors = validateMedicationStatementQuestion(
                 medicationData,
                 q.id,
+              );
+              errors.push(...medicationErrors);
+              if (medicationErrors.length > 0) {
+                firstErrorId = firstErrorId ? firstErrorId : q.id;
+              }
+              break;
+            }
+            case "medication_request": {
+              const medicationData =
+                (response?.values?.[0]?.value as MedicationRequest[]) || [];
+
+              const medicationErrors = validateMedicationRequestQuestion(
+                medicationData,
+                q.id,
+                t,
               );
               errors.push(...medicationErrors);
               if (medicationErrors.length > 0) {

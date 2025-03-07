@@ -2114,6 +2114,7 @@
   "scheduled_for": "Schedule for:",
   "scribe__reviewing_field": "Reviewing field {{currentField}} / {{totalFields}}",
   "scribe_error": "Could not autofill fields",
+  "scroll_to_question": "Scroll to question",
   "search": "Search",
   "search_by": "Search by",
   "search_by_department_team_name": "Search by department/team name",

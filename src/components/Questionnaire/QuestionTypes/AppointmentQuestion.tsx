@@ -59,7 +59,7 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
     validate: (value: string) => !!value?.trim(),
   },
   SLOT: {
-    key: "select_slot",
+    key: "slot_id",
     required: true,
   },
 } as const;
@@ -151,9 +151,14 @@ export function AppointmentQuestion({
         <Select
           disabled={resourcesQuery.isLoading || disabled}
           value={resource?.id}
-          onValueChange={(value) =>
-            setResource(resourcesQuery.data?.users.find((r) => r.id === value))
-          }
+          onValueChange={(selectedValue) => {
+            setResource(
+              resourcesQuery.data?.users.find((r) => r.id === selectedValue),
+            );
+            if (value.slot_id) {
+              handleUpdate({ slot_id: undefined });
+            }
+          }}
         >
           <SelectTrigger
             className={cn(
@@ -192,14 +197,27 @@ export function AppointmentQuestion({
                 "border border-red-500",
             )}
           >
-            <DatePicker date={selectedDate} onChange={setSelectedDate} />
+            <DatePicker
+              date={selectedDate}
+              onChange={(date) => {
+                setSelectedDate(date);
+                if (value.slot_id) {
+                  handleUpdate({ slot_id: undefined });
+                }
+              }}
+            />
           </div>
         </div>
 
         <div className="flex-1">
           <Label className="block mb-2">{t("select_time")}</Label>
           {showNoSlotsMessage ? (
-            <div className="rounded-md border border-input px-3 py-2 text-sm text-gray-500">
+            <div
+              className={cn(
+                "rounded-md border border-input px-3 py-2 text-sm text-gray-500",
+                hasError(APPOINTMENT_FIELDS.SLOT.key) && "border-red-500",
+              )}
+            >
               {t("no_slots_available")}
             </div>
           ) : (
