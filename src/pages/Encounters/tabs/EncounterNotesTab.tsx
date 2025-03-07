@@ -16,7 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link, usePathParams } from "raviger";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -44,12 +44,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
@@ -82,16 +77,9 @@ const threadTemplates = [
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
-      </TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs text-sm">{content}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
+  <TooltipComponent content={content}>
+    <Info className="h-4 w-4 text-gray-500 hover:text-primary cursor-help" />
+  </TooltipComponent>
 );
 
 // Thread item component
@@ -125,80 +113,84 @@ const ThreadItem = ({
 );
 
 // Message item component
-const MessageItem = ({ message }: { message: Message }) => {
-  const authUser = useAuthUser();
-  const { facilityId } = usePathParams("/facility/:facilityId/*")!;
-  const isCurrentUser = authUser?.external_id === message.created_by.id;
 
-  return (
-    <div
-      className={cn(
-        "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
-        isCurrentUser ? "justify-end" : "justify-start",
-      )}
-    >
+const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
+  ({ message }, ref) => {
+    const authUser = useAuthUser();
+    const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+    const isCurrentUser = authUser?.external_id === message.created_by.id;
+
+    return (
       <div
         className={cn(
-          "flex max-w-[80%] items-start gap-3",
-          isCurrentUser ? "flex-row-reverse" : "flex-row",
+          "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
+          isCurrentUser ? "justify-end" : "justify-start",
         )}
+        ref={ref}
       >
-        <TooltipProvider>
-          <Tooltip>
-            <Link
-              href={`/facility/${facilityId}/users/${message.created_by.username}`}
-            >
-              <TooltipTrigger asChild>
-                <div className="flex pr-2">
-                  <Avatar
-                    name={message.created_by.username}
-                    imageUrl={message.created_by.profile_picture_url}
-                    className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
-                  />
-                </div>
-              </TooltipTrigger>
-            </Link>
-            <TooltipContent>
-              <p>{message.created_by.username}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
         <div
           className={cn(
-            "flex flex-col",
-            isCurrentUser ? "items-end" : "items-start",
+            "flex max-w-[80%] items-start gap-3",
+            isCurrentUser ? "flex-row-reverse" : "flex-row",
           )}
         >
-          <p className="text-xs space-x-2 mb-1">
-            <span className="text-gray-700 font-medium">
-              {message.created_by.username}
-            </span>
-            <time
-              className="text-gray-500"
-              dateTime={message.created_date}
-              title={formatDateTime(message.created_date)}
+          <TooltipComponent content={message.created_by?.username}>
+            <Link
+              href={
+                facilityId
+                  ? `/facility/${facilityId}/users/${message.created_by?.username}`
+                  : `/users/${message.created_by?.username}`
+              }
             >
-              {formatRelative(message.created_date, new Date())}
-            </time>
-          </p>
+              <span className="flex pr-2">
+                <Avatar
+                  name={message.created_by?.username}
+                  imageUrl={message.created_by?.profile_picture_url}
+                  className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
+                />
+              </span>
+            </Link>
+          </TooltipComponent>
           <div
             className={cn(
-              "p-3 rounded-lg break-words",
+              "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
               isCurrentUser
                 ? "bg-white text-black rounded-tr-none border border-gray-200"
                 : "bg-gray-100 rounded-tl-none border border-gray-200",
             )}
           >
-            {message.message && (
-              <Markdown content={message.message} className="text-sm" />
-            )}
+            <p className="text-xs space-x-2 mb-1">
+              <span className="text-gray-700 font-medium">
+                {message.created_by.username}
+              </span>
+              <time
+                className="text-gray-500"
+                dateTime={message.created_date}
+                title={formatDateTime(message.created_date)}
+              >
+                {formatRelative(message.created_date, new Date())}
+              </time>
+            </p>
+            <div
+              className={cn(
+                "p-3 rounded-lg break-words",
+                isCurrentUser
+                  ? "bg-white text-black rounded-tr-none border border-gray-200"
+                  : "bg-gray-100 rounded-tl-none border border-gray-200",
+              )}
+            >
+              {message.message && (
+                <Markdown content={message.message} className="text-sm" />
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
+
+MessageItem.displayName = "MessageItem";
 
 // New thread dialog component
 const NewThreadDialog = ({
@@ -326,6 +318,8 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const [showNewThreadDialog, setShowNewThreadDialog] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // points to the first message fetched in the last page or the newly created message
+  const recentMessageRef = useRef<HTMLDivElement | null>(null);
   const { ref, inView } = useInView();
   const [commentAdded, setCommentAdded] = useState(false);
 
@@ -342,7 +336,6 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
   const {
     data: messagesData,
     isLoading: messagesLoading,
-    isFetching: isFetchingMessages,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -400,15 +393,6 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     },
   });
 
-  // handle scrolling to last message when new message is added
-
-  useEffect(() => {
-    if (commentAdded && !isFetchingMessages) {
-      messagesEndRef.current?.scrollIntoView();
-      setCommentAdded(false);
-    }
-  }, [commentAdded, isFetchingMessages]);
-
   const [threads, setThreads] = useState<string[]>([...threadTemplates]);
 
   // Auto-select first thread
@@ -433,17 +417,17 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
 
   useEffect(() => {
     if (inView && hasNextPage) {
+      setCommentAdded(false);
       fetchNextPage();
-      messagesEndRef.current?.scrollIntoView();
     }
-  }, [
-    inView,
-    hasNextPage,
-    fetchNextPage,
-    messagesData,
-    isFetchingNextPage,
-    messagesLoading,
-  ]);
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    recentMessageRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
     if (title.trim()) {
@@ -466,6 +450,11 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
   };
+
+  const recentMessage = useMemo(() => {
+    if (commentAdded) return messagesData?.pages[0]?.results[0];
+    return messagesData?.pages[messagesData.pages.length - 1]?.results[0];
+  }, [messagesData]);
 
   if (threadsLoading) {
     return <Loading />;
@@ -593,27 +582,19 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       ?.title
                   }
                 </h2>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                      <Users className="h-4 w-4" />
-                      <span>
-                        {new Set(messages.map((m) => m.created_by.id)).size}
-                      </span>
-                      <MessageSquare className="h-4 w-4 ml-3" />
-                      <span>{totalMessages}</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {t("participants")}:{" "}
+                <TooltipComponent
+                  content={`${t("participants")}: ${new Set(messages.map((m) => m.created_by.id)).size}
+                  ${t("messages")}: ${totalMessages}`}
+                >
+                  <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <Users className="h-4 w-4" />
+                    <span>
                       {new Set(messages.map((m) => m.created_by.id)).size}
-                    </p>
-                    <p>
-                      {t("messages")}: {totalMessages}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
+                    </span>
+                    <MessageSquare className="h-4 w-4 ml-3" />
+                    <span>{totalMessages}</span>
+                  </div>
+                </TooltipComponent>
               </div>
             ) : (
               <div className="text-center text-sm font-medium text-gray-500">
@@ -632,8 +613,8 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               ) : (
                 <>
                   {/* Messages List */}
-                  <ScrollArea className="flex-1 px-4">
-                    <div className="flex flex-col-reverse py-4">
+                  <ScrollArea className="flex-1 px-4 h-full max-h-screen">
+                    <div className="flex flex-col-reverse h-full py-4">
                       <div ref={messagesEndRef} />
                       {messages.length === 0 ? (
                         <div className="text-center py-8">
@@ -647,7 +628,15 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                         </div>
                       ) : (
                         messages.map((message) => (
-                          <MessageItem key={message.id} message={message} />
+                          <MessageItem
+                            key={message.id}
+                            message={message}
+                            ref={
+                              message.id === recentMessage?.id
+                                ? recentMessageRef
+                                : undefined
+                            }
+                          />
                         ))
                       )}
                       {isFetchingNextPage ? (
