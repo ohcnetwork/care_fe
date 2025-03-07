@@ -552,12 +552,13 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                     </div>
 
                     <DateRangePicker
+                      key={`${qParams.date_from}-${qParams.date_to}`}
                       date={{
                         from: qParams.date_from
-                          ? new Date(qParams.date_from)
+                          ? dateQueryString(new Date(qParams.date_from))
                           : undefined,
                         to: qParams.date_to
-                          ? new Date(qParams.date_to)
+                          ? dateQueryString(new Date(qParams.date_to))
                           : undefined,
                       }}
                       onChange={(date) =>

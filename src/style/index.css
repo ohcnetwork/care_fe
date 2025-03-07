@@ -124,6 +124,9 @@ h6 {
     width: 10px;
     height: 8px;
 }
+::-webkit-calendar-picker-indicator{
+  margin-left: -20px;
+}
 
 ::-webkit-scrollbar-track {
     background: transparent;

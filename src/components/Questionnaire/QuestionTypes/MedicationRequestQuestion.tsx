@@ -821,12 +821,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <DateTimePicker
           value={
             medication.authored_on
-              ? new Date(medication.authored_on)
+              ? new Date(medication.authored_on).toISOString()
               : undefined
           }
           onChange={(date) => {
             if (!date) return;
-            onUpdate?.({ authored_on: date.toISOString() });
+            onUpdate?.({ authored_on: date.toString() });
           }}
           disabled={disabled || isReadOnly}
         />

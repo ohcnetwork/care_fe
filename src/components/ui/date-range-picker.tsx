@@ -1,26 +1,15 @@
-import { format } from "date-fns";
 import { t } from "i18next";
-import * as React from "react";
-import { DateRange } from "react-day-picker";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Input } from "./input";
+import { Label } from "./label";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-type DateRangePickerProps = Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  "onChange"
-> & {
-  date?: DateRange;
-  onChange?: (date?: DateRange) => void;
+type DateRangePickerProps = {
+  date?: { from?: string; to?: string };
+  onChange?: (date?: { from?: string; to?: string }) => void;
   className?: string;
 };
 
@@ -29,44 +18,49 @@ export function DateRangePicker({
   onChange,
   className,
 }: DateRangePickerProps) {
+  const [startDate, setStartDate] = useState(date?.from || "");
+  const [endDate, setEndDate] = useState(date?.to || "");
+
+  const handleDateChange = (key: "from" | "to", value: string) => {
+    if (key === "from") {
+      if (endDate && value > endDate) {
+        setEndDate(value);
+      }
+      setStartDate(value);
+      onChange?.({ from: value, to: endDate });
+    } else {
+      if (value < startDate) {
+        toast.error(t("end_date_must_be_after_start_date"));
+        return;
+      }
+      setEndDate(value);
+      onChange?.({ from: startDate, to: value });
+    }
+  };
+
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "justify-center text-left font-normal",
-              !date && "text-gray-500",
-            )}
-          >
-            <CareIcon icon="l-calender" className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>{t("pick_a_date")}</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={onChange}
-            numberOfMonths={2}
-          />
-        </PopoverContent>
-      </Popover>
+      <div className="flex items-center gap-2">
+        <Label className="text-gray-700 font-medium">{t("start_date")}</Label>
+        <Input
+          type="date"
+          value={startDate}
+          onChange={(e) => handleDateChange("from", e.target.value)}
+          className="border px-3 py-2 rounded-md"
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <Label className="text-gray-700 font-medium">{t("end_date")}</Label>
+        <Input
+          type="date"
+          value={endDate}
+          onChange={(e) => handleDateChange("to", e.target.value)}
+          className={cn(
+            "border px-3 py-2 rounded-md",
+            endDate && endDate < startDate ? "border-red-500" : "",
+          )}
+        />
+      </div>
     </div>
   );
 }

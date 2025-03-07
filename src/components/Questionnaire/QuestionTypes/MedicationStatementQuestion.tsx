@@ -42,6 +42,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
@@ -485,19 +486,20 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
           {t("medication_taken_between")}
         </Label>
         <DateRangePicker
+          key={`${medication.effective_period}`}
           date={{
             from: medication.effective_period?.start
-              ? new Date(medication.effective_period?.start)
+              ? dateQueryString(new Date(medication.effective_period?.start))
               : undefined,
             to: medication.effective_period?.end
-              ? new Date(medication.effective_period?.end)
+              ? dateQueryString(new Date(medication.effective_period?.end))
               : undefined,
           }}
           onChange={(date) =>
             onUpdate?.({
               effective_period: {
-                start: date?.from?.toISOString(),
-                end: date?.to?.toISOString(),
+                start: date?.from?.toString(),
+                end: date?.to?.toString(),
               },
             })
           }
