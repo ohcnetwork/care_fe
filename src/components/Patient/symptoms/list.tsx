@@ -163,7 +163,7 @@ const SymptomListLayout = ({
                 encounterId={encounterId}
                 facilityId={facilityId}
                 initialTab="symptoms"
-                encounter={encounter!}
+                encounter={encounter}
               />
             )}
           </div>

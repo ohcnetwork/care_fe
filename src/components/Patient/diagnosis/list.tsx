@@ -175,7 +175,7 @@ const DiagnosisListLayout = ({
                 encounterId={encounterId}
                 facilityId={facilityId}
                 initialTab="diagnoses"
-                encounter={encounter!}
+                encounter={encounter}
               />
             )}
           </div>

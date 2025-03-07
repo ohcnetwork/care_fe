@@ -326,7 +326,7 @@ const AllergyListLayout = ({
                 encounterId={encounterId}
                 facilityId={facilityId}
                 initialTab="allergies"
-                encounter={encounter!}
+                encounter={encounter}
               />
             )}
           </div>
