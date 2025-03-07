@@ -69,8 +69,14 @@ interface LoginProps {
 
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
-  const { reCaptchaSiteKey, urls, stateLogo, customLogo, customLogoAlt } =
-    careConfig;
+  const {
+    reCaptchaSiteKey,
+    urls,
+    stateLogo,
+    customLogo,
+    customLogoAlt,
+    resendOtpTimeout,
+  } = careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const initForm: any = {
     username: "",
@@ -93,6 +99,21 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
+  const [resendOtpCountdown, setResendOtpCountdown] =
+    useState(resendOtpTimeout);
+
+  // Timer Function for resend OTP
+  useEffect(() => {
+    if (resendOtpCountdown <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setResendOtpCountdown((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Remember the last login mode
   useEffect(() => {
@@ -272,6 +293,7 @@ const Login = (props: LoginProps) => {
 
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
+      setResendOtpCountdown(resendOtpTimeout);
     } else {
       verifyOtp({ phone_number: phone, otp });
     }
@@ -673,6 +695,28 @@ const Login = (props: LoginProps) => {
                           t("send_otp")
                         )}
                       </Button>
+                      {isOtpSent &&
+                        (resendOtpCountdown <= 0 ? (
+                          <div className="flex justify-center">
+                            <Button
+                              variant="link"
+                              type="button"
+                              className=" text-center cursor-pointer hover:underline inline-block "
+                              onClick={() => {
+                                sendOtp({ phone_number: phone });
+                                setResendOtpCountdown(resendOtpTimeout);
+                              }}
+                            >
+                              {t("resend_otp")}
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className=" text-gray-500 text-center mt-5 ">
+                            {t("resend_otp_timer", {
+                              time: resendOtpCountdown,
+                            })}
+                          </p>
+                        ))}
                     </form>
                   </TabsContent>
                 </Tabs>
