@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
@@ -80,8 +81,20 @@ const AppointmentRoutes = {
 
 export default function PatientRouter() {
   const pages = useRoutes(DashboardRoutes);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const appointmentPages = useRoutes(AppointmentRoutes);
+
+  // load the sidebar state from the cookie
+  useEffect(() => {
+    const cookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("sidebar:state"));
+    if (cookie) {
+      const value = cookie.split("=")[1];
+      setSidebarOpen(value === "true");
+    }
+  }, []);
 
   if (!pages) {
     if (appointmentPages) {
@@ -92,7 +105,7 @@ export default function PatientRouter() {
 
   return (
     <PatientUserProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"

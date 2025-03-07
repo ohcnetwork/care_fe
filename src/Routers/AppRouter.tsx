@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { Redirect, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -73,6 +74,7 @@ const AdminRouter: AppRoutes = {
 
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   let routes = Routes;
 
   useRedirect("/user", "/users");
@@ -94,8 +96,19 @@ export default function AppRouter() {
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
 
+  // load the sidebar state from the cookie
+  useEffect(() => {
+    const cookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("sidebar:state"));
+    if (cookie) {
+      const value = cookie.split("=")[1];
+      setSidebarOpen(value === "true");
+    }
+  }, []);
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <PermissionProvider
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
