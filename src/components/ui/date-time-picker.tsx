@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -26,11 +27,15 @@ export function DateTimePicker({
     onChange?.(newDateTime);
   };
 
+  const formattedDateTime = dateTime
+    ? format(new Date(dateTime), "yyyy-MM-dd'T'HH:mm")
+    : "";
+
   return (
     <div className={cn(className)}>
       <Input
         type="datetime-local"
-        value={dateTime}
+        value={formattedDateTime}
         disabled={disabled}
         onChange={handleChange}
       />
