@@ -22,7 +22,6 @@ import { DiagnosisTable } from "./DiagnosisTable";
 interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
-  facilityId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
@@ -32,7 +31,6 @@ interface DiagnosisListProps {
 export function DiagnosisList({
   patientId,
   encounterId,
-  facilityId,
   hideFullViewButton,
   encounter,
   className = "",
@@ -53,7 +51,6 @@ export function DiagnosisList({
   if (isLoading) {
     return (
       <DiagnosisListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
         className={className}
@@ -81,7 +78,6 @@ export function DiagnosisList({
   if (!filteredDiagnoses?.length) {
     return (
       <DiagnosisListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
         className={className}
@@ -97,7 +93,6 @@ export function DiagnosisList({
 
   return (
     <DiagnosisListLayout
-      facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
       className={className}
@@ -147,7 +142,6 @@ const DiagnosisListLayout = ({
   encounter,
   encounterId,
   patientId,
-  facilityId,
   readOnly = false,
 }: {
   children: ReactNode;
@@ -156,7 +150,6 @@ const DiagnosisListLayout = ({
   encounter?: Encounter;
   encounterId?: string;
   patientId: string;
-  facilityId?: string;
   readOnly?: boolean;
 }) => {
   return (
@@ -180,7 +173,6 @@ const DiagnosisListLayout = ({
               <FullViewDialog
                 patientId={patientId}
                 encounterId={encounterId}
-                facilityId={facilityId}
                 initialTab="diagnoses"
                 encounter={encounter}
               />

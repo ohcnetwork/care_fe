@@ -24,7 +24,6 @@ interface FullViewDialogProps {
 export function FullViewDialog({
   patientId,
   encounterId,
-  facilityId,
   initialTab = "symptoms",
   encounter,
 }: FullViewDialogProps) {
@@ -116,7 +115,6 @@ export function FullViewDialog({
                 <AllergyList
                   patientId={patientId}
                   encounterId={encounterId}
-                  facilityId={facilityId}
                   hideFullViewButton={true}
                 />
               </div>
@@ -127,7 +125,6 @@ export function FullViewDialog({
                 <SymptomsList
                   patientId={patientId}
                   encounterId={encounterId}
-                  facilityId={facilityId ?? ""}
                   hideFullViewButton={true}
                 />
               </div>
@@ -138,7 +135,6 @@ export function FullViewDialog({
                 <DiagnosisList
                   patientId={patientId}
                   encounterId={encounterId}
-                  facilityId={facilityId}
                   hideFullViewButton={true}
                 />
               </div>

@@ -21,7 +21,6 @@ import { SymptomTable } from "./SymptomTable";
 
 interface SymptomsListProps {
   patientId: string;
-  facilityId?: string;
   encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
@@ -31,7 +30,6 @@ interface SymptomsListProps {
 
 export function SymptomsList({
   patientId,
-  facilityId,
   encounterId,
   className,
   hideFullViewButton,
@@ -55,7 +53,6 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
-        facilityId={facilityId}
         hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-2">
@@ -81,7 +78,6 @@ export function SymptomsList({
         encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
-        facilityId={facilityId}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -95,7 +91,6 @@ export function SymptomsList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
-      facilityId={facilityId}
       hideFullViewButton={hideFullViewButton}
       readOnly={readOnly}
     >
@@ -134,14 +129,12 @@ export function SymptomsList({
 const SymptomListLayout = ({
   children,
   className,
-  facilityId,
   hideFullViewButton = false,
   encounter,
   encounterId,
   patientId,
   readOnly = false,
 }: {
-  facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
@@ -169,7 +162,6 @@ const SymptomListLayout = ({
               <FullViewDialog
                 patientId={patientId}
                 encounterId={encounterId}
-                facilityId={facilityId}
                 initialTab="symptoms"
                 encounter={encounter}
               />

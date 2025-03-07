@@ -36,7 +36,6 @@ export const EncounterUpdatesTab = ({
             <DiagnosisList
               patientId={patient.id}
               encounterId={encounter.id}
-              facilityId={facilityId}
               encounter={encounter}
             />
             <DiagnosisList patientId={patient.id} encounterId={encounter.id} />

@@ -47,7 +47,6 @@ import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoler
 import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface AllergyListProps {
-  facilityId?: string;
   patientId: string;
   encounterId?: string;
   className?: string;
@@ -73,7 +72,6 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 export function AllergyList({
   patientId,
   encounterId,
-  facilityId,
   className = "",
   readOnly = false,
   encounterStatus,
@@ -99,7 +97,6 @@ export function AllergyList({
       <AllergyListLayout
         patientId={patientId}
         encounterId={encounterId}
-        facilityId={facilityId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
         className={className}
@@ -125,7 +122,6 @@ export function AllergyList({
       <AllergyListLayout
         patientId={patientId}
         encounterId={encounterId}
-        facilityId={facilityId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
         className={className}
@@ -224,7 +220,6 @@ export function AllergyList({
 
   return (
     <AllergyListLayout
-      facilityId={facilityId ?? ""}
       patientId={patientId}
       encounterId={encounterId ?? ""}
       className={className}
@@ -299,7 +294,6 @@ const AllergyListLayout = ({
   children,
   className,
   patientId,
-  facilityId,
   encounterId,
   hideFullViewButton = false,
   encounter,
@@ -307,7 +301,6 @@ const AllergyListLayout = ({
 }: {
   children: ReactNode;
   patientId: string;
-  facilityId?: string;
   encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
@@ -333,7 +326,6 @@ const AllergyListLayout = ({
               <FullViewDialog
                 patientId={patientId}
                 encounterId={encounterId ?? ""}
-                facilityId={facilityId}
                 initialTab="allergies"
                 encounter={encounter}
               />
