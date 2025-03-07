@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isBefore, startOfToday } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -121,10 +121,10 @@ export function AppointmentQuestion({
     enabled: !!resource && !!selectedDate,
   });
 
-  const hasSlots =
-    slotsQuery.data?.results && slotsQuery.data.results.length > 0;
-  const showNoSlotsMessage = !hasSlots && selectedDate && resource;
   const slots = slotsQuery.data?.results ?? [];
+  const availableSlots = groupSlotsByAvailability(slots, true);
+  const hasSlots = availableSlots.length > 0;
+  const showNoSlotsMessage = !hasSlots && selectedDate && resource;
 
   return (
     <div className="space-y-4">
@@ -205,6 +205,7 @@ export function AppointmentQuestion({
                   handleUpdate({ slot_id: undefined });
                 }
               }}
+              disabled={(date) => isBefore(date, startOfToday())}
             />
           </div>
         </div>
@@ -237,37 +238,34 @@ export function AppointmentQuestion({
               </SelectTrigger>
               <SelectContent>
                 {hasSlots ? (
-                  groupSlotsByAvailability(slots).map(
-                    ({ availability, slots }) => (
-                      <div key={availability.name}>
-                        <div className="px-2 py-1.5 text-sm font-semibold">
-                          {availability.name}
-                        </div>
-                        {slots.map((slot) => {
-                          const isFullyBooked =
-                            slot.allocated >= availability.tokens_per_slot;
-                          return (
-                            <SelectItem
-                              key={slot.id}
-                              value={slot.id}
-                              disabled={isFullyBooked}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span>
-                                  {format(slot.start_datetime, "HH:mm")}
-                                </span>
-                                <span className="pl-1 text-xs text-gray-500">
-                                  {availability.tokens_per_slot -
-                                    slot.allocated}{" "}
-                                  {t("slots_left")}
-                                </span>
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
+                  availableSlots.map(({ availability, slots }) => (
+                    <div key={availability.name}>
+                      <div className="px-2 py-1.5 text-sm font-semibold">
+                        {availability.name}
                       </div>
-                    ),
-                  )
+                      {slots.map((slot) => {
+                        const isFullyBooked =
+                          slot.allocated >= availability.tokens_per_slot;
+                        return (
+                          <SelectItem
+                            key={slot.id}
+                            value={slot.id}
+                            disabled={isFullyBooked}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>
+                                {format(slot.start_datetime, "HH:mm")}
+                              </span>
+                              <span className="pl-1 text-xs text-gray-500">
+                                {availability.tokens_per_slot - slot.allocated}{" "}
+                                {t("slots_left")}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </div>
+                  ))
                 ) : (
                   <div className="px-2 py-4 text-center text-sm text-gray-500">
                     {t("no_slots_available")}
