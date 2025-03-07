@@ -1,6 +1,3 @@
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import {
   Dispatch,
   ReactNode,
@@ -13,6 +10,8 @@ import {
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
@@ -189,20 +189,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
               <div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <p className="text-2xl font-bold text-gray-800 truncate">
-                        {fileNameTooltip}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm text-white truncate bg-red rounded-md p-2">
-                        {fileName}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TooltipComponent content={fileName}>
+                  <p className="text-2xl font-bold text-gray-800 truncate">
+                    {fileNameTooltip}
+                  </p>
+                </TooltipComponent>
                 {uploadedFiles &&
                   uploadedFiles[index] &&
                   uploadedFiles[index].created_date && (
@@ -247,7 +238,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-left" className="h-4 w-4" />
                 </Button>
               )}
-              <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
+              <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
                   <img
                     src={fileUrl}
@@ -273,7 +264,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     sandbox=""
                     title={t("source_file")}
                     src={fileUrl}
-                    className="h-[75vh] w-full"
+                    className="h-[50vh] md:h-[75vh] w-full"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center">
@@ -297,8 +288,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </Button>
               )}
             </div>
-            <div className="flex items-center justify-between">
-              <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">
+            <div className="flex items-center justify-center">
+              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
                 {file_state.isImage && (
                   <>
                     {[
@@ -339,7 +330,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         variant="ghost"
                         key={index}
                         onClick={button[2] as () => void}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                        className={cn(
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                        )}
                         disabled={button[3] as boolean}
                       >
                         {button[1] && (
@@ -382,7 +376,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         variant="ghost"
                         key={index}
                         onClick={button[2] as () => void}
-                        className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                        className={cn(
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                        )}
                         disabled={button[3] as boolean}
                       >
                         {button[1] && (
@@ -400,7 +397,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </>
         ) : (
-          <div className="flex h-[75vh] items-center justify-center">
+          <div className="flex h-[50vh] md:h-[75vh] items-center justify-center">
             <CircularProgress />
           </div>
         )}

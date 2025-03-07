@@ -7,7 +7,6 @@ import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 
 export const EncounterUpdatesTab = ({
-  facilityId,
   encounter,
   patient,
 }: EncounterTabProps) => {
@@ -20,7 +19,6 @@ export const EncounterUpdatesTab = ({
           {/* Allergies Section */}
           <div>
             <AllergyList
-              facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
               encounterStatus={encounter.status}
@@ -30,11 +28,7 @@ export const EncounterUpdatesTab = ({
 
           {/* Symptoms Section */}
           <div>
-            <SymptomsList
-              patientId={patient.id}
-              encounterId={encounter.id}
-              facilityId={facilityId}
-            />
+            <SymptomsList patientId={patient.id} encounterId={encounter.id} />
           </div>
 
           {/* Diagnoses Section */}
@@ -45,6 +39,7 @@ export const EncounterUpdatesTab = ({
               facilityId={facilityId}
               encounter={encounter}
             />
+            <DiagnosisList patientId={patient.id} encounterId={encounter.id} />
           </div>
 
           {/* Questionnaire Responses Section */}
@@ -52,7 +47,6 @@ export const EncounterUpdatesTab = ({
             <QuestionnaireResponsesList
               encounter={encounter}
               patientId={patient.id}
-              hideFullViewButton
             />
           </div>
         </div>

@@ -53,6 +53,7 @@ interface AllergyListProps {
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
   encounterStatus?: Encounter["status"];
 }
 
@@ -70,10 +71,10 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 };
 
 export function AllergyList({
-  facilityId,
   patientId,
   encounterId,
-  className,
+  className = "",
+  readOnly = false,
   encounterStatus,
   hideFullViewButton,
 }: AllergyListProps) {
@@ -100,6 +101,7 @@ export function AllergyList({
         encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
       >
+      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -122,6 +124,8 @@ export function AllergyList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        readOnly={readOnly} 
+        className={className}
         hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-3 pt-2">
@@ -222,6 +226,7 @@ export function AllergyList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
+      readOnly={readOnly}
       hideFullViewButton={hideFullViewButton}
     >
       <Table className="border-separate border-spacing-y-0.5">
@@ -289,21 +294,17 @@ export function AllergyList({
 }
 
 const AllergyListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
   hideFullViewButton = false,
   encounter,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
@@ -311,9 +312,9 @@ const AllergyListLayout = ({
         <CardTitle>{t("allergies")}</CardTitle>
         {!hideFullViewButton && (
           <div className="flex items-center gap-x-2">
-            {facilityId && encounterId && (
+            {!readOnly && (
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
+                href={`questionnaire/allergy`}
                 className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
               >
                 <CareIcon icon="l-pen" className="w-4 h-4" />
@@ -330,7 +331,6 @@ const AllergyListLayout = ({
               />
             )}
           </div>
-        )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>

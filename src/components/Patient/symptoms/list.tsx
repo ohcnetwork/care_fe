@@ -22,18 +22,18 @@ import { SymptomTable } from "./SymptomTable";
 interface SymptomsListProps {
   patientId: string;
   encounterId?: string;
-  facilityId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
 }
 
 export function SymptomsList({
   patientId,
   encounterId,
-  facilityId,
   className,
   hideFullViewButton,
+  readOnly = false,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -50,9 +50,9 @@ export function SymptomsList({
   if (isLoading) {
     return (
       <SymptomListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        readOnly={readOnly}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -73,10 +73,10 @@ export function SymptomsList({
   if (!filteredSymptoms?.length) {
     return (
       <SymptomListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
+        readOnly={readOnly}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -87,11 +87,11 @@ export function SymptomsList({
 
   return (
     <SymptomListLayout
-      facilityId={facilityId}
       patientId={patientId}
       encounterId={encounterId}
       className={className}
       hideFullViewButton={hideFullViewButton}
+      readOnly={readOnly}
     >
       <SymptomTable
         symptoms={[
@@ -126,13 +126,11 @@ export function SymptomsList({
 }
 
 const SymptomListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
   hideFullViewButton = false,
   encounter,
+  readOnly = false,
 }: {
   facilityId?: string;
   patientId: string;
@@ -141,6 +139,7 @@ const SymptomListLayout = ({
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
@@ -148,9 +147,9 @@ const SymptomListLayout = ({
         <CardTitle>{t("symptoms")}</CardTitle>
         {!hideFullViewButton && (
           <div className="flex items-center gap-x-2">
-            {facilityId && encounterId && (
+            {!readOnly && (
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
+                href={`questionnaire/symptom`}
                 className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
               >
                 <CareIcon icon="l-pen" className="w-4 h-4" />
@@ -167,7 +166,6 @@ const SymptomListLayout = ({
               />
             )}
           </div>
-        )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
