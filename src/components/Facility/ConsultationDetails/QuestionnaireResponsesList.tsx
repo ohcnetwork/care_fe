@@ -294,6 +294,7 @@ function ResponseCard({
 }
 
 export default function QuestionnaireResponsesList({
+  encounter,
   patientId,
   isPrintPreview = false,
   onlyUnstructured,
@@ -310,8 +311,9 @@ export default function QuestionnaireResponsesList({
           limit: RESULTS_PER_PAGE_LIMIT,
           offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
         }),
+        encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
-        subject_type: "patient",
+        subject_type: encounter ? "encounter" : "patient",
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
