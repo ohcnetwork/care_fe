@@ -31,7 +31,7 @@ export function DatePicker({ date, onChange, disabled }: DatePickerProps) {
           className={cn(
             "w-full justify-start text-left font-normal",
             !date && "text-gray-500",
-            "sm:w-auto",
+            "sm:w-full",
           )}
         >
           <CareIcon

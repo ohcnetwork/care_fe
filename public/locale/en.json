@@ -1457,6 +1457,8 @@
   "medication_administration_saved": "Medicine Administration saved",
   "medication_already_marked_as_error": "Medication already marked as entered in error",
   "medication_taken_between": "Medication Taken Between",
+  "medication_taken_from": "Medication Taken From",
+  "medication_taken_to": "Medication Taken To",
   "medications": "Medications",
   "medicine": "Medicine",
   "medicine_administration": "Medicine Administration",

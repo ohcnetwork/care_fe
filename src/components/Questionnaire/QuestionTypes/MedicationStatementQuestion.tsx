@@ -24,7 +24,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -218,12 +218,12 @@ export function MedicationStatementQuestion({
         <div className="md:overflow-x-auto w-auto pb-2">
           <div className="min-w-fit">
             <div
-              className={cn("max-w-[1600px] relative lg:border rounded-md", {
+              className={cn("max-w-[1800px] relative lg:border rounded-md", {
                 "bg-gray-50/50": !desktopLayout,
               })}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[300px,180px,170px,250px,230px,230px,190px,200px,48px] bg-gray-50 border-b text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medicine")}
                 </div>
@@ -237,7 +237,10 @@ export function MedicationStatementQuestion({
                   {t("dosage_instructions")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
-                  {t("medication_taken_between")}
+                  {t("medication_taken_from")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r">
+                  {t("medication_taken_to")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("reason")}
@@ -390,7 +393,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,260px,190px,200px,48px] border-b hover:bg-gray-50/50",
+        "grid grid-cols-1 lg:grid-cols-[300px,180px,170px,250px,230px,230px,190px,200px,48px] border-b hover:bg-gray-50/50",
         {
           "opacity-40 pointer-events-none":
             medication.status === "entered_in_error",
@@ -487,25 +490,44 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
         />
       </div>
 
-      {/* Period */}
+      {/* Medication Taken From */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("medication_taken_between")}
+          {t("medication_taken_from")}
         </Label>
-        <DateRangePicker
-          date={{
-            from: medication.effective_period?.start
-              ? new Date(medication.effective_period?.start)
-              : undefined,
-            to: medication.effective_period?.end
-              ? new Date(medication.effective_period?.end)
-              : undefined,
-          }}
+        <DatePicker
+          date={
+            medication.effective_period?.start
+              ? new Date(medication.effective_period.start)
+              : undefined
+          }
           onChange={(date) =>
             onUpdate?.({
               effective_period: {
-                start: date?.from?.toISOString(),
-                end: date?.to?.toISOString(),
+                ...medication.effective_period,
+                start: date?.toISOString(),
+              },
+            })
+          }
+        />
+      </div>
+
+      {/* Medication Taken To */}
+      <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden ">
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("medication_taken_to")}
+        </Label>
+        <DatePicker
+          date={
+            medication.effective_period?.end
+              ? new Date(medication.effective_period.end)
+              : undefined
+          }
+          onChange={(date) =>
+            onUpdate?.({
+              effective_period: {
+                ...medication.effective_period,
+                end: date?.toISOString(),
               },
             })
           }
