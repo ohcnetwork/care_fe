@@ -67,6 +67,7 @@ import Loading from "@/components/Common/Loading";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
+import { ValueSetSystem } from "@/types/questionnaire/code";
 import {
   EnableWhen,
   Question,
@@ -1645,7 +1646,7 @@ function QuestionEditor({
                           ? undefined
                           : question.answer_value_set
                       }
-                      onValueChange={(val: string) =>
+                      onValueChange={(val: ValueSetSystem) =>
                         updateField("answer_value_set", val)
                       }
                     >

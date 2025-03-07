@@ -16,4 +16,5 @@ export type ValueSetSystem =
   | "system-observation"
   | "system-body-site-observation"
   | "system-collection-method"
-  | "system-ucum-units";
+  | "system-ucum-units"
+  | "valueset";
