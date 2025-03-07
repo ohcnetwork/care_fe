@@ -24,6 +24,7 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               encounterStatus={encounter.status}
+              encounter={encounter}
             />
           </div>
 
@@ -42,6 +43,7 @@ export const EncounterUpdatesTab = ({
               patientId={patient.id}
               encounterId={encounter.id}
               facilityId={facilityId}
+              encounter={encounter}
             />
           </div>
 
@@ -50,6 +52,7 @@ export const EncounterUpdatesTab = ({
             <QuestionnaireResponsesList
               encounter={encounter}
               patientId={patient.id}
+              hideFullViewButton
             />
           </div>
         </div>

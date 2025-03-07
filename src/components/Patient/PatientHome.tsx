@@ -161,6 +161,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 patientId={id}
                 patientData={patientData}
+                hideFullViewButton
               />
             )}
           </div>

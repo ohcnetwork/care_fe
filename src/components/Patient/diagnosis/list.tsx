@@ -11,8 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
+
 import query from "@/Utils/request/query";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { Encounter } from "@/types/emr/encounter";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
@@ -21,6 +24,8 @@ interface DiagnosisListProps {
   encounterId?: string;
   facilityId?: string;
   className?: string;
+  hideFullViewButton?: boolean;
+  encounter?: Encounter;
 }
 
 export function DiagnosisList({
@@ -28,6 +33,8 @@ export function DiagnosisList({
   encounterId,
   facilityId,
   className,
+  hideFullViewButton,
+  encounter,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -48,6 +55,8 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
         className={className}
+        hideFullViewButton={hideFullViewButton}
+        encounter={encounter}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -73,6 +82,7 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
         className={className}
+        hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
@@ -87,6 +97,7 @@ export function DiagnosisList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
+      hideFullViewButton={hideFullViewButton}
     >
       <>
         <DiagnosisTable
@@ -130,12 +141,16 @@ const DiagnosisListLayout = ({
   encounterId,
   children,
   className,
+  hideFullViewButton = false,
+  encounter,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
   className?: string;
+  hideFullViewButton?: boolean;
+  encounter?: Encounter;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
@@ -143,14 +158,27 @@ const DiagnosisListLayout = ({
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {facilityId && encounterId && (
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
-            {t("edit")}
-          </Link>
+        {!hideFullViewButton && (
+          <div className="flex items-center gap-x-2">
+            {facilityId && encounterId && (
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+              >
+                <CareIcon icon="l-pen" className="w-4 h-4" />
+                {t("edit")}
+              </Link>
+            )}
+            {!hideFullViewButton && encounterId && (
+              <FullViewDialog
+                patientId={patientId}
+                encounterId={encounterId}
+                facilityId={facilityId}
+                initialTab="diagnoses"
+                encounter={encounter!}
+              />
+            )}
+          </div>
         )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>

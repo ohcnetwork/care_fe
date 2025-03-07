@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
+
 import query from "@/Utils/request/query";
+import { Encounter } from "@/types/emr/encounter";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -21,6 +24,8 @@ interface SymptomsListProps {
   encounterId?: string;
   facilityId?: string;
   className?: string;
+  hideFullViewButton?: boolean;
+  encounter?: Encounter;
 }
 
 export function SymptomsList({
@@ -28,6 +33,7 @@ export function SymptomsList({
   encounterId,
   facilityId,
   className,
+  hideFullViewButton,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -70,6 +76,7 @@ export function SymptomsList({
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_symptoms_recorded")}</p>
@@ -84,6 +91,7 @@ export function SymptomsList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
+      hideFullViewButton={hideFullViewButton}
     >
       <SymptomTable
         symptoms={[
@@ -123,25 +131,42 @@ const SymptomListLayout = ({
   encounterId,
   children,
   className,
+  hideFullViewButton = false,
+  encounter,
 }: {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
   children: ReactNode;
   className?: string;
+  hideFullViewButton?: boolean;
+  encounter?: Encounter;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("symptoms")}</CardTitle>
-        {facilityId && encounterId && (
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
-            className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
-          >
-            <CareIcon icon="l-pen" className="w-4 h-4" />
-            {t("edit")}
-          </Link>
+        {!hideFullViewButton && (
+          <div className="flex items-center gap-x-2">
+            {facilityId && encounterId && (
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/symptom`}
+                className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
+              >
+                <CareIcon icon="l-pen" className="w-4 h-4" />
+                {t("edit")}
+              </Link>
+            )}
+            {!hideFullViewButton && encounterId && (
+              <FullViewDialog
+                patientId={patientId}
+                encounterId={encounterId}
+                facilityId={facilityId}
+                initialTab="symptoms"
+                encounter={encounter!}
+              />
+            )}
+          </div>
         )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
