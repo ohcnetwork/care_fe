@@ -38,7 +38,6 @@ export const EncounterUpdatesTab = ({
               encounterId={encounter.id}
               encounter={encounter}
             />
-            <DiagnosisList patientId={patient.id} encounterId={encounter.id} />
           </div>
 
           {/* Questionnaire Responses Section */}
