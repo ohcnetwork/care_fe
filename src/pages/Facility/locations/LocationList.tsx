@@ -155,7 +155,7 @@ export default function LocationList({
   }, [locationDetail, handleLocationSelect]);
 
   return (
-    <div className="flex px-4 space-x-4 min-h-[100vh]">
+    <div className="flex px-4 space-x-4">
       <LocationNavbar
         facilityId={facilityId}
         selectedLocationId={selectedLocationId}

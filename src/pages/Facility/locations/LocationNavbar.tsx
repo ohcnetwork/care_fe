@@ -83,7 +83,7 @@ function LocationTreeNode({
 
   // Query for this node's children
   const { data: children, isLoading } = useQuery({
-    queryKey: ["locations", facilityId, "children", location.id],
+    queryKey: ["locations", facilityId, "children", location.id, "kind"],
     queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
@@ -171,7 +171,7 @@ export default function LocationNavbar({
   const { t } = useTranslation();
 
   const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
-    queryKey: ["locations", facilityId, "all"],
+    queryKey: ["locations", facilityId, "mine", "kind"],
     queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {

@@ -258,6 +258,7 @@ export default function LocationContent({
       facilityId,
       "children",
       selectedLocationId,
+      "kind",
       "full",
       currentPage,
       searchQuery,
