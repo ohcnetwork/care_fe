@@ -5,6 +5,13 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 
 import Page from "@/components/Common/Page";
@@ -132,8 +139,38 @@ export default function OrganizationLayout({
             ))}
         </Menubar>
       </div>
+      {orgParents.length > 0 && (
+        <div className="flex items-center gap-2 mt-5">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {orgParents.reverse().map((parent) => (
+                <>
+                  <BreadcrumbItem key={parent.id}>
+                    <BreadcrumbLink
+                      asChild
+                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                    >
+                      <Link href={path.replace(id, parent.id)}>
+                        {parent.name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem key={`ellipsis-${parent.id}`}>
+                    <BreadcrumbSeparator />
+                  </BreadcrumbItem>
+                </>
+              ))}
+              <BreadcrumbItem key={org.id}>
+                <span className="text-sm font-semibold text-gray-900">
+                  {org.name}
+                </span>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
       {/* Page Content */}
-      <div className="mt-4">{children}</div>
+      <div>{children}</div>
     </Page>
   );
 }
