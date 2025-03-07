@@ -15,17 +15,16 @@ import { usePluginRoutes } from "@/hooks/useCareApps";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
+import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
-
-import OrganizationRoutes from "./routes/OrganizationRoutes";
-import AdminRoutes from "./routes/adminRoutes";
 
 // List of paths where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = ["/", "/session-expired"];
@@ -87,7 +86,7 @@ export default function AppRouter() {
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
 
-  const sidebarFor = appPages ? SidebarFor.FACILITY : SidebarFor.ADMIN;
+  const sidebarFor = adminPages ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   const pages = appPages || adminPages || <ErrorPage />;
 
@@ -106,7 +105,7 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
+          className="overflow-y-auto flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
         >
           <div className="relative z-10 flex h-16 bg-white shadow shrink-0 md:hidden">
             <div className="flex items-center">

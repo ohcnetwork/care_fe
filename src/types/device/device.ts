@@ -52,4 +52,12 @@ export interface DeviceList extends DeviceBase {
   care_metadata: Record<string, unknown>;
 }
 
+export interface DeviceLocationHistory {
+  id: string;
+  created_by: UserBase;
+  location: LocationList;
+  start: string;
+  end: string;
+}
+
 export type DeviceWrite = DeviceBase;

@@ -26,13 +26,20 @@ export const Appointments = (props: PatientProps) => {
   const { patientData, facilityId, patientId } = props;
   const { t } = useTranslation();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["patient-appointments", patientId],
-    queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: facilityId ?? "" },
-      queryParams: { patient: patientId, limit: 100 },
-    }),
-    enabled: !!facilityId,
+    queryFn: query(
+      facilityId
+        ? scheduleApis.appointments.list
+        : scheduleApis.appointments.getAppointments,
+      {
+        pathParams: {
+          facility_id: facilityId ?? "",
+          patient_id: patientId,
+        },
+        queryParams: { patient: patientId, limit: 100 },
+      },
+    ),
   });
 
   const appointments = data?.results;
@@ -64,15 +71,17 @@ export const Appointments = (props: PatientProps) => {
         <h2 className="text-2xl font-semibold leading-tight text-center sm:text-left">
           {t("appointments")}
         </h2>
-        <Button variant="outline_primary" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
-            className="flex items-center justify-center w-full sm:w-auto"
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("schedule_appointment")}
-          </Link>
-        </Button>
+        {facilityId && (
+          <Button variant="outline_primary" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/book-appointment`}
+              className="flex items-center justify-center w-full sm:w-auto"
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("schedule_appointment")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="rounded-lg border bg-white">
@@ -87,13 +96,13 @@ export const Appointments = (props: PatientProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!appointments ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
                   {t("loading")}
                 </TableCell>
               </TableRow>
-            ) : appointments.length ? (
+            ) : appointments && appointments.length ? (
               appointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell className="font-medium">
