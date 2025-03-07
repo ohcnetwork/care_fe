@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
 import { t } from "i18next";
 import { Loader } from "lucide-react";
 
@@ -24,8 +23,6 @@ import { completedEncounterStatus } from "@/types/emr/encounter";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
-
-dayjs.extend(localizedFormat);
 
 interface TreatmentSummaryProps {
   facilityId: string;

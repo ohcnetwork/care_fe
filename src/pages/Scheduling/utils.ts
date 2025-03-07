@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
 
 import { Time } from "@/Utils/types";
 import {
@@ -7,8 +6,6 @@ import {
   ScheduleAvailability,
   ScheduleException,
 } from "@/types/scheduling/schedule";
-
-dayjs.extend(isBetween);
 
 export const isDateInRange = (
   date: Date,

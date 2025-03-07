@@ -5,7 +5,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import {
   Info,
   Loader2,
@@ -61,8 +60,6 @@ import { formatDateTime } from "@/Utils/utils";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-
-dayjs.extend(relativeTime);
 
 const MESSAGES_LIMIT = 20;
 

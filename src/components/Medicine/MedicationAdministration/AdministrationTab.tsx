@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -45,8 +44,6 @@ import {
   TIME_SLOTS,
   createMedicationAdministrationRequest,
 } from "./utils";
-
-dayjs.extend(relativeTime);
 
 // Utility Functions
 function isTimeInSlot(

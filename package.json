@@ -200,8 +200,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss --plugin @trivago/prettier-plugin-sort-imports",
-      "eslint --fix",
-      "git update-index --again"
+      "eslint --fix"
     ],
     "public/locale/*.json": [
       "npm run sort-locales"

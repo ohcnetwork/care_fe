@@ -1,8 +1,6 @@
 "use client";
 
 import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
@@ -38,9 +36,6 @@ import {
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest";
-
-dayjs.extend(localizedFormat);
-dayjs.extend(relativeTime);
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
