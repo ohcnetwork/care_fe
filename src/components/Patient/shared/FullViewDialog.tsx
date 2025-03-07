@@ -209,7 +209,6 @@ export function FullViewDialog({
                 <QuestionnaireResponsesList
                   encounter={encounter}
                   patientId={patientId}
-                  hideFullViewButton={true}
                 />
               </div>
             </TabsContent>

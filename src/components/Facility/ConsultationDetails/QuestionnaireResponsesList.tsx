@@ -27,7 +27,6 @@ interface Props {
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
-  hideFullViewButton: boolean;
 }
 
 interface QuestionResponseProps {

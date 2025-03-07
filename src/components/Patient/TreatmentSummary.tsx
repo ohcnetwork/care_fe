@@ -487,7 +487,6 @@ export default function TreatmentSummary({
               patientId={encounter.patient.id}
               isPrintPreview={true}
               onlyUnstructured={true}
-              hideFullViewButton
             />
           </div>
         </div>
