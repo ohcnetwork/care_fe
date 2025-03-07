@@ -1,4 +1,6 @@
 export class PatientEncounter {
+  private routes = {};
+
   // Navigation
   navigateToEncounters() {
     cy.get('[data-sidebar="content"]').contains("Encounters").click();
@@ -120,6 +122,57 @@ export class PatientEncounter {
       expect(interception.request.url).to.include("status=in_progress");
       expect(interception.response.statusCode).to.eq(200);
     });
+    return this;
+  }
+
+  // Encounter Notes
+  openEncounterNotesTab() {
+    cy.get('[data-cy="encounter-notes-tab"]').click();
+    return this;
+  }
+
+  clickNewThreadButton() {
+    cy.get('[data-cy="new-thread-button"]').click();
+    return this;
+  }
+
+  typeThreadTitle(title: string) {
+    cy.get('[data-cy="new-thread-title-input"]').type(title);
+    return this;
+  }
+
+  clickCreateThreadButton() {
+    cy.get('[data-cy="create-thread-button"]').click();
+    return this;
+  }
+
+  sendMessage(message: string) {
+    cy.get('[data-cy="encounter-message-input"]')
+      .should("be.visible")
+      .should("not.be.disabled")
+      .clear()
+      .type(message);
+
+    cy.get('[data-cy="send-chat-message-button"]')
+      .should("be.visible")
+      .should("not.be.disabled")
+      .click();
+
+    cy.wait("@sendMessage").its("response.statusCode").should("eq", 200);
+    cy.contains(message).should("be.visible");
+  }
+
+  addNewChatMessages(singleLineMessage: string, multiLineMessage: string) {
+    cy.intercept("POST", "/api/v1/patient/*/thread/*/note/").as("sendMessage");
+
+    this.sendMessage(singleLineMessage);
+    this.sendMessage(multiLineMessage);
+
+    return this;
+  }
+
+  changeThread(title: string) {
+    cy.contains('[data-cy="thread-title"]', title).should("be.visible").click();
     return this;
   }
 }

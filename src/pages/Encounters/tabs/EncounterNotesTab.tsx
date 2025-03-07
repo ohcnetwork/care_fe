@@ -107,7 +107,9 @@ const ThreadItem = ({
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate">{thread.title}</h4>
+        <h4 className="font-medium text-sm truncate" data-cy="thread-title">
+          {thread.title}
+        </h4>
       </div>
       {isSelected && (
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
@@ -255,6 +257,7 @@ const NewThreadDialog = ({
               placeholder={t("encounter_notes__enter_discussion_title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              data-cy="new-thread-title-input"
             />
           </div>
         </div>
@@ -267,6 +270,7 @@ const NewThreadDialog = ({
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
+            data-cy="create-thread-button"
           >
             {isCreating ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -488,6 +492,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
             </div>
             {canWriteCurrentEncounter && (
               <Button
+                data-cy="new-thread-button"
                 variant="outline"
                 size="sm"
                 onClick={() => setShowNewThreadDialog(true)}
