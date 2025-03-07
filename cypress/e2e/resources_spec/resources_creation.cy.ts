@@ -27,7 +27,6 @@ describe("Resources Management", () => {
       .selectFacility("DH Aluva")
       .selectStatus("Pending")
       .selectCategory("Medicines")
-      .selectAssignedUser("Sam Hospital")
       .enterResourceTitle("TestCypress")
       .enterReasonOfRequest("Reason Testing")
       .clickFillMyDetails()
