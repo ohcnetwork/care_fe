@@ -21,7 +21,7 @@ import { SymptomTable } from "./SymptomTable";
 
 interface SymptomsListProps {
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
   encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
