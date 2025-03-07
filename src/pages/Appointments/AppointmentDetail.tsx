@@ -308,9 +308,24 @@ const AppointmentDetails = ({
           <div className="flex items-center space-x-4 text-sm">
             <MobileIcon className="h-5 w-5 text-gray-600" />
             <div>
-              <p className="font-medium">{appointment.patient.phone_number}</p>
+              <p className="font-medium">
+                <a
+                  href={`tel:${appointment.patient.phone_number}`}
+                  className="text-primary hover:underline"
+                >
+                  {appointment.patient.phone_number}
+                </a>
+              </p>
               <p className="text-gray-600">
-                {t("emergency")}: {appointment.patient.emergency_phone_number}
+                {t("emergency")}:{" "}
+                {appointment.patient.emergency_phone_number && (
+                  <a
+                    href={`tel:${appointment.patient.emergency_phone_number}`}
+                    className="text-primary hover:underline"
+                  >
+                    {appointment.patient.emergency_phone_number}
+                  </a>
+                )}
               </p>
             </div>
           </div>
