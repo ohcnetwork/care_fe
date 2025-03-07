@@ -1,9 +1,6 @@
 import { Redirect } from "raviger";
 
-import {
-  facilityPatientTabs,
-  patientTabs,
-} from "@/components/Patient/PatientDetailsTab";
+import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
@@ -50,7 +47,7 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientHome facilityId={facilityId} id={id} page="demography" />
   ),
-  ...facilityPatientTabs.reduce((acc: AppRoutes, tab) => {
+  ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/facility/:facilityId/patient/:id/" + tab.route] = ({
       facilityId,
       id,
