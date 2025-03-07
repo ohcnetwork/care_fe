@@ -23,7 +23,7 @@ import {
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
-import { handleCameraPermission } from "@/Utils/cameraPermissionHandler";
+import { useCamera } from "@/Utils/useCamera";
 
 interface Props {
   title: string;
@@ -79,7 +79,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { requestPermission } = handleCameraPermission();
+  const { requestPermission } = useCamera();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint(
@@ -395,10 +395,7 @@ const AvatarEditModal = ({
                         ref={webRef}
                         videoConstraints={constraint}
                         onUserMediaError={async () => {
-                          const hasPermission = await requestPermission(
-                            "camera",
-                            "user",
-                          );
+                          const hasPermission = await requestPermission("user");
                           if (!hasPermission) {
                             setIsCameraOpen(false);
                           }
