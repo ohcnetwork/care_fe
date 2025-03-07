@@ -26,15 +26,17 @@ interface DiagnosisListProps {
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
   facilityId,
-  className,
   hideFullViewButton,
   encounter,
+  className = "",
+  readOnly = false,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -58,6 +60,7 @@ export function DiagnosisList({
         hideFullViewButton={hideFullViewButton}
         encounter={encounter}
       >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -84,6 +87,7 @@ export function DiagnosisList({
         className={className}
         hideFullViewButton={hideFullViewButton}
       >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
@@ -99,6 +103,7 @@ export function DiagnosisList({
       className={className}
       hideFullViewButton={hideFullViewButton}
     >
+    <DiagnosisListLayout className={className} readOnly={readOnly}>
       <>
         <DiagnosisTable
           diagnoses={[
@@ -136,21 +141,17 @@ export function DiagnosisList({
 }
 
 const DiagnosisListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
   hideFullViewButton = false,
   encounter,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
@@ -160,9 +161,9 @@ const DiagnosisListLayout = ({
         <CardTitle>{t("diagnoses")}</CardTitle>
         {!hideFullViewButton && (
           <div className="flex items-center gap-x-2">
-            {facilityId && encounterId && (
+            {!readOnly && (
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+                href={`questionnaire/diagnosis`}
                 className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
               >
                 <CareIcon icon="l-pen" className="w-4 h-4" />
@@ -179,7 +180,6 @@ const DiagnosisListLayout = ({
               />
             )}
           </div>
-        )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>

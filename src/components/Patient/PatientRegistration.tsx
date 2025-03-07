@@ -289,6 +289,7 @@ export default function PatientRegistration(
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
+        death_datetime: patientQuery.data.death_datetime || undefined,
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);

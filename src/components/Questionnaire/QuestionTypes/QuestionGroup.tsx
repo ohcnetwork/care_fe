@@ -26,7 +26,7 @@ interface QuestionGroupProps {
   clearError: (questionId: string) => void;
   disabled?: boolean;
   activeGroupId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 
@@ -144,6 +144,7 @@ export const QuestionGroup = memo(function QuestionGroup({
       >
         {question.questions?.map((subQuestion) => (
           <QuestionGroup
+            encounterId={encounterId}
             facilityId={facilityId}
             key={subQuestion.id}
             question={subQuestion}

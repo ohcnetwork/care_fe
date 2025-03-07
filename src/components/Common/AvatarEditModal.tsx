@@ -235,7 +235,7 @@ const AvatarEditModal = ({
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex flex-1 items-center justify-center rounded-lg">
+                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -243,7 +243,7 @@ const AvatarEditModal = ({
                             : imageUrl
                         }
                         alt="cover-photo"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">
