@@ -18,7 +18,7 @@ interface FullViewDialogProps {
   encounterId: string;
   facilityId?: string;
   initialTab?: "allergies" | "symptoms" | "diagnoses" | "questionnaire";
-  encounter: Encounter;
+  encounter?: Encounter;
 }
 
 export function FullViewDialog({
@@ -30,7 +30,8 @@ export function FullViewDialog({
 }: FullViewDialogProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState(initialTab);
+  type Tabkey = "allergies" | "symptoms" | "diagnoses" | "questionnaire";
+  const [activeTab, setActiveTab] = useState<Tabkey>(initialTab);
   const tabOrder = ["allergies", "symptoms", "diagnoses", "questionnaire"];
 
   // Function to navigate to the previous tab
