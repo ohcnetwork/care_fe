@@ -1,14 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Link, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -298,7 +295,6 @@ function ResponseCard({
 
 export default function QuestionnaireResponsesList({
   patientId,
-  facilityId,
   isPrintPreview = false,
   onlyUnstructured,
 }: Props) {
@@ -325,23 +321,6 @@ export default function QuestionnaireResponsesList({
   return (
     <div className="mt-4 gap-4">
       <div className="max-w-full">
-        <div className="flex justify-between items-center mb-4">
-          <div className="mr-4 text-xl font-bold text-secondary-900">
-            {t("updates")}
-          </div>
-          <Button asChild variant="outline_primary">
-            <Link
-              href={
-                facilityId
-                  ? `/facility/${facilityId}/patient/${patientId}/questionnaire`
-                  : `/patient/${patientId}/questionnaire`
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_patient_updates")}
-            </Link>
-          </Button>
-        </div>
         {isLoading ? (
           <div className="grid gap-5">
             <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
