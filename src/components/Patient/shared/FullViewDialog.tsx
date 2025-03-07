@@ -127,7 +127,7 @@ export function FullViewDialog({
                 <SymptomsList
                   patientId={patientId}
                   encounterId={encounterId}
-                  facilityId={facilityId}
+                  facilityId={facilityId ?? ""}
                   hideFullViewButton={true}
                 />
               </div>

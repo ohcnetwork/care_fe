@@ -73,6 +73,7 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 export function AllergyList({
   patientId,
   encounterId,
+  facilityId,
   className = "",
   readOnly = false,
   encounterStatus,
@@ -96,12 +97,13 @@ export function AllergyList({
   if (isLoading) {
     return (
       <AllergyListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
+        facilityId={facilityId}
         hideFullViewButton={hideFullViewButton}
+        readOnly={readOnly}
+        className={className}
       >
-      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -121,12 +123,12 @@ export function AllergyList({
   if (!filteredAllergies?.length) {
     return (
       <AllergyListLayout
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
-        readOnly={readOnly} 
-        className={className}
+        facilityId={facilityId}
         hideFullViewButton={hideFullViewButton}
+        readOnly={readOnly}
+        className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
@@ -222,9 +224,9 @@ export function AllergyList({
 
   return (
     <AllergyListLayout
-      facilityId={facilityId}
+      facilityId={facilityId ?? ""}
       patientId={patientId}
-      encounterId={encounterId}
+      encounterId={encounterId ?? ""}
       className={className}
       readOnly={readOnly}
       hideFullViewButton={hideFullViewButton}
@@ -296,11 +298,17 @@ export function AllergyList({
 const AllergyListLayout = ({
   children,
   className,
+  patientId,
+  facilityId,
+  encounterId,
   hideFullViewButton = false,
   encounter,
   readOnly = false,
 }: {
   children: ReactNode;
+  patientId: string;
+  facilityId?: string;
+  encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
@@ -321,16 +329,17 @@ const AllergyListLayout = ({
                 {t("edit")}
               </Link>
             )}
-            {!hideFullViewButton && encounterId && (
+            {!hideFullViewButton && (
               <FullViewDialog
                 patientId={patientId}
-                encounterId={encounterId}
+                encounterId={encounterId ?? ""}
                 facilityId={facilityId}
                 initialTab="allergies"
                 encounter={encounter}
               />
             )}
           </div>
+        )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>

@@ -57,10 +57,10 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
         className={className}
+        readOnly={readOnly}
         hideFullViewButton={hideFullViewButton}
         encounter={encounter}
       >
-      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -85,9 +85,9 @@ export function DiagnosisList({
         patientId={patientId}
         encounterId={encounterId}
         className={className}
+        readOnly={readOnly}
         hideFullViewButton={hideFullViewButton}
       >
-      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
@@ -101,9 +101,9 @@ export function DiagnosisList({
       patientId={patientId}
       encounterId={encounterId}
       className={className}
+      readOnly={readOnly}
       hideFullViewButton={hideFullViewButton}
     >
-    <DiagnosisListLayout className={className} readOnly={readOnly}>
       <>
         <DiagnosisTable
           diagnoses={[
@@ -145,12 +145,18 @@ const DiagnosisListLayout = ({
   className,
   hideFullViewButton = false,
   encounter,
+  encounterId,
+  patientId,
+  facilityId,
   readOnly = false,
 }: {
   children: ReactNode;
   className?: string;
   hideFullViewButton?: boolean;
   encounter?: Encounter;
+  encounterId?: string;
+  patientId: string;
+  facilityId?: string;
   readOnly?: boolean;
 }) => {
   return (
@@ -180,6 +186,7 @@ const DiagnosisListLayout = ({
               />
             )}
           </div>
+        )}
       </CardHeader>
       <CardContent className="px-2 pb-2">{children}</CardContent>
     </Card>
