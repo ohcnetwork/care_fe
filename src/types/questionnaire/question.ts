@@ -1,4 +1,4 @@
-import { Code } from "./code";
+import { Code, ValueSetSystem } from "./code";
 
 export type QuestionType =
   | "group"
@@ -99,7 +99,7 @@ export interface Question {
   max_length?: number;
   answer_constraint?: string;
   answer_option?: AnswerOption[];
-  answer_value_set?: string;
+  answer_value_set?: ValueSetSystem;
   answer_unit?: Code;
   is_observation?: boolean;
   unit?: Code;
