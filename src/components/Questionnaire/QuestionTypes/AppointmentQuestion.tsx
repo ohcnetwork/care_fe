@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,14 +23,22 @@ import useSlug from "@/hooks/useSlug";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDisplayName } from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
+import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import {
+  FieldDefinitions,
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
+
+import { FieldError } from "./FieldError";
 
 interface FollowUpVisitQuestionProps {
   question: Question;
@@ -39,38 +49,53 @@ interface FollowUpVisitQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  errors: QuestionValidationError[];
+}
+
+const APPOINTMENT_FIELDS: FieldDefinitions = {
+  REASON: {
+    key: "reason_for_visit",
+    required: true,
+    validate: (value: string) => !!value?.trim(),
+  },
+  SLOT: {
+    key: "select_slot",
+    required: true,
+  },
+} as const;
+
+export function validateAppointmentQuestion(
+  value: CreateAppointmentQuestion,
+  questionId: string,
+): QuestionValidationError[] {
+  return validateFields(value, questionId, APPOINTMENT_FIELDS);
 }
 
 export function AppointmentQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  errors,
 }: FollowUpVisitQuestionProps) {
   const { t } = useTranslation();
   const [resource, setResource] = useState<UserBase>();
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const facilityId = useSlug("facility");
+  const { hasError } = useFieldError(question.id, errors);
 
   const values =
-    (questionnaireResponse.values?.[0]
-      ?.value as unknown as CreateAppointmentQuestion[]) || [];
-
+    (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
+    [];
   const value = values[0] ?? {};
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
-    const appointment = { ...value, ...updates };
     updateQuestionnaireResponseCB(
-      [
-        {
-          type: "appointment",
-          value: [appointment],
-        },
-      ],
+      [{ type: "appointment", value: [{ ...value, ...updates }] }],
       questionnaireResponse.question_id,
       questionnaireResponse.note,
     );
   };
-
-  const facilityId = useSlug("facility");
 
   const resourcesQuery = useQuery({
     queryKey: ["availableResources", facilityId],
@@ -89,14 +114,17 @@ export function AppointmentQuestion({
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        // voluntarily coalesce to empty string since we know query would be
-        // enabled only if resource and selectedDate are present
         user: resource?.id ?? "",
         day: dateQueryString(selectedDate),
       },
     }),
     enabled: !!resource && !!selectedDate,
   });
+
+  const hasSlots =
+    slotsQuery.data?.results && slotsQuery.data.results.length > 0;
+  const showNoSlotsMessage = !hasSlots && selectedDate && resource;
+  const slots = slotsQuery.data?.results ?? [];
 
   return (
     <div className="space-y-4">
@@ -107,8 +135,17 @@ export function AppointmentQuestion({
           value={value.reason_for_visit || ""}
           onChange={(e) => handleUpdate({ reason_for_visit: e.target.value })}
           disabled={disabled}
+          className={cn(
+            hasError(APPOINTMENT_FIELDS.REASON.key) && "border-red-500",
+          )}
+        />
+        <FieldError
+          fieldKey={APPOINTMENT_FIELDS.REASON.key}
+          questionId={question.id}
+          errors={errors}
         />
       </div>
+
       <div>
         <Label className="block mb-2">{t("select_practitioner")}</Label>
         <Select
@@ -118,7 +155,13 @@ export function AppointmentQuestion({
             setResource(resourcesQuery.data?.users.find((r) => r.id === value))
           }
         >
-          <SelectTrigger>
+          <SelectTrigger
+            className={cn(
+              !resource &&
+                hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+                "border-red-500",
+            )}
+          >
             <SelectValue placeholder={t("show_all")} />
           </SelectTrigger>
           <SelectContent>
@@ -141,15 +184,21 @@ export function AppointmentQuestion({
       <div className="flex gap-2">
         <div className="flex-1">
           <Label className="block mb-2">{t("select_date")}</Label>
-          <DatePicker date={selectedDate} onChange={setSelectedDate} />
+          <div
+            className={cn(
+              "rounded-md w-fit",
+              !selectedDate &&
+                hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+                "border border-red-500",
+            )}
+          >
+            <DatePicker date={selectedDate} onChange={setSelectedDate} />
+          </div>
         </div>
 
         <div className="flex-1">
           <Label className="block mb-2">{t("select_time")}</Label>
-          {(!slotsQuery.data?.results ||
-            slotsQuery.data.results.length === 0) &&
-          selectedDate &&
-          resource ? (
+          {showNoSlotsMessage ? (
             <div className="rounded-md border border-input px-3 py-2 text-sm text-gray-500">
               {t("no_slots_available")}
             </div>
@@ -159,16 +208,18 @@ export function AppointmentQuestion({
                 !selectedDate || !resource || slotsQuery.isLoading || disabled
               }
               value={value.slot_id}
-              onValueChange={(slotId) => {
-                handleUpdate({ slot_id: slotId });
-              }}
+              onValueChange={(slotId) => handleUpdate({ slot_id: slotId })}
             >
-              <SelectTrigger>
+              <SelectTrigger
+                className={cn(
+                  hasError(APPOINTMENT_FIELDS.SLOT.key) && "border-red-500",
+                )}
+              >
                 <SelectValue placeholder={t("select_time_slot")} />
               </SelectTrigger>
               <SelectContent>
-                {slotsQuery.data?.results &&
-                  groupSlotsByAvailability(slotsQuery.data.results).map(
+                {hasSlots ? (
+                  groupSlotsByAvailability(slots).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
                         <div className="px-2 py-1.5 text-sm font-semibold">
@@ -198,8 +249,8 @@ export function AppointmentQuestion({
                         })}
                       </div>
                     ),
-                  )}
-                {slotsQuery.data?.results.length === 0 && (
+                  )
+                ) : (
                   <div className="px-2 py-4 text-center text-sm text-gray-500">
                     {t("no_slots_available")}
                   </div>
@@ -207,6 +258,11 @@ export function AppointmentQuestion({
               </SelectContent>
             </Select>
           )}
+          <FieldError
+            fieldKey={APPOINTMENT_FIELDS.SLOT.key}
+            questionId={question.id}
+            errors={errors}
+          />
         </div>
       </div>
     </div>

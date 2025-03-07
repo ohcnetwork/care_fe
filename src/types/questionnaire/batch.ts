@@ -19,6 +19,7 @@ export interface QuestionValidationError {
   error?: string;
   msg?: string;
   type?: string;
+  field_key?: string;
 }
 
 export interface DetailedValidationError {

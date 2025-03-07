@@ -30,8 +30,10 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
+import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -517,19 +519,44 @@ export function QuestionnaireForm({
         }
 
         if (q.required) {
-          const response = form.responses.find((r) => r.question_id === q.id);
-          const hasValue = response?.values?.some(
-            (v) => v.value !== undefined && v.value !== null && v.value !== "",
-          );
+          // Handle appointment validation
+          if (q.type === "structured") {
+            const response = form.responses.find((r) => r.question_id === q.id);
+            switch (q.structured_type) {
+              case "appointment": {
+                const appointmentData =
+                  (response?.values?.[0]
+                    ?.value as CreateAppointmentQuestion[]) || [];
 
-          if (!hasValue) {
-            errors.push({
-              question_id: q.id,
-              error: t("field_required"),
-              type: "validation_error",
-              msg: t("field_required"),
-            });
-            firstErrorId = firstErrorId ? firstErrorId : q.id;
+                const appointmentErrors = validateAppointmentQuestion(
+                  appointmentData[0],
+                  q.id,
+                );
+                errors.push(...appointmentErrors);
+                if (appointmentErrors.length > 0) {
+                  firstErrorId = firstErrorId ? firstErrorId : q.id;
+                }
+                return;
+              }
+              default:
+                break;
+            }
+          } else {
+            const response = form.responses.find((r) => r.question_id === q.id);
+            const hasValue = response?.values?.some(
+              (v) =>
+                v.value !== undefined && v.value !== null && v.value !== "",
+            );
+
+            if (!hasValue) {
+              errors.push({
+                question_id: q.id,
+                error: t("field_required"),
+                type: "validation_error",
+                msg: t("field_required"),
+              });
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
           }
         }
       };
