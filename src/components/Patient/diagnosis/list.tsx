@@ -26,6 +26,7 @@ interface DiagnosisListProps {
   hideFullViewButton?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
+  overviewSection?: boolean;
 }
 
 export function DiagnosisList({
@@ -35,16 +36,19 @@ export function DiagnosisList({
   encounter,
   className = "",
   readOnly = false,
+  overviewSection = true,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  let limit;
+  overviewSection ? (limit = 14) : (limit = 100);
 
   const { data: diagnoses, isLoading } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
       queryParams: encounterId
-        ? { encounter: encounterId, limit: 100 }
-        : { limit: 100 },
+        ? { encounter: encounterId, limit: limit }
+        : { limit: limit },
     }),
   });
 

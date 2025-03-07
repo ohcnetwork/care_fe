@@ -116,6 +116,7 @@ export function FullViewDialog({
                   patientId={patientId}
                   encounterId={encounterId}
                   hideFullViewButton={true}
+                  overviewSection={false}
                 />
               </div>
             </TabsContent>
@@ -126,6 +127,7 @@ export function FullViewDialog({
                   patientId={patientId}
                   encounterId={encounterId}
                   hideFullViewButton={true}
+                  overviewSection={false}
                 />
               </div>
             </TabsContent>
@@ -136,6 +138,7 @@ export function FullViewDialog({
                   patientId={patientId}
                   encounterId={encounterId}
                   hideFullViewButton={true}
+                  overviewSection={false}
                 />
               </div>
             </TabsContent>

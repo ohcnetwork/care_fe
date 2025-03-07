@@ -26,6 +26,7 @@ interface SymptomsListProps {
   hideFullViewButton?: boolean;
   encounter?: Encounter;
   readOnly?: boolean;
+  overviewSection?: boolean;
 }
 
 export function SymptomsList({
@@ -34,16 +35,19 @@ export function SymptomsList({
   className,
   hideFullViewButton,
   readOnly = false,
+  overviewSection = true,
 }: SymptomsListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
+  let limit;
+  overviewSection ? (limit = 14) : (limit = 100);
 
   const { data: symptoms, isLoading } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: encounterId
-        ? { encounter: encounterId, limit: 100 }
-        : { limit: 100 },
+        ? { encounter: encounterId, limit: limit }
+        : { limit: limit },
     }),
   });
 

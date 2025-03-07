@@ -54,6 +54,7 @@ interface AllergyListProps {
   encounter?: Encounter;
   readOnly?: boolean;
   encounterStatus?: Encounter["status"];
+  overviewSection?: boolean;
 }
 
 export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
@@ -76,9 +77,11 @@ export function AllergyList({
   readOnly = false,
   encounterStatus,
   hideFullViewButton,
+  overviewSection = true,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
-
+  let limit;
+  overviewSection ? (limit = 14) : (limit = 100);
   const { data: allergies, isLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId, encounterStatus],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
@@ -87,7 +90,7 @@ export function AllergyList({
         encounter: completedEncounterStatus.includes(encounterStatus as string)
           ? encounterId
           : undefined,
-        limit: 100,
+        limit: limit,
       },
     }),
   });
