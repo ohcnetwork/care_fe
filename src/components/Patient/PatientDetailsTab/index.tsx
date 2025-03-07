@@ -1,8 +1,6 @@
-import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
-import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
 
 import { Patient } from "@/types/emr/newPatient";
 
@@ -10,6 +8,7 @@ import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientUsers } from "./PatientUsers";
 import { ResourceRequests } from "./ResourceRequests";
+import { Updates } from "./patientUpdates";
 
 export interface PatientProps {
   facilityId?: string;
@@ -18,37 +17,6 @@ export interface PatientProps {
 }
 
 export const patientTabs = [
-  {
-    route: "demography",
-    component: Demography,
-  },
-  {
-    route: "encounters",
-    component: EncounterHistory,
-  },
-  {
-    route: "health-profile",
-    component: HealthProfileSummary,
-  },
-  {
-    route: "updates",
-    component: Updates,
-  },
-  {
-    route: "resource_requests",
-    component: ResourceRequests,
-  },
-  {
-    route: "users",
-    component: PatientUsers,
-  },
-  {
-    route: "files",
-    component: PatientFilesTab,
-  },
-];
-
-export const facilityPatientTabs = [
   {
     route: "demography",
     component: Demography,
@@ -67,7 +35,7 @@ export const facilityPatientTabs = [
   },
   {
     route: "updates",
-    component: QuestionnaireResponsesList,
+    component: Updates,
   },
   {
     route: "resource_requests",

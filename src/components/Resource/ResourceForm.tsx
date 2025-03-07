@@ -76,7 +76,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         name: z.string(),
       })
       .nullable(),
-    assigned_to: z.string().min(1, { message: t("field_required") }),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z.string().min(1, { message: t("field_required") }),
@@ -85,6 +84,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       .min(1, { message: t("field_required") }),
     referring_facility_contact_number: validators().phoneNumber.required,
     priority: z.number().default(1),
+    assigned_to: id
+      ? z.string().min(1, { message: t("field_required") })
+      : z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -410,26 +412,26 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="assigned_to"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel required>{t("assigned_to")}</FormLabel>
-                          <FormControl>
-                            <div data-cy="select-assigned-user">
+                    {id && (
+                      <FormField
+                        control={form.control}
+                        name="assigned_to"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel required>{t("assigned_to")}</FormLabel>
+                            <FormControl>
                               <UserSelector
                                 selected={assignedToUser}
                                 onChange={handleUserChange}
                                 placeholder={t("search_users")}
                                 noOptionsMessage={t("no_users_found")}
                               />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 </div>
                 <Separator />
