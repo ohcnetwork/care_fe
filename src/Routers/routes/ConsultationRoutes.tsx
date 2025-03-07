@@ -40,33 +40,34 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:id":
     ({ patientId, id }) => (
       <QuestionnaireResponseView responseId={id} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/:tab": ({
-    facilityId,
-    patientId,
-    encounterId,
-    tab,
-  }) => (
-    <EncounterShow
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      tab={tab}
-    />
-  ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/:tab/:subPage":
-    ({ facilityId, encounterId, patientId, tab, subPage }) => (
+  ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
+    acc[`/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab`] =
+      ({ id, encounterId, tab, patientId }) => (
+        <EncounterShow
+          patientId={patientId}
+          encounterId={encounterId}
+          tab={tab}
+          facilityId={identifier === "facility" ? id : undefined}
+        />
+      );
+    acc[
+      `/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab/:subPage`
+    ] = ({ id, encounterId, patientId, tab, subPage }) => (
       <EncounterShow
-        facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
         tab={tab}
+        facilityId={identifier === "facility" ? id : undefined}
         subPage={subPage}
       />
-    ),
+    );
+    return acc;
+  }, {}),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
