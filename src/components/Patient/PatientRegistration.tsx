@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { InfoIcon } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -77,6 +78,7 @@ export default function PatientRegistration(
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [isDeceased, setIsDeceased] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -99,6 +101,7 @@ export default function PatientRegistration(
               return parsedDate.isValid() && !parsedDate.isAfter(dayjs());
             }, t("enter_valid_dob"))
             .optional(),
+          death_datetime: z.string().nullable().optional(),
           age: z
             .number()
             .int()
@@ -261,27 +264,35 @@ export default function PatientRegistration(
       setSelectedLevels([
         patientQuery.data.geo_organization as unknown as Organization,
       ]);
+      setIsDeceased(!!patientQuery.data.death_datetime);
       form.reset({
-        ...patientQuery.data,
+        name: patientQuery.data.name || "",
+        phone_number: patientQuery.data.phone_number || "",
+        emergency_phone_number: patientQuery.data.emergency_phone_number || "",
         same_phone_number:
           patientQuery.data.phone_number ===
           patientQuery.data.emergency_phone_number,
         same_address:
           patientQuery.data.address === patientQuery.data.permanent_address,
+        gender: patientQuery.data.gender as (typeof GENDERS)[number],
+        blood_group: patientQuery.data.blood_group,
         age_or_dob: patientQuery.data.date_of_birth ? "dob" : "age",
+        date_of_birth: patientQuery.data.date_of_birth || undefined,
         age:
           !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
             ? new Date().getFullYear() - patientQuery.data.year_of_birth
             : undefined,
-        date_of_birth: patientQuery.data.date_of_birth
-          ? patientQuery.data.date_of_birth
-          : undefined,
+        address: patientQuery.data.address || "",
+        permanent_address: patientQuery.data.permanent_address || "",
+        pincode: patientQuery.data.pincode || undefined,
+        nationality: patientQuery.data.nationality || "India",
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
+        death_datetime: patientQuery.data.death_datetime || undefined,
       } as unknown as z.infer<typeof formSchema>);
     }
-  }, [patientQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [patientQuery.data]);
 
   const showDuplicate =
     !patientPhoneSearch.isLoading &&
@@ -578,6 +589,79 @@ export default function PatientRegistration(
                 </TabsContent>
               </Tabs>
 
+              <div className="space-y-4 rounded-lg bg-white p-4 border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-semibold">
+                      {t("deceased_status")}
+                    </h2>
+                    <span
+                      className="text-sm text-gray-500
+"
+                    >
+                      ({t("only_mark_if_applicable")})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="is-deceased"
+                      checked={isDeceased}
+                      onCheckedChange={(checked) => {
+                        setIsDeceased(checked as boolean);
+                        form.setValue(
+                          "death_datetime",
+                          checked ? form.getValues("death_datetime") : null,
+                        );
+                      }}
+                      data-cy="is-deceased-checkbox"
+                    />
+                    <label
+                      htmlFor="is-deceased"
+                      className="text-sm font-medium"
+                    >
+                      {t("patient_is_deceased")}
+                    </label>
+                  </div>
+                </div>
+
+                {(isDeceased || form.watch("death_datetime")) && (
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 mb-4 text-gray-500">
+                      <InfoIcon className="w-4 h-4" />
+                      <p className="text-sm text-gray-500">
+                        {t("deceased_disclaimer")}
+                      </p>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="death_datetime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("date_and_time_of_death")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="datetime-local"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value || undefined;
+                                field.onChange(value);
+                                setIsDeceased(!!value);
+                              }}
+                              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                              id="death-datetime"
+                              data-cy="death-datetime-input"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+
               <FormField
                 control={form.control}
                 name="address"
@@ -733,7 +817,11 @@ export default function PatientRegistration(
               <Button
                 type="submit"
                 variant="primary"
-                disabled={isCreatingPatient || isUpdatingPatient}
+                disabled={
+                  isCreatingPatient ||
+                  isUpdatingPatient ||
+                  !form.formState.isDirty
+                }
               >
                 {patientId ? t("save") : t("save_and_continue")}
               </Button>

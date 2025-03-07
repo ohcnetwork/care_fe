@@ -35,10 +35,10 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6 space-y-8">
+    <div className="">
+      <div className="container p-6 mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="bg-white rounded-lg p-6 shadow-sm">
+        <div className="p-6 bg-white rounded-lg shadow-sm">
           <div className="flex items-center gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -53,20 +53,20 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
         {/* Quick Actions Section */}
         <div className="">
-          <h2 className="text-xl font-semibold mb-6 text-gray-900">
+          <h2 className="mb-6 text-xl font-semibold text-gray-900">
             {t("quick_actions")}
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {shortcuts.map((shortcut) => (
               <Link
                 key={shortcut.href}
                 href={shortcut.href}
                 className="block h-full transition-all duration-200 hover:scale-102 hover:shadow-md"
               >
-                <Card className="border-0 shadow-sm hover:bg-gray-50 h-full">
-                  <CardHeader className="h-full flex flex-row items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <shortcut.icon className="h-6 w-6 text-primary" />
+                <Card className="h-full border-0 shadow-sm hover:bg-gray-50">
+                  <CardHeader className="flex flex-row items-center h-full gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <shortcut.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">
