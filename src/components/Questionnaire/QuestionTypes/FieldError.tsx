@@ -1,15 +1,33 @@
-import { FieldErrorProps } from "@/types/questionnaire/validation";
+import { useTranslation } from "react-i18next";
 
-export function FieldError<T extends string>({
+import { QuestionValidationError } from "@/types/questionnaire/batch";
+
+interface FieldErrorProps {
+  fieldKey: string;
+  questionId: string;
+  errors?: QuestionValidationError[];
+  index?: number;
+}
+
+export function FieldError({
   fieldKey,
   questionId,
   errors,
-}: FieldErrorProps<T>) {
+  index,
+}: FieldErrorProps) {
+  const { t } = useTranslation();
   const error = errors?.find(
-    (error) => error.question_id === questionId && error.field_key === fieldKey,
-  )?.error;
+    (e) =>
+      e.question_id === questionId &&
+      e.field_key === fieldKey &&
+      (index === undefined || e.index === index),
+  );
 
   if (!error) return null;
 
-  return <p className="text-sm text-red-500 mt-1">{error}</p>;
+  return (
+    <div className="text-sm text-red-500 mt-1">
+      {error.error || error.msg || t("field_required")}
+    </div>
+  );
 }

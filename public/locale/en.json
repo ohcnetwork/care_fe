@@ -1300,6 +1300,7 @@
   "invalid_url_http_https": "URL should start with http:// or https://",
   "invalid_url_javascript": "URL should not include javascript, please enter a valid URL.",
   "invalid_username": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+  "invalid_value": "Invalid value",
   "inventory_management": "Inventory Management",
   "investigation_report": "Investigation Report",
   "investigation_report_for_{{name}}": "Investigation Report for {{name}}",

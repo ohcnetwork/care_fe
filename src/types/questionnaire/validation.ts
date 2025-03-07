@@ -22,22 +22,21 @@ export function createFieldKeys<T extends { [K: string]: string }>(keys: T) {
   return keys as { readonly [P in keyof T]: T[P] };
 }
 
-export function useFieldError<T extends string>(
+export function useFieldError(
   questionId: string,
   errors?: QuestionValidationError[],
+  index?: number,
 ) {
-  return {
-    getError: (fieldKey: T) =>
-      errors?.find(
-        (error) =>
-          error.question_id === questionId && error.field_key === fieldKey,
-      )?.error,
-    hasError: (fieldKey: T) =>
-      errors?.some(
-        (error) =>
-          error.question_id === questionId && error.field_key === fieldKey,
-      ),
+  const hasError = (fieldKey: string) => {
+    return errors?.some(
+      (error) =>
+        error.question_id === questionId &&
+        error.field_key === fieldKey &&
+        (index === undefined || error.index === index),
+    );
   };
+
+  return { hasError };
 }
 
 export function createValidationError(
@@ -58,17 +57,47 @@ export function validateFields(
   value: any,
   questionId: string,
   fields: FieldDefinitions,
+  index?: number,
 ): QuestionValidationError[] {
-  return Object.entries(fields).reduce((errors, [_, field]) => {
-    if (
-      field.required &&
-      (!value?.[field.key] ||
-        (field.validate && !field.validate(value[field.key])))
-    ) {
-      errors.push(
-        createValidationError(questionId, field.key, t("field_required")),
-      );
-    }
-    return errors;
-  }, [] as QuestionValidationError[]);
+  return Object.entries(fields).reduce(
+    (errors: QuestionValidationError[], [_, field]) => {
+      // Handle case where value itself is undefined
+      if (!value) {
+        if (field.required) {
+          errors.push({
+            question_id: questionId,
+            error: t("field_required"),
+            type: "validation_error",
+            field_key: field.key,
+            index,
+          });
+        }
+        return errors;
+      }
+
+      // Check if the field exists and has a value
+      const hasField = field.key in value;
+      const fieldValue = value[field.key];
+
+      if (field.required && (!hasField || !fieldValue)) {
+        errors.push({
+          question_id: questionId,
+          error: t("field_required"),
+          type: "validation_error",
+          field_key: field.key,
+          index,
+        });
+      } else if (hasField && field.validate && !field.validate(fieldValue)) {
+        errors.push({
+          question_id: questionId,
+          error: t("invalid_value"),
+          type: "validation_error",
+          field_key: field.key,
+          index,
+        });
+      }
+      return errors;
+    },
+    [],
+  );
 }
