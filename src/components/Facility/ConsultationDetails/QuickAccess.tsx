@@ -6,6 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import EncounterActions from "@/components/Encounter/EncounterActions";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
@@ -43,6 +44,15 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
           <div className="w-full border-t border-dashed border-gray-300" />
         </section>
       )}
+
+      {/* Encounter Actions */}
+      <section>
+        <h3 className="text-lg font-medium text-gray-950 mb-1">
+          {t("actions")}
+        </h3>
+
+        <EncounterActions encounter={encounter} />
+      </section>
 
       {/* Departments and Teams */}
       <section>

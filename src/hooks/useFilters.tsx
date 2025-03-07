@@ -26,9 +26,11 @@ interface FilterBadgeProps {
 export default function useFilters({
   limit = 14,
   cacheBlacklist = [],
+  disableCache = false,
 }: {
   limit?: number;
   cacheBlacklist?: string[];
+  disableCache?: boolean;
 }) {
   const { t } = useTranslation();
   const hasPagination = limit > 0;
@@ -40,6 +42,7 @@ export default function useFilters({
   }>({ value: false });
 
   const updateCache = (query: QueryParam) => {
+    if (disableCache) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };

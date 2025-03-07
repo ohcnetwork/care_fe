@@ -119,7 +119,7 @@ export default function UserForm({
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      user_type: "staff",
+      user_type: "nurse",
       username: "",
       password: "",
       c_password: "",

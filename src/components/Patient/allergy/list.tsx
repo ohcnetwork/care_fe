@@ -50,6 +50,7 @@ interface AllergyListProps {
   patientId: string;
   encounterId?: string;
   className?: string;
+  readOnly?: boolean;
 
   encounterStatus?: Encounter["status"];
 }
@@ -68,10 +69,10 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 };
 
 export function AllergyList({
-  facilityId,
   patientId,
   encounterId,
-  className,
+  className = "",
+  readOnly = false,
   encounterStatus,
 }: AllergyListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
@@ -90,11 +91,7 @@ export function AllergyList({
 
   if (isLoading) {
     return (
-      <AllergyListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -113,11 +110,7 @@ export function AllergyList({
 
   if (!filteredAllergies?.length) {
     return (
-      <AllergyListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-      >
+      <AllergyListLayout readOnly={readOnly} className={className}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_allergies_recorded")}</p>
         </CardContent>
@@ -211,12 +204,7 @@ export function AllergyList({
   }
 
   return (
-    <AllergyListLayout
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      className={className}
-    >
+    <AllergyListLayout readOnly={readOnly} className={className}>
       <Table className="border-separate border-spacing-y-0.5">
         <TableHeader>
           <TableRow className="rounded-md overflow-hidden bg-gray-100">
@@ -282,25 +270,21 @@ export function AllergyList({
 }
 
 const AllergyListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("border-none rounded-sm", className)}>
       <CardHeader className="flex justify-between flex-row px-4 pt-4 pb-2">
         <CardTitle>{t("allergies")}</CardTitle>
-        {facilityId && encounterId && (
+        {!readOnly && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/allergy_intolerance`}
+            href={`questionnaire/allergy`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
             <CareIcon icon="l-pen" className="w-4 h-4" />
