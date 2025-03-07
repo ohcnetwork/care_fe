@@ -178,7 +178,11 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       })(body),
     onSuccess: (data: Patient) => {
       toast.success(t("patient_created_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["patients"],
+      });
       publish("patient:upsert", data);
+      localStorage.setItem("selectedPatient", JSON.stringify(data));
       createAppointment({
         patient: data.id,
         reason_for_visit: reason ?? "",
