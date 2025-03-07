@@ -41,7 +41,7 @@ export default function DevicesList({ facilityId }: Props) {
       pathParams: { facility_id: facilityId },
       queryParams: {
         search_text: qParams.search_text,
-        current_location: selectedLocation?.id || undefined,
+        current_location: qParams.current_location,
         limit: resultsPerPage,
         offset: (qParams.page - 1) * resultsPerPage,
       },
