@@ -147,7 +147,7 @@ export function LandingPage() {
                     }
                     onChange={handleSearchChange}
                     onClick={handleInputClick}
-                    placeholder="Enter district name to find facilities."
+                    placeholder={t("search_placeholder")}
                     className="flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-gray-500 cursor-pointer shadow-none ring-0"
                   />
                   {(searchQuery || selectedOrganization) && (
