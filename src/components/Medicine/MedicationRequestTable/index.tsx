@@ -199,6 +199,7 @@ export default function MedicationRequestTable({
                         <div
                           className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
                           onClick={() => setShowStopped(!showStopped)}
+                          data-cy="toggle-stopped-medications"
                         >
                           <CareIcon
                             icon={showStopped ? "l-eye-slash" : "l-eye"}

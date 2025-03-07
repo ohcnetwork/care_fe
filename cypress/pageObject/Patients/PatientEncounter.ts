@@ -30,37 +30,69 @@ export class PatientEncounter {
     method,
     notes,
   ) {
-    cy.get('[data-cy="question-medication-request"]').click();
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(medicineName)
-      .click();
-    cy.get('input[inputmode="numeric"]').should("exist").type(dosage);
-    cy.get('[data-cy="frequency"]').click();
-    cy.get('[role="option"]').contains(frequency).click();
-    cy.contains("Select additional instructions").click();
-    cy.get('[role="listbox"]')
-      .find('[role="option"]')
-      .contains(instructions)
-      .click();
-    cy.contains("Select route").click();
-    cy.get('[role="listbox"]').find('[role="option"]').contains(route).click();
-    cy.contains("Select site").click();
-    cy.get('[role="listbox"]').find('[role="option"]').contains(site).click();
-    cy.contains("Select method").click();
-    cy.get('[role="listbox"]').get('[role="option"]').contains(method).click();
+    cy.clickAndSelectOption(
+      '[data-cy="question-medication-request"]',
+      medicineName,
+    );
+    cy.get('[data-cy="dosage"]').click().type(dosage);
+    cy.clickAndSelectOption('[data-cy="dosage"]', dosage);
+    cy.clickAndSelectOption('[data-cy="frequency"]', frequency);
+    cy.clickAndSelectOption('[data-cy="instructions"]', instructions);
+    cy.clickAndSelectOption('[data-cy="route"]', route);
+    cy.clickAndSelectOption('[data-cy="site"]', site);
+    cy.clickAndSelectOption('[data-cy="method"]', method);
     cy.get('[data-cy="notes"]').click();
     cy.get('[data-cy="notes-textarea"]').type(notes);
-
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
+    return this;
+  }
+  verifyMedication(
+    medicineName,
+    dosage,
+    frequency,
+    instructions,
+    route,
+    site,
+    method,
+    notes,
+  ) {
+    cy.get('[data-cy="medications-table"]').within(() => {
+      cy.contains("td", medicineName).should("exist");
+      cy.contains("td", dosage).should("exist");
+      cy.contains("td", frequency).should("exist");
+      cy.contains("td", instructions).should("exist");
+      cy.contains("td", route).should("exist");
+      cy.contains("td", site).should("exist");
+      cy.contains("td", method).should("exist");
+      cy.contains("td", notes).should("exist");
+    });
     return this;
   }
   removeMedication() {
-    cy.get('[data-cy="medication-remove"]').first().click();
+    cy.get('[data-cy="remove-medication"]').first().click();
     cy.verifyAndClickElement('[data-cy="confirm-remove-medication"]', "Remove");
-    this.clickSubmitQuestionnaire();
-    this.verifyQuestionnaireSubmission();
+    return this;
+  }
+  verifyDeletedMedication(
+    medicineName,
+    dosage,
+    frequency,
+    instructions,
+    route,
+    site,
+    method,
+    notes,
+  ) {
+    cy.get('[data-cy="toggle-stopped-medications"]').click();
+    cy.get('[data-cy="medications-table"]').within(() => {
+      cy.contains("td", medicineName).should("exist");
+      cy.contains("td", dosage).should("exist");
+      cy.contains("td", frequency).should("exist");
+      cy.contains("td", instructions).should("exist");
+      cy.contains("td", route).should("exist");
+      cy.contains("td", site).should("exist");
+      cy.contains("td", method).should("exist");
+      cy.contains("td", notes).should("exist");
+    });
   }
   clickUpdateEncounter() {
     cy.verifyAndClickElement(

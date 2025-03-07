@@ -6,14 +6,15 @@ const patientEncounter = new PatientEncounter();
 
 describe("Patient Prescription Management", () => {
   beforeEach(() => {
-    cy.loginByApi("devnurse");
+    cy.loginByApi("testnurse4");
     cy.visit("/");
   });
 
   it("should add a new medicine for the patient", () => {
     facilityCreation.selectFacility("GHC payyanur");
-    const medicineName = "Senna 15 mg oral tablet";
+    const medicineName = "Estriol 1 mg oral tablet";
     const dosage = 6;
+    const dosageInput = "6 Milligram";
     const frequency = "BID (1-0-1)";
     const instructions = "Until symptoms improve";
     const route = "Sublabial route";
@@ -34,16 +35,32 @@ describe("Patient Prescription Management", () => {
         site,
         method,
         notes,
-      );
-  });
-  it("should delete prescription", () => {
-    facilityCreation.selectFacility("GHC payyanur");
-
-    patientEncounter
-      .navigateToEncounters()
-      .openFirstEncounterDetails()
+      )
+      .submitQuestionnaire()
       .clickMedicinesTab()
+      .verifyMedication(
+        medicineName,
+        dosageInput,
+        frequency,
+        instructions,
+        route,
+        site,
+        method,
+        notes,
+      )
       .clickEditPrescription()
-      .removeMedication();
+      .removeMedication()
+      .submitQuestionnaire()
+      .clickMedicinesTab()
+      .verifyDeletedMedication(
+        medicineName,
+        dosageInput,
+        frequency,
+        instructions,
+        route,
+        site,
+        method,
+        notes,
+      );
   });
 });
