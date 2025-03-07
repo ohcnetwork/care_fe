@@ -84,7 +84,7 @@ export default function ServiceHistoryForm({
       onSuccess: (resp: ServiceHistory) => {
         toast.success(t("service_record_added_successfully"));
         queryClient.invalidateQueries({
-          queryKey: ["deviceserviceHistory", facilityId, deviceId],
+          queryKey: ["deviceServiceHistory", facilityId, deviceId],
         });
         form.reset();
         onSubmitSuccess?.(resp);
@@ -108,7 +108,7 @@ export default function ServiceHistoryForm({
       onSuccess: (resp: ServiceHistory) => {
         toast.success(t("service_record_updated_successfully"));
         queryClient.invalidateQueries({
-          queryKey: ["deviceserviceHistory", facilityId, deviceId],
+          queryKey: ["deviceServiceHistory", facilityId, deviceId],
         });
         form.reset();
         onSubmitSuccess?.(resp);

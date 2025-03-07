@@ -48,7 +48,7 @@ export default function DeviceServiceHistory({
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { data: serviceHistory, isLoading } = useQuery({
-    queryKey: ["deviceserviceHistory", facilityId, deviceId, qParams],
+    queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
     queryFn: query(deviceApi.serviceHistory, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
@@ -73,8 +73,16 @@ export default function DeviceServiceHistory({
 
   const handleServiceSheetClose = () => {
     queryClient.invalidateQueries({
-      queryKey: ["deviceserviceHistory", facilityId, deviceId],
+      queryKey: ["deviceServiceHistory", facilityId, deviceId],
     });
+  };
+
+  const handleEditServiceSheetOpen = (open: boolean) => {
+    setIsEditServiceSheetOpen(open);
+    if (!open) {
+      handleServiceSheetClose();
+      setSelectedServiceHistory(null);
+    }
   };
 
   return (
@@ -93,8 +101,8 @@ export default function DeviceServiceHistory({
       <CardContent>
         {isLoading ? (
           <TableSkeleton count={5} />
-        ) : serviceHistory && serviceHistory?.results?.length > 0 ? (
-          <>
+        ) : (
+          <div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -104,28 +112,36 @@ export default function DeviceServiceHistory({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {serviceHistory.results.map((service: ServiceHistory) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">
-                      {format(new Date(service.serviced_on), "PPP")}
-                    </TableCell>
-                    <TableCell className="max-w-md truncate">
-                      {service.note}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditService(service)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                {serviceHistory?.results?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      {t("service_records_none")}
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  serviceHistory?.results.map((service: ServiceHistory) => (
+                    <TableRow key={service.id}>
+                      <TableCell className="font-medium">
+                        {format(new Date(service.serviced_on), "PPP")}
+                      </TableCell>
+                      <TableCell className="max-w-md truncate">
+                        {service.note}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditService(service)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
-            <div className="flex w-full items-center justify-center">
+            <div className="flex w-full items-center justify-center mt-4">
               <div
                 className={cn(
                   "flex w-full justify-center",
@@ -142,23 +158,13 @@ export default function DeviceServiceHistory({
                 />
               </div>
             </div>
-          </>
-        ) : (
-          <div className="text-center py-6 text-muted-foreground">
-            {t("service_records_none")}
           </div>
         )}
       </CardContent>
       {selectedServiceHistory && (
         <EditServiceHistorySheet
           open={isEditServiceSheetOpen}
-          setOpen={(open) => {
-            setIsEditServiceSheetOpen(open);
-            if (!open) {
-              handleServiceSheetClose();
-              setSelectedServiceHistory(null);
-            }
-          }}
+          setOpen={handleEditServiceSheetOpen}
           facilityId={facilityId}
           deviceId={deviceId}
           serviceRecord={selectedServiceHistory}
