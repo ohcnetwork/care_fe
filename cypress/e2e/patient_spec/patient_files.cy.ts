@@ -8,13 +8,13 @@ const patientFiles = new PatientFiles();
 
 describe("Patient Files", () => {
   beforeEach(() => {
-    cy.loginByApi("raj");
-    cy.visit("/");
-    facilityCreation.selectFacility("MEDICAL FACILITY");
-
-    // cy.loginByApi("nihal-nurse");
+    // cy.loginByApi("raj");
     // cy.visit("/");
-    // facilityCreation.selectFacility("GHC payyanur");
+    // facilityCreation.selectFacility("MEDICAL FACILITY");
+
+    cy.loginByApi("nihal-nurse");
+    cy.visit("/");
+    facilityCreation.selectFacility("GHC payyanur");
 
     patientEncounter
       .navigateToEncounters()
@@ -172,13 +172,14 @@ describe("Patient Files", () => {
   it("File Accessible by another user", () => {
     // Login as a new user
 
-    // cy.loginByApi("devnurse");
-    // cy.visit("/");
-    // facilityCreation.selectFacility("GHC payyanur");
-
-    cy.loginByApi("raj");
+    cy.loginByApi("devnurse");
     cy.visit("/");
-    facilityCreation.selectFacility("MEDICAL FACILITY");
+    facilityCreation.selectFacility("GHC payyanur");
+
+    // cy.loginByApi("raj");
+    // cy.visit("/");
+    // facilityCreation.selectFacility("MEDICAL FACILITY");
+
     patientEncounter
       .navigateToEncounters()
       .openFirstEncounterDetails()
