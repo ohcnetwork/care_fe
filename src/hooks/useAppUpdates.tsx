@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import { checkForUpdate } from "@/components/Common/UpdatableApp";
-
-import { useToast } from "@/hooks/useToast";
 
 const APP_VERSION_KEY = "app-version";
 const APP_UPDATED_KEY = "app-updated";
@@ -16,7 +13,6 @@ export const useAppUpdates = (silentlyAutoUpdate?: boolean) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { t } = useTranslation();
-  const { toast } = useToast();
 
   useEffect(() => {
     checkForUpdate()
@@ -25,6 +21,7 @@ export const useAppUpdates = (silentlyAutoUpdate?: boolean) => {
         const appUpdated = localStorage.getItem(APP_UPDATED_KEY);
         if (appUpdated === "true") {
           setAppUpdated(true);
+          localStorage.removeItem(APP_UPDATED_KEY);
         }
       });
   }, []);
@@ -58,23 +55,20 @@ export const useAppUpdates = (silentlyAutoUpdate?: boolean) => {
 
   useEffect(() => {
     if (newVersion && !silentlyAutoUpdate) {
-      toast({
-        title: t("software_update"),
+      toast(t("software_update"), {
         description: t("a_new_version_of_care_is_available"),
         duration: Infinity,
-        action: (
-          <Button onClick={updateApp} disabled={isUpdating} variant="white">
-            {isUpdating ? t("updating") : t("update")}
-          </Button>
-        ),
+        action: {
+          label: isUpdating ? t("updating") : t("update"),
+          onClick: updateApp,
+        },
       });
     }
   }, [newVersion, isUpdating]);
 
   useEffect(() => {
     if (appUpdated) {
-      toast({
-        title: t("updated_successfully"),
+      toast(t("updated_successfully"), {
         description: t("now_using_the_latest_version_of_care"),
         duration: 5000,
       });

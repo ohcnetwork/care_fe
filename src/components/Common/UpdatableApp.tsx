@@ -4,6 +4,7 @@ import { useAppUpdates } from "@/hooks/useAppUpdates";
 
 const META_URL = "/build-meta.json";
 const APP_VERSION_KEY = "app-version";
+const APP_UPDATED_KEY = "app-updated";
 
 interface UpdatableAppProps {
   children: ReactNode;
@@ -32,6 +33,7 @@ export const checkForUpdate = async () => {
 
   if (appVersion !== meta.version) {
     console.info("App can be updated.");
+    localStorage.removeItem(APP_UPDATED_KEY);
     return meta.version as string;
   }
 };
