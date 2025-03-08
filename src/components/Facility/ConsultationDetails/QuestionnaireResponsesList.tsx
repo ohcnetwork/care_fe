@@ -25,6 +25,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
 }
@@ -312,6 +313,7 @@ export default function QuestionnaireResponsesList({
         }),
         encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
+        subject_type: encounter ? "encounter" : "patient",
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,

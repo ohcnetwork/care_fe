@@ -9,7 +9,7 @@ const md = new MarkdownIt({
   breaks: true,
   linkify: true,
   typographer: true,
-  quotes: ['""', "''"],
+  quotes: "“”‘’",
 });
 
 export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
