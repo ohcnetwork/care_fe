@@ -12,7 +12,7 @@ describe("Patient Files", () => {
     // cy.visit("/");
     // facilityCreation.selectFacility("MEDICAL FACILITY");
 
-    cy.loginByApi("nihal-nurse");
+    cy.loginByApi("nurse");
     cy.visit("/");
     facilityCreation.selectFacility("GHC payyanur");
 
