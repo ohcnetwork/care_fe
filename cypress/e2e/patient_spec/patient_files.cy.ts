@@ -190,7 +190,9 @@ describe("Patient Files", () => {
 
       // Verify archieved file is accessible to another user
 
-      .clickViewFile("Cypress Image Test 2 1741396881203.png")
+      .clickViewFile(fileDisplayNames[1])
+      .closeFilePreview()
+      .clickViewFile(fileDisplayNames[0])
       .closeFilePreview()
 
       // Verify archieved file is not accessible to another user
