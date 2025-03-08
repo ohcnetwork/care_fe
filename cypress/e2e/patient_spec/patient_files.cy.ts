@@ -193,14 +193,14 @@ describe("Patient Files", () => {
     patientFiles
       .clickFilesTab()
 
-      // Verify archieved file is accessible to another user
+      // Verify active file is accessible to other user
 
       .clickViewFile(fileDisplayNames[1])
       .closeFilePreview()
       .clickViewFile(fileDisplayNames[0])
       .closeFilePreview()
 
-      // Verify archieved file is not accessible to another user
+      // Verify archived file is not accessible to other user
 
       .filterArchivedFiles()
       .verifyNotAccessible(newFileDisplayName, archiveReason)
