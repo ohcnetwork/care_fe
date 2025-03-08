@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { ChevronLeft, ChevronRight, Fullscreen } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -166,7 +167,8 @@ export function FullViewDialog({
                     {t("date_and_time_of_assessment")}
                   </div>
                   <div className="text-base">
-                    {t("encounter_fallback_time")}
+                    {encounter?.period.start &&
+                      format(new Date(encounter.period.start), "PPp")}
                   </div>
                 </div>
                 <div className="flex gap-4 mb-4">

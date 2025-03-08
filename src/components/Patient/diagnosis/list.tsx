@@ -101,6 +101,7 @@ export function DiagnosisList({
       encounterId={encounterId}
       className={className}
       readOnly={readOnly}
+      encounter={encounter}
       hideFullViewButton={hideFullViewButton}
     >
       <>

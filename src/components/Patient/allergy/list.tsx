@@ -76,6 +76,7 @@ export function AllergyList({
   className = "",
   readOnly = false,
   encounterStatus,
+  encounter,
   hideFullViewButton,
   overviewSection = true,
 }: AllergyListProps) {
@@ -102,6 +103,7 @@ export function AllergyList({
         encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
+        encounter={encounter}
         className={className}
       >
         <CardContent className="px-2 pb-2">
@@ -127,6 +129,7 @@ export function AllergyList({
         encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
+        encounter={encounter}
         className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
@@ -227,6 +230,7 @@ export function AllergyList({
       encounterId={encounterId ?? ""}
       className={className}
       readOnly={readOnly}
+      encounter={encounter}
       hideFullViewButton={hideFullViewButton}
     >
       <Table className="border-separate border-spacing-y-0.5">

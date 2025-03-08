@@ -33,6 +33,7 @@ export function SymptomsList({
   patientId,
   encounterId,
   className,
+  encounter,
   hideFullViewButton,
   readOnly = false,
   overviewSection = true,
@@ -57,6 +58,7 @@ export function SymptomsList({
         patientId={patientId}
         encounterId={encounterId}
         readOnly={readOnly}
+        encounter={encounter}
         hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-2">
@@ -94,6 +96,7 @@ export function SymptomsList({
     <SymptomListLayout
       patientId={patientId}
       encounterId={encounterId}
+      encounter={encounter}
       className={className}
       hideFullViewButton={hideFullViewButton}
       readOnly={readOnly}
