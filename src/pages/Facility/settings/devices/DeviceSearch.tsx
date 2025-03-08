@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -35,7 +36,7 @@ export function DeviceSearch({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: devices } = useQuery({
+  const { data: devices, isPending } = useQuery({
     queryKey: ["devices", facilityId, search],
     queryFn: query.debounced(deviceApi.list, {
       pathParams: { facility_id: facilityId },
@@ -62,7 +63,11 @@ export function DeviceSearch({
             className="outline-none border-none ring-0 shadow-none"
             onValueChange={setSearch}
           />
-          <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
+          {isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin mx-auto my-6" />
+          ) : (
+            <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
+          )}
           <CommandGroup>
             {devices?.results.map((device) => (
               <CommandItem
