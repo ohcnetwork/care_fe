@@ -63,7 +63,11 @@ export default function CreateScheduleExceptionSheet({
     .object({
       reason: z.string().min(1, t("field_required")),
       valid_from: z.date({ required_error: t("field_required") }),
-      valid_to: z.date({ required_error: t("field_required") }),
+      valid_to: z
+        .date({ required_error: t("field_required") })
+        .refine((date) => date > new Date(), {
+          message: t("date_must_be_future"),
+        }),
       start_time: z
         .string()
         .min(1, t("field_required")) as unknown as z.ZodType<Time>,
