@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   ArchiveIcon,
   FileCheckIcon,
@@ -10,6 +11,8 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,13 +34,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import Loading from "@/components/Common/Loading";
-
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { TableSkeleton } from "@/src/components/Common/SkeletonLoading";
 import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
+
+function EmptyState() {
+  return (
+    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+      <div className="rounded-full bg-primary/10 p-3 mb-4">
+        <CareIcon icon="l-folder-open" className="h-6 w-6 text-primary" />
+      </div>
+      <h3 className="text-lg font-semibold mb-1">{t("no_valuesets_found")}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        {t("adjust_valueset_filters")}
+      </p>
+    </Card>
+  );
+}
 
 const RenderCard = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
   const { t } = useTranslation();
@@ -45,104 +61,97 @@ const RenderCard = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
 
   return (
     <div className="xl:hidden space-y-4 px-4">
-      {valuesets.length > 0 ? (
-        valuesets.map((valueset) => (
-          <Card
-            key={valueset.id}
-            className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
-          >
-            <CardContent className="p-6 relative">
-              <div className="absolute top-4 right-4">
-                <Badge
-                  className={
-                    {
-                      active: "bg-green-100 text-green-800 hover:bg-green-200",
-                      draft:
-                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                      unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                    }[valueset.status]
-                  }
-                >
-                  {t(valueset.status)}
-                </Badge>
-              </div>
+      {valuesets.map((valueset) => (
+        <Card
+          key={valueset.id}
+          className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
+        >
+          <CardContent className="p-6 relative">
+            <div className="absolute top-4 right-4">
+              <Badge
+                className={
+                  {
+                    active: "bg-green-100 text-green-800 hover:bg-green-200",
+                    draft: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                    retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                    unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                  }[valueset.status]
+                }
+              >
+                {t(valueset.status)}
+              </Badge>
+            </div>
 
-              <div className="mb-4 border-b pb-2">
-                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("name")}
-                </h3>
-                {valueset.name && valueset.name.length > 20 ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="turncate">
-                        <p className="mt-2 text-xl font-bold text-gray-900 truncate">
-                          {valueset.name}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-black text-white z-40">
+            <div className="mb-4 border-b pb-2">
+              <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("name")}
+              </h3>
+              {valueset.name && valueset.name.length > 20 ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="turncate">
+                      <p className="mt-2 text-xl font-bold text-gray-900 truncate">
                         {valueset.name}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <p className="mt-2 text-xl font-bold text-gray-900 truncate">
-                    {valueset.name}
-                  </p>
-                )}
-              </div>
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black text-white z-40">
+                      {valueset.name}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                  {valueset.name}
+                </p>
+              )}
+            </div>
 
-              <div className="mb-4 flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[120px]">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("slug")}
-                  </h3>
-                  <p className="text-sm text-gray-900 break-words">
-                    {valueset.slug}
-                  </p>
-                </div>
-                <div className="flex-1 min-w-[120px]">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("system")}
-                  </h3>
-                  <p className="text-sm text-gray-900">
-                    {valueset.is_system_defined ? t("yes") : t("no")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-4">
+            <div className="mb-4 flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[120px]">
                 <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("description")}
+                  {t("slug")}
                 </h3>
-                <p className="text-sm text-gray-900 line-clamp-2">
-                  {valueset.description}
+                <p className="text-sm text-gray-900 break-words">
+                  {valueset.slug}
                 </p>
               </div>
+              <div className="flex-1 min-w-[120px]">
+                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  {t("system")}
+                </h3>
+                <p className="text-sm text-gray-900">
+                  {valueset.is_system_defined ? t("yes") : t("no")}
+                </p>
+              </div>
+            </div>
 
-              {!valueset.is_system_defined && (
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                    }
-                    className="hover:bg-primary/5"
-                  >
-                    <Pencil className="w-4 h-4 mr-0" />
-                    {t("edit")}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <div className="py-6 text-center text-gray-500">
-          {t("no_valuesets_found")}
-        </div>
-      )}
+            <div className="mb-4">
+              <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {t("description")}
+              </h3>
+              <p className="text-sm text-gray-900 line-clamp-2">
+                {valueset.description}
+              </p>
+            </div>
+
+            {!valueset.is_system_defined && (
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                  }
+                  className="hover:bg-primary/5"
+                >
+                  <Pencil className="w-4 h-4 mr-0" />
+                  {t("edit")}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };
@@ -176,79 +185,70 @@ const RenderTable = ({ valuesets }: { valuesets: ValuesetBase[] }) => {
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-gray-200 bg-white">
-          {valuesets.length > 0 ? (
-            valuesets.map((valueset) => (
-              <TableRow key={valueset.id} className="hover:bg-gray-50">
-                <TableCell className="whitespace-nowrap px-6 py-4">
-                  {valueset.name && valueset.name.length > 20 ? (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <div className="text-sm font-medium text-gray-900 truncate">
-                            {valueset.name}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-black text-white z-40">
+          {valuesets.map((valueset) => (
+            <TableRow key={valueset.id} className="hover:bg-gray-50">
+              <TableCell className="whitespace-nowrap px-6 py-4">
+                {valueset.name && valueset.name.length > 20 ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="text-sm font-medium text-gray-900 truncate">
                           {valueset.name}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <div className="text-sm font-medium text-gray-900 truncate">
-                      {valueset.name}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {valueset.slug}
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4">
-                  <Badge
-                    className={
-                      {
-                        active:
-                          "bg-green-100 text-green-800 hover:bg-green-200",
-                        draft:
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                        unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                      }[valueset.status]
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-black text-white z-40">
+                        {valueset.name}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {valueset.name}
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                {valueset.slug}
+              </TableCell>
+              <TableCell className="whitespace-nowrap px-6 py-4">
+                <Badge
+                  className={
+                    {
+                      active: "bg-green-100 text-green-800 hover:bg-green-200",
+                      draft:
+                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                      unknown: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                    }[valueset.status]
+                  }
+                >
+                  {t(valueset.status)}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-6 py-4">
+                <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
+                  {valueset.description}
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                {valueset.is_system_defined ? t("yes") : t("no")}
+              </TableCell>
+              <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
+                {!valueset.is_system_defined && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
                     }
                   >
-                    {t(valueset.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-6 py-4">
-                  <div className="max-w-md truncate text-sm text-gray-900 break-words whitespace-normal">
-                    {valueset.description}
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {valueset.is_system_defined ? t("yes") : t("no")}
-                </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
-                  {!valueset.is_system_defined && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                      }
-                    >
-                      <Pencil className="w-4 h-4 mr-0" />
-                      {t("edit")}
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                {t("no_valuesets_found")}
+                    <Pencil className="w-4 h-4 mr-0" />
+                    {t("edit")}
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>
@@ -332,7 +332,11 @@ export function ValueSetList() {
         </div>
       </div>
       {isLoading ? (
-        <Loading />
+        <TableSkeleton count={5} />
+      ) : valuesets.length === 0 ? (
+        <div className="col-span-full">
+          <EmptyState />
+        </div>
       ) : (
         <>
           <RenderTable valuesets={valuesets} />
