@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, ChevronUp, Folder } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp, Hospital } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,11 +15,18 @@ import ReactFlow, {
   Position,
   ReactFlowProvider,
   useReactFlow,
+  useViewport,
 } from "reactflow";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   LocationList as LocationListType,
@@ -36,13 +43,18 @@ interface LocationMapProps {
   onLocationClick: (location: LocationListType) => void;
   facilityName: string;
   searchQuery?: string;
+  isEditing?: boolean;
 }
 
 const CustomNode = ({ data }: NodeProps) => {
   const { t } = useTranslation();
+  const { zoom } = useViewport();
   const hasChildren = data.childCount > 0;
   const Icon =
-    LocationTypeIcons[data.form as keyof typeof LocationTypeIcons] || Folder;
+    data.form === "facility"
+      ? Hospital
+      : LocationTypeIcons[data.form as keyof typeof LocationTypeIcons];
+  const showTooltip = zoom < 1 || data.name.length > 25;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,9 +96,20 @@ const CustomNode = ({ data }: NodeProps) => {
               <Icon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 truncate">
-                {data.name}
-              </h3>
+              <TooltipProvider>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <h3 className="font-medium text-gray-900 truncate">
+                      {data.name}
+                    </h3>
+                  </TooltipTrigger>
+                  {showTooltip && (
+                    <TooltipContent>
+                      <p>{data.name}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-sm text-gray-500 truncate">{data.type}</p>
             </div>
           </div>
@@ -300,15 +323,38 @@ function LocationMapContent({
   onLocationClick,
   facilityName,
   searchQuery,
+  isEditing,
 }: LocationMapProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { fitView } = useReactFlow();
+  const { fitView, setViewport, getViewport } = useReactFlow();
   const { t } = useTranslation();
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+  const [isDraggable, setIsDraggable] = useState(true);
   const [nodePositions, setNodePositions] = useState<
     Record<string, { x: number; y: number }>
   >({});
+  const [savedViewport, setSavedViewport] = useState<{
+    x: number;
+    y: number;
+    zoom: number;
+  } | null>(null);
+
+  // Save viewport when opening edit
+  useEffect(() => {
+    if (isEditing) {
+      const currentViewport = getViewport();
+      setSavedViewport(currentViewport);
+    }
+  }, [isEditing, getViewport]);
+
+  // Restore viewport when closing edit
+  useEffect(() => {
+    if (!isEditing && savedViewport && nodes.length > 0) {
+      setViewport(savedViewport);
+      setSavedViewport(null); // Clear saved viewport after restoring
+    }
+  }, [isEditing, savedViewport, setViewport, nodes]);
 
   // Get root locations
   const rootLocations = useMemo(
@@ -464,6 +510,11 @@ function LocationMapContent({
     [fitView],
   );
 
+  // Handle interactive mode changes
+  const handleInteractiveChange = useCallback((enabled: boolean) => {
+    setIsDraggable(enabled);
+  }, []);
+
   // Generate nodes and edges
   useEffect(() => {
     const newNodes: Node[] = [];
@@ -475,6 +526,8 @@ function LocationMapContent({
       rootLocations.length,
       t,
     );
+    // Update draggable property
+    facilityNode.draggable = isDraggable;
     newNodes.push(facilityNode);
 
     // Process root locations
@@ -509,6 +562,11 @@ function LocationMapContent({
             t,
           );
 
+        // Update draggable property for all location nodes
+        locationNodes.forEach((node) => {
+          node.draggable = isDraggable;
+        });
+
         newNodes.push(...locationNodes);
         newEdges.push(...locationEdges);
 
@@ -530,6 +588,7 @@ function LocationMapContent({
     nodePositions,
     rootLocations,
     facilityName,
+    isDraggable,
   ]);
 
   return (
@@ -553,10 +612,10 @@ function LocationMapContent({
           },
         }}
         proOptions={{ hideAttribution: true }}
-        draggable={true}
+        draggable={isDraggable}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
-        fitView={true}
+        fitView={!savedViewport && !isEditing}
         fitViewOptions={{
           padding: 0.2,
           minZoom: 0.2,
@@ -572,7 +631,12 @@ function LocationMapContent({
         connectionMode={ConnectionMode.Loose}
       >
         <Background />
-        <Controls showFitView={true} showZoom={true} showInteractive={false} />
+        <Controls
+          showFitView={true}
+          showZoom={true}
+          showInteractive={true}
+          onInteractiveChange={handleInteractiveChange}
+        />
         <Panel
           position="top-right"
           className="bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-sm"
