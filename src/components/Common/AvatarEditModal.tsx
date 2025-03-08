@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import React, {
   ChangeEventHandler,
   useCallback,
@@ -18,13 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import CameraSelect from "@/components/Common/CameraSelect";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
@@ -72,7 +68,6 @@ const AvatarEditModal = ({
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [devices, setDevices] = useState<any>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
@@ -85,29 +80,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { preferredDeviceId, setDeviceId } = usePreferredMediaDevice();
-
-  useEffect(() => {
-    const getDevices = async () => {
-      try {
-        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = mediaDevices.filter(
-          ({ kind }) => kind === "videoinput",
-        );
-        setDevices(videoDevices);
-        if (videoDevices.length > 0) {
-          const initialDeviceId =
-            preferredDeviceId != null
-              ? preferredDeviceId
-              : videoDevices[0].deviceId;
-          setSelectedDeviceId(initialDeviceId);
-        }
-      } catch {
-        toast.error("Error fetching camera devices");
-      }
-    };
-    getDevices();
-  }, [preferredDeviceId]);
+  const { setDeviceId } = usePreferredMediaDevice();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint((prev) => {
@@ -256,27 +229,12 @@ const AvatarEditModal = ({
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
         </DialogHeader>
-        <Select
-          value={selectedDeviceId}
-          onValueChange={(val: any) => {
-            setDeviceId(val);
-            setSelectedDeviceId(val);
+        <CameraSelect
+          onChange={(deviceId) => {
+            setDeviceId(deviceId);
+            setSelectedDeviceId(deviceId);
           }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a camera" />
-          </SelectTrigger>
-          <SelectContent>
-            {devices.map((device: any) => (
-              <SelectItem
-                key={device.deviceId}
-                value={device.deviceId || "Unknown Device"}
-              >
-                {device.label || `Camera ${device.deviceId}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
             {!isCameraOpen ? (
@@ -285,7 +243,11 @@ const AvatarEditModal = ({
                   <>
                     <div className="flex flex-1 items-center justify-center rounded-lg">
                       <img
-                        src={preview || imageUrl}
+                        src={
+                          preview && preview.startsWith("blob:")
+                            ? DOMPurify.sanitize(preview)
+                            : imageUrl
+                        }
                         alt="cover-photo"
                         className="h-full w-full object-cover"
                       />
@@ -434,9 +396,7 @@ const AvatarEditModal = ({
                         ref={webRef}
                         videoConstraints={{
                           deviceId: selectedDeviceId,
-                          facingMode: constraint.facingMode,
-                          height: constraint.height,
-                          width: constraint.width,
+                          ...constraint,
                         }}
                         onUserMediaError={(_e) => {
                           setIsCameraOpen(false);

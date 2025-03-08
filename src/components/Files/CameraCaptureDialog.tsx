@@ -12,13 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import CameraSelect from "@/components/Common/CameraSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
@@ -38,39 +33,16 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
-  const [devices, setDevices] = useState<any>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
-  const { preferredDeviceId, setDeviceId } = usePreferredMediaDevice();
+  const { setDeviceId } = usePreferredMediaDevice();
 
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
     facingMode: cameraFacingMode,
   };
-
-  useEffect(() => {
-    const getDevices = async () => {
-      try {
-        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = mediaDevices.filter(
-          ({ kind }) => kind === "videoinput",
-        );
-        setDevices(videoDevices);
-        if (videoDevices.length > 0) {
-          const initialDeviceId =
-            preferredDeviceId != null
-              ? preferredDeviceId
-              : videoDevices[0].deviceId;
-          setSelectedDeviceId(initialDeviceId);
-        }
-      } catch {
-        toast.error("Error fetching camera devices");
-      }
-    };
-    getDevices();
-  }, [preferredDeviceId]);
 
   useEffect(() => {
     if (!open) return;
@@ -143,27 +115,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </div>
           </DialogTitle>
         </DialogHeader>
-        <Select
-          value={selectedDeviceId}
-          onValueChange={(val: any) => {
-            setDeviceId(val);
-            setSelectedDeviceId(val);
+        <CameraSelect
+          onChange={(deviceId) => {
+            setDeviceId(deviceId);
+            setSelectedDeviceId(deviceId);
           }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a camera" />
-          </SelectTrigger>
-          <SelectContent>
-            {devices.map((device: any) => (
-              <SelectItem
-                key={device.deviceId}
-                value={device.deviceId || "Unknown Device"}
-              >
-                {device.label || `Camera ${device.deviceId}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
 
         <div>
           {!previewImage ? (
