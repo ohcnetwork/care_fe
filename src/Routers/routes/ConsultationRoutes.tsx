@@ -36,6 +36,7 @@ const consultationRoutes: AppRoutes = {
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
+        subjectType="encounter"
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
@@ -66,6 +67,7 @@ const consultationRoutes: AppRoutes = {
         encounterId={encounterId}
         questionnaireSlug={slug}
         patientId={patientId}
+        subjectType="encounter"
       />
     ),
 
@@ -115,6 +117,9 @@ const consultationRoutes: AppRoutes = {
       patientId={patientId}
       subjectType="patient"
     />
+  ),
+  "/patient/:patientId/questionnaire": ({ patientId }) => (
+    <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
   ),
 };
 
