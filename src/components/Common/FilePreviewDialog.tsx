@@ -144,7 +144,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     : "";
 
   const fileNameTooltip =
-    fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+    fileName.length > 100 ? fileName.slice(0, 100) + "..." : fileName;
 
   const handleNext = (newIndex: number) => {
     if (
@@ -179,8 +179,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
-        <DialogHeader>
+      <DialogContent className="h-full w-full max-w-5xl flex flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
+        <DialogHeader className="flex justify-center items-center">
           <DialogTitle className="text-sm text-gray-600">
             {t("file_preview")}
           </DialogTitle>
@@ -188,7 +188,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
         {fileUrl ? (
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
-              <div>
+              <div className="w-full md:w-auto">
                 <TooltipComponent content={fileName}>
                   <p className="text-2xl font-bold text-gray-800 truncate">
                     {fileNameTooltip}
@@ -289,7 +289,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               )}
             </div>
             <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
+              <div className="mt-2 grid grid-cols-2 gap-4 md:grid-cols-5">
                 {file_state.isImage && (
                   <>
                     {[
@@ -332,7 +332,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         onClick={button[2] as () => void}
                         className={cn(
                           "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                          "col-span-1",
                         )}
                         disabled={button[3] as boolean}
                       >
@@ -378,7 +378,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                         onClick={button[2] as () => void}
                         className={cn(
                           "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                          "col-span-1",
                         )}
                         disabled={button[3] as boolean}
                       >

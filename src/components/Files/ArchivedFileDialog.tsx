@@ -31,18 +31,16 @@ export default function ArchivedFileDialog({
       aria-labelledby="file-archive-dialog"
     >
       <DialogContent
-        className="mb-8 rounded-lg p-4 w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
+        className="mb-8 rounded-lg p-4 w-full max-w-md sm:w-[calc(100%-2rem)] flex flex-col space-y-2"
         aria-describedby="file-archive"
       >
         <DialogHeader>
-          <DialogTitle>
-            {t("archived_file")}:{" "}
-            <TooltipComponent content={fileName}>
-              <span className="max-w-sm truncate inline-block align-bottom">
-                {fileName}
-              </span>
-            </TooltipComponent>
-          </DialogTitle>
+          <DialogTitle>{t("archived_file")}</DialogTitle>
+          <TooltipComponent content={fileName}>
+            <span className="truncate block text-sm text-gray-600">
+              {fileName}
+            </span>
+          </TooltipComponent>
         </DialogHeader>
         <div className="space-y-2">
           <div className="flex flex-col gap-1 bg-gray-100 p-4 rounded-md">
@@ -51,7 +49,7 @@ export default function ArchivedFileDialog({
             </span>
             <span>{file?.archive_reason}</span>
           </div>
-          <div className="flex flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
+          <div className="flex flex-col sm:flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span>
               {t("archived_by")}: {file.archived_by?.username}
             </span>

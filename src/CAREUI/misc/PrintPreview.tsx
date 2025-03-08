@@ -44,7 +44,7 @@ export default function PrintPreview(props: Props) {
         </div>
 
         <ZoomProvider initialScale={normalScale}>
-          <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
+          <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none w-full max-w-[90vw] sm:max-w-[95vw] md:max-w-[80vw] lg:max-w-[unset]">
             <div
               id="section-to-print"
               className={cn("w-full", props.className)}
