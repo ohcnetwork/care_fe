@@ -34,10 +34,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { TableSkeleton } from "@/src/components/Common/SkeletonLoading";
 import { ValuesetBase } from "@/types/valueset/valueset";
 import valuesetApi from "@/types/valueset/valuesetApi";
 

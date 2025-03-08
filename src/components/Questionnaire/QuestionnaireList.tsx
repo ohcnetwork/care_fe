@@ -32,10 +32,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { TableSkeleton } from "@/src/components/Common/SkeletonLoading";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
