@@ -1,6 +1,3 @@
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import {
   Dispatch,
   ReactNode,
@@ -24,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FileUploadModel } from "@/components/Patient/models";
@@ -191,20 +189,11 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
               <div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <p className="text-2xl font-bold text-gray-800 truncate">
-                        {fileNameTooltip}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm text-white truncate bg-red rounded-md p-2">
-                        {fileName}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TooltipComponent content={fileName}>
+                  <p className="text-2xl font-bold text-gray-800 truncate">
+                    {fileNameTooltip}
+                  </p>
+                </TooltipComponent>
                 {uploadedFiles &&
                   uploadedFiles[index] &&
                   uploadedFiles[index].created_date && (
