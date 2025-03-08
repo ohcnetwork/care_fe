@@ -104,12 +104,11 @@ const ThreadItem = ({
         : "hover:bg-gray-100 hover:border-gray-200",
     )}
     onClick={onClick}
+    data-cy="thread-title"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm truncate" data-cy="thread-title">
-          {thread.title}
-        </h4>
+        <h4 className="font-medium text-sm truncate">{thread.title}</h4>
       </div>
       {isSelected && (
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
@@ -632,7 +631,10 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                 <>
                   {/* Messages List */}
                   <ScrollArea className="flex-1 px-4 h-full max-h-screen">
-                    <div className="flex flex-col-reverse h-full py-4">
+                    <div
+                      className="flex flex-col-reverse h-full py-4"
+                      data-cy="chat-messages"
+                    >
                       <div ref={messagesEndRef} />
                       {messages.length === 0 ? (
                         <div className="text-center py-8">
@@ -674,6 +676,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
+                            data-cy="encounter-notes-chat-message-input"
                             placeholder={t("encounter_notes__type_message")}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}

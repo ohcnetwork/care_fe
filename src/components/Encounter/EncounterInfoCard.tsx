@@ -58,6 +58,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
   const { encounter, facilityId, hideBorder = false } = props;
   return (
     <Card
+      data-cy={`encounter-card-${encounter.id}`}
       key={props.encounter.id}
       className={cn(
         "hover:shadow-lg transition-shadow group md:flex md:flex-col",

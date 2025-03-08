@@ -125,54 +125,115 @@ export class PatientEncounter {
     return this;
   }
 
-  // Encounter Notes
-  openEncounterNotesTab() {
-    cy.get('[data-cy="encounter-notes-tab"]').click();
+  /*** ENCOUNTER_NOTES ***/
+
+  // **1️⃣ Intercept Setup**
+  interceptSendMessageRequest() {
+    cy.intercept("POST", "/api/v1/patient/*/thread/*/note/").as("sendMessage");
     return this;
   }
 
+  // **2️⃣ Encounter Handling**
+  openEncounterAndSaveId() {
+    cy.get("[data-cy^='encounter-card-']")
+      .first()
+      .invoke("attr", "data-cy")
+      .then((attr) => {
+        if (attr) {
+          const encounterId = attr.replace("encounter-card-", "");
+          Cypress.env("encounterId", encounterId);
+        }
+      });
+
+    this.openFirstEncounterDetails();
+    return this;
+  }
+
+  openEncounterById(encounterId: string) {
+    cy.verifyAndClickElement(
+      `[data-cy="encounter-card-${encounterId}"]`,
+      "View Details",
+    );
+    return this;
+  }
+
+  openEncounterNotesTab() {
+    cy.verifyAndClickElement('[data-cy="encounter-notes-tab"]', "Notes");
+    return this;
+  }
+
+  // **3️⃣ Thread Management**
   clickNewThreadButton() {
-    cy.get('[data-cy="new-thread-button"]').click();
+    cy.verifyAndClickElement('[data-cy="new-thread-button"]', "New");
     return this;
   }
 
   typeThreadTitle(title: string) {
-    cy.get('[data-cy="new-thread-title-input"]').type(title);
+    cy.typeIntoField('[data-cy="new-thread-title-input"]', title);
     return this;
   }
 
   clickCreateThreadButton() {
-    cy.get('[data-cy="create-thread-button"]').click();
+    cy.verifyAndClickElement('[data-cy="create-thread-button"]', "Create");
+    return this;
+  }
+
+  // **4️⃣ Message Handling**
+  typeMessage(message: string) {
+    cy.get('[data-cy="encounter-notes-chat-message-input"]')
+      .should("be.visible")
+      .clear()
+      .type(message);
     return this;
   }
 
   sendMessage(message: string) {
-    cy.get('[data-cy="encounter-message-input"]')
-      .should("be.visible")
-      .should("not.be.disabled")
-      .clear()
-      .type(message);
+    if (!message.trim()) return;
 
+    this.typeMessage(message);
     cy.get('[data-cy="send-chat-message-button"]')
       .should("be.visible")
       .should("not.be.disabled")
       .click();
 
     cy.wait("@sendMessage").its("response.statusCode").should("eq", 200);
-    cy.contains(message).should("be.visible");
   }
 
-  addNewChatMessages(singleLineMessage: string, multiLineMessage: string) {
-    cy.intercept("POST", "/api/v1/patient/*/thread/*/note/").as("sendMessage");
+  addNewChatMessages(messages: string[]) {
+    this.interceptSendMessageRequest();
 
-    this.sendMessage(singleLineMessage);
-    this.sendMessage(multiLineMessage);
+    messages.forEach((message) => {
+      this.sendMessage(message);
+    });
 
     return this;
   }
 
+  verifyMessagesInChat(messages: string[]) {
+    cy.verifyContentPresence('[data-cy="chat-messages"]', messages);
+    return this;
+  }
+
+  verifyMessagesNotExistInChat(messages: string[]) {
+    messages.forEach((message) => {
+      cy.get('[data-cy="chat-messages"]').contains(message).should("not.exist");
+    });
+    return this;
+  }
+
+  // **5️⃣ Thread Switching**
   changeThread(title: string) {
-    cy.contains('[data-cy="thread-title"]', title).should("be.visible").click();
+    cy.get('[data-cy="thread-title"]')
+      .should("be.visible")
+      .contains(title)
+      .click();
+    return this;
+  }
+
+  // **6️⃣ Logout**
+  logout() {
+    cy.visit("/");
+    cy.verifyAndClickElement('[data-cy="sign-out-button"]', "Sign out");
     return this;
   }
 }

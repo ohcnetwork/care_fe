@@ -109,6 +109,7 @@ export default function UserDashboard() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  data-cy="sign-out-button"
                   variant="outline"
                   size="sm"
                   className="px-2 w-full sm:w-auto"
