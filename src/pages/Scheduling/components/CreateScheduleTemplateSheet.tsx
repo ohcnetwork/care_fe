@@ -201,6 +201,32 @@ export default function CreateScheduleTemplateSheet({
     });
   }
 
+  const dateValidationCallout = () => {
+    const validFrom = form.watch("valid_from");
+    const validTill = form.watch("valid_to");
+
+    if (!validFrom || !validTill) return null;
+
+    // normalizing today date (i.e remove time)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const fromDate = new Date(validFrom);
+    const tillDate = new Date(validTill);
+    fromDate.setHours(0, 0, 0, 0);
+    tillDate.setHours(0, 0, 0, 0);
+
+    if (fromDate < today && tillDate < today) {
+      return (
+        <Callout variant="alert" badge="Info">
+          <Trans i18nKey="schedule_dates_in_past_callout" />
+        </Callout>
+      );
+    }
+
+    return null;
+  };
+
   const timeAllocationCallout = (index: number) => {
     const startTime = form.watch(`availabilities.${index}.start_time`);
     const endTime = form.watch(`availabilities.${index}.end_time`);
@@ -309,6 +335,7 @@ export default function CreateScheduleTemplateSheet({
                     </FormItem>
                   )}
                 />
+                <div className="col-span-2">{dateValidationCallout()}</div>
               </div>
 
               <div>

@@ -2091,6 +2091,7 @@
   "schedule_availability_created_successfully": "Availability created successfully",
   "schedule_availability_deleted_successfully": "Schedule availability deleted successfully",
   "schedule_calendar": "Schedule Calendar",
+  "schedule_dates_in_past_callout": "Both 'Valid From' and 'Valid Till' dates are in the past. Please verify before saving.",
   "schedule_end_time": "End Time",
   "schedule_for": "Scheduled for",
   "schedule_information": "Schedule Information",
