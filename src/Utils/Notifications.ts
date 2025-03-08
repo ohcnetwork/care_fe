@@ -21,6 +21,28 @@ const formatKey = (key: string) => {
 
 const notifyError = (error: any) => {
   let errorMsg = "";
+
+  if (
+    error?.type === "validation_error" &&
+    error?.msg &&
+    typeof error.msg === "object"
+  ) {
+    Object.values(error.msg).forEach((messages) => {
+      if (Array.isArray(messages)) {
+        errorMsg += messages.join(", ");
+      } else {
+        errorMsg += messages;
+      }
+    });
+
+    if (errorMsg.length > 0) {
+      toast.error(errorMsg);
+    } else {
+      toast.error("Something went wrong , please upload different image");
+    }
+    return;
+  }
+
   if (typeof error === "string" || !error) {
     errorMsg =
       !error || error.length > 100 ? "Something went wrong...!" : error;
