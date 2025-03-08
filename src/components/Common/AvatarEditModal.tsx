@@ -381,13 +381,14 @@ const AvatarEditModal = ({
               </>
             ) : (
               <>
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-1 items-center justify-center p-10 md:p-0">
                   {!previewImage ? (
                     <>
                       <Webcam
                         audio={false}
-                        className="w-full max-w-[320px] h-auto sm:max-w-[480px]"
+                        height={720}
                         screenshotFormat="image/jpeg"
+                        width={1280}
                         ref={webRef}
                         videoConstraints={constraint}
                         onUserMediaError={(_e) => {
@@ -398,10 +399,7 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img
-                        src={previewImage}
-                        className="h-auto max-h-[360px] w-full object-contain"
-                      />
+                      <img src={previewImage} />
                     </>
                   )}
                 </div>
