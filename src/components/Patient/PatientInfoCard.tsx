@@ -425,30 +425,29 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {!completedEncounterStatus.includes(encounter.status) &&
-            !disableButtons && (
-              <div
-                className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
-                data-cy="update-encounter-button"
-              >
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="primary">
-                      {t("update")}
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                    <EncounterActions encounter={encounter} layout="dropdown" />
-                    <PLUGIN_Component
-                      __name="PatientInfoCardActions"
-                      encounter={encounter}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+          {!disableButtons && (
+            <div
+              className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
+              data-cy="update-encounter-button"
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="primary">
+                    {t("update")}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                  <EncounterActions encounter={encounter} layout="dropdown" />
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    encounter={encounter}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
       </section>
     </>
