@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BedSingle,
   Building,
@@ -10,29 +9,16 @@ import {
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -43,14 +29,13 @@ import {
 } from "@/components/ui/popover";
 
 import { Avatar } from "@/components/Common/Avatar";
+import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import dayjs from "@/Utils/dayjs";
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import {
   Encounter,
@@ -70,35 +55,6 @@ export interface PatientInfoCardProps {
 export default function PatientInfoCard(props: PatientInfoCardProps) {
   const { patient, encounter, disableButtons = false } = props;
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(routes.encounter.update, {
-      pathParams: { id: encounter.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("encounter_marked_as_complete"));
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
-    },
-    onError: () => {
-      toast.error(t("error_updating_encounter"));
-    },
-  });
-
-  const handleMarkAsComplete = () => {
-    updateEncounter({
-      ...encounter,
-      status: "completed",
-      organizations: encounter.organizations.map((org) => org.id),
-      patient: encounter.patient.id,
-      encounter_class: encounter.encounter_class,
-      period: encounter.period,
-      hospitalization: encounter.hospitalization,
-      priority: encounter.priority,
-      external_identifier: encounter.external_identifier,
-      facility: encounter.facility.id,
-    });
-  };
 
   return (
     <>
@@ -475,71 +431,22 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row"
                 data-cy="update-encounter-button"
               >
-                <AlertDialog>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="primary">
-                        {t("update")}
-                        <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                      <DropdownMenuItem>
-                        <Link
-                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/treatment_summary`}
-                          className="cursor-pointer text-gray-800"
-                        >
-                          {t("treatment_summary")}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/facility/${encounter.facility.id}/patient/${patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-                          className="cursor-pointer text-gray-800"
-                        >
-                          {t("discharge_summary")}
-                        </Link>
-                      </DropdownMenuItem>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          {t("mark_as_complete")}
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <PLUGIN_Component
-                        __name="PatientInfoCardActions"
-                        encounter={encounter}
-                      />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        {t("mark_as_complete")}
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t("mark_encounter_as_complete_confirmation")}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="primary">
+                      {t("update")}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    <EncounterActions encounter={encounter} layout="dropdown" />
                     <PLUGIN_Component
-                      __name="PatientInfoCardMarkAsComplete"
+                      __name="PatientInfoCardActions"
                       encounter={encounter}
                     />
-
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-
-                      <AlertDialogAction
-                        className={cn(buttonVariants({ variant: "primary" }))}
-                        onClick={handleMarkAsComplete}
-                        data-cy="mark-encounter-as-complete"
-                      >
-                        {t("mark_as_complete")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
         </div>
