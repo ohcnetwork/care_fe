@@ -82,7 +82,7 @@ export default function AssociateDeviceSheet({
   };
 
   return (
-    <Sheet modal={false} open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent>
         <SheetHeader>

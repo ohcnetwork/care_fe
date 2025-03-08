@@ -41,13 +41,13 @@ export const EncounterDevicesTab = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row-reverse justify-between items-start sm:items-center gap-4">
         <AssociateDeviceSheet
           facilityId={facilityId}
           encounterId={encounter.id}
         >
           <Button variant="primary">
-            <CareIcon icon="l-plus" className="h-4 w-4 m-auto center" />
+            <CareIcon icon="l-plus" className="h-4 w-4 center" />
             {t("associate_device")}
           </Button>
         </AssociateDeviceSheet>
