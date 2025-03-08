@@ -222,7 +222,7 @@ const AvatarEditModal = ({
 
   return (
     <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="md:max-w-4xl">
+      <DialogContent className="md:max-w-4xl p-5 md:p-0">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
           <DialogDescription className="sr-only">
