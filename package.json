@@ -207,7 +207,8 @@
       "git update-index --again"
     ],
     "public/locale/*.json": [
-      "npm run sort-locales"
+      "npm run sort-locales",
+      "npm run remove-unused-keys"
     ]
   },
   "engines": {
