@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isBefore, parse } from "date-fns";
-import { ArrowRightIcon, Loader2, SaveIcon, Trash2Icon } from "lucide-react";
+import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -43,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -88,6 +89,9 @@ export default function EditScheduleTemplateSheet({
       <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("edit_schedule_template")}
+          </SheetDescription>
         </SheetHeader>
         <div className="overflow-auto -mx-6 px-6 pb-16">
           <ScheduleTemplateEditor
@@ -319,7 +323,7 @@ const ScheduleTemplateEditor = ({
             <Button
               variant="primary"
               type="submit"
-              disabled={isUpdating}
+              disabled={isUpdating || !form.formState.isDirty}
               size="sm"
             >
               <SaveIcon />
@@ -749,12 +753,12 @@ const NewAvailabilityCard = ({
             )}
           /> */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap">
             <FormField
               control={form.control}
               name="start_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full">
                   <FormLabel required>{t("start_time")}</FormLabel>
                   <FormControl>
                     <Input type="time" {...field} />
@@ -764,13 +768,11 @@ const NewAvailabilityCard = ({
               )}
             />
 
-            <ArrowRightIcon className="size-4 mt-5" />
-
             <FormField
               control={form.control}
               name="end_time"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col w-full mt-2">
                   <FormLabel required>{t("end_time")}</FormLabel>
                   <FormControl>
                     <Input type="time" {...field} />

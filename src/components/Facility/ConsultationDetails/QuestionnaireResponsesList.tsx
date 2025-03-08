@@ -25,6 +25,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 interface Props {
   encounter?: Encounter;
   patientId: string;
+  facilityId?: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
 }
@@ -197,12 +198,23 @@ function StructuredResponseBadge({
   );
 }
 
-function ResponseCard({ item }: { item: QuestionnaireResponse }) {
+function ResponseCard({
+  item,
+  isPrintPreview,
+}: {
+  item: QuestionnaireResponse;
+  isPrintPreview?: boolean;
+}) {
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
 
   return (
-    <Card className="flex flex-col py-3 px-4 transition-colors hover:bg-muted/50">
+    <Card
+      className={cn(
+        "flex flex-col py-3 px-4 transition-colors hover:bg-muted/50",
+        isPrintPreview && "shadow-none",
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -301,6 +313,7 @@ export default function QuestionnaireResponsesList({
         }),
         encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
+        subject_type: encounter ? "encounter" : "patient",
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
@@ -317,7 +330,12 @@ export default function QuestionnaireResponsesList({
         ) : (
           <div>
             {questionnarieResponses?.results?.length === 0 ? (
-              <Card className="p-6">
+              <Card
+                className={cn(
+                  "p-6",
+                  isPrintPreview && "shadow-none border-gray",
+                )}
+              >
                 <div className="text-lg font-medium text-gray-500">
                   {t("no_questionnaire_responses")}
                 </div>
@@ -327,7 +345,11 @@ export default function QuestionnaireResponsesList({
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
                     <li key={item.id} className="w-full">
-                      <ResponseCard key={item.id} item={item} />
+                      <ResponseCard
+                        key={item.id}
+                        item={item}
+                        isPrintPreview={isPrintPreview}
+                      />
                     </li>
                   ),
                 )}

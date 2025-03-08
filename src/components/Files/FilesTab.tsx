@@ -28,12 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
@@ -251,54 +246,52 @@ export const FilesTab = (props: FilesTabProps) => {
     const filetype = getFileType(file);
     return (
       <>
-        {editPermission() && (
-          <div className="flex flex-row gap-2 justify-end">
-            {filetype === "AUDIO" && !file.is_archived && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setSelectedAudioFile(file);
-                  setOpenAudioPlayerDialog(true);
-                }}
-              >
-                <span className="flex flex-row items-center gap-1">
-                  <CareIcon icon="l-play-circle" className="mr-1" />
-                  {t("play")}
-                </span>
+        <div className="flex flex-row gap-2 justify-end">
+          {filetype === "AUDIO" && !file.is_archived && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSelectedAudioFile(file);
+                setOpenAudioPlayerDialog(true);
+              }}
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-play-circle" className="mr-1" />
+                {t("play")}
+              </span>
+            </Button>
+          )}
+          {fileManager.isPreviewable(file) && (
+            <Button
+              variant="secondary"
+              onClick={() => fileManager.viewFile(file, associatingId)}
+            >
+              <span className="flex flex-row items-center gap-1">
+                <CareIcon icon="l-eye" />
+                {t("view")}
+              </span>
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <CareIcon icon="l-ellipsis-h" />
               </Button>
-            )}
-            {fileManager.isPreviewable(file) && (
-              <Button
-                variant="secondary"
-                onClick={() => fileManager.viewFile(file, associatingId)}
-              >
-                <span className="flex flex-row items-center gap-1">
-                  <CareIcon icon="l-eye" />
-                  {t("view")}
-                </span>
-              </Button>
-            )}
-            {
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary">
-                    <CareIcon icon="l-ellipsis-h" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild className="text-primary-900">
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        fileManager.downloadFile(file, associatingId)
-                      }
-                      variant="ghost"
-                      className="w-full flex flex-row justify-stretch items-center"
-                    >
-                      <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                      <span>{t("download")}</span>
-                    </Button>
-                  </DropdownMenuItem>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild className="text-primary-900">
+                <Button
+                  size="sm"
+                  onClick={() => fileManager.downloadFile(file, associatingId)}
+                  variant="ghost"
+                  className="w-full flex flex-row justify-stretch items-center"
+                >
+                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                  <span>{t("download")}</span>
+                </Button>
+              </DropdownMenuItem>
+              {editPermission() && (
+                <>
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       size="sm"
@@ -323,11 +316,11 @@ export const FilesTab = (props: FilesTabProps) => {
                       <span>{t("rename")}</span>
                     </Button>
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            }
-          </div>
-        )}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </>
     );
   };
@@ -550,18 +543,11 @@ export const FilesTab = (props: FilesTabProps) => {
                         <CareIcon icon={icons[filetype]} className="text-xl" />
                       </span>
                       {file.name && file.name.length > 20 ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger className="truncate">
-                              <span className="text-gray-900 truncate block">
-                                {fileName}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white z-40">
-                              <span>{fileName}</span>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <TooltipComponent content={fileName}>
+                          <span className="text-gray-900 truncate block">
+                            {fileName}
+                          </span>
+                        </TooltipComponent>
                       ) : (
                         <span className="text-gray-900 truncate block">
                           {fileName}
