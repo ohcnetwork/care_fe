@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ExternalLink } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 
@@ -355,9 +357,28 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         </Card>
 
         {device.care_type && (
-          <PluginDeviceShowCard
-            device={device as DeviceDetail & { care_type: string }}
-          />
+          <ErrorBoundary
+            fallback={
+              <Card className="md:col-span-2 border-red-200 bg-red-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-600">
+                    <AlertCircle className="h-5 w-5" />
+                    <span>
+                      Couldn't load device type specific information.{" "}
+                      <strong className="font-semibold capitalize">
+                        {device.care_type.replace(/_-/g, " ")}
+                      </strong>{" "}
+                      is not supported.
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <PluginDeviceShowCard
+              device={device as DeviceDetail & { care_type: string }}
+            />
+          </ErrorBoundary>
         )}
 
         {device.contact?.length > 0 && (
