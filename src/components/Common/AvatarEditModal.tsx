@@ -386,9 +386,9 @@ const AvatarEditModal = ({
                     <>
                       <Webcam
                         audio={false}
-                        height={720}
+                        height={360}
                         screenshotFormat="image/jpeg"
-                        width={1280}
+                        width={640}
                         ref={webRef}
                         videoConstraints={constraint}
                         onUserMediaError={(_e) => {
@@ -399,7 +399,10 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img src={previewImage} />
+                      <img
+                        src={previewImage}
+                        className="h-auto max-h-[360px] w-full object-contain"
+                      />
                     </>
                   )}
                 </div>
