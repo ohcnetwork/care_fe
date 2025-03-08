@@ -108,7 +108,7 @@ export default function OrganizationLayout({
   return (
     <Page title={`${org.name}`}>
       {/* Navigation */}
-      <div className="mt-4">
+      <div className="mt-4 flex justify-center md:justify-start">
         <Menubar className="w-full h-full overflow-x-auto">
           {navItems
             .filter((item) => item.visibility)
