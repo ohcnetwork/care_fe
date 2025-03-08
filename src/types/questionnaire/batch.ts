@@ -1,5 +1,6 @@
 export interface BatchRequestResult<T = unknown> {
-  data: T;
+  reference_id: string;
+  data?: T;
   status_code: number;
 }
 
@@ -12,41 +13,81 @@ export interface BatchRequestBody {
   }>;
 }
 
-interface BaseValidationError {
-  type: string;
-  msg: string;
-}
-
-export interface QuestionValidationError extends BaseValidationError {
+// Error types
+export interface QuestionValidationError {
   question_id: string;
   error?: string;
+  msg?: string;
+  type?: string;
 }
 
-export interface DetailedValidationError extends BaseValidationError {
+export interface DetailedValidationError {
+  type: string;
   loc: string[];
-  input: any;
-  url: string;
+  msg: string;
   ctx?: {
-    error: string;
+    error?: string;
   };
 }
 
-export interface SuccessResponse {
-  data: any;
-  status_code: 200;
+export interface BatchRequestError {
+  question_id?: string;
+  msg?: string;
+  error?: string;
+  type?: string;
+  loc?: string[];
+  ctx?: {
+    error?: string;
+  };
+}
+
+export interface StructuredDataError {
+  errors: Array<{
+    type: string;
+    loc: string[];
+    msg: string;
+    ctx?: {
+      error?: string;
+    };
+  }>;
+}
+
+// Request/Response types
+export interface BatchRequest {
+  url: string;
+  method: string;
+  reference_id: string;
+  body: any; // Using any since the body type varies based on the request type
+}
+
+export interface BatchErrorData {
+  errors: BatchRequestError[];
+}
+
+export interface BatchResponseBase {
+  reference_id: string;
+  status_code: number;
+}
+
+export interface BatchErrorResponse extends BatchResponseBase {
+  data: BatchErrorData | StructuredDataError[];
+}
+
+export interface BatchSuccessResponse extends BatchResponseBase {
+  data: unknown;
 }
 
 export interface ValidationErrorResponse {
+  reference_id: string;
+  status_code: number;
   data: {
-    errors: Array<QuestionValidationError | DetailedValidationError>;
+    errors: QuestionValidationError[];
   };
-  status_code: 400 | 404;
 }
 
-export type BatchResponseResult = SuccessResponse | ValidationErrorResponse;
+// Type unions
+export type BatchResponse = BatchErrorResponse | BatchSuccessResponse;
 
-export interface BatchResponse {
-  results: BatchResponseResult[];
-}
+export type BatchSubmissionResult = BatchRequestResult<unknown>;
 
-export type BatchSubmissionResult = BatchResponseResult;
+export type BatchResponseResult = ValidationErrorResponse | BatchResponse;
