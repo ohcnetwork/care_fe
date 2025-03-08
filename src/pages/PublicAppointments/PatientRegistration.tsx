@@ -182,7 +182,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         queryKey: ["patients"],
       });
       publish("patient:upsert", data);
-      localStorage.setItem("selectedPatient", JSON.stringify(data));
       createAppointment({
         patient: data.id,
         reason_for_visit: reason ?? "",
