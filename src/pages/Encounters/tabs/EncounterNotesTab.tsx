@@ -117,7 +117,7 @@ const ThreadItem = ({
 const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
   ({ message }, ref) => {
     const authUser = useAuthUser();
-    const { facilityId } = usePathParams("/facility/:facilityId/*")!;
+    const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
     const isCurrentUser = authUser?.external_id === message.created_by.id;
 
     return (
@@ -136,7 +136,11 @@ const MessageItem = forwardRef<HTMLDivElement, { message: Message }>(
         >
           <TooltipComponent content={message.created_by?.username}>
             <Link
-              href={`/facility/${facilityId}/users/${message.created_by?.username}`}
+              href={
+                facilityId
+                  ? `/facility/${facilityId}/users/${message.created_by?.username}`
+                  : `/users/${message.created_by?.username}`
+              }
             >
               <span className="flex pr-2">
                 <Avatar

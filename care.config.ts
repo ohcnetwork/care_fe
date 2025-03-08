@@ -140,9 +140,6 @@ const careConfig = {
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
-
-
-
 } as const;
 
 export default careConfig;
