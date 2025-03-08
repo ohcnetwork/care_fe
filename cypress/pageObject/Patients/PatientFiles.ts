@@ -253,4 +253,26 @@ export class PatientFiles {
     cy.verifyAndClickElement("[data-cy=archive-dialog-close", "Close");
     return this;
   }
+
+  openCamera() {
+    cy.get('[data-cy="open-camera-button"]').click();
+    return this;
+  }
+
+  captureImage() {
+    cy.verifyAndClickElement('[data-cy="capture-button"]', "Capture");
+    cy.wait(400);
+    return this;
+  }
+
+  retakeCapture() {
+    cy.verifyAndClickElement('[data-cy="retake-button"]', "Retake");
+    cy.wait(400);
+    return this;
+  }
+
+  clickSubmit() {
+    cy.verifyAndClickElement('[data-cy="capture-submit-button"]', "Submit");
+    return this;
+  }
 }

@@ -35,8 +35,13 @@ describe("Patient Files", () => {
 
   // Audio File Upload Setup
 
-  const audioFileName = `Cypress Audio Test ${timestamp}`;
+  const audioFileName = "Cypress Audio Test " + timestamp;
   const audioDisplayName = audioFileName + ".mp3";
+
+  // Capture Image Upload Setup
+
+  const captureFileName = "Cypress Capture Test " + timestamp;
+  const captureDisplayName = captureFileName + ".png";
 
   // Single File Upload Setup
 
@@ -91,7 +96,7 @@ describe("Patient Files", () => {
       .verifyFilesAdded(fileDisplayNames);
   });
 
-  it("Record an Audio and download", () => {
+  it("Record, Upload and Download Audio file", () => {
     patientFiles
       .clickAddFilesButton()
       .clickRecordAudioButton()
@@ -172,13 +177,13 @@ describe("Patient Files", () => {
   it("File Accessible by another user", () => {
     // Login as a new user
 
-    cy.loginByApi("devnurse");
-    cy.visit("/");
-    facilityCreation.selectFacility("GHC payyanur");
-
-    // cy.loginByApi("raj");
+    // cy.loginByApi("devnurse");
     // cy.visit("/");
-    // facilityCreation.selectFacility("MEDICAL FACILITY");
+    // facilityCreation.selectFacility("GHC payyanur");
+
+    cy.loginByApi("raj");
+    cy.visit("/");
+    facilityCreation.selectFacility("MEDICAL FACILITY");
 
     patientEncounter
       .navigateToEncounters()
@@ -200,5 +205,23 @@ describe("Patient Files", () => {
       .filterArchivedFiles()
       .verifyNotAccessible(newFileDisplayName, archiveReason)
       .removeFilter();
+  });
+
+  it("Capture image and upload", () => {
+    patientFiles
+      .clickAddFilesButton()
+      .openCamera()
+      .captureImage()
+      .retakeCapture()
+      .captureImage()
+      .clickSubmit()
+      .clickUploadFilesButton()
+      .verifyValidationErrors(validationMessage)
+      .fillSingleFileName(captureFileName)
+      .interceptFileUploadRequest()
+      .clickUploadFilesButton()
+      .verifyFileUploadApiCall()
+      .verifySingleFileUploadSuccess(fileUploadSuccessToast)
+      .verifyFilesAdded([captureDisplayName]);
   });
 });

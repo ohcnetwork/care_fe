@@ -430,6 +430,7 @@ export const FilesTab = (props: FilesTabProps) => {
               variant="ghost"
               onClick={() => fileUpload.handleCameraCapture()}
               className="flex flex-row justify-stretch items-center w-full text-primary-900"
+              data-cy="open-camera-button"
             >
               <CareIcon icon="l-camera" />
               <span>{t("open_camera")}</span>
