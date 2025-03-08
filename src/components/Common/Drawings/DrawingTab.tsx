@@ -30,19 +30,16 @@ interface ExcalidrawPreviewProps {
   elements: readonly ExcalidrawElement[];
 }
 
-// Memoize the preview component to prevent unnecessary re-renders
 const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [svgKey, setSvgKey] = useState(0); // Add a key to force re-rendering
+  const [svgKey, setSvgKey] = useState(0);
 
-  // Reset loading state when elements change
   useEffect(() => {
     setIsLoading(true);
     setSvgKey((prev) => prev + 1);
   }, [elements]);
 
-  // Generate SVG effect
   useEffect(() => {
     let isMounted = true;
 
@@ -53,7 +50,6 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
 
     const generateSvg = async () => {
       try {
-        // Clear previous content
         if (svgContainerRef.current) {
           svgContainerRef.current.innerHTML = "";
         }
@@ -69,7 +65,6 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
           files: null,
         });
 
-        // Add the SVG to the container if component is still mounted
         if (isMounted && svgContainerRef.current) {
           svg.setAttribute("width", "100%");
           svg.setAttribute("height", "100%");
@@ -87,17 +82,15 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
       }
     };
 
-    // Small timeout to ensure DOM is ready, especially during hot reloading
     const timeoutId = setTimeout(() => {
       generateSvg();
     }, 50);
 
-    // Cleanup function
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [elements, svgKey]); // Add svgKey to dependencies
+  }, [elements, svgKey]);
 
   return (
     <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
@@ -123,7 +116,6 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
   );
 });
 
-// Add display name for debugging purposes
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
 export const DrawingTab = (props: DrawingsTabProps) => {
@@ -182,13 +174,7 @@ export const DrawingTab = (props: DrawingsTabProps) => {
                   key={drawing.id}
                   className="overflow-hidden hover:shadow-md transition-shadow duration-200 group cursor-pointer"
                   onClick={() => {
-                    if (props.type === "encounter") {
-                      navigate(
-                        `/facility/${props.encounter?.facility.id}/patient/${props.patientId}/encounter/${props.encounter?.id}/drawings/${drawing.id}`,
-                      );
-                    } else {
-                      navigate(`./drawings/${drawing.id}`);
-                    }
+                    navigate(`./drawings/${drawing.id}`);
                   }}
                 >
                   <div className="relative">
