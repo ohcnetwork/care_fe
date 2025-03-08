@@ -115,32 +115,8 @@ export default function OrganizationLayout({
   return (
     <Page title={`${org.name}`}>
       {/* Navigation */}
-      <div className="mt-4 flex min-w-0">
-        <Menubar className="w-full h-full overflow-x-auto">
-          {navItems
-            .filter((item) => item.visibility)
-            .map((item) => (
-              <MenubarMenu key={item.path}>
-                <MenubarTrigger
-                  data-cy={`org-nav-${item.title.toLowerCase()}`}
-                  className={`${
-                    path === item.path
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                  }`}
-                  asChild
-                >
-                  <Link href={item.path} className="cursor-pointer">
-                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
-                    {item.title}
-                  </Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-            ))}
-        </Menubar>
-      </div>
       {orgParents.length > 0 && (
-        <div className="flex items-center gap-2 mt-5">
+        <div className="flex items-center gap-2 mt-4">
           <Breadcrumb>
             <BreadcrumbList>
               {orgParents.reverse().map((parent) => (
@@ -169,8 +145,32 @@ export default function OrganizationLayout({
           </Breadcrumb>
         </div>
       )}
+      <div className="mt-4">
+        <Menubar className="w-full h-full overflow-x-auto">
+          {navItems
+            .filter((item) => item.visibility)
+            .map((item) => (
+              <MenubarMenu key={item.path}>
+                <MenubarTrigger
+                  data-cy={`org-nav-${item.title.toLowerCase()}`}
+                  className={`${
+                    path === item.path
+                      ? "font-medium text-primary-700 bg-gray-100"
+                      : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
+                  }`}
+                  asChild
+                >
+                  <Link href={item.path} className="cursor-pointer">
+                    <CareIcon icon={item.icon} className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Link>
+                </MenubarTrigger>
+              </MenubarMenu>
+            ))}
+        </Menubar>
+      </div>
       {/* Page Content */}
-      <div>{children}</div>
+      <div className="mt-2">{children}</div>
     </Page>
   );
 }
