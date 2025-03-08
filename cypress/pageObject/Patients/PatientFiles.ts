@@ -214,7 +214,6 @@ export class PatientFiles {
 
   verifyArchiveReason(reason: string) {
     cy.verifyContentPresence('[data-cy="archived-reason"]', [reason]);
-
     return this;
   }
 
