@@ -93,7 +93,7 @@ function getMutationParams(
       facilityId,
       id: entityId,
     } as DevicePathParams,
-    queryKey: [entityType, entityId],
+    queryKey: ["device", entityId],
   };
 }
 
