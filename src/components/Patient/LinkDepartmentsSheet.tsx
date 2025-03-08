@@ -84,6 +84,69 @@ function getInvalidateQueries(
   return ["location", entityId, "organizations"];
 }
 
+function DeleteOrganizationButton({
+  organizationId,
+  entityType,
+  entityId,
+  facilityId,
+  onSuccess,
+}: {
+  organizationId: string;
+  entityType: "encounter" | "location";
+  entityId: string;
+  facilityId: string;
+  onSuccess?: () => void;
+}) {
+  const queryClient = useQueryClient();
+
+  const { mutate: removeOrganization, isPending } = useMutation({
+    mutationFn: (organizationId: string) => {
+      const { route, pathParams } = getMutationParams(
+        entityType,
+        entityId,
+        facilityId,
+        false,
+      );
+      return mutate(route, {
+        pathParams,
+        body: { organization: organizationId },
+      })({ organization: organizationId });
+    },
+    onSuccess: () => {
+      const { queryKey } = getMutationParams(
+        entityType,
+        entityId,
+        facilityId,
+        false,
+      );
+      queryClient.invalidateQueries({ queryKey });
+      toast.success(t("organization_removed_successfully"));
+      onSuccess?.();
+    },
+    onError: (error) => {
+      const errorData = error.cause as { errors: { msg: string }[] };
+      errorData.errors.forEach((er) => {
+        toast.error(er.msg);
+      });
+    },
+  });
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => removeOrganization(organizationId)}
+      disabled={isPending}
+    >
+      {isPending ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Trash2 className="h-4 w-4 text-destructive" />
+      )}
+    </Button>
+  );
+}
+
 export default function LinkDepartmentsSheet({
   entityType,
   entityId,
@@ -112,41 +175,9 @@ export default function LinkDepartmentsSheet({
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
-      toast.success("Organization added successfully");
+      toast.success(t("organization_added_successfully"));
       setSelectedOrg("");
       setOpen(false);
-      onUpdate?.();
-    },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
-  });
-
-  const { mutate: removeOrganization, isPending: isRemoving } = useMutation({
-    mutationFn: (organizationId: string) => {
-      const { route, pathParams } = getMutationParams(
-        entityType,
-        entityId,
-        facilityId,
-        false,
-      );
-      return mutate(route, {
-        pathParams,
-        body: { organization: organizationId },
-      })({ organization: organizationId });
-    },
-    onSuccess: () => {
-      const { queryKey } = getMutationParams(
-        entityType,
-        entityId,
-        facilityId,
-        false,
-      );
-      queryClient.invalidateQueries({ queryKey });
-      toast.success("Organization removed successfully");
       onUpdate?.();
     },
     onError: (error) => {
@@ -215,18 +246,13 @@ export default function LinkDepartmentsSheet({
                         )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeOrganization(org.id)}
-                      disabled={isRemoving}
-                    >
-                      {isRemoving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      )}
-                    </Button>
+                    <DeleteOrganizationButton
+                      organizationId={org.id}
+                      entityType={entityType}
+                      entityId={entityId}
+                      facilityId={facilityId}
+                      onSuccess={onUpdate}
+                    />
                   </div>
                 ))}
                 {currentOrganizations.length === 0 && (
