@@ -98,6 +98,7 @@ export class PatientFiles {
     cy.wait("@archiveFile").then((interception) => {
       expect(interception.response?.statusCode).to.equal(200);
     });
+    cy.wait(2000);
     return this;
   }
 
@@ -171,17 +172,17 @@ export class PatientFiles {
   }
 
   clickDownloadFile() {
-    cy.verifyAndClickElement('[data-cy="download-button"]', "Download");
+    cy.verifyAndClickElement('[data-cy="file-download-button"]', "Download");
     return this;
   }
 
   clickRenameOption() {
-    cy.verifyAndClickElement('[data-cy="rename-button"]', "Rename");
+    cy.verifyAndClickElement('[data-cy="file-rename-button"]', "Rename");
     return this;
   }
 
   fillNewFileName(newFileName: string) {
-    cy.typeIntoField('[data-cy="edit-file-input"]', newFileName, {
+    cy.typeIntoField('[data-cy="edit-filename-input"]', newFileName, {
       clearBeforeTyping: true,
     });
     return this;
@@ -194,7 +195,6 @@ export class PatientFiles {
 
   clickArchiveOption() {
     cy.verifyAndClickElement('[data-cy="file-archive-option"]', "Archive");
-    cy.contains("button", "Archive").should("be.enabled").click();
     return this;
   }
 
