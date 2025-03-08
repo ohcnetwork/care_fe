@@ -74,7 +74,7 @@ function getMutationParams(
       pathParams: { encounterId: entityId } as EncounterPathParams,
       queryKey: ["encounter", entityId],
     };
-  } else if (entityType === "location")
+  } else if (entityType === "location") {
     return {
       route: isAdd
         ? locationApi.addOrganization
@@ -85,6 +85,7 @@ function getMutationParams(
       } as LocationPathParams,
       queryKey: ["location", entityId],
     };
+  }
 
   return {
     route: isAdd ? deviceApi.addOrganization : deviceApi.removeOrganization,
@@ -92,7 +93,7 @@ function getMutationParams(
       facilityId,
       id: entityId,
     } as DevicePathParams,
-    queryKey: ["device", entityId],
+    queryKey: [entityType, entityId],
   };
 }
 
