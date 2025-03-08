@@ -380,8 +380,18 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="relative grid gap-1 md:gap-2 grid-cols-[1fr,3fr,auto] py-2"
+              className="relative grid gap-3 sm:gap-1 grid-cols-1 sm:grid-cols-[1fr,3fr,auto] py-2"
             >
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => remove(index)}
+                className="h-10 px-2 flex sm:hidden w-1/12 justify-self-end"
+              >
+                <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
+              </Button>
+
               <FormField
                 control={form.control}
                 name={`contact.${index}.system`}
@@ -453,7 +463,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 variant="ghost"
                 size="sm"
                 onClick={() => remove(index)}
-                className="h-8 px-2"
+                className="h-10 px-2 hidden sm:flex"
               >
                 <CareIcon icon="l-trash" className="h-4 w-4 text-destructive" />
               </Button>
