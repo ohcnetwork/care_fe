@@ -222,7 +222,7 @@ const AvatarEditModal = ({
 
   return (
     <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="md:max-w-4xl p-5 md:p-0">
+      <DialogContent className="md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
           <DialogDescription className="sr-only">
@@ -381,7 +381,7 @@ const AvatarEditModal = ({
               </>
             ) : (
               <>
-                <div className="flex flex-1 items-center justify-center p-10 md:p-0">
+                <div className="flex flex-1 items-center justify-center p-12 md:p-0">
                   {!previewImage ? (
                     <>
                       <Webcam
