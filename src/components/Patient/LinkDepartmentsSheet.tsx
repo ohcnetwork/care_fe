@@ -117,7 +117,7 @@ function DeleteOrganizationButton({
   onSuccess,
 }: {
   organizationId: string;
-  entityType: "encounter" | "location";
+  entityType: "encounter" | "location" | "device";
   entityId: string;
   facilityId: string;
   onSuccess?: () => void;
