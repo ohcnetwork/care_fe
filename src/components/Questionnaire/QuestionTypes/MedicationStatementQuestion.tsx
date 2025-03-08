@@ -181,6 +181,8 @@ export function MedicationStatementQuestion({
     );
   };
 
+  const medication = medications[medicationToDelete!]?.medication?.display;
+
   return (
     <div className="space-y-4">
       <AlertDialog
@@ -192,8 +194,7 @@ export function MedicationStatementQuestion({
             <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
+                medication: medication,
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
