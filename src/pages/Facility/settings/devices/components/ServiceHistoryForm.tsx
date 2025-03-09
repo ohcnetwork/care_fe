@@ -179,14 +179,6 @@ export default function ServiceHistoryForm({
           )}
         />
         <div className="flex justify-end space-x-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onSubmitSuccess(serviceRecord as ServiceHistory)}
-            data-cy="cancel-button"
-          >
-            {t("cancel")}
-          </Button>
           <Button type="submit" disabled={isPending} data-cy="submit-button">
             {isPending
               ? isEditMode
