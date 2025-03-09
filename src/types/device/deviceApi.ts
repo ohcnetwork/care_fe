@@ -10,8 +10,7 @@ import {
   ServiceHistoryWriteRequest,
 } from "./device";
 
-// Device API with Service History
-const deviceApi = {
+export default {
   list: {
     path: "/api/v1/facility/{facility_id}/device/",
     method: HttpMethod.GET,
@@ -80,5 +79,3 @@ const deviceApi = {
     TRes: Type<PaginatedResponse<DeviceLocationHistory>>(),
   },
 };
-
-export default deviceApi;
