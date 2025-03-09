@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -39,6 +39,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import CreateFacilityOrganizationSheet from "@/pages/Facility/settings/organizations/components/CreateFacilityOrganizationSheet";
+import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
 
 export default function FacilityOrganizationIndex({
   facilityId,
@@ -58,21 +59,19 @@ export default function FacilityOrganizationIndex({
     enabled: !!facilityId,
   });
 
-  const tableData = data?.results || [];
-
   const [{ childrenMap, topLevelOrganizations }, setOrganizationHierarchy] =
     useState<{
-      childrenMap: Map<string, (typeof tableData)[0][]>;
-      topLevelOrganizations: (typeof tableData)[0][];
+      childrenMap: Map<string, FacilityOrganization[]>;
+      topLevelOrganizations: FacilityOrganization[];
     }>({ childrenMap: new Map(), topLevelOrganizations: [] });
 
   useEffect(() => {
-    const childrenMap = new Map<string, (typeof tableData)[0][]>();
-    const topLevelOrgs = tableData.filter(
+    const childrenMap = new Map<string, FacilityOrganization[]>();
+    const topLevelOrgs = (data?.results ?? []).filter(
       (org) => !org.parent || Object.keys(org.parent).length === 0,
     );
 
-    tableData.forEach((org) => {
+    data?.results.forEach((org) => {
       if (org.parent?.id) {
         const parentId = org.parent.id;
         if (!childrenMap.has(parentId)) {
@@ -86,63 +85,49 @@ export default function FacilityOrganizationIndex({
       childrenMap,
       topLevelOrganizations: topLevelOrgs,
     });
-  }, [tableData]);
+  }, [data?.results]);
 
-  const getChildren = useCallback(
-    (parentId: string) => {
-      return childrenMap.get(parentId) || [];
-    },
-    [childrenMap],
-  );
+  const getChildren = (parentId: string) => {
+    return childrenMap.get(parentId) || [];
+  };
 
   const createSearchMatcher = (query: string) => {
     const normalizedQuery = query.toLowerCase().trim();
     return (name: string) => name.toLowerCase().includes(normalizedQuery);
   };
 
-  const matchesSearch = useMemo(
-    () => createSearchMatcher(searchQuery),
-    [searchQuery],
-  );
+  const matchesSearch = createSearchMatcher(searchQuery);
 
-  const hasMatchingChildren = useCallback(
-    (parentId: string): boolean => {
-      const children = childrenMap.get(parentId) || [];
-      return children.some(
-        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
-      );
-    },
-    [childrenMap, matchesSearch],
-  );
-
-  const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return tableData;
-
-    const hasMatchingDescendant = (orgId: string): boolean => {
-      const children = childrenMap.get(orgId) || [];
-      return children.some(
-        (child) => matchesSearch(child.name) || hasMatchingDescendant(child.id),
-      );
-    };
-
-    return tableData.filter(
-      (org) => matchesSearch(org.name) || hasMatchingDescendant(org.id),
+  const hasMatchingChildren = (parentId: string): boolean => {
+    const children = childrenMap.get(parentId) || [];
+    return children.some(
+      (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
     );
-  }, [tableData, searchQuery, childrenMap, matchesSearch]);
+  };
 
-  const getFilteredChildren = useCallback(
-    (parentId: string) => {
-      const children = getChildren(parentId);
-      if (!searchQuery.trim()) {
-        return children;
-      }
+  const filteredData =
+    data?.results.filter((org) => {
+      const hasMatchingDescendant = (orgId: string): boolean => {
+        const children = childrenMap.get(orgId) || [];
+        return children.some(
+          (child) =>
+            matchesSearch(child.name) || hasMatchingDescendant(child.id),
+        );
+      };
 
-      return children.filter(
-        (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
-      );
-    },
-    [getChildren, searchQuery, matchesSearch, hasMatchingChildren],
-  );
+      return matchesSearch(org.name) || hasMatchingDescendant(org.id);
+    }) || [];
+
+  const getFilteredChildren = (parentId: string) => {
+    const children = getChildren(parentId);
+    if (!searchQuery.trim()) {
+      return children;
+    }
+
+    return children.filter(
+      (child) => matchesSearch(child.name) || hasMatchingChildren(child.id),
+    );
+  };
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -152,12 +137,14 @@ export default function FacilityOrganizationIndex({
 
     const newExpandedRows: Record<string, boolean> = {};
 
-    const processMatchingNodes = (org: (typeof tableData)[0]) => {
+    const processMatchingNodes = (org: FacilityOrganization) => {
       if (matchesSearch(org.name)) {
         let current = org;
         while (current.parent?.id) {
           newExpandedRows[current.parent.id] = true;
-          const parentOrg = tableData.find((o) => o.id === current.parent?.id);
+          const parentOrg = data?.results.find(
+            (o) => o.id === current.parent?.id,
+          );
           if (!parentOrg) break;
           current = parentOrg;
         }
@@ -174,7 +161,7 @@ export default function FacilityOrganizationIndex({
     setExpandedRows(newExpandedRows);
   }, [
     searchQuery,
-    tableData,
+    data?.results,
     childrenMap,
     topLevelOrganizations,
     matchesSearch,
@@ -204,7 +191,7 @@ export default function FacilityOrganizationIndex({
     );
   }
 
-  if (!tableData?.length) {
+  if (!data?.results.length) {
     return (
       <Page title={t("organizations")} hideTitleOnPage={true}>
         <div className="flex justify-center md:justify-end mt-2 mb-4">
