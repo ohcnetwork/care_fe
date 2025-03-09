@@ -334,7 +334,11 @@ export default function CreateEncounterForm({
                     facilityId={facilityId}
                     value={field.value[0]}
                     onChange={(value) => {
-                      form.setValue("organizations", [value]);
+                      if (value === null) {
+                        form.setValue("organizations", []);
+                      } else {
+                        form.setValue("organizations", [value]);
+                      }
                     }}
                   />
                   <FormMessage />
@@ -342,7 +346,11 @@ export default function CreateEncounterForm({
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isPending || !form.watch("organizations").length}
+            >
               {isPending ? t("creating") : t("create_encounter")}
             </Button>
           </form>
