@@ -38,6 +38,7 @@ export function DateTimePicker({
         value={formattedDateTime}
         disabled={disabled}
         onChange={handleChange}
+        className="px-0"
       />
     </div>
   );
