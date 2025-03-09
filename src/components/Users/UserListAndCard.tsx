@@ -52,9 +52,9 @@ export const UserStatusIndicator = ({
           className="bg-gray-100 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs sm:text-sm text-gray-700 
         max-w-full truncate overflow-hidden whitespace-nowrap"
         >
-          <span className="h-2 w-2 shrink-0 rounded-full bg-gray-500"></span>
-          <span className="hidden lg:inline-block">Never Logged In</span>
-          <span className="inline-block lg:hidden">Never</span>
+          <span className=" h-2 w-2 shrink-0 rounded-full bg-gray-500 " />
+          <span className="hidden:lg:inline block">{t("never_logged_in")}</span>
+          <span className="inline-block lg:hidden">{t("Never")}</span>
         </Badge>
       )}
     </span>
