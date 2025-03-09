@@ -235,7 +235,7 @@ export default function FacilityOrganizationIndex({
     };
     expandedRows: Record<string, boolean>;
     toggleRow: (id: string) => void;
-    getChildren: (parentId: string) => any[];
+    getChildren: (parentId: string) => FacilityOrganization[];
     indent: number;
   }) => {
     const children = searchQuery.trim()
