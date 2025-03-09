@@ -1,12 +1,13 @@
 import { PatientEncounter } from "@/pageObject/Patients/PatientEncounter";
 import { FacilityCreation } from "@/pageObject/facility/FacilityCreation";
+import { viewPort } from "@/utils/viewPort";
 
 const facilityCreation = new FacilityCreation();
 const patientEncounter = new PatientEncounter();
 
 describe("Patient Encounter Questionnaire", () => {
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop1080p.height);
     cy.loginByApi("devnurse");
     cy.visit("/");
   });

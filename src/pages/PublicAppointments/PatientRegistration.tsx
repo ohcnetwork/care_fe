@@ -40,21 +40,6 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
-// const initialForm: Omit<AppointmentPatientRegister, "gender"> & {
-//   ageInputType: "age" | "date_of_birth";
-//   gender: "male" | "female" | "transgender" | "non_binary";
-// } = {
-//   name: "",
-//   gender: "male",
-//   ageInputType: "date_of_birth",
-//   year_of_birth: undefined,
-//   date_of_birth: undefined,
-//   phone_number: "",
-//   address: "",
-//   pincode: "",
-//   geo_organization: undefined,
-// };
-
 type PatientRegistrationProps = {
   facilityId: string;
   staffId: string;
@@ -84,7 +69,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
-      year_of_birth: z.string().optional(),
+      age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: z
         .string()
@@ -100,8 +85,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
     .superRefine((data, ctx) => {
-      const field =
-        data.ageInputType === "age" ? "year_of_birth" : "date_of_birth";
+      const field = data.ageInputType === "age" ? "age" : "date_of_birth";
       if (!data[field]) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -110,17 +94,16 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         });
         return;
       }
-      // yob corresponds to age till now, only converted to year after validation
       if (
-        field === "year_of_birth" &&
-        data.year_of_birth &&
-        !isNaN(Number(data.year_of_birth)) &&
-        Number(data.year_of_birth) < 0
+        field === "age" &&
+        data.age &&
+        !isNaN(Number(data.age)) &&
+        Number(data.age) < 0
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("age_less_than_0"),
-          path: ["year_of_birth"],
+          path: ["age"],
         });
       }
     });
@@ -133,7 +116,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: {
       name: "",
       ageInputType: "date_of_birth",
-      year_of_birth: undefined,
+      age: undefined,
       date_of_birth: undefined,
       address: "",
       pincode: "",
@@ -196,7 +179,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.year_of_birth : undefined,
+      age: data.ageInputType === "age" ? data.age : undefined,
       pincode: data.pincode || undefined,
       geo_organization: data.geo_organization,
       is_active: true,
@@ -348,13 +331,13 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                 {form.watch("ageInputType") === "age" && (
                   <FormField
                     control={form.control}
-                    name="year_of_birth"
+                    name="age"
                     render={() => (
                       <FormItem className="flex flex-col">
                         <FormLabel required>{t("age")}</FormLabel>
                         <FormControl>
                           <Input
-                            {...form.register("year_of_birth")}
+                            {...form.register("age")}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
@@ -362,6 +345,21 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
+                        {form.getValues("age") && (
+                          <div className="text-sm font-bold">
+                            {Number(form.getValues("age")) <= 0 ? (
+                              <span className="text-red-600">
+                                {t("invalid_age")}
+                              </span>
+                            ) : (
+                              <span className="text-violet-600">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() -
+                                  Number(form.getValues("age"))}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />

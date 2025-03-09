@@ -1,26 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import {
-  facilityPatientTabs,
-  patientTabs,
-} from "@/components/Patient/PatientDetailsTab";
+import { patientTabs as tabs } from "@/components/Patient/PatientDetailsTab";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -31,7 +21,7 @@ import { Patient } from "@/types/emr/newPatient";
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
-  page: (typeof patientTabs | typeof facilityPatientTabs)[0]["route"];
+  page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
 
@@ -50,8 +40,6 @@ export const PatientHome = (props: {
   if (isLoading) {
     return <Loading />;
   }
-
-  const tabs = facilityId ? facilityPatientTabs : patientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
@@ -76,7 +64,7 @@ export const PatientHome = (props: {
         </>
       }
     >
-      <div className="mt-3" data-testid="patient-dashboard">
+      <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
             <div>
@@ -154,7 +142,7 @@ export const PatientHome = (props: {
             </div>
           </div>
         </div>
-        <div className="h-full lg:flex">
+        <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
             {Tab && (
               <Tab
@@ -200,18 +188,11 @@ export const PatientHome = (props: {
 
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.modified_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.modified_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.modified_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.modified_date)}
+                      >
+                        <span>{relativeTime(patientData.modified_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
@@ -228,39 +209,17 @@ export const PatientHome = (props: {
                   </div>
                   <div className="whitespace-normal text-xs font-normal text-gray-900">
                     {patientData.created_date ? (
-                      <TooltipProvider delayDuration={1}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              {relativeTime(patientData.created_date)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatDateTime(patientData.created_date)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <TooltipComponent
+                        content={formatDateTime(patientData.created_date)}
+                      >
+                        <span>{relativeTime(patientData.created_date)}</span>
+                      </TooltipComponent>
                     ) : (
                       "--:--"
                     )}
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="py-2">
-              {patientData.death_datetime && (
-                <div>
-                  <Button
-                    id="death-report"
-                    className="my-2 w-full"
-                    name="death_report"
-                    onClick={() => navigate(`/death_report/${id}`)}
-                  >
-                    <CareIcon icon="l-file-download" className="text-lg" />
-                    {t("death_report")}
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>
