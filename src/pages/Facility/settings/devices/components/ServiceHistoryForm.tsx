@@ -35,7 +35,7 @@ interface Props {
   facilityId: string;
   deviceId: string;
   serviceRecord?: ServiceHistory | null;
-  onSubmitSuccess?: (serviceRecord: ServiceHistory) => void;
+  onSubmitSuccess: (serviceRecord: ServiceHistory) => void;
 }
 
 export default function ServiceHistoryForm({
@@ -49,7 +49,7 @@ export default function ServiceHistoryForm({
   const isEditMode = !!serviceRecord;
 
   const formSchema = z.object({
-    note: z.string().min(1, { message: t("notes_required") }),
+    note: z.string().min(1, { message: t("field_required") }),
     serviced_on: z.date({ required_error: t("date_required") }),
   });
 
@@ -87,10 +87,7 @@ export default function ServiceHistoryForm({
           queryKey: ["deviceServiceHistory", facilityId, deviceId],
         });
         form.reset();
-        onSubmitSuccess?.(resp);
-      },
-      onError: (error) => {
-        toast.error(error?.message ?? t("service_record_add_error"));
+        onSubmitSuccess(resp);
       },
     },
   );
@@ -111,10 +108,7 @@ export default function ServiceHistoryForm({
           queryKey: ["deviceServiceHistory", facilityId, deviceId],
         });
         form.reset();
-        onSubmitSuccess?.(resp);
-      },
-      onError: (error) => {
-        toast.error(error?.message ?? t("service_record_update_error"));
+        onSubmitSuccess(resp);
       },
     },
   );
@@ -199,7 +193,7 @@ export default function ServiceHistoryForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onSubmitSuccess?.(serviceRecord as ServiceHistory)}
+            onClick={() => onSubmitSuccess(serviceRecord as ServiceHistory)}
             data-cy="cancel-button"
           >
             {t("cancel")}

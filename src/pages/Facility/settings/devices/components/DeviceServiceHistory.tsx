@@ -61,28 +61,22 @@ export default function DeviceServiceHistory({
     }),
   });
 
-  const handleAddService = (open: boolean) => {
-    setIsAddServiceSheetOpen(open);
-    if (!open) handleServiceSheetClose();
-  };
-
   const handleEditService = (service: ServiceHistory) => {
     setSelectedServiceHistory(service);
     setIsEditServiceSheetOpen(true);
   };
 
-  const handleServiceSheetClose = () => {
+  const handleServiceCreated = () => {
     queryClient.invalidateQueries({
-      queryKey: ["deviceServiceHistory", facilityId, deviceId],
+      queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
     });
   };
 
-  const handleEditServiceSheetOpen = (open: boolean) => {
-    setIsEditServiceSheetOpen(open);
-    if (!open) {
-      handleServiceSheetClose();
-      setSelectedServiceHistory(null);
-    }
+  const handleServiceUpdated = () => {
+    setSelectedServiceHistory(null);
+    queryClient.invalidateQueries({
+      queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
+    });
   };
 
   return (
@@ -95,7 +89,8 @@ export default function DeviceServiceHistory({
           facilityId={facilityId}
           deviceId={deviceId}
           open={isAddServiceSheetOpen}
-          setOpen={handleAddService}
+          setOpen={setIsAddServiceSheetOpen}
+          onServiceCreated={handleServiceCreated}
         />
       </CardHeader>
       <CardContent>
@@ -164,10 +159,11 @@ export default function DeviceServiceHistory({
       {selectedServiceHistory && (
         <EditServiceHistorySheet
           open={isEditServiceSheetOpen}
-          setOpen={handleEditServiceSheetOpen}
+          setOpen={setIsEditServiceSheetOpen}
           facilityId={facilityId}
           deviceId={deviceId}
           serviceRecord={selectedServiceHistory}
+          onServiceUpdated={handleServiceUpdated}
         />
       )}
     </Card>

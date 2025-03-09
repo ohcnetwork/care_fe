@@ -11,6 +11,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { ServiceHistory } from "@/types/device/device";
+
 import ServiceHistoryForm from "./ServiceHistoryForm";
 
 interface AddServiceHistorySheetProps {
@@ -18,6 +20,7 @@ interface AddServiceHistorySheetProps {
   deviceId: string;
   open: boolean;
   setOpen: (open: boolean) => void;
+  onServiceCreated?: (service: ServiceHistory) => void;
 }
 
 export default function AddServiceHistorySheet({
@@ -25,8 +28,10 @@ export default function AddServiceHistorySheet({
   deviceId,
   open,
   setOpen,
+  onServiceCreated,
 }: AddServiceHistorySheetProps) {
   const { t } = useTranslation();
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -47,8 +52,9 @@ export default function AddServiceHistorySheet({
           <ServiceHistoryForm
             facilityId={facilityId}
             deviceId={deviceId}
-            onSubmitSuccess={() => {
+            onSubmitSuccess={(service) => {
               setOpen(false);
+              onServiceCreated?.(service);
             }}
           />
         </div>

@@ -18,6 +18,7 @@ interface EditServiceHistorySheetProps {
   serviceRecord: ServiceHistory;
   open: boolean;
   setOpen: (open: boolean) => void;
+  onServiceUpdated?: (service: ServiceHistory) => void;
 }
 
 export default function EditServiceHistorySheet({
@@ -26,8 +27,10 @@ export default function EditServiceHistorySheet({
   serviceRecord,
   open,
   setOpen,
+  onServiceUpdated,
 }: EditServiceHistorySheetProps) {
   const { t } = useTranslation();
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent
@@ -43,8 +46,9 @@ export default function EditServiceHistorySheet({
             facilityId={facilityId}
             deviceId={deviceId}
             serviceRecord={serviceRecord}
-            onSubmitSuccess={() => {
+            onSubmitSuccess={(service) => {
               setOpen(false);
+              onServiceUpdated?.(service);
             }}
           />
         </div>
