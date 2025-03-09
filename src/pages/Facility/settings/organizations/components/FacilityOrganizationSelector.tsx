@@ -18,9 +18,8 @@ import {
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface FacilityOrganizationSelectorProps {
-  value?: string;
-  onChange: (value: string) => void;
-  required?: boolean;
+  value?: string | null;
+  onChange: (value: string | null) => void;
   facilityId: string;
 }
 
@@ -54,7 +53,6 @@ export default function FacilityOrganizationSelector(
         queryParams: {
           parent: "",
           name: facilityOrgSearch,
-          ...(showAllOrgs ? {} : { mine: true }),
         },
       },
     ),
@@ -112,22 +110,21 @@ export default function FacilityOrganizationSelector(
       onChange(lastOrg.id);
     } else {
       setSelectedOrganization(null);
-      onChange("");
+      onChange(null);
     }
   };
 
   const handleRemoveOrganization = () => {
     setSelectedLevels([]);
     setSelectedOrganization(null);
-    onChange("");
+    onChange(null);
   };
 
   const handleOrganizationViewChange = (value: string) => {
     setShowAllOrgs(value === "all");
-    // Clear selection when switching views
     setSelectedLevels([]);
     setSelectedOrganization(null);
-    onChange("");
+    onChange(null);
   };
 
   const renderOrganizationLevel = (level: number) => {
@@ -186,9 +183,6 @@ export default function FacilityOrganizationSelector(
             {t("select_department")}
             <span className="text-red-500 ml-0.5">*</span>
           </Label>
-          <p className="text-sm text-gray-500">
-            {t("select_department_description")}
-          </p>
         </div>
       </div>
 
