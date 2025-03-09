@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useEffect } from "react";
@@ -45,7 +45,6 @@ export default function ServiceHistoryForm({
   onSubmitSuccess,
 }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const isEditMode = !!serviceRecord;
 
   const formSchema = z.object({
@@ -83,9 +82,6 @@ export default function ServiceHistoryForm({
       }),
       onSuccess: (resp: ServiceHistory) => {
         toast.success(t("service_record_added_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["deviceServiceHistory", facilityId, deviceId],
-        });
         form.reset();
         onSubmitSuccess(resp);
       },
@@ -104,9 +100,6 @@ export default function ServiceHistoryForm({
       }),
       onSuccess: (resp: ServiceHistory) => {
         toast.success(t("service_record_updated_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["deviceServiceHistory", facilityId, deviceId],
-        });
         form.reset();
         onSubmitSuccess(resp);
       },
