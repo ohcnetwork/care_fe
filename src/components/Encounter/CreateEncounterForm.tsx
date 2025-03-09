@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { t } from "i18next";
 import {
   Ambulance,
   BedDouble,
@@ -47,49 +48,52 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
+  ENCOUNTER_CLASS,
+  ENCOUNTER_PRIORITY,
   Encounter,
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter";
 
-const encounterClasses = [
-  {
-    value: "imp",
-    label: "Inpatient",
-    icon: BedDouble,
-    description: "Patient is admitted to the hospital",
-  },
-  {
-    value: "amb",
-    label: "Ambulatory",
-    icon: Ambulance,
-    description: "Patient visits for outpatient care",
-  },
-  {
-    value: "obsenc",
-    label: "Observation",
-    icon: Stethoscope,
-    description: "Patient is under observation",
-  },
-  {
-    value: "emer",
-    label: "Emergency",
-    icon: Building2,
-    description: "Emergency department visit",
-  },
-  {
-    value: "vr",
-    label: "Virtual",
-    icon: MonitorSmartphone,
-    description: "Virtual/telehealth consultation",
-  },
-  {
-    value: "hh",
-    label: "Home Health",
-    icon: Home,
-    description: "Care provided at patient's home",
-  },
-] as const;
+const encounterClasses = () =>
+  [
+    {
+      value: "imp",
+      label: "Inpatient",
+      icon: BedDouble,
+      description: t("inpatient_description"),
+    },
+    {
+      value: "amb",
+      label: "Ambulatory",
+      icon: Ambulance,
+      description: t("ambulatory_description"),
+    },
+    {
+      value: "obsenc",
+      label: "Observation",
+      icon: Stethoscope,
+      description: t("observation_description"),
+    },
+    {
+      value: "emer",
+      label: "Emergency",
+      icon: Building2,
+      description: t("emergency_description"),
+    },
+    {
+      value: "vr",
+      label: "Virtual",
+      icon: MonitorSmartphone,
+      description: t("virtual_description"),
+    },
+    {
+      value: "hh",
+      label: "Home Health",
+      icon: Home,
+      description: t("home_health_description"),
+    },
+  ] as const;
 
 interface Props {
   patientId: string;
@@ -114,29 +118,8 @@ export default function CreateEncounterForm({
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum([
-      "imp",
-      "amb",
-      "obsenc",
-      "emer",
-      "vr",
-      "hh",
-    ] as const),
-    priority: z.enum([
-      "ASAP",
-      "callback_results",
-      "callback_for_scheduling",
-      "elective",
-      "emergency",
-      "preop",
-      "as_needed",
-      "routine",
-      "rush_reporting",
-      "stat",
-      "timing_critical",
-      "use_as_directed",
-      "urgent",
-    ] as const),
+    encounter_class: z.enum(ENCOUNTER_CLASS),
+    priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
       message: t("at_least_one_department_is_required"),
     }),
@@ -155,7 +138,7 @@ export default function CreateEncounterForm({
   const { mutate: createEncounter, isPending } = useMutation({
     mutationFn: mutate(routes.encounter.create),
     onSuccess: (data: Encounter) => {
-      toast.success("Encounter created successfully");
+      toast.success(t("encounter_created"));
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
@@ -221,7 +204,7 @@ export default function CreateEncounterForm({
                     {t("type_of_encounter")}
                   </FormLabel>
                   <div className="grid grid-cols-2 gap-3">
-                    {encounterClasses.map(
+                    {encounterClasses().map(
                       ({ value, label, icon: Icon, description }) => (
                         <Button
                           key={value}
