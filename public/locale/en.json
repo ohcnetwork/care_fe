@@ -1281,6 +1281,7 @@
   "intended": "Intended",
   "intent": "Intent",
   "international_mobile": "International Mobile",
+  "invalid_age": "Invalid age",
   "invalid_asset_id_msg": "Oops! The asset ID you entered does not appear to be valid.",
   "invalid_date_format": "Invalid date format, expected {{format}}",
   "invalid_email": "Please enter a valid email address",
