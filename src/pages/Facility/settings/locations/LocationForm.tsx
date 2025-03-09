@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import { Info, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -61,14 +60,27 @@ export default function LocationForm({
   const queryClient = useQueryClient();
 
   const formSchema = z.object({
-    name: z.string().min(1, { message: t("name_is_required") }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
     description: z.string().optional(),
     status: z.enum(["active", "inactive", "unknown"] as const),
     operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
     form: z.enum(LocationFormOptions),
     parent: z.string().optional().nullable(),
+    enableBulkCreation: z.boolean().default(false),
+    numberOfBeds: z.string().optional(),
+    customizeNames: z.boolean().default(false),
     organizations: z.array(z.string()).default([]),
     availability_status: z.enum(["available", "unavailable"] as const),
+    bedNames: z
+      .array(
+        z.object({
+          name: z.string().min(1, { message: t("field_required") }),
+        }),
+      )
+      .default([]),
   });
 
   type FormValues = z.infer<typeof formSchema>;
@@ -80,8 +92,12 @@ export default function LocationForm({
     operational_status: "O",
     form: "ro",
     parent: null,
+    enableBulkCreation: false,
+    numberOfBeds: "2",
+    customizeNames: false,
     organizations: [],
     availability_status: "available",
+    bedNames: [],
   };
 
   const { data: location, isLoading } = useQuery({
