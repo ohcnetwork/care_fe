@@ -26,9 +26,14 @@ import OrganizationLayout from "./components/OrganizationLayout";
 interface Props {
   id: string;
   navOrganizationId?: string;
+  page: number;
 }
 
-export default function OrganizationPatients({ id, navOrganizationId }: Props) {
+export default function OrganizationPatients({
+  id,
+  navOrganizationId,
+  page,
+}: Props) {
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
@@ -95,6 +100,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       id={id}
       navOrganizationId={navOrganizationId}
       setOrganization={setOrganization}
+      page={page}
     >
       <div className="space-y-6">
         <div className="flex justify-between items-center">

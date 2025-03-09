@@ -23,6 +23,7 @@ interface Props {
   navOrganizationId?: string;
   id: string;
   children: React.ReactNode;
+  page: number;
   setOrganization?: (org: Organization) => void;
 }
 
@@ -36,6 +37,7 @@ interface NavItem {
 export default function OrganizationLayout({
   id,
   navOrganizationId,
+  page,
   children,
   setOrganization,
 }: Props) {
@@ -71,25 +73,25 @@ export default function OrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `${baseUrl}/${id}`,
+      path: `${baseUrl}/${id}/${page}`,
       title: "Organizations",
       icon: "d-hospital",
       visibility: hasPermission("can_view_organization", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/users`,
+      path: `${baseUrl}/${id}/${page}/users`,
       title: "Users",
       icon: "d-people",
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/patients`,
+      path: `${baseUrl}/${id}/${page}/patients`,
       title: "Patients",
       icon: "d-patient",
       visibility: hasPermission("can_list_patients", org.permissions),
     },
     {
-      path: `${baseUrl}/${id}/facilities`,
+      path: `${baseUrl}/${id}/${page}/facilities`,
       title: "Facilities",
       icon: "d-hospital",
       visibility: hasPermission("can_read_facility", org.permissions),

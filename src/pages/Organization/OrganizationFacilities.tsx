@@ -25,11 +25,13 @@ import OrganizationLayout from "./components/OrganizationLayout";
 interface Props {
   id: string;
   navOrganizationId?: string;
+  page: number;
 }
 
 export default function OrganizationFacilities({
   id,
   navOrganizationId,
+  page,
 }: Props) {
   const { t } = useTranslation();
 
@@ -56,7 +58,11 @@ export default function OrganizationFacilities({
   }
 
   return (
-    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+    <OrganizationLayout
+      id={id}
+      navOrganizationId={navOrganizationId}
+      page={page}
+    >
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">

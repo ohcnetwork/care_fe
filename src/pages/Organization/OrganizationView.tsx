@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,12 +25,15 @@ import OrganizationLayout from "./components/OrganizationLayout";
 interface Props {
   id: string;
   navOrganizationId?: string;
+  page: number;
 }
 
-export default function OrganizationView({ id, navOrganizationId }: Props) {
+export default function OrganizationView({
+  id,
+  navOrganizationId,
+  page,
+}: Props) {
   const { t } = useTranslation();
-
-  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: children, isFetching } = useQuery({
@@ -45,17 +48,17 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     }),
   });
 
-  useEffect(() => {
-    setPage(1);
-  }, [id, searchQuery]);
-
   // Hack for the sidebar to work
   const baseUrl = navOrganizationId
-    ? `/organization/${navOrganizationId}`
+    ? `/organization/${id}`
     : `/organization/${id}`;
 
   return (
-    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+    <OrganizationLayout
+      id={id}
+      navOrganizationId={navOrganizationId}
+      page={page}
+    >
       <div className="space-y-6">
         <div className="flex flex-col justify-between items-start gap-4">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
@@ -71,8 +74,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to first page on search
+                setSearchQuery(e.target.value); // Reset to first page on search
               }}
               className="w-full"
             />
@@ -88,23 +90,27 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {children?.results?.length ? (
                 children.results.map((orgChild: Organization) => (
-                  <Card key={orgChild.id} className="flex flex-col h-full">
-                    <CardContent className="p-6 flex-grow">
-                      <div className="space-y-4 flex-grow">
-                        <div className="space-y-1 mb-2">
-                          <h3 className="text-lg font-semibold">
-                            {orgChild.name}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{orgChild.org_type}</Badge>
-                            {orgChild.metadata?.govt_org_type && (
+                  <Card key={orgChild.id}>
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between flex-wrap">
+                          <div className="space-y-1 mb-2">
+                            <h3 className="text-lg font-semibold">
+                              {orgChild.name}
+                            </h3>
+                            <div className="flex items-center gap-2">
                               <Badge variant="outline">
-                                {getOrgLabel(
-                                  orgChild.org_type,
-                                  orgChild.metadata,
-                                )}
+                                {orgChild.org_type}
                               </Badge>
-                            )}
+                              {orgChild.metadata?.govt_org_type && (
+                                <Badge variant="outline">
+                                  {getOrgLabel(
+                                    orgChild.org_type,
+                                    orgChild.metadata,
+                                  )}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                         {orgChild.description && (
@@ -116,7 +122,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
                     </CardContent>
                     <div className="p-4 pt-0 mt-auto text-end">
                       <Button variant="link" asChild>
-                        <Link href={`${baseUrl}/children/${orgChild.id}`}>
+                        <Link href={`${baseUrl}/children/${orgChild.id}/1`}>
                           {t("view_details")}
                           <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                         </Link>
@@ -138,7 +144,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               <div className="flex justify-center">
                 <Pagination
                   data={{ totalCount: children.count }}
-                  onChange={(page, _) => setPage(page)}
+                  onChange={(page, _) => navigate(`${baseUrl}/${page}`)}
                   defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                   cPage={page}
                 />

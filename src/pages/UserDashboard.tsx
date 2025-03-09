@@ -134,7 +134,7 @@ export default function UserDashboard() {
             data-cy="organization-list"
           >
             {organizations.map((org) => (
-              <Link key={org.id} href={`/organization/${org.id}`}>
+              <Link key={org.id} href={`/organization/${org.id}/1`}>
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
