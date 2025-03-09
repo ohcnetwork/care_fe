@@ -73,7 +73,7 @@ export default function ServiceHistoryForm({
 
   const { mutate: createService, isPending: isCreatePending } = useMutation({
     mutationKey: ["create_service_record"],
-    mutationFn: mutate(deviceApi.createServiceHistory, {
+    mutationFn: mutate(deviceApi.serviceHistory.create, {
       pathParams: {
         facilityId,
         deviceId,
@@ -88,7 +88,7 @@ export default function ServiceHistoryForm({
 
   const { mutate: updateService, isPending: isUpdatePending } = useMutation({
     mutationKey: ["update_service_record"],
-    mutationFn: mutate(deviceApi.updateServiceHistory, {
+    mutationFn: mutate(deviceApi.serviceHistory.update, {
       pathParams: {
         facilityId,
         deviceId,

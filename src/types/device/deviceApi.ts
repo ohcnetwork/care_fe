@@ -52,26 +52,28 @@ export default {
     TBody: Type<{ location: string }>(),
   },
   serviceHistory: {
-    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<ServiceHistory>>(),
-  },
-  retrieveServiceHistory: {
-    method: HttpMethod.GET,
-    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
-    TRes: Type<ServiceHistory>(),
-  },
-  createServiceHistory: {
-    method: HttpMethod.POST,
-    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
-    TRes: Type<ServiceHistory>(),
-    TBody: Type<ServiceHistoryWriteRequest>(),
-  },
-  updateServiceHistory: {
-    method: HttpMethod.PUT,
-    path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
-    TRes: Type<ServiceHistory>(),
-    TBody: Type<ServiceHistoryWriteRequest>(),
+    list: {
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<ServiceHistory>>(),
+    },
+    retrieve: {
+      method: HttpMethod.GET,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
+      TRes: Type<ServiceHistory>(),
+    },
+    create: {
+      method: HttpMethod.POST,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/",
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
+    },
+    update: {
+      method: HttpMethod.PUT,
+      path: "/api/v1/facility/{facilityId}/device/{deviceId}/service_history/{id}/",
+      TRes: Type<ServiceHistory>(),
+      TBody: Type<ServiceHistoryWriteRequest>(),
+    },
   },
   locationHistory: {
     path: "/api/v1/facility/{facilityId}/device/{id}/location_history/",

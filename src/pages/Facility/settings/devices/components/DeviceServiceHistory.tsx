@@ -49,7 +49,7 @@ export default function DeviceServiceHistory({
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { data: serviceHistory, isLoading } = useQuery({
     queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
-    queryFn: query(deviceApi.serviceHistory, {
+    queryFn: query(deviceApi.serviceHistory.list, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
