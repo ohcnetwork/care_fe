@@ -16,12 +16,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
   FacilityOrganization,
   FacilityOrganizationParent,
 } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   id: string;
@@ -61,7 +61,7 @@ export default function FacilityOrganizationLayout({
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
-    queryFn: query(routes.facilityOrganization.get, {
+    queryFn: query(facilityOrganizationApi.get, {
       pathParams: { facilityId, organizationId: id },
     }),
   });
