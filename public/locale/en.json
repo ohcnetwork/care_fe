@@ -1681,6 +1681,7 @@
   "packages": "Packages",
   "page_load_error": "Couldn't Load the Page",
   "page_not_found": "Page Not Found",
+  "page_too_long": "Pager number too long",
   "pain": "Pain",
   "pain_chart_description": "Mark region and intensity of pain",
   "part_number": "Part Number",

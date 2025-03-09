@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { z } from "zod";
 
 import validators from "@/Utils/validators";
@@ -61,14 +62,14 @@ export const contactPointSchema = () =>
       system: z.literal("pager"),
       value: z
         .string()
-        .min(1, { message: "Required" })
-        .max(20, { message: "Pager number too long" }),
+        .min(1, { message: t("required") })
+        .max(20, { message: t("page_too_long") }),
       use: z.enum(ContactPointUses),
     }),
     // Other (catch-all with basic validation)
     z.object({
       system: z.literal("other"),
-      value: z.string().min(1, { message: "Required" }),
+      value: z.string().min(1, { message: t("required") }),
       use: z.enum(ContactPointUses),
     }),
   ]);
