@@ -16,6 +16,7 @@ import {
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
+import { MFAResponse } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -64,11 +65,6 @@ export function Type<T>(): T {
 export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
-}
-
-export interface MFAResponse {
-  temp_token: string;
-  mfa_required?: boolean;
 }
 
 export type LoginResponse = JwtTokenObtainPair | MFAResponse;
@@ -161,7 +157,7 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<UserModel>(),
+    TRes: Type<UserModel & Pick<UserBase, "mfa_enabled">>(),
   },
 
   deleteProfilePicture: {

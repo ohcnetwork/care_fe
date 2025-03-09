@@ -12,12 +12,12 @@ import { LocalStorageKeys } from "@/common/constants";
 import routes, {
   JwtTokenObtainPair,
   LoginResponse,
-  MFAResponse,
   Type,
 } from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { TokenData } from "@/types/auth/otpToken";
+import authApi from "@/types/auth/authApi";
+import { MFAResponse, TokenData } from "@/types/auth/otp";
 
 interface Props {
   children: React.ReactNode;
@@ -25,13 +25,15 @@ interface Props {
   otpAuthorized: React.ReactNode;
 }
 
-function isMFAResponse(data: LoginResponse): data is MFAResponse {
+const isMFAResponse = (data: LoginResponse): data is MFAResponse => {
   return "temp_token" in data;
-}
+};
 
-function isJwtTokenResponse(data: LoginResponse): data is JwtTokenObtainPair {
+const isJwtTokenResponse = (
+  data: LoginResponse,
+): data is JwtTokenObtainPair => {
   return "access" in data && "refresh" in data;
-}
+};
 
 export default function AuthUserProvider({
   children,
@@ -113,6 +115,32 @@ export default function AuthUserProvider({
     },
   });
 
+  const { mutateAsync: verifyMFA, isPending: isVerifyingMFA } = useMutation({
+    mutationFn: mutate(authApi.mfa.login),
+    onSuccess: async (data: JwtTokenObtainPair) => {
+      // Clear MFA related data
+      localStorage.removeItem("mfa_temp_token");
+      localStorage.removeItem("mfa_method");
+
+      // Set new tokens
+      setAccessToken(data.access);
+      localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+      localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+
+      // Invalidate and wait for the currentUser query to complete
+      try {
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        await queryClient.refetchQueries({ queryKey: ["currentUser"] });
+      } catch (error) {
+        console.error("Error refreshing currentUser query:", error);
+      }
+
+      // Get redirect URL from query params or localStorage
+      const redirectURL = getRedirectURL() || "/";
+      navigate(redirectURL);
+    },
+  });
+
   const patientLogin = (tokenData: TokenData, redirectUrl: string) => {
     setPatientToken(tokenData);
     localStorage.setItem(
@@ -181,7 +209,9 @@ export default function AuthUserProvider({
       value={{
         signIn,
         signOut,
+        verifyMFA,
         isAuthenticating,
+        isVerifyingMFA,
         user,
         patientLogin,
         patientToken,

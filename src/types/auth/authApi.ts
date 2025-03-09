@@ -1,33 +1,12 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
+import { HttpMethod, JwtTokenObtainPair, Type } from "@/Utils/request/api";
 
-export interface TOTPSetupResponse {
-  uri: string;
-  secret_key: string;
-  backup_codes?: string[];
-}
-
-export interface TOTPVerifyRequest {
-  code: string;
-}
-
-export interface TOTPVerifyResponse {
-  backup_codes: string[];
-}
-
-export interface TOTPDisableRequest {
-  password: string;
-}
-
-export interface MFALoginRequest {
-  method: string;
-  code: string;
-  temp_token: string;
-}
-
-export interface MFALoginResponse {
-  access: string;
-  refresh: string;
-}
+import {
+  MFALoginRequest,
+  TOTPDisableRequest,
+  TOTPSetupResponse,
+  TOTPVerifyRequest,
+  TOTPVerifyResponse,
+} from "./otp";
 
 export default {
   /**
@@ -66,7 +45,7 @@ export default {
       path: "/api/v1/mfa/login/",
       method: HttpMethod.POST,
       TBody: Type<MFALoginRequest>(),
-      TRes: Type<MFALoginResponse>(),
+      TRes: Type<JwtTokenObtainPair>(),
     },
   },
 } as const;

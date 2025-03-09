@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -18,26 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-import useAuthUser from "@/hooks/useAuthUser";
+import { userChildProps } from "@/components/Common/UserColumns";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
-import authApi, {
-  TOTPSetupResponse,
-  TOTPVerifyResponse,
-} from "@/types/auth/authApi";
-
-interface TwoFactorAuthProps {
-  isEnabled?: boolean;
-  onSuccess?: () => void;
-}
-
-interface ExtendedUserModel {
-  is_2fa_enabled?: boolean;
-  // ... other user model properties
-}
+import authApi from "@/types/auth/authApi";
+import { TOTPSetupResponse, TOTPVerifyResponse } from "@/types/auth/otp";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -83,7 +69,7 @@ function PasswordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md w-[93%] rounded-md ">
         <DialogHeader>
           {icon ? (
             <div className="flex items-center gap-2">
@@ -93,7 +79,9 @@ function PasswordDialog({
           ) : (
             <DialogTitle>{title}</DialogTitle>
           )}
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription className="text-start">
+            {description}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -108,14 +96,7 @@ function PasswordDialog({
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
           </div>
-          <DialogFooter className="flex justify-between sm:justify-between mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              {t("cancel")}
-            </Button>
+          <DialogFooter className="flex items-end mt-4">
             <Button
               type="submit"
               variant={buttonVariant}
@@ -140,12 +121,8 @@ function PasswordDialog({
   );
 }
 
-export function TwoFactorAuth({
-  isEnabled = false,
-  onSuccess,
-}: TwoFactorAuthProps) {
+export const TwoFactorAuth = ({ userData }: userChildProps) => {
   const { t } = useTranslation();
-  const authUser = useAuthUser();
   const queryClient = useQueryClient();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSetupDialog, setShowSetupDialog] = useState(false);
@@ -161,21 +138,6 @@ export function TwoFactorAuth({
   const [disableError, setDisableError] = useState("");
   const [regeneratePasswordError, setRegeneratePasswordError] = useState("");
 
-  // Fetch current user to check 2FA status
-  const { data: currentUser, isLoading: isLoadingUser } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: query(routes.currentUser),
-    enabled: !!authUser,
-    // Ensure we get fresh data
-    staleTime: 0,
-    // Fetch immediately when component mounts
-    refetchOnMount: true,
-  });
-
-  // Use the 2FA status directly from currentUser
-  const is2FAEnabled =
-    (currentUser as ExtendedUserModel)?.is_2fa_enabled ?? isEnabled;
-
   const handleSetup = () => {
     setShowPasswordDialog(true);
   };
@@ -187,16 +149,12 @@ export function TwoFactorAuth({
       setShowPasswordDialog(false);
       setShowSetupDialog(true);
       setSetupPasswordError("");
-      // Force update the UI state
-      queryClient.setQueryData(["currentUser"], (oldData: any) => ({
-        ...oldData,
-        is_2fa_enabled: true,
-      }));
+      queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
     },
     onError: (error: HTTPError) => {
       const errors = error.cause as StructuredError;
 
-      // Check for already enabled 2FA
+      // Check for already enabled MFA
       const isAlreadyEnabled =
         (error.cause &&
           typeof error.cause === "object" &&
@@ -214,11 +172,7 @@ export function TwoFactorAuth({
 
       if (isAlreadyEnabled) {
         setShowPasswordDialog(false);
-        // Force update the UI state
-        queryClient.setQueryData(["currentUser"], (oldData: any) => ({
-          ...oldData,
-          is_2fa_enabled: true,
-        }));
+        queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
         return;
       }
 
@@ -245,8 +199,8 @@ export function TwoFactorAuth({
         setShowBackupCodes(true);
         setVerificationCode("");
         setVerificationError("");
-        // Refresh the current user data to update the 2FA status
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        toast.success(t("two_factor_authentication_enabled"));
+        queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
       }
     },
     onError: (error: HTTPError) => {
@@ -263,9 +217,7 @@ export function TwoFactorAuth({
       toast.success(t("two_factor_authentication_disabled_success"));
       setShowDisableDialog(false);
       setDisableError("");
-      // Refresh the current user data to update the 2FA status
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      onSuccess?.();
+      queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
     },
     onError: (error: HTTPError) => {
       const errors = error.cause as StructuredError;
@@ -279,7 +231,6 @@ export function TwoFactorAuth({
     useMutation({
       mutationFn: mutate(authApi.totp.regenerateBackupCodes),
       onSuccess: (data: { backup_codes: string[] }) => {
-        // Create a new setupData object with the new backup codes
         setSetupData({
           backup_codes: data.backup_codes,
           secret_key: "",
@@ -293,21 +244,17 @@ export function TwoFactorAuth({
       onError: (error: HTTPError) => {
         const errors = error.cause as StructuredError;
 
-        // Check if 2FA is not enabled
-        const is2FANotEnabled =
+        // Check if MFA is not enabled
+        const isMFANotEnabled =
           error.status === 400 ||
           (errors?.detail &&
             typeof errors.detail === "string" &&
             errors.detail.includes("not enabled"));
 
-        if (is2FANotEnabled) {
+        if (isMFANotEnabled) {
           setShowRegenerateConfirm(false);
           setRegeneratePasswordError("");
-          // Force update the UI state
-          queryClient.setQueryData(["currentUser"], (oldData: any) => ({
-            ...oldData,
-            is_2fa_enabled: false,
-          }));
+          queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
           return;
         }
 
@@ -379,28 +326,17 @@ export function TwoFactorAuth({
     }
   };
 
-  // Force refresh current user data when component mounts
+  // Update local state when MFA status changes
   useEffect(() => {
-    if (authUser) {
-      queryClient.fetchQuery({ queryKey: ["currentUser"] });
+    if (!userData.mfa_enabled) {
+      // Close all dialogs if MFA is not enabled
+      setShowPasswordDialog(false);
+      setShowSetupDialog(false);
+      setShowRegenerateConfirm(false);
+      setShowRegenerateBackupCodes(false);
+      setShowDisableDialog(false);
     }
-  }, [authUser, queryClient]);
-
-  // Update local state when currentUser changes
-  useEffect(() => {
-    if (currentUser) {
-      const enabled =
-        (currentUser as ExtendedUserModel)?.is_2fa_enabled ?? isEnabled;
-      if (!enabled) {
-        // Close all dialogs if 2FA is not enabled
-        setShowPasswordDialog(false);
-        setShowSetupDialog(false);
-        setShowRegenerateConfirm(false);
-        setShowRegenerateBackupCodes(false);
-        setShowDisableDialog(false);
-      }
-    }
-  }, [currentUser, isEnabled]);
+  }, [userData.mfa_enabled]);
 
   return (
     <>
@@ -410,12 +346,7 @@ export function TwoFactorAuth({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {isLoadingUser ? (
-              <div className="flex items-center space-x-2">
-                <CareIcon icon="l-spinner" className="h-4 w-4 animate-spin" />
-                <p className="text-gray-700">{t("loading")}</p>
-              </div>
-            ) : !is2FAEnabled ? (
+            {!userData.mfa_enabled ? (
               <>
                 <p className="text-sm text-gray-700">
                   {t("two_factor_authentication_not_active")}
@@ -443,12 +374,12 @@ export function TwoFactorAuth({
                 <p className="text-sm text-gray-700">
                   {t("two_factor_authentication_active")}
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex flex-col md:flex-row gap-2">
                   <Button
                     variant="outline"
                     onClick={() => setShowRegenerateConfirm(true)}
                     disabled={isRegenerating}
-                    className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                    className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 w-auto"
                   >
                     {isRegenerating ? (
                       <>
@@ -456,7 +387,7 @@ export function TwoFactorAuth({
                           icon="l-spinner"
                           className="mr-2 h-4 w-4 animate-spin"
                         />
-                        {t("two_factor_authentication_regenerating_codes")}
+                        <span>{t("regenerating")}</span>
                       </>
                     ) : (
                       <>
@@ -468,7 +399,7 @@ export function TwoFactorAuth({
                   <Button
                     variant="destructive"
                     onClick={() => setShowDisableDialog(true)}
-                    className="hover:bg-red-600"
+                    className="hover:bg-red-600 w-auto"
                   >
                     <CareIcon icon="l-shield" className="mr-2 h-4 w-4" />
                     {t("two_factor_authentication_disable")}
@@ -494,7 +425,7 @@ export function TwoFactorAuth({
       />
 
       <Dialog open={showSetupDialog} onOpenChange={setShowSetupDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md w-[93%] rounded-md ">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold text-primary-800">
               {t("two_factor_authentication")}
@@ -542,7 +473,7 @@ export function TwoFactorAuth({
                   className="p-2 bg-indigo-50 rounded flex items-center justify-between cursor-pointer"
                   onClick={handleCopyKey}
                 >
-                  <code className="text-indigo-600">
+                  <code className="text-indigo-600 text-sm select-all">
                     {setupData.secret_key}
                   </code>
                   <CareIcon icon="l-copy" className="h-4 w-4 text-gray-500" />
@@ -608,14 +539,10 @@ export function TwoFactorAuth({
           if (!open) {
             setShowBackupCodes(false);
             setShowRegenerateBackupCodes(false);
-            if (!showBackupCodes) {
-              // Only call onSuccess when closing from initial setup
-              onSuccess?.();
-            }
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md w-[93%] rounded-md">
           <DialogHeader>
             {showBackupCodes ? (
               <div className="flex items-center space-x-2">
@@ -687,10 +614,6 @@ export function TwoFactorAuth({
               onClick={() => {
                 setShowBackupCodes(false);
                 setShowRegenerateBackupCodes(false);
-                if (!showRegenerateBackupCodes) {
-                  // Only call onSuccess when closing from initial setup
-                  onSuccess?.();
-                }
               }}
               className="w-full"
             >
@@ -736,4 +659,4 @@ export function TwoFactorAuth({
       />
     </>
   );
-}
+};

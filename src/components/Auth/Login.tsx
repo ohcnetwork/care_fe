@@ -38,7 +38,7 @@ import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
-import { TokenData } from "@/types/auth/otpToken";
+import { TokenData } from "@/types/auth/otp";
 
 interface OtpLoginData {
   phone_number: string;

@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -20,14 +19,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { LocalStorageKeys } from "@/common/constants";
-
-import mutate from "@/Utils/request/mutate";
-import authApi, { MFALoginRequest } from "@/types/auth/authApi";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 export const Authenticate = () => {
   const { urls, stateLogo, customLogo, customLogoAlt } = careConfig;
-  // Handle customDescriptionHtml as a separate variable since it might not exist in careConfig
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
@@ -36,6 +31,7 @@ export const Authenticate = () => {
   const [error, setError] = useState<string>("");
   const method = localStorage.getItem("mfa_method") || "totp";
   const [recoveryModal, setRecoveryModal] = useState(false);
+  const { verifyMFA, isVerifyingMFA } = useAuthContext();
 
   // Form validation schema
   const formSchema = z.object({
@@ -62,36 +58,26 @@ export const Authenticate = () => {
     }
   }, [temp_token]);
 
-  // MFA verification mutation
-  const { mutate: verifyMFA, isPending } = useMutation({
-    mutationFn: (data: MFALoginRequest) => {
-      return mutate(authApi.mfa.login)(data);
-    },
-    onSuccess: async (data) => {
-      localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-      localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-      localStorage.removeItem("mfa_temp_token");
-      localStorage.removeItem("mfa_method");
-
-      // Force reload the page to ensure the app picks up the new tokens
-      window.location.href = "/";
-    },
-  });
-
   // Handle form submission
-  const handleSubmit = form.handleSubmit((values) => {
+  const handleSubmit = form.handleSubmit(async (values) => {
     if (!temp_token) {
       setError(t("session_expired"));
       navigate("/login");
       return;
     }
 
-    // Verify MFA code
-    verifyMFA({
-      method: recoveryModal ? "backup" : method,
-      code: values.code,
-      temp_token,
-    });
+    try {
+      await verifyMFA({
+        method: recoveryModal ? "backup" : method,
+        code: values.code,
+        temp_token,
+      });
+    } catch (_err: any) {
+      // Handle specific API error messages
+      if (_err?.response?.data?.detail) {
+        setError(_err.response.data.detail);
+      }
+    }
   });
 
   const accesWays: readonly string[] = ["Use a recovery code"];
@@ -253,10 +239,11 @@ export const Authenticate = () => {
                       className="w-full mt-4"
                       variant="primary"
                       disabled={
-                        isPending || codeValue.length < (recoveryModal ? 8 : 6)
+                        isVerifyingMFA ||
+                        codeValue.length < (recoveryModal ? 8 : 6)
                       }
                     >
-                      {isPending ? t("verifying") : t("verify")}{" "}
+                      {isVerifyingMFA ? t("verifying") : t("verify")}{" "}
                       <CareIcon icon="l-angle-right" className="ml-2 text-sm" />
                     </Button>
 
