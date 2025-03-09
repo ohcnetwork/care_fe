@@ -262,9 +262,7 @@ export function LocationSheet({
           location.status === "planned" ||
           location.status === "reserved") && (
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-muted-foreground">
-              {t("start_time")}
-            </label>
+            <label className="text-sm text-gray-500">{t("start_time")}</label>
             <Input
               type="datetime-local"
               value={format(
@@ -283,9 +281,7 @@ export function LocationSheet({
         )}
         {location.status !== "active" && (
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-muted-foreground">
-              {t("end_time")}
-            </label>
+            <label className="text-sm text-gray-500">{t("end_time")}</label>
             <Input
               type="datetime-local"
               value={
@@ -329,7 +325,7 @@ export function LocationSheet({
           <SheetTitle className="text-xl font-semibold">
             {t("update_location")}
           </SheetTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500">
             {t("manage_patient_location_and_transfers")}
           </p>
         </SheetHeader>
@@ -361,7 +357,7 @@ export function LocationSheet({
                 {selectedLocation && (
                   <div className="space-y-3 pt-3 border-t">
                     <div className="grid gap-2">
-                      <label className="text-sm text-muted-foreground">
+                      <label className="text-sm text-gray-500">
                         {t("status")}
                       </label>
                       <Select
@@ -388,7 +384,7 @@ export function LocationSheet({
                       newLocation.status === "planned" ||
                       newLocation.status === "reserved") && (
                       <div className="grid gap-2">
-                        <label className="text-sm text-muted-foreground">
+                        <label className="text-sm text-gray-500">
                           {t("start_time")}
                         </label>
                         <Input
@@ -406,7 +402,7 @@ export function LocationSheet({
                     )}
                     {newLocation.status !== "active" && (
                       <div className="grid gap-2">
-                        <label className="text-sm text-muted-foreground">
+                        <label className="text-sm text-gray-500">
                           {t("end_time")}
                         </label>
                         <Input
