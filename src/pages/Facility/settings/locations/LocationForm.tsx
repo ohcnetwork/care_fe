@@ -8,12 +8,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -431,47 +425,40 @@ export default function LocationForm({
                     </Button>
                   </div>
 
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="bed-names">
-                      <AccordionTrigger>
-                        <span className="text-sm font-medium">
-                          {t("edit_bed_names", {
-                            count: Number(form.watch("numberOfBeds")),
-                          })}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-3 mt-2">
-                          {bedFields.map((field, index) => (
-                            <FormField
-                              key={field.id}
-                              control={form.control}
-                              name={`bedNames.${index}.name`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center gap-2">
-                                    <FormLabel className="text-sm font-medium min-w-[60px]">
-                                      {t("bed_number", { number: index + 1 })}:
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        placeholder={t("bed_name_placeholder", {
-                                          number: index + 1,
-                                        })}
-                                        className="flex-1"
-                                      />
-                                    </FormControl>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                  <span className="text-sm font-medium">
+                    {t("edit_bed_names", {
+                      count: Number(form.watch("numberOfBeds")),
+                    })}
+                  </span>
+
+                  <div className="space-y-3 mt-2">
+                    {bedFields.map((field, index) => (
+                      <FormField
+                        key={field.id}
+                        control={form.control}
+                        name={`bedNames.${index}.name`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex items-center gap-2">
+                              <FormLabel className="text-sm font-medium min-w-[60px]">
+                                {t("bed_number", { number: index + 1 })}:
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder={t("bed_name_placeholder", {
+                                    number: index + 1,
+                                  })}
+                                  className="flex-1"
+                                />
+                              </FormControl>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-md bg-muted p-4">
