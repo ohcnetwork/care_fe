@@ -299,7 +299,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <Button
                       className="cursor-pointer font-semibold"
                       variant="outline"
-                      size="sm"
                     >
                       <CareIcon icon="l-pen" />
                       {t("edit_facility_details")}

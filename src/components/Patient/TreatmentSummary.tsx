@@ -462,7 +462,7 @@ export default function TreatmentSummary({
                       medication.medication.display ??
                       medication.medication.code,
                     dosage: medication.dosage_text,
-                    status: medication.status,
+                    status: t(medication.status),
                     medication_taken_between: [
                       medication.effective_period?.start,
                       medication.effective_period?.end,
