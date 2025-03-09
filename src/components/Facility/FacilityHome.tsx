@@ -296,10 +296,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 <EditFacilitySheet
                   facilityId={facilityId}
                   trigger={
-                    <Button
-                      className="cursor-pointer font-semibold"
-                      variant="outline"
-                    >
+                    <Button className="cursor-pointer" variant="outline">
                       <CareIcon icon="l-pen" />
                       {t("edit_facility_details")}
                     </Button>
