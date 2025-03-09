@@ -105,7 +105,7 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="overflow-y-auto flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
+          className="flex flex-col flex-1 min-h-[calc(100svh-theme(spacing.4))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border rounded-lg shadow bg-gray-50 focus:outline-none"
         >
           <div className="relative z-10 flex h-16 bg-white shadow shrink-0 md:hidden">
             <div className="flex items-center">

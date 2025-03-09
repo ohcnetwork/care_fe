@@ -49,7 +49,6 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           );
           if (patient) {
             patientUserContext.setSelectedPatient(patient);
-            localStorage.setItem("selectedPatient", JSON.stringify(patient));
           }
         }}
       >
