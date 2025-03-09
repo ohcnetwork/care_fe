@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
 import {
   Ambulance,
   BedDouble,
@@ -50,36 +49,6 @@ import {
   EncounterClass,
   EncounterRequest,
 } from "@/types/emr/encounter";
-
-const encounterFormSchema = z.object({
-  status: z.enum(["planned", "in_progress", "on_hold"] as const),
-  encounter_class: z.enum([
-    "imp",
-    "amb",
-    "obsenc",
-    "emer",
-    "vr",
-    "hh",
-  ] as const),
-  priority: z.enum([
-    "ASAP",
-    "callback_results",
-    "callback_for_scheduling",
-    "elective",
-    "emergency",
-    "preop",
-    "as_needed",
-    "routine",
-    "rush_reporting",
-    "stat",
-    "timing_critical",
-    "use_as_directed",
-    "urgent",
-  ] as const),
-  organizations: z.array(z.string()).min(1, {
-    message: t("at_least_one_department_is_required"),
-  }),
-});
 
 const encounterClasses = [
   {
@@ -140,6 +109,36 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+
+  const encounterFormSchema = z.object({
+    status: z.enum(["planned", "in_progress", "on_hold"] as const),
+    encounter_class: z.enum([
+      "imp",
+      "amb",
+      "obsenc",
+      "emer",
+      "vr",
+      "hh",
+    ] as const),
+    priority: z.enum([
+      "ASAP",
+      "callback_results",
+      "callback_for_scheduling",
+      "elective",
+      "emergency",
+      "preop",
+      "as_needed",
+      "routine",
+      "rush_reporting",
+      "stat",
+      "timing_critical",
+      "use_as_directed",
+      "urgent",
+    ] as const),
+    organizations: z.array(z.string()).min(1, {
+      message: t("at_least_one_department_is_required"),
+    }),
+  });
 
   const form = useForm<z.infer<typeof encounterFormSchema>>({
     resolver: zodResolver(encounterFormSchema),
