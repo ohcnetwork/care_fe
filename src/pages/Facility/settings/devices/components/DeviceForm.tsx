@@ -64,6 +64,7 @@ const formSchema = z
     contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
       const valueMap = new Map();
       contacts.forEach((contact, index) => {
+        //To take care of case sensitivity in URL
         const normalizedValue = contact.value.trim().toLowerCase();
         if (normalizedValue) {
           if (valueMap.has(normalizedValue)) {
