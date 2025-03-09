@@ -876,7 +876,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             {t("preview_form")}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="edit">
           <div className="flex flex-col md:flex-row gap-2">
             <div className="space-y-4 md:w-60">
@@ -2219,8 +2218,8 @@ function QuestionEditor({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="true">True</SelectItem>
-                            <SelectItem value="false">False</SelectItem>
+                            <SelectItem value="true">{t("true")}</SelectItem>
+                            <SelectItem value="false">{t("false")}</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (

@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { FacilityOrganizationCreate } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -52,7 +52,7 @@ export default function FacilityOrganizationSheet({
 
   const { mutate: createOrganization, isPending } = useMutation({
     mutationFn: (body: FacilityOrganizationCreate) =>
-      mutate(routes.facilityOrganization.create, {
+      mutate(facilityOrganizationApi.create, {
         pathParams: { facilityId },
         body,
       })(body),
