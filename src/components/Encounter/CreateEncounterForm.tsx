@@ -251,9 +251,11 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="planned">Planned</SelectItem>
-                        <SelectItem value="on_hold">On Hold</SelectItem>
+                        <SelectItem value="in_progress">
+                          {t("in_progress")}
+                        </SelectItem>
+                        <SelectItem value="planned">{t("planned")}</SelectItem>
+                        <SelectItem value="on_hold">{t("on_hold")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -277,29 +279,35 @@ export default function CreateEncounterForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="ASAP">ASAP</SelectItem>
+                        <SelectItem value="ASAP">{t("asap")}</SelectItem>
                         <SelectItem value="callback_results">
-                          Callback Results
+                          {t("callback_results")}
                         </SelectItem>
                         <SelectItem value="callback_for_scheduling">
-                          Callback for Scheduling
+                          {t("callback_for_scheduling")}
                         </SelectItem>
-                        <SelectItem value="elective">Elective</SelectItem>
-                        <SelectItem value="emergency">Emergency</SelectItem>
-                        <SelectItem value="preop">Preop</SelectItem>
-                        <SelectItem value="as_needed">As Needed</SelectItem>
-                        <SelectItem value="routine">Routine</SelectItem>
+                        <SelectItem value="elective">
+                          {t("elective")}
+                        </SelectItem>
+                        <SelectItem value="emergency">
+                          {t("emergency")}
+                        </SelectItem>
+                        <SelectItem value="preop">{t("preop")}</SelectItem>
+                        <SelectItem value="as_needed">
+                          {t("as_needed")}
+                        </SelectItem>
+                        <SelectItem value="routine">{t("routine")}</SelectItem>
                         <SelectItem value="rush_reporting">
-                          Rush Reporting
+                          {t("rush_reporting")}
                         </SelectItem>
-                        <SelectItem value="stat">Stat</SelectItem>
+                        <SelectItem value="stat">{t("stat")}</SelectItem>
                         <SelectItem value="timing_critical">
-                          Timing Critical
+                          {t("timing_critical")}
                         </SelectItem>
                         <SelectItem value="use_as_directed">
-                          Use as Directed
+                          {t("use_as_directed")}
                         </SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="urgent">{t("urgent")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
