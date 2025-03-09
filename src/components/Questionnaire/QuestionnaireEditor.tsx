@@ -772,7 +772,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         <CareIcon icon="l-exclamation-circle" className="h-4 w-4" />
         <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>
-          {t("failed_to_load_questionnaire_Please_try_later")}
+          {t("failed_to_load_questionnaire_please_try_later")}
         </AlertDescription>
       </Alert>
     );
@@ -1008,7 +1008,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       className="font-mono"
                     />
                     <p className="text-sm text-gray-500 mt-1">
-                      {t("a_unique_url_friendly_identifier_questionnaire")}
+                      {t("unique_url_id_questionnaire")}
                     </p>
                   </div>
 
@@ -1030,8 +1030,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle>
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? t("s") : ""}
+                        {questionnaire.questions?.length || 0}{" "}
+                        {questionnaire.questions?.length === 1
+                          ? t("question_one")
+                          : t("question_other")}
                       </p>
                     </CardTitle>
                   </div>
@@ -1152,7 +1154,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title={t("questionnaire")}
+            title={t("questionnaire_one")}
             className="mt-4"
           />
         </TabsContent>
@@ -1279,8 +1281,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                   <div>
                     <CardTitle className="flex justify-between items-center w-full">
                       <p className="text-sm text-gray-700 font-medium mt-1">
-                        {questionnaire.questions?.length || 0} {t("question")}
-                        {questionnaire.questions?.length !== 1 ? t("s") : ""}
+                        {questionnaire.questions?.length || 0}{" "}
+                        {questionnaire.questions?.length === 1
+                          ? t("question_one")
+                          : t("question_other")}
                       </p>
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-1">
@@ -1305,9 +1309,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 </CardHeader>
                 <CardContent className="bg-white py-4">
                   <div className="space-y-6">
-                    {questionnaire.questions.map((question, index) => (
+                    {questionnaire.questions.map((question) => (
                       <div key={question.id} id={`question-${question.id}`}>
-                        {QuestionPreview(question, index, 0)}
+                        {QuestionPreview(question, 0)}
                       </div>
                     ))}
                   </div>
@@ -1343,7 +1347,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </div>
           <DebugPreview
             data={questionnaire}
-            title={t("questionnaire")}
+            title={t("questionnaire_one")}
             className="mt-4"
           />
         </TabsContent>
@@ -1351,7 +1355,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     </div>
   );
 }
-function QuestionPreview(question: Question, index: number, depth: number) {
+function QuestionPreview(question: Question, depth: number) {
   const isRequired = question.required;
   const hasSubQuestions =
     question.type === "group" && (question.questions?.length ?? 0) > 0;
@@ -1400,12 +1404,64 @@ function QuestionPreview(question: Question, index: number, depth: number) {
         />
       )}
 
-      {question.type === "structured" && (
-        <Input
-          type="text"
-          placeholder="Search..."
-          className="border border-gray-300 rounded-md p-2 text-sm w-full"
-        />
+      {question.type === "structured" && question.structured_type && (
+        <>
+          {question.structured_type === "symptom" && (
+            <Input placeholder="Search Symptoms..." className="w-full" />
+          )}
+
+          {question.structured_type === "diagnosis" && (
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Diagnosis..." />
+              </SelectTrigger>
+              <SelectContent></SelectContent>
+            </Select>
+          )}
+
+          {question.structured_type === "medication_request" && (
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose Medication..." />
+              </SelectTrigger>
+              <SelectContent></SelectContent>
+            </Select>
+          )}
+
+          {question.structured_type === "medication_statement" && (
+            <Input
+              type="text"
+              placeholder="Medication History..."
+              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+              readOnly
+            />
+          )}
+
+          {question.structured_type === "allergy_intolerance" && (
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Alergies..." />
+              </SelectTrigger>
+              <SelectContent></SelectContent>
+            </Select>
+          )}
+
+          {question.structured_type === "encounter" && (
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Pick Encounter..." />
+              </SelectTrigger>
+              <SelectContent></SelectContent>
+            </Select>
+          )}
+
+          {question.structured_type === "appointment" && (
+            <Input
+              type="date"
+              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+            />
+          )}
+        </>
       )}
 
       {(question.type === "date" ||
@@ -1430,19 +1486,18 @@ function QuestionPreview(question: Question, index: number, depth: number) {
         />
       )}
       {question.type === "choice" && question.answer_option && (
-        <RadioGroup defaultValue={question.answer_option[0]?.value}>
-          {question.answer_option.map((option) => (
-            <div key={option.value} className="flex items-center space-x-2">
-              <RadioGroupItem
-                value={option.value}
-                id={`option-${option.value}`}
-              />
-              <Label htmlFor={`option-${option.value}`}>
+        <Select defaultValue={question.answer_option[0]?.value}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t("select")} />
+          </SelectTrigger>
+          <SelectContent>
+            {question.answer_option.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
                 {option.display || option.value}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       {question.type === "quantity" && (
@@ -1461,8 +1516,8 @@ function QuestionPreview(question: Question, index: number, depth: number) {
 
       {hasSubQuestions && (
         <div className="border border-gray-200 rounded-md p-4 space-y-3 mt-2">
-          {question.questions?.map((subQuestion, subIndex) =>
-            QuestionPreview(subQuestion, subIndex, depth + 1),
+          {question.questions?.map((subQuestion) =>
+            QuestionPreview(subQuestion, depth + 1),
           )}
         </div>
       )}
@@ -1563,7 +1618,7 @@ function QuestionEditor({
               {repeats && <Badge variant="secondary">{t("repeatable")}</Badge>}
               {type === "group" && questions && questions.length > 0 && (
                 <Badge variant="secondary">
-                  {questions.length} {t("sub_questions")}
+                  {questions.length} {t("sub_question_other")}
                 </Badge>
               )}
             </div>
@@ -1825,7 +1880,7 @@ function QuestionEditor({
                   {t("group_layout_options")}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
-                  {t("choose_layout_style_fits_questions_options")}
+                  {t("choose_layout_style")}
                 </p>
                 <RadioGroup
                   value={
@@ -1999,9 +2054,10 @@ function QuestionEditor({
             <div className="bg-gray-100 rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-gray-950 font-semibold">
-                  {question.questions?.length || 0} {t("sub_question")}
-                  {question.questions?.length !== 1 ? t("s") : " "}
-                  {t("for_group", { text })}
+                  {t("sub_questions_for_group", {
+                    count: question.questions?.length || 0,
+                    text,
+                  })}
                 </Label>
                 <Button
                   variant="ghost"
@@ -2025,7 +2081,7 @@ function QuestionEditor({
                   }}
                 >
                   <CareIcon icon="l-plus" className="h-4 w-4" />
-                  {t("add_subquestion")}
+                  {t("add_sub_question")}
                 </Button>
               </div>
               <div className="space-y-4">
