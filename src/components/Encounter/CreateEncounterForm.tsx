@@ -50,9 +50,9 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
-  Encounter,
-  EncounterClass,
-  EncounterRequest,
+  type Encounter,
+  type EncounterClass,
+  type EncounterRequest,
 } from "@/types/emr/encounter";
 
 const encounterClasses = () =>
