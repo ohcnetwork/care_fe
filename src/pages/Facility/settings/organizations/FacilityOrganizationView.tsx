@@ -13,9 +13,9 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
@@ -76,7 +76,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       resultsPerPage,
       qParams.search,
     ],
-    queryFn: query.debounced(routes.facilityOrganization.list, {
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId },
       queryParams: {
         parent: id,
