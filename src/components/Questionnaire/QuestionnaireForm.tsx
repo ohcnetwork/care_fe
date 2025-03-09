@@ -605,7 +605,7 @@ export function QuestionnaireForm({
                     };
                   }
                   if (value.value_code) {
-                    return { value_code: value.value_code };
+                    return { coding: value.value_code };
                   }
                   return { value: String(value.value) };
                 }),

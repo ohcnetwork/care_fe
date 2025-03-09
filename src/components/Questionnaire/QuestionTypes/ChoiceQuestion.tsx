@@ -58,6 +58,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     newValues[index] = {
       type: "string",
       value: code.display,
+      value_code: code,
     };
     updateQuestionnaireResponseCB(
       newValues,

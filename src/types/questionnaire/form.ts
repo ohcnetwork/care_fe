@@ -14,6 +14,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
  */
 type RV<T extends string, V> = {
   value_code?: Code;
+  coding?: Code;
   value_quantity?: Quantity;
   type: T;
   value: V;
