@@ -21,13 +21,14 @@ interface DiagnosisListProps {
   encounterId?: string;
   facilityId?: string;
   className?: string;
+  readOnly?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
-  facilityId,
-  className,
+  className = "",
+  readOnly = false,
 }: DiagnosisListProps) {
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
@@ -41,12 +42,7 @@ export function DiagnosisList({
 
   if (isLoading) {
     return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        className={className}
-      >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -66,12 +62,7 @@ export function DiagnosisList({
 
   if (!filteredDiagnoses?.length) {
     return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        className={className}
-      >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
@@ -80,12 +71,7 @@ export function DiagnosisList({
   }
 
   return (
-    <DiagnosisListLayout
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      className={className}
-    >
+    <DiagnosisListLayout className={className} readOnly={readOnly}>
       <>
         <DiagnosisTable
           diagnoses={[
@@ -123,17 +109,13 @@ export function DiagnosisList({
 }
 
 const DiagnosisListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
   className,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
@@ -141,9 +123,9 @@ const DiagnosisListLayout = ({
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {facilityId && encounterId && (
+        {!readOnly && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+            href={`questionnaire/diagnosis`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
             <CareIcon icon="l-pen" className="w-4 h-4" />

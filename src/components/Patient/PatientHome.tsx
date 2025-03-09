@@ -10,10 +10,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import {
-  facilityPatientTabs,
-  patientTabs,
-} from "@/components/Patient/PatientDetailsTab";
+import { patientTabs as tabs } from "@/components/Patient/PatientDetailsTab";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import routes from "@/Utils/request/api";
@@ -24,7 +21,7 @@ import { Patient } from "@/types/emr/newPatient";
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
-  page: (typeof patientTabs | typeof facilityPatientTabs)[0]["route"];
+  page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
 
@@ -43,8 +40,6 @@ export const PatientHome = (props: {
   if (isLoading) {
     return <Loading />;
   }
-
-  const tabs = facilityId ? facilityPatientTabs : patientTabs;
 
   const Tab = tabs.find((t) => t.route === page)?.component;
 
