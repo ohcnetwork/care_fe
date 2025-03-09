@@ -71,40 +71,38 @@ export default function ServiceHistoryForm({
     }
   }, [serviceRecord, form]);
 
-  const { mutate: createServiceRecord, isPending: createPending } = useMutation(
-    {
-      mutationKey: ["create_service_record"],
-      mutationFn: mutate(deviceApi.createServiceHistory, {
-        pathParams: {
-          facilityId,
-          deviceId,
-        },
-      }),
-      onSuccess: (resp: ServiceHistory) => {
-        toast.success(t("service_record_added_successfully"));
-        form.reset();
-        onSubmitSuccess(resp);
+  const { mutate: createService, isPending: isCreatePending } = useMutation({
+    mutationKey: ["create_service_record"],
+    mutationFn: mutate(deviceApi.createServiceHistory, {
+      pathParams: {
+        facilityId,
+        deviceId,
       },
+    }),
+    onSuccess: (resp: ServiceHistory) => {
+      toast.success(t("service_record_added_successfully"));
+      form.reset();
+      onSubmitSuccess(resp);
     },
-  );
+  });
 
-  const { mutate: updateServiceRecord, isPending: updatePending } = useMutation(
-    {
-      mutationKey: ["update_service_record"],
-      mutationFn: mutate(deviceApi.updateServiceHistory, {
-        pathParams: {
-          facilityId,
-          deviceId,
-          id: serviceRecord?.id,
-        },
-      }),
-      onSuccess: (resp: ServiceHistory) => {
-        toast.success(t("service_record_updated_successfully"));
-        form.reset();
-        onSubmitSuccess(resp);
+  const { mutate: updateService, isPending: isUpdatePending } = useMutation({
+    mutationKey: ["update_service_record"],
+    mutationFn: mutate(deviceApi.updateServiceHistory, {
+      pathParams: {
+        facilityId,
+        deviceId,
+        id: serviceRecord?.id,
       },
+    }),
+    onSuccess: (resp: ServiceHistory) => {
+      toast.success(t("service_record_updated_successfully"));
+      form.reset();
+      onSubmitSuccess(resp);
     },
-  );
+  });
+
+  const isPending = isCreatePending || isUpdatePending;
 
   const onSubmit = (values: FormValues) => {
     const payload = {
@@ -114,13 +112,11 @@ export default function ServiceHistoryForm({
     };
 
     if (isEditMode) {
-      updateServiceRecord(payload);
+      updateService(payload);
     } else {
-      createServiceRecord(payload);
+      createService(payload);
     }
   };
-
-  const isPending = createPending || updatePending;
 
   return (
     <Form {...form}>
