@@ -59,8 +59,8 @@ function LocationTreeNode({
         className={cn(
           "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
           isSelected && "bg-blue-100 text-blue-800",
-          `pl-${level * 1}`,
         )}
+        style={{ paddingLeft: `${level}rem` }}
       >
         {hasChildren ? (
           <Button
