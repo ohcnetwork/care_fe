@@ -88,7 +88,7 @@ const RenderCard = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500 border-b-2 border-dotted border-gray-300">
                         {t("slug")}
                       </h3>
                     </TooltipTrigger>
