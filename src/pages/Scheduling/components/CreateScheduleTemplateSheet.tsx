@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
@@ -201,13 +202,13 @@ export default function CreateScheduleTemplateSheet({
     });
   }
 
-  const dateValidationCallout = () => {
+  const dateValidationCallout = useCallback(() => {
     const validFrom = form.watch("valid_from");
     const validTill = form.watch("valid_to");
 
     if (!validFrom || !validTill) return null;
 
-    // normalizing today date (i.e remove time)
+    // normalizing today date (remove time)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -225,7 +226,7 @@ export default function CreateScheduleTemplateSheet({
     }
 
     return null;
-  };
+  }, [form.watch("valid_from"), form.watch("valid_to")]);
 
   const timeAllocationCallout = (index: number) => {
     const startTime = form.watch(`availabilities.${index}.start_time`);
