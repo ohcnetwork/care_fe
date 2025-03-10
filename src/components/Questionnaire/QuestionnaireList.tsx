@@ -54,25 +54,7 @@ const RenderCard = ({
             }
           >
             <CardContent className="p-6 relative flex flex-col">
-              <div className="absolute top-4 right-4">
-                <Badge
-                  className={
-                    {
-                      active: "bg-green-100 text-green-800 hover:bg-green-200",
-                      draft:
-                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                    }[questionnaire.status]
-                  }
-                >
-                  {t(questionnaire.status)}
-                </Badge>
-              </div>
-
-              <div className="mb-4 border-b pb-2">
-                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("title")}
-                </h3>
+              <div className="flex flex-row justify-between items-center mb-4 border-b pb-2">
                 {questionnaire.title && questionnaire.title.length > 20 ? (
                   <TooltipProvider>
                     <Tooltip>
@@ -91,6 +73,18 @@ const RenderCard = ({
                     {questionnaire.title}
                   </p>
                 )}
+                <Badge
+                  className={
+                    {
+                      active: "bg-green-100 text-green-800 hover:bg-green-200",
+                      draft:
+                        "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                      retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                    }[questionnaire.status]
+                  }
+                >
+                  {t(questionnaire.status)}
+                </Badge>
               </div>
 
               <div className="mb-4">
