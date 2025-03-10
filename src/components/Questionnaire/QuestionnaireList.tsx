@@ -84,22 +84,6 @@ const RenderCard = ({
                 </Badge>
               </div>
 
-              <div className="mb-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500 border-b-2 border-dotted border-gray-300">
-                        {t("slug")}
-                      </h3>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("slug_description")}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <p className="text-sm text-gray-900 truncate">
-                  {questionnaire.slug}
-                </p>
-              </div>
-
               <div className="mb-4 flex-1">
                 {questionnaire.description?.trim() ? (
                   <>
