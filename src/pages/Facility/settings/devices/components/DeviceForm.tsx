@@ -52,56 +52,56 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { goBack } = useAppHistory();
-  
-const formSchema = z
-  .object({
-    identifier: z.string().optional(),
-    status: z.enum(DeviceStatuses),
-    availability_status: z.enum(DeviceAvailabilityStatuses),
-    manufacturer: z.string().optional(),
-    manufacture_date: z
-      .string()
-      .optional()
-      .refine(
-        (date) => !date || isBefore(new Date(date), startOfTomorrow()),
-        t("manufacture_date_cannot_be_in_future"),
-      ),
-    expiration_date: z.string().optional(),
-    lot_number: z.string().optional(),
-    serial_number: z.string().optional(),
-    registered_name: z.string().min(1, { message: t("required") }),
-    user_friendly_name: z.string().optional(),
-    model_number: z.string().optional(),
-    part_number: z.string().optional(),
-    contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
-      const valueMap = new Map();
-      contacts.forEach((contact, index) => {
-        //To take care of case sensitivity in URL
-        const normalizedValue = contact.value.trim().toLowerCase();
-        if (normalizedValue) {
-          if (valueMap.has(normalizedValue)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: t("duplicate_contact_values_not_allowed"),
-              path: [index, "value"],
-            });
-          } else {
-            valueMap.set(normalizedValue, true);
+
+  const formSchema = z
+    .object({
+      identifier: z.string().optional(),
+      status: z.enum(DeviceStatuses),
+      availability_status: z.enum(DeviceAvailabilityStatuses),
+      manufacturer: z.string().optional(),
+      manufacture_date: z
+        .string()
+        .optional()
+        .refine(
+          (date) => !date || isBefore(new Date(date), startOfTomorrow()),
+          t("manufacture_date_cannot_be_in_future"),
+        ),
+      expiration_date: z.string().optional(),
+      lot_number: z.string().optional(),
+      serial_number: z.string().optional(),
+      registered_name: z.string().min(1, { message: t("required") }),
+      user_friendly_name: z.string().optional(),
+      model_number: z.string().optional(),
+      part_number: z.string().optional(),
+      contact: z.array(contactPointSchema()).superRefine((contacts, ctx) => {
+        const valueMap = new Map();
+        contacts.forEach((contact, index) => {
+          //To take care of case sensitivity in URL
+          const normalizedValue = contact.value.trim().toLowerCase();
+          if (normalizedValue) {
+            if (valueMap.has(normalizedValue)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("duplicate_contact_values_not_allowed"),
+                path: [index, "value"],
+              });
+            } else {
+              valueMap.set(normalizedValue, true);
+            }
           }
-        }
-      });
-    }),
-  })
-  .refine(
-    (data) => {
-      if (!data.expiration_date || !data.manufacture_date) return true;
-      return new Date(data.expiration_date) > new Date(data.manufacture_date);
-    },
-    {
-      message: t("expiration_date_must_be_after_manufacture_date"),
-      path: ["expiration_date"],
-    },
-  );
+        });
+      }),
+    })
+    .refine(
+      (data) => {
+        if (!data.expiration_date || !data.manufacture_date) return true;
+        return new Date(data.expiration_date) > new Date(data.manufacture_date);
+      },
+      {
+        message: t("expiration_date_must_be_after_manufacture_date"),
+        path: ["expiration_date"],
+      },
+    );
 
   const defaultValues: z.infer<typeof formSchema> = {
     identifier: undefined,
