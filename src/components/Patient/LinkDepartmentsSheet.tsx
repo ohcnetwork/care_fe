@@ -216,15 +216,24 @@ export default function LinkDepartmentsSheet({
         {trigger || (
           <Button variant="outline" size="sm">
             <Building className="mr-2 h-4 w-4" />
-            {t("manage_organizations")}
+            {t("manage_organization", {
+              count: entityType === "device" ? 1 : 0,
+            })}
           </Button>
         )}
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("manage_organizations")}</SheetTitle>
+          <SheetTitle>
+            {t("manage_organization", {
+              count: entityType === "device" ? 1 : 0,
+            })}
+          </SheetTitle>
           <SheetDescription>
-            {t("manage_organization_description", { entityType })}
+            {t("manage_organization_description", {
+              entityType,
+              count: entityType === "device" ? 1 : 0,
+            })}
           </SheetDescription>
         </SheetHeader>
 
@@ -250,13 +259,17 @@ export default function LinkDepartmentsSheet({
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("add_organizations")}
+                {t("add_organization", {
+                  count: entityType === "device" ? 1 : 0,
+                })}
               </Button>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-sm font-medium">
-                {t("current_organizations")}
+                {t("current_organization", {
+                  count: entityType === "device" ? 1 : 0,
+                })}
               </h3>
               <div className="space-y-2">
                 {currentOrganizations.map((org) => (
@@ -286,7 +299,9 @@ export default function LinkDepartmentsSheet({
                 ))}
                 {currentOrganizations.length === 0 && (
                   <p className="text-sm text-gray-500">
-                    {t("no_organizations_added_yet")}
+                    {t("no_organization_added_yet", {
+                      count: entityType === "device" ? 1 : 0,
+                    })}
                   </p>
                 )}
               </div>
