@@ -147,8 +147,14 @@ const SelectSeparator = React.forwardRef<
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
+const ForwardedSelect = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>
+>(({ children, ...props }, _ref) => <Select {...props}>{children}</Select>);
+ForwardedSelect.displayName = "ForwardedSelect";
+
 export {
-  Select,
+  ForwardedSelect as Select,
   SelectGroup,
   SelectValue,
   SelectTrigger,

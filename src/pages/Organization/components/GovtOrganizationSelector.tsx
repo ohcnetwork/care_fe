@@ -1,6 +1,7 @@
 import { t } from "i18next";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import React from "react";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Label } from "@/components/ui/label";
@@ -86,73 +87,73 @@ function OrganizationLevelSelect({
   );
 }
 
-export default function GovtOrganizationSelector(
-  props: GovtOrganizationSelectorProps,
-) {
-  const { onChange, required, selected, authToken } = props;
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+export default React.forwardRef<HTMLDivElement, GovtOrganizationSelectorProps>(
+  function GovtOrganizationSelector(props, ref) {
+    const { onChange, required, selected, authToken } = props;
+    const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
 
-  useEffect(() => {
-    if (selected && selected.length > 0) {
-      let currentOrg = selected[0];
-      if (currentOrg.level_cache === 0) {
-        setSelectedLevels(selected);
-      } else {
-        const levels: Organization[] = [];
-        while (currentOrg && currentOrg.level_cache >= 0) {
-          levels.unshift(currentOrg);
-          currentOrg = currentOrg.parent as unknown as Organization;
+    useEffect(() => {
+      if (selected && selected.length > 0) {
+        let currentOrg = selected[0];
+        if (currentOrg.level_cache === 0) {
+          setSelectedLevels(selected);
+        } else {
+          const levels: Organization[] = [];
+          while (currentOrg && currentOrg.level_cache >= 0) {
+            levels.unshift(currentOrg);
+            currentOrg = currentOrg.parent as unknown as Organization;
+          }
+          setSelectedLevels(levels);
         }
-        setSelectedLevels(levels);
       }
-    }
-  }, [selected]);
+    }, [selected]);
 
-  const handleFilterChange = (
-    filter: FilterState,
-    index: number,
-    organization: Organization,
-  ) => {
-    if (filter.organization) {
-      setSelectedLevels((prev) => {
-        const newLevels = prev.slice(0, index);
-        newLevels.push(organization);
-        return newLevels;
-      });
-      if (!organization.has_children) {
-        onChange(organization.id);
-        // Else condition is necessary to reset the form value for pre-filled forms
+    const handleFilterChange = (
+      filter: FilterState,
+      index: number,
+      organization: Organization,
+    ) => {
+      if (filter.organization) {
+        setSelectedLevels((prev) => {
+          const newLevels = prev.slice(0, index);
+          newLevels.push(organization);
+          return newLevels;
+        });
+        if (!organization.has_children) {
+          onChange(organization.id);
+          // Else condition is necessary to reset the form value for pre-filled forms
+        } else {
+          onChange("");
+        }
       } else {
         onChange("");
+        // Reset subsequent levels when clearing a selection
+        setSelectedLevels((prev) => prev.slice(0, index));
       }
-    } else {
-      onChange("");
-      // Reset subsequent levels when clearing a selection
-      setSelectedLevels((prev) => prev.slice(0, index));
-    }
-  };
+    };
 
-  // Calculate the number of levels to show based on selectedLevels and has_children
-  const totalLevels =
-    selectedLevels.length +
-    (selectedLevels.length === 0 ||
-    selectedLevels[selectedLevels.length - 1]?.has_children
-      ? 1
-      : 0);
+    // Calculate the number of levels to show based on selectedLevels and has_children
+    const totalLevels =
+      selectedLevels.length +
+      (selectedLevels.length === 0 ||
+      selectedLevels[selectedLevels.length - 1]?.has_children
+        ? 1
+        : 0);
 
-  return (
-    <>
-      {Array.from({ length: totalLevels }).map((_, index) => (
-        <OrganizationLevelSelect
-          key={index}
-          index={index}
-          currentLevel={selectedLevels[index]}
-          previousLevel={selectedLevels[index - 1]}
-          onChange={handleFilterChange}
-          required={required}
-          authToken={authToken}
-        />
-      ))}
-    </>
-  );
-}
+    return (
+      <div ref={ref}>
+        {Array.from({ length: totalLevels }).map((_, index) => (
+          <OrganizationLevelSelect
+            key={index}
+            index={index}
+            currentLevel={selectedLevels[index]}
+            previousLevel={selectedLevels[index - 1]}
+            onChange={handleFilterChange}
+            required={required}
+            authToken={authToken}
+          />
+        ))}
+      </div>
+    );
+  },
+);

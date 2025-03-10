@@ -281,15 +281,15 @@ export default function PatientRegistration(
         age:
           !patientQuery.data.date_of_birth && patientQuery.data.year_of_birth
             ? new Date().getFullYear() - patientQuery.data.year_of_birth
-            : undefined,
+            : "",
         address: patientQuery.data.address || "",
         permanent_address: patientQuery.data.permanent_address || "",
-        pincode: patientQuery.data.pincode || undefined,
+        pincode: patientQuery.data.pincode || "",
         nationality: patientQuery.data.nationality || "India",
         geo_organization: (
           patientQuery.data.geo_organization as unknown as Organization
         )?.id,
-        death_datetime: patientQuery.data.death_datetime || undefined,
+        death_datetime: patientQuery.data.death_datetime || "",
       } as unknown as z.infer<typeof formSchema>);
     }
   }, [patientQuery.data]);
@@ -349,6 +349,7 @@ export default function PatientRegistration(
                       <Input
                         placeholder={t("type_patient_name")}
                         {...field}
+                        value={field.value || ""}
                         data-cy="patient-name-input"
                       />
                     </FormControl>
@@ -501,7 +502,7 @@ export default function PatientRegistration(
                 onValueChange={(v) => {
                   form.setValue("age_or_dob", v as "dob" | "age");
                   if (v === "age") {
-                    form.setValue("date_of_birth", undefined);
+                    form.setValue("date_of_birth", "");
                   } else {
                     form.setValue("age", undefined);
                   }
@@ -557,6 +558,7 @@ export default function PatientRegistration(
                             min={1}
                             max={120}
                             {...field}
+                            value={field.value || ""}
                             onChange={(e) =>
                               form.setValue(
                                 "age",
@@ -576,7 +578,7 @@ export default function PatientRegistration(
                               <span className="text-red-600">Invalid age</span>
                             ) : (
                               <span className="text-violet-600">
-                                {t("year_of_birth")}:{" "}
+                                {t("year_of_birth")}:{""}
                                 {new Date().getFullYear() -
                                   Number(form.getValues("age"))}
                               </span>
@@ -645,7 +647,7 @@ export default function PatientRegistration(
                               {...field}
                               value={field.value ?? ""}
                               onChange={(e) => {
-                                const value = e.target.value || undefined;
+                                const value = e.target.value || null;
                                 field.onChange(value);
                                 setIsDeceased(!!value);
                               }}
@@ -738,6 +740,7 @@ export default function PatientRegistration(
                       <Input
                         type="number"
                         {...field}
+                        value={field.value || ""}
                         onChange={(e) =>
                           form.setValue(
                             "pincode",
