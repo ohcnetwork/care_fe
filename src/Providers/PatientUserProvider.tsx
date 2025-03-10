@@ -43,14 +43,7 @@ export default function PatientUserProvider({ children }: Props) {
   useEffect(() => {
     if (userData?.results && userData.results.length > 0) {
       setPatients(userData.results);
-      const localPatient: Patient | undefined = JSON.parse(
-        localStorage.getItem("selectedPatient") || "{}",
-      );
-      const selectedPatient =
-        userData.results.find((patient) => patient.id === localPatient?.id) ||
-        userData.results[0];
-      setSelectedPatient(selectedPatient);
-      localStorage.setItem("selectedPatient", JSON.stringify(selectedPatient));
+      setSelectedPatient(userData.results[0]);
     }
   }, [userData]);
 
