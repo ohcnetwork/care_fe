@@ -50,7 +50,9 @@ function OrganizationCard({
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
-              <Link href={`/departments/${org.id}`}>{t("see_details")}</Link>
+              <Link href={`/departments/${org.id}/users`}>
+                {t("see_details")}
+              </Link>
             </Button>
           </div>
         </div>
@@ -63,7 +65,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 12,
-    cacheBlacklist: ["username"],
+    disableCache: true,
   });
 
   const { data: children, isLoading } = useQuery({
