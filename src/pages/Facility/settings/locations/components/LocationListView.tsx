@@ -1,10 +1,25 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -19,7 +34,9 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import mutate from "@/Utils/request/mutate";
 import { LocationList as LocationListType } from "@/types/location/location";
+import locationApi from "@/types/location/locationApi";
 
 interface LocationRowProps {
   location: LocationListType;
@@ -32,6 +49,7 @@ interface LocationRowProps {
     React.SetStateAction<Record<string, boolean>>
   >;
   displayExpandAll?: boolean;
+  facilityId: string;
 }
 
 function LocationRow({
@@ -43,8 +61,10 @@ function LocationRow({
   onEdit,
   setExpandedRows,
   displayExpandAll = true,
+  facilityId,
 }: LocationRowProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
   const children = getChildren(location.id);
   const isTopLevel =
@@ -68,6 +88,17 @@ function LocationRow({
       return newExpandedRows;
     });
   };
+  const { mutate: removeLocation } = useMutation({
+    mutationFn: mutate(locationApi.delete, {
+      pathParams: { facility_id: facilityId, id: location.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["locations", facilityId],
+      });
+      toast.success(t("location_removed_successfully"));
+    },
+  });
 
   const allExpanded = children.every((child) => expandedRows[child.id]);
 
@@ -110,7 +141,7 @@ function LocationRow({
           </div>
           {isTopLevel && (
             <div className="flex justify-between items-center gap-2">
-              <div className="flex-1">
+              <div className="flex-1 mr-20">
                 {children.length > 0 && displayExpandAll && (
                   <Button
                     variant="white"
@@ -127,6 +158,52 @@ function LocationRow({
                     </span>
                   </Button>
                 )}
+              </div>
+              <div>
+                {!location.has_children && !location.current_encounter ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="white"
+                        size={isMobile ? "xs" : "sm"}
+                        className="gap-2"
+                      >
+                        <CareIcon icon={"l-trash"} className="h-4 w-4" />
+                        <span className="hidden lg:inline">{t("delete")}</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("remove")} {location.name}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t("are_you_sure_want_to_delete", {
+                            name: location.name,
+                          })}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            removeLocation({
+                              pathParams: {
+                                facility_id: facilityId,
+                                id: location.id,
+                              },
+                            })
+                          }
+                          className={cn(
+                            buttonVariants({ variant: "destructive" }),
+                          )}
+                        >
+                          {t("remove")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : null}
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
@@ -167,6 +244,7 @@ function LocationRow({
             indent={indent + 1}
             onEdit={onEdit}
             setExpandedRows={setExpandedRows}
+            facilityId={facilityId}
           />
         ))}
     </>
@@ -185,6 +263,7 @@ interface LocationListViewProps {
   setExpandedRows: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
+  facilityId: string;
 }
 
 export function LocationListView({
@@ -197,6 +276,7 @@ export function LocationListView({
   getChildren,
   handleEditLocation,
   setExpandedRows,
+  facilityId,
 }: LocationListViewProps) {
   const { t } = useTranslation();
 
@@ -239,6 +319,7 @@ export function LocationListView({
               onEdit={handleEditLocation}
               setExpandedRows={setExpandedRows}
               displayExpandAll={searchQuery ? false : true}
+              facilityId={facilityId}
             />
           ))}
         </TableBody>
