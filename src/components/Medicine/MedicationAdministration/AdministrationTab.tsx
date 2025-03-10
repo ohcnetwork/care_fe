@@ -92,7 +92,6 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
-  facilityId: string;
 }
 
 interface TimeSlotHeaderProps {
@@ -361,7 +360,6 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
-  facilityId,
 }) => {
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -810,9 +808,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           size="sm"
           className="text-gray-950 hover:text-gray-700 h-9"
         >
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/medicines/administrations/print`}
-          >
+          <Link href={`medicines/administrations/print`}>
             <CareIcon icon="l-print" className="mr-2" />
             {t("print")}
           </Link>
