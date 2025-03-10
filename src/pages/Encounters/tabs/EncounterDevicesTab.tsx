@@ -18,14 +18,12 @@ import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import DeviceCard from "@/pages/Facility/settings/devices/components/DeviceCard";
 import deviceApi from "@/types/device/deviceApi";
 
-export const EncounterDevicesTab = ({
-  facilityId,
-  encounter,
-}: EncounterTabProps) => {
+export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
 
   const limit = RESULTS_PER_PAGE_LIMIT;
+  const facilityId = encounter.facility.id;
 
   const { data, isLoading } = useQuery({
     queryKey: ["devices", facilityId, encounter.patient.id, page, limit],

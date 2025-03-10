@@ -24,7 +24,6 @@ import { Patient } from "@/types/emr/newPatient";
 import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 
 export interface EncounterTabProps {
-  facilityId: string;
   encounter: Encounter;
   patient: Patient;
   subPage?: string;
@@ -81,7 +80,6 @@ export const EncounterShow = (props: Props) => {
   }
 
   const encounterTabProps: EncounterTabProps = {
-    facilityId: encounterData.facility.id,
     encounter: encounterData,
     patient: encounterData.patient,
     subPage: subPage,

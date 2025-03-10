@@ -140,23 +140,25 @@ export default function DeviceDetail({ facilityId, deviceId }: Props) {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between flex-col sm:flex-row">
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex flex-wrap gap-3 justify-center lg:justify-between w-full">
         <PageTitle title={device.registered_name} />
-        <div className="flex items-center gap-2 flex-col sm:flex-row justify-center align-center ">
-          <Link href={`/devices/${deviceId}/encounterHistory`}>
-            <Button variant="outline_primary">
-              <CareIcon icon="l-medkit" className="h-4 w-4" />
-              {t("encounter_history")}
-            </Button>
-          </Link>
-          <Link href={`/devices/${deviceId}/locationHistory`}>
-            <Button variant="outline_primary" className="sm:mr-3">
-              <CareIcon icon="l-location-point" className="h-4 w-4" />
-              {t("location_history")}
-            </Button>
-          </Link>
-          <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex  gap-2 flex-wrap flex-col sm:flex-row">
+            <Link href={`/devices/${deviceId}/encounterHistory`}>
+              <Button variant="outline_primary">
+                <CareIcon icon="l-medkit" className="h-4 w-4" />
+                {t("encounter_history")}
+              </Button>
+            </Link>
+            <Link href={`/devices/${deviceId}/locationHistory`}>
+              <Button variant="outline_primary" className="sm:mr-3">
+                <CareIcon icon="l-location-point" className="h-4 w-4" />
+                {t("location_history")}
+              </Button>
+            </Link>
+          </div>
+          <div className="flex gap-2 flex-wrap">
             <Link href={`/devices/${deviceId}/edit`}>
               <Button variant="outline">
                 <CareIcon icon="l-pen" className="w-4 h-4" />
