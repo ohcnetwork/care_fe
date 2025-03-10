@@ -49,9 +49,6 @@ const RenderCard = ({
           <Card
             key={questionnaire.id}
             className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
-            onClick={() =>
-              navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
-            }
           >
             <CardContent className="p-6 relative flex flex-col">
               <div className="flex flex-row justify-between items-center mb-4 border-b pb-2">
