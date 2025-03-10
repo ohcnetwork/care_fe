@@ -252,6 +252,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
       return;
     }
+
+    const updates: Partial<QueryParams> = {};
+
+    // Sets the practitioner filter to the current user if they are in the list of
+    // schedulable users and no practitioner was selected.
     if (
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
@@ -264,18 +269,24 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       const today = new Date();
       const defaultDays = careConfig.appointments.defaultDateFilter;
       if (defaultDays === 0) {
-        qParams.date_from = dateQueryString(today);
-        qParams.date_to = dateQueryString(today);
+        // Today only
+        updates.date_from = dateQueryString(today);
+        updates.date_to = dateQueryString(today);
       } else {
-        updateQuery({
-          date_from: dateQueryString(dayjs(today).subtract(7, "day").toDate()),
-          date_to: dateQueryString(today),
-          slot: null,
-        });
+        // Past or future days based on configuration
+        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
+        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+        updates.date_from = dateQueryString(fromDate);
+        updates.date_to = dateQueryString(toDate);
       }
     }
-    if (Object.keys(qParams).length > 0) {
-      updateQuery({ ...qParams });
+
+    // Only update if there are changes
+    if (Object.keys(updates).length > 0) {
+      setQParams({
+        ...qParams,
+        ...updates,
+      });
     }
   }, [schedulableUsersQuery.isLoading]);
 
@@ -371,7 +382,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       <CommandItem
                         value="all"
                         onSelect={() =>
-                          updateQuery({ practitioner: null, slot: null })
+                          setQParams({
+                            ...qParams,
+                            practitioner: null,
+                            slot: null,
+                          })
                         }
                         className="cursor-pointer w-full"
                       >
@@ -439,10 +454,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(
-                              dayjs(today).subtract(7, "day").toDate(),
-                            ),
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(subDays(today, 7)),
                             date_to: dateQueryString(today),
                             slot: null,
                           });
@@ -456,13 +470,10 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          updateQuery({
-                            date_from: dateQueryString(
-                              dayjs(today).subtract(1, "day").toDate(),
-                            ),
-                            date_to: dateQueryString(
-                              dayjs(today).subtract(1, "day").toDate(),
-                            ),
+                          setQParams({
+                            ...qParams,
+                            date_from: dateQueryString(subDays(today, 1)),
+                            date_to: dateQueryString(subDays(today, 1)),
                             slot: null,
                           });
                         }}
