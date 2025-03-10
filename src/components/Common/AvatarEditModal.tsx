@@ -404,7 +404,7 @@ const AvatarEditModal = ({
                   )}
                 </div>
                 {/* buttons for mobile screens */}
-                <div className="flex flex-col gap-2 pt-4 sm:flex-row">
+                <div className="flex flex-col gap-2 pt-4 md:flex-row">
                   {!previewImage ? (
                     <>
                       <Button variant="primary" onClick={handleSwitchCamera}>
