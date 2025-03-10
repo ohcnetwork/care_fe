@@ -130,10 +130,9 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   useEffect(() => {
     if (file_state.isImage) {
-      // Reset zoom to fit image properly
       setFileState((prev) => ({
         ...prev,
-        zoom: 4, // Set to 100% zoom by default
+        zoom: 4,
       }));
     }
   }, [fileUrl, file_state.isImage]);
