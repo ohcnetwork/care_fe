@@ -63,7 +63,24 @@ const formSchema = z
     user_friendly_name: z.string().optional(),
     model_number: z.string().optional(),
     part_number: z.string().optional(),
-    contact: z.array(contactPointSchema),
+    contact: z.array(contactPointSchema).superRefine((contacts, ctx) => {
+      const valueMap = new Map();
+      contacts.forEach((contact, index) => {
+        //To take care of case sensitivity in URL
+        const normalizedValue = contact.value.trim().toLowerCase();
+        if (normalizedValue) {
+          if (valueMap.has(normalizedValue)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("duplicate_contact_values_not_allowed"),
+              path: [index, "value"],
+            });
+          } else {
+            valueMap.set(normalizedValue, true);
+          }
+        }
+      });
+    }),
   })
   .refine(
     (data) => {
