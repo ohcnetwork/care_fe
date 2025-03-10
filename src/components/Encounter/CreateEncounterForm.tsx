@@ -59,37 +59,37 @@ const encounterClasses = () =>
   [
     {
       value: "imp",
-      label: "Inpatient",
+      label: t("inpatient"),
       icon: BedDouble,
       description: t("inpatient_description"),
     },
     {
       value: "amb",
-      label: "Ambulatory",
+      label: t("ambulatory"),
       icon: Ambulance,
       description: t("ambulatory_description"),
     },
     {
       value: "obsenc",
-      label: "Observation",
+      label: t("observation"),
       icon: Stethoscope,
       description: t("observation_description"),
     },
     {
       value: "emer",
-      label: "Emergency",
+      label: t("emergency"),
       icon: Building2,
       description: t("emergency_description"),
     },
     {
       value: "vr",
-      label: "Virtual",
+      label: t("virtual"),
       icon: MonitorSmartphone,
       description: t("virtual_description"),
     },
     {
       value: "hh",
-      label: "Home Health",
+      label: t("home_health"),
       icon: Home,
       description: t("home_health_description"),
     },
