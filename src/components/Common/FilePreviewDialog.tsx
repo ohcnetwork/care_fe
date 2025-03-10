@@ -40,6 +40,7 @@ export const zoom_values = [
   "scale-175",
   "scale-200",
 ];
+
 export interface StateInterface {
   open: boolean;
   isImage: boolean;
@@ -52,6 +53,7 @@ export interface StateInterface {
   id?: string;
   associating_id?: string;
 }
+
 type FilePreviewProps = {
   title?: ReactNode;
   description?: ReactNode;
@@ -68,6 +70,7 @@ type FilePreviewProps = {
   loadFile?: (file: FileUploadModel, associating_id: string) => void;
   currentIndex: number;
 };
+
 const previewExtensions = [
   ".html",
   ".htm",
@@ -80,11 +83,13 @@ const previewExtensions = [
   ".gif",
   ".webp",
 ];
+
 interface DragState {
   isDragging: boolean;
   position: { x: number; y: number };
   dragStart: { x: number; y: number };
 }
+
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const {
     show,
@@ -108,17 +113,31 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     position: { x: 0, y: 0 },
     dragStart: { x: 0, y: 0 },
   });
+
   useEffect(() => {
     if (uploadedFiles && show) {
       setIndex(currentIndex);
     }
   }, [uploadedFiles, show, currentIndex]);
+
   useEffect(() => {
-    setDragState((prev) => ({
-      ...prev,
+    setDragState({
+      isDragging: false,
       position: { x: 0, y: 0 },
-    }));
+      dragStart: { x: 0, y: 0 },
+    });
   }, [index, show]);
+
+  useEffect(() => {
+    if (file_state.isImage) {
+      // Reset zoom to fit image properly
+      setFileState((prev) => ({
+        ...prev,
+        zoom: 4, // Set to 100% zoom by default
+      }));
+    }
+  }, [fileUrl, file_state.isImage]);
+
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
     setFileState({
@@ -136,6 +155,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
     setScale((prevScale) => Math.max(prevScale - 0.25, 0.5));
   };
+
   const handleRotate = (angle: number) => {
     setFileState((prev: any) => {
       const newRotation = (prev.rotation + angle + 360) % 360;
@@ -145,6 +165,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       };
     });
   };
+
   function getRotationClass(rotation: number) {
     const normalizedRotation = rotation % 360;
     switch (normalizedRotation) {
@@ -158,11 +179,13 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
         return "";
     }
   }
+
   const fileName = file_state?.name
     ? file_state.name + "." + file_state.extension
     : "";
   const fileNameTooltip =
     fileName.length > 30 ? fileName.slice(0, 30) + "..." : fileName;
+
   const handleNext = (newIndex: number) => {
     if (
       !uploadedFiles?.length ||
@@ -179,6 +202,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     loadFile(nextFile, associating_id);
     setIndex(newIndex);
   };
+
   const handleClose = () => {
     setPage(1);
     setNumPages(1);
@@ -186,11 +210,13 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     setScale(1);
     onClose?.();
   };
+
   useKeyboardShortcut(["ArrowLeft"], () => index > 0 && handleNext(index - 1));
   useKeyboardShortcut(
     ["ArrowRight"],
     () => index < (uploadedFiles?.length || 0) - 1 && handleNext(index + 1),
   );
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!file_state.isImage) return;
     setDragState((prev) => ({
@@ -202,22 +228,41 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       },
     }));
   };
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragState.isDragging) return;
+    const container = e.currentTarget as HTMLDivElement;
+    const image = container.querySelector("img");
+    if (!image) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
+    const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
+
+    const newX = e.clientX - dragState.dragStart.x;
+    const newY = e.clientY - dragState.dragStart.y;
+
+    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
+    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+
     setDragState((prev) => ({
       ...prev,
       position: {
-        x: e.clientX - prev.dragStart.x,
-        y: e.clientY - prev.dragStart.y,
+        x: clampedX,
+        y: clampedY,
       },
     }));
   };
+
   const handleMouseUp = () => {
     setDragState((prev) => ({
       ...prev,
       isDragging: false,
     }));
   };
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!file_state.isImage) return;
     setDragState((prev) => ({
@@ -229,23 +274,42 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       },
     }));
   };
+
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!dragState.isDragging) return;
     e.preventDefault();
+    const container = e.currentTarget as HTMLDivElement;
+    const image = container.querySelector("img");
+    if (!image) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
+    const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
+
+    const newX = e.touches[0].clientX - dragState.dragStart.x;
+    const newY = e.touches[0].clientY - dragState.dragStart.y;
+
+    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
+    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+
     setDragState((prev) => ({
       ...prev,
       position: {
-        x: e.touches[0].clientX - dragState.dragStart.x,
-        y: e.touches[0].clientY - dragState.dragStart.y,
+        x: clampedX,
+        y: clampedY,
       },
     }));
   };
+
   const handleTouchEnd = () => {
     setDragState((prev) => ({
       ...prev,
       isDragging: false,
     }));
   };
+
   return (
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="h-full w-full max-w-5xl flex-col gap-4 bg-white rounded-lg p-4 shadow-xl md:p-6">
@@ -254,7 +318,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             {t("file_preview")}
           </DialogTitle>
         </DialogHeader>
-
         {fileUrl ? (
           <>
             <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
@@ -333,7 +396,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 {file_state.isImage ? (
                   <div
                     className={cn(
-                      "transition-transform duration-100 relative",
+                      "flex items-center justify-center w-full h-full transition-transform duration-100",
                       dragState.isDragging ? "duration-0" : "",
                     )}
                     style={{
@@ -344,7 +407,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       src={fileUrl}
                       alt="file"
                       className={cn(
-                        "h-full w-full select-none object-contain",
+                        "max-h-full max-w-full select-none object-contain",
                         zoom_values[file_state.zoom - 1],
                         getRotationClass(file_state.rotation),
                       )}
@@ -380,7 +443,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   </div>
                 )}
               </div>
-
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
                   variant="primary"
@@ -392,6 +454,113 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Button>
               )}
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
+                {file_state.isImage && (
+                  <>
+                    {[
+                      [
+                        t("zoom_in"),
+                        "l-search-plus",
+                        handleZoomIn,
+                        file_state.zoom === zoom_values.length,
+                      ],
+                      [
+                        `${25 * file_state.zoom}%`,
+                        false,
+                        () => {
+                          setFileState({ ...file_state, zoom: 4 });
+                        },
+                        false,
+                      ],
+                      [
+                        t("zoom_out"),
+                        "l-search-minus",
+                        handleZoomOut,
+                        file_state.zoom === 1,
+                      ],
+                      [
+                        t("rotate_left"),
+                        "l-corner-up-left",
+                        () => handleRotate(-90),
+                        false,
+                      ],
+                      [
+                        t("rotate_right"),
+                        "l-corner-up-right",
+                        () => handleRotate(90),
+                        false,
+                      ],
+                    ].map((button, index) => (
+                      <Button
+                        variant="ghost"
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className={cn(
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                        )}
+                        disabled={button[3] as boolean}
+                      >
+                        {button[1] && (
+                          <CareIcon
+                            icon={button[1] as IconName}
+                            className="mr-2 text-lg"
+                          />
+                        )}
+                        {button[0] as string}
+                      </Button>
+                    ))}
+                  </>
+                )}
+                {file_state.extension === "pdf" && (
+                  <>
+                    {[
+                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
+                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
+                      [
+                        t("zoom_out"),
+                        "l-search-minus",
+                        handleZoomOut,
+                        scale <= 0.5,
+                      ],
+                      [
+                        t("previous"),
+                        "l-arrow-left",
+                        () => setPage((prev) => prev - 1),
+                        page === 1,
+                      ],
+                      [`${page}/${numPages}`, false, () => ({}), false],
+                      [
+                        t("next"),
+                        "l-arrow-right",
+                        () => setPage((prev) => prev + 1),
+                        page === numPages,
+                      ],
+                    ].map((button, index) => (
+                      <Button
+                        variant="ghost"
+                        key={index}
+                        onClick={button[2] as () => void}
+                        className={cn(
+                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
+                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
+                        )}
+                        disabled={button[3] as boolean}
+                      >
+                        {button[1] && (
+                          <CareIcon
+                            icon={button[1] as IconName}
+                            className="mr-2 text-lg"
+                          />
+                        )}
+                        {button[0] as string}
+                      </Button>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
             <div className="flex items-center justify-center">
               <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
