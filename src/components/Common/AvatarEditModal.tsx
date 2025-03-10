@@ -152,16 +152,21 @@ const AvatarEditModal = ({
 
   useEffect(() => {
     if (croppedImage) {
-      fetch(croppedImage)
-        .then((res) => res.blob())
-        .then((blob) => {
+      const processCroppedImage = async () => {
+        try {
+          const res = await fetch(croppedImage);
+          const blob = await res.blob();
           const myFile = new File([blob], "cropped_image.png", {
             type: blob.type,
           });
           setSelectedFile(myFile);
           setPreview(croppedImage);
           setCroppedImage(null);
-        });
+        } catch (error) {
+          console.error("Error processing cropped image:", error);
+        }
+      };
+      processCroppedImage();
     }
   }, [croppedImage]);
 
