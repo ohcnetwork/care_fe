@@ -16,10 +16,11 @@ import { Encounter, completedEncounterStatus } from "@/types/emr/encounter";
 
 interface EncounterCardProps {
   encounter: Encounter;
+  facilityId?: string;
 }
 
 export const EncounterCard = (props: EncounterCardProps) => {
-  const { encounter } = props;
+  const { encounter, facilityId } = props;
 
   const Icon = encounterIcons[encounter.encounter_class];
 
@@ -118,7 +119,11 @@ export const EncounterCard = (props: EncounterCardProps) => {
             <div className="w-full py-2 bg-gray-100 px-2">
               <Button variant="outline" className="p-2 border border-black">
                 <Link
-                  href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
+                  href={
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                      : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                  }
                   className="flex items-center gap-2"
                 >
                   <Eye className="w-4 h-4" />

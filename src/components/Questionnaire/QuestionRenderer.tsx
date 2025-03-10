@@ -29,7 +29,7 @@ interface QuestionRendererProps {
   disabled?: boolean;
   activeGroupId?: string;
   encounterId?: string;
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
 }
 
