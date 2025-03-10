@@ -48,7 +48,7 @@ const RenderCard = ({
         questionnaireList.map((questionnaire: QuestionnaireDetail) => (
           <Card
             key={questionnaire.id}
-            className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
+            className="overflow-hidden bg-white rounded-lg cursor-pointer"
             onClick={() =>
               navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
             }
