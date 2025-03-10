@@ -88,7 +88,7 @@ const RenderCard = ({
               </div>
 
               <div className="mb-4 flex-1">
-                {questionnaire.description?.trim() ? (
+                {questionnaire.description?.trim() && (
                   <>
                     <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       {t("description")}
@@ -97,10 +97,6 @@ const RenderCard = ({
                       {questionnaire.description}
                     </p>
                   </>
-                ) : (
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t("no_description")}
-                  </h3>
                 )}
               </div>
 
