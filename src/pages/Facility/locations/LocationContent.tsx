@@ -1,20 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  Bed,
-  Building2,
-  Home,
-  Hotel,
-  LandPlot,
-  Layers,
-  LayoutGrid,
-  MapPin,
-  Route,
-  Split,
-  Store,
-  Truck,
-  Users,
-} from "lucide-react";
+import { t } from "i18next";
+import { ArrowRight, Bed } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -35,35 +21,8 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import query from "@/Utils/request/query";
-import { LocationList } from "@/types/location/location";
+import { LocationList, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-// Constants
-const LocationIcon = {
-  si: Building2,
-  bu: Hotel,
-  wi: Split,
-  wa: Users,
-  lvl: Layers,
-  co: Store,
-  ro: LayoutGrid,
-  bd: Bed,
-  ve: Truck,
-  ho: Home,
-  ca: Home,
-  rd: Route,
-  area: LandPlot,
-  jdn: MapPin,
-  vi: Building2,
-} as const;
-
-type LocationFormType = keyof typeof LocationIcon;
-
-function getLocationIcon(
-  form: LocationFormType,
-): (typeof LocationIcon)[LocationFormType] {
-  return LocationIcon[form] || Building2;
-}
 
 interface BedCardProps {
   location: LocationList;
@@ -76,29 +35,37 @@ function BedCard({ location, facilityId }: BedCardProps) {
 
   return (
     <div
-      className={`border rounded-lg overflow-hidden shadow-sm h-full ${
-        isOccupied ? "bg-white border-gray-200" : "bg-green-50 border-green-200"
-      }`}
+      className={cn(
+        "border rounded-lg overflow-hidden shadow-sm h-full",
+        isOccupied
+          ? "bg-white border-gray-200"
+          : "bg-green-50 border-green-200",
+      )}
     >
       <div
-        className={`px-4 py-3 flex justify-between items-center ${
+        className={cn(
+          "px-4 py-3 flex justify-between items-center",
           isOccupied
             ? "bg-blue-50 border-b border-blue-100"
-            : "bg-green-100 border-b border-green-200"
-        }`}
+            : "bg-green-100 border-b border-green-200",
+        )}
       >
         <div className="flex items-center">
           <Bed
-            className={`h-4 w-4 mr-2 ${isOccupied ? "text-blue-600" : "text-green-600"}`}
+            className={cn(
+              "h-4 w-4 mr-2",
+              isOccupied ? "text-blue-600" : "text-green-600",
+            )}
           />
           <span className="font-medium">{location.name}</span>
         </div>
         <div
-          className={`text-xs px-2 py-1 rounded-full ${
+          className={cn(
+            "text-xs px-2 py-1 rounded-full",
             isOccupied
               ? "bg-blue-100 text-blue-800"
-              : "bg-green-200 text-green-800"
-          }`}
+              : "bg-green-200 text-green-800",
+          )}
         >
           {isOccupied ? t("occupied") : t("available")}
         </div>
@@ -130,7 +97,8 @@ interface LocationCardProps {
 
 function LocationCard({ location, onClick }: LocationCardProps) {
   const { t } = useTranslation();
-  const Icon = getLocationIcon(location.form as LocationFormType);
+  const Icon =
+    LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
   return (
     <div
@@ -159,11 +127,12 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 
           <div className="flex items-center">
             <span
-              className={`capitalize ${
+              className={cn(
+                "capitalize",
                 location.availability_status === "available"
                   ? "text-green-600"
-                  : "text-gray-600"
-              }`}
+                  : "text-gray-600",
+              )}
             >
               {location.availability_status}
             </span>
@@ -192,10 +161,9 @@ function ChildLocationCard(props: ChildLocationCardProps) {
 interface BreadcrumbsProps {
   location: LocationList;
   onSelect: (location: LocationList) => void;
-  t: (key: string) => string;
 }
 
-function Breadcrumbs({ location, onSelect, t }: BreadcrumbsProps) {
+function Breadcrumbs({ location, onSelect }: BreadcrumbsProps) {
   const items = [];
   let current: LocationList | undefined = location;
 
@@ -283,7 +251,6 @@ export default function LocationContent({
           <Breadcrumbs
             location={selectedLocation}
             onSelect={onLocationSelect}
-            t={t}
           />
         )}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

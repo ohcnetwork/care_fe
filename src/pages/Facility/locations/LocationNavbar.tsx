@@ -1,21 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  Bed,
-  Building2,
-  ChevronDown,
-  ChevronRight,
-  Home,
-  Hotel,
-  LandPlot,
-  Layers,
-  LayoutGrid,
-  MapPin,
-  Route,
-  Split,
-  Store,
-  Truck,
-  Users,
-} from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -27,35 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { LocationList } from "@/types/location/location";
+import { LocationList, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-// Constants
-const LocationIcon = {
-  si: Building2, // Site
-  bu: Hotel, // Building
-  wi: Split, // Wing
-  wa: Users, // Ward
-  lvl: Layers, // Level
-  co: Store, // Counter
-  ro: LayoutGrid, // Room
-  bd: Bed, // Bed
-  ve: Truck, // Vehicle
-  ho: Home, // Home
-  ca: Home, // Cabin
-  rd: Route, // Road
-  area: LandPlot, // Area
-  jdn: MapPin, // Junction
-  vi: Building2, // Village
-} as const;
-
-type LocationFormType = keyof typeof LocationIcon;
-
-function getLocationIcon(
-  form: LocationFormType,
-): (typeof LocationIcon)[LocationFormType] {
-  return LocationIcon[form] || Building2;
-}
 
 interface LocationTreeNodeProps {
   location: LocationList;
@@ -79,7 +36,8 @@ function LocationTreeNode({
   const hasChildren = location.has_children;
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
-  const Icon = getLocationIcon(location.form as LocationFormType);
+  const Icon =
+    LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
   // Query for this node's children
   const { data: children, isLoading } = useQuery({
@@ -101,8 +59,8 @@ function LocationTreeNode({
         className={cn(
           "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
           isSelected && "bg-blue-100 text-blue-800",
+          `pl-${level * 1}`,
         )}
-        style={{ paddingLeft: `${level * 1}rem` }}
       >
         {hasChildren ? (
           <Button

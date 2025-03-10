@@ -19,14 +19,13 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
     <EncountersOverview facilityId={facilityId} tab={tab} />
   ),
-  "/facility/:facilityId/encounters/:tab/:locationId": ({
+  "/facility/:facilityId/encounters/locations/:locationId": ({
     facilityId,
-    tab,
     locationId,
   }) => (
     <EncountersOverview
       facilityId={facilityId}
-      tab={tab}
+      tab="locations"
       locationId={locationId}
     />
   ),
