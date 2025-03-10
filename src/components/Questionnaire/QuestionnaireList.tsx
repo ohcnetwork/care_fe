@@ -54,12 +54,12 @@ const RenderCard = ({
             }
           >
             <CardContent className="p-6 relative flex flex-col">
-              <div className="flex flex-row justify-between items-center mb-4 border-b pb-2">
+              <div className="flex flex-row gap-2 justify-between items-center mb-4 border-b pb-2">
                 {questionnaire.title && questionnaire.title.length > 20 ? (
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="truncate">
-                        <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
+                      <TooltipTrigger>
+                        <p className="mt-2 text-xl text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
                           {questionnaire.title}
                         </p>
                       </TooltipTrigger>
@@ -69,7 +69,7 @@ const RenderCard = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
+                  <p className="mt-2 text-xl text-left font-bold text-gray-900 line-clamp-1 text-ellipsis">
                     {questionnaire.title}
                   </p>
                 )}
