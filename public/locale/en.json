@@ -882,6 +882,7 @@
   "downloads": "Downloads",
   "draft": "Draft",
   "drag_drop_image_to_upload": "Drag & drop image to upload",
+  "duplicate_contact_values_not_allowed": "Duplicate contact values are not allowed across different contact types",
   "duplicate_patient_record_birth_unknown": "Please contact your district care coordinator, the shifting facility or the patient themselves if you are not sure about the patient's year of birth.",
   "duplicate_patient_record_confirmation": "Admit the patient record to your facility by adding the year of birth",
   "duplicate_patient_record_rejection": "I confirm that the suspect / patient I want to create is not on the list.",
