@@ -97,12 +97,20 @@ const RenderCard = ({
               </div>
 
               <div className="mb-4 flex-1">
-                <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  {t("description")}
-                </h3>
-                <p className="text-sm text-gray-900 line-clamp-2">
-                  {questionnaire.description}
-                </p>
+                {questionnaire.description?.trim() ? (
+                  <>
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="text-sm text-gray-900 line-clamp-2">
+                      {questionnaire.description}
+                    </p>
+                  </>
+                ) : (
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("no_description")}
+                  </h3>
+                )}
               </div>
 
               <div className="mt-4 flex justify-end">
