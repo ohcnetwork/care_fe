@@ -60,7 +60,11 @@ export const EncounterDevicesTab = ({ encounter }: EncounterTabProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data?.results?.length ? (
               data.results.map((device) => (
-                <DeviceCard key={device.id} device={device} />
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  encounter={encounter}
+                />
               ))
             ) : (
               <Card className="col-span-full">
