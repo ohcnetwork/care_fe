@@ -720,7 +720,7 @@ export function EncounterList({
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    <div className="flex flex-col md:justify-between md:h-full space-y-2">
+                    <div className="flex flex-col justify-between h-full space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge
                           className={getStatusColor(encounter.status)}
@@ -742,7 +742,7 @@ export function EncounterList({
                         </Badge>
                       </div>
 
-                      <div className="">
+                      <div>
                         <Separator className="my-2" />
                         <Link
                           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
