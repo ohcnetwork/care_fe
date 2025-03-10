@@ -62,7 +62,7 @@ export interface QuestionnaireFormProps {
   subjectType?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
-  facilityId: string;
+  facilityId?: string;
 }
 
 interface ValidationErrorDisplayProps {
@@ -587,7 +587,7 @@ export function QuestionnaireForm({
           method: "POST",
           reference_id: form.questionnaire.id,
           body: {
-            resource_id: encounterId,
+            resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
             patient: patientId,
             results: nonStructuredResponses

@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 
+import useAppHistory from "@/hooks/useAppHistory";
+
 import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
@@ -20,6 +22,7 @@ interface Props {
 
 export default function UpdateDevice({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -40,7 +43,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             facilityId={facilityId}
             device={device}
             onSuccess={() => {
-              window.history.back();
+              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
             }}
           />
         </div>

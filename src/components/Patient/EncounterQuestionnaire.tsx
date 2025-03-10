@@ -15,7 +15,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
   encounterId?: string;
   questionnaireSlug?: string;
@@ -34,7 +34,7 @@ export default function EncounterQuestionnaire({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId ?? "" },
-      queryParams: { facility: facilityId },
+      queryParams: { facility: facilityId! },
     }),
     enabled: !!encounterId,
   });
@@ -72,9 +72,13 @@ export default function EncounterQuestionnaire({
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
               onSubmit={() => {
-                if (encounterId) {
+                if (encounterId && facilityId) {
                   navigate(
                     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+                  );
+                } else if (facilityId) {
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/updates`,
                   );
                 } else {
                   navigate(`/patient/${patientId}/updates`);
