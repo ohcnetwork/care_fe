@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
-import { Building, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import { Building, Check, Loader2 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -17,11 +16,6 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -138,9 +132,7 @@ export default function CloneQuestionnaireSheet({
 
           {/* Selected Organizations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">
-              {t("selected_organizations")}
-            </h3>
+            <h3 className="text-sm font-medium">Selected Organizations</h3>
             <div className="flex flex-wrap gap-2">
               {selectedIds.length > 0 ? (
                 availableOrganizations?.results
@@ -152,19 +144,11 @@ export default function CloneQuestionnaireSheet({
                       className="flex items-center gap-1"
                     >
                       {org.name}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 p-0 hover:bg-transparent"
-                        onClick={() => handleToggleOrganization(org.id)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
                     </Badge>
                   ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {t("no_organizations_selected")}
+                  No organizations selected
                 </p>
               )}
             </div>
@@ -172,61 +156,44 @@ export default function CloneQuestionnaireSheet({
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-full justify-between"
-                >
-                  <span className="truncate">{t("select_organizations")}</span>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="p-0 w-[var(--radix-popover-trigger-width)]"
-                align="start"
-              >
-                <Command>
-                  <CommandInput
-                    placeholder={t("search_organizations")}
-                    onValueChange={setSearchQuery}
-                  />
-                  <CommandList>
-                    <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
-                    <CommandGroup>
-                      {isLoadingOrganizations ? (
-                        <div className="flex items-center justify-center py-6">
-                          <Loader2 className="h-6 w-4 animate-spin" />
+            <h3 className="text-sm font-medium">Add Organizations</h3>
+            <Command className="rounded-lg border shadow-md">
+              <CommandInput
+                placeholder="Search organizations..."
+                onValueChange={setSearchQuery}
+              />
+              <CommandList>
+                <CommandEmpty>No organizations found.</CommandEmpty>
+                <CommandGroup>
+                  {isLoadingOrganizations ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : (
+                    availableOrganizations?.results.map((org) => (
+                      <CommandItem
+                        key={org.id}
+                        value={org.id}
+                        onSelect={() => handleToggleOrganization(org.id)}
+                      >
+                        <div className="flex flex-1 items-center gap-2">
+                          <Building className="h-4 w-4" />
+                          <span>{org.name}</span>
+                          {org.description && (
+                            <span className="text-xs text-gray-500">
+                              - {org.description}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        availableOrganizations?.results.map((org) => (
-                          <CommandItem
-                            key={org.id}
-                            value={org.id}
-                            onSelect={() => handleToggleOrganization(org.id)}
-                          >
-                            <div className="flex flex-1 items-center gap-2">
-                              <Building className="h-4 w-4" />
-                              <span>{org.name}</span>
-                              {org.description && (
-                                <span className="text-xs text-gray-500">
-                                  - {org.description}
-                                </span>
-                              )}
-                            </div>
-                            {selectedIds.includes(org.id) && (
-                              <Check className="h-4 w-4" />
-                            )}
-                          </CommandItem>
-                        ))
-                      )}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                        {selectedIds.includes(org.id) && (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </CommandItem>
+                    ))
+                  )}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </div>
         </div>
 
