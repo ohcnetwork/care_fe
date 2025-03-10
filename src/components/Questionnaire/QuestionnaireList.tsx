@@ -59,7 +59,7 @@ const RenderCard = ({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <p className="mt-2 text-xl text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
+                        <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
                           {questionnaire.title}
                         </p>
                       </TooltipTrigger>
@@ -69,7 +69,7 @@ const RenderCard = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <p className="mt-2 text-xl text-left font-bold text-gray-900 line-clamp-1 text-ellipsis">
+                  <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis">
                     {questionnaire.title}
                   </p>
                 )}
