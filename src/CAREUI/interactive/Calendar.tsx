@@ -34,14 +34,6 @@ export default function Calendar(props: Props) {
   }
 
   const handlePrevMonth = () => {
-    const today = new Date();
-    if (
-      currentMonth.getFullYear() === today.getFullYear() &&
-      currentMonth.getMonth() === today.getMonth()
-    ) {
-      return;
-    }
-
     const prevMonth = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth() - 1,
@@ -56,7 +48,6 @@ export default function Calendar(props: Props) {
     );
     props.onMonthChange?.(nextMonth);
   };
-
   const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
