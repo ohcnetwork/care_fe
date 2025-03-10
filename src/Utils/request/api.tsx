@@ -28,17 +28,9 @@ import {
   CreateFacility,
   FacilityData,
 } from "@/types/facility/facility";
-import {
-  FacilityOrganization,
-  FacilityOrganizationCreate,
-  FacilityOrganizationResponse,
-} from "@/types/facilityOrganization/facilityOrganization";
 import { Message } from "@/types/notes/messages";
 import { Thread } from "@/types/notes/threads";
-import {
-  OrganizationUserRole,
-  RoleResponse,
-} from "@/types/organization/organization";
+import { RoleResponse } from "@/types/organization/organization";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -409,46 +401,6 @@ const routes = {
     path: "/api/v1/patient/{patientId}/observation/analyse/",
     method: "POST",
     TRes: Type<ObservationAnalyzeResponse>(),
-  },
-  facilityOrganization: {
-    list: {
-      path: "/api/v1/facility/{facilityId}/organizations/",
-      method: "GET",
-      TRes: {} as FacilityOrganizationResponse,
-    },
-    get: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
-      method: "GET",
-      TRes: {} as FacilityOrganization,
-    },
-    create: {
-      path: "/api/v1/facility/{facilityId}/organizations/",
-      method: "POST",
-      TRes: {} as FacilityOrganization,
-      TBody: {} as FacilityOrganizationCreate,
-    },
-    listUsers: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
-      method: "GET",
-      TRes: {} as PaginatedResponse<OrganizationUserRole>,
-    },
-    assignUser: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/",
-      method: "POST",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    updateUserRole: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
-      method: "PUT",
-      TRes: {} as OrganizationUserRole,
-      TBody: {} as { user: string; role: string },
-    },
-    removeUserRole: {
-      path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
-      method: "DELETE",
-      TRes: {} as Record<string, never>,
-    },
   },
 
   // Role Routes
