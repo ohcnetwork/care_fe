@@ -4,8 +4,8 @@ import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Edit3Icon } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { Link, navigate } from "raviger";
+import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -53,6 +53,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -74,14 +75,6 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-
-interface QueryParams {
-  practitioner: string | null;
-  slot: string | null;
-  date_from: string | null;
-  date_to: string | null;
-  search: string | null;
-}
 
 interface DateRangeDisplayProps {
   dateFrom: string | null;
@@ -106,23 +99,25 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
     (dateFrom === dateQueryString(dayjs(today).subtract(1, "day").toDate()) &&
       dateTo === dateQueryString(dayjs(today).subtract(1, "day").toDate()))
   ) {
-    <>
-      {dateFrom === dateQueryString(today) ? (
-        <>
-          <span className="text-black">{t("today")}</span>
-          <span className="pl-1 text-gray-500">
-            ({dayjs(dateFrom).format("DD MMM YYYY")})
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="text-black">{t("yesterday")}</span>
-          <span className="pl-1 text-gray-500">
-            ({dayjs(dateFrom).format("DD MMM YYYY")})
-          </span>
-        </>
-      )}
-    </>;
+    return (
+      <>
+        {dateFrom === dateQueryString(today) ? (
+          <>
+            <span className="text-black">{t("today")}</span>
+            <span className="pl-1 text-gray-500">
+              ({dayjs(dateFrom).format("DD MMM YYYY")})
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="text-black">{t("yesterday")}</span>
+            <span className="pl-1 text-gray-500">
+              ({dayjs(dateFrom).format("DD MMM YYYY")})
+            </span>
+          </>
+        )}
+      </>
+    );
   }
 
   // Case 2: Pre-defined ranges
@@ -233,8 +228,9 @@ function DateRangeDisplay({ dateFrom, dateTo }: DateRangeDisplayProps) {
 export default function AppointmentsPage(props: { facilityId?: string }) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
+    limit: 15,
+  });
 
   const facilityId = props.facilityId ?? authUser.home_facility!;
 
@@ -253,58 +249,36 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   );
 
   useEffect(() => {
-    // trigger this effect only when there are no query params already applied, and once the query is loaded
     if (Object.keys(qParams).length !== 0 || schedulableUsersQuery.isLoading) {
       return;
     }
-
-    const updates: Partial<QueryParams> = {};
-
-    // Sets the practitioner filter to the current user if they are in the list of
-    // schedulable users and no practitioner was selected.
     if (
       !qParams.practitioner &&
       schedulableUsersQuery.data?.users.some(
         (r) => r.username === authUser.username,
       )
     ) {
-      updates.practitioner = authUser.username;
+      qParams.practitioner = authUser.username;
     }
-
-    // Set default date range if no dates are present
     if (!qParams.date_from && !qParams.date_to) {
       const today = new Date();
       const defaultDays = careConfig.appointments.defaultDateFilter;
-
       if (defaultDays === 0) {
-        // Today only
-        updates.date_from = dateQueryString(today);
-        updates.date_to = dateQueryString(today);
+        qParams.date_from = dateQueryString(today);
+        qParams.date_to = dateQueryString(today);
       } else {
-        // Past or future days based on configuration
-        const fromDate =
-          defaultDays > 0
-            ? today
-            : dayjs(today).add(defaultDays, "day").toDate();
-        const toDate =
-          defaultDays > 0
-            ? dayjs(today).add(defaultDays, "day").toDate()
-            : today;
-        updates.date_from = dateQueryString(fromDate);
-        updates.date_to = dateQueryString(toDate);
+        updateQuery({
+          date_from: dateQueryString(dayjs(today).subtract(7, "day").toDate()),
+          date_to: dateQueryString(today),
+          slot: null,
+        });
       }
     }
-
-    // Only update if there are changes
-    if (Object.keys(updates).length > 0) {
-      setQParams({
-        ...qParams,
-        ...updates,
-      });
+    if (Object.keys(qParams).length > 0) {
+      updateQuery({ ...qParams });
     }
-  }, [schedulableUsersQuery.isLoading, qParams]);
+  }, [schedulableUsersQuery.isLoading]);
 
-  // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
     !!qParams.date_from &&
     !!practitioner &&
@@ -315,8 +289,6 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facility_id: facilityId },
       body: {
-        // voluntarily coalesce to empty string since we know query would be
-        // enabled only if practitioner and date_from are present
         user: practitioner?.id ?? "",
         day: qParams.date_from ?? "",
       },
@@ -399,11 +371,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       <CommandItem
                         value="all"
                         onSelect={() =>
-                          setQParams({
-                            ...qParams,
-                            practitioner: null,
-                            slot: null,
-                          })
+                          updateQuery({ practitioner: null, slot: null })
                         }
                         className="cursor-pointer w-full"
                       >
@@ -419,8 +387,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           key={user.id}
                           value={formatName(user)}
                           onSelect={() =>
-                            setQParams({
-                              ...qParams,
+                            updateQuery({
                               practitioner: user.username,
                               slot: null,
                             })
@@ -472,8 +439,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(
                               dayjs(today).subtract(7, "day").toDate(),
                             ),
@@ -490,8 +456,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(
                               dayjs(today).subtract(1, "day").toDate(),
                             ),
@@ -510,8 +475,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(today),
                             slot: null,
@@ -526,8 +490,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(
                               dayjs(today).add(7, "day").toDate(),
@@ -544,8 +507,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
-                            ...qParams,
+                          updateQuery({
                             date_from: dateQueryString(today),
                             date_to: dateQueryString(
                               dayjs(today).add(30, "day").toDate(),
@@ -568,12 +530,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                           : undefined,
                       }}
                       onChange={(date) =>
-                        setQParams({
-                          ...qParams,
+                        updateQuery({
                           date_from: date?.from
                             ? dateQueryString(date.from)
                             : null,
-                          date_to: date?.to ? dateQueryString(date?.to) : null,
+                          date_to: date?.to ? dateQueryString(date.to) : null,
                           slot: null,
                         })
                       }
@@ -589,9 +550,9 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                 selectedSlot={slot}
                 onSelect={(slot) => {
                   if (slot === "all") {
-                    setQParams({ ...qParams, slot: null });
+                    updateQuery({ slot: null });
                   } else {
-                    setQParams({ ...qParams, slot });
+                    updateQuery({ slot });
                   }
                 }}
               />
@@ -604,7 +565,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             className="w-[300px]"
             placeholder={t("search")}
             value={qParams.search ?? ""}
-            onChange={(e) => setQParams({ ...qParams, search: e.target.value })}
+            onChange={(e) => updateQuery({ search: e.target.value })}
           />
         </div>
       </div>
@@ -638,11 +599,16 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
       ) : (
         <AppointmentRow
           facilityId={facilityId}
+          updateQuery={updateQuery}
           practitioner={practitioner?.id ?? null}
           slot={qParams.slot}
+          page={qParams.page}
           date_from={qParams.date_from}
           date_to={qParams.date_to}
           search={qParams.search?.toLowerCase()}
+          resultsPerPage={resultsPerPage}
+          status={qParams.status}
+          Pagination={Pagination}
         />
       )}
     </Page>
@@ -711,13 +677,8 @@ function AppointmentColumn(props: {
           ) : (
             <Trans
               i18nKey="showing_x_of_y"
-              values={{
-                x: appointments.length,
-                y: data.count,
-              }}
-              components={{
-                strong: <span className="font-bold" />,
-              }}
+              values={{ x: appointments.length, y: data.count }}
+              components={{ strong: <span className="font-bold" /> }}
             />
           )}
         </span>
@@ -762,10 +723,8 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             {t(`GENDER__${patient.gender}`)}
           </p>
         </div>
-
         <div className="bg-gray-100 px-2 py-1 rounded text-center">
           <p className="text-[10px] uppercase">{t("token")}</p>
-          {/* TODO: replace this with token number once that's ready... */}
           <p className="font-bold text-2xl uppercase">
             {getFakeTokenNumber(appointment)}
           </p>
@@ -774,22 +733,34 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
+
 function AppointmentRow(props: {
   facilityId: string;
+  page: number | null;
   practitioner: string | null;
+  Pagination: ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => JSX.Element;
+  updateQuery: (filter: FilterState) => void;
+  resultsPerPage: number;
   slot: string | null;
+  status: string | null;
   date_from: string | null;
   date_to: string | null;
   search?: string;
 }) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<Appointment["status"]>("booked");
 
   const { data } = useQuery({
     queryKey: [
       "appointments",
       props.facilityId,
-      status,
+      props.status,
+      props.page,
       props.practitioner,
       props.slot,
       props.date_from,
@@ -798,12 +769,13 @@ function AppointmentRow(props: {
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: props.facilityId },
       queryParams: {
-        status: status,
-        limit: 100,
+        status: props.status ?? "booked",
         slot: props.slot,
         user: props.practitioner ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
+        limit: props.resultsPerPage,
+        offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
       },
     }),
     enabled: !!props.date_from && !!props.date_to,
@@ -820,9 +792,9 @@ function AppointmentRow(props: {
     <>
       <div className={cn(!data && "animate-pulse")}>
         <Tabs
-          value={status}
+          value={props.status ?? "booked"}
           className="w-full overflow-scroll"
-          onValueChange={(value) => setStatus(value as Appointment["status"])}
+          onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <TabsList>
             <TabsTrigger value="booked">{t("booked")}</TabsTrigger>
@@ -856,7 +828,7 @@ function AppointmentRow(props: {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="">
+            <TableBody>
               {appointments.map((appointment) => (
                 <TableRow
                   key={appointment.id}
@@ -876,6 +848,7 @@ function AppointmentRow(props: {
             </TableBody>
           </Table>
         )}
+        {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
     </>
   );
@@ -908,7 +881,6 @@ function AppointmentRowItem({
           </span>
         </span>
       </TableCell>
-      {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         {formatDisplayName(appointment.user)}
       </TableCell>
@@ -918,7 +890,6 @@ function AppointmentRowItem({
           facilityId={facilityId}
         />
       </TableCell>
-      {/* TODO: replace this with token number once that's ready... */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
         {getFakeTokenNumber(appointment)}
       </TableCell>
@@ -948,35 +919,28 @@ const AppointmentStatusDropdown = ({
       },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", facilityId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["appointments", facilityId] });
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
     },
   });
 
-  // Get available status options based on current status
   const getAvailableStatuses = () => {
     if (
       ["fulfilled", "cancelled", "entered_in_error"].includes(currentStatus)
     ) {
       return [currentStatus];
     }
-
     if (currentStatus === "booked") {
       return ["booked", "checked_in", "in_consultation", "noshow", "cancelled"];
     }
-
     if (currentStatus === "checked_in") {
       return ["checked_in", "in_consultation", "noshow", "cancelled"];
     }
-
     if (currentStatus === "in_consultation") {
       return ["in_consultation", "fulfilled", "cancelled"];
     }
-
     return AppointmentStatuses;
   };
 
@@ -1044,8 +1008,7 @@ export const SlotFilter = ({
               value={slot.id}
               disabled={props.disabled}
             >
-              {dayjs(slot.start_datetime).format("h:mm A").replace(":00", "")}
-              {" - "}
+              {dayjs(slot.start_datetime).format("h:mm A").replace(":00", "")} -{" "}
               {dayjs(slot.end_datetime).format("h:mm A").replace(":00", "")}
             </TabsTrigger>
           ))}
