@@ -57,6 +57,7 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { QueryParams } from "@/Utils/request/types";
 import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
@@ -274,8 +275,14 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
         updates.date_to = dateQueryString(today);
       } else {
         // Past or future days based on configuration
-        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
-        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+        const fromDate =
+          defaultDays > 0
+            ? today
+            : dayjs(today).add(defaultDays, "day").toDate();
+        const toDate =
+          defaultDays > 0
+            ? dayjs(today).add(defaultDays, "day").toDate()
+            : today;
         updates.date_from = dateQueryString(fromDate);
         updates.date_to = dateQueryString(toDate);
       }
@@ -283,7 +290,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
 
     // Only update if there are changes
     if (Object.keys(updates).length > 0) {
-      setQParams({
+      updateQuery({
         ...qParams,
         ...updates,
       });
@@ -382,7 +389,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                       <CommandItem
                         value="all"
                         onSelect={() =>
-                          setQParams({
+                          updateQuery({
                             ...qParams,
                             practitioner: null,
                             slot: null,
@@ -454,9 +461,11 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
+                          updateQuery({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 7)),
+                            date_from: dateQueryString(
+                              dayjs(today).subtract(7, "day").toDate(),
+                            ),
                             date_to: dateQueryString(today),
                             slot: null,
                           });
@@ -470,10 +479,14 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
                         size="xs"
                         onClick={() => {
                           const today = new Date();
-                          setQParams({
+                          updateQuery({
                             ...qParams,
-                            date_from: dateQueryString(subDays(today, 1)),
-                            date_to: dateQueryString(subDays(today, 1)),
+                            date_from: dateQueryString(
+                              dayjs(today).subtract(1, "day").toDate(),
+                            ),
+                            date_to: dateQueryString(
+                              dayjs(today).subtract(1, "day").toDate(),
+                            ),
                             slot: null,
                           });
                         }}
