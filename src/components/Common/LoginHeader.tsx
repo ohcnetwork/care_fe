@@ -73,7 +73,7 @@ export const LoginHeader = () => {
       <div className="flex justify-end items-center">
         <Button
           variant="ghost"
-          className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+          className="text-sm text-white font-medium bg-green-600 hover:bg-gray-100 rounded-full px-6 "
           onClick={() =>
             navigate(
               `/login?mode=${
