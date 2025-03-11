@@ -58,7 +58,7 @@ export function PasswordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[93%] rounded-md ">
+      <DialogContent className="max-w-md w-[95%] rounded-md ">
         <DialogHeader>
           {icon ? (
             <div className="flex items-center gap-2">

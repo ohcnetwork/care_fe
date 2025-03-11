@@ -1,5 +1,5 @@
 import { QRCodeSVG } from "qrcode.react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -37,6 +37,13 @@ export function TOTPSetupDialog({
 }: TOTPSetupDialogProps) {
   const { t } = useTranslation();
   const [verificationCode, setVerificationCode] = useState("");
+  const [showSecretKey, setShowSecretKey] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setShowSecretKey(false);
+    }
+  }, [open]);
 
   const handleCopyKey = () => {
     if (setupData?.secret_key) {
@@ -82,13 +89,22 @@ export function TOTPSetupDialog({
               </p>
             </div>
           </div>
+
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <p className="text-sm text-gray-500">
                 <Trans
                   i18nKey="cant_scan_copy_key"
                   components={{
-                    strong: <strong />,
+                    strong: (
+                      <strong
+                        className="cursor-pointer text-primary-600 hover:underline"
+                        onClick={() => {
+                          setShowSecretKey(true);
+                          handleCopyKey();
+                        }}
+                      />
+                    ),
                     CareIcon: (
                       <CareIcon icon="l-copy" className="h-4 w-4 mr-1" />
                     ),
@@ -97,18 +113,21 @@ export function TOTPSetupDialog({
               </p>
             </div>
 
-            <div
-              className="p-2 bg-indigo-50 rounded flex items-center justify-between cursor-pointer"
-              onClick={handleCopyKey}
-            >
-              <code className="text-indigo-600 text-sm select-all">
-                {setupData.secret_key}
-              </code>
-              <CareIcon icon="l-copy" className="h-4 w-4 text-gray-500" />
-            </div>
+            {showSecretKey && (
+              <div
+                className="p-2 bg-indigo-50 rounded flex items-center justify-between cursor-pointer"
+                onClick={handleCopyKey}
+              >
+                <code className="text-indigo-600 text-sm select-all">
+                  {setupData.secret_key}
+                </code>
+                <CareIcon icon="l-copy" className="h-4 w-4 text-gray-500" />
+              </div>
+            )}
           </div>
+
           <form onSubmit={handleSubmit}>
-            <div className="space-y-2">
+            <div className="space-y-2 px-1">
               <label className="text-sm font-medium">
                 {t("enter_verification_code")}
               </label>
