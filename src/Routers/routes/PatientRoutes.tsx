@@ -1,5 +1,6 @@
 import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
+
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientDrawingTab } from "@/components/Patient/PatientDetailsTab/PatientDrawingsTab";
