@@ -76,7 +76,7 @@ const RenderCard = ({
                 {questionnaire.title && questionnaire.title.length > 20 ? (
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="truncate">
+                      <TooltipTrigger className="w-full">
                         <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
                           {questionnaire.title}
                         </p>
