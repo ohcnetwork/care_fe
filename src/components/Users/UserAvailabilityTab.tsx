@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
-import { useState } from "react";
+import dayjs from "dayjs";
+import { Link, useQueryParams } from "raviger";
+import { useCallback, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -42,6 +43,8 @@ import {
   isDateInRange,
 } from "@/pages/Scheduling/utils";
 import {
+  Appointment,
+  AppointmentNonCancelledStatuses,
   AvailabilityDateTime,
   ScheduleException,
   ScheduleTemplate,
@@ -85,6 +88,33 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
+  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const appointmentsPageLink = `/facility/${facilityId}/appointments/?practitioner=${user.username}&limit=15`;
+
+  const { data: appoinments } = useQuery({
+    queryKey: ["appointments", facilityId, user.id, monthStart],
+    queryFn: query(scheduleApis.appointments.list, {
+      pathParams: { facility_id: facilityId },
+      queryParams: {
+        limit: 100,
+        user: user.id,
+        date_from: dateQueryString(monthStart),
+        date_to: dateQueryString(monthEnd),
+        status: [...AppointmentNonCancelledStatuses],
+      },
+    }),
+  });
+
+  const getAppointmentsForDate = useCallback(
+    (date: Date) => {
+      return appoinments?.results.filter((appointment) =>
+        dayjs(appointment.token_slot.start_datetime).isSame(dayjs(date), "day"),
+      );
+    },
+    [appoinments],
+  );
+
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
@@ -97,6 +127,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         onMonthChange={setMonth}
         renderDay={(date: Date) => {
           const isToday = date.toDateString() === new Date().toDateString();
+          const currentDayAppointments = getAppointmentsForDate(date) ?? [];
 
           // TODO: handle for "Closed" schedule type once we have it...
           const templates = templatesQuery.data?.results.filter(
@@ -168,6 +199,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                 templates={templates}
                 unavailableExceptions={unavailableExceptions}
                 setQParams={setQParams}
+                currentDayAppointments={currentDayAppointments}
+                appointmentsPageLink={appointmentsPageLink}
               />
             </Popover>
           );
@@ -251,11 +284,15 @@ function DayDetailsPopover({
   templates,
   unavailableExceptions,
   setQParams,
+  currentDayAppointments,
+  appointmentsPageLink,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: AvailabilityTabQueryParams) => void;
+  currentDayAppointments: Appointment[];
+  appointmentsPageLink: string;
 }) {
   const { t } = useTranslation();
 
@@ -297,14 +334,47 @@ function DayDetailsPopover({
             </div>
 
             <div className="pl-5 py-2 space-y-4">
-              {template.availabilities.map((availability) => (
-                <ScheduleTemplateAvailabilityItem
-                  key={availability.id}
-                  availability={availability}
-                  unavailableExceptions={unavailableExceptions}
-                  date={date}
-                />
-              ))}
+              {template.availabilities.map((availability) => {
+                const currentDate = dayjs(date);
+                const availabilityDay = availability.availability.find(
+                  (a) => a.day_of_week + 1 === currentDate.get("day"),
+                );
+                const startTime = dayjs(
+                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.start_time}`,
+                  "YYYY-MM-DD HH:mm:ss",
+                );
+                const endTime = dayjs(
+                  `${currentDate.format("YYYY-MM-DD")} ${availabilityDay?.end_time}`,
+                  "YYYY-MM-DD HH:mm:ss",
+                );
+                let appointmentsInAvailability: Appointment[] = [];
+                if (
+                  currentDayAppointments.length > 0 &&
+                  startTime.isValid() &&
+                  endTime.isValid()
+                ) {
+                  appointmentsInAvailability = currentDayAppointments.filter(
+                    (appointment) =>
+                      dayjs(appointment.token_slot.start_datetime).isBetween(
+                        startTime,
+                        endTime,
+                        "minutes",
+                        "[]",
+                      ),
+                  );
+                }
+
+                return (
+                  <ScheduleTemplateAvailabilityItem
+                    key={availability.id}
+                    availability={availability}
+                    unavailableExceptions={unavailableExceptions}
+                    date={date}
+                    appointments={appointmentsInAvailability}
+                    appointmentsPageLink={appointmentsPageLink}
+                  />
+                );
+              })}
             </div>
           </div>
         ))}
@@ -340,13 +410,16 @@ function ScheduleTemplateAvailabilityItem({
   availability,
   unavailableExceptions,
   date,
+  appointments,
+  appointmentsPageLink,
 }: {
   availability: ScheduleTemplate["availabilities"][0];
   unavailableExceptions: ScheduleException[];
   date: Date;
+  appointments: Appointment[];
+  appointmentsPageLink: string;
 }) {
   const { t } = useTranslation();
-
   if (availability.slot_type !== "appointment") {
     return (
       <div key={availability.id}>
@@ -434,6 +507,11 @@ function ScheduleTemplateAvailabilityItem({
           )}
         </p>
       )}
+      {appointments.length > 0 && (
+        <p className="text-sm text-gray-600">
+          {formatAppointmentsNote(appointments, appointmentsPageLink, date)}
+        </p>
+      )}
     </div>
   );
 }
@@ -455,4 +533,32 @@ export const formatAvailabilityTime = (
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;
   return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
+};
+
+export const formatAppointmentsNote = (
+  appointments: Appointment[],
+  appointmentsPageLink: string,
+  date: Date,
+) => {
+  const link = `${appointmentsPageLink}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`;
+  return (
+    <Trans
+      i18nKey={
+        dayjs(date).isBefore(dayjs())
+          ? "appointments_note_past"
+          : "appointments_note"
+      }
+      values={{ count: appointments.length }}
+      components={{
+        a: (
+          <Link
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          />
+        ),
+      }}
+    />
+  );
 };
