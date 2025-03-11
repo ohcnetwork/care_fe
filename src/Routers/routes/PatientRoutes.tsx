@@ -1,3 +1,4 @@
+import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
@@ -8,7 +9,7 @@ import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { EncounterList } from "@/pages/Encounters/EncounterList";
+import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
 
 const ExcalidrawEditor = lazy(
@@ -20,7 +21,20 @@ const PatientRoutes: AppRoutes = {
     <PatientIndex facilityId={facilityId} />
   ),
   "/facility/:facilityId/encounters": ({ facilityId }) => (
-    <EncounterList facilityId={facilityId} />
+    <Redirect to={`/facility/${facilityId}/encounters/patients`} />
+  ),
+  "/facility/:facilityId/encounters/:tab": ({ facilityId, tab }) => (
+    <EncountersOverview facilityId={facilityId} tab={tab} />
+  ),
+  "/facility/:facilityId/encounters/locations/:locationId": ({
+    facilityId,
+    locationId,
+  }) => (
+    <EncountersOverview
+      facilityId={facilityId}
+      tab="locations"
+      locationId={locationId}
+    />
   ),
   "/facility/:facilityId/patients/verify": ({ facilityId }) => (
     <VerifyPatient facilityId={facilityId} />
