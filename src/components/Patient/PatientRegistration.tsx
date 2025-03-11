@@ -67,6 +67,9 @@ export const BLOOD_GROUPS = BLOOD_GROUP_CHOICES.map((bg) => bg.id) as [
   (typeof BLOOD_GROUP_CHOICES)[number]["id"],
 ];
 
+const FORM_STORAGE_KEY = "patient_registration_form_data";
+const AUTO_SAVE_INTERVAL = 5000; // Save every 5 seconds
+
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
@@ -146,6 +149,50 @@ export default function PatientRegistration(
     [], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  const saveFormToStorage = (data: any) => {
+    try {
+      localStorage.setItem(
+        `${FORM_STORAGE_KEY}_${facilityId}`,
+        JSON.stringify({
+          timestamp: new Date().getTime(),
+          data: data,
+          facilityId: facilityId,
+        }),
+      );
+    } catch (error) {
+      console.error("Error saving form data to localStorage:", error);
+    }
+  };
+
+  const restoreFormFromStorage = () => {
+    try {
+      const stored = localStorage.getItem(`${FORM_STORAGE_KEY}_${facilityId}`);
+      if (stored) {
+        const {
+          timestamp,
+          data,
+          facilityId: storedFacilityId,
+        } = JSON.parse(stored);
+        const isValid = new Date().getTime() - timestamp < 24 * 60 * 60 * 1000;
+        const isSameFacility = storedFacilityId === facilityId;
+        if (isValid && isSameFacility && !patientId) {
+          return data;
+        }
+      }
+    } catch (error) {
+      console.error("Error restoring form data from localStorage:", error);
+    }
+    return null;
+  };
+
+  const clearStoredFormData = () => {
+    try {
+      localStorage.removeItem(`${FORM_STORAGE_KEY}_${facilityId}`);
+    } catch (error) {
+      console.error("Error clearing form data from localStorage:", error);
+    }
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -155,13 +202,27 @@ export default function PatientRegistration(
       age_or_dob: "dob",
       same_phone_number: false,
       same_address: true,
+      ...restoreFormFromStorage(),
     },
   });
+
+  useEffect(() => {
+    if (patientId) return;
+    const autoSaveInterval = setInterval(() => {
+      const formData = form.getValues();
+      if (form.formState.isDirty) {
+        saveFormToStorage(formData);
+      }
+    }, AUTO_SAVE_INTERVAL);
+
+    return () => clearInterval(autoSaveInterval);
+  }, [form, patientId]);
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
     mutationFn: mutate(routes.addPatient),
     onSuccess: (resp: PatientModel) => {
+      clearStoredFormData();
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
       navigate(`/facility/${facilityId}/patients/verify`, {
