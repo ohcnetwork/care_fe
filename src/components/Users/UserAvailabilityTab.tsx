@@ -85,6 +85,19 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
+  const schedulableUsersQuery = useQuery({
+    queryKey: ["schedulable-users", facilityId],
+    queryFn: query(scheduleApis.appointments.availableUsers, {
+      pathParams: { facility_id: facilityId },
+    }),
+  });
+
+  const availableUserId = schedulableUsersQuery.data?.users.find(
+    (f) => f.id == user.id,
+  );
+
+  console.log("hey", schedulableUsersQuery.data?.users);
+
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
@@ -187,16 +200,18 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
             >
               {t("schedule")}
             </Button>
-            <Button
-              variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setQParams({ tab: "exceptions" })}
-              className={cn(
-                view === "exceptions" && "shadow",
-                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
-              )}
-            >
-              {t("exceptions")}
-            </Button>
+            {availableUserId && (
+              <Button
+                variant={view === "exceptions" ? "outline" : "ghost"}
+                onClick={() => setQParams({ tab: "exceptions" })}
+                className={cn(
+                  view === "exceptions" && "shadow",
+                  "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+                )}
+              >
+                {t("exceptions")}
+              </Button>
+            )}
           </div>
           {view === "schedule" && (
             <CreateScheduleTemplateSheet
