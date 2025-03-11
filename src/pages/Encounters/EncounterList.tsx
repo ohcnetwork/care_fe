@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,13 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -35,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -45,40 +38,12 @@ import { Encounter, EncounterPriority } from "@/types/emr/encounter";
 
 interface EncounterListProps {
   encounters?: Encounter[];
-  facilityId?: string;
+  facilityId: string;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "planned":
-      return "bg-blue-100 text-blue-800";
-    case "in_progress":
-      return "bg-yellow-100 text-yellow-800";
-    case "completed":
-      return "bg-green-100 text-green-800";
-    case "cancelled":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "stat":
-      return "bg-red-100 text-red-800";
-    case "urgent":
-      return "bg-orange-100 text-orange-800";
-    case "asap":
-      return "bg-yellow-100 text-yellow-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
 const buildQueryParams = (
+  facilityId: string,
   status?: string,
-  facilityId?: string,
   encounterClass?: string,
   priority?: string,
 ) => {
@@ -161,7 +126,7 @@ export function EncounterList({
     queryKey: ["encounters", facilityId, qParams],
     queryFn: query.debounced(routes.encounter.list, {
       queryParams: {
-        ...buildQueryParams(status, facilityId, encounterClass, priority),
+        ...buildQueryParams(facilityId, status, encounterClass, priority),
         name,
         external_identifier,
         limit: resultsPerPage,
@@ -691,70 +656,11 @@ export function EncounterList({
           ) : (
             <>
               {encounters.map((encounter: Encounter) => (
-                <Card
+                <EncounterInfoCard
                   key={encounter.id}
-                  className="hover:shadow-lg transition-shadow group"
-                >
-                  <CardHeader className="space-y-1 pb-2">
-                    <div className="flex items-center justify-between">
-                      <Link
-                        href={`/facility/${facilityId}/patient/${encounter.patient.id}`}
-                        className="hover:text-primary"
-                      >
-                        <CardTitle className="group-hover:text-primary transition-colors">
-                          {encounter.patient.name}
-                          {encounter.patient.death_datetime && (
-                            <Badge variant="destructive" className="ml-2 py-0">
-                              <h3 className="text-xs font-medium">
-                                {t("expired")}
-                              </h3>
-                            </Badge>
-                          )}
-                        </CardTitle>
-                      </Link>
-                    </div>
-                    <CardDescription className="flex items-center">
-                      <CareIcon icon="l-clock" className="mr-2 h-4 w-4" />
-                      {encounter.period.start &&
-                        format(new Date(encounter.period.start), "PPp")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="">
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          className={getStatusColor(encounter.status)}
-                          variant="outline"
-                        >
-                          {t(`encounter_status__${encounter.status}`)}
-                        </Badge>
-                        <Badge
-                          className="bg-gray-100 text-gray-800"
-                          variant="outline"
-                        >
-                          {t(`encounter_class__${encounter.encounter_class}`)}
-                        </Badge>
-                        <Badge
-                          className={getPriorityColor(encounter.priority)}
-                          variant="outline"
-                        >
-                          {t(`encounter_priority__${encounter.priority}`)}
-                        </Badge>
-                      </div>
-                      <Separator className="my-2" />
-                      <Link
-                        href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
-                        className="text-sm text-primary hover:underline text-right flex items-center justify-end group-hover:translate-x-1 transition-transform"
-                      >
-                        View Details
-                        <CareIcon
-                          icon="l-arrow-right"
-                          className="ml-1 h-4 w-4"
-                        />
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                  encounter={encounter}
+                  facilityId={facilityId}
+                />
               ))}
               {queryEncounters?.count &&
                 queryEncounters.count > resultsPerPage && (
