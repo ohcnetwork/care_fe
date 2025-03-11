@@ -26,7 +26,7 @@ export const routes = {
     page: string;
   }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
   "/login": () => <Login />,
-  "/authenticate": () => <Authenticate />,
+  "/2fa": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (
     <ResetPassword token={token} />

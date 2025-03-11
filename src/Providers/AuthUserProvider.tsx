@@ -17,7 +17,7 @@ import routes, {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import authApi from "@/types/auth/authApi";
-import { MFAResponse, TokenData } from "@/types/auth/otp";
+import { MFAAuthenticationToken, TokenData } from "@/types/auth/otp";
 
 interface Props {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ interface Props {
   otpAuthorized: React.ReactNode;
 }
 
-const isMFAResponse = (data: LoginResponse): data is MFAResponse => {
+const isMFAResponse = (data: LoginResponse): data is MFAAuthenticationToken => {
   return "temp_token" in data;
 };
 
@@ -90,7 +90,7 @@ export default function AuthUserProvider({
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         localStorage.setItem("mfa_method", "totp");
-        navigate("/authenticate");
+        navigate("/2fa");
         return;
       }
 

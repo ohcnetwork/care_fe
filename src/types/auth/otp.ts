@@ -4,10 +4,16 @@ export interface TokenData {
   createdAt: string;
 }
 
+export type MFAMethod = "totp" | "backup" | "sms" | "email";
+
+export interface MFAOption {
+  id: MFAMethod;
+  label: string;
+}
+
 export interface TOTPSetupResponse {
   uri: string;
   secret_key: string;
-  backup_codes?: string[];
 }
 
 export interface TOTPVerifyRequest {
@@ -28,6 +34,6 @@ export interface MFALoginRequest {
   temp_token: string;
 }
 
-export interface MFAResponse {
+export interface MFAAuthenticationToken {
   temp_token: string;
 }
