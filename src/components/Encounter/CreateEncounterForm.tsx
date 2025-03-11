@@ -332,13 +332,9 @@ export default function CreateEncounterForm({
                 <FormItem>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={field.value[0]}
+                    value={field.value}
                     onChange={(value) => {
-                      if (value === null) {
-                        form.setValue("organizations", []);
-                      } else {
-                        form.setValue("organizations", [value]);
-                      }
+                      form.setValue("organizations", value ? value : []);
                     }}
                   />
                   <FormMessage />

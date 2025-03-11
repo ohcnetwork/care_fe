@@ -156,7 +156,7 @@ export default function LinkDepartmentsSheet({
   onUpdate,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
+  const [selectedOrg, setSelectedOrg] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   const { mutate: addOrganization, isPending: isAdding } = useMutation({
@@ -176,7 +176,7 @@ export default function LinkDepartmentsSheet({
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
-      setSelectedOrg(null);
+      setSelectedOrg([]);
       setOpen(false);
       onUpdate?.();
     },
@@ -211,13 +211,15 @@ export default function LinkDepartmentsSheet({
             <div className="space-y-4">
               <FacilityOrganizationSelector
                 facilityId={facilityId}
-                value={selectedOrg}
+                value={selectedOrg.length > 0 ? selectedOrg : undefined}
                 onChange={setSelectedOrg}
               />
 
               <Button
                 className="w-full"
-                onClick={() => selectedOrg && addOrganization(selectedOrg)}
+                onClick={() =>
+                  selectedOrg.forEach((orgId) => addOrganization(orgId))
+                }
                 disabled={!selectedOrg || isAdding}
               >
                 {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
