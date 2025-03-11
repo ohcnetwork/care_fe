@@ -160,13 +160,8 @@ export default function FacilityOrganizationIndex({
     topLevelOrganizations.forEach(processMatchingNodes);
 
     setExpandedRows(newExpandedRows);
-  }, [
-    searchQuery,
-    data?.results,
-    childrenMap,
-    topLevelOrganizations,
-    matchesSearch,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, data?.results]);
 
   const toggleRow = (id: string) => {
     const newExpandedRows = { ...expandedRows };
