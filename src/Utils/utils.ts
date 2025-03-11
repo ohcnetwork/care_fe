@@ -39,17 +39,24 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   } at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const formatName = (user: { first_name: string; last_name: string }) => {
-  return `${user.first_name} ${user.last_name}`;
+export const formatName = (user: {
+  prefix?: string | null;
+  first_name: string;
+  last_name: string;
+  suffix?: string | null;
+}) => {
+  return `${user.prefix ? `${user.prefix} ` : ""}${user.first_name} ${user.last_name}${user.suffix ? ` ${user.suffix}` : ""}`;
 };
 
 export const formatDisplayName = (user: {
+  prefix?: string | null;
   first_name: string;
   last_name: string;
   username: string;
+  suffix?: string | null;
 }) => {
   return user.first_name && user.last_name
-    ? `${user.first_name} ${user.last_name}`
+    ? `${user.prefix ? `${user.prefix} ` : ""}${user.first_name} ${user.last_name}${user.suffix ? ` ${user.suffix}` : ""}`
     : user.first_name || user.username || "User";
 };
 

@@ -22,10 +22,7 @@ interface Props {
 }
 
 export function UserCard({ user, className, facilityId }: Props) {
-  const name = formatName({
-    first_name: user.first_name || "",
-    last_name: user.last_name || "",
-  });
+  const name = formatName(user);
 
   const { patientToken: tokenData } = useAuthContext();
 

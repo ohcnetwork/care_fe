@@ -32,7 +32,9 @@ export default function UserDashboard() {
           />
           <div className="space-y-1 text-center sm:text-left">
             <h1 className="text-xl md:text-2xl font-bold">
-              {t("welcome_back_name", { name: user.first_name })}
+              {t("welcome_back_name", {
+                name: (user.prefix ? user.prefix + " " : "") + user.first_name,
+              })}
             </h1>
             <p className="text-sm md:text-base text-gray-500">
               {new Date().toLocaleDateString("en-US", {
