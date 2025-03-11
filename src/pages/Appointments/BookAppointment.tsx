@@ -8,23 +8,15 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDisplayName, formatName } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
@@ -44,7 +36,7 @@ export default function BookAppointment(props: Props) {
   const [reason, setReason] = useState("");
 
   const resourcesQuery = useQuery({
-    queryKey: ["availableResources", props.facilityId],
+    queryKey: ["practitioners", props.facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: {
         facility_id: props.facilityId,
@@ -106,7 +98,6 @@ export default function BookAppointment(props: Props) {
       <hr className="mt-6 mb-8" />
       <div className="container mx-auto p-4 max-w-5xl">
         <div className="mb-8">
-          {/* TODO: confirm how to rename this since we are keeping it abstract / not specific to doctor */}
           <h1 className="text-lg font-bold mb-2">{t("book_appointment")}</h1>
         </div>
 
@@ -122,41 +113,13 @@ export default function BookAppointment(props: Props) {
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div>
-              <label className="block mb-2">{t("select_practitioner")}</label>
-              <Select
-                disabled={resourcesQuery.isLoading}
-                value={resourceId}
-                onValueChange={(value) => setResourceId(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_practitioner")}>
-                    {resource && (
-                      <div className="flex items-center gap-2">
-                        <Avatar
-                          imageUrl={resource.profile_picture_url}
-                          name={formatName(resource)}
-                          className="size-6 rounded-full"
-                        />
-                        <span>{formatName(resource)}</span>
-                      </div>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {resourcesQuery.data?.users.map((user) => (
-                    <SelectItem key={user.username} value={user.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar
-                          imageUrl={user.profile_picture_url}
-                          name={formatDisplayName(user)}
-                          className="size-6 rounded-full"
-                        />
-                        <span>{formatDisplayName(user)}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="block mb-2">{t("select_practitioner")}</Label>
+              <PractitionerSelector
+                facilityId={props.facilityId}
+                selected={resource ?? null}
+                onSelect={(user) => setResourceId(user?.id ?? undefined)}
+                clearSelection={t("show_all")}
+              />
             </div>
           </div>
 
