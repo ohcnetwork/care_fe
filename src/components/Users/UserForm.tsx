@@ -60,6 +60,8 @@ export default function UserForm({
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [otherPrefix, setOtherPrefix] = useState<string>();
+  const [otherSuffix, setOtherSuffix] = useState<string>();
 
   const userFormSchema = z
     .object({
@@ -150,8 +152,8 @@ export default function UserForm({
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender || undefined,
-        prefix: userData.prefix || "",
-        suffix: userData.suffix || "",
+        prefix: otherPrefix || userData.prefix || "",
+        suffix: otherSuffix || userData.suffix || "",
       };
       form.reset(formData);
     }
@@ -317,7 +319,14 @@ export default function UserForm({
                 <FormLabel>{t("prefix")}</FormLabel>
                 <Select
                   {...field}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    if (value === "__other__") {
+                      setOtherPrefix("");
+                    } else {
+                      setOtherPrefix(undefined);
+                    }
+                    field.onChange(value);
+                  }}
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -332,8 +341,17 @@ export default function UserForm({
                         {prefix}
                       </SelectItem>
                     ))}
+                    <SelectItem value="__other__">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
+                {typeof otherPrefix !== "undefined" && (
+                  <Input
+                    placeholder={t("prefix")}
+                    className="md:w-20"
+                    value={otherPrefix}
+                    onChange={(e) => setOtherPrefix(e.target.value)}
+                  />
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -380,7 +398,14 @@ export default function UserForm({
                 <FormLabel>{t("suffix")}</FormLabel>
                 <Select
                   {...field}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    if (value === "__other__") {
+                      setOtherSuffix("");
+                    } else {
+                      setOtherSuffix(undefined);
+                    }
+                    field.onChange(value);
+                  }}
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -395,8 +420,17 @@ export default function UserForm({
                         {suffix}
                       </SelectItem>
                     ))}
+                    <SelectItem value="__other__">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
+                {typeof otherSuffix !== "undefined" && (
+                  <Input
+                    placeholder={t("suffix")}
+                    value={otherSuffix}
+                    onChange={(e) => setOtherSuffix(e.target.value)}
+                    className="md:w-20"
+                  />
+                )}
                 <FormMessage />
               </FormItem>
             )}
