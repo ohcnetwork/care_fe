@@ -16,7 +16,7 @@ import {
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { MFAResponse } from "@/types/auth/otp";
+import { MFAAuthenticationToken } from "@/types/auth/otp";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -59,7 +59,7 @@ export interface JwtTokenObtainPair {
   refresh: string;
 }
 
-export type LoginResponse = JwtTokenObtainPair | MFAResponse;
+export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
 
 export interface LoginCredentials {
   username: string;
@@ -149,7 +149,7 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<UserModel & Pick<UserBase, "mfa_enabled">>(),
+    TRes: Type<UserModel>(),
   },
 
   deleteProfilePicture: {
