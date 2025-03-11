@@ -55,24 +55,9 @@ const RenderCard = ({
           >
             <CardContent className="p-6 relative flex flex-col">
               <div className="flex flex-row gap-2 justify-between items-center mb-4 border-b pb-2">
-                {questionnaire.title && questionnaire.title.length > 20 ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
-                          {questionnaire.title}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-black text-white z-40">
-                        {questionnaire.title}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis">
-                    {questionnaire.title}
-                  </p>
-                )}
+                <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
+                  {questionnaire.title}
+                </p>
                 <Badge
                   className={
                     {
