@@ -54,13 +54,11 @@ export interface ServiceHistory {
   id: string;
   serviced_on: string;
   note: string;
-  meta: Record<string, any>;
 }
 
 export interface ServiceHistoryWriteRequest {
   serviced_on: string;
   note: string;
-  meta?: Record<string, any>;
 }
 
 export interface DeviceLocationHistory {

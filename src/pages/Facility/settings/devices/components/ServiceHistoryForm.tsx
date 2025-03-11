@@ -108,7 +108,6 @@ export default function ServiceHistoryForm({
     const payload = {
       ...values,
       serviced_on: values.serviced_on.toISOString(),
-      meta: serviceRecord?.meta || {},
     };
 
     if (isEditMode) {
