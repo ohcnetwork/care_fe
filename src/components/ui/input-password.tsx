@@ -23,6 +23,10 @@ const PasswordInput = React.forwardRef<
         type="button"
         className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
         onClick={() => setShowPassword(!showPassword)}
+        aria-label={showPassword ? "Hide password" : "Show password"}
+        aria-pressed={showPassword}
+        title={showPassword ? "Hide password" : "Show password"}
+        tabIndex={-1}
       >
         <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
       </button>
