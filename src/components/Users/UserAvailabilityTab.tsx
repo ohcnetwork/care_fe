@@ -96,8 +96,6 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     (f) => f.id == user.id,
   );
 
-  console.log("hey", schedulableUsersQuery.data?.users);
-
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
   }
