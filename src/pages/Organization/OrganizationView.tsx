@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useQueryParams } from "raviger";
-import { useState } from "react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import Pagination from "@/components/Common/Pagination";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
@@ -27,10 +27,10 @@ interface Props {
 
 export default function OrganizationView({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
-
-  const [page, setPage] = useState(1);
-  const limit = 12; // 3x4 grid
-  const [qParams, setQParams] = useQueryParams();
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 15,
+    disableCache: true,
+  });
 
   const searchOptions = [
     {
@@ -41,23 +41,13 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     },
   ];
 
-  const handleSearch = (_key: string, value: string) => {
-    setPage(1);
-    setQParams({ name: value || null });
-  };
-
-  const handleFieldChange = () => {
-    setPage(1);
-    setQParams({ name: null });
-  };
-
   const { data: children, isFetching } = useQuery({
-    queryKey: ["organization", id, "children", page, limit, qParams.name],
+    queryKey: ["organization", id, "children", qParams, resultsPerPage],
     queryFn: query.debounced(organizationApi.list, {
       queryParams: {
         parent: id,
-        offset: (page - 1) * limit,
-        limit,
+        offset: (qParams.page - 1) * resultsPerPage,
+        limit: resultsPerPage,
         name: qParams.name || undefined,
       },
     }),
@@ -87,8 +77,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               key={id}
               options={searchOptions}
               initialOptionIndex={0}
-              onSearch={handleSearch}
-              onFieldChange={handleFieldChange}
+              onSearch={(value) => updateQuery({ name: value || null })}
               className="w-full"
             />
           </div>
@@ -155,12 +144,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               )}
             </div>
             <div className="flex justify-center">
-              <Pagination
-                data={{ totalCount: children?.count || 0 }}
-                onChange={(page) => setPage(page)}
-                defaultPerPage={limit}
-                cPage={page}
-              />
+              <Pagination totalCount={children?.count || 0} />
             </div>
           </div>
         )}
