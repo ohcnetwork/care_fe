@@ -204,7 +204,7 @@ export function DiagnosisQuestion({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-55">{t("diagnosis")}</TableHead>
-                  <TableHead className="w-25 text-center px-0.5">
+                  <TableHead className="w-20 text-center px-0.5">
                     {t("date")}
                   </TableHead>
                   <TableHead className="w-21 text-center px-0.5">
@@ -332,7 +332,7 @@ export function DiagnosisQuestion({
                         })
                       }
                       disabled={disabled || !!diagnosis.id}
-                      className="h-8 mt-1"
+                      className="h-8 mt-1 px-1"
                     />
                   </div>
 

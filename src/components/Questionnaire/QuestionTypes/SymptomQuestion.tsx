@@ -374,7 +374,7 @@ export function SymptomQuestion({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-55">{t("symptom")}</TableHead>
-                  <TableHead className="w-25 text-center px-0.5">
+                  <TableHead className="w-20 text-center px-0.5">
                     {t("date")}
                   </TableHead>
                   <TableHead className="w-21 text-center px-0.5">

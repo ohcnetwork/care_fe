@@ -209,10 +209,10 @@ export function AllergyQuestion({
                   <TableHead className="w-17 text-center px-0.5">
                     {t("criticality")}
                   </TableHead>
-                  <TableHead className="w-21 text-center px-0.5">
+                  <TableHead className="w-20 text-center px-0.5">
                     {t("status")}
                   </TableHead>
-                  <TableHead className="w-25 text-center px-0.5 pr-6">
+                  <TableHead className="w-20 text-center px-0.5 pr-6">
                     {t("occurrence")}
                   </TableHead>
                   <TableHead className="w-9"></TableHead>
@@ -415,7 +415,7 @@ export function AllergyQuestion({
                         })
                       }
                       disabled={disabled}
-                      className="h-8 mt-1"
+                      className="h-8 mt-1 px-1"
                     />
                   </div>
                 </div>
