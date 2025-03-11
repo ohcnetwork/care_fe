@@ -293,12 +293,17 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                           className="flex items-center divide-x divide-secondary-400 bg-white rounded-md w-fit border border-secondary-400"
                         >
                           <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem value="date_of_birth" />
-                            <Label>{t("date_of_birth")}</Label>
+                            <RadioGroupItem
+                              id="dob-option"
+                              value="date_of_birth"
+                            />
+                            <Label htmlFor="dob-option">
+                              {t("date_of_birth")}
+                            </Label>
                           </div>
                           <div className="flex items-center gap-2 px-4 py-2">
-                            <RadioGroupItem value="age" />
-                            <Label>{t("age")}</Label>
+                            <RadioGroupItem id="age-option" value="age" />
+                            <Label htmlFor="age-option">{t("age")}</Label>
                           </div>
                         </RadioGroup>
                       </FormControl>
