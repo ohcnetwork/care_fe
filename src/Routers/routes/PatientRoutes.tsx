@@ -1,6 +1,8 @@
 import { Redirect } from "raviger";
-
+import { Suspense, lazy } from "react";
+import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import { PatientDrawingTab } from "@/components/Patient/PatientDetailsTab/PatientDrawingsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
@@ -8,6 +10,10 @@ import PatientRegistration from "@/components/Patient/PatientRegistration";
 import { AppRoutes } from "@/Routers/AppRouter";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import VerifyPatient from "@/pages/Patients/VerifyPatient";
+
+const ExcalidrawEditor = lazy(
+  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
+);
 
 const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients": ({ facilityId }) => (
@@ -55,6 +61,51 @@ const PatientRoutes: AppRoutes = {
   }, {}),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
     <PatientRegistration facilityId={facilityId} patientId={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/drawings/new": ({ patientId }) => {
+    return (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawEditor
+          associatingId={patientId}
+          associating_type="patient"
+        />
+      </Suspense>
+    );
+  },
+  "/facility/:facilityId/patient/:patientId/drawings/:drawingId": ({
+    patientId,
+    drawingId,
+  }) => (
+    <Suspense fallback={<Loading />}>
+      <ExcalidrawEditor
+        associatingId={patientId}
+        associating_type="patient"
+        drawingId={drawingId}
+      />
+    </Suspense>
+  ),
+  "/patient/:patientId/drawings": ({ patientId }) => (
+    <PatientDrawingTab patientId={patientId} />
+  ),
+
+  "/patient/:patientId/drawings/new": ({ patientId }) => {
+    return (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawEditor
+          associatingId={patientId}
+          associating_type="patient"
+        />
+      </Suspense>
+    );
+  },
+  "/patient/:patientId/drawings/:drawingId": ({ patientId, drawingId }) => (
+    <Suspense fallback={<Loading />}>
+      <ExcalidrawEditor
+        associatingId={patientId}
+        associating_type="patient"
+        drawingId={drawingId}
+      />
+    </Suspense>
   ),
 };
 
