@@ -67,6 +67,7 @@ import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import {
   dateQueryString,
+  formatDateTime,
   formatDisplayName,
   formatPatientAge,
 } from "@/Utils/utils";
@@ -663,6 +664,12 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             {formatPatientAge(patient as any, true)},{" "}
             {t(`GENDER__${patient.gender}`)}
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDateTime(
+              appointment.token_slot.start_datetime,
+              "ddd, DD MMM YYYY, HH:mm",
+            )}
+          </p>
         </div>
 
         <div className="bg-gray-100 px-2 py-1 rounded text-center">
@@ -676,6 +683,7 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
+
 function AppointmentRow(props: {
   facilityId: string;
   page: number | null;
