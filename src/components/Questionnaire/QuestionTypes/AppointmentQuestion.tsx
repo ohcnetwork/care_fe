@@ -18,7 +18,7 @@ import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { PracticionerSelector } from "@/pages/Appointments/components/PracticionerSelector";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   QuestionnaireResponse,
@@ -103,7 +103,7 @@ export function AppointmentQuestion({
       </div>
       <div>
         <Label className="block mb-2">{t("select_practitioner")}</Label>
-        <PracticionerSelector
+        <PractitionerSelector
           facilityId={facilityId}
           selected={resource ?? null}
           onSelect={(user) => setResource(user ?? undefined)}

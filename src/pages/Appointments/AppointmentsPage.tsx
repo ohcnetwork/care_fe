@@ -70,7 +70,7 @@ import {
   formatDisplayName,
   formatPatientAge,
 } from "@/Utils/utils";
-import { PracticionerSelector } from "@/pages/Appointments/components/PracticionerSelector";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -242,7 +242,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
-    queryKey: ["practicioners", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -350,7 +350,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
-            <PracticionerSelector
+            <PractitionerSelector
               facilityId={facilityId}
               selected={practitioner ?? null}
               onSelect={(user) =>

@@ -16,7 +16,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PracticionerSelector } from "@/pages/Appointments/components/PracticionerSelector";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
@@ -36,7 +36,7 @@ export default function BookAppointment(props: Props) {
   const [reason, setReason] = useState("");
 
   const resourcesQuery = useQuery({
-    queryKey: ["practicioners", props.facilityId],
+    queryKey: ["practitioners", props.facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: {
         facility_id: props.facilityId,
@@ -114,7 +114,7 @@ export default function BookAppointment(props: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div>
               <Label className="block mb-2">{t("select_practitioner")}</Label>
-              <PracticionerSelector
+              <PractitionerSelector
                 facilityId={props.facilityId}
                 selected={resource ?? null}
                 onSelect={(user) => setResourceId(user?.id ?? undefined)}

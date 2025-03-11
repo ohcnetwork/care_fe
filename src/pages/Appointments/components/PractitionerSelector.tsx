@@ -26,26 +26,26 @@ import { formatName } from "@/Utils/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserBase } from "@/types/user/user";
 
-interface PracticionerSelectorProps {
+interface PractitionerSelectorProps {
   selected: UserBase | null;
   onSelect: (user: UserBase | null) => void;
   facilityId: string;
   clearSelection?: string;
 }
 
-export const PracticionerSelector = ({
+export const PractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
   clearSelection,
-}: PracticionerSelectorProps) => {
+}: PractitionerSelectorProps) => {
   const { t } = useTranslation();
   const {
-    data: practicioners,
+    data: practitioners,
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["practicioners", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -97,7 +97,7 @@ export const PracticionerSelector = ({
                   </PopoverClose>
                 </CommandItem>
               )}
-              {practicioners?.users.map((user) => (
+              {practitioners?.users.map((user) => (
                 <CommandItem
                   key={user.id}
                   value={formatName(user)}
