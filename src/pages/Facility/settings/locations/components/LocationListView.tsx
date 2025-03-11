@@ -4,8 +4,6 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
@@ -194,9 +192,7 @@ function LocationRow({
                               },
                             })
                           }
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
+                          className={buttonVariants({ variant: "destructive" })}
                         >
                           {t("remove")}
                         </AlertDialogAction>

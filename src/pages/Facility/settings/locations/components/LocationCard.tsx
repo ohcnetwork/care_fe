@@ -121,9 +121,7 @@ export function LocationCard({
               <div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      className={cn(buttonVariants({ variant: "white" }))}
-                    >
+                    <Button variant={"white"}>
                       <CareIcon icon="l-trash" />
                     </Button>
                   </AlertDialogTrigger>
@@ -149,9 +147,7 @@ export function LocationCard({
                             },
                           })
                         }
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
+                        className={buttonVariants({ variant: "destructive" })}
                       >
                         {t("remove")}
                       </AlertDialogAction>
