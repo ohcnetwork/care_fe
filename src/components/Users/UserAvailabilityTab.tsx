@@ -86,7 +86,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   });
 
   const schedulableUsersQuery = useQuery({
-    queryKey: ["schedulable-users", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -95,8 +95,6 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const availableUserId = schedulableUsersQuery.data?.users.find(
     (f) => f.id == user.id,
   );
-
-  console.log("hey", schedulableUsersQuery.data?.users);
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
@@ -176,12 +174,14 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
                   <div />
                 </div>
               </PopoverTrigger>
-              <DayDetailsPopover
-                date={date}
-                templates={templates}
-                unavailableExceptions={unavailableExceptions}
-                setQParams={setQParams}
-              />
+              {availableUserId && (
+                <DayDetailsPopover
+                  date={date}
+                  templates={templates}
+                  unavailableExceptions={unavailableExceptions}
+                  setQParams={setQParams}
+                />
+              )}
             </Popover>
           );
         }}
