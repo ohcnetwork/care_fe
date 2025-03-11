@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore, parse, startOfDay } from "date-fns";
+import { isAfter, isBefore, parse } from "date-fns";
+import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
@@ -238,29 +239,24 @@ export default function CreateScheduleTemplateSheet({
 
   const validFrom = form.watch("valid_from");
   const validTill = form.watch("valid_to");
-  const [dateValidationCallout, setDateValidationCallout] =
-    useState<ReactNode>(null);
+  const [ShowPastDateWarning, setShowPastDateWarning] = useState(false);
 
   // show warning while filling "valid from" and "valid till" are in past
   useEffect(() => {
     if (!validFrom || !validTill) {
-      setDateValidationCallout(null);
+      setShowPastDateWarning(false);
       return;
     }
 
     // Normalizing today’s date (removes time)
-    const today = startOfDay(new Date());
-    const fromDate = startOfDay(new Date(validFrom));
-    const tillDate = startOfDay(new Date(validTill));
+    const today = dayjs().startOf("day");
+    const fromDate = dayjs(validFrom).startOf("day");
+    const tillDate = dayjs(validTill).startOf("day");
 
     if (fromDate < today && tillDate < today) {
-      setDateValidationCallout(
-        <Callout variant="warning" badge={t("warning")}>
-          <Trans i18nKey="schedule_dates_in_past_callout" />
-        </Callout>,
-      );
+      setShowPastDateWarning(true);
     } else {
-      setDateValidationCallout(null);
+      setShowPastDateWarning(false);
     }
   }, [validFrom, validTill]);
 
@@ -338,7 +334,13 @@ export default function CreateScheduleTemplateSheet({
                     </FormItem>
                   )}
                 />
-                <div className="col-span-2">{dateValidationCallout}</div>
+                <div className="col-span-2">
+                  {ShowPastDateWarning && (
+                    <Callout variant="warning" badge={t("warning")}>
+                      <Trans i18nKey="schedule_dates_in_past_callout" />
+                    </Callout>
+                  )}
+                </div>
               </div>
 
               <div>
