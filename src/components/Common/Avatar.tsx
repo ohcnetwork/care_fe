@@ -62,39 +62,36 @@ const Avatar = React.forwardRef<
         background: bgColor,
       }}
     >
-      {imageUrl ? (
-        <AvatarPrimitive.Image
-          src={imageUrl}
-          alt={name}
-          className={cn(
-            "aspect-square h-full w-full object-cover rounded-md",
-            className,
-          )}
-        />
-      ) : (
-        <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-            viewBox="0 0 100 100"
-            className="aspect-square h-full w-full object-cover"
+      <AvatarPrimitive.Image
+        src={imageUrl}
+        alt={name}
+        className={cn(
+          "aspect-square h-full w-full object-cover rounded-md",
+          className,
+        )}
+      />
+      <AvatarPrimitive.Fallback className="flex h-full w-full select-none items-center justify-center text-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          viewBox="0 0 100 100"
+          className="aspect-square h-full w-full object-cover"
+        >
+          <text
+            fill={textColor}
+            fillOpacity="0.5"
+            fontSize="50"
+            fontWeight="900"
+            x="50"
+            y="54"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            alignmentBaseline="middle"
           >
-            <text
-              fill={textColor}
-              fillOpacity="0.5"
-              fontSize="50"
-              fontWeight="900"
-              x="50"
-              y="54"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              alignmentBaseline="middle"
-            >
-              {avatarText ? initials(avatarText) : null}
-            </text>
-          </svg>
-        </AvatarPrimitive.Fallback>
-      )}
+            {avatarText ? initials(avatarText) : null}
+          </text>
+        </svg>
+      </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   );
 });
