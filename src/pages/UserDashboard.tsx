@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -19,6 +20,14 @@ export default function UserDashboard() {
   const { t } = useTranslation();
 
   const organizations = user.organizations || [];
+
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleMobileNavigation = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
@@ -54,6 +63,7 @@ export default function UserDashboard() {
             <Link
               href={`/users/${user.username}`}
               className="gap-2 text-inherit flex items-center"
+              onClick={handleMobileNavigation}
             >
               <Settings className="h-4 w-4" />
               {t("edit_profile")}
@@ -69,6 +79,7 @@ export default function UserDashboard() {
               <Link
                 href="/admin/questionnaire"
                 className="gap-2 text-inherit flex items-center"
+                onClick={handleMobileNavigation}
               >
                 <User2Icon className="h-4 w-4" />
                 {t("admin_dashboard")}
@@ -99,6 +110,7 @@ export default function UserDashboard() {
               <Link
                 key={facility.id}
                 href={`/facility/${facility.id}/overview`}
+                onClick={handleMobileNavigation}
               >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
@@ -134,7 +146,11 @@ export default function UserDashboard() {
             data-cy="organization-list"
           >
             {organizations.map((org) => (
-              <Link key={org.id} href={`/organization/${org.id}`}>
+              <Link
+                key={org.id}
+                href={`/organization/${org.id}`}
+                onClick={handleMobileNavigation}
+              >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
                     <Avatar
