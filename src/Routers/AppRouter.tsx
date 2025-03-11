@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { Redirect, useRedirect, useRoutes } from "raviger";
+import { useEffect } from "react";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -93,6 +94,18 @@ export default function AppRouter() {
   const user = useAuthUser();
   const currentPath = window.location.pathname;
   const shouldShowSidebar = !PATHS_WITHOUT_SIDEBAR.includes(currentPath);
+
+  useEffect(() => {
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "auto",
+      });
+    }, 50);
+  }, [currentPath]);
 
   return (
     <SidebarProvider>
