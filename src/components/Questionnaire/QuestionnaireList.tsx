@@ -32,7 +32,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -58,165 +61,187 @@ function EmptyState() {
 
 const RenderCard = ({
   questionnaireList,
+  isLoading,
 }: {
   questionnaireList: QuestionnaireDetail[];
+  isLoading: boolean;
 }) => {
   const navigate = useNavigate();
   return (
     <div className="xl:hidden space-y-4">
-      {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
-        <Card
-          key={questionnaire.id}
-          className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
-          onClick={() =>
-            navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
-          }
-        >
-          <CardContent className="p-6 relative flex flex-col">
-            <div className="absolute top-4 right-4">
-              <Badge
-                className={
-                  {
-                    active: "bg-green-100 text-green-800 hover:bg-green-200",
-                    draft: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-                    retired: "bg-red-100 text-red-800 hover:bg-red-200",
-                  }[questionnaire.status]
-                }
-              >
-                {t(questionnaire.status)}
-              </Badge>
-            </div>
+      {isLoading ? (
+        <CardGridSkeleton count={5} />
+      ) : questionnaireList.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <>
+          {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
+            <Card
+              key={questionnaire.id}
+              className="overflow-hidden bg-white rounded-lg cursor-pointer transition-shadow transform hover:shadow-lg"
+              onClick={() =>
+                navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
+              }
+            >
+              <CardContent className="p-6 relative flex flex-col">
+                <div className="absolute top-4 right-4">
+                  <Badge
+                    className={
+                      {
+                        active:
+                          "bg-green-100 text-green-800 hover:bg-green-200",
+                        draft:
+                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+                        retired: "bg-red-100 text-red-800 hover:bg-red-200",
+                      }[questionnaire.status]
+                    }
+                  >
+                    {t(questionnaire.status)}
+                  </Badge>
+                </div>
 
-            <div className="mb-4 border-b pb-2">
-              <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("title")}
-              </h3>
-              {questionnaire.title && questionnaire.title.length > 20 ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger className="truncate">
-                      <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
-                        {questionnaire.title}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-black text-white z-40">
+                <div className="mb-4 border-b pb-2">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("title")}
+                  </h3>
+                  {questionnaire.title && questionnaire.title.length > 20 ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="truncate">
+                          <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
+                            {questionnaire.title}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black text-white z-40">
+                          {questionnaire.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
                       {questionnaire.title}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <p className="mt-2 text-xl text-left font-bold text-gray-900 truncate">
-                  {questionnaire.title}
-                </p>
-              )}
-            </div>
+                    </p>
+                  )}
+                </div>
 
-            <div className="mb-4">
-              <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("slug")}
-              </h3>
-              <p className="text-sm text-gray-900 truncate">
-                {questionnaire.slug}
-              </p>
-            </div>
+                <div className="mb-4">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("slug")}
+                  </h3>
+                  <p className="text-sm text-gray-900 truncate">
+                    {questionnaire.slug}
+                  </p>
+                </div>
 
-            <div className="mb-4 flex-1">
-              <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                {t("description")}
-              </h3>
-              <p className="text-sm text-gray-900 line-clamp-2">
-                {questionnaire.description}
-              </p>
-            </div>
+                <div className="mb-4 flex-1">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t("description")}
+                  </h3>
+                  <p className="text-sm text-gray-900 line-clamp-2">
+                    {questionnaire.description}
+                  </p>
+                </div>
 
-            <div className="mt-4 flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/admin/questionnaire/${questionnaire.slug}/edit`);
-                }}
-                className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
-              >
-                <EyeIcon className="w-4 h-4 mr-1" />
-                {t("view")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(
+                        `/admin/questionnaire/${questionnaire.slug}/edit`,
+                      );
+                    }}
+                    className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
+                  >
+                    <EyeIcon className="w-4 h-4 mr-1" />
+                    {t("View")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </>
+      )}
     </div>
   );
 };
 
 const RenderTable = ({
   questionnaireList,
+  isLoading,
 }: {
   questionnaireList: QuestionnaireDetail[];
+  isLoading: boolean;
 }) => {
   const navigate = useNavigate();
   return (
     <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow overflow-x-auto">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-gray-100 text-gray-700">
-          <TableRow>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-              {t("title")}
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-              {t("description")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="divide-y divide-gray-200 bg-white">
-          {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
-            <TableRow
-              key={questionnaire.id}
-              className="cursor-pointer hover:bg-gray-50"
-              onClick={() =>
-                navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
-              }
-            >
-              <TableCell className="px-6 py-2">
-                {questionnaire.title && questionnaire.title.length > 20 ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <span className="text-sm text-left font-semibold text-gray-950 truncate">
-                          {questionnaire.title}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-black text-white z-40">
-                        {questionnaire.title}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <span className="text-sm text-left font-semibold text-gray-950 truncate">
-                    {questionnaire.title}
-                  </span>
-                )}
-              </TableCell>
-              <TableCell className="px-6 py-2">
-                <div className="flex items-center justify-between space-x-4">
-                  <div className="truncate text-sm text-gray-900 break-words whitespace-normal">
-                    {questionnaire.description}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
-                  >
-                    <EyeIcon className="w-4 h-4 mr-0" />
-                    {t("View")}
-                  </Button>
-                </div>
-              </TableCell>
+      {isLoading ? (
+        <TableSkeleton count={5} />
+      ) : questionnaireList.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <Table className="min-w-full divide-y divide-gray-200">
+          <TableHeader className="bg-gray-100 text-gray-700">
+            <TableRow>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                {t("title")}
+              </TableHead>
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                {t("description")}
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-200 bg-white">
+            {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
+              <TableRow
+                key={questionnaire.id}
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() =>
+                  navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
+                }
+              >
+                <TableCell className="px-6 py-2">
+                  {questionnaire.title && questionnaire.title.length > 20 ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="text-sm text-left font-semibold text-gray-950 truncate">
+                            {questionnaire.title}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black text-white z-40">
+                          {questionnaire.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <span className="text-sm text-left font-semibold text-gray-950 truncate">
+                      {questionnaire.title}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="px-6 py-2">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="truncate text-sm text-gray-900 break-words whitespace-normal">
+                      {questionnaire.description}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
+                    >
+                      <EyeIcon className="w-4 h-4 mr-0" />
+                      {t("View")}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 };
@@ -293,19 +318,12 @@ export function QuestionnaireList() {
           </div>
         </div>
       </div>
-      {isLoading ? (
-        <TableSkeleton count={5} />
-      ) : questionnaireList.length === 0 ? (
-        <div className="col-span-full">
-          <EmptyState />
-        </div>
-      ) : (
-        <>
-          <RenderTable questionnaireList={questionnaireList} />
-          <RenderCard questionnaireList={questionnaireList} />
-          <Pagination totalCount={response?.count ?? 0} />
-        </>
-      )}
+      <RenderTable
+        questionnaireList={questionnaireList}
+        isLoading={isLoading}
+      />
+      <RenderCard questionnaireList={questionnaireList} isLoading={isLoading} />
+      <Pagination totalCount={response?.count ?? 0} />
     </div>
   );
 }
