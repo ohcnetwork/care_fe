@@ -40,6 +40,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
   });
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
+    disableCache: true,
   });
   const { t } = useTranslation();
 

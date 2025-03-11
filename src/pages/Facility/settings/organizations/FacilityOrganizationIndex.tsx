@@ -228,7 +228,7 @@ export default function FacilityOrganizationIndex({
                         asChild
                       >
                         <Link
-                          href={`/departments/${org.id}`}
+                          href={`/departments/${org.id}/users`}
                           className="text-gray-900 flex items-center"
                         >
                           <CareIcon
