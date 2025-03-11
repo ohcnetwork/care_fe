@@ -93,10 +93,10 @@ type SupportedPluginExtensions =
 export type PluginManifest = {
   plugin: string;
   routes?: AppRoutes;
-  extends?: SupportedPluginExtensions[];
+  extends?: readonly SupportedPluginExtensions[];
   components?: PluginComponentMap;
   encounterTabs?: Record<string, LazyComponent<React.FC<EncounterTabProps>>>;
-  devices?: PluginDeviceManifest[];
+  devices?: readonly PluginDeviceManifest[];
 };
 
 export { pluginMap };
