@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore, parse } from "date-fns";
+import { isAfter, isBefore, parse, startOfDay } from "date-fns";
 import { useQueryParams } from "raviger";
-import { useCallback } from "react";
+import { useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
@@ -202,32 +203,6 @@ export default function CreateScheduleTemplateSheet({
     });
   }
 
-  const dateValidationCallout = useCallback(() => {
-    const validFrom = form.watch("valid_from");
-    const validTill = form.watch("valid_to");
-
-    if (!validFrom || !validTill) return null;
-
-    // normalizing today date (remove time)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const fromDate = new Date(validFrom);
-    const tillDate = new Date(validTill);
-    fromDate.setHours(0, 0, 0, 0);
-    tillDate.setHours(0, 0, 0, 0);
-
-    if (fromDate < today && tillDate < today) {
-      return (
-        <Callout variant="alert" badge="Info">
-          <Trans i18nKey="schedule_dates_in_past_callout" />
-        </Callout>
-      );
-    }
-
-    return null;
-  }, [form.watch("valid_from"), form.watch("valid_to")]);
-
   const timeAllocationCallout = (index: number) => {
     const startTime = form.watch(`availabilities.${index}.start_time`);
     const endTime = form.watch(`availabilities.${index}.end_time`);
@@ -261,6 +236,34 @@ export default function CreateScheduleTemplateSheet({
       </Callout>
     );
   };
+
+  const validFrom = form.watch("valid_from");
+  const validTill = form.watch("valid_to");
+  const [dateValidationCallout, setDateValidationCallout] =
+    useState<ReactNode>(null);
+
+  // show warning while filling "valid from" and "valid till" are in past
+  useEffect(() => {
+    if (!validFrom || !validTill) {
+      setDateValidationCallout(null);
+      return;
+    }
+
+    // Normalizing today’s date (removes time)
+    const today = startOfDay(new Date());
+    const fromDate = startOfDay(new Date(validFrom));
+    const tillDate = startOfDay(new Date(validTill));
+
+    if (fromDate < today && tillDate < today) {
+      setDateValidationCallout(
+        <Callout variant="warning" badge={t("warning")}>
+          <Trans i18nKey="schedule_dates_in_past_callout" />
+        </Callout>,
+      );
+    } else {
+      setDateValidationCallout(null);
+    }
+  }, [validFrom, validTill]);
 
   return (
     <Sheet
@@ -336,7 +339,7 @@ export default function CreateScheduleTemplateSheet({
                     </FormItem>
                   )}
                 />
-                <div className="col-span-2">{dateValidationCallout()}</div>
+                <div className="col-span-2">{dateValidationCallout}</div>
               </div>
 
               <div>
