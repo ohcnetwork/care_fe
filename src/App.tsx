@@ -11,6 +11,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 
 import Loading from "@/components/Common/Loading";
+import { ScrollRestoration } from "@/components/Common/ScrollRestoration";
 
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
@@ -54,6 +55,7 @@ const App = () => {
           <PubSubProvider>
             <PluginEngine>
               <HistoryAPIProvider>
+                <ScrollRestoration />
                 <AuthUserProvider
                   unauthorized={<Routers.PublicRouter />}
                   otpAuthorized={<Routers.PatientRouter />}
