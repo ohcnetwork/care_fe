@@ -117,7 +117,7 @@ export default function PatientSelect({
     return (
       <>
         {/* Mobile View (Cards) */}
-        <div className="space-y-4 overflow-auto max-h-[600px] p-4 md:hidden">
+        <div className="space-y-4 overflow-auto max-h-[600px] p-0 sm:p-4 md:hidden">
           {patients?.map((patient) => (
             <Card
               key={patient.id}
@@ -138,25 +138,27 @@ export default function PatientSelect({
                 <p className="text-xs text-muted-foreground">{patient.id}</p>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">
+                <div className="flex justify-between">
+                  <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
                     {t("primary_ph_no")}:
                   </span>
-                  <span className="font-semibold">{patient.phone_number}</span>
+                  <span className="text-xs sm:text-sm font-semibold">
+                    {patient.phone_number}
+                  </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">
+                <div className="flex justify-between">
+                  <span className="text-xs sm:text-sm text-muted-foreground font-medium">
                     {t("date_of_birth_age")}:
                   </span>
-                  <span className="font-semibold">
+                  <span className="text-xs sm:text-sm font-semibold">
                     {getPatienDoBorAge(patient)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">
+                <div className="flex justify-between">
+                  <span className="text-xs sm:text-sm text-muted-foreground font-medium">
                     {t("sex")}:
                   </span>
-                  <span className="font-semibold">
+                  <span className="text-xs sm:text-sm font-semibold">
                     {t(`GENDER__${patient.gender}`)}
                   </span>
                 </div>
