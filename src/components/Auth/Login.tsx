@@ -321,7 +321,7 @@ const Login = (props: LoginProps) => {
       {!forgotPassword && <BrowserWarning />}
 
       {/* Login Forms Section */}
-      <div className="login-hero-form py-16 w-full md:mt-0 md:h-full md:w-1/2">
+      <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
         <div className="relative h-full items-center flex justify-center md:flex">
           <div className="w-full max-w-[400px] space-y-6">
             {/* Logo for Mobile */}

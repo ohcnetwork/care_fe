@@ -4,7 +4,7 @@ export interface TokenData {
   createdAt: string;
 }
 
-export type MFAMethod = "totp" | "backup" | "sms" | "email";
+export type MFAMethod = "totp" | "backup";
 
 export interface MFAOption {
   id: MFAMethod;
