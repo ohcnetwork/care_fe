@@ -65,12 +65,8 @@ export default function CreateScheduleExceptionSheet({
       reason: z.string().min(1, t("field_required")),
       valid_from: z.date({ required_error: t("field_required") }),
       valid_to: z.date({ required_error: t("field_required") }),
-      start_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
-      end_time: z
-        .string()
-        .min(1, t("field_required")) as unknown as z.ZodType<Time>,
+      start_time: z.string().min(1, t("field_required")),
+      end_time: z.string().min(1, t("field_required")),
       unavailable_all_day: z.boolean(),
     })
     .refine(
@@ -99,8 +95,8 @@ export default function CreateScheduleExceptionSheet({
     defaultValues: {
       valid_from: undefined,
       valid_to: undefined,
-      start_time: undefined,
-      end_time: undefined,
+      start_time: "",
+      end_time: "",
       reason: "",
       unavailable_all_day: false,
     },
@@ -139,8 +135,12 @@ export default function CreateScheduleExceptionSheet({
       form.setValue("start_time", "00:00");
       form.setValue("end_time", "23:59");
     } else {
-      form.resetField("start_time");
-      form.resetField("end_time");
+      if (form.getValues("start_time") === "00:00") {
+        form.setValue("start_time", "");
+      }
+      if (form.getValues("end_time") === "23:59") {
+        form.setValue("end_time", "");
+      }
     }
   }, [unavailableAllDay, form]);
 
@@ -149,8 +149,8 @@ export default function CreateScheduleExceptionSheet({
       reason: data.reason,
       valid_from: dateQueryString(data.valid_from),
       valid_to: dateQueryString(data.valid_to),
-      start_time: data.start_time,
-      end_time: data.end_time,
+      start_time: data.start_time as Time,
+      end_time: data.end_time as Time,
       user: userId,
     });
   }
@@ -265,7 +265,8 @@ export default function CreateScheduleExceptionSheet({
                         <FormControl>
                           <Input
                             type="time"
-                            {...field}
+                            value={field.value}
+                            onChange={field.onChange}
                             disabled={unavailableAllDay}
                           />
                         </FormControl>
@@ -283,7 +284,8 @@ export default function CreateScheduleExceptionSheet({
                         <FormControl>
                           <Input
                             type="time"
-                            {...field}
+                            value={field.value}
+                            onChange={field.onChange}
                             disabled={unavailableAllDay}
                           />
                         </FormControl>

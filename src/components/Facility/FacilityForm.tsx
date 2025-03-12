@@ -435,6 +435,7 @@ export default function FacilityForm({
                     <Input
                       {...field}
                       type="number"
+                      value={field.value ?? ""}
                       onChange={(e) => {
                         form.setValue(
                           "latitude",
@@ -463,6 +464,7 @@ export default function FacilityForm({
                     <Input
                       {...field}
                       type="number"
+                      value={field.value ?? ""}
                       onChange={(e) => {
                         form.setValue(
                           "longitude",
