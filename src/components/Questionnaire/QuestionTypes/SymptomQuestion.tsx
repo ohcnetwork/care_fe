@@ -206,7 +206,7 @@ const SymptomRow = React.memo(function SymptomRow({
             value={symptom.onset?.onset_datetime || ""}
             onChange={handleDateChange}
             disabled={disabled || !!symptom.id}
-            className="h-7 text-sm px-1"
+            className="h-7"
           />
         </TableCell>
 
@@ -430,7 +430,7 @@ export function SymptomQuestion({
                         })
                       }
                       disabled={disabled || !!symptom.id}
-                      className="h-8 mt-1"
+                      className="h-8 mt-1 px-1"
                     />
                   </div>
 
@@ -509,7 +509,7 @@ export function SymptomQuestion({
                         handleUpdateSymptom(index, { note: e.target.value })
                       }
                       disabled={disabled}
-                      className="mt-1"
+                      className="mt-1 h-8"
                     />
                   </div>
                 )}

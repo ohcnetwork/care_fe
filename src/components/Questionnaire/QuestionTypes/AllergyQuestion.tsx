@@ -415,7 +415,7 @@ export function AllergyQuestion({
                         })
                       }
                       disabled={disabled}
-                      className="h-8 mt-1 px-1"
+                      className="h-8 mt-1"
                     />
                   </div>
                 </div>
@@ -573,7 +573,7 @@ const AllergyTableRow = ({
             value={allergy.last_occurrence}
             onChange={(e) => onUpdate?.({ last_occurrence: e.target.value })}
             disabled={disabled}
-            className="h-7 text-sm px-1"
+            className="h-7"
           />
         </TableCell>
         <TableCell className="min-w-[35px] py-1 px-0">

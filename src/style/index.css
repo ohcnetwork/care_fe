@@ -236,6 +236,30 @@ input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration { display: none; }
+input[type="date"] {
+  position: relative;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 1;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}
+@media (max-width: 640px) {
+  input[type="date"] {
+    font-size: 0.875rem; /* Smaller font on mobile */
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
 
 @layer base {
   :root {

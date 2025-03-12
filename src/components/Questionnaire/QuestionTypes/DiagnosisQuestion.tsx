@@ -332,7 +332,7 @@ export function DiagnosisQuestion({
                         })
                       }
                       disabled={disabled || !!diagnosis.id}
-                      className="h-8 mt-1 px-1"
+                      className="h-8 mt-1"
                     />
                   </div>
 
@@ -482,7 +482,7 @@ const DiagnosisTableRow = ({
               })
             }
             disabled={disabled || !!diagnosis.id}
-            className="h-7 text-sm px-1"
+            className="h-7"
           />
         </TableCell>
         <TableCell className="min-w-[80px] py-1 px-0.5">
