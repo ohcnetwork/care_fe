@@ -105,5 +105,6 @@ export class PatientEncounter {
 
   assertEncounterCompleteSuccess() {
     cy.verifyNotification("Encounter Complete");
+    return this;
   }
 }
