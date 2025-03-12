@@ -83,7 +83,7 @@ export type PluginDeviceManifest = {
     metadata: Record<string, unknown>;
     onChange: (metadata: Record<string, unknown>) => void;
   }>;
-  showPageCard?: React.FC<{ device: DeviceDetail }>;
+  showPageCard?: React.FC<{ device: DeviceDetail; facilityId: string }>;
 };
 
 type SupportedPluginExtensions =

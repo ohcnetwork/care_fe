@@ -377,6 +377,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
           >
             <PluginDeviceShowCard
               device={device as DeviceDetail & { care_type: string }}
+              facilityId={facilityId}
             />
           </ErrorBoundary>
         )}
@@ -410,13 +411,15 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
 
 const PluginDeviceShowCard = ({
   device,
+  facilityId,
 }: {
   device: DeviceDetail & { care_type: string };
+  facilityId: string;
 }) => {
   const pluginDevice = usePluginDevice(device.care_type);
   if (!pluginDevice.showPageCard) {
     return null;
   }
 
-  return <pluginDevice.showPageCard device={device} />;
+  return <pluginDevice.showPageCard device={device} facilityId={facilityId} />;
 };
