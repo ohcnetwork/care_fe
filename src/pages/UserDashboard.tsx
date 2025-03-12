@@ -21,13 +21,7 @@ export default function UserDashboard() {
 
   const organizations = user.organizations || [];
 
-  const { isMobile, setOpenMobile } = useSidebar();
-
-  const handleMobileNavigation = () => {
-    if (isMobile) {
-      setOpenMobile(false);
-    }
-  };
+  const { closeOnNavigate } = useSidebar();
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-8 max-w-5xl px-4 py-4 md:p-6">
@@ -63,7 +57,7 @@ export default function UserDashboard() {
             <Link
               href={`/users/${user.username}`}
               className="gap-2 text-inherit flex items-center"
-              onClick={handleMobileNavigation}
+              onClick={closeOnNavigate}
             >
               <Settings className="h-4 w-4" />
               {t("edit_profile")}
@@ -79,7 +73,7 @@ export default function UserDashboard() {
               <Link
                 href="/admin/questionnaire"
                 className="gap-2 text-inherit flex items-center"
-                onClick={handleMobileNavigation}
+                onClick={closeOnNavigate}
               >
                 <User2Icon className="h-4 w-4" />
                 {t("admin_dashboard")}
@@ -110,7 +104,7 @@ export default function UserDashboard() {
               <Link
                 key={facility.id}
                 href={`/facility/${facility.id}/overview`}
-                onClick={handleMobileNavigation}
+                onClick={closeOnNavigate}
               >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">
@@ -149,7 +143,7 @@ export default function UserDashboard() {
               <Link
                 key={org.id}
                 href={`/organization/${org.id}`}
-                onClick={handleMobileNavigation}
+                onClick={closeOnNavigate}
               >
                 <Card className="transition-all hover:shadow-md hover:border-primary/20">
                   <CardContent className="flex items-center gap-3 p-3 md:p-4">

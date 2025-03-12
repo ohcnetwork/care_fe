@@ -44,6 +44,7 @@ type SidebarContextType = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  closeOnNavigate: () => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextType | null>(null);
@@ -106,6 +107,13 @@ const SidebarProvider = React.forwardRef<
         : setOpen((open) => !open);
     }, [isMobile, setOpen, setOpenMobile]);
 
+    // Helper to close sidebar on navigation (mobile only)
+    const closeOnNavigate = React.useCallback(() => {
+      if (isMobile) {
+        setOpenMobile(false);
+      }
+    }, [isMobile, setOpenMobile]);
+
     // Adds a keyboard shortcut to toggle the sidebar.
     useKeyboardShortcut(
       [isAppleDevice ? "Meta" : "Control", SIDEBAR_KEYBOARD_SHORTCUT],
@@ -125,6 +133,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        closeOnNavigate,
       }),
       [
         state,
@@ -134,6 +143,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        closeOnNavigate,
       ],
     );
 

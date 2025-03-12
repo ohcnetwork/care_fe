@@ -23,7 +23,7 @@ export function NavMain({
     icon?: string;
   }[];
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { closeOnNavigate } = useSidebar();
 
   return (
     <SidebarGroup>
@@ -36,11 +36,7 @@ export function NavMain({
               className={
                 "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
               }
-              onClick={() => {
-                if (isMobile) {
-                  setOpenMobile(false);
-                }
-              }}
+              onClick={closeOnNavigate}
             >
               <ActiveLink
                 href={link.url}

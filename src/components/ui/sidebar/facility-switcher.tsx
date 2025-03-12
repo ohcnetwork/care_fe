@@ -29,7 +29,7 @@ export function FacilitySwitcher({
   facilities: UserFacilityModel[];
   selectedFacility: UserFacilityModel | null;
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { isMobile, closeOnNavigate } = useSidebar();
   const { t } = useTranslation();
 
   return (
@@ -71,9 +71,7 @@ export function FacilitySwitcher({
                 key={index}
                 onClick={() => {
                   navigate(`/facility/${facility.id}/overview`);
-                  if (isMobile) {
-                    setOpenMobile(false);
-                  }
+                  closeOnNavigate();
                 }}
                 className={cn(
                   "gap-2 p-2",
