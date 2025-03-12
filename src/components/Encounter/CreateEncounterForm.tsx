@@ -1,15 +1,7 @@
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
-import {
-  Ambulance,
-  BedDouble,
-  Building2,
-  Home,
-  MonitorSmartphone,
-  Stethoscope,
-} from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -50,50 +42,11 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
-  type Encounter,
-  type EncounterClass,
-  type EncounterRequest,
+  Encounter,
+  EncounterClass,
+  EncounterRequest,
+  encounterClasses,
 } from "@/types/emr/encounter";
-
-const encounterClasses = () =>
-  [
-    {
-      value: "imp",
-      label: t("inpatient"),
-      icon: BedDouble,
-      description: t("inpatient_description"),
-    },
-    {
-      value: "amb",
-      label: t("ambulatory"),
-      icon: Ambulance,
-      description: t("ambulatory_description"),
-    },
-    {
-      value: "obsenc",
-      label: t("observation"),
-      icon: Stethoscope,
-      description: t("observation_description"),
-    },
-    {
-      value: "emer",
-      label: t("emergency"),
-      icon: Building2,
-      description: t("emergency_description"),
-    },
-    {
-      value: "vr",
-      label: t("virtual"),
-      icon: MonitorSmartphone,
-      description: t("virtual_description"),
-    },
-    {
-      value: "hh",
-      label: t("home_health"),
-      icon: Home,
-      description: t("home_health_description"),
-    },
-  ] as const;
 
 interface Props {
   patientId: string;
