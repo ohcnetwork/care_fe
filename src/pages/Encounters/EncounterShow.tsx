@@ -174,7 +174,7 @@ export const EncounterShow = (props: Props) => {
                   <Link
                     key={tab}
                     className={tabButtonClasses(props.tab === tab)}
-                    href={`${tab}`}
+                    href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${tab}`}
                   >
                     {t(`ENCOUNTER_TAB__${tab}`)}
                   </Link>
