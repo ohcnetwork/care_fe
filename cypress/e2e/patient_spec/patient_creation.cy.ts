@@ -192,7 +192,8 @@ describe("Patient Creation and modification", () => {
         ])
         .clickEncounterMarkAsComplete()
         .clickConfirmEncounterAsComplete()
-        .assertEncounterCompleteSuccess();
+        .assertEncounterCompleteSuccess()
+        .verifyEncounterPatientInfo(["Completed"]);
     });
   });
 });
