@@ -19,14 +19,18 @@ export default function Calendar(props: Props) {
   const highlightToday = props.highlightToday ?? true;
   const currentMonthRange = getMonthStartAndEnd(currentMonth);
 
+  // Calculate days to display from previous month
   const startingDayOfWeek = currentMonthRange.start.getDay();
 
+  // Generate calendar days array for current month only
   const calendarDays: Date[] = [];
 
+  // Add empty slots for previous month days
   for (let i = 0; i < startingDayOfWeek; i++) {
     calendarDays.push(null as unknown as Date);
   }
 
+  // Add current month's days
   for (let i = 1; i <= currentMonthRange.end.getDate(); i++) {
     calendarDays.push(
       new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i),
@@ -48,6 +52,7 @@ export default function Calendar(props: Props) {
     );
     props.onMonthChange?.(nextMonth);
   };
+
   const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   return (
