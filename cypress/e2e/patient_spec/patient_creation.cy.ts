@@ -20,13 +20,13 @@ const ENCOUNTER_STATUS = "In Progress";
 const ENCOUNTER_PRIORITY = "ASAP";
 const ORGANIZATION_NAME = "Administration";
 
-describe("Patient Management", () => {
-  const TEST_PHONE = "9495031234";
-  const PATIENT_DETAILS = {
-    name: "Nihal",
-    phone: TEST_PHONE,
-  };
+beforeEach(() => {
+  cy.viewport(viewPort.desktop1080p.width, viewPort.desktop2k.height);
+  cy.loginByApi("doctor");
+  cy.visit("/");
+});
 
+describe("Patient Creation and modification", () => {
   const basePatientData: Partial<PatientFormData> = {
     pincode: "682001",
     state: "Kerala",
@@ -101,12 +101,6 @@ describe("Patient Management", () => {
     // ... other test cases ...
   ];
 
-  beforeEach(() => {
-    cy.viewport(viewPort.desktop1080p.width, viewPort.desktop2k.height);
-    cy.loginByApi("doctor");
-    cy.visit("/");
-  });
-
   patientTestCases.forEach(({ description, data }) => {
     it(`creates a new ${description} and verifies registration`, () => {
       facilityCreation.selectFacility("GHC payyanur");
@@ -137,34 +131,6 @@ describe("Patient Management", () => {
     });
   });
 
-  it("Search patient with phone number and create a new encounter", () => {
-    facilityCreation.selectFacility("GHC payyanur");
-    patientCreation
-      .clickSearchPatients()
-      .searchPatient(TEST_PHONE)
-      .verifySearchResults(PATIENT_DETAILS)
-      .selectPatientFromResults(PATIENT_DETAILS.name)
-      .enterYearOfBirth("1999")
-      .clickVerifyButton();
-
-    patientVerify
-      .verifyPatientName(PATIENT_DETAILS.name)
-      .verifyCreateEncounterButton()
-      .clickCreateEncounter()
-      .selectEncounterType(ENCOUNTER_TYPE)
-      .selectEncounterStatus(ENCOUNTER_STATUS)
-      .selectEncounterPriority(ENCOUNTER_PRIORITY)
-      .selectOrganization(ORGANIZATION_NAME)
-      .clickSubmitEncounter()
-      .assertEncounterCreationSuccess();
-
-    patientEncounter.verifyEncounterPatientInfo([
-      ENCOUNTER_TYPE,
-      ENCOUNTER_STATUS,
-      ENCOUNTER_PRIORITY,
-    ]);
-  });
-
   it("Edit a patient details and verify the changes", () => {
     const updatedPatientData: Partial<PatientFormData> = {
       gender: "Female",
@@ -190,5 +156,43 @@ describe("Patient Management", () => {
       updatedPatientData.gender,
       updatedPatientData.address,
     ]);
+  });
+
+  describe("Patient Search and Encounter Creation", () => {
+    it("Search patient with phone number and create a new encounter", () => {
+      const patientDetail = {
+        name: "Nihal",
+        phone: "8199210687",
+      };
+      facilityCreation.selectFacility("GHC payyanur");
+      patientCreation
+        .clickSearchPatients()
+        .searchPatient(patientDetail.phone)
+        .verifySearchResults(patientDetail)
+        .selectPatientFromResults(patientDetail.name)
+        .enterYearOfBirth("1999")
+        .clickVerifyButton();
+
+      patientVerify
+        .verifyPatientName(patientDetail.name)
+        .verifyCreateEncounterButton()
+        .clickCreateEncounter()
+        .selectEncounterType(ENCOUNTER_TYPE)
+        .selectEncounterStatus(ENCOUNTER_STATUS)
+        .selectEncounterPriority(ENCOUNTER_PRIORITY)
+        .selectOrganization(ORGANIZATION_NAME)
+        .clickSubmitEncounter()
+        .assertEncounterCreationSuccess();
+
+      patientEncounter
+        .verifyEncounterPatientInfo([
+          ENCOUNTER_TYPE,
+          ENCOUNTER_STATUS,
+          ENCOUNTER_PRIORITY,
+        ])
+        .clickEncounterMarkAsComplete()
+        .clickConfirmEncounterAsComplete()
+        .assertEncounterCompleteSuccess();
+    });
   });
 });
