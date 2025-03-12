@@ -56,7 +56,6 @@ export const MultiSelect = React.forwardRef<
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-    const commandListRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
       setSelectedValues(value);
@@ -179,7 +178,6 @@ export const MultiSelect = React.forwardRef<
           >
             <Command>
               <CommandList
-                ref={commandListRef}
                 className="max-h-64 overflow-y-auto overflow-x-hidden touch-auto"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
