@@ -76,20 +76,12 @@ export default function CreateScheduleTemplateSheet({
   const formSchema = z
     .object({
       name: z.string().min(1, t("field_required")),
-      valid_from: z
-        .date({
-          required_error: t("field_required"),
-        })
-        .refine((date) => !isBefore(date, new Date()), {
-          message: t("valid_from_must_be_today_or_future"),
-        }),
-      valid_to: z
-        .date({
-          required_error: t("field_required"),
-        })
-        .refine((date) => isAfter(date, new Date()), {
-          message: t("valid_to_must_be_future"),
-        }),
+      valid_from: z.date({
+        required_error: t("field_required"),
+      }),
+      valid_to: z.date({
+        required_error: t("field_required"),
+      }),
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
@@ -97,6 +89,7 @@ export default function CreateScheduleTemplateSheet({
         .array(
           z
             .discriminatedUnion("slot_type", [
+              // Schema for appointment type
               z.object({
                 slot_type: z.literal("appointment"),
                 name: z.string().min(1, t("field_required")),
@@ -114,6 +107,7 @@ export default function CreateScheduleTemplateSheet({
                   .number()
                   .min(1, t("number_min_error", { min: 1 })),
               }),
+              // Schema for open and closed types
               z.object({
                 slot_type: z.enum(["open", "closed"]),
                 name: z.string().min(1, t("field_required")),
@@ -130,13 +124,14 @@ export default function CreateScheduleTemplateSheet({
             ])
             .refine(
               (data) => {
+                // Validate each availability's time range
                 const startTime = parse(data.start_time, "HH:mm", new Date());
                 const endTime = parse(data.end_time, "HH:mm", new Date());
                 return isBefore(startTime, endTime);
               },
               {
                 message: t("start_time_must_be_before_end_time"),
-                path: ["start_time"],
+                path: ["start_time"], // This will show error at the start_time field
               },
             ),
         )
@@ -146,6 +141,7 @@ export default function CreateScheduleTemplateSheet({
       message: t("from_date_must_be_before_to_date"),
       path: ["valid_from"],
     });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
