@@ -1996,6 +1996,7 @@
   "remove": "Remove",
   "remove_allergy": "Remove Allergy",
   "remove_diagnosis": "Remove Diagnosis",
+  "remove_location": "Remove {{name}}",
   "remove_medication": "Remove Medication",
   "remove_medication_confirmation": "Are you sure you want to remove {{medication}}?",
   "remove_organization": "Remove organization",
