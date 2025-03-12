@@ -45,7 +45,7 @@ export default function QuickAccess({ encounter }: QuickAccessProps) {
             ))}
           </div>
           <QuestionnaireSearch
-            placeholder={t("new_questionnaire")}
+            placeholder={t("choose_questionnaire")}
             subjectType="encounter"
             onSelect={(selected) =>
               navigate(
