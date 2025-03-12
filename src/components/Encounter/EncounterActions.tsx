@@ -97,10 +97,10 @@ export default function EncounterActions({
           {!completedEncounterStatus.includes(encounter.status) && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onSelect={(e) => e.preventDefault()}
                   data-cy="mark-encounter-as-complete"
-                  >
+                >
                   {t("mark_as_complete")}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
