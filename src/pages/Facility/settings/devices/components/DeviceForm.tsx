@@ -161,12 +161,13 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             control={form.control}
             name="registered_name"
             render={({ field }) => (
-              <FormItem data-cy="device-registered-name">
+              <FormItem>
                 <FormLabel htmlFor="registered_name" required>
                   {t("registered_name")}
                 </FormLabel>
                 <FormControl>
                   <Input
+                    data-cy="device-registered-name"
                     id="registered_name"
                     {...field}
                     placeholder={t("enter_registered_name")}

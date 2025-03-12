@@ -8,4 +8,14 @@ export class FacilityDevices {
     cy.verifyAndClickElement('[data-cy="add-device-button"]', "Add Device");
     return this;
   }
+
+  enterRegisteredDeviceName(deviceName: string) {
+    cy.typeIntoField('[data-cy="device-registered-name"]', deviceName);
+    return this;
+  }
+
+  clickSubmitDeviceForm() {
+    cy.clickSubmitButton("Save");
+    return this;
+  }
 }

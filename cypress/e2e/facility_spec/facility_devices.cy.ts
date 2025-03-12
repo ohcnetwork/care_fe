@@ -8,14 +8,19 @@ describe("Facility Devices", () => {
   const facilityDevices = new FacilityDevices();
 
   beforeEach(() => {
-    cy.loginByApi("nurse");
+    cy.loginByApi("dev-nurse1");
     cy.visit("/");
   });
 
   it("Create a new device with mandatory fields and edit the details", () => {
+    const deviceName = "Camera 1";
     facilityCreation.selectFacility("GHC payyanur");
     facilityHomepage.navigateToSettings();
-    facilityDevices.navigateToDevices().clickAddDeviceButton();
+    facilityDevices
+      .navigateToDevices()
+      .clickAddDeviceButton()
+      .enterRegisteredDeviceName(deviceName)
+      .clickSubmitDeviceForm();
   });
 
   it("Assign a new location to the devices and verify location history", () => {
