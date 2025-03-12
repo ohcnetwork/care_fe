@@ -666,8 +666,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
                               }
                             }
                           }}
-                          rows={1}
-                          className="flex-1 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="flex-1 min-h-10 max-h-48"
                         />
                         <Button
                           type="submit"

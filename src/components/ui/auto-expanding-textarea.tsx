@@ -29,11 +29,9 @@ const AutoExpandingTextarea = forwardRef<
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       {...rest}
-      style={{
-        overflow: "hidden",
-        resize: "none",
-        ...rest.style,
-      }}
+      rows={1}
+      style={{ overflow: "hidden", resize: "none" }}
+      className="flex-1 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
     />
   );
 });
