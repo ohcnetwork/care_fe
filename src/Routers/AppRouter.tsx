@@ -97,7 +97,7 @@ export default function AppRouter() {
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
-      history.scrollRestoration = "manual";
+      history.scrollRestoration = "auto";
     }
     setTimeout(() => {
       window.scrollTo({
