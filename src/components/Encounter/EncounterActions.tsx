@@ -88,9 +88,7 @@ export default function EncounterActions({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-            >
+            <Link href={`files/discharge_summary`}>
               {t("discharge_summary")}
             </Link>
           </DropdownMenuItem>
@@ -152,11 +150,7 @@ export default function EncounterActions({
           className="w-full justify-start"
           asChild
         >
-          <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
-          >
-            {t("discharge_summary")}
-          </Link>
+          <Link href={`files/discharge_summary`}>{t("discharge_summary")}</Link>
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>

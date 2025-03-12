@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
-import { Link } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -186,6 +186,12 @@ export const FilesTab = (props: FilesTabProps) => {
       fileUpload.clearFiles();
     }
   }, [openUploadDialog]);
+
+  const pathParams = usePathParams("/organization/:id/*");
+
+  const baseUrl = pathParams?.id
+    ? `/organization/organizationId/patient/${patientId}/encounter/${encounter?.id}`
+    : `/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}`;
 
   const getFileType = (file: FileUploadModel) => {
     return fileManager.getFileType(file);
@@ -639,17 +645,14 @@ export const FilesTab = (props: FilesTabProps) => {
         {type === "encounter" && (
           <TabsList className="grid w-auto grid-cols-2 sm:w-fit">
             <TabsTrigger value="all" asChild>
-              <Link
-                className="text-gray-600"
-                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/all`}
-              >
+              <Link className="text-gray-600" href={`${baseUrl}/files/all`}>
                 {t("all")}
               </Link>
             </TabsTrigger>
             <TabsTrigger value="discharge_summary" asChild>
               <Link
                 className="text-gray-600"
-                href={`/facility/${encounter?.facility.id}/patient/${patientId}/encounter/${encounter?.id}/files/discharge_summary`}
+                href={`${baseUrl}/files/discharge_summary`}
               >
                 {t("discharge_summary")}
               </Link>
