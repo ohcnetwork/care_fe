@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { t } from "i18next";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -30,11 +30,12 @@ interface QuestionnaireListResponse {
 }
 
 export function QuestionnaireSearch({
-  placeholder = t("add_questionnaire"),
+  placeholder,
   onSelect,
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -75,7 +76,7 @@ export function QuestionnaireSearch({
               {t("loading")}
             </>
           ) : (
-            <span>{placeholder}</span>
+            <span>{placeholder || t("add_questionnaire")}</span>
           )}
           <CareIcon icon="l-arrow-down" className="ml-2 h-4 w-4" />
         </Button>
