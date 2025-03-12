@@ -161,7 +161,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
+            <h3 className="text-sm font-medium">
+              {t("add_organization", { count: 0 })}
+            </h3>
             <Command className="rounded-lg border shadow-md">
               <CommandInput
                 placeholder="Search organizations..."
