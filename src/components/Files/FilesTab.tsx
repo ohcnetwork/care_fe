@@ -54,11 +54,10 @@ export interface FilesTabProps {
   patientId?: string;
   encounter?: Encounter;
   patient?: Patient;
-  subPage?: string;
 }
 
 export const FilesTab = (props: FilesTabProps) => {
-  const { patientId, type, encounter, subPage = "all" } = props;
+  const { patientId, type, encounter } = props;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
   });
@@ -637,7 +636,7 @@ export const FilesTab = (props: FilesTabProps) => {
         associatingId={associatingId}
       />
       <Tabs
-        value={qParams.file || subPage}
+        value={qParams.file || "all"}
         onValueChange={(value) =>
           updateQuery({
             file: value,
