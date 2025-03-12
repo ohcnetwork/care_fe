@@ -62,7 +62,7 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between items-start gap-4">
+        <div className="justify-between items-center flex flex-wrap">
           <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
             <EntityBadge
               title={t("organizations")}
@@ -71,16 +71,16 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
               translationParams={{ entity: "Organization" }}
             />
           </div>
-          <div className="w-72">
-            <SearchByMultipleFields
-              id="organization-search"
-              key={id}
-              options={searchOptions}
-              initialOptionIndex={0}
-              onSearch={(value) => updateQuery({ name: value || null })}
-              className="w-full"
-            />
-          </div>
+        </div>
+        <div className="flex gap-2">
+          <SearchByMultipleFields
+            id="organization-search"
+            key={id}
+            options={searchOptions}
+            initialOptionIndex={0}
+            onSearch={(value) => updateQuery({ name: value || null })}
+            className="w-full"
+          />
         </div>
 
         {isFetching ? (
