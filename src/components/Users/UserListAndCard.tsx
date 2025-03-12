@@ -64,7 +64,7 @@ const UserCard = ({ user }: { user: UserBase }) => {
   return (
     <Card key={user.id} className="h-full">
       <CardContent className="p-4 sm:p-6 flex flex-col h-full justify-between">
-        <div className="flex items-start gap-3 ">
+        <div className="flex items-start gap-3">
           <Avatar
             name={formatName(user)}
             imageUrl={
