@@ -331,23 +331,6 @@ const AvatarEditModal = ({
                           />
                         )}
                       </div>
-                      {isCropping && (
-                        <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setIsCropping(false);
-                              setCrop({ x: 0, y: 0 });
-                              setZoom(1);
-                            }}
-                          >
-                            {t("cancel")}
-                          </Button>
-                          <Button onClick={handleCropImage} variant="primary">
-                            {t("Crop")}
-                          </Button>
-                        </div>
-                      )}
                     </div>
                     <p className="text-center font-medium text-secondary-700">
                       {hintMessage}
@@ -440,6 +423,23 @@ const AvatarEditModal = ({
                   >
                     {`${t("open_camera")}`}
                   </Button>
+                  {isCropping && (
+                    <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsCropping(false);
+                          setCrop({ x: 0, y: 0 });
+                          setZoom(1);
+                        }}
+                      >
+                        {t("cancel")}
+                      </Button>
+                      <Button onClick={handleCropImage} variant="primary">
+                        {t("Crop")}
+                      </Button>
+                    </div>
+                  )}
                   {preview && !isCropping && (
                     <Button
                       variant="primary"
