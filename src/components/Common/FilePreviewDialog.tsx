@@ -90,6 +90,30 @@ interface DragState {
   dragStart: { x: number; y: number };
 }
 
+const calculateClampedPosition = (
+  e: { clientX: number; clientY: number },
+  dragStart: { x: number; y: number },
+  containerRect: DOMRect,
+  imageRect: DOMRect,
+) => {
+  const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
+  const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
+
+  const newX = e.clientX - dragStart.x;
+  const newY = e.clientY - dragStart.y;
+
+  return {
+    x: Math.max(-maxX, Math.min(maxX, newX)),
+    y: Math.max(-maxY, Math.min(maxY, newY)),
+  };
+};
+
+const initialDragState: DragState = {
+  isDragging: false,
+  position: { x: 0, y: 0 },
+  dragStart: { x: 0, y: 0 },
+};
+
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const {
     show,
@@ -108,11 +132,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   const [numPages, setNumPages] = useState(1);
   const [index, setIndex] = useState<number>(currentIndex);
   const [scale, setScale] = useState(1.0);
-  const [dragState, setDragState] = useState<DragState>({
-    isDragging: false,
-    position: { x: 0, y: 0 },
-    dragStart: { x: 0, y: 0 },
-  });
+  const [dragState, setDragState] = useState<DragState>(initialDragState);
 
   useEffect(() => {
     if (uploadedFiles && show) {
@@ -121,21 +141,8 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   }, [uploadedFiles, show, currentIndex]);
 
   useEffect(() => {
-    setDragState({
-      isDragging: false,
-      position: { x: 0, y: 0 },
-      dragStart: { x: 0, y: 0 },
-    });
+    setDragState(initialDragState);
   }, [index, show]);
-
-  useEffect(() => {
-    if (file_state.isImage) {
-      setFileState((prev) => ({
-        ...prev,
-        zoom: 4,
-      }));
-    }
-  }, [fileUrl, file_state.isImage]);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -237,21 +244,16 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     const containerRect = container.getBoundingClientRect();
     const imageRect = image.getBoundingClientRect();
 
-    const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
-    const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
-
-    const newX = e.clientX - dragState.dragStart.x;
-    const newY = e.clientY - dragState.dragStart.y;
-
-    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
-    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+    const { x, y } = calculateClampedPosition(
+      e,
+      dragState.dragStart,
+      containerRect,
+      imageRect,
+    );
 
     setDragState((prev) => ({
       ...prev,
-      position: {
-        x: clampedX,
-        y: clampedY,
-      },
+      position: { x, y },
     }));
   };
 
@@ -284,21 +286,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     const containerRect = container.getBoundingClientRect();
     const imageRect = image.getBoundingClientRect();
 
-    const maxX = Math.max(0, (imageRect.width - containerRect.width) / 2);
-    const maxY = Math.max(0, (imageRect.height - containerRect.height) / 2);
-
-    const newX = e.touches[0].clientX - dragState.dragStart.x;
-    const newY = e.touches[0].clientY - dragState.dragStart.y;
-
-    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
-    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+    const { x, y } = calculateClampedPosition(
+      {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+      },
+      dragState.dragStart,
+      containerRect,
+      imageRect,
+    );
 
     setDragState((prev) => ({
       ...prev,
-      position: {
-        x: clampedX,
-        y: clampedY,
-      },
+      position: { x, y },
     }));
   };
 
@@ -453,113 +453,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </Button>
               )}
-            </div>
-            <div className="flex items-center justify-center">
-              <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      [
-                        t("zoom_in"),
-                        "l-search-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        `${25 * file_state.zoom}%`,
-                        false,
-                        () => {
-                          setFileState({ ...file_state, zoom: 4 });
-                        },
-                        false,
-                      ],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("rotate_left"),
-                        "l-corner-up-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("rotate_right"),
-                        "l-corner-up-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
-                      >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
-                      </Button>
-                    ))}
-                  </>
-                )}
-                {file_state.extension === "pdf" && (
-                  <>
-                    {[
-                      [t("zoom_in"), "l-search-plus", handleZoomIn, scale >= 2],
-                      [`${Math.round(scale * 100)}%`, false, () => {}, false],
-                      [
-                        t("zoom_out"),
-                        "l-search-minus",
-                        handleZoomOut,
-                        scale <= 0.5,
-                      ],
-                      [
-                        t("previous"),
-                        "l-arrow-left",
-                        () => setPage((prev) => prev - 1),
-                        page === 1,
-                      ],
-                      [`${page}/${numPages}`, false, () => ({}), false],
-                      [
-                        t("next"),
-                        "l-arrow-right",
-                        () => setPage((prev) => prev + 1),
-                        page === numPages,
-                      ],
-                    ].map((button, index) => (
-                      <Button
-                        variant="ghost"
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className={cn(
-                          "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70",
-                          index > 2 ? "max-md:col-span-3" : "max-md:col-span-2",
-                        )}
-                        disabled={button[3] as boolean}
-                      >
-                        {button[1] && (
-                          <CareIcon
-                            icon={button[1] as IconName}
-                            className="mr-2 text-lg"
-                          />
-                        )}
-                        {button[0] as string}
-                      </Button>
-                    ))}
-                  </>
-                )}
-              </div>
             </div>
             <div className="flex items-center justify-center">
               <div className="mt-2 grid grid-cols-5 max-md:grid-cols-6 gap-4">
