@@ -11,13 +11,13 @@ import {
 
 import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
 
-export interface CameraSelectProps {
+interface UseCameraSelectOptions {
   onChange?: (deviceId: string) => void;
 }
 
-const CameraSelect: React.FC<CameraSelectProps> = ({ onChange }) => {
+const useCameraSelect = ({ onChange }: UseCameraSelectOptions = {}) => {
   const [devices, setDevices] = useState<any[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const { preferredDeviceId, setDeviceId } = usePreferredMediaDevice();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const CameraSelect: React.FC<CameraSelectProps> = ({ onChange }) => {
     };
 
     getDevices();
-  }, [preferredDeviceId]);
+  }, [onChange, preferredDeviceId]);
 
   const handleValueChange = (value: string) => {
     setSelectedDeviceId(value);
@@ -60,23 +60,22 @@ const CameraSelect: React.FC<CameraSelectProps> = ({ onChange }) => {
     }
   };
 
-  return (
-    <Select value={selectedDeviceId || ""} onValueChange={handleValueChange}>
+  const CameraSelect = () => (
+    <Select value={selectedDeviceId} onValueChange={handleValueChange}>
       <SelectTrigger>
         <SelectValue placeholder="Select a camera" />
       </SelectTrigger>
       <SelectContent>
         {devices.map((device: any) => (
-          <SelectItem
-            key={device.deviceId}
-            value={device.deviceId || "Unknown Device"}
-          >
+          <SelectItem key={device.deviceId} value={device.deviceId}>
             {device.label || `Camera ${device.deviceId}`}
           </SelectItem>
         ))}
       </SelectContent>
     </Select>
   );
+
+  return { CameraSelect, selectedDeviceId };
 };
 
-export default CameraSelect;
+export default useCameraSelect;

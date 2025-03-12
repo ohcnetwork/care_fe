@@ -16,14 +16,13 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import CameraSelect from "@/components/Common/CameraSelect";
-
+import useCameraSelect from "@/hooks/useCameraSelect";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
-import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
 
 interface Props {
   title: string;
@@ -68,7 +67,6 @@ const AvatarEditModal = ({
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<Webcam>(null);
@@ -80,7 +78,7 @@ const AvatarEditModal = ({
   );
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const { setDeviceId } = usePreferredMediaDevice();
+  const { CameraSelect, selectedDeviceId } = useCameraSelect();
 
   const handleSwitchCamera = useCallback(() => {
     setConstraint((prev) => {
@@ -141,11 +139,12 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (!isImageFile(e.target.files[0])) {
+    const file = e.target.files[0];
+    if (!isImageFile(file)) {
       toast.warning(t("please_upload_an_image_file"));
       return;
     }
-    setSelectedFile(e.target.files[0]);
+    setSelectedFile(file);
   };
 
   const uploadAvatar = async () => {
@@ -228,20 +227,17 @@ const AvatarEditModal = ({
       <DialogContent className="md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl">{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("edit_avatar")}
+          </DialogDescription>
         </DialogHeader>
-        <CameraSelect
-          onChange={(deviceId) => {
-            setDeviceId(deviceId);
-            setSelectedDeviceId(deviceId);
-          }}
-        />
         <div className="flex h-full w-full items-center justify-center overflow-y-auto">
           <div className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
             {!isCameraOpen ? (
               <>
                 {preview || imageUrl ? (
                   <>
-                    <div className="flex flex-1 items-center justify-center rounded-lg">
+                    <div className="flex h-[50vh] md:h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
                       <img
                         src={
                           preview && preview.startsWith("blob:")
@@ -249,7 +245,7 @@ const AvatarEditModal = ({
                             : imageUrl
                         }
                         alt="cover-photo"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                     <p className="text-center font-medium text-secondary-700">
@@ -267,7 +263,9 @@ const AvatarEditModal = ({
                         : dragProps.dragOver
                           ? "border-primary-500"
                           : "border-secondary-500"
-                    } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
+                    } ${
+                      dragProps.fileDropError !== "" ? "border-red-500" : ""
+                    }`}
                   >
                     <svg
                       stroke="currentColor"
@@ -359,6 +357,7 @@ const AvatarEditModal = ({
                       variant="destructive"
                       onClick={deleteAvatar}
                       disabled={isProcessing}
+                      data-cy="delete-avatar"
                     >
                       {t("delete")}
                     </Button>
@@ -368,6 +367,7 @@ const AvatarEditModal = ({
                     variant="outline"
                     onClick={uploadAvatar}
                     disabled={isProcessing || !selectedFile}
+                    data-cy="save-cover-image"
                   >
                     {isProcessing ? (
                       <CareIcon
@@ -385,9 +385,12 @@ const AvatarEditModal = ({
               </>
             ) : (
               <>
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-1 flex-wrap items-center justify-center">
                   {!previewImage ? (
                     <>
+                      <div className="mb-2 w-full">
+                        <CameraSelect />
+                      </div>
                       <Webcam
                         audio={false}
                         height={constraint.height}
@@ -406,11 +409,10 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      <img src={previewImage} />
+                      <img src={previewImage} alt="captured" />
                     </>
                   )}
                 </div>
-                {/* buttons for mobile screens */}
                 <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                   {!previewImage ? (
                     <>

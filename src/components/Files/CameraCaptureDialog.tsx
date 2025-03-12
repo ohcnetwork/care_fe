@@ -13,10 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import CameraSelect from "@/components/Common/CameraSelect";
-
 import useBreakpoints from "@/hooks/useBreakpoints";
-import usePreferredMediaDevice from "@/hooks/usePreferredMediaDevice";
+import useCameraSelect from "@/hooks/useCameraSelect";
 
 export interface CameraCaptureDialogProps {
   open: boolean;
@@ -33,10 +31,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
   );
-  const [selectedDeviceId, setSelectedDeviceId] = useState<any>(null);
+  const { CameraSelect, selectedDeviceId } = useCameraSelect();
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
-  const { setDeviceId } = usePreferredMediaDevice();
 
   const videoConstraints = {
     width: { ideal: 4096 },
@@ -115,13 +112,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </div>
           </DialogTitle>
         </DialogHeader>
-        <CameraSelect
-          onChange={(deviceId) => {
-            setDeviceId(deviceId);
-            setSelectedDeviceId(deviceId);
-          }}
-        />
-
+        <CameraSelect />
         <div>
           {!previewImage ? (
             <div className="m-3">
@@ -140,7 +131,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             </div>
           ) : (
             <div className="m-3">
-              <img src={previewImage} />
+              <img src={previewImage} alt="captured" />
             </div>
           )}
         </div>
