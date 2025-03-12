@@ -192,7 +192,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     queryKey: ["facilities", facilitySearch],
     queryFn: query.debounced(facilityApi.getAllFacilities, {
       queryParams: {
-        search_text: facilitySearch,
+        search_text: facilitySearch ? facilitySearch : undefined,
         limit: 50,
       },
     }),
