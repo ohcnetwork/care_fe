@@ -18,10 +18,10 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
 import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";
@@ -43,6 +43,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
   });
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
+    disableCache: true,
   });
   const { t } = useTranslation();
 
@@ -51,7 +52,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["facilityOrganizationUsers", facilityId, id, qParams],
-    queryFn: query.debounced(routes.facilityOrganization.listUsers, {
+    queryFn: query.debounced(facilityOrganizationApi.listUsers, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
         search_text: qParams.search || undefined,

@@ -35,10 +35,12 @@ export default function ArchivedFileDialog({
         aria-describedby="file-archive"
       >
         <DialogHeader>
-          <DialogTitle className="flex flex-row gap-1">
-            {t("archived_file")}:
+          <DialogTitle>
+            {t("archived_file")}:{" "}
             <TooltipComponent content={fileName}>
-              <span className="max-w-[200px] truncate">{fileName}</span>
+              <span className="max-w-sm truncate inline-block align-bottom">
+                {fileName}
+              </span>
             </TooltipComponent>
           </DialogTitle>
         </DialogHeader>

@@ -6,7 +6,6 @@ export const EncounterMedicinesTab = (props: EncounterTabProps) => {
   return (
     <div className="flex flex-col gap-16">
       <MedicationRequestTable
-        facilityId={props.facilityId}
         patientId={props.patient.id}
         encounter={props.encounter}
       />

@@ -39,13 +39,20 @@ export const Appointments = (props: PatientProps) => {
   );
   const { goBack } = useAppHistory();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["patient-appointments", patientId],
-    queryFn: query(scheduleApis.appointments.list, {
-      pathParams: { facility_id: facilityId ?? "" },
-      queryParams: { patient: patientId, limit: 100 },
-    }),
-    enabled: !!facilityId && canViewAppointments,
+    queryFn: query(
+      facilityId
+        ? scheduleApis.appointments.list
+        : scheduleApis.appointments.getAppointments,
+      {
+        pathParams: {
+          facility_id: facilityId ?? "",
+          patient_id: patientId,
+        },
+        queryParams: { patient: patientId, limit: 100 },
+      },
+    ),
   });
 
   useEffect(() => {
@@ -110,13 +117,13 @@ export const Appointments = (props: PatientProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!appointments ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
                   {t("loading")}
                 </TableCell>
               </TableRow>
-            ) : appointments.length ? (
+            ) : appointments && appointments.length ? (
               appointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell className="font-medium">

@@ -22,6 +22,7 @@ import {
   FacilityOrganization,
   FacilityOrganizationParent,
 } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   id: string;
@@ -45,19 +46,19 @@ export default function FacilityOrganizationLayout({
 
   const navItems: NavItem[] = [
     {
-      path: `/departments/${id}`,
-      title: t("departments_or_teams"),
-      value: "departments",
-    },
-    {
       path: `/departments/${id}/users`,
       title: t("users"),
       value: "users",
     },
+    {
+      path: `/departments/${id}`,
+      title: t("departments_or_teams"),
+      value: "departments",
+    },
   ];
 
   const currentTab =
-    navItems.find((item) => item.path === path)?.value || "departments";
+    navItems.find((item) => item.path === path)?.value || "users";
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -68,7 +69,7 @@ export default function FacilityOrganizationLayout({
 
   const { data: org, isLoading } = useQuery<FacilityOrganization>({
     queryKey: ["facilityOrganization", id],
-    queryFn: query(routes.facilityOrganization.get, {
+    queryFn: query(facilityOrganizationApi.get, {
       pathParams: { facilityId, organizationId: id },
     }),
   });

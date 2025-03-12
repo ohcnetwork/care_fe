@@ -13,19 +13,26 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
 export const EncounterUpdatesTab = ({
-  facilityId,
   encounter,
   patient,
 }: EncounterTabProps) => {
   const { hasPermission } = usePermissions();
-  const { canViewClinicalData, canViewEncounter } = getPermissions(
-    hasPermission,
-    encounter.permissions,
-  );
+  const {
+    canViewClinicalData,
+    canViewEncounter,
+    canSubmitPatientQuestionnaireResponses,
+    canSubmitEncounterQuestionnaire,
+  } = getPermissions(hasPermission, encounter.permissions);
+  const canAccess = canViewEncounter || canViewClinicalData;
+  const canEdit =
+    (canSubmitEncounterQuestionnaire &&
+      !inactiveEncounterStatus.includes(encounter.status ?? "")) ||
+    canSubmitPatientQuestionnaireResponses;
+
   const { goBack } = useAppHistory();
-  const canAccess = canViewClinicalData || canViewEncounter;
 
   useEffect(() => {
     if (!canAccess) {
@@ -44,11 +51,10 @@ export const EncounterUpdatesTab = ({
           {/* Allergies Section */}
           <div>
             <AllergyList
-              facilityId={facilityId}
               patientId={patient.id}
               encounterId={encounter.id}
+              readOnly={!canEdit}
               encounterStatus={encounter.status}
-              permissions={encounter.permissions}
             />
           </div>
 
@@ -57,9 +63,7 @@ export const EncounterUpdatesTab = ({
             <SymptomsList
               patientId={patient.id}
               encounterId={encounter.id}
-              facilityId={facilityId}
-              encounterStatus={encounter.status}
-              permissions={encounter.permissions}
+              readOnly={!canEdit}
             />
           </div>
 
@@ -68,9 +72,7 @@ export const EncounterUpdatesTab = ({
             <DiagnosisList
               patientId={patient.id}
               encounterId={encounter.id}
-              facilityId={facilityId}
-              encounterStatus={encounter.status}
-              permissions={encounter.permissions}
+              readOnly={!canEdit}
             />
           </div>
 

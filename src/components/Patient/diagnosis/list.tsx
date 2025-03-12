@@ -11,44 +11,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { getPermissions } from "@/common/Permissions";
-
 import query from "@/Utils/request/query";
-import { usePermissions } from "@/context/PermissionContext";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
 interface DiagnosisListProps {
   patientId: string;
   encounterId?: string;
-  facilityId?: string;
-  encounterStatus?: Encounter["status"];
   className?: string;
-  permissions: string[];
+  readOnly?: boolean;
 }
 
 export function DiagnosisList({
   patientId,
   encounterId,
-  facilityId,
-  encounterStatus,
-  className,
-  permissions,
+  className = "",
+  readOnly = false,
 }: DiagnosisListProps) {
-  const { hasPermission } = usePermissions();
-  const {
-    canViewClinicalData,
-    canViewEncounter,
-    canSubmitEncounterQuestionnaire,
-    canSubmitPatientQuestionnaireResponses,
-  } = getPermissions(hasPermission, permissions);
-  const canAccess = encounterId ? canViewEncounter : canViewClinicalData;
-  const canEdit = encounterId
-    ? canSubmitEncounterQuestionnaire &&
-      !inactiveEncounterStatus.includes(encounterStatus ?? "")
-    : canSubmitPatientQuestionnaireResponses;
   const [showEnteredInError, setShowEnteredInError] = useState(false);
 
   const { data: diagnoses, isLoading } = useQuery({
@@ -57,17 +37,11 @@ export function DiagnosisList({
       pathParams: { patientId },
       queryParams: encounterId ? { encounter: encounterId } : undefined,
     }),
-    enabled: canAccess,
   });
 
   if (isLoading) {
     return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        className={className}
-      >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
         </CardContent>
@@ -87,13 +61,7 @@ export function DiagnosisList({
 
   if (!filteredDiagnoses?.length) {
     return (
-      <DiagnosisListLayout
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        canEdit={canEdit}
-        className={className}
-      >
+      <DiagnosisListLayout className={className} readOnly={readOnly}>
         <CardContent className="px-2 pb-3 pt-2">
           <p className="text-gray-500">{t("no_diagnoses_recorded")}</p>
         </CardContent>
@@ -102,13 +70,7 @@ export function DiagnosisList({
   }
 
   return (
-    <DiagnosisListLayout
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      canEdit={canEdit}
-      className={className}
-    >
+    <DiagnosisListLayout className={className} readOnly={readOnly}>
       <>
         <DiagnosisTable
           diagnoses={[
@@ -146,19 +108,13 @@ export function DiagnosisList({
 }
 
 const DiagnosisListLayout = ({
-  facilityId,
-  patientId,
-  encounterId,
   children,
-  canEdit = false,
   className,
+  readOnly = false,
 }: {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
-  canEdit?: boolean;
   className?: string;
+  readOnly?: boolean;
 }) => {
   return (
     <Card className={cn("rounded-sm ", className)}>
@@ -166,9 +122,9 @@ const DiagnosisListLayout = ({
         className={cn("px-4 pt-4 pb-2 flex justify-between flex-row")}
       >
         <CardTitle>{t("diagnoses")}</CardTitle>
-        {facilityId && encounterId && canEdit && (
+        {!readOnly && (
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/diagnosis`}
+            href={`questionnaire/diagnosis`}
             className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950"
           >
             <CareIcon icon="l-pen" className="w-4 h-4" />

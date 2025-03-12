@@ -41,6 +41,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -68,7 +69,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.updateUserRole, {
+      mutate(facilityOrganizationApi.updateUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -93,7 +94,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(routes.facilityOrganization.removeUserRole, {
+      mutate(facilityOrganizationApi.removeUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,

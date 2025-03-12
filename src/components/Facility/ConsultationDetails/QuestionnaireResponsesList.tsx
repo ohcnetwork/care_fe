@@ -337,6 +337,7 @@ export default function QuestionnaireResponsesList({
         }),
         encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
+        subject_type: encounter ? "encounter" : "patient",
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,

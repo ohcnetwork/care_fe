@@ -32,7 +32,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, cacheBlacklist: ["name", "phone_number"] });
+    useFilters({ limit: 15, disableCache: true });
 
   const [organization, setOrganization] = useState<Organization | null>(null);
 

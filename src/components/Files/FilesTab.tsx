@@ -553,11 +553,17 @@ export const FilesTab = (props: FilesTabProps) => {
                       <span className="p-2 rounded-full bg-gray-100 shrink-0">
                         <CareIcon icon={icons[filetype]} className="text-xl" />
                       </span>
-                      <TooltipComponent content={fileName}>
-                        <p className="text-gray-900 truncate max-w-[10rem]">
+                      {file.name && file.name.length > 20 ? (
+                        <TooltipComponent content={fileName}>
+                          <span className="text-gray-900 truncate block">
+                            {fileName}
+                          </span>
+                        </TooltipComponent>
+                      ) : (
+                        <span className="text-gray-900 truncate block">
                           {fileName}
-                        </p>
-                      </TooltipComponent>
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell

@@ -15,10 +15,10 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 import FacilityOrganizationLayout from "./components/FacilityOrganizationLayout";
@@ -53,7 +53,9 @@ function OrganizationCard({
               </div>
             </div>
             <Button variant="white" size="sm" className="font-semibold" asChild>
-              <Link href={`/departments/${org.id}`}>{t("see_details")}</Link>
+              <Link href={`/departments/${org.id}/users`}>
+                {t("see_details")}
+              </Link>
             </Button>
           </div>
         </div>
@@ -66,7 +68,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 12,
-    cacheBlacklist: ["username"],
+    disableCache: true,
   });
 
   const { hasPermission } = usePermissions();
@@ -81,7 +83,7 @@ export default function FacilityOrganizationView({ id, facilityId }: Props) {
       resultsPerPage,
       qParams.search,
     ],
-    queryFn: query.debounced(routes.facilityOrganization.list, {
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId },
       queryParams: {
         parent: id,

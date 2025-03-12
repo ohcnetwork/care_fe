@@ -130,6 +130,7 @@ const EncounterHistory = (props: PatientProps) => {
                       key={encounter.id}
                       encounter={encounter}
                       permissions={patientData.permissions ?? []}
+                      facilityId={facilityId}
                     />
                   </li>
                 ))}

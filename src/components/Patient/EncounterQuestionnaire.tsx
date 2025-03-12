@@ -19,7 +19,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { inactiveEncounterStatus } from "@/types/emr/encounter";
 
 interface Props {
-  facilityId: string;
+  facilityId?: string;
   patientId: string;
   encounterId?: string;
   questionnaireSlug?: string;
@@ -38,7 +38,7 @@ export default function EncounterQuestionnaire({
     queryKey: ["encounter", encounterId],
     queryFn: query(routes.encounter.get, {
       pathParams: { id: encounterId ?? "" },
-      queryParams: { facility: facilityId },
+      queryParams: { facility: facilityId! },
     }),
     enabled: !!encounterId,
   });
@@ -56,7 +56,7 @@ export default function EncounterQuestionnaire({
 
   return (
     <Page title={t("questionnaire_one")}>
-      <div className="flex flex-col space-y-4 mt-4">
+      <div className="flex flex-col space-y-4 mt-4 overflow-y-auto">
         {encounter && (
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
@@ -89,9 +89,13 @@ export default function EncounterQuestionnaire({
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
               onSubmit={() => {
-                if (encounterId) {
+                if (encounterId && facilityId) {
                   navigate(
                     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+                  );
+                } else if (facilityId) {
+                  navigate(
+                    `/facility/${facilityId}/patient/${patientId}/updates`,
                   );
                 } else {
                   navigate(`/patient/${patientId}/updates`);
