@@ -274,7 +274,7 @@ const AvatarEditModal = ({
     <>
       {t("max_size_for_image_uploaded_should_be", { maxSize: "1MB" })}
       <br />
-      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}
+      {t("allowed_formats_are", { formats: "jpg, png, jpeg" })}{" "}
       {t("recommended_aspect_ratio_for", { aspectRatio: "1:1" })}
     </>
   );
@@ -332,7 +332,7 @@ const AvatarEditModal = ({
                         )}
                       </div>
                       {isCropping && (
-                        <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center gap-4 p-4 bg-white border-t border-gray-200 shadow-lg z-10">
+                        <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
                           <Button
                             variant="outline"
                             onClick={() => {
@@ -340,15 +340,10 @@ const AvatarEditModal = ({
                               setCrop({ x: 0, y: 0 });
                               setZoom(1);
                             }}
-                            className="min-w-[100px]"
                           >
                             {t("cancel")}
                           </Button>
-                          <Button
-                            onClick={handleCropImage}
-                            variant="primary"
-                            className="min-w-[100px]"
-                          >
+                          <Button onClick={handleCropImage} variant="primary">
                             {t("Crop")}
                           </Button>
                         </div>
@@ -530,34 +525,6 @@ const AvatarEditModal = ({
                             onZoomChange={setZoom}
                             onCropComplete={onCropComplete}
                           />
-                          <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center gap-4 p-4 bg-white border-t border-gray-200 shadow-lg z-10">
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                setIsCropping(false);
-                                setCrop({ x: 0, y: 0 });
-                                setZoom(1);
-                              }}
-                              className="min-w-[100px]"
-                            >
-                              {t("cancel")}
-                            </Button>
-                            <Button
-                              variant="primary"
-                              onClick={handleCropImage}
-                              disabled={isProcessing}
-                              className="min-w-[100px]"
-                            >
-                              {isProcessing ? (
-                                <CareIcon
-                                  icon="l-spinner"
-                                  className="animate-spin text-lg"
-                                />
-                              ) : (
-                                t("crop")
-                              )}
-                            </Button>
-                          </div>
                         </div>
                       ) : (
                         <div className="aspect-square max-w-[720px] w-full overflow-hidden">
@@ -590,7 +557,34 @@ const AvatarEditModal = ({
                     </>
                   ) : (
                     <>
-                      {!isCropping && (
+                      {isCropping ? (
+                        <>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              setIsCropping(false);
+                              setCrop({ x: 0, y: 0 });
+                              setZoom(1);
+                            }}
+                          >
+                            {t("cancel")}
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={handleCropImage}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <CareIcon
+                                icon="l-spinner"
+                                className="animate-spin text-lg"
+                              />
+                            ) : (
+                              t("crop")
+                            )}
+                          </Button>
+                        </>
+                      ) : (
                         <>
                           <Button
                             variant="primary"
