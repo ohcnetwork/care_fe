@@ -89,7 +89,6 @@ export default function AuthUserProvider({
       // Handle MFA cases
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
-        // localStorage.setItem("mfa_method", "totp");
         navigate("/2fa");
         return;
       }
@@ -100,13 +99,7 @@ export default function AuthUserProvider({
         localStorage.setItem(LocalStorageKeys.accessToken, data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
-        // Invalidate and wait for the currentUser query to complete
-        try {
-          await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-          await queryClient.refetchQueries({ queryKey: ["currentUser"] });
-        } catch (error) {
-          console.error("Error refreshing currentUser query:", error);
-        }
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
         if (location.pathname === "/" || location.pathname === "/login") {
           navigate(getRedirectOr("/"));
