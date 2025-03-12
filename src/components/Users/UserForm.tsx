@@ -60,8 +60,6 @@ export default function UserForm({
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
-  const [otherPrefix, setOtherPrefix] = useState<string>();
-  const [otherSuffix, setOtherSuffix] = useState<string>();
 
   const userFormSchema = z
     .object({
@@ -152,8 +150,8 @@ export default function UserForm({
         email: userData.email,
         phone_number: userData.phone_number || "",
         gender: userData.gender || undefined,
-        prefix: otherPrefix || userData.prefix || "",
-        suffix: otherSuffix || userData.suffix || "",
+        prefix: userData.prefix || "",
+        suffix: userData.suffix || "",
       };
       form.reset(formData);
     }
@@ -319,15 +317,11 @@ export default function UserForm({
                 <FormLabel>{t("prefix")}</FormLabel>
                 <Select
                   {...field}
-                  onValueChange={(value) => {
-                    if (value === "__other__") {
-                      setOtherPrefix("");
-                    } else {
-                      setOtherPrefix(undefined);
-                    }
-                    field.onChange(value);
-                  }}
+                  onValueChange={field.onChange}
                   defaultValue={field.value}
+                  {...(field.value && !NAME_PREFIXES.includes(field.value)
+                    ? { value: "__other__" }
+                    : {})}
                 >
                   <FormControl>
                     <SelectTrigger data-cy="prefix-input" className="md:w-20">
@@ -344,14 +338,15 @@ export default function UserForm({
                     <SelectItem value="__other__">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
-                {typeof otherPrefix !== "undefined" && (
-                  <Input
-                    placeholder={t("prefix")}
-                    className="md:w-20"
-                    value={otherPrefix}
-                    onChange={(e) => setOtherPrefix(e.target.value)}
-                  />
-                )}
+                {typeof field.value !== "undefined" &&
+                  !NAME_PREFIXES.includes(field.value) && (
+                    <Input
+                      placeholder={t("prefix")}
+                      className="md:w-20"
+                      value={field.value === "__other__" ? "" : field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 <FormMessage />
               </FormItem>
             )}
@@ -398,15 +393,11 @@ export default function UserForm({
                 <FormLabel>{t("suffix")}</FormLabel>
                 <Select
                   {...field}
-                  onValueChange={(value) => {
-                    if (value === "__other__") {
-                      setOtherSuffix("");
-                    } else {
-                      setOtherSuffix(undefined);
-                    }
-                    field.onChange(value);
-                  }}
+                  onValueChange={field.onChange}
                   defaultValue={field.value}
+                  {...(field.value && !NAME_SUFFIXES.includes(field.value)
+                    ? { value: "__other__" }
+                    : {})}
                 >
                   <FormControl>
                     <SelectTrigger data-cy="suffix-input" className="md:w-20">
@@ -423,14 +414,15 @@ export default function UserForm({
                     <SelectItem value="__other__">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
-                {typeof otherSuffix !== "undefined" && (
-                  <Input
-                    placeholder={t("suffix")}
-                    value={otherSuffix}
-                    onChange={(e) => setOtherSuffix(e.target.value)}
-                    className="md:w-20"
-                  />
-                )}
+                {typeof field.value !== "undefined" &&
+                  !NAME_SUFFIXES.includes(field.value) && (
+                    <Input
+                      placeholder={t("suffix")}
+                      className="md:w-20"
+                      value={field.value === "__other__" ? "" : field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 <FormMessage />
               </FormItem>
             )}
