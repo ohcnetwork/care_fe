@@ -173,7 +173,7 @@ function LocationRow({
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          {t("remove")} {location.name}
+                          {t("remove_location", { name: location.name })}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                           {t("are_you_sure_want_to_delete", {
@@ -186,10 +186,8 @@ function LocationRow({
                         <AlertDialogAction
                           onClick={() =>
                             removeLocation({
-                              pathParams: {
-                                facility_id: facilityId,
-                                id: location.id,
-                              },
+                              facility_id: facilityId,
+                              id: location.id,
                             })
                           }
                           className={buttonVariants({ variant: "destructive" })}
