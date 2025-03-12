@@ -2325,6 +2325,7 @@
   "slot_configuration": "Slot Configuration",
   "slots_left": "slots left",
   "slug": "Slug",
+  "slug_format_message": "Slug must only contain letters, numbers, underscores, and hyphens",
   "social_profile": "Social Profile",
   "social_profile_detail": "Include occupation, ration card category, socioeconomic status, and domestic healthcare support for a complete profile.",
   "socioeconomic_status": "Socioeconomic status",
