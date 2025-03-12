@@ -5,12 +5,19 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const PasswordInput = React.forwardRef<
   HTMLInputElement,
   React.ComponentProps<"input">
 >(({ className, ...props }, ref) => {
   const [showPassword, setShowPassword] = React.useState(false);
+
   return (
     <div className="relative">
       <Input
@@ -19,17 +26,24 @@ const PasswordInput = React.forwardRef<
         ref={ref}
         {...props}
       />
-      <button
-        type="button"
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
-        onClick={() => setShowPassword(!showPassword)}
-        aria-label={showPassword ? "Hide password" : "Show password"}
-        aria-pressed={showPassword}
-        title={showPassword ? "Hide password" : "Show password"}
-        tabIndex={-1}
-      >
-        <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
-      </button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+            >
+              <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {showPassword ? "Hide password" : "Show password"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 });
