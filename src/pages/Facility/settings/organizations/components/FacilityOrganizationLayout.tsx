@@ -138,7 +138,7 @@ export default function FacilityOrganizationLayout({
       >
         <div className="mt-2">
           {org.description && (
-            <p className="text-sm text-gray-500 line-clamp-2">
+            <p className="text-sm text-gray-500 break-all whitespace-normal">
               {org.description}
             </p>
           )}
