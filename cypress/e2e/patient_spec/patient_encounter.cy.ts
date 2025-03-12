@@ -22,6 +22,7 @@ describe("Patient Encounter Questionnaire", () => {
     // Chain the methods instead of multiple separate calls
     patientEncounter
       .navigateToEncounters()
+      .clickInProgressEncounterFilter()
       .openFirstEncounterDetails()
       .clickUpdateEncounter()
       .addQuestionnaire("Arterial Blood Gas")
