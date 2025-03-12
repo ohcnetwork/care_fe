@@ -86,4 +86,24 @@ export class PatientEncounter {
     cy.verifyAndClickElement('[data-cy="edit-patient-button"]', "Edit");
     return this;
   }
+
+  clickEncounterMarkAsComplete() {
+    cy.verifyAndClickElement(
+      '[data-cy="mark-encounter-complete"]',
+      "Mark as Complete",
+    );
+    return this;
+  }
+
+  clickConfirmEncounterAsComplete() {
+    cy.verifyAndClickElement(
+      '[data-cy="confirm-encounter-complete"]',
+      "Mark as Complete",
+    );
+    return this;
+  }
+
+  assertEncounterCompleteSuccess() {
+    cy.verifyNotification("Encounter Complete");
+  }
 }
