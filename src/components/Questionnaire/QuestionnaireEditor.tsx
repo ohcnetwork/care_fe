@@ -66,6 +66,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import Autocomplete from "@/src/components/ui/autocomplete";
 import organizationApi from "@/types/organization/organizationApi";
 import {
   EnableWhen,
@@ -1639,27 +1640,23 @@ function QuestionEditor({
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
-                    <Select
+                    <Autocomplete
+                      options={valuesets.map((valueset) => {
+                        return {
+                          label: valueset.name,
+                          value: valueset.slug,
+                        };
+                      })}
+                      placeholder={t("select_a_value_set")}
                       value={
                         question.answer_value_set === "valueset"
-                          ? undefined
+                          ? ""
                           : question.answer_value_set
                       }
-                      onValueChange={(val: string) =>
+                      onChange={(val: string) =>
                         updateField("answer_value_set", val)
                       }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder={t("select_a_value_set")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {valuesets.map((valueset) => (
-                          <SelectItem key={valueset.id} value={valueset.slug}>
-                            {valueset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </CardContent>
                 )}
               </Card>
