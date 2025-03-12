@@ -89,7 +89,7 @@ export default function EncounterActions({
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
+              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files?file=discharge_summary`}
             >
               {t("discharge_summary")}
             </Link>
@@ -150,7 +150,7 @@ export default function EncounterActions({
           asChild
         >
           <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files/discharge_summary`}
+            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/files?file=discharge_summary`}
           >
             {t("discharge_summary")}
           </Link>
