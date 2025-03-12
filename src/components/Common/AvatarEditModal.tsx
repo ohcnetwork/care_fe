@@ -424,7 +424,7 @@ const AvatarEditModal = ({
                     {`${t("open_camera")}`}
                   </Button>
                   {isCropping && (
-                    <div className="flex gap-4 absolute bottom-5 left-1/2 transform -translate-x-1/2">
+                    <div className="flex gap-4 relative justify-center md:absolute md:bottom-5 md:left-1/2 md:transform md:-translate-x-1/2">
                       <Button
                         variant="outline"
                         onClick={() => {
