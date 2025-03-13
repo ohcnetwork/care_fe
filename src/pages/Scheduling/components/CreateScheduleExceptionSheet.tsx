@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
@@ -31,12 +31,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { useIsUserSchedulableResource } from "@/hooks/useIsUserSchedulableResource";
+
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
 
 interface Props {
   facilityId: string;
@@ -134,14 +134,10 @@ export default function CreateScheduleExceptionSheet({
     },
   });
 
-  const { data: isSchedulableResource } = useQuery({
-    queryKey: ["practitioners", facilityId],
-    queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
-    }),
-    select: (data: { users: UserBase[] }) =>
-      data.users.some(({ id }) => userId === id),
-  });
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    userId,
+  );
 
   const unavailableAllDay = form.watch("unavailable_all_day");
 
@@ -179,7 +175,10 @@ export default function CreateScheduleExceptionSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={!isSchedulableResource}>
+          <Button
+            variant="primary"
+            disabled={isPending || !isSchedulableResource}
+          >
             {t("add_exception")}
           </Button>
         )}
