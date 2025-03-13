@@ -185,11 +185,6 @@ export default function LinkConsentDialog({
   }, [fileUpload.files, form]);
 
   const onSubmit = (values: ConsentFormValues) => {
-    if (values.option === "existing") {
-      // TODO: Add API endpoint for linking existing consent
-      return;
-    }
-
     const verifier: UserBase = {
       id: authUser.external_id,
       first_name: authUser.first_name,
@@ -202,6 +197,50 @@ export default function LinkConsentDialog({
       last_login: authUser.last_login || new Date().toISOString(),
       profile_picture_url: authUser.read_profile_picture_url || "",
     };
+
+    if (values.option === "existing") {
+      const consentId = values.existingConsent;
+      const consent = existingConsents?.results?.find(
+        (consent) => consent.id === consentId,
+      );
+
+      if (!consent) {
+        toast.error(t("consent_not_found"));
+        return;
+      }
+
+      if (consent.status !== "active") {
+        toast.error(t("consent_not_active"));
+        return;
+      }
+
+      if (consent.period.end && new Date(consent.period.end) < new Date()) {
+        toast.error(t("consent_expired"));
+        return;
+      }
+
+      createConsent({
+        status: consent.status,
+        category: consent.category,
+        date: consent.date,
+        decision: consent.decision,
+        period: {
+          start: consent.period.start,
+          end: consent.period.end,
+        },
+        encounter: encounterId,
+        source_attachments: [],
+        verification_details: [
+          {
+            verified: true,
+            verified_by: verifier,
+            verification_date: new Date().toISOString(),
+            verification_type: values.verification_type,
+          },
+        ],
+      });
+      return;
+    }
 
     createConsent({
       status: values.status,
@@ -609,12 +648,13 @@ type ConsentRadioItemProps = {
 function ConsentRadioItem({ consent, selected }: ConsentRadioItemProps) {
   const [loadPreview, setLoadPreview] = useState(false);
 
+  const attachmentId = consent.source_attachments[0]?.id;
   const { data: consentFile, isPending } = useQuery({
-    queryKey: ["file_upload", consent.source_attachments[0]?.id],
+    queryKey: ["file_upload", attachmentId],
     queryFn: query(routes.retrieveUpload, {
-      pathParams: { id: consent.source_attachments[0].id! },
+      pathParams: { id: attachmentId! },
     }),
-    enabled: loadPreview && !!consent.source_attachments[0]?.id,
+    enabled: loadPreview && !!attachmentId,
   });
 
   const fileManager = useFileManager({
@@ -641,7 +681,7 @@ function ConsentRadioItem({ consent, selected }: ConsentRadioItemProps) {
         <CardContent className="p-0 group">
           <div className="aspect-video relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
-              {!consentFile && loadPreview === false && (
+              {!consentFile && attachmentId && loadPreview === false && (
                 <Download
                   onClick={() => setLoadPreview(true)}
                   className="text-secondary-800 hidden group-hover:block cursor-pointer animate-bounce"
