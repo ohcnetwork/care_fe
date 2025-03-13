@@ -16,6 +16,13 @@ import {
 
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
+import {
+  ConsentListResponse,
+  ConsentModel,
+  CreateConsentRequest,
+  UpdateConsentRequest,
+  VerificationType,
+} from "@/types/consent/consent";
 import { Encounter, EncounterEditRequest } from "@/types/emr/encounter";
 import { PartialPatientModel, Patient } from "@/types/emr/newPatient";
 import {
@@ -616,6 +623,53 @@ const routes = {
         value: "Bearer {token}",
         type: "header",
       },
+    },
+  },
+
+  consent: {
+    create: {
+      method: "POST",
+      path: "/api/v1/patient/{patientId}/consent/",
+      TRes: Type<ConsentModel>(),
+      TBody: Type<CreateConsentRequest>(),
+    },
+    list: {
+      method: "GET",
+      path: "/api/v1/patient/{patientId}/consent/",
+      TRes: Type<ConsentListResponse>(),
+    },
+    retrieve: {
+      method: "GET",
+      path: "/api/v1/patient/{patientId}/consent/{id}/",
+      TRes: Type<ConsentModel>(),
+    },
+    update: {
+      method: "PUT",
+      path: "/api/v1/patient/{patientId}/consent/{id}/",
+      TRes: Type<ConsentModel>(),
+      TBody: Type<UpdateConsentRequest>(),
+    },
+    delete: {
+      method: "DELETE",
+      path: "/api/v1/patient/{patientId}/consent/{id}/",
+    },
+    addVerification: {
+      method: "POST",
+      path: "/api/v1/patient/{patientId}/consent/{id}/add_verification/",
+      TRes: Type<ConsentModel>(),
+      TBody: Type<{ verification_type: VerificationType }>(),
+    },
+    removeVerification: {
+      method: "POST",
+      path: "/api/v1/patient/{patientId}/consent/{id}/remove_verification/",
+      TRes: Type<ConsentModel>(),
+      TBody: Type<{ verification_id: string }>(),
+    },
+    upsert: {
+      method: "POST",
+      path: "/api/v1/patient/{patientId}/consent/upsert/",
+      TRes: Type<ConsentModel>(),
+      TBody: Type<CreateConsentRequest>(),
     },
   },
 } as const;

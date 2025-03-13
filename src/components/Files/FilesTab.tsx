@@ -409,7 +409,7 @@ export const FilesTab = (props: FilesTabProps) => {
             }}
           >
             <Label
-              htmlFor="file_upload_patient"
+              htmlFor={`file_upload_${type}`}
               className="py-1 flex flex-row items-center cursor-pointer text-primary-900  w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
@@ -646,6 +646,7 @@ export const FilesTab = (props: FilesTabProps) => {
         onOpenChange={setOpenUploadDialog}
         fileUpload={fileUpload}
         associatingId={associatingId}
+        type={type}
       />
       <Tabs defaultValue={subPage}>
         {type === "encounter" && (

@@ -1,0 +1,9 @@
+{
+  "error_creating_consent": "Error creating consent",
+  "select_status": "Select status",
+  "consent_option": "Choose an option",
+  "please_select_a_consent": "Please select a consent",
+  "consent_attachments": "Consent Attachments",
+  "saving": "Saving...",
+  "save": "Save"
+}
