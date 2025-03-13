@@ -40,11 +40,18 @@ export default function DeviceServiceHistory({
   deviceId,
 }: DeviceServiceHistoryProps) {
   const { t } = useTranslation();
-  const [isAddServiceSheetOpen, setIsAddServiceSheetOpen] = useState(false);
-  const [isEditServiceSheetOpen, setIsEditServiceSheetOpen] = useState(false);
-  const [selectedServiceHistory, setSelectedServiceHistory] =
-    useState<ServiceHistory | null>(null);
+  const [sheetState, setSheetState] = useState<{
+    sheet: "" | "add" | "edit";
+    serviceHistory: ServiceHistory | null;
+  }>({
+    sheet: "",
+    serviceHistory: null,
+  });
   const queryClient = useQueryClient();
+
+  // Derived values from the state
+  const isAddServiceSheetOpen = sheetState.sheet === "add";
+  const isEditServiceSheetOpen = sheetState.sheet === "edit";
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { data: serviceHistory, isLoading } = useQuery({
@@ -62,8 +69,10 @@ export default function DeviceServiceHistory({
   });
 
   const handleEditService = (service: ServiceHistory) => {
-    setSelectedServiceHistory(service);
-    setIsEditServiceSheetOpen(true);
+    setSheetState({
+      sheet: "edit",
+      serviceHistory: service,
+    });
   };
 
   const handleServiceCreated = () => {
@@ -73,7 +82,11 @@ export default function DeviceServiceHistory({
   };
 
   const handleServiceUpdated = () => {
-    setSelectedServiceHistory(null);
+    setSheetState({
+      sheet: "",
+      serviceHistory: null,
+    });
+
     queryClient.invalidateQueries({
       queryKey: ["deviceServiceHistory", facilityId, deviceId, qParams],
     });
@@ -89,7 +102,12 @@ export default function DeviceServiceHistory({
           facilityId={facilityId}
           deviceId={deviceId}
           open={isAddServiceSheetOpen}
-          setOpen={setIsAddServiceSheetOpen}
+          setOpen={(open) =>
+            setSheetState({
+              sheet: open ? "add" : "",
+              serviceHistory: sheetState.serviceHistory,
+            })
+          }
           onServiceCreated={handleServiceCreated}
         />
       </CardHeader>
@@ -156,13 +174,18 @@ export default function DeviceServiceHistory({
           </div>
         )}
       </CardContent>
-      {selectedServiceHistory && (
+      {sheetState.serviceHistory && (
         <EditServiceHistorySheet
           open={isEditServiceSheetOpen}
-          setOpen={setIsEditServiceSheetOpen}
+          setOpen={(open) =>
+            setSheetState({
+              sheet: open ? "edit" : "",
+              serviceHistory: open ? sheetState.serviceHistory : null,
+            })
+          }
           facilityId={facilityId}
           deviceId={deviceId}
-          serviceRecord={selectedServiceHistory}
+          serviceRecord={sheetState.serviceHistory}
           onServiceUpdated={handleServiceUpdated}
         />
       )}
