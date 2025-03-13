@@ -1,4 +1,6 @@
-import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+import { Suspense, lazy } from "react";
+
+import Loading from "@/components/Common/Loading";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
@@ -6,6 +8,11 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+
+const ExcalidrawEditor = lazy(
+  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
+);
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
@@ -44,6 +51,27 @@ const consultationRoutes: AppRoutes = {
         subjectType="encounter"
       />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
+    ({ encounterId }) => (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawEditor
+          associatingId={encounterId}
+          associating_type="encounter"
+        />
+      </Suspense>
+    ),
+
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
+    ({ encounterId, drawingId }) => (
+      <Suspense fallback={<Loading />}>
+        <ExcalidrawEditor
+          associatingId={encounterId}
+          associating_type="encounter"
+          drawingId={drawingId}
+        />
+      </Suspense>
+    ),
+
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (
       <EncounterQuestionnaire
