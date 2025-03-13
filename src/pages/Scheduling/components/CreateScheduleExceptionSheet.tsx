@@ -31,11 +31,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { useIsUserSchedulableResource } from "@/hooks/useIsUserSchedulableResource";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {

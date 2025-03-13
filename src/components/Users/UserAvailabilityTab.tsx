@@ -23,7 +23,6 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
-import { useIsUserSchedulableResource } from "@/hooks/useIsUserSchedulableResource";
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
@@ -36,6 +35,7 @@ import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
 import ScheduleTemplates from "@/pages/Scheduling/ScheduleTemplates";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import {
   computeAppointmentSlots,
   filterAvailabilitiesByDayOfWeek,
