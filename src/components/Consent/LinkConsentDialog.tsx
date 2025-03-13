@@ -318,15 +318,28 @@ export default function LinkConsentDialog({
                           }
                         >
                           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                            {existingConsents?.results?.map((consent) => (
-                              <ConsentRadioItem
-                                key={consent.id}
-                                consent={consent}
-                                selected={
-                                  consent.id === form.watch("existingConsent")
-                                }
-                              />
-                            ))}
+                            {existingConsents?.results
+                              ?.filter((consent) =>
+                                CONSENT_CATEGORY_TYPES.find(
+                                  (category) =>
+                                    category.id === consent.category,
+                                )
+                                  ?.label.toLowerCase()
+                                  .includes(
+                                    form
+                                      .watch("existingConsentSearchQuery")
+                                      ?.toLowerCase() ?? "",
+                                  ),
+                              )
+                              .map((consent) => (
+                                <ConsentRadioItem
+                                  key={consent.id}
+                                  consent={consent}
+                                  selected={
+                                    consent.id === form.watch("existingConsent")
+                                  }
+                                />
+                              ))}
                           </div>
                         </RadioGroup>
                       </div>
@@ -359,7 +372,7 @@ export default function LinkConsentDialog({
                   name="period.start"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>{t("consent_start_date")}</FormLabel>
+                      <FormLabel>{t("consent_period_start_date")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={field.onChange}
@@ -374,7 +387,7 @@ export default function LinkConsentDialog({
                   name="period.end"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>{t("consent_end_date")}</FormLabel>
+                      <FormLabel>{t("consent_period_end_date")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={field.onChange}
