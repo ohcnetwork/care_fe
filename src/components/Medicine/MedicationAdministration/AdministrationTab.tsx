@@ -796,6 +796,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           variant="outline"
           className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
           onClick={() => setIsSheetOpen(true)}
+          disabled={!activeMedications?.results.length}
         >
           <CareIcon icon="l-plus" className="mr-2 h-4 w-4" />
           {t("administer_medicine")}
@@ -839,7 +840,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             });
           }
         }}
-        medications={medications}
+        medications={activeMedications?.results || []}
         lastAdministeredDates={lastAdministeredDetails?.dates}
         patientId={patientId}
         encounterId={encounterId}

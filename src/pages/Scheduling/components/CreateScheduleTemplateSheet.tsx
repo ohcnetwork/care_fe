@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter, isBefore, parse } from "date-fns";
-import { ArrowRightIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -372,23 +371,27 @@ export default function CreateScheduleTemplateSheet({
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                      <FormField
-                        control={form.control}
-                        name={`availabilities.${index}.name`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel required>{t("session_title")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder={t("session_title_placeholder")}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div className="flex flex-col gap-x-6 gap-y-4">
+                      <div className="items-stretch">
+                        <FormField
+                          control={form.control}
+                          name={`availabilities.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel required>
+                                {t("session_title")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder={t("session_title_placeholder")}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
                       {/* <FormField
                         control={form.control}
@@ -434,13 +437,12 @@ export default function CreateScheduleTemplateSheet({
                           </FormItem>
                         )}
                       /> */}
-
-                      <div className="flex items-center gap-0 sm:gap-4 col-span-2 md:col-span-1">
+                      <div className="flex flex-wrap">
                         <FormField
                           control={form.control}
                           name={`availabilities.${index}.start_time`}
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem className="flex flex-col w-full">
                               <FormLabel required>{t("start_time")}</FormLabel>
                               <FormControl>
                                 <Input type="time" {...field} />
@@ -450,13 +452,11 @@ export default function CreateScheduleTemplateSheet({
                           )}
                         />
 
-                        <ArrowRightIcon className="size-4 mt-5" />
-
                         <FormField
                           control={form.control}
                           name={`availabilities.${index}.end_time`}
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem className="flex flex-col w-full mt-2">
                               <FormLabel required>{t("end_time")}</FormLabel>
                               <FormControl>
                                 <Input type="time" {...field} />
@@ -470,15 +470,15 @@ export default function CreateScheduleTemplateSheet({
                       {form.watch(`availabilities.${index}.slot_type`) ===
                         "appointment" && (
                         <>
-                          <div className="flex items-center gap-2 sm:gap-4 col-span-2 md:col-span-1">
+                          <div className="flex flex-wrap mt-0 pt-2 gap-2">
                             <FormField
                               control={form.control}
                               name={`availabilities.${index}.slot_size_in_minutes`}
                               render={({ field }) => (
-                                <FormItem className="flex-1">
+                                <FormItem className="flex flex-grow flex-col">
                                   <FormLabel
                                     required
-                                    className="whitespace-nowrap"
+                                    className="whitespace-nowrap "
                                   >
                                     {t("schedule_slot_size_label")}
                                   </FormLabel>
@@ -503,7 +503,7 @@ export default function CreateScheduleTemplateSheet({
                               control={form.control}
                               name={`availabilities.${index}.tokens_per_slot`}
                               render={({ field }) => (
-                                <FormItem className="flex-1">
+                                <FormItem className="flex flex-col flex-grow">
                                   <FormLabel
                                     required
                                     className="whitespace-nowrap"
@@ -534,7 +534,7 @@ export default function CreateScheduleTemplateSheet({
                       )}
                     </div>
 
-                    <div className="mt-4">
+                    <div>
                       <FormField
                         control={form.control}
                         name={`availabilities.${index}.reason`}
