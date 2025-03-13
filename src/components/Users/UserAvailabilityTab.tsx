@@ -44,7 +44,7 @@ import {
 } from "@/pages/Scheduling/utils";
 import {
   Appointment,
-  AppointmentCancelledStatuses,
+  AppointmentNonCancelledStatuses,
   AvailabilityDateTime,
   ScheduleException,
   ScheduleTemplate,
@@ -105,9 +105,8 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
-  const appoinments = appoinmentsData?.results.filter(
-    (appointment) =>
-      !AppointmentCancelledStatuses.includes(appointment.status as any),
+  const appoinments = appoinmentsData?.results.filter((appointment) =>
+    AppointmentNonCancelledStatuses.includes(appointment.status),
   );
 
   const getAppointmentsForDate = useCallback(
