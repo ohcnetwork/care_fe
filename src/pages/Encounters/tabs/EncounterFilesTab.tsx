@@ -8,7 +8,6 @@ export const EncounterFilesTab = (props: EncounterTabProps) => {
       type="encounter"
       encounter={props.encounter}
       patientId={props.patient.id}
-      subPage={props.subPage}
     />
   );
 };
