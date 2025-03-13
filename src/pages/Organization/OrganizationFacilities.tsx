@@ -34,7 +34,7 @@ export default function OrganizationFacilities({
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, cacheBlacklist: ["name"] });
+    useFilters({ limit: 15, disableCache: true });
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],
@@ -142,7 +142,7 @@ export default function OrganizationFacilities({
                           size="icon"
                           className="text-primary"
                         >
-                          <CareIcon icon="l-edit" className="h-4 w-4" />
+                          <CareIcon icon="l-pen" className="h-4 w-4" />
                           <span className="">{t("edit_facility")}</span>
                         </Button>
                       }
