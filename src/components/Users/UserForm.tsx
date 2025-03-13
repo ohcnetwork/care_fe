@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { FreeInputCombobox } from "@/components/ui/free-input-combobox";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/input-password";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -315,38 +316,16 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("prefix")}</FormLabel>
-                <Select
-                  {...field}
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  {...(field.value && !NAME_PREFIXES.includes(field.value)
-                    ? { value: "__other__" }
-                    : {})}
-                >
-                  <FormControl>
-                    <SelectTrigger data-cy="prefix-input" className="md:w-20">
-                      <SelectValue placeholder={t("select_prefix")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={null as any}>{t("none")}</SelectItem>
-                    {NAME_PREFIXES.map((prefix) => (
-                      <SelectItem key={prefix} value={prefix}>
-                        {prefix}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="__other__">{t("other")}</SelectItem>
-                  </SelectContent>
-                </Select>
-                {typeof field.value !== "undefined" &&
-                  !NAME_PREFIXES.includes(field.value) && (
-                    <Input
-                      placeholder={t("prefix")}
-                      className="md:w-20"
-                      value={field.value === "__other__" ? "" : field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
+                <FreeInputCombobox
+                  options={NAME_PREFIXES.map((prefix) => ({
+                    label: prefix,
+                    value: prefix,
+                  }))}
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  className="w-28"
+                  placeholder={t("select_or_type")}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -391,38 +370,16 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("suffix")}</FormLabel>
-                <Select
-                  {...field}
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  {...(field.value && !NAME_SUFFIXES.includes(field.value)
-                    ? { value: "__other__" }
-                    : {})}
-                >
-                  <FormControl>
-                    <SelectTrigger data-cy="suffix-input" className="md:w-20">
-                      <SelectValue placeholder={t("select_suffix")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={null as any}>{t("none")}</SelectItem>
-                    {NAME_SUFFIXES.map((suffix) => (
-                      <SelectItem key={suffix} value={suffix}>
-                        {suffix}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="__other__">{t("other")}</SelectItem>
-                  </SelectContent>
-                </Select>
-                {typeof field.value !== "undefined" &&
-                  !NAME_SUFFIXES.includes(field.value) && (
-                    <Input
-                      placeholder={t("suffix")}
-                      className="md:w-20"
-                      value={field.value === "__other__" ? "" : field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
+                <FreeInputCombobox
+                  options={NAME_SUFFIXES.map((suffix) => ({
+                    label: suffix,
+                    value: suffix,
+                  }))}
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  className="w-28"
+                  placeholder={t("select_or_type")}
+                />
                 <FormMessage />
               </FormItem>
             )}

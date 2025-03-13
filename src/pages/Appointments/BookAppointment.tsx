@@ -24,7 +24,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDisplayName, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
@@ -148,10 +148,10 @@ export default function BookAppointment(props: Props) {
                       <div className="flex items-center gap-2">
                         <Avatar
                           imageUrl={user.profile_picture_url}
-                          name={formatDisplayName(user)}
+                          name={formatName(user)}
                           className="size-6 rounded-full"
                         />
-                        <span>{formatDisplayName(user)}</span>
+                        <span>{formatName(user)}</span>
                       </div>
                     </SelectItem>
                   ))}

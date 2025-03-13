@@ -67,12 +67,7 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import {
-  dateQueryString,
-  formatDisplayName,
-  formatName,
-  formatPatientAge,
-} from "@/Utils/utils";
+import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -904,7 +899,7 @@ function AppointmentRowItem({
       </TableCell>
       {/* TODO: Replace with relevant information */}
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
-        {formatDisplayName(appointment.user)}
+        {formatName(appointment.user)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
         <AppointmentStatusDropdown

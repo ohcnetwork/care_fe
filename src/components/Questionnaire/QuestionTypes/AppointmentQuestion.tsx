@@ -19,7 +19,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
-import { dateQueryString, formatDisplayName } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   QuestionnaireResponse,
@@ -127,10 +127,10 @@ export function AppointmentQuestion({
                 <div className="flex items-center gap-2">
                   <Avatar
                     imageUrl={user.profile_picture_url}
-                    name={formatDisplayName(user)}
+                    name={formatName(user)}
                     className="size-6 rounded-full"
                   />
-                  <span>{formatDisplayName(user)}</span>
+                  <span>{formatName(user)}</span>
                 </div>
               </SelectItem>
             ))}

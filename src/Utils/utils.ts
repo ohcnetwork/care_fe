@@ -40,24 +40,15 @@ export const relativeDate = (date: DateLike, withoutSuffix = false) => {
 };
 
 export const formatName = (user: {
+  first_name?: string | null;
+  last_name?: string | null;
   prefix?: string | null;
-  first_name: string;
-  last_name: string;
   suffix?: string | null;
-}) => {
-  return `${user.prefix ? `${user.prefix} ` : ""}${user.first_name} ${user.last_name}${user.suffix ? ` ${user.suffix}` : ""}`;
-};
-
-export const formatDisplayName = (user: {
-  prefix?: string | null;
-  first_name: string;
-  last_name: string;
   username: string;
-  suffix?: string | null;
 }) => {
-  return user.first_name && user.last_name
+  return user.first_name
     ? `${user.prefix ? `${user.prefix} ` : ""}${user.first_name} ${user.last_name}${user.suffix ? ` ${user.suffix}` : ""}`
-    : user.first_name || user.username || "User";
+    : user.username;
 };
 
 export const relativeTime = (time?: DateLike) => {

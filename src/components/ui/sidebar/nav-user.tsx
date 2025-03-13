@@ -27,7 +27,7 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { formatDisplayName, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -90,7 +90,7 @@ export function FacilityNavUser({
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {formatDisplayName(user)}
+                    {formatName(user)}
                   </span>
                   <span className="truncate text-xs">{user.username}</span>
                 </div>
