@@ -35,6 +35,37 @@ type PhoneInputProps = Omit<
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
     ({ className, onChange, ...props }, ref) => {
+      const getCountryFromNumber = (phoneNumber: string) => {
+        try {
+          return (
+            RPNInput.parsePhoneNumber(phoneNumber)?.country ||
+            careConfig.defaultCountry
+          );
+        } catch {
+          return careConfig.defaultCountry;
+        }
+      };
+
+      const [selectedCountry, setSelectedCountry] =
+        React.useState<RPNInput.Country>(
+          props.value
+            ? (getCountryFromNumber(props.value as string) as RPNInput.Country)
+            : (careConfig.defaultCountry as RPNInput.Country),
+        );
+      React.useEffect(() => {
+        if (props.value) {
+          const detectedCountry = getCountryFromNumber(props.value as string);
+          if (detectedCountry && detectedCountry !== selectedCountry) {
+            setSelectedCountry(detectedCountry as RPNInput.Country);
+          }
+        }
+      }, [props.value]);
+
+      const handleCountryChange = (country: RPNInput.Country) => {
+        setSelectedCountry(country);
+        onChange?.("" as RPNInput.Value);
+      };
+
       return (
         <RPNInput.default
           ref={ref}
@@ -47,19 +78,17 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
               : "ring-primary-700",
           )}
           flagComponent={FlagComponent}
-          countrySelectComponent={CountrySelect}
+          countrySelectComponent={(countrySelectProps) => (
+            <CountrySelect
+              {...countrySelectProps}
+              onChange={handleCountryChange}
+              value={selectedCountry}
+            />
+          )}
           inputComponent={InputComponent}
           defaultCountry={careConfig.defaultCountry}
           smartCaret={true}
-          /**
-           * Handles the onChange event.
-           *
-           * react-phone-number-input might trigger the onChange event as undefined
-           * when a valid phone number is not entered. To prevent this,
-           * the value is coerced to an empty string.
-           *
-           * @param {E164Number | undefined} value - The entered value
-           */
+          country={selectedCountry}
           onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
           {...props}
         />
@@ -136,13 +165,25 @@ const CountrySelect = ({
               <CommandGroup>
                 {countryList.map(({ value, label }) =>
                   value ? (
-                    <CountrySelectOption
+                    <CommandItem
                       key={value}
-                      country={value}
-                      countryName={label}
-                      selectedCountry={selectedCountry}
-                      onChange={onChange}
-                    />
+                      onSelect={() => onChange(value)}
+                      className="gap-2"
+                    >
+                      <FlagComponent country={value} countryName={label} />
+                      <span className="flex-1 text-sm">{label}</span>
+                      <span className="text-sm text-foreground/50">
+                        {`+${RPNInput.getCountryCallingCode(value)}`}
+                      </span>
+                      <CheckIcon
+                        className={cn(
+                          "ml-auto size-4",
+                          value === selectedCountry
+                            ? "opacity-100"
+                            : "opacity-0",
+                        )}
+                      />
+                    </CommandItem>
                   ) : null,
                 )}
               </CommandGroup>
@@ -151,29 +192,6 @@ const CountrySelect = ({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-};
-
-interface CountrySelectOptionProps extends RPNInput.FlagProps {
-  selectedCountry: RPNInput.Country;
-  onChange: (country: RPNInput.Country) => void;
-}
-
-const CountrySelectOption = ({
-  country,
-  countryName,
-  selectedCountry,
-  onChange,
-}: CountrySelectOptionProps) => {
-  return (
-    <CommandItem className="gap-2" onSelect={() => onChange(country)}>
-      <FlagComponent country={country} countryName={countryName} />
-      <span className="flex-1 text-sm">{countryName}</span>
-      <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
-      <CheckIcon
-        className={`ml-auto size-4 ${country === selectedCountry ? "opacity-100" : "opacity-0"}`}
-      />
-    </CommandItem>
   );
 };
 
