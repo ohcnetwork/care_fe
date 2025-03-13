@@ -44,7 +44,7 @@ import {
 } from "@/pages/Scheduling/utils";
 import {
   Appointment,
-  AppointmentNonCancelledStatuses,
+  AppointmentCancelledStatuses,
   AvailabilityDateTime,
   ScheduleException,
   ScheduleTemplate,
@@ -92,7 +92,7 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
   const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
   const appointmentsPageLink = `/facility/${facilityId}/appointments/?practitioner=${user.username}&limit=15`;
 
-  const { data: appoinments } = useQuery({
+  const { data: appoinmentsData } = useQuery({
     queryKey: ["appointments", facilityId, user.id, monthStart],
     queryFn: query(scheduleApis.appointments.list, {
       pathParams: { facility_id: facilityId },
@@ -101,14 +101,18 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
         user: user.id,
         date_from: dateQueryString(monthStart),
         date_to: dateQueryString(monthEnd),
-        status: [...AppointmentNonCancelledStatuses],
       },
     }),
   });
 
+  const appoinments = appoinmentsData?.results.filter(
+    (appointment) =>
+      !AppointmentCancelledStatuses.includes(appointment.status as any),
+  );
+
   const getAppointmentsForDate = useCallback(
     (date: Date) => {
-      return appoinments?.results.filter((appointment) =>
+      return appoinments?.filter((appointment) =>
         dayjs(appointment.token_slot.start_datetime).isSame(dayjs(date), "day"),
       );
     },
