@@ -31,7 +31,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import LinkConsentDialog from "@/components/Consent/LinkConsentDialog";
-import { LocationHistorySheet } from "@/components/Location/LocationHistorySheet";
 import EncounterActions from "@/components/Encounter/EncounterActions";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import { LocationTree } from "@/components/Location/LocationTree";
