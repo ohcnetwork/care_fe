@@ -14,12 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Avatar } from "@/components/Common/Avatar";
-
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
-import { dateQueryString, formatDisplayName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   QuestionnaireResponse,
@@ -72,13 +71,6 @@ export function AppointmentQuestion({
 
   const facilityId = useSlug("facility");
 
-  const resourcesQuery = useQuery({
-    queryKey: ["availableResources", facilityId],
-    queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
-    }),
-  });
-
   const slotsQuery = useQuery({
     queryKey: [
       "slots",
@@ -111,31 +103,12 @@ export function AppointmentQuestion({
       </div>
       <div>
         <Label className="block mb-2">{t("select_practitioner")}</Label>
-        <Select
-          disabled={resourcesQuery.isLoading || disabled}
-          value={resource?.id}
-          onValueChange={(value) =>
-            setResource(resourcesQuery.data?.users.find((r) => r.id === value))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("show_all")} />
-          </SelectTrigger>
-          <SelectContent>
-            {resourcesQuery.data?.users.map((user) => (
-              <SelectItem key={user.username} value={user.id}>
-                <div className="flex items-center gap-2">
-                  <Avatar
-                    imageUrl={user.profile_picture_url}
-                    name={formatDisplayName(user)}
-                    className="size-6 rounded-full"
-                  />
-                  <span>{formatDisplayName(user)}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <PractitionerSelector
+          facilityId={facilityId}
+          selected={resource ?? null}
+          onSelect={(user) => setResource(user ?? undefined)}
+          clearSelection={t("show_all")}
+        />
       </div>
 
       <div className="flex gap-2">

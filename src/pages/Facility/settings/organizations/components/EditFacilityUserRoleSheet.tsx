@@ -41,6 +41,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { FacilityOrganizationUserRole } from "@/types/facilityOrganization/facilityOrganization";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
   facilityId: string;
@@ -68,7 +69,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.updateUserRole, {
+      mutate(facilityOrganizationApi.updateUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -93,7 +94,7 @@ export default function EditUserRoleSheet({
 
   const { mutate: removeRole } = useMutation({
     mutationFn: () =>
-      mutate(routes.facilityOrganization.removeUserRole, {
+      mutate(facilityOrganizationApi.removeUserRole, {
         pathParams: {
           facilityId,
           organizationId: organizationId,
@@ -157,18 +158,22 @@ export default function EditUserRoleSheet({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-              <div>
-                <span className="text-sm text-gray-500">{t("username")}</span>
-                <p className="text-sm font-medium">{userRole.user.username}</p>
+            <div className="flex flex-col flex-wrap gap-2 pt-2 border-t">
+              <div className="flex flex-wrap">
+                <div className="mr-3">
+                  <span className="text-sm text-gray-500">{t("username")}</span>
+                  <p className="text-sm font-medium truncate ">
+                    {userRole.user.username}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">
+                    {t("current_role")}
+                  </span>
+                  <p className="text-sm font-medium">{userRole.role.name}</p>
+                </div>
               </div>
               <div>
-                <span className="text-sm text-gray-500">
-                  {t("current_role")}
-                </span>
-                <p className="text-sm font-medium">{userRole.role.name}</p>
-              </div>
-              <div className="col-span-2">
                 <span className="text-sm text-gray-500">
                   {t("last_login")}{" "}
                 </span>

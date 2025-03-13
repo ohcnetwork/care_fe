@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -14,9 +16,9 @@ import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
 import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";
@@ -38,6 +40,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
   });
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
+    disableCache: true,
   });
   const { t } = useTranslation();
 
@@ -46,7 +49,7 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["facilityOrganizationUsers", facilityId, id, qParams],
-    queryFn: query.debounced(routes.facilityOrganization.listUsers, {
+    queryFn: query.debounced(facilityOrganizationApi.listUsers, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
         search_text: qParams.search || undefined,
@@ -152,24 +155,40 @@ export default function FacilityOrganizationUsers({ id, facilityId }: Props) {
                                 {t("phone_number")}
                               </div>
                               <div className="font-medium truncate">
-                                {userRole.user.phone_number}
+                                {userRole.user.phone_number
+                                  ? formatPhoneNumberIntl(
+                                      userRole.user.phone_number,
+                                    )
+                                  : "-"}
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end">
+                      <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
                         <EditFacilityUserRoleSheet
                           facilityId={facilityId}
                           organizationId={id}
                           userRole={userRole}
                           trigger={
                             <Button variant="outline" size="sm">
-                              <span>{t("see_details")}</span>
+                              <span>{t("edit_role")}</span>
                             </Button>
                           }
                         />
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/facility/${facilityId}/users/${userRole.user.username}`}
+                            basePath="/"
+                          >
+                            <CareIcon
+                              icon="l-arrow-up-right"
+                              className="text-lg mr-1"
+                            />
+                            <span>{t("see_details")}</span>
+                          </Link>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

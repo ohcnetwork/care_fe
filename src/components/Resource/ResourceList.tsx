@@ -119,7 +119,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         </Badge>
       }
     >
-      <div className="space-y-4 mt-2">
+      <div className="space-y-4 mt-2 px-6">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
@@ -279,7 +279,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
         </div>
 
         <div
-          className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
           data-cy="resource-list-cards"
         >
           {isLoading ? (

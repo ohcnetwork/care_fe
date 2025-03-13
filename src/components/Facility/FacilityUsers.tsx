@@ -22,9 +22,9 @@ import { useView } from "@/Utils/useView";
 
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination } = useFilters({
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["username"],
+    disableCache: true,
   });
   const [activeTab, setActiveTab] = useView("users", "card");
 
@@ -33,13 +33,13 @@ export default function FacilityUsers(props: { facilityId: string }) {
   let usersList: JSX.Element = <></>;
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
-    queryKey: ["facilityUsers", facilityId, qParams],
+    queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
     queryFn: query.debounced(routes.facility.getUsers, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         username: qParams.username,
-        limit: qParams.limit,
-        offset: (qParams.page - 1) * qParams.limit,
+        limit: resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,
@@ -48,7 +48,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
   if (userListFetching || !userListData) {
     usersList =
       activeTab === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           <CardGridSkeleton count={6} />
         </div>
       ) : (

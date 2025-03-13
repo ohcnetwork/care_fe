@@ -1,17 +1,4 @@
-import {
-  Bed,
-  Building,
-  Building2,
-  Car,
-  ChevronRight,
-  Eye,
-  Folder,
-  FolderOpen,
-  Home,
-  Hospital,
-  Map,
-  PenLine,
-} from "lucide-react";
+import { ChevronRight, Folder, FolderOpen, PenLine } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -21,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { LocationList, getLocationFormLabel } from "@/types/location/location";
+import { LocationList, LocationTypeIcons } from "@/types/location/location";
 
 interface Props {
   location: LocationList;
@@ -31,43 +18,9 @@ interface Props {
 
 export function LocationCard({ location, onEdit, className }: Props) {
   const { t } = useTranslation();
-
-  const getLocationTypeIcon = (form: string) => {
-    switch (form.toLowerCase()) {
-      case "bd": // bed
-        return <Bed className="h-5 w-5" />;
-      case "wa": // ward
-        return <Hospital className="h-5 w-5" />;
-      case "lvl": // level/floor
-        return <Building2 className="h-5 w-5" />;
-      case "bu": // building
-        return <Building className="h-5 w-5" />;
-      case "si": // site
-        return <Map className="h-5 w-5" />;
-      case "wi": // wing
-        return <Building2 className="h-5 w-5" />;
-      case "co": // corridor
-        return <Building2 className="h-5 w-5" />;
-      case "ro": // room
-        return <Home className="h-5 w-5" />;
-      case "ve": // vehicle
-        return <Car className="h-5 w-5" />;
-      case "ho": // house
-        return <Home className="h-5 w-5" />;
-      case "ca": // carpark
-        return <Car className="h-5 w-5" />;
-      case "rd": // road
-        return <Car className="h-5 w-5" />;
-      case "area": // area
-        return <Map className="h-5 w-5" />;
-      case "jdn": // garden
-        return <Map className="h-5 w-5" />;
-      case "vi": // virtual
-        return <Eye className="h-5 w-5" />;
-      default:
-        return <Folder className="h-5 w-5" />;
-    }
-  };
+  const Icon =
+    LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
+    Folder;
 
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
@@ -75,7 +28,7 @@ export function LocationCard({ location, onEdit, className }: Props) {
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
-              {getLocationTypeIcon(location.form)}
+              <Icon className="h-5 w-5" />
             </div>
 
             <div className="flex grow flex-col min-w-0">
@@ -83,7 +36,7 @@ export function LocationCard({ location, onEdit, className }: Props) {
                 {location.name}
               </h3>
               <p className="text-sm text-gray-500">
-                {getLocationFormLabel(location.form)}
+                {t(`location_form__${location.form}`)}
               </p>
 
               <div className="mt-2 flex flex-wrap gap-2">
@@ -92,17 +45,17 @@ export function LocationCard({ location, onEdit, className }: Props) {
                     location.status === "active" ? "default" : "secondary"
                   }
                 >
-                  {location.status}
+                  {t(location.status)}
                 </Badge>
                 <Badge
                   variant={
-                    location.availability_status === "available"
-                      ? "default"
-                      : "destructive"
+                    !location.current_encounter ? "default" : "destructive"
                   }
                   className="capitalize"
                 >
-                  {location.availability_status}
+                  {location.current_encounter
+                    ? t("unavailable")
+                    : t("available")}
                 </Badge>
                 {location.has_children && (
                   <Badge variant="outline" className="flex items-center gap-1">

@@ -2,37 +2,132 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { Loader } from "lucide-react";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import Loading from "@/components/Common/Loading";
+import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
-import { AllergyList } from "@/components/Patient/allergy/list";
-import { DiagnosisList } from "@/components/Patient/diagnosis/list";
-import { SymptomsList } from "@/components/Patient/symptoms/list";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import api from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
-
-import { MedicationStatementList } from "./MedicationStatementList";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { completedEncounterStatus } from "@/types/emr/encounter";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface TreatmentSummaryProps {
   facilityId: string;
   encounterId: string;
+
+  patientId: string;
 }
 
+const SectionLayout = ({
+  children,
+  title,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Card className="rounded-sm shadow-none border-none">
+      <CardHeader className="flex justify-between flex-row px-0 py-2 ">
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-0 py-0">{children}</CardContent>
+    </Card>
+  );
+};
+
+const EmptyState = ({ message }: { message: string }) => {
+  return (
+    <CardContent className="px-2 pb-3 pt-2">
+      <p className="text-gray-500">{message}</p>
+    </CardContent>
+  );
+};
 export default function TreatmentSummary({
   facilityId,
   encounterId,
+  patientId,
 }: TreatmentSummaryProps) {
-  const { data: encounter } = useQuery({
+  const { data: encounter, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(api.encounter.get, {
       pathParams: { id: encounterId },
       queryParams: { facility: facilityId },
     }),
+    enabled: !!encounterId && !!facilityId,
   });
+
+  const { data: allergies, isLoading: allergiesLoading } = useQuery({
+    queryKey: ["allergies", patientId, encounterId],
+    queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: (
+          encounter?.status
+            ? completedEncounterStatus.includes(encounter.status)
+            : false
+        )
+          ? encounterId
+          : undefined,
+      },
+      pageSize: 100,
+    }),
+  });
+
+  const { data: symptoms, isLoading: symptomsLoading } = useQuery({
+    queryKey: ["symptoms", patientId, encounterId],
+    queryFn: query.paginated(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
+    }),
+    enabled: !!patientId && !!encounterId,
+  });
+
+  const { data: diagnoses, isLoading: diagnosesLoading } = useQuery({
+    queryKey: ["diagnosis", patientId, encounterId],
+    queryFn: query.paginated(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
+    }),
+    enabled: !!patientId && !!encounterId,
+  });
+
+  const { data: medications, isLoading: medicationsLoading } = useQuery({
+    queryKey: ["medication_requests", patientId, encounterId],
+    queryFn: query.paginated(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: { encounter: encounterId },
+      pageSize: 100,
+    }),
+    enabled: !!encounterId,
+  });
+  const { data: medicationStatement, isLoading: medicationStatementLoading } =
+    useQuery({
+      queryKey: ["medication_statements", patientId],
+      queryFn: query.paginated(medicationStatementApi.list, {
+        pathParams: { patientId },
+        pageSize: 100,
+      }),
+      enabled: !!patientId,
+    });
+
+  if (encounterLoading) {
+    return <Loading />;
+  }
 
   if (!encounter) {
     return (
@@ -42,11 +137,31 @@ export default function TreatmentSummary({
     );
   }
 
+  const isLoading =
+    encounterLoading ||
+    allergiesLoading ||
+    diagnosesLoading ||
+    symptomsLoading ||
+    medicationsLoading ||
+    medicationStatementLoading;
+
+  if (isLoading) {
+    return (
+      <PrintPreview
+        title={`${t("treatment_summary")} - ${encounter.patient.name}`}
+      >
+        <div className="flex items-center justify-center h-full">
+          <Loader />
+        </div>
+      </PrintPreview>
+    );
+  }
+
   return (
     <PrintPreview
       title={`${t("treatment_summary")} - ${encounter.patient.name}`}
     >
-      <div className="min-h-screen bg-white py-2 max-w-4xl mx-auto">
+      <div className="min-h-screen py-2 max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex justify-between items-start pb-2 border-b">
@@ -68,36 +183,39 @@ export default function TreatmentSummary({
           </div>
 
           {/* Patient Details */}
-          <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="space-y-3">
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("patient")}</span>
                 <span className="text-gray-600">:</span>
-                <span className="font-semibold">{encounter.patient.name}</span>
+                <span className="font-semibold break-words">
+                  {encounter.patient.name}
+                </span>
               </div>
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{`${t("age")} / ${t("sex")}`}</span>
                 <span className="text-gray-600">:</span>
-                <span className="font-semibold">
+                <span className="font-semibold break-words">
                   {`${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`}
                 </span>
               </div>
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("encounter_class")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
                   {t(`encounter_class__${encounter.encounter_class}`)}
                 </span>
               </div>
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("priority")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
                   {t(`encounter_priority__${encounter.priority}`)}
                 </span>
               </div>
+
               {encounter.hospitalization?.admit_source && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">{t("admission_source")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -108,14 +226,14 @@ export default function TreatmentSummary({
                 </div>
               )}
               {encounter.hospitalization?.re_admission && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">{t("readmission")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">{t("yes")}</span>
                 </div>
               )}
               {encounter.hospitalization?.diet_preference && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">{t("diet_preference")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -126,16 +244,19 @@ export default function TreatmentSummary({
                 </div>
               )}
             </div>
+
+            {/* Right Column */}
             <div className="space-y-3">
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("mobile_number")}</span>
                 <span className="text-gray-600">:</span>
-                <span className="font-semibold">
+                <span className="font-semibold break-words">
                   {encounter.patient.phone_number}
                 </span>
               </div>
+
               {encounter.period?.start && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">{t("encounter_date")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -146,22 +267,25 @@ export default function TreatmentSummary({
                   </span>
                 </div>
               )}
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("status")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
                   {t(`encounter_status__${encounter.status}`)}
                 </span>
               </div>
-              <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+
+              <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                 <span className="text-gray-600">{t("consulting_doctor")}</span>
                 <span className="text-gray-600">:</span>
                 <span className="font-semibold">
                   {formatName(encounter.created_by)}
                 </span>
               </div>
+
               {encounter.external_identifier && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">{t("external_id")}</span>
                   <span className="text-gray-600">:</span>
                   <span className="font-semibold">
@@ -169,8 +293,9 @@ export default function TreatmentSummary({
                   </span>
                 </div>
               )}
+
               {encounter.hospitalization?.discharge_disposition && (
-                <div className="grid grid-cols-[8rem,0.25rem,1fr] items-center">
+                <div className="grid grid-cols-[10rem,auto,1fr] md:grid-cols-[8rem,auto,1fr] items-center">
                   <span className="text-gray-600">
                     {t("discharge_disposition")}
                   </span>
@@ -184,51 +309,176 @@ export default function TreatmentSummary({
               )}
             </div>
           </div>
-
           {/* Medical Information */}
           <div className="space-y-6">
             {/* Allergies */}
-            <AllergyList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              className="border-none shadow-none"
-              isPrintPreview={true}
-            />
+            <SectionLayout title={t("allergies")}>
+              {allergies?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "allergen" },
+                    { key: "status" },
+                    { key: "criticality" },
+                    { key: "verification" },
+                    { key: "notes" },
+                    { key: "logged_by" },
+                  ]}
+                  rows={allergies?.results.map((allergy) => ({
+                    allergen: allergy.code.display,
+                    status: t(allergy.clinical_status),
+                    criticality: t(allergy.criticality),
+                    verification: t(allergy.verification_status),
+                    notes: allergy.note,
+                    logged_by: formatName(allergy.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_allergies_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Symptoms */}
-            <SymptomsList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              className="border-none shadow-none"
-              isPrintPreview={true}
-            />
+
+            <SectionLayout title={t("symptoms")}>
+              {symptoms?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "symptom" },
+                    { key: "severity" },
+                    { key: "status" },
+                    { key: "verification" },
+                    { key: "onset" },
+                    { key: "notes" },
+                    { key: "logged_by" },
+                  ]}
+                  rows={symptoms?.results?.map((symptom) => ({
+                    symptom: symptom.code.display,
+                    severity: t(symptom.severity),
+                    status: t(symptom.clinical_status),
+                    verification: t(symptom.verification_status),
+                    onset: symptom.onset?.onset_datetime
+                      ? new Date(
+                          symptom.onset.onset_datetime,
+                        ).toLocaleDateString()
+                      : "-",
+                    notes: symptom.note,
+                    logged_by: formatName(symptom.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_symptoms_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Diagnoses */}
-            <DiagnosisList
-              patientId={encounter.patient.id}
-              encounterId={encounterId}
-              className="border-none shadow-none"
-              isPrintPreview={true}
-            />
+            <SectionLayout title={t("diagnoses")}>
+              {diagnoses?.count ? (
+                <PrintTable
+                  headers={[
+                    { key: "diagnosis" },
+                    { key: "status" },
+                    { key: "verification" },
+                    { key: "onset" },
+                    { key: "notes" },
+                    { key: "logged_by" },
+                  ]}
+                  rows={diagnoses?.results.map((diagnosis) => ({
+                    diagnosis: diagnosis.code.display,
+                    status: t(diagnosis.clinical_status),
+                    verification: t(diagnosis.verification_status),
+                    onset: diagnosis.onset?.onset_datetime
+                      ? new Date(
+                          diagnosis.onset.onset_datetime,
+                        ).toLocaleDateString()
+                      : undefined,
+                    notes: diagnosis.note,
+                    logged_by: formatName(diagnosis.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_diagnoses_recorded")} />
+              )}
+            </SectionLayout>
 
             {/* Medications */}
-            <div className="border-none shadow-none space-y-2">
-              <p className="text-sm font-semibold text-gray-950">
-                {t("medications")}
-              </p>
-              <MedicationsTable
-                patientId={encounter.patient.id}
-                encounterId={encounterId}
-              />
-            </div>
-          </div>
+            <SectionLayout title={t("medications")}>
+              {medications?.results.length ? (
+                <PrintTable
+                  headers={[
+                    { key: "medicine" },
+                    { key: "status" },
+                    { key: "dosage" },
+                    { key: "frequency" },
+                    { key: "duration" },
+                    { key: "instructions" },
+                  ]}
+                  rows={medications?.results.map((medication) => {
+                    const instruction = medication.dosage_instruction[0];
+                    const frequency = getFrequencyDisplay(instruction?.timing);
+                    const dosage = formatDosage(instruction);
+                    const duration =
+                      instruction?.timing?.repeat?.bounds_duration;
+                    const remarks = formatSig(instruction);
+                    const notes = medication.note;
+                    return {
+                      medicine: medication.medication?.display,
+                      status: t(medication.status),
+                      dosage: dosage,
+                      frequency: instruction?.as_needed_boolean
+                        ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
+                        : (frequency?.meaning ?? "-") +
+                          (instruction?.additional_instruction?.[0]?.display
+                            ? `, ${instruction.additional_instruction[0].display}`
+                            : ""),
+                      duration: duration
+                        ? `${duration.value} ${duration.unit}`
+                        : "-",
+                      instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+                    };
+                  })}
+                />
+              ) : (
+                <EmptyState message={t("no_medication_recorded")} />
+              )}
+            </SectionLayout>
 
-          {/* Medication Statements */}
-          <MedicationStatementList
-            patientId={encounter.patient.id}
-            className="border-none shadow-none"
-            isPrintPreview={true}
-          />
+            {/* Medication Statements */}
+            <SectionLayout title={t("ongoing_medications")}>
+              {medicationStatement?.results.length ? (
+                <PrintTable
+                  headers={[
+                    { key: "medication" },
+                    { key: "dosage" },
+                    { key: "status" },
+                    {
+                      key: "medication_taken_between",
+                    },
+                    { key: "reason" },
+                    { key: "notes" },
+                    { key: "logged_by" },
+                  ]}
+                  rows={medicationStatement?.results.map((medication) => ({
+                    medication:
+                      medication.medication.display ??
+                      medication.medication.code,
+                    dosage: medication.dosage_text,
+                    status: medication.status,
+                    medication_taken_between: [
+                      medication.effective_period?.start,
+                      medication.effective_period?.end,
+                    ]
+                      .map((date) => formatDateTime(date))
+                      .join(" - "),
+                    reason: medication.reason,
+                    notes: medication.note,
+                    logged_by: formatName(medication.created_by),
+                  }))}
+                />
+              ) : (
+                <EmptyState message={t("no_ongoing_medications")} />
+              )}
+            </SectionLayout>
+          </div>
 
           {/* Questionnaire Responses Section */}
           <div>

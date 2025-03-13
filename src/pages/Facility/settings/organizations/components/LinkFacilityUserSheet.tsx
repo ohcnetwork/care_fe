@@ -28,6 +28,7 @@ import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserBase } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
@@ -72,7 +73,7 @@ export default function LinkFacilityUserSheet({
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
-      mutate(routes.facilityOrganization.assignUser, {
+      mutate(facilityOrganizationApi.assignUser, {
         pathParams: { facilityId: facilityId, organizationId: organizationId },
         body,
       })(body),
@@ -136,16 +137,16 @@ export default function LinkFacilityUserSheet({
           {selectedUser && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4 space-y-4">
-                <div className="flex items-start gap-4">
+                <div className="flex gap-4 flex-row">
                   <Avatar
                     imageUrl={selectedUser.profile_picture_url}
                     name={formatName(selectedUser)}
                     className="h-12 w-12"
                   />
-                  <div className="flex flex-col flex-1">
-                    <span className="font-medium text-lg">
+                  <div className="w-3/4">
+                    <p className="font-medium text-lg truncate">
                       {selectedUser.first_name} {selectedUser.last_name}
-                    </span>
+                    </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}
                     </span>
@@ -153,7 +154,7 @@ export default function LinkFacilityUserSheet({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-                  <div>
+                  <div className="truncate">
                     <span className="text-sm text-gray-500">Username</span>
                     <p className="text-sm font-medium">
                       {selectedUser.username}

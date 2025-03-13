@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInYears, format, isSameDay } from "date-fns";
-import { BanIcon, PrinterIcon } from "lucide-react";
+import { BanIcon, Loader2, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge, BadgeProps } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -308,9 +308,24 @@ const AppointmentDetails = ({
           <div className="flex items-center space-x-4 text-sm">
             <MobileIcon className="h-5 w-5 text-gray-600" />
             <div>
-              <p className="font-medium">{appointment.patient.phone_number}</p>
+              <p className="font-medium">
+                <a
+                  href={`tel:${appointment.patient.phone_number}`}
+                  className="text-primary hover:underline"
+                >
+                  {appointment.patient.phone_number}
+                </a>
+              </p>
               <p className="text-gray-600">
-                {t("emergency")}: {appointment.patient.emergency_phone_number}
+                {t("emergency")}:{" "}
+                {appointment.patient.emergency_phone_number && (
+                  <a
+                    href={`tel:${appointment.patient.emergency_phone_number}`}
+                    className="text-primary hover:underline"
+                  >
+                    {appointment.patient.emergency_phone_number}
+                  </a>
+                )}
               </p>
             </div>
           </div>
@@ -380,7 +395,7 @@ const AppointmentActions = ({
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());
 
-  const { mutate: cancelAppointment } = useMutation({
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
     mutationFn: mutate(scheduleApis.appointments.cancel, {
       pathParams: {
         facility_id: facilityId,
@@ -543,8 +558,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "cancelled" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -573,8 +593,13 @@ const AppointmentActions = ({
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => cancelAppointment({ reason: "entered_in_error" })}
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
-              {t("confirm")}
+              {isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                t("confirm")
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

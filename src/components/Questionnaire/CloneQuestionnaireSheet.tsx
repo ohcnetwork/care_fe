@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Building, Check, Loader2 } from "lucide-react";
+import { t } from "i18next";
+import { Building, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,11 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -64,15 +71,14 @@ export default function CloneQuestionnaireSheet({
       silent: true,
     }),
     onSuccess: async (data: QuestionnaireDetail) => {
-      navigate(`/admin/questionnaire/${data.slug}`);
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
       setOpen(false);
     },
-    onError: (error: any) => {
-      if (error.response?.status === 400) {
-        setError("This slug is already in use. Please choose a different one.");
-      } else {
-        setError("Failed to clone questionnaire. Please try again.");
-      }
+    onError: (error) => {
+      const errorData = error.cause as { errors: { msg: string }[] };
+      errorData.errors.forEach((er) => {
+        toast.error(er.msg);
+      });
     },
   });
 
@@ -132,7 +138,9 @@ export default function CloneQuestionnaireSheet({
 
           {/* Selected Organizations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Selected Organizations</h3>
+            <h3 className="text-sm font-medium">
+              {t("selected_organizations")}
+            </h3>
             <div className="flex flex-wrap gap-2">
               {selectedIds.length > 0 ? (
                 availableOrganizations?.results
@@ -144,11 +152,19 @@ export default function CloneQuestionnaireSheet({
                       className="flex items-center gap-1"
                     >
                       {org.name}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 p-0 hover:bg-transparent"
+                        onClick={() => handleToggleOrganization(org.id)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </Badge>
                   ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  No organizations selected
+                  {t("no_organizations_selected")}
                 </p>
               )}
             </div>
@@ -156,48 +172,67 @@ export default function CloneQuestionnaireSheet({
 
           {/* Organization Selector */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Add Organizations</h3>
-            <Command className="rounded-lg border shadow-md">
-              <CommandInput
-                placeholder="Search organizations..."
-                onValueChange={setSearchQuery}
-              />
-              <CommandList>
-                <CommandEmpty>No organizations found.</CommandEmpty>
-                <CommandGroup>
-                  {isLoadingOrganizations ? (
-                    <div className="flex items-center justify-center py-6">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    </div>
-                  ) : (
-                    availableOrganizations?.results.map((org) => (
-                      <CommandItem
-                        key={org.id}
-                        value={org.id}
-                        onSelect={() => handleToggleOrganization(org.id)}
-                      >
-                        <div className="flex flex-1 items-center gap-2">
-                          <Building className="h-4 w-4" />
-                          <span>{org.name}</span>
-                          {org.description && (
-                            <span className="text-xs text-gray-500">
-                              - {org.description}
-                            </span>
-                          )}
+            <h3 className="text-sm font-medium">{t("add_organizations")}</h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between"
+                >
+                  <span className="truncate">{t("select_organizations")}</span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0 w-[var(--radix-popover-trigger-width)]"
+                align="start"
+              >
+                <Command>
+                  <CommandInput
+                    placeholder={t("search_organizations")}
+                    onValueChange={setSearchQuery}
+                    className="focus:ring-0 focus:outline-none border-none"
+                  />
+                  <CommandList>
+                    <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
+                    <CommandGroup>
+                      {isLoadingOrganizations ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="h-6 w-4 animate-spin" />
                         </div>
-                        {selectedIds.includes(org.id) && (
-                          <Check className="h-4 w-4" />
-                        )}
-                      </CommandItem>
-                    ))
-                  )}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+                      ) : (
+                        availableOrganizations?.results.map((org) => (
+                          <CommandItem
+                            key={org.id}
+                            value={org.id}
+                            onSelect={() => handleToggleOrganization(org.id)}
+                            className="flex items-center justify-between pr-2"
+                          >
+                            <div className="flex flex-1 items-center gap-2">
+                              <Building className="h-4 w-4" />
+                              <span>{org.name}</span>
+                              {org.description && (
+                                <span className="text-xs text-gray-500">
+                                  - {org.description}
+                                </span>
+                              )}
+                            </div>
+                            {selectedIds.includes(org.id) && (
+                              <Check className="h-4 w-4" />
+                            )}
+                          </CommandItem>
+                        ))
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t">
           <div className="flex w-full justify-end gap-4">
             <Button
               variant="outline"
@@ -212,7 +247,9 @@ export default function CloneQuestionnaireSheet({
             </Button>
             <Button
               onClick={handleClone}
-              disabled={isCloning || !newSlug.trim()}
+              disabled={
+                isCloning || !newSlug.trim() || selectedIds.length === 0
+              }
             >
               {isCloning ? (
                 <>
