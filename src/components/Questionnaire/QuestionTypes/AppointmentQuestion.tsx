@@ -57,10 +57,6 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
     required: true,
     validate: (value: string) => !!value?.trim(),
   },
-  PRACTITIONER: {
-    key: "practitioner",
-    required: true,
-  },
   SLOT: {
     key: "slot_id",
     required: true,
@@ -146,29 +142,19 @@ export function AppointmentQuestion({
         <Label className="block mb-2">{t("select_practitioner")}</Label>
         <div
           className={cn(
+            "rounded-md",
             !resource &&
-              hasError(APPOINTMENT_FIELDS.PRACTITIONER.key) &&
-              "border border-red-500 rounded-md",
+              hasError(APPOINTMENT_FIELDS.SLOT.key) &&
+              "ring-1 ring-red-500",
           )}
         >
           <PractitionerSelector
             facilityId={facilityId}
             selected={resource ?? null}
-            onSelect={(user) => {
-              setResource(user ?? undefined);
-              handleUpdate({ practitioner: user?.id });
-              if (value.slot_id) {
-                handleUpdate({ slot_id: undefined });
-              }
-            }}
+            onSelect={(user) => setResource(user ?? undefined)}
             clearSelection={t("show_all")}
           />
         </div>
-        <FieldError
-          fieldKey={APPOINTMENT_FIELDS.PRACTITIONER.key}
-          questionId={question.id}
-          errors={errors}
-        />
       </div>
 
       <div className="flex gap-2">
