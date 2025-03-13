@@ -698,8 +698,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.update, {
       pathParams: { id: id! },
     }),
-    onSuccess: () => {
+    onSuccess: (data: QuestionnaireDetail) => {
       toast.success("Questionnaire updated successfully");
+      navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
     onError: (_error) => {
@@ -887,14 +888,28 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                   <button
                                     key={subQuestion.id}
                                     onClick={() => {
-                                      const element = document.getElementById(
-                                        `question-${subQuestion.id}`,
-                                      );
-                                      if (element) {
-                                        element.scrollIntoView({
-                                          behavior: "smooth",
-                                        });
+                                      if (!expandedQuestions.has(question.id)) {
                                         toggleQuestionExpanded(question.id);
+                                        setTimeout(() => {
+                                          const element =
+                                            document.getElementById(
+                                              `question-${subQuestion.id}`,
+                                            );
+                                          if (element) {
+                                            element.scrollIntoView({
+                                              behavior: "smooth",
+                                            });
+                                          }
+                                        }, 100);
+                                      } else {
+                                        const element = document.getElementById(
+                                          `question-${subQuestion.id}`,
+                                        );
+                                        if (element) {
+                                          element.scrollIntoView({
+                                            behavior: "smooth",
+                                          });
+                                        }
                                       }
                                     }}
                                     className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2"
