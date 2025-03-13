@@ -88,7 +88,8 @@ export default function AuthUserProvider({
     onSuccess: async (data: LoginResponse) => {
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
-        navigate("/2fa");
+        const redirectURL = getRedirectURL();
+        navigate(redirectURL ? `/2fa?redirect=${redirectURL}` : "/2fa");
         return;
       }
 
