@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -32,13 +32,12 @@ interface DiagnosisListProps {
 export function DiagnosisList({
   patientId,
   encounterId,
-  hideFullViewButton,
+  hideFullViewButton = false,
   encounter,
   className = "",
   readOnly = false,
   overviewSection = true,
 }: DiagnosisListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
   let limit;
   overviewSection ? (limit = 14) : (limit = 100);
 
@@ -55,12 +54,9 @@ export function DiagnosisList({
   if (isLoading) {
     return (
       <DiagnosisListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         className={className}
         readOnly={readOnly}
         hideFullViewButton={hideFullViewButton}
-        encounter={encounter}
       >
         <CardContent className="px-2 pb-2">
           <Skeleton className="h-[100px] w-full" />
@@ -70,20 +66,19 @@ export function DiagnosisList({
   }
 
   const filteredDiagnoses = diagnoses?.results?.filter(
-    (diagnosis) =>
-      showEnteredInError ||
-      diagnosis.verification_status !== "entered_in_error",
+    (diagnosis) => diagnosis.verification_status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = diagnoses?.results?.some(
-    (diagnosis) => diagnosis.verification_status === "entered_in_error",
+  const hasInActiveRecords = diagnoses?.results?.some(
+    (diagnose) =>
+      diagnose.verification_status === "entered_in_error" ||
+      diagnose.clinical_status === "inactive" ||
+      diagnose.clinical_status === "resolved",
   );
 
   if (!filteredDiagnoses?.length) {
     return (
       <DiagnosisListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         className={className}
         readOnly={readOnly}
         hideFullViewButton={hideFullViewButton}
@@ -97,42 +92,54 @@ export function DiagnosisList({
 
   return (
     <DiagnosisListLayout
-      patientId={patientId}
-      encounterId={encounterId}
       className={className}
       readOnly={readOnly}
-      encounter={encounter}
       hideFullViewButton={hideFullViewButton}
     >
       <>
         <DiagnosisTable
           diagnoses={[
-            ...filteredDiagnoses.filter(
-              (diagnosis) =>
-                diagnosis.verification_status !== "entered_in_error",
-            ),
-            ...(showEnteredInError
-              ? filteredDiagnoses.filter(
-                  (diagnosis) =>
-                    diagnosis.verification_status === "entered_in_error",
-                )
-              : []),
+            ...filteredDiagnoses.filter((diagnosis) => {
+              if (diagnosis.verification_status === "entered_in_error") {
+                return false;
+              }
+
+              if (!hideFullViewButton) {
+                return (
+                  diagnosis.clinical_status !== "inactive" &&
+                  diagnosis.clinical_status !== "resolved"
+                );
+              }
+
+              return true;
+            }),
           ]}
         />
 
-        {hasEnteredInErrorRecords && !showEnteredInError && (
+        {hasInActiveRecords && (
           <>
-            <div className="border-b border-dashed border-gray-200 my-2" />
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => setShowEnteredInError(true)}
-                className="text-xs underline text-gray-950"
-              >
-                {t("view_all")}
-              </Button>
-            </div>
+            {!hideFullViewButton && encounterId && (
+              <FullViewDialog
+                patientId={patientId}
+                encounterId={encounterId}
+                initialTab="diagnoses"
+                encounter={encounter}
+              />
+            )}
+            {hideFullViewButton && (
+              <div>
+                <div className="border-b border-dashed border-gray-200 my-2" />
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="text-xs underline text-gray-950"
+                  >
+                    {t("load_more")}
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </>
@@ -144,17 +151,11 @@ const DiagnosisListLayout = ({
   children,
   className,
   hideFullViewButton = false,
-  encounter,
-  encounterId,
-  patientId,
   readOnly = false,
 }: {
   children: ReactNode;
   className?: string;
   hideFullViewButton?: boolean;
-  encounter?: Encounter;
-  encounterId?: string;
-  patientId: string;
   readOnly?: boolean;
 }) => {
   return (
@@ -173,14 +174,6 @@ const DiagnosisListLayout = ({
                 <CareIcon icon="l-pen" className="w-4 h-4" />
                 {t("edit")}
               </Link>
-            )}
-            {!hideFullViewButton && encounterId && (
-              <FullViewDialog
-                patientId={patientId}
-                encounterId={encounterId}
-                initialTab="diagnoses"
-                encounter={encounter}
-              />
             )}
           </div>
         )}

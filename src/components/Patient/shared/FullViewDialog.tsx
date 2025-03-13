@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ChevronLeft, ChevronRight, Fullscreen } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +17,6 @@ import { Encounter } from "@/types/emr/encounter";
 interface FullViewDialogProps {
   patientId: string;
   encounterId: string;
-  facilityId?: string;
   initialTab?: "allergies" | "symptoms" | "diagnoses" | "questionnaire";
   encounter?: Encounter;
 }
@@ -50,13 +49,18 @@ export function FullViewDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-1 text-sm hover:text-gray-500 text-gray-950 border border-gray-300 rounded-md ml-2"
-        >
-          <Fullscreen className="mr-2" />
-          {t("full_view")}
-        </Button>
+        <div>
+          <div className="border-b border-dashed border-gray-200 my-2" />
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-xs underline text-gray-950"
+            >
+              {t("view_all")}
+            </Button>
+          </div>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[80vw] max-h-[90vh] overflow-y-auto p-0">
         <Tabs

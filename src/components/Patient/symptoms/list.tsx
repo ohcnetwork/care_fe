@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -34,11 +34,10 @@ export function SymptomsList({
   encounterId,
   className,
   encounter,
-  hideFullViewButton,
+  hideFullViewButton = false,
   readOnly = false,
   overviewSection = true,
 }: SymptomsListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
   let limit;
   overviewSection ? (limit = 14) : (limit = 100);
 
@@ -55,10 +54,7 @@ export function SymptomsList({
   if (isLoading) {
     return (
       <SymptomListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         readOnly={readOnly}
-        encounter={encounter}
         hideFullViewButton={hideFullViewButton}
       >
         <CardContent className="px-2 pb-2">
@@ -69,19 +65,19 @@ export function SymptomsList({
   }
 
   const filteredSymptoms = symptoms?.results?.filter(
-    (symptom) =>
-      showEnteredInError || symptom.verification_status !== "entered_in_error",
+    (symptom) => symptom.verification_status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = symptoms?.results?.some(
-    (symptom) => symptom.verification_status === "entered_in_error",
+  const hasInActiveRecords = symptoms?.results?.some(
+    (symptom) =>
+      symptom.verification_status === "entered_in_error" ||
+      symptom.clinical_status === "inactive" ||
+      symptom.clinical_status === "resolved",
   );
 
   if (!filteredSymptoms?.length) {
     return (
       <SymptomListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
       >
@@ -94,39 +90,53 @@ export function SymptomsList({
 
   return (
     <SymptomListLayout
-      patientId={patientId}
-      encounterId={encounterId}
-      encounter={encounter}
       className={className}
       hideFullViewButton={hideFullViewButton}
       readOnly={readOnly}
     >
       <SymptomTable
         symptoms={[
-          ...filteredSymptoms.filter(
-            (symptom) => symptom.verification_status !== "entered_in_error",
-          ),
-          ...(showEnteredInError
-            ? filteredSymptoms.filter(
-                (symptom) => symptom.verification_status === "entered_in_error",
-              )
-            : []),
+          ...filteredSymptoms.filter((symptom) => {
+            if (symptom.verification_status === "entered_in_error") {
+              return false;
+            }
+
+            if (!hideFullViewButton) {
+              return (
+                symptom.clinical_status !== "inactive" &&
+                symptom.clinical_status !== "resolved"
+              );
+            }
+
+            return true;
+          }),
         ]}
       />
 
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+      {hasInActiveRecords && (
         <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center ">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
+          {!hideFullViewButton && encounterId && (
+            <FullViewDialog
+              patientId={patientId}
+              encounterId={encounterId}
+              initialTab="symptoms"
+              encounter={encounter}
+            />
+          )}
+          {hideFullViewButton && (
+            <div>
+              <div className="border-b border-dashed border-gray-200 my-2" />
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-xs underline text-gray-950"
+                >
+                  {t("load_more")}
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </SymptomListLayout>
@@ -137,17 +147,11 @@ const SymptomListLayout = ({
   children,
   className,
   hideFullViewButton = false,
-  encounter,
-  encounterId,
-  patientId,
   readOnly = false,
 }: {
-  patientId: string;
-  encounterId?: string;
   children: ReactNode;
   className?: string;
   hideFullViewButton?: boolean;
-  encounter?: Encounter;
   readOnly?: boolean;
 }) => {
   return (
@@ -164,14 +168,6 @@ const SymptomListLayout = ({
                 <CareIcon icon="l-pen" className="w-4 h-4" />
                 {t("edit")}
               </Link>
-            )}
-            {!hideFullViewButton && encounterId && (
-              <FullViewDialog
-                patientId={patientId}
-                encounterId={encounterId}
-                initialTab="symptoms"
-                encounter={encounter}
-              />
             )}
           </div>
         )}

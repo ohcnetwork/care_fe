@@ -7,7 +7,7 @@ import {
   LeafIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -77,10 +77,9 @@ export function AllergyList({
   readOnly = false,
   encounterStatus,
   encounter,
-  hideFullViewButton,
+  hideFullViewButton = false,
   overviewSection = true,
 }: AllergyListProps) {
-  const [showEnteredInError, setShowEnteredInError] = useState(false);
   let limit;
   overviewSection ? (limit = 14) : (limit = 100);
   const { data: allergies, isLoading } = useQuery({
@@ -99,11 +98,8 @@ export function AllergyList({
   if (isLoading) {
     return (
       <AllergyListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
-        encounter={encounter}
         className={className}
       >
         <CardContent className="px-2 pb-2">
@@ -114,22 +110,21 @@ export function AllergyList({
   }
 
   const filteredAllergies = allergies?.results?.filter(
-    (allergy) =>
-      showEnteredInError || allergy.verification_status !== "entered_in_error",
+    (allergy) => allergy.verification_status !== "entered_in_error",
   );
 
-  const hasEnteredInErrorRecords = allergies?.results?.some(
-    (allergy) => allergy.verification_status === "entered_in_error",
+  const hasInActiveRecords = allergies?.results?.some(
+    (allergy) =>
+      allergy.verification_status === "entered_in_error" ||
+      allergy.clinical_status === "inactive" ||
+      allergy.clinical_status === "resolved",
   );
 
   if (!filteredAllergies?.length) {
     return (
       <AllergyListLayout
-        patientId={patientId}
-        encounterId={encounterId}
         hideFullViewButton={hideFullViewButton}
         readOnly={readOnly}
-        encounter={encounter}
         className={className}
       >
         <CardContent className="px-2 pb-3 pt-2">
@@ -226,11 +221,8 @@ export function AllergyList({
 
   return (
     <AllergyListLayout
-      patientId={patientId}
-      encounterId={encounterId ?? ""}
       className={className}
       readOnly={readOnly}
-      encounter={encounter}
       hideFullViewButton={hideFullViewButton}
     >
       <Table className="border-separate border-spacing-y-0.5">
@@ -258,39 +250,50 @@ export function AllergyList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* Valid entries */}
           {filteredAllergies
-            .filter(
-              (allergy) => allergy.verification_status !== "entered_in_error",
-            )
+            .filter((allergy) => {
+              if (allergy.verification_status === "entered_in_error") {
+                return false;
+              }
+
+              if (!hideFullViewButton) {
+                return (
+                  allergy.clinical_status !== "inactive" &&
+                  allergy.clinical_status !== "resolved"
+                );
+              }
+
+              return true;
+            })
             .map((allergy) => (
               <AllergyRow key={allergy.id} allergy={allergy} />
             ))}
-
-          {/* Entered in error entries */}
-          {showEnteredInError &&
-            filteredAllergies
-              .filter(
-                (allergy) => allergy.verification_status === "entered_in_error",
-              )
-              .map((allergy) => (
-                <AllergyRow key={allergy.id} allergy={allergy} />
-              ))}
         </TableBody>
       </Table>
-      {hasEnteredInErrorRecords && !showEnteredInError && (
+      {hasInActiveRecords && (
         <>
-          <div className="border-b border-dashed border-gray-200 my-2" />
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setShowEnteredInError(true)}
-              className="text-xs underline text-gray-950"
-            >
-              {t("view_all")}
-            </Button>
-          </div>
+          {!hideFullViewButton && (
+            <FullViewDialog
+              patientId={patientId}
+              encounterId={encounterId ?? ""}
+              initialTab="allergies"
+              encounter={encounter}
+            />
+          )}
+          {hideFullViewButton && (
+            <div>
+              <div className="border-b border-dashed border-gray-200 my-2" />
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-xs underline text-gray-950"
+                >
+                  {t("load_more")}
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </AllergyListLayout>
@@ -300,18 +303,12 @@ export function AllergyList({
 const AllergyListLayout = ({
   children,
   className,
-  patientId,
-  encounterId,
   hideFullViewButton = false,
-  encounter,
   readOnly = false,
 }: {
   children: ReactNode;
-  patientId: string;
-  encounterId?: string;
   className?: string;
   hideFullViewButton?: boolean;
-  encounter?: Encounter;
   readOnly?: boolean;
 }) => {
   return (
@@ -328,14 +325,6 @@ const AllergyListLayout = ({
                 <CareIcon icon="l-pen" className="w-4 h-4" />
                 {t("edit")}
               </Link>
-            )}
-            {!hideFullViewButton && (
-              <FullViewDialog
-                patientId={patientId}
-                encounterId={encounterId ?? ""}
-                initialTab="allergies"
-                encounter={encounter}
-              />
             )}
           </div>
         )}
