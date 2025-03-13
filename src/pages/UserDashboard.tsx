@@ -9,7 +9,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
-import { formatDisplayName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { getOrgLabel } from "@/types/organization/organization";
 
 export default function UserDashboard() {
@@ -26,13 +26,15 @@ export default function UserDashboard() {
       <div className="flex flex-col gap-4 bg-card p-4 md:p-6 rounded-lg border shadow-sm w-full  mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar
-            name={formatDisplayName(user)}
+            name={formatName(user)}
             imageUrl={user.read_profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />
           <div className="space-y-1 text-center sm:text-left">
             <h1 className="text-xl md:text-2xl font-bold">
-              {t("welcome_back_name", { name: user.first_name })}
+              {t("welcome_back_name", {
+                name: (user.prefix ? user.prefix + " " : "") + user.first_name,
+              })}
             </h1>
             <p className="text-sm md:text-base text-gray-500">
               {new Date().toLocaleDateString("en-US", {

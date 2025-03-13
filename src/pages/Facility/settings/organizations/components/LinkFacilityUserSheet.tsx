@@ -145,7 +145,7 @@ export default function LinkFacilityUserSheet({
                   />
                   <div className="w-3/4">
                     <p className="font-medium text-lg truncate">
-                      {selectedUser.first_name} {selectedUser.last_name}
+                      {formatName(selectedUser)}
                     </p>
                     <span className="text-sm text-gray-500">
                       {selectedUser.email}

@@ -115,7 +115,7 @@ export default function MedicationRequestTable({
     <div className="space-y-2">
       <div className="rounded-lg">
         <Tabs defaultValue="prescriptions">
-          <TabsList className="">
+          <TabsList>
             <TabsTrigger
               value="prescriptions"
               className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
