@@ -85,31 +85,37 @@ const MEDICATION_REQUEST_FIELDS = {
   DOSAGE: {
     key: "dosage_instruction.dose",
     required: true,
-    validate: (value: MedicationRequest["dosage_instruction"][0]) => {
-      // Check if either dose_quantity or dose_range exists
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
       return !!(
-        value?.dose_and_rate?.dose_quantity || value?.dose_and_rate?.dose_range
+        dosageInstruction?.dose_and_rate?.dose_quantity ||
+        dosageInstruction?.dose_and_rate?.dose_range
       );
     },
   },
   FREQUENCY: {
     key: "dosage_instruction.frequency",
     required: true,
-    validate: (value: MedicationRequest["dosage_instruction"][0]) => {
-      // Check if either timing exists or as_needed_boolean is true
-      return !!(value?.timing || value?.as_needed_boolean);
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
+      return !!(
+        dosageInstruction?.timing || dosageInstruction?.as_needed_boolean
+      );
     },
   },
   DURATION: {
     key: "dosage_instruction.duration",
     required: false,
-    validate: (value: MedicationRequest["dosage_instruction"][0]) => {
-      // If timing exists, bounds_duration must be present with value and unit
-      if (value?.timing) {
-        const duration = value.timing.repeat.bounds_duration;
+    validate: (value: unknown) => {
+      const dosageInstruction =
+        value as MedicationRequest["dosage_instruction"][0];
+      if (dosageInstruction?.timing) {
+        const duration = dosageInstruction.timing.repeat.bounds_duration;
         return !!(duration?.value && duration?.unit);
       }
-      return true; // No validation needed if no timing
+      return true;
     },
   },
 } as const;
@@ -117,7 +123,6 @@ const MEDICATION_REQUEST_FIELDS = {
 export function validateMedicationRequestQuestion(
   values: MedicationRequest[],
   questionId: string,
-  t: (key: string) => string,
 ): QuestionValidationError[] {
   return values.reduce((errors: QuestionValidationError[], value, index) => {
     // Skip validation for medications marked as entered_in_error

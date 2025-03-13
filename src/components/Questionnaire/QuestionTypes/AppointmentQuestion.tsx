@@ -55,7 +55,10 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
   REASON: {
     key: "reason_for_visit",
     required: true,
-    validate: (value: string) => !!value?.trim(),
+    validate: (value: unknown) => {
+      const str = value as string;
+      return !!str?.trim();
+    },
   },
   SLOT: {
     key: "slot_id",

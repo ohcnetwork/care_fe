@@ -584,7 +584,6 @@ export function QuestionnaireForm({
               const medicationErrors = validateMedicationRequestQuestion(
                 medicationData,
                 q.id,
-                t,
               );
               errors.push(...medicationErrors);
               if (medicationErrors.length > 0) {

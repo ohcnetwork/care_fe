@@ -98,8 +98,10 @@ const MEDICATION_STATEMENT_FIELDS: FieldDefinitions = {
   PERIOD: {
     key: "effective_period",
     required: true,
-    validate: (value: { start?: string; end?: string }) =>
-      !!value?.start && !!value?.end,
+    validate: (value: unknown) => {
+      const period = value as { start?: string; end?: string };
+      return !!period?.start && !!period?.end;
+    },
   },
   REASON: {
     key: "reason",
