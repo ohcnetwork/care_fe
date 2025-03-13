@@ -186,7 +186,6 @@ function PatientIndex() {
           <span className="text-xl font-bold">{t("appointments")}</span>
           <Button variant="primary_gradient" className="sticky right-0" asChild>
             <Link href="/facilities">
-              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
               <span>{t("book_appointment")}</span>
             </Link>
           </Button>
