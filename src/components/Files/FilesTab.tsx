@@ -53,7 +53,6 @@ import { Patient } from "@/types/emr/newPatient";
 
 export interface FilesTabProps {
   type: "encounter" | "patient";
-  facilityId?: string;
   encounter?: Encounter;
   patient?: Patient;
   subPage?: string;
@@ -90,6 +89,10 @@ export const FilesTab = (props: FilesTabProps) => {
     canWriteEncounter &&
     encounter &&
     !inactiveEncounterStatus.includes(encounter.status);
+
+  const canEdit =
+    type === "encounter" ? canWriteCurrentEncounter : canWritePatient;
+
   const queryClient = useQueryClient();
 
   const associatingId =
@@ -244,15 +247,6 @@ export const FilesTab = (props: FilesTabProps) => {
     );
   };
 
-  const editPermission = () => {
-    if (type === "encounter") {
-      return canWriteCurrentEncounter;
-    } else if (type === "patient") {
-      return canWritePatient;
-    }
-    return false;
-  };
-
   const DetailButtons = ({ file }: { file: FileUploadModel }) => {
     const filetype = getFileType(file);
     return (
@@ -301,7 +295,7 @@ export const FilesTab = (props: FilesTabProps) => {
                   <span>{t("download")}</span>
                 </Button>
               </DropdownMenuItem>
-              {editPermission() && (
+              {canEdit && (
                 <>
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
@@ -391,7 +385,7 @@ export const FilesTab = (props: FilesTabProps) => {
   };
 
   const FileUploadButtons = (): JSX.Element => {
-    if (!editPermission()) return <></>;
+    if (!canEdit) return <></>;
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

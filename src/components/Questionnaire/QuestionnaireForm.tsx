@@ -519,11 +519,7 @@ export function QuestionnaireForm({
         if (q.required) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
-            (v) =>
-              v.value !== undefined &&
-              v.value !== null &&
-              v.value !== "" &&
-              (Array.isArray(v.value) ? v.value.length > 0 : true),
+            (v) => v.value !== undefined && v.value !== null && v.value !== "",
           );
 
           if (!hasValue) {

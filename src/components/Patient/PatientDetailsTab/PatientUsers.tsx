@@ -213,7 +213,8 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 }
 
 export const PatientUsers = (props: PatientProps) => {
-  const { patientId, patientData } = props;
+  const { patientData } = props;
+  const patientId = patientData.id;
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(

@@ -70,18 +70,13 @@ export default function MedicationRequestTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [showStopped, setShowStopped] = useState(false);
   const { hasPermission } = usePermissions();
-  const {
-    canViewClinicalData,
-    canViewEncounter,
-    canSubmitEncounterQuestionnaire,
-  } = getPermissions(hasPermission, encounter.permissions);
+  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
+    getPermissions(hasPermission, encounter.permissions);
   const canAccess = canViewClinicalData || canViewEncounter;
   const { goBack } = useAppHistory();
 
-  const canWriteCurrentEncounter =
-    canSubmitEncounterQuestionnaire &&
-    encounter &&
-    !inactiveEncounterStatus.includes(encounter.status);
+  const canWrite =
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const { data: activeMedications, isLoading: loadingActive } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query(medicationRequestApi.list, {
@@ -180,7 +175,7 @@ export default function MedicationRequestTable({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {canWriteCurrentEncounter && (
+                  {canWrite && (
                     <Button
                       asChild
                       variant="outline"
@@ -250,8 +245,8 @@ export default function MedicationRequestTable({
             <AdministrationTab
               patientId={patientId}
               encounterId={encounter.id}
-              encounterStatus={encounter.status}
-              encounterPermissions={encounter.permissions}
+              canAccess={canAccess}
+              canWrite={canWrite}
             />
           </TabsContent>
         </Tabs>

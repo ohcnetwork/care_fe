@@ -37,12 +37,11 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
-import { getPermissions } from "@/common/Permissions";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { usePermissions } from "@/context/PermissionContext";
 import { OrganizationUserRole } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -52,19 +51,18 @@ interface Props {
   organizationId: string;
   userRole: OrganizationUserRole;
   trigger?: React.ReactNode;
-  permissions: string[];
 }
 
 export default function EditUserRoleSheet({
   organizationId,
   userRole,
   trigger,
-  permissions,
 }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>(userRole.role.id);
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const authUser = useAuthUser();
   const { t } = useTranslation();
 
   const { data: roles } = useQuery({
@@ -125,8 +123,8 @@ export default function EditUserRoleSheet({
       role: selectedRole,
     });
   };
-  const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, permissions);
+  const canEditUser =
+    authUser.is_superuser || authUser.username === userRole.user.username;
 
   return (
     <>
@@ -250,7 +248,7 @@ export default function EditUserRoleSheet({
                 </AlertDialogContent>
               </AlertDialog>
 
-              {canCreateUser && (
+              {canEditUser && (
                 <Button
                   variant="outline"
                   className="w-full"

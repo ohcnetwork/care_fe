@@ -80,7 +80,6 @@ export default function ObservationsList(props: Props) {
   const encounterId = props.encounter.id;
   const { ref, inView } = useInView();
 
-  const canAccess = props.canAccess;
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery<PaginatedResponse<Observation>, HTTPError>({
       queryKey: ["observations", patientId, encounterId],
@@ -101,7 +100,7 @@ export default function ObservationsList(props: Props) {
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: canAccess,
+      enabled: props.canAccess,
     });
 
   useEffect(() => {

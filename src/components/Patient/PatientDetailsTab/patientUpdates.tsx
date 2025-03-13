@@ -18,7 +18,8 @@ import { usePermissions } from "@/context/PermissionContext";
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
-  const { facilityId, patientId, patientData } = props;
+  const { facilityId, patientData } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
@@ -60,7 +61,7 @@ export const Updates = (props: PatientProps) => {
       </div>
       <QuestionnaireResponsesList
         patientId={patientId}
-        patientData={patientData}
+        canAccess={canViewPatientQuestionnaireResponses}
       />
     </div>
   );

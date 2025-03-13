@@ -106,6 +106,7 @@ const consultationRoutes: AppRoutes = {
       facilityId={facilityId}
       patientId={patientId}
       questionnaireSlug="encounter"
+      subjectType="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({

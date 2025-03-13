@@ -30,7 +30,8 @@ import { usePermissions } from "@/context/PermissionContext";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 export const Appointments = (props: PatientProps) => {
-  const { patientData, facilityId, patientId } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { canViewAppointments, canCreateAppointment } = getPermissions(

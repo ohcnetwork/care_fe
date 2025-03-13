@@ -78,18 +78,20 @@ export default function TreatmentSummary({
 
   const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
-  const { canViewEncounter } = getPermissions(
+  const { canViewEncounter, canViewClinicalData } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
 
+  const canAccess = canViewEncounter || canViewClinicalData;
+
   useEffect(() => {
-    if (!canViewEncounter) {
+    if (!canAccess) {
       toast.error(t("no_permission_to_view_page"));
       goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canViewEncounter]);
+  }, [canAccess]);
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],
     queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
@@ -508,6 +510,7 @@ export default function TreatmentSummary({
               patientId={encounter.patient.id}
               isPrintPreview={true}
               onlyUnstructured={true}
+              canAccess={canAccess}
             />
           </div>
         </div>

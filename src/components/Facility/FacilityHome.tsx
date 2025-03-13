@@ -282,7 +282,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   </div>
                 </div>
               </div>
-              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:35rem)]:top-0">
+              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:55rem)]:top-0">
                 {canUpdateFacility && (
                   <Button
                     variant="link"

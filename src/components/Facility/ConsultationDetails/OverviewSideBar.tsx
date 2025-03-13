@@ -2,10 +2,7 @@ import { t } from "i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
+import { Encounter } from "@/types/emr/encounter";
 
 import ObservationsList from "./ObservationsList";
 import QuickAccess from "./QuickAccess";
@@ -13,18 +10,10 @@ import QuickAccess from "./QuickAccess";
 interface Props {
   encounter: Encounter;
   canAccess: boolean;
+  canEdit: boolean;
 }
 
 export default function SideOverview(props: Props) {
-  const { hasPermission } = usePermissions();
-  const { canSubmitEncounterQuestionnaire } = getPermissions(
-    hasPermission,
-    props.encounter.permissions,
-  );
-  const canEdit =
-    canSubmitEncounterQuestionnaire &&
-    !inactiveEncounterStatus.includes(props.encounter.status);
-
   return (
     <div className="mt-4 flex w-full h-auto flex-col gap-4 text-sm">
       <Tabs defaultValue="quick_access" className="w-full">
@@ -41,7 +30,7 @@ export default function SideOverview(props: Props) {
 
         <div>
           <TabsContent value="quick_access" className="p-2">
-            <QuickAccess encounter={props.encounter} canEdit={canEdit} />
+            <QuickAccess encounter={props.encounter} canEdit={props.canEdit} />
           </TabsContent>
           <TabsContent value="observations" className="p-2">
             <ObservationsList

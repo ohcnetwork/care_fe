@@ -228,7 +228,6 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                             <EditUserRoleSheet
                               organizationId={id}
                               userRole={userRole}
-                              permissions={orgPermissions}
                               trigger={
                                 <Button variant="outline" size="sm">
                                   <span>{t("edit_role")}</span>

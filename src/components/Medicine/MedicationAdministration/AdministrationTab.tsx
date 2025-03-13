@@ -22,13 +22,9 @@ import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
 
-import { getPermissions } from "@/common/Permissions";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import { Encounter, inactiveEncounterStatus } from "@/types/emr/encounter";
 import {
   MedicationAdministration,
   MedicationAdministrationRequest,
@@ -95,8 +91,8 @@ function getAdministrationsForTimeSlot(
 interface AdministrationTabProps {
   patientId: string;
   encounterId: string;
-  encounterStatus: Encounter["status"];
-  encounterPermissions: Encounter["permissions"];
+  canAccess: boolean;
+  canWrite: boolean;
 }
 
 interface TimeSlotHeaderProps {
@@ -368,15 +364,9 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
 export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   patientId,
   encounterId,
-  encounterStatus,
-  encounterPermissions,
+  canAccess,
+  canWrite,
 }) => {
-  const { hasPermission } = usePermissions();
-  const { canViewClinicalData, canViewEncounter, canWriteEncounter } =
-    getPermissions(hasPermission, encounterPermissions);
-  const canAccess = canViewClinicalData || canViewEncounter;
-  const canWrite =
-    canWriteEncounter && !inactiveEncounterStatus.includes(encounterStatus);
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);

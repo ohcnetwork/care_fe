@@ -16,7 +16,8 @@ import { usePermissions } from "@/context/PermissionContext";
 import { PatientProps } from ".";
 
 export const HealthProfileSummary = (props: PatientProps) => {
-  const { patientId, facilityId, patientData } = props;
+  const { facilityId, patientData } = props;
+  const patientId = patientData.id;
   const { hasPermission } = usePermissions();
   const { canViewClinicalData } = getPermissions(
     hasPermission,

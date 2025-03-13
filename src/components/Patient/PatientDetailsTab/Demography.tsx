@@ -22,7 +22,8 @@ import {
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
-  const { patientData, facilityId, patientId } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(

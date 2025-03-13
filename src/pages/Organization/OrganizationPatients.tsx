@@ -171,13 +171,13 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                           </div>
                           <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
                             <div className="text-sm">
-                              <div className="text-gray-500">Phone</div>
+                              <div className="text-gray-500">{t("phone")}</div>
                               <div className="font-medium">
                                 {patient.phone_number}
                               </div>
                             </div>
                             <div className="text-sm">
-                              <div className="text-gray-500">Gender</div>
+                              <div className="text-gray-500">{t("gender")}</div>
                               <div className="font-medium">
                                 {patient.gender}
                               </div>
@@ -185,7 +185,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
                             {patient.geo_organization && (
                               <div className="col-span-2 text-sm">
                                 <div className="text-gray-500">
-                                  Organization
+                                  {t("organization")}
                                 </div>
                                 <div className="font-medium">
                                   {patient.geo_organization.name}

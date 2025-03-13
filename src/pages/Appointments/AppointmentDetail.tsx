@@ -92,10 +92,8 @@ export default function AppointmentDetail(props: Props) {
     }),
   });
 
-  const { canViewAppointments, canUpdateAppointment } = getPermissions(
-    hasPermission,
-    facilityData?.permissions ?? [],
-  );
+  const { canViewAppointments, canUpdateAppointment, canCreateAppointment } =
+    getPermissions(hasPermission, facilityData?.permissions ?? []);
 
   const appointmentQuery = useQuery({
     queryKey: ["appointment", props.appointmentId],
@@ -205,7 +203,7 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     onChange={(status) => updateAppointment({ status })}
                     onViewPatient={redirectToPatientPage}
-                    permissions={facilityData.permissions}
+                    canCreateAppointment={canCreateAppointment}
                   />
                 </div>
               </>
@@ -404,7 +402,7 @@ interface AppointmentActionsProps {
   appointment: Appointment;
   onChange: (status: Appointment["status"]) => void;
   onViewPatient: () => void;
-  permissions: string[];
+  canCreateAppointment: boolean;
 }
 
 const AppointmentActions = ({
@@ -412,14 +410,12 @@ const AppointmentActions = ({
   appointment,
   onChange,
   onViewPatient,
-  permissions,
+  canCreateAppointment,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
-  const { hasPermission } = usePermissions();
-  const { canCreateAppointment } = getPermissions(hasPermission, permissions);
 
   const currentStatus = appointment.status;
   const isToday = isSameDay(appointment.token_slot.start_datetime, new Date());

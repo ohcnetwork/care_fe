@@ -78,13 +78,18 @@ export const EncounterUpdatesTab = ({
             <QuestionnaireResponsesList
               encounter={encounter}
               patientId={patient.id}
+              canAccess={canAccess}
             />
           </div>
         </div>
 
         {/* Right Column - Observations */}
         <div className="xl:w-1/4 p-1 bg-white rounded-md shadow-md h-full">
-          <SideOverview encounter={encounter} canAccess={canAccess} />
+          <SideOverview
+            encounter={encounter}
+            canAccess={canAccess}
+            canEdit={canEdit}
+          />
         </div>
       </div>
     </div>

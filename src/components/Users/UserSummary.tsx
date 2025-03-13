@@ -22,16 +22,8 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { getPermissions } from "@/common/Permissions";
-
-import {
-  showAvatarEdit,
-  showUserDelete,
-  showUserPasswordReset,
-} from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
-import { usePermissions } from "@/context/PermissionContext";
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 
 export default function UserSummaryTab({
@@ -42,8 +34,6 @@ export default function UserSummaryTab({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const authUser = useAuthUser();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
-  const { hasPermission } = usePermissions();
-  const { canCreateUser } = getPermissions(hasPermission, permissions ?? []);
 
   const { mutate: deleteUser, isPending: isDeleting } = useMutation({
     mutationFn: mutate(routes.deleteUser, {
@@ -72,9 +62,9 @@ export default function UserSummaryTab({
     username: userData.username,
     permissions,
   };
-  const deletePermitted = showUserDelete(authUser, userData);
-  const passwordResetPermitted = showUserPasswordReset(authUser, userData);
-  const avatarPermitted = showAvatarEdit(authUser, userData);
+  const loggedInUsersProfile = authUser.username === userData.username;
+  const canEditUser = authUser.is_superuser || loggedInUsersProfile;
+  const canResetPassword = loggedInUsersProfile;
 
   const renderBasicInformation = () => {
     return (
@@ -111,7 +101,7 @@ export default function UserSummaryTab({
         setOpen={setShowEditUserSheet}
       />
       <div className="mt-10 flex flex-col gap-y-6">
-        {(canCreateUser || authUser.username === userData.username) && (
+        {canEditUser && (
           <Button
             variant="outline"
             className="w-fit self-end"
@@ -122,7 +112,7 @@ export default function UserSummaryTab({
             {t("edit_user")}
           </Button>
         )}
-        {avatarPermitted && (
+        {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}
             note={
@@ -139,7 +129,7 @@ export default function UserSummaryTab({
           note={
             authUser.username === userData.username
               ? t("personal_information_note_self")
-              : canCreateUser
+              : canEditUser
                 ? t("personal_information_note")
                 : t("personal_information_note_view")
           }
@@ -151,14 +141,14 @@ export default function UserSummaryTab({
           note={
             authUser.username === userData.username
               ? t("contact_info_note_self")
-              : canCreateUser
+              : canEditUser
                 ? t("contact_info_note")
                 : t("contact_info_note_view")
           }
           Child={renderContactInformation}
           childProps={userColumnsData}
         />
-        {passwordResetPermitted && (
+        {canResetPassword && (
           <UserColumns
             heading={t("reset_password")}
             note={t("reset_password_note_self")}
@@ -182,7 +172,7 @@ export default function UserSummaryTab({
             />
           </>
         )}
-        {deletePermitted && (
+        {canEditUser && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
             <div className="sm:w-1/4">
               <div className="my-1 text-sm leading-5">

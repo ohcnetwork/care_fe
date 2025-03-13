@@ -25,8 +25,12 @@ interface EncounterCardProps {
 export const EncounterCard = (props: EncounterCardProps) => {
   const { encounter, permissions, facilityId } = props;
   const { hasPermission } = usePermissions();
-  const { canViewEncounter } = getPermissions(hasPermission, permissions);
+  const { canViewEncounter, canViewPatients } = getPermissions(
+    hasPermission,
+    permissions,
+  );
 
+  const canAccess = canViewEncounter || canViewPatients;
   const Icon = encounterIcons[encounter.encounter_class];
 
   return (
@@ -121,7 +125,7 @@ export const EncounterCard = (props: EncounterCardProps) => {
                 </div>
               )}
             </div>
-            {canViewEncounter && (
+            {canAccess && (
               <div className="w-full py-2 bg-gray-100 px-2">
                 <Button variant="outline" className="p-2 border border-black">
                   <Link

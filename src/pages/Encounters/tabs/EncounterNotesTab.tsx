@@ -330,9 +330,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
     getPermissions(hasPermission, encounter.permissions);
   const canAccess = canViewClinicalData || canViewEncounter;
   const canWriteCurrentEncounter =
-    canWriteEncounter &&
-    encounter &&
-    !inactiveEncounterStatus.includes(encounter.status);
+    canWriteEncounter && !inactiveEncounterStatus.includes(encounter.status);
   const [commentAdded, setCommentAdded] = useState(false);
 
   // Fetch threads
@@ -724,7 +722,7 @@ export const EncounterNotesTab = ({ encounter }: EncounterTabProps) => {
               </Button>
               {!canWriteCurrentEncounter && (
                 <p className="text-sm text-gray-500 mt-4">
-                  {t("encounter_notes__cannot_start_discussion_old_encounter", {
+                  {t("encounter_notes__inactive_encounter", {
                     encounterStatus: t(`encounter_status__${encounter.status}`),
                   })}
                 </p>

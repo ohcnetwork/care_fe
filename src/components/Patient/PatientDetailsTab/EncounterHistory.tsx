@@ -25,7 +25,8 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { patientId, facilityId, patientData } = props;
+  const { patientData, facilityId } = props;
+  const patientId = patientData.id;
 
   const { t } = useTranslation();
 
