@@ -40,7 +40,7 @@ export function DiagnosisList({
 }: DiagnosisListProps) {
   const [allDiagnoses, setAllDiagnoses] = useState<Diagnosis[]>([]);
   const [page, setPage] = useState(1);
-  let limit = 14;
+  const limit = 14;
 
   const {
     data: diagnoses,

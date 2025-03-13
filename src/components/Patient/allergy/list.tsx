@@ -96,7 +96,7 @@ export function AllergyList({
           ? encounterId
           : undefined,
         limit: limit,
-        offset: (page - 1) * limit, // Add offset for pagination
+        offset: (page - 1) * limit,
       },
     }),
   });

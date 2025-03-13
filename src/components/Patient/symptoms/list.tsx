@@ -39,8 +39,8 @@ export function SymptomsList({
   readOnly = false,
 }: SymptomsListProps) {
   const [allSymptoms, setAllSymptoms] = useState<Symptom[]>([]);
-  let [page, setPage] = useState(1);
-  let limit = 14;
+  const [page, setPage] = useState(1);
+  const limit = 14;
 
   const {
     data: symptoms,
