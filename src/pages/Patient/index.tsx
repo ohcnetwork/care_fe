@@ -121,21 +121,22 @@ function PatientIndex() {
               setAppointmentDialogOpen(true);
             }}
           >
-            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
             <span>{t("view_details")}</span>
           </Button>
         </CardHeader>
         <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-2 justify-between">
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0">
+          <div className="flex flex-col md:flex-row gap-2 justify-between md:justify-start">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0 md:flex-grow md:mr-8">
               <span className="text-xs font-medium">{t("location")}: </span>
-              <span className="text-sm">{"Facility Location"}</span>
+              <span className="text-sm">
+                {appointment.facility?.name || "Unknown Facility"}
+              </span>
             </div>
-            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-0 items-center md:items-start md:flex-none md:w-[80px] md:mr-8">
               <span className="text-xs font-medium">{t("status")}: </span>
               <span>{getStatusChip(appointment.status)}</span>
             </div>
-            <div className="flex flex-row gap-3 justify-between">
+            <div className="flex flex-row gap-3 justify-between md:flex-none md:w-[170px]">
               <div className="flex flex-row md:flex-col gap-2 md:gap-0">
                 <span className="text-xs font-medium">{t("date")}: </span>
                 <span className="text-sm">{appointmentDate}</span>
@@ -185,7 +186,6 @@ function PatientIndex() {
           <span className="text-xl font-bold">{t("appointments")}</span>
           <Button variant="primary_gradient" className="sticky right-0" asChild>
             <Link href="/facilities">
-              <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
               <span>{t("book_appointment")}</span>
             </Link>
           </Button>
