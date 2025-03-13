@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -258,6 +258,13 @@ function ResponseCard({
           </div>
         </div>
       </div>
+
+      <Link
+        href={`questionnaire/${item.questionnaire?.id}/responses/print`}
+        className="text-xs text-blue-600 underline mt-2"
+      >
+        {t("print_questionnaire_responses")}
+      </Link>
 
       {item.questionnaire && (
         <div className="mt-4 space-y-4">

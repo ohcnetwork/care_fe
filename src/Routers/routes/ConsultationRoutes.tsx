@@ -1,3 +1,4 @@
+import { PrintQuestionnaireQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 import TreatmentSummary from "@/components/Patient/TreatmentSummary";
@@ -15,6 +16,17 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print":
+    ({ encounterId, patientId, questionnaireId, facilityId }) => {
+      return (
+        <PrintQuestionnaireQuestionnaireResponses
+          encounterId={encounterId}
+          patientId={patientId}
+          questionnaireId={questionnaireId}
+          facilityId={facilityId}
+        />
+      );
+    },
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
     ({ facilityId, encounterId, patientId }) => (
       <TreatmentSummary
