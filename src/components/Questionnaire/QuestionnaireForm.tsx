@@ -279,6 +279,29 @@ function ValidationErrorDisplay({
   );
 }
 
+const STRUCTURED_TYPE_VALIDATORS = {
+  appointment: (response: ResponseValue | undefined, questionId: string) => {
+    const appointmentData =
+      (response?.value as CreateAppointmentQuestion[]) || [];
+    return validateAppointmentQuestion(appointmentData[0], questionId);
+  },
+  medication_statement: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData =
+      (response?.value as MedicationStatementRequest[]) || [];
+    return validateMedicationStatementQuestion(medicationData, questionId);
+  },
+  medication_request: (
+    response: ResponseValue | undefined,
+    questionId: string,
+  ) => {
+    const medicationData = (response?.value as MedicationRequest[]) || [];
+    return validateMedicationRequestQuestion(medicationData, questionId);
+  },
+} as const;
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -543,56 +566,19 @@ export function QuestionnaireForm({
           }
         }
 
-        if (q.type === "structured") {
+        if (q.type === "structured" && q.structured_type) {
           const response = form.responses.find((r) => r.question_id === q.id);
+          const validator =
+            STRUCTURED_TYPE_VALIDATORS[
+              q.structured_type as keyof typeof STRUCTURED_TYPE_VALIDATORS
+            ];
 
-          switch (q.structured_type) {
-            case "appointment": {
-              const appointmentData =
-                (response?.values?.[0]?.value as CreateAppointmentQuestion[]) ||
-                [];
-
-              const appointmentErrors = validateAppointmentQuestion(
-                appointmentData[0],
-                q.id,
-              );
-              errors.push(...appointmentErrors);
-              if (appointmentErrors.length > 0) {
-                firstErrorId = firstErrorId ? firstErrorId : q.id;
-              }
-              break;
+          if (validator) {
+            const validationErrors = validator(response?.values?.[0], q.id);
+            errors.push(...validationErrors);
+            if (validationErrors.length > 0) {
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
             }
-            case "medication_statement": {
-              const medicationData =
-                (response?.values?.[0]
-                  ?.value as MedicationStatementRequest[]) || [];
-
-              const medicationErrors = validateMedicationStatementQuestion(
-                medicationData,
-                q.id,
-              );
-              errors.push(...medicationErrors);
-              if (medicationErrors.length > 0) {
-                firstErrorId = firstErrorId ? firstErrorId : q.id;
-              }
-              break;
-            }
-            case "medication_request": {
-              const medicationData =
-                (response?.values?.[0]?.value as MedicationRequest[]) || [];
-
-              const medicationErrors = validateMedicationRequestQuestion(
-                medicationData,
-                q.id,
-              );
-              errors.push(...medicationErrors);
-              if (medicationErrors.length > 0) {
-                firstErrorId = firstErrorId ? firstErrorId : q.id;
-              }
-              break;
-            }
-            default:
-              break;
           }
         }
       };
