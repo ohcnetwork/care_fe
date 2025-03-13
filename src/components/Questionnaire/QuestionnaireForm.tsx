@@ -625,6 +625,25 @@ export function QuestionnaireForm({
     submitBatch({ requests });
   };
 
+  const scrollToQuestion = (questionnaireId: string, groupId?: string) => {
+    setActiveQuestionnaireId(questionnaireId);
+    setActiveGroupId(groupId);
+
+    let element: Element | null;
+
+    if (groupId) {
+      element = document.querySelector(`[data-group-id="${groupId}"]`);
+    } else {
+      element = document.querySelector(
+        `[data-questionnaire-id="${questionnaireId}"]`,
+      );
+    }
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
@@ -637,7 +656,7 @@ export function QuestionnaireForm({
                 activeQuestionnaireId === form.questionnaire.id &&
                   "bg-gray-100 text-green-600",
               )}
-              onClick={() => setActiveQuestionnaireId(form.questionnaire.id)}
+              onClick={() => scrollToQuestion(form.questionnaire.id)}
               disabled={isPending}
             >
               {form.questionnaire.title}
@@ -653,10 +672,9 @@ export function QuestionnaireForm({
                       activeGroupId === group.id &&
                         "bg-gray-100 text-green-600",
                     )}
-                    onClick={() => {
-                      setActiveQuestionnaireId(form.questionnaire.id);
-                      setActiveGroupId(group.id);
-                    }}
+                    onClick={() =>
+                      scrollToQuestion(form.questionnaire.id, group.id)
+                    }
                     disabled={isPending}
                   >
                     {group.text}
@@ -674,6 +692,7 @@ export function QuestionnaireForm({
           <div
             key={`${form.questionnaire.id}-${index}`}
             className="rounded-lg py-6 px-4 space-y-6"
+            data-questionnaire-id={form.questionnaire.id}
           >
             <div className="flex justify-between items-center max-w-4xl">
               <div className="space-y-1">

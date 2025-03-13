@@ -107,7 +107,10 @@ export default function EncounterActions({
           {canWrite && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  data-cy="mark-encounter-as-complete"
+                >
                   {t("mark_as_complete")}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
@@ -129,7 +132,7 @@ export default function EncounterActions({
                   <AlertDialogAction
                     className={cn(buttonVariants({ variant: "primary" }))}
                     onClick={handleMarkAsComplete}
-                    data-cy="mark-encounter-as-complete"
+                    data-cy="encounter-complete-dropdown"
                   >
                     {t("mark_as_complete")}
                   </AlertDialogAction>
@@ -172,6 +175,7 @@ export default function EncounterActions({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
+                  data-cy="mark-encounter-complete"
                   variant={variant}
                   size={size}
                   className="w-full justify-start"
@@ -197,7 +201,7 @@ export default function EncounterActions({
                   <AlertDialogAction
                     className={cn(buttonVariants({ variant: "primary" }))}
                     onClick={handleMarkAsComplete}
-                    data-cy="mark-encounter-as-complete"
+                    data-cy="confirm-encounter-complete"
                   >
                     {t("mark_as_complete")}
                   </AlertDialogAction>
