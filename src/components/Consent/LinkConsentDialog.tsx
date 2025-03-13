@@ -129,6 +129,10 @@ export default function LinkConsentDialog({
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
     compress: false,
+    onUpload: () => {
+      setOpenUploadDialog(false);
+      setIsOpen(false);
+    },
   });
 
   useEffect(() => {
@@ -175,6 +179,10 @@ export default function LinkConsentDialog({
       source_attachments: [],
     },
   });
+
+  useEffect(() => {
+    form.setValue("source_attachments", fileUpload.files);
+  }, [fileUpload.files, form]);
 
   const onSubmit = (values: ConsentFormValues) => {
     if (values.option === "existing") {
