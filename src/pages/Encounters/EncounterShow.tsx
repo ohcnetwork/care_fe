@@ -29,7 +29,6 @@ import { EncounterNotesTab } from "./tabs/EncounterNotesTab";
 export interface EncounterTabProps {
   encounter: Encounter;
   patient: Patient;
-  subPage?: string;
 }
 
 const defaultTabs = {
@@ -50,11 +49,10 @@ interface Props {
   encounterId: string;
   facilityId?: string;
   tab?: string;
-  subPage?: string;
 }
 
 export const EncounterShow = (props: Props) => {
-  const { encounterId, patientId, facilityId, subPage } = props;
+  const { encounterId, patientId, facilityId } = props;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
@@ -103,7 +101,6 @@ export const EncounterShow = (props: Props) => {
   const encounterTabProps: EncounterTabProps = {
     encounter: encounterData,
     patient: encounterData.patient,
-    subPage: subPage,
   };
 
   if (!props.tab) {
