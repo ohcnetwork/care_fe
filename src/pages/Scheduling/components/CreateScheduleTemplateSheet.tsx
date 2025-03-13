@@ -249,7 +249,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit ">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -587,12 +587,7 @@ export default function CreateScheduleTemplateSheet({
 
               <SheetFooter className="absolute inset-x-0 bottom-0 border-t bg-white p-6">
                 <SheetClose asChild>
-                  <Button
-                    className="mt-2 md:mt-0"
-                    variant="outline"
-                    type="button"
-                    disabled={isPending}
-                  >
+                  <Button variant="outline" type="button" disabled={isPending}>
                     {t("cancel")}
                   </Button>
                 </SheetClose>
