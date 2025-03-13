@@ -133,7 +133,7 @@ export default function ServiceHistoryForm({
                       variant={"outline"}
                       className={cn(
                         "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground",
+                        !field.value && "text-gray-500",
                       )}
                       data-cy="service-date-select"
                     >
