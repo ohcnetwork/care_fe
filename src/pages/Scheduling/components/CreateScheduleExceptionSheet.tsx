@@ -139,8 +139,8 @@ export default function CreateScheduleExceptionSheet({
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
-    select: (data) =>
-      (data as { users: UserBase[] }).users.some(({ id }) => userId === id),
+    select: (data: { users: UserBase[] }) =>
+      data.users.some(({ id }) => userId === id),
   });
 
   const unavailableAllDay = form.watch("unavailable_all_day");
