@@ -86,14 +86,12 @@ export default function AuthUserProvider({
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(routes.login),
     onSuccess: async (data: LoginResponse) => {
-      // Handle MFA cases
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         navigate("/2fa");
         return;
       }
 
-      // Handle normal login with JWT tokens
       if (isJwtTokenResponse(data)) {
         setAccessToken(data.access);
         localStorage.setItem(LocalStorageKeys.accessToken, data.access);
@@ -111,20 +109,15 @@ export default function AuthUserProvider({
   const { mutateAsync: verifyMFA, isPending: isVerifyingMFA } = useMutation({
     mutationFn: mutate(authApi.mfa.login),
     onSuccess: async (data: JwtTokenObtainPair) => {
-      // Clear MFA related data
       localStorage.removeItem("mfa_temp_token");
 
-      // Set new tokens
       setAccessToken(data.access);
       localStorage.setItem(LocalStorageKeys.accessToken, data.access);
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
-      // Invalidate and wait for the currentUser query to complete
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 
-      // Get redirect URL from query params or localStorage
-      const redirectURL = getRedirectURL() || "/";
-      navigate(redirectURL);
+      navigate(getRedirectOr("/"));
     },
   });
 
