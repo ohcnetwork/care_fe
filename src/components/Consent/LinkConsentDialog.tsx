@@ -25,6 +25,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -66,20 +67,39 @@ import {
 } from "@/types/consent/consent";
 import { UserBase } from "@/types/user/user";
 
-const consentFormSchema = z.object({
-  option: z.enum(["existing", "new"] as const).optional(),
-  existingConsent: z.string().optional(),
-  decision: z.enum(CONSENT_DECISIONS).default("permit"),
-  category: z.enum(CONSENT_CATEGORIES).default("treatment"),
-  status: z.enum(CONSENT_STATUSES).default("active"),
-  date: z.date(),
-  period: z.object({
-    start: z.date().optional(),
-    end: z.date().optional(),
-  }),
-  verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
-  source_attachments: z.array(z.instanceof(File)).default([]),
-});
+const consentFormSchema = z
+  .object({
+    option: z.enum(["existing", "new"]).default("new"),
+    existingConsent: z.string().optional(),
+    existingConsentSearchQuery: z.string().optional(),
+    decision: z.enum(CONSENT_DECISIONS).default("permit"),
+    category: z.enum(CONSENT_CATEGORIES).default("treatment"),
+    status: z.enum(CONSENT_STATUSES).default("active"),
+    date: z.date(),
+    period: z.object({
+      start: z.date().optional(),
+      end: z.date().optional(),
+    }),
+    verification_type: z.enum(VERIFICATION_TYPES).default("validation"),
+    source_attachments: z.array(z.instanceof(File)).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.option === "existing" && !data.existingConsent) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("please_select_a_consent"),
+        path: ["existingConsent"],
+      });
+    }
+
+    if (data.option === "new" && data.source_attachments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("please_upload_a_file"),
+        path: ["source_attachments"],
+      });
+    }
+  });
 
 type ConsentFormValues = z.infer<typeof consentFormSchema>;
 
@@ -97,7 +117,6 @@ export default function LinkConsentDialog({
   onSuccess,
 }: LinkConsentDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isNewConsent, setIsNewConsent] = useState(false);
   const [associatingId, setAssociatingId] = useState<string | null>(null);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const queryClient = useQueryClient();
@@ -143,7 +162,8 @@ export default function LinkConsentDialog({
   const form = useForm<ConsentFormValues>({
     resolver: zodResolver(consentFormSchema),
     defaultValues: {
-      option: "existing",
+      option: "new",
+      decision: "permit",
       category: "treatment",
       status: "active",
       date: new Date(),
@@ -158,11 +178,6 @@ export default function LinkConsentDialog({
 
   const onSubmit = (values: ConsentFormValues) => {
     if (values.option === "existing") {
-      // Handle linking existing consent
-      if (!values.existingConsent) {
-        toast.error(t("please_select_a_consent"));
-        return;
-      }
       // TODO: Add API endpoint for linking existing consent
       return;
     }
@@ -181,9 +196,16 @@ export default function LinkConsentDialog({
     };
 
     createConsent({
-      ...values,
-      decision: "permit",
+      status: values.status,
+      category: values.category,
+      date: values.date,
+      decision: values.decision,
+      period: {
+        start: values.period.start,
+        end: values.period.end,
+      },
       encounter: encounterId,
+      source_attachments: [],
       verification_details: [
         {
           verified: true,
@@ -198,7 +220,6 @@ export default function LinkConsentDialog({
   const handleUploadDialogClose = (open: boolean) => {
     setOpenUploadDialog(open);
     if (!open) {
-      // When dialog is closed, we're done with the whole flow
       toast.success(t("consent_and_files_uploaded"));
       queryClient.invalidateQueries({ queryKey: ["consents", patientId] });
       setIsOpen(false);
@@ -209,10 +230,6 @@ export default function LinkConsentDialog({
   };
 
   const hasExistingConsents = Boolean(existingConsents?.results?.length);
-
-  // TODO: use form state
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -239,11 +256,14 @@ export default function LinkConsentDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full peer-aria-checked:border-primary peer-aria-checked:bg-primary/5"
+                  className={cn(
+                    "w-full",
+                    form.watch("option") === "existing" &&
+                      "bg-primary/5 border-primary",
+                  )}
                   onClick={() => {
-                    setIsNewConsent(false);
                     form.setValue("option", "existing");
-                    form.setValue("existingConsent", "");
+                    form.setValue("existingConsent", undefined);
                   }}
                 >
                   {t("use_existing_consent")}
@@ -252,18 +272,21 @@ export default function LinkConsentDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full peer-aria-checked:border-primary peer-aria-checked:bg-primary/5"
+                className={cn(
+                  "w-full",
+                  form.watch("option") === "new" &&
+                    "bg-primary/5 border-primary",
+                )}
                 onClick={() => {
-                  setIsNewConsent(true);
                   form.setValue("option", "new");
-                  form.setValue("existingConsent", "");
+                  form.setValue("existingConsent", undefined);
                 }}
               >
                 {t("create_new_consent")}
               </Button>
             </div>
 
-            {!isNewConsent && hasExistingConsents && (
+            {form.watch("option") === "existing" && hasExistingConsents && (
               <FormField
                 control={form.control}
                 name="existingConsent"
@@ -277,22 +300,31 @@ export default function LinkConsentDialog({
                           <Input
                             placeholder={t("search_existing_consent")}
                             className="pl-10"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            value={form.watch("existingConsentSearchQuery")}
+                            onChange={(e) =>
+                              form.setValue(
+                                "existingConsentSearchQuery",
+                                e.target.value,
+                              )
+                            }
                           />
                         </div>
 
                         <RadioGroup
                           {...field}
-                          value={selectedItem || ""}
-                          onValueChange={setSelectedItem}
+                          value={form.watch("existingConsent")}
+                          onValueChange={(value) =>
+                            form.setValue("existingConsent", value)
+                          }
                         >
                           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {existingConsents?.results?.map((consent) => (
                               <ConsentRadioItem
                                 key={consent.id}
                                 consent={consent}
-                                selected={consent.id === selectedItem}
+                                selected={
+                                  consent.id === form.watch("existingConsent")
+                                }
                               />
                             ))}
                           </div>
@@ -305,7 +337,7 @@ export default function LinkConsentDialog({
               />
             )}
 
-            {isNewConsent && (
+            {form.watch("option") === "new" && (
               <>
                 <FormField
                   control={form.control}
@@ -327,7 +359,7 @@ export default function LinkConsentDialog({
                   name="period.start"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("consent_start_date")}</FormLabel>
+                      <FormLabel>{t("consent_start_date")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={field.onChange}
@@ -342,7 +374,7 @@ export default function LinkConsentDialog({
                   name="period.end"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel required>{t("consent_end_date")}</FormLabel>
+                      <FormLabel>{t("consent_end_date")}</FormLabel>
                       <DatePicker
                         date={field.value}
                         onChange={field.onChange}
@@ -357,7 +389,7 @@ export default function LinkConsentDialog({
                   name="decision"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("consent_decision")}</FormLabel>
+                      <FormLabel required>{t("consent_decision")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -394,28 +426,34 @@ export default function LinkConsentDialog({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t("select_category")} />
+                            <SelectValue
+                              placeholder={t("select_category")}
+                              className="flex justify-start items-center w-full"
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {CONSENT_CATEGORY_TYPES.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
-                              {category.label}
+                              <p>{category.label}</p>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        <div className="text-xs text-blue-600 bg-blue-100 rounded-md p-2">
+                          {
+                            CONSENT_CATEGORY_TYPES.find(
+                              (category) =>
+                                category.id === form.watch("category"),
+                            )?.desc
+                          }
+                        </div>
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="text-xs text-blue-600 bg-blue-100 rounded-md p-2">
-                  {
-                    CONSENT_CATEGORY_TYPES.find(
-                      (category) => category.id === form.watch("category"),
-                    )?.desc
-                  }
-                </div>
 
                 <FormField
                   control={form.control}
@@ -475,32 +513,52 @@ export default function LinkConsentDialog({
                   )}
                 />
 
-                <Label
-                  htmlFor={`file_upload_consent`}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground"
-                >
-                  <CareIcon icon="l-file-upload-alt" className="mr-1" />
-                  <span
-                    className="truncate"
-                    title={fileUpload.files.map((file) => file.name).join(", ")}
-                  >
-                    {fileUpload.files.length > 0
-                      ? fileUpload.files.map((file) => file.name).join(", ")
-                      : t("upload")}
-                  </span>
-                  {fileUpload.Input({ className: "hidden" })}
-                </Label>
+                <FormField
+                  control={form.control}
+                  name="source_attachments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl {...field}>
+                        <>
+                          <Label
+                            htmlFor={`file_upload_consent`}
+                            className="w-full inline-flex items-center justify-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <CareIcon
+                              icon="l-file-upload-alt"
+                              className="mr-1"
+                            />
+                            <span
+                              className="truncate"
+                              title={fileUpload.files
+                                .map((file) => file.name)
+                                .join(", ")}
+                            >
+                              {fileUpload.files.length > 0
+                                ? fileUpload.files
+                                    .map((file) => file.name)
+                                    .join(", ")
+                                : t("upload")}
+                            </span>
+                            {fileUpload.Input({ className: "hidden" })}
+                          </Label>
 
-                {fileUpload.files.length > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => fileUpload.clearFiles()}
-                  >
-                    {t("clear")}
-                  </Button>
-                )}
+                          {fileUpload.files.length > 0 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => fileUpload.clearFiles()}
+                            >
+                              {t("clear")}
+                            </Button>
+                          )}
+                        </>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </>
             )}
 
@@ -562,19 +620,21 @@ function ConsentRadioItem({ consent, selected }: ConsentRadioItemProps) {
         <CardContent className="p-0 group">
           <div className="aspect-video relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
-              {loadPreview === false && (
+              {!consentFile && loadPreview === false && (
                 <Download
                   onClick={() => setLoadPreview(true)}
                   className="text-secondary-800 hidden group-hover:block cursor-pointer animate-bounce"
                 />
               )}
-              {loadPreview === true && isPending && (
+              {!consentFile && loadPreview === true && isPending && (
                 <Loader2 className="text-secondary-800 cursor-pointer animate-spin" />
               )}
             </div>
             {consentFile ? (
               <div className="h-full w-full object-cover">
-                <PreviewFile file={consentFile} />
+                <div className="h-full w-full opacity-30 hover:opacity-100 transition-opacity">
+                  <PreviewFile file={consentFile} />
+                </div>
                 {fileManager.isPreviewable(consentFile) && (
                   <Button
                     type="button"
