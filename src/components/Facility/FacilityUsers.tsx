@@ -114,7 +114,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
           </TabsList>
         </Tabs>
       </div>
-      <div>{usersList}</div>
+      <div className="overflow-x-auto overflow-y-hidden">{usersList}</div>
     </Page>
   );
 }
