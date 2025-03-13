@@ -155,11 +155,11 @@ export function validateMedicationRequestQuestion(
       ...errors,
       ...fieldErrors.map((error) => ({
         ...error,
-        error:
-          (["DOSAGE", "FREQUENCY", "DURATION"] as const)
-            .some((attr) => MEDICATION_REQUEST_FIELDS[attr].key === error.field_key) 
-              ? t("field_required") 
-              : error.error,
+        error: (["DOSAGE", "FREQUENCY", "DURATION"] as const).some(
+          (attr) => MEDICATION_REQUEST_FIELDS[attr].key === error.field_key,
+        )
+          ? t("field_required")
+          : error.error,
       })),
     ];
   }, []);
