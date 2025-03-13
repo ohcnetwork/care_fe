@@ -2,7 +2,7 @@ import { t } from "i18next";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 
-export interface FieldMetadata<T = any> {
+export interface FieldMetadata<T = unknown> {
   key: string;
   required: boolean;
   validate?: (value: T) => boolean;
