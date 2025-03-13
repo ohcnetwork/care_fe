@@ -184,12 +184,7 @@ function LocationRow({
                       <AlertDialogFooter>
                         <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() =>
-                            removeLocation({
-                              facility_id: facilityId,
-                              id: location.id,
-                            })
-                          }
+                          onClick={() => removeLocation({})}
                           className={buttonVariants({ variant: "destructive" })}
                         >
                           {t("remove")}
