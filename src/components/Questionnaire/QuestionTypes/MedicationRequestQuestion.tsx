@@ -314,9 +314,11 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("dosage")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("frequency")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("duration")}
@@ -621,7 +623,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Dosage */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("dosage")}</Label>
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("dosage")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
         <div>
           {dosageInstruction?.dose_and_rate?.dose_range ? (
             <Input
@@ -709,6 +714,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <Select
           value={

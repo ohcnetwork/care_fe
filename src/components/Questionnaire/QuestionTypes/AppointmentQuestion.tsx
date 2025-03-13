@@ -121,7 +121,10 @@ export function AppointmentQuestion({
   return (
     <div className="space-y-4">
       <div>
-        <Label className="mb-2">{t("reason_for_visit")}</Label>
+        <Label className="mb-2">
+          {t("reason_for_visit")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
         <Textarea
           placeholder={t("reason_for_visit_placeholder")}
           value={value.reason_for_visit || ""}
@@ -139,7 +142,10 @@ export function AppointmentQuestion({
       </div>
 
       <div>
-        <Label className="block mb-2">{t("select_practitioner")}</Label>
+        <Label className="block mb-2">
+          {t("select_practitioner")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
         <div
           className={cn(
             "rounded-md",
@@ -159,7 +165,10 @@ export function AppointmentQuestion({
 
       <div className="flex gap-2">
         <div className="flex-1">
-          <Label className="block mb-2">{t("select_date")}</Label>
+          <Label className="block mb-2">
+            {t("select_date")}
+            <span className="text-red-500 ml-0.5">*</span>
+          </Label>
           <div
             className={cn(
               "rounded-md w-fit",
@@ -182,7 +191,10 @@ export function AppointmentQuestion({
         </div>
 
         <div className="flex-1">
-          <Label className="block mb-2">{t("select_time")}</Label>
+          <Label className="block mb-2">
+            {t("select_time")}
+            <span className="text-red-500 ml-0.5">*</span>
+          </Label>
           {showNoSlotsMessage ? (
             <div
               className={cn(

@@ -272,12 +272,15 @@ export function MedicationStatementQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("dosage_instructions")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("medication_taken_between")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("reason")}
+                  <span className="text-red-500 ml-0.5">*</span>
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r">
                   {t("notes")}
@@ -520,6 +523,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage_instructions")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <Input
           value={medication.dosage_text || ""}
@@ -544,6 +548,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("medication_taken_between")}
+          <span className="text-red-500 ml-0.5">*</span>
         </Label>
         <div
           className={cn(
@@ -580,7 +585,10 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 
       {/* Reason */}
       <div className="lg:px-2 lg:py-1 lg:border-r overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("reason")}</Label>
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("reason")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </Label>
         <Input
           maxLength={100}
           placeholder={t("reason_for_medication")}
