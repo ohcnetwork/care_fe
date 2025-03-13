@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 
 import query from "@/Utils/request/query";
+import { Diagnosis } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { Encounter } from "@/types/emr/encounter";
 
@@ -36,12 +37,16 @@ export function DiagnosisList({
   encounter,
   className = "",
   readOnly = false,
-  overviewSection = true,
 }: DiagnosisListProps) {
-  let limit;
-  overviewSection ? (limit = 14) : (limit = 100);
+  const [allDiagnoses, setAllDiagnoses] = useState<Diagnosis[]>([]);
+  const [page, setPage] = useState(1);
+  let limit = 14;
 
-  const { data: diagnoses, isLoading } = useQuery({
+  const {
+    data: diagnoses,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["diagnosis", patientId, encounterId],
     queryFn: query(diagnosisApi.listDiagnosis, {
       pathParams: { patientId },
@@ -50,6 +55,20 @@ export function DiagnosisList({
         : { limit: limit },
     }),
   });
+
+  useEffect(() => {
+    if (diagnoses?.results) {
+      setAllDiagnoses((prev) =>
+        page === 1 ? diagnoses.results : [...prev, ...diagnoses.results],
+      );
+    }
+  }, [diagnoses, page]);
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const hasMorePages = (diagnoses?.count || 0) > page * limit;
 
   if (isLoading) {
     return (
@@ -65,7 +84,7 @@ export function DiagnosisList({
     );
   }
 
-  const filteredDiagnoses = diagnoses?.results?.filter(
+  const filteredDiagnoses = allDiagnoses?.filter(
     (diagnosis) => diagnosis.verification_status !== "entered_in_error",
   );
 
@@ -126,7 +145,7 @@ export function DiagnosisList({
                 encounter={encounter}
               />
             )}
-            {hideFullViewButton && (
+            {hideFullViewButton && hasMorePages && (
               <div>
                 <div className="border-b border-dashed border-gray-200 my-2" />
                 <div className="flex justify-center">
@@ -134,8 +153,10 @@ export function DiagnosisList({
                     variant="ghost"
                     size="xs"
                     className="text-xs underline text-gray-950"
+                    onClick={handleLoadMore}
+                    disabled={isFetching}
                   >
-                    {t("load_more")}
+                    {isFetching ? t("loading...") : t("load_more")}
                   </Button>
                 </div>
               </div>

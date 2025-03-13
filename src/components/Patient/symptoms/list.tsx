@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ import { FullViewDialog } from "@/components/Patient/shared/FullViewDialog";
 
 import query from "@/Utils/request/query";
 import { Encounter } from "@/types/emr/encounter";
+import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
 import { SymptomTable } from "./SymptomTable";
@@ -36,12 +37,16 @@ export function SymptomsList({
   encounter,
   hideFullViewButton = false,
   readOnly = false,
-  overviewSection = true,
 }: SymptomsListProps) {
-  let limit;
-  overviewSection ? (limit = 14) : (limit = 100);
+  const [allSymptoms, setAllSymptoms] = useState<Symptom[]>([]);
+  let [page, setPage] = useState(1);
+  let limit = 14;
 
-  const { data: symptoms, isLoading } = useQuery({
+  const {
+    data: symptoms,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["symptoms", patientId, encounterId],
     queryFn: query(symptomApi.listSymptoms, {
       pathParams: { patientId },
@@ -50,6 +55,20 @@ export function SymptomsList({
         : { limit: limit },
     }),
   });
+
+  useEffect(() => {
+    if (symptoms?.results) {
+      setAllSymptoms((prev) =>
+        page === 1 ? symptoms.results : [...prev, ...symptoms.results],
+      );
+    }
+  }, [symptoms, page]);
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const hasMorePages = (symptoms?.count || 0) > page * limit;
 
   if (isLoading) {
     return (
@@ -64,7 +83,7 @@ export function SymptomsList({
     );
   }
 
-  const filteredSymptoms = symptoms?.results?.filter(
+  const filteredSymptoms = allSymptoms?.filter(
     (symptom) => symptom.verification_status !== "entered_in_error",
   );
 
@@ -123,7 +142,7 @@ export function SymptomsList({
               encounter={encounter}
             />
           )}
-          {hideFullViewButton && (
+          {hideFullViewButton && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">
@@ -131,8 +150,10 @@ export function SymptomsList({
                   variant="ghost"
                   size="xs"
                   className="text-xs underline text-gray-950"
+                  onClick={handleLoadMore}
+                  disabled={isFetching}
                 >
-                  {t("load_more")}
+                  {isFetching ? t("loading...") : t("load_more")}
                 </Button>
               </div>
             </div>

@@ -7,7 +7,7 @@ import {
   LeafIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -78,12 +78,17 @@ export function AllergyList({
   encounterStatus,
   encounter,
   hideFullViewButton = false,
-  overviewSection = true,
 }: AllergyListProps) {
-  let limit;
-  overviewSection ? (limit = 14) : (limit = 100);
-  const { data: allergies, isLoading } = useQuery({
-    queryKey: ["allergies", patientId, encounterId, encounterStatus],
+  const [allAllergies, setAllAllergies] = useState<AllergyIntolerance[]>([]);
+  const [page, setPage] = useState(1);
+  const limit = 14;
+
+  const {
+    data: allergies,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["allergies", patientId, encounterId, encounterStatus, page],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId },
       queryParams: {
@@ -91,10 +96,23 @@ export function AllergyList({
           ? encounterId
           : undefined,
         limit: limit,
+        offset: (page - 1) * limit, // Add offset for pagination
       },
     }),
   });
 
+  useEffect(() => {
+    if (allergies?.results) {
+      setAllAllergies((prev) =>
+        page === 1 ? allergies.results : [...prev, ...allergies.results],
+      );
+    }
+  }, [allergies, page]);
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+  const hasMorePages = (allergies?.count || 0) > page * limit;
   if (isLoading) {
     return (
       <AllergyListLayout
@@ -109,7 +127,7 @@ export function AllergyList({
     );
   }
 
-  const filteredAllergies = allergies?.results?.filter(
+  const filteredAllergies = allAllergies?.filter(
     (allergy) => allergy.verification_status !== "entered_in_error",
   );
 
@@ -280,7 +298,7 @@ export function AllergyList({
               encounter={encounter}
             />
           )}
-          {hideFullViewButton && (
+          {hideFullViewButton && hasMorePages && (
             <div>
               <div className="border-b border-dashed border-gray-200 my-2" />
               <div className="flex justify-center">
@@ -288,8 +306,10 @@ export function AllergyList({
                   variant="ghost"
                   size="xs"
                   className="text-xs underline text-gray-950"
+                  onClick={handleLoadMore}
+                  disabled={isFetching}
                 >
-                  {t("load_more")}
+                  {isFetching ? t("loading...") : t("load_more")}
                 </Button>
               </div>
             </div>
