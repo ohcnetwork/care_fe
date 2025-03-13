@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -57,7 +56,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -67,7 +65,13 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import { dateQueryString, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  dateQueryString,
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import {
   formatSlotTimeRange,
   groupSlotsByAvailability,
@@ -239,7 +243,7 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
   const [activeTab, setActiveTab] = useView("appointments", "board");
 
   const schedulableUsersQuery = useQuery({
-    queryKey: ["schedulable-users", facilityId],
+    queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
@@ -347,94 +351,17 @@ export default function AppointmentsPage(props: { facilityId?: string }) {
             <Label className="mb-2 text-black">
               {t("select_practitioner")}
             </Label>
-            <Popover>
-              <PopoverTrigger
-                asChild
-                disabled={schedulableUsersQuery.isLoading}
-              >
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="min-w-60 justify-start"
-                >
-                  {practitioner ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={practitioner.profile_picture_url}
-                        name={formatName(practitioner)}
-                        className="size-6 rounded-full"
-                      />
-                      <span>{formatName(practitioner)}</span>
-                    </div>
-                  ) : (
-                    <span>{t("show_all")}</span>
-                  )}
-                  <CaretDownIcon className="ml-auto" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder={t("search")}
-                    className="outline-none border-none ring-0 shadow-none"
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      {schedulableUsersQuery.isFetching
-                        ? t("searching")
-                        : t("no_results")}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value="all"
-                        onSelect={() =>
-                          updateQuery({
-                            practitioner: null,
-                            slot: null,
-                          })
-                        }
-                        className="cursor-pointer w-full"
-                      >
-                        <PopoverClose className="w-full flex items-start">
-                          <span>{t("show_all")}</span>
-                          {!qParams.practitioner && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </PopoverClose>
-                      </CommandItem>
-                      {schedulableUsersQuery.data?.users.map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={formatName(user)}
-                          onSelect={() =>
-                            updateQuery({
-                              practitioner: user.username,
-                              slot: null,
-                            })
-                          }
-                          className="cursor-pointer w-full"
-                        >
-                          <PopoverClose className="flex items-center gap-2 w-full">
-                            <Avatar
-                              imageUrl={user.profile_picture_url}
-                              name={formatName(user)}
-                              className="size-6 rounded-full"
-                            />
-                            <span>{formatName(user)}</span>
-                            <span className="text-xs text-gray-500 font-medium">
-                              {user.user_type}
-                            </span>
-                          </PopoverClose>
-                          {qParams.practitioner === user.username && (
-                            <CheckIcon className="ml-auto" />
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <PractitionerSelector
+              facilityId={facilityId}
+              selected={practitioner ?? null}
+              onSelect={(user) =>
+                updateQuery({
+                  practitioner: user?.username ?? null,
+                  slot: null,
+                })
+              }
+              clearSelection={t("show_all")}
+            />
           </div>
 
           <div>
@@ -737,6 +664,12 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             {formatPatientAge(patient as any, true)},{" "}
             {t(`GENDER__${patient.gender}`)}
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDateTime(
+              appointment.token_slot.start_datetime,
+              "ddd, DD MMM YYYY, HH:mm",
+            )}
+          </p>
         </div>
 
         <div className="bg-gray-100 px-2 py-1 rounded text-center">
@@ -750,6 +683,7 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
     </div>
   );
 }
+
 function AppointmentRow(props: {
   facilityId: string;
   page: number | null;
