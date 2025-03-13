@@ -1,3 +1,5 @@
+import { FileUploadModel } from "@/components/Patient/models";
+
 import { UserBase } from "@/types/user/user";
 
 export const CONSENT_CATEGORY_TYPES = [
@@ -96,7 +98,7 @@ export interface ConsentModel {
   period: ConsentPeriod;
   encounter: string;
   decision: ConsentDecision;
-  source_attachments: File[];
+  source_attachments: FileUploadModel[];
   verification_details: ConsentVerification[];
 }
 

@@ -60,6 +60,7 @@ export interface FileUploadModel {
   archive_reason?: string;
   extension?: string;
   archived_by?: UserBareMinimum;
+  mime_type?: string;
   archived_datetime?: string;
 }
 

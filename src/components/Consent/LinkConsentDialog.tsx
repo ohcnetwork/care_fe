@@ -1,15 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { Plus } from "lucide-react";
+import { Download, Loader2, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
@@ -27,7 +30,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -36,9 +41,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import PDFViewer from "@/components/Common/PDFViewer";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
+import { FileUploadModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import routes from "@/Utils/request/api";
@@ -98,7 +106,7 @@ export default function LinkConsentDialog({
   const fileUpload = useFileUpload({
     type: "consent",
     category: "consent_attachment",
-    multiple: true,
+    multiple: false,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
     compress: false,
@@ -202,6 +210,10 @@ export default function LinkConsentDialog({
 
   const hasExistingConsents = Boolean(existingConsents?.results?.length);
 
+  // TODO: use form state
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -258,28 +270,35 @@ export default function LinkConsentDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("select_consent")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={t("select_existing_consent")}
+                    <FormControl>
+                      <div className="container">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                          <Input
+                            placeholder={t("search_existing_consent")}
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                           />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {existingConsents?.results?.map(
-                          (consent: ConsentModel) => (
-                            <SelectItem key={consent.id} value={consent.id}>
-                              {t(`consent_category__${consent.category}`)} -{" "}
-                              {new Date(consent.date).toLocaleDateString()}
-                            </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
+                        </div>
+
+                        <RadioGroup
+                          {...field}
+                          value={selectedItem || ""}
+                          onValueChange={setSelectedItem}
+                        >
+                          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            {existingConsents?.results?.map((consent) => (
+                              <ConsentRadioItem
+                                key={consent.id}
+                                consent={consent}
+                                selected={consent.id === selectedItem}
+                              />
+                            ))}
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -500,5 +519,137 @@ export default function LinkConsentDialog({
         type="consent"
       />
     </Dialog>
+  );
+}
+
+type ConsentRadioItemProps = {
+  consent: ConsentModel;
+  selected?: boolean;
+};
+
+function ConsentRadioItem({ consent, selected }: ConsentRadioItemProps) {
+  const [loadPreview, setLoadPreview] = useState(false);
+
+  const { data: consentFile, isPending } = useQuery({
+    queryKey: ["file_upload", consent.source_attachments[0]?.id],
+    queryFn: query(routes.retrieveUpload, {
+      pathParams: { id: consent.source_attachments[0].id! },
+    }),
+    enabled: loadPreview && !!consent.source_attachments[0]?.id,
+  });
+
+  const fileManager = useFileManager({
+    type: "patient",
+    uploadedFiles: consentFile ? [consentFile] : [],
+  });
+
+  return (
+    <div className="relative">
+      <Card
+        className={cn(
+          "overflow-hidden transition-all",
+          selected && "ring-2 ring-primary",
+        )}
+      >
+        <div className="absolute top-3 left-3 z-10">
+          <RadioGroupItem
+            value={consent.id}
+            id={consent.id}
+            checked={selected}
+            className="h-5 w-5"
+          />
+        </div>
+        <CardContent className="p-0 group">
+          <div className="aspect-video relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-3 -translate-y-3">
+              {loadPreview === false && (
+                <Download
+                  onClick={() => setLoadPreview(true)}
+                  className="text-secondary-800 hidden group-hover:block cursor-pointer animate-bounce"
+                />
+              )}
+              {loadPreview === true && isPending && (
+                <Loader2 className="text-secondary-800 cursor-pointer animate-spin" />
+              )}
+            </div>
+            {consentFile ? (
+              <div className="h-full w-full object-cover">
+                <PreviewFile file={consentFile} />
+                {fileManager.isPreviewable(consentFile) && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 z-20"
+                    onClick={() =>
+                      fileManager.viewFile(
+                        consentFile,
+                        consentFile.associating_id!,
+                      )
+                    }
+                  >
+                    <CareIcon icon="l-eye" />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <img
+                src="/images/placeholder.svg"
+                alt={consent.category}
+                className="object-cover w-full h-full"
+              />
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="p-4 flex items-center justify-between">
+          <Label htmlFor={consent.id} className="font-medium cursor-pointer">
+            {t(`consent_category__${consent.category}`)} -{" "}
+            {new Date(consent.date).toLocaleDateString()}
+          </Label>
+        </CardFooter>
+      </Card>
+
+      {fileManager.Dialogues}
+    </div>
+  );
+}
+
+type PreviewFileProps = {
+  file: FileUploadModel;
+};
+
+function PreviewFile({ file }: PreviewFileProps) {
+  if (!file.read_signed_url) {
+    return null;
+  }
+
+  if (file.mime_type === "application/pdf") {
+    return (
+      <PDFViewer
+        url={file.read_signed_url}
+        pageNumber={1}
+        onDocumentLoadSuccess={() => {}}
+        scale={1}
+        className="object-cover w-full h-full !overflow-hidden"
+      />
+    );
+  }
+
+  if (file.mime_type?.startsWith("image")) {
+    return (
+      <img
+        src={file.read_signed_url}
+        alt={file.name}
+        className="object-cover w-full h-full"
+      />
+    );
+  }
+
+  return (
+    <iframe
+      src={file.read_signed_url}
+      title={file.name}
+      className="object-cover w-full h-full"
+    />
   );
 }
