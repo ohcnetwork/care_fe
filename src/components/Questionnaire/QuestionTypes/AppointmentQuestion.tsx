@@ -16,12 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Avatar } from "@/components/Common/Avatar";
-
 import useSlug from "@/hooks/useSlug";
 
 import query from "@/Utils/request/query";
-import { dateQueryString, formatDisplayName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -57,6 +56,10 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
     key: "reason_for_visit",
     required: true,
     validate: (value: string) => !!value?.trim(),
+  },
+  PRACTITIONER: {
+    key: "practitioner",
+    required: true,
   },
   SLOT: {
     key: "slot_id",
@@ -96,13 +99,6 @@ export function AppointmentQuestion({
       questionnaireResponse.note,
     );
   };
-
-  const resourcesQuery = useQuery({
-    queryKey: ["availableResources", facilityId],
-    queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
-    }),
-  });
 
   const slotsQuery = useQuery({
     queryKey: [
@@ -148,42 +144,31 @@ export function AppointmentQuestion({
 
       <div>
         <Label className="block mb-2">{t("select_practitioner")}</Label>
-        <Select
-          disabled={resourcesQuery.isLoading || disabled}
-          value={resource?.id}
-          onValueChange={(selectedValue) => {
-            setResource(
-              resourcesQuery.data?.users.find((r) => r.id === selectedValue),
-            );
-            if (value.slot_id) {
-              handleUpdate({ slot_id: undefined });
-            }
-          }}
+        <div
+          className={cn(
+            !resource &&
+              hasError(APPOINTMENT_FIELDS.PRACTITIONER.key) &&
+              "border border-red-500 rounded-md",
+          )}
         >
-          <SelectTrigger
-            className={cn(
-              !resource &&
-                hasError(APPOINTMENT_FIELDS.SLOT.key) &&
-                "border-red-500",
-            )}
-          >
-            <SelectValue placeholder={t("show_all")} />
-          </SelectTrigger>
-          <SelectContent>
-            {resourcesQuery.data?.users.map((user) => (
-              <SelectItem key={user.username} value={user.id}>
-                <div className="flex items-center gap-2">
-                  <Avatar
-                    imageUrl={user.profile_picture_url}
-                    name={formatDisplayName(user)}
-                    className="size-6 rounded-full"
-                  />
-                  <span>{formatDisplayName(user)}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <PractitionerSelector
+            facilityId={facilityId}
+            selected={resource ?? null}
+            onSelect={(user) => {
+              setResource(user ?? undefined);
+              handleUpdate({ practitioner: user?.id });
+              if (value.slot_id) {
+                handleUpdate({ slot_id: undefined });
+              }
+            }}
+            clearSelection={t("show_all")}
+          />
+        </div>
+        <FieldError
+          fieldKey={APPOINTMENT_FIELDS.PRACTITIONER.key}
+          questionId={question.id}
+          errors={errors}
+        />
       </div>
 
       <div className="flex gap-2">
