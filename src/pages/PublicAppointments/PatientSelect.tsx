@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { TFunction } from "i18next";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -119,79 +120,16 @@ export default function PatientSelect({
         {/* Mobile View (Cards) */}
         <div className="space-y-4 overflow-auto max-h-[600px] p-0 sm:p-4 md:hidden">
           {patients?.map((patient) => (
-            <Card
+            <PatientCard
               key={patient.id}
-              onClick={() => setSelectedPatient(patient.id)}
-              className={`cursor-pointer transition-all duration-200 rounded-xl shadow-md border ${
-                selectedPatient === patient.id
-                  ? "border-primary shadow-lg"
-                  : "hover:border-gray-300"
-              }`}
-            >
-              <CardHeader>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {t("patient_name_uhid")}
-                </p>
-                <CardTitle className="capitalize text-lg font-semibold">
-                  {patient.name}
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">{patient.id}</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
-                    {t("primary_ph_no")}:
-                  </span>
-                  <span className="text-xs sm:text-sm font-semibold">
-                    {patient.phone_number}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-                    {t("date_of_birth_age")}:
-                  </span>
-                  <span className="text-xs sm:text-sm font-semibold">
-                    {getPatienDoBorAge(patient)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-                    {t("sex")}:
-                  </span>
-                  <span className="text-xs sm:text-sm font-semibold">
-                    {t(`GENDER__${patient.gender}`)}
-                  </span>
-                </div>
-
-                {selectedPatient === patient.id && (
-                  <div className="mt-4 flex flex-row gap-3">
-                    <Button
-                      variant="destructive"
-                      className="w-1/2 md:w-auto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPatient(null);
-                      }}
-                    >
-                      {t("cancel")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      className="w-1/2 md:w-auto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        createAppointment({
-                          patient: patient.id ?? "",
-                          reason_for_visit: reason ?? "",
-                        });
-                      }}
-                    >
-                      {t("confirm")}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              patient={patient}
+              selectedPatient={selectedPatient}
+              setSelectedPatient={setSelectedPatient}
+              getPatienDoBorAge={getPatienDoBorAge}
+              createAppointment={createAppointment}
+              reason={reason ?? ""}
+              t={t}
+            />
           ))}
         </div>
 
@@ -214,57 +152,16 @@ export default function PatientSelect({
             </thead>
             <tbody className="divide-y rounded-lg border bg-card">
               {patients?.map((patient) => (
-                <tr
+                <PatientTable
                   key={patient.id}
-                  onClick={() => setSelectedPatient(patient.id ?? null)}
-                  className="hover:bg-secondary-100 cursor-pointer"
-                >
-                  {selectedPatient === patient.id ? (
-                    <td colSpan={4} className="w-full p-4">
-                      <div className="flex items-center justify-center gap-4">
-                        <Button
-                          variant="destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPatient(null);
-                          }}
-                        >
-                          {t("cancel")}
-                        </Button>
-                        <Button
-                          variant="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            createAppointment({
-                              patient: patient.id ?? "",
-                              reason_for_visit: reason ?? "",
-                            });
-                          }}
-                        >
-                          {t("confirm")}
-                        </Button>
-                      </div>
-                    </td>
-                  ) : (
-                    <>
-                      <td className="p-4 align-middle text-left">
-                        <div className="font-medium">{patient.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {patient.id}
-                        </div>
-                      </td>
-                      <td className="p-4 align-middle text-left">
-                        {patient.phone_number}
-                      </td>
-                      <td className="p-4 align-middle text-left">
-                        {getPatienDoBorAge(patient)}
-                      </td>
-                      <td className="p-4 align-middle text-left">
-                        {t(`GENDER__${patient.gender}`)}
-                      </td>
-                    </>
-                  )}
-                </tr>
+                  patient={patient}
+                  selectedPatient={selectedPatient}
+                  setSelectedPatient={setSelectedPatient}
+                  getPatienDoBorAge={getPatienDoBorAge}
+                  createAppointment={createAppointment}
+                  reason={reason ?? ""}
+                  t={t}
+                />
               ))}
             </tbody>
           </table>
@@ -313,5 +210,167 @@ export default function PatientSelect({
         </Button>
       </div>
     </div>
+  );
+}
+
+function PatientCard({
+  patient,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDoBorAge,
+  createAppointment,
+  reason,
+  t,
+}: {
+  patient: Patient;
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string | null) => void;
+  getPatienDoBorAge: (patient: Patient) => string;
+  createAppointment: (body: AppointmentCreateRequest) => void;
+  reason: string;
+  t: TFunction;
+}) {
+  return (
+    <Card
+      key={patient.id}
+      onClick={() => setSelectedPatient(patient.id)}
+      className={`cursor-pointer transition-all duration-200 rounded-xl shadow-md border ${
+        selectedPatient === patient.id
+          ? "border-primary shadow-lg"
+          : "hover:border-gray-300"
+      }`}
+    >
+      <CardHeader>
+        <p className="text-sm text-muted-foreground font-medium">
+          {t("patient_name_uhid")}
+        </p>
+        <CardTitle className="capitalize text-lg font-semibold">
+          {patient.name}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">{patient.id}</p>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
+            {t("primary_ph_no")}:
+          </span>
+          <span className="text-xs sm:text-sm font-semibold">
+            {patient.phone_number}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+            {t("date_of_birth_age")}:
+          </span>
+          <span className="text-xs sm:text-sm font-semibold">
+            {getPatienDoBorAge(patient)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+            {t("sex")}:
+          </span>
+          <span className="text-xs sm:text-sm font-semibold">
+            {t(`GENDER__${patient.gender}`)}
+          </span>
+        </div>
+
+        {selectedPatient === patient.id && (
+          <div className="mt-4 flex flex-row gap-3">
+            <Button
+              variant="destructive"
+              className="w-1/2 md:w-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedPatient(null);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              className="w-1/2 md:w-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                createAppointment({
+                  patient: patient.id ?? "",
+                  reason_for_visit: reason ?? "",
+                });
+              }}
+            >
+              {t("confirm")}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PatientTable({
+  patient,
+  selectedPatient,
+  setSelectedPatient,
+  getPatienDoBorAge,
+  createAppointment,
+  reason,
+  t,
+}: {
+  patient: Patient;
+  selectedPatient: string | null;
+  setSelectedPatient: (patientId: string | null) => void;
+  getPatienDoBorAge: (patient: Patient) => string;
+  createAppointment: (body: AppointmentCreateRequest) => void;
+  reason: string;
+  t: TFunction;
+}) {
+  return (
+    <tr
+      key={patient.id}
+      onClick={() => setSelectedPatient(patient.id ?? null)}
+      className="hover:bg-secondary-100 cursor-pointer"
+    >
+      {selectedPatient === patient.id ? (
+        <td colSpan={4} className="w-full p-4">
+          <div className="flex items-center justify-center gap-4">
+            <Button
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedPatient(null);
+              }}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                createAppointment({
+                  patient: patient.id ?? "",
+                  reason_for_visit: reason ?? "",
+                });
+              }}
+            >
+              {t("confirm")}
+            </Button>
+          </div>
+        </td>
+      ) : (
+        <>
+          <td className="p-4 align-middle text-left">
+            <div className="font-medium">{patient.name}</div>
+            <div className="text-xs text-gray-500">{patient.id}</div>
+          </td>
+          <td className="p-4 align-middle text-left">{patient.phone_number}</td>
+          <td className="p-4 align-middle text-left">
+            {getPatienDoBorAge(patient)}
+          </td>
+          <td className="p-4 align-middle text-left">
+            {t(`GENDER__${patient.gender}`)}
+          </td>
+        </>
+      )}
+    </tr>
   );
 }
