@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -28,11 +27,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatTimeShort } from "@/Utils/utils";
+import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
 import { ScheduleException } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { UserBase } from "@/types/user/user";
 
 interface Props {
   items?: ScheduleException[];
@@ -47,36 +45,29 @@ export default function ScheduleExceptions({
 }: Props) {
   const { t } = useTranslation();
 
-  const { data: isSchedulableResource } = useQuery({
-    queryKey: ["is_schedulable_resource", facilityId, userId],
-    queryFn: query(scheduleApis.appointments.availableUsers, {
-      pathParams: { facility_id: facilityId },
-    }),
-    select: (data: { users: UserBase[] }) =>
-      data.users.some(({ id }) => userId === id),
-  });
+  const { data: isSchedulableResource } = useIsUserSchedulableResource(
+    facilityId,
+    userId,
+  );
 
   if (items == null) {
     return <Loading />;
   }
 
-  const getMessage = () => {
-    if (!isSchedulableResource) {
-      return t("exceptions_can_be_created_only_after_creating_a_schedule");
-    }
-    if (items.length === 0) {
-      return t("no_scheduled_exceptions_found");
-    }
-    return null;
-  };
-
-  const message = getMessage();
-
-  if (message) {
+  if (!isSchedulableResource) {
     return (
       <div className="flex flex-col items-center text-center text-gray-500 py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>{message}</p>
+        <p>{t("exceptions_can_be_created_only_after_creating_a_schedule")}</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center text-center text-gray-500 py-16">
+        <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
+        <p>{t("no_scheduled_exceptions_found")}</p>
       </div>
     );
   }
