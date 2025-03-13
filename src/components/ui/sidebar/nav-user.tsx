@@ -34,7 +34,7 @@ export function FacilityNavUser({
 }) {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const { isMobile, open, closeOnNavigate } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
 
   return (
@@ -102,7 +102,6 @@ export function FacilityNavUser({
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
                     : `/users/${user.username}`;
                   navigate(profileUrl);
-                  closeOnNavigate();
                 }}
               >
                 <BadgeCheck />

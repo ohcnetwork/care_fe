@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -23,8 +22,6 @@ export function NavMain({
     icon?: string;
   }[];
 }) {
-  const { closeOnNavigate } = useSidebar();
-
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -36,7 +33,6 @@ export function NavMain({
               className={
                 "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
               }
-              onClick={closeOnNavigate}
             >
               <ActiveLink
                 href={link.url}
