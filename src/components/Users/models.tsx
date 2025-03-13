@@ -47,8 +47,6 @@ export type UserModel = UserBareMinimum & {
   facilities?: UserFacilityModel[];
   organizations?: Organization[];
   permissions: string[];
-  prefix: string;
-  suffix: string;
 };
 
 export interface UserAssignedModel extends UserBareMinimum {
