@@ -94,10 +94,7 @@ export function getTabs(
       case "updates":
         return {
           ...tab,
-          visible:
-            canViewClinicalData ||
-            canViewEncounter ||
-            canViewPatientQuestionnaireResponses,
+          visible: canViewPatientQuestionnaireResponses,
         };
       default:
         return tab;

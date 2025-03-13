@@ -23,15 +23,12 @@ export const EncounterUpdatesTab = ({
   const {
     canViewClinicalData,
     canViewEncounter,
-    canSubmitPatientQuestionnaireResponses,
     canSubmitEncounterQuestionnaire,
   } = getPermissions(hasPermission, encounter.permissions);
   const canAccess = canViewEncounter || canViewClinicalData;
   const canEdit =
-    (canSubmitEncounterQuestionnaire &&
-      !inactiveEncounterStatus.includes(encounter.status ?? "")) ||
-    canSubmitPatientQuestionnaireResponses;
-
+    canSubmitEncounterQuestionnaire &&
+    !inactiveEncounterStatus.includes(encounter.status ?? "");
   const { goBack } = useAppHistory();
 
   useEffect(() => {

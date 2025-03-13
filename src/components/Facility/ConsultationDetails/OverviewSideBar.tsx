@@ -21,23 +21,18 @@ export default function SideOverview(props: Props) {
     hasPermission,
     props.encounter.permissions,
   );
-  const canWrite =
+  const canEdit =
     canSubmitEncounterQuestionnaire &&
     !inactiveEncounterStatus.includes(props.encounter.status);
 
   return (
     <div className="mt-4 flex w-full h-auto flex-col gap-4 text-sm">
-      <Tabs
-        defaultValue={canWrite ? "quick_access" : "observations"}
-        className="w-full"
-      >
+      <Tabs defaultValue="quick_access" className="w-full">
         <div className="px-2">
           <TabsList className="h-9">
-            {canWrite && (
-              <TabsTrigger value="quick_access" className="font-semibold">
-                {t("quick_access")}
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="quick_access" className="font-semibold">
+              {t("quick_access")}
+            </TabsTrigger>
             <TabsTrigger value="observations" className="font-semibold">
               {t("observations")}
             </TabsTrigger>
@@ -45,11 +40,9 @@ export default function SideOverview(props: Props) {
         </div>
 
         <div>
-          {canWrite && (
-            <TabsContent value="quick_access" className="p-2">
-              <QuickAccess encounter={props.encounter} />
-            </TabsContent>
-          )}
+          <TabsContent value="quick_access" className="p-2">
+            <QuickAccess encounter={props.encounter} canEdit={canEdit} />
+          </TabsContent>
           <TabsContent value="observations" className="p-2">
             <ObservationsList
               encounter={props.encounter}

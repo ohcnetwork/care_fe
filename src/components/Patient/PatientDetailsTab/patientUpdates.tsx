@@ -22,10 +22,10 @@ export const Updates = (props: PatientProps) => {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  const { canViewPatientQuestionnaireResponses } = getPermissions(
-    hasPermission,
-    patientData.permissions,
-  );
+  const {
+    canViewPatientQuestionnaireResponses,
+    canSubmitPatientQuestionnaireResponses,
+  } = getPermissions(hasPermission, patientData.permissions);
 
   useEffect(() => {
     if (!canViewPatientQuestionnaireResponses) {
@@ -43,20 +43,25 @@ export const Updates = (props: PatientProps) => {
     <div className="mt-4 px-3 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold leading-tight">{t("updates")}</h2>
-        <Button asChild variant="outline_primary">
-          <Link
-            href={
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/questionnaire`
-                : `/patient/${patientId}/questionnaire`
-            }
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("add_patient_updates")}
-          </Link>
-        </Button>
+        {canSubmitPatientQuestionnaireResponses && (
+          <Button asChild variant="outline_primary">
+            <Link
+              href={
+                facilityId
+                  ? `/facility/${facilityId}/patient/${patientId}/questionnaire`
+                  : `/patient/${patientId}/questionnaire`
+              }
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("add_patient_updates")}
+            </Link>
+          </Button>
+        )}
       </div>
-      <QuestionnaireResponsesList patientId={patientId} />
+      <QuestionnaireResponsesList
+        patientId={patientId}
+        patientData={patientData}
+      />
     </div>
   );
 };
