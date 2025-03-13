@@ -85,16 +85,13 @@ export default function UserAvailabilityTab({ userData: user }: Props) {
     }),
   });
 
-  const schedulableUsersQuery = useQuery({
+  const { data: isSchedulableResource } = useQuery({
     queryKey: ["practitioners", facilityId],
     queryFn: query(scheduleApis.appointments.availableUsers, {
       pathParams: { facility_id: facilityId },
     }),
+    select: (data) => data.users.some(({ id }) => user.id === id ),
   });
-
-  const availableUserId = schedulableUsersQuery.data?.users.find(
-    (f) => f.id == user.id,
-  );
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
     return <Loading />;
