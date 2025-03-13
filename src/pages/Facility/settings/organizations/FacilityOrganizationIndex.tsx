@@ -33,9 +33,10 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import CreateFacilityOrganizationSheet from "@/pages/Facility/settings/organizations/components/CreateFacilityOrganizationSheet";
+import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
+
+import CreateFacilityOrganizationSheet from "./components/CreateFacilityOrganizationSheet";
 
 export default function FacilityOrganizationIndex({
   facilityId,
@@ -46,7 +47,7 @@ export default function FacilityOrganizationIndex({
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["facilityOrganization", "list", facilityId],
-    queryFn: query.paginated(routes.facilityOrganization.list, {
+    queryFn: query.paginated(facilityOrganizationApi.list, {
       pathParams: { facilityId },
     }),
     enabled: !!facilityId,
@@ -227,7 +228,7 @@ export default function FacilityOrganizationIndex({
                         asChild
                       >
                         <Link
-                          href={`/departments/${org.id}`}
+                          href={`/departments/${org.id}/users`}
                           className="text-gray-900 flex items-center"
                         >
                           <CareIcon

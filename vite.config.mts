@@ -162,6 +162,7 @@ export default defineConfig(({ mode }) => {
   return {
     envPrefix: "REACT_",
     define: {
+      "process.env.IS_PREACT": JSON.stringify("true"),
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
