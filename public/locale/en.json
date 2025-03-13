@@ -1126,6 +1126,7 @@
   "exception_created": "Exception created successfully",
   "exception_deleted": "Exception deleted",
   "exceptions": "Exceptions",
+  "exceptions_can_be_created_only_after_creating_a_schedule": "Exceptions can be created only after creating a schedule",
   "expand_all": "Expand All",
   "expand_sidebar": "Expand Sidebar",
   "expected_burn_rate": "Expected Burn Rate",

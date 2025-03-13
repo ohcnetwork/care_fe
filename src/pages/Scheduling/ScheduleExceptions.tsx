@@ -52,7 +52,7 @@ export default function ScheduleExceptions({
     return (
       <div className="flex flex-col items-center text-center text-gray-500 py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>{t("no_scheduled_exceptions_found")}</p>
+        <p>{t("exceptions_can_be_created_only_after_creating_a_schedule")}</p>
       </div>
     );
   }
