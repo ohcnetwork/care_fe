@@ -7,14 +7,24 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
     image.src = url;
   });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getCroppedImg(imageSrc: string, croppedAreaPixels: any) {
+// Define interface for cropped area pixels
+interface CroppedAreaPixels {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export async function getCroppedImg(
+  imageSrc: string,
+  croppedAreaPixels: CroppedAreaPixels,
+) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
   if (!ctx) {
-    return null;
+    return Promise.resolve("");
   }
 
   const { x, y, width, height } = croppedAreaPixels;

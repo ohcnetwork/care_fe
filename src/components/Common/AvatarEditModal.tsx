@@ -136,6 +136,10 @@ const AvatarEditModal = ({
     setIsProcessing(true);
     const imageSrc = previewImage || preview;
     try {
+      if (!croppedAreaPixels) {
+        toast.error("No area selected for cropping");
+        return;
+      }
       const croppedImage = await getCroppedImg(
         imageSrc as string,
         croppedAreaPixels,
