@@ -180,7 +180,16 @@ export const EncounterShow = (props: Props) => {
             </div>
           </div>
         </div>
-        <div className="mt-4">
+        {/* 
+          want to do this: 
+          
+          const {open: isSidebarOpen} = useSidebar();
+          <div className= { `mt-4 ${ isSidebarOpen && "max-w-[calc(96vw-var(--sidebar-width))] overflow-x-auto"}
+          
+          where isSidebarOpen would be the open state on sidebar, 
+          but it's only accessible through useSidebar (needs to be in SidebarProvider)
+         */}
+        <div className="mt-4 max-w-[calc(96vw-var(--sidebar-width))] overflow-x-auto">
           <PageHeadTitle title={t(`ENCOUNTER_TAB__${props.tab}`)} />
           <SelectedTab {...encounterTabProps} />
         </div>
