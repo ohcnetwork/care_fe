@@ -370,58 +370,60 @@ export default function UserForm({
                         className="text-small mt-2 pl-2 text-secondary-500"
                         aria-live="polite"
                       >
-                        <ValidationHelper
-                          isInputEmpty={!field.value}
-                          successMessage={t("username_success_message")}
-                          validations={[
-                            {
-                              description: (
-                                <Trans
-                                  i18nKey={"username_min_length_validation"}
-                                />
-                              ),
-                              fulfilled: (field.value || "").length >= 4,
-                            },
-                            {
-                              description: (
-                                <Trans
-                                  i18nKey={"username_max_length_validation"}
-                                />
-                              ),
-                              fulfilled: (field.value || "").length <= 16,
-                            },
-                            {
-                              description: (
-                                <Trans
-                                  i18nKey={"username_characters_validation"}
-                                />
-                              ),
-                              fulfilled: /^[a-z0-9._-]*$/.test(
-                                field.value || "",
-                              ),
-                            },
-                            {
-                              description: (
-                                <Trans
-                                  i18nKey={"username_start_end_validation"}
-                                />
-                              ),
-                              fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
-                                field.value || "",
-                              ),
-                            },
-                            {
-                              description: (
-                                <Trans
-                                  i18nKey={"username_consecutive_validation"}
-                                />
-                              ),
-                              fulfilled: !/(?:[._-]{2,})/.test(
-                                field.value || "",
-                              ),
-                            },
-                          ]}
-                        />
+                        {(isUsernameChecking || !isUsernameTaken) && (
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("username_success_message")}
+                            validations={[
+                              {
+                                description: (
+                                  <Trans
+                                    i18nKey={"username_min_length_validation"}
+                                  />
+                                ),
+                                fulfilled: (field.value || "").length >= 4,
+                              },
+                              {
+                                description: (
+                                  <Trans
+                                    i18nKey={"username_max_length_validation"}
+                                  />
+                                ),
+                                fulfilled: (field.value || "").length <= 16,
+                              },
+                              {
+                                description: (
+                                  <Trans
+                                    i18nKey={"username_characters_validation"}
+                                  />
+                                ),
+                                fulfilled: /^[a-z0-9._-]*$/.test(
+                                  field.value || "",
+                                ),
+                              },
+                              {
+                                description: (
+                                  <Trans
+                                    i18nKey={"username_start_end_validation"}
+                                  />
+                                ),
+                                fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
+                                  field.value || "",
+                                ),
+                              },
+                              {
+                                description: (
+                                  <Trans
+                                    i18nKey={"username_consecutive_validation"}
+                                  />
+                                ),
+                                fulfilled: !/(?:[._-]{2,})/.test(
+                                  field.value || "",
+                                ),
+                              },
+                            ]}
+                          />
+                        )}
                       </div>
                       <div className="pl-2">
                         {renderUsernameFeedback(usernameInput || "")}
