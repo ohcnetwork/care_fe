@@ -23,6 +23,7 @@ export class PatientEncounter {
   addMedication(
     medicineName,
     dosage,
+    dosageInput,
     frequency,
     instructions,
     route,
@@ -35,7 +36,7 @@ export class PatientEncounter {
       medicineName,
     );
     cy.get('[data-cy="dosage"]').click().type(dosage);
-    cy.clickAndSelectOption('[data-cy="dosage"]', dosage);
+    cy.clickAndSelectOption('[data-cy="dosage"]', dosageInput);
     cy.clickAndSelectOption('[data-cy="frequency"]', frequency);
     cy.clickAndSelectOption('[data-cy="instructions"]', instructions);
     cy.clickAndSelectOption('[data-cy="route"]', route);

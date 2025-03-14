@@ -29,6 +29,7 @@ describe("Patient Prescription Management", () => {
       .addMedication(
         medicineName,
         dosage,
+        dosageInput,
         frequency,
         instructions,
         route,
