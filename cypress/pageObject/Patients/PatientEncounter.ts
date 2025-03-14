@@ -57,7 +57,7 @@ export class PatientEncounter {
   ) {
     cy.get('[data-cy="medications-table"]').within(() => {
       cy.contains("td", medicineName).should("exist");
-      // cy.contains("td", dosage).should("exist");
+      cy.contains("td", dosage).should("exist");
       cy.contains("td", frequency).should("exist");
       cy.contains("td", instructions).should("exist");
       cy.contains("td", route).should("exist");
@@ -85,7 +85,7 @@ export class PatientEncounter {
     cy.get('[data-cy="toggle-stopped-medications"]').click();
     cy.get('[data-cy="medications-table"]').within(() => {
       cy.contains("td", medicineName).should("exist");
-      // cy.contains("td", dosage).should("exist");
+      cy.contains("td", dosage).should("exist");
       cy.contains("td", frequency).should("exist");
       cy.contains("td", instructions).should("exist");
       cy.contains("td", route).should("exist");
