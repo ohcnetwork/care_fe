@@ -5,6 +5,7 @@ import {
   ChevronUp,
   ChevronsDownUp,
   ChevronsUpDown,
+  Plus,
   SquarePenIcon,
   Tags,
   ViewIcon,
@@ -362,6 +363,45 @@ function TagSelector({
   selection: QuestionnairePropertiesProps["tagSelection"];
   questionnaire: QuestionnaireDetail;
 }) {
+  const queryClient = useQueryClient();
+  const { mutate: createTag, isPending: isCreating } = useMutation({
+    mutationFn: mutate(questionnaireApi.tags.create),
+    onSuccess: (data: unknown) => {
+      const tagData = data as QuestionnaireTagModel;
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_tags"],
+      });
+      selection.onToggle(tagData.id);
+      toast.success("Tag created successfully");
+      selection.setSearchQuery("");
+    },
+    onError: () => {
+      toast.error("Failed to create tag");
+    },
+  });
+
+  const handleCreateTag = (tagName: string) => {
+    if (!tagName.trim()) {
+      return;
+    }
+
+    const slug = tagName.trim().toLowerCase().replace(/\s+/g, "-");
+
+    createTag({
+      name: tagName.trim(),
+      slug: slug,
+    });
+  };
+
+  // Filter tags based on search query
+  const filteredTags =
+    selection.available?.results.filter((tag) =>
+      tag.name.toLowerCase().includes(selection.searchQuery.toLowerCase()),
+    ) || [];
+
+  // Check if there are no matching tags and we have a search query
+  const noMatchingTags = selection.searchQuery && filteredTags.length === 0;
+
   if (id) {
     return (
       <>
@@ -436,17 +476,18 @@ function TagSelector({
           <Command>
             <CommandInput
               placeholder={t("search_tags")}
+              value={selection.searchQuery}
               onValueChange={selection.setSearchQuery}
             />
             <CommandList>
-              <CommandEmpty>{t("no_tags_found")}</CommandEmpty>
               <CommandGroup>
                 {selection.isLoading ? (
                   <div className="flex items-center justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
-                  selection.available?.results.map((tag) => (
+                  // Map through the filtered tags
+                  filteredTags.map((tag) => (
                     <CommandItem
                       key={tag.id}
                       value={tag.id}
@@ -463,6 +504,25 @@ function TagSelector({
                   ))
                 )}
               </CommandGroup>
+
+              {/* Show create option when no matching tags and we have a search query */}
+              {noMatchingTags && (
+                <CommandEmpty>
+                  <div
+                    className="flex items-center gap-2 text-primary rounded-sm px-4 py-3 cursor-pointer hover:bg-accent"
+                    onClick={() => handleCreateTag(selection.searchQuery)}
+                  >
+                    {isCreating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                    <span>
+                      {t("create_new")} "{selection.searchQuery}" {t("tag")}
+                    </span>
+                  </div>
+                </CommandEmpty>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
