@@ -36,14 +36,8 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
     ({ className, onChange, ...props }, ref) => {
       const getCountryFromNumber = (phoneNumber: string) => {
-        try {
-          return (
-            RPNInput.parsePhoneNumber(phoneNumber)?.country ||
-            careConfig.defaultCountry
-          );
-        } catch {
-          return careConfig.defaultCountry;
-        }
+        const parsedNumber = RPNInput.parsePhoneNumber(phoneNumber);
+        return parsedNumber?.country || careConfig.defaultCountry;
       };
 
       const [selectedCountry, setSelectedCountry] =
