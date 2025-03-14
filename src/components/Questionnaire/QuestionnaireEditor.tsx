@@ -717,7 +717,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       },
     }),
   });
-
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create),
     onSuccess: (data: QuestionnaireDetail) => {
@@ -742,7 +741,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       toast.error("Failed to update questionnaire");
     },
   });
-
   const [questionnaire, setQuestionnaire] =
     useState<QuestionnaireDetail | null>(() => {
       if (!id) {
@@ -1294,6 +1292,21 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     <p className="text-sm text-gray-700">
                       {questionnaire.description}
                     </p>
+                    {selectedOrgIds?.length > 0 && (
+                      <>
+                        <CardTitle>{t("organizations")}</CardTitle>
+                        {selectedOrgIds.map((orgId) => {
+                          const org = availableOrganizations?.results.find(
+                            (org) => org.id === orgId,
+                          );
+                          return org ? (
+                            <Badge key={orgId} variant="secondary">
+                              {org.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </>
+                    )}
                   </CardContent>
                 </Card>
                 <Card className="border-none bg-transparent shadow-none">
