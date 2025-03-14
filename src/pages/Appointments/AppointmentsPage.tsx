@@ -739,11 +739,11 @@ function AppointmentRow(props: {
     );
   }
   return (
-    <>
-      <div className={cn(!data && "animate-pulse")}>
+    <div className="max-w-[95vw] overflow-x-auto whitespace-nowrap">
+      <div className={`${cn(!data && "animate-pulse")}`}>
         <Tabs
           value={props.status ?? "booked"}
-          className="w-full overflow-scroll"
+          className="max-w-[95vw] overflow-x-auto whitespace-nowrap "
           onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <TabsList>
@@ -800,7 +800,7 @@ function AppointmentRow(props: {
         )}
         {props.Pagination({ totalCount: data?.count ?? 0 })}
       </div>
-    </>
+    </div>
   );
 }
 
