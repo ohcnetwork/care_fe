@@ -190,8 +190,7 @@ const AvatarEditModal = ({
           setSelectedFile(myFile);
           setPreview(cropState.croppedImage!);
           setCropState((prev) => ({ ...prev, croppedImage: null }));
-        } catch (error) {
-          console.error(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"), error);
+        } catch (_error) {
           toast.error(t("AVATAR_EDIT__ERROR_PROCESSING_IMAGE"));
         }
       };
@@ -604,6 +603,7 @@ const AvatarEditModal = ({
                           <img
                             src={previewImage || ""}
                             className="h-full w-full object-cover"
+                            alt={t("preview")}
                           />
                         </div>
                       )}

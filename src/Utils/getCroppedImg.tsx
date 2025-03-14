@@ -1,5 +1,19 @@
 import i18next from "i18next";
 
+// Helper function to sanitize URLs
+const sanitizeUrl = (url: string): string => {
+  // Only allow specific URL schemes
+  if (
+    url.startsWith("blob:") ||
+    url.startsWith("data:image/") ||
+    url.startsWith("http://") ||
+    url.startsWith("https://")
+  ) {
+    return url;
+  }
+  return "";
+};
+
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -7,14 +21,10 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
     image.addEventListener("error", (error) => reject(error));
     image.setAttribute("crossOrigin", "anonymous");
 
-    // Add more detailed validation for the URL
-    if (
-      url.startsWith("blob:") || // Accept blob URLs
-      ((url.startsWith("http://") || url.startsWith("https://")) &&
-        /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url)) ||
-      url.startsWith("data:image/")
-    ) {
-      image.src = url;
+    // Sanitize URL before setting it as src
+    const sanitizedUrl = sanitizeUrl(url);
+    if (sanitizedUrl) {
+      image.src = sanitizedUrl;
     } else {
       reject(new Error(i18next.t("AVATAR_EDIT__INVALID_IMAGE_URL")));
     }
@@ -67,8 +77,7 @@ export async function getCroppedImg(
         resolve(url);
       }, "image/png");
     });
-  } catch (error) {
-    console.log(error);
+  } catch (_error) {
     return "";
   }
 }
