@@ -15,7 +15,7 @@ const EntityBadge: React.FC<EntityBadgeProps> = ({
   title,
   count,
   isFetching,
-  translationParams = {},
+  translationParams,
   customTranslation,
 }) => {
   const { t } = useTranslation();

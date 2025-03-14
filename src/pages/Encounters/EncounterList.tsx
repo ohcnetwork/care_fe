@@ -187,19 +187,19 @@ export function EncounterList({
         >
           {isLoading ? (
             t("loading")
-          ) : queryEncounters?.count ? (
+          ) : queryEncounters?.count == 1 ? (
             <Trans
-              i18nKey="entity_count_other"
+              i18nKey="entity_count_one"
               values={{
-                count: queryEncounters?.count,
+                count: 1,
                 entity: "Encounter",
               }}
             />
           ) : (
             <Trans
-              i18nKey="entity_count_one"
+              i18nKey="entity_count_other"
               values={{
-                count: 0,
+                count: queryEncounters?.count ?? 0,
                 entity: "Encounter",
               }}
             />

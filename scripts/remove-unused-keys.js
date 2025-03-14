@@ -71,7 +71,6 @@ async function extractAndCleanTranslations(options) {
     }
   });
 
-  // const localeFiles = glob.sync(`en.json`, { cwd: localesPath });
   const localeFiles = [];
 
   locales.forEach((locale) => {
